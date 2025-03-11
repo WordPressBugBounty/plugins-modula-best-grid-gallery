@@ -1,79 +1,162 @@
-# Modula Gallery - The Best WordPress Gallery Plugin 🏞️
+=== Modula Image Gallery ===
+Contributors: wpchill, silkalns  
+Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPress gallery plugin  
+Requires at least: 5.3  
+Tested up to: 6.7  
+Requires PHP: 5.6  
+Stable tag: 2.12.6
 
-Modula is the fastest, most customizable, and versatile image gallery plugin for WordPress. Built from the ground up with the latest technology, Modula ensures that your galleries load quickly while also looking fantastic on popular devices.
+License: GNU General Public License v3.0 or later  
 
----
+== Description ==
+## The Best Gallery Plugin for Beautiful Image & Video Galleries in WordPress
 
-👉 Not a developer? Running WordPress? [Download Modula](https://wordpress.org/plugins/modula-best-grid-gallery/) on WordPress.org.
+**Modula gallery plugin** makes creating stunning galleries easy. Just add images, pick a gallery type, and publish—effortless for everyone!
+**Modula AI** helps you quickly improve your gallery images by optimizing **titles**, **captions**, and **ALT text** in just a few clicks. Manual edits for each image are a thing of the past—save time and let **AI** do the work for you.
+## How to Create a Gallery with Modula
 
-![Plugin version](https://img.shields.io/wordpress/plugin/v/modula-best-grid-gallery.svg) 
-![WordPress Rating](https://img.shields.io/wordpress/plugin/r/modula-best-grid-gallery.svg) 
-![WordPress Downloads](https://img.shields.io/wordpress/plugin/dt/modula-best-grid-gallery.svg) 
-[![License](https://img.shields.io/badge/license-GPL--3.0%2B-green.svg)](https://github.com/WPChill/modula-lite/blob/master/license.txt) 
+### **It’s This Easy:**
+1. **Go to Modula & click Add New.**
+2. **Add your images & customize.**
+3. **Copy the shortcode & paste it** where you want it. Example shortcode: `[modula id="1192"]`.
 
+https://www.youtube.com/watch?v=Ah1vHSTEW-c
 
-Welcome to the Modula Gallery Plugin GitHub repository. Here you can browse the source, look at open issues, and contribute to the project.
+## What you get extra in Modula Pro when making a purchase:
+* **[Image proofing](https://wp-modula.com/image-proofing?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Image+Proofing)**: Make it easy for customers to choose the photos they want edited with proofing galleries on your website. They can pick their favorites and send their choices directly through the site. No more long email chains or back-and-forth—everything is handled in one place!
+* **[Instagram](https://wp-modula.com/modula-instagram/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Instagram)**: Easily link your Instagram account to your Modula Gallery. With this connection you will then be able to import Instagram images directly in your gallery, enriching your website with your Instagram content.
+* **[Defaults](https://wp-modula.com/modula-defaults/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Defaults)**: Are you tired of going through each gallery and setting up the same settings repeatedly? Use the Defaults extension to define a basic set of options for your galleries, then simply add this to each new gallery you create. It saves a lot of time!
+* **[Content Galleries](https://wp-modula.com/modula-content-galleries/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Content+Galleries)**: Take your gallery creation to the next level, with this add-on you will be able to generate a new gallery from your current posts, pages or custom post types. Even more, each gallery is synched with the original source, changes to the original content will also be reflected in the gallery.
+* **[Bulk Edit](https://wp-modula.com/bulk-edit/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Bulk+edit)**: Easily edit multiple images at once, saving up precious configuration time.
+* **[Video gallery](https://wp-modula.com/kb/modula-video/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Video+gallery)**: Use the Video extension to combine videos with images in your galleries. It works with YouTube, Vimeo, and self-hosted videos.
+* **[Lightbox slideshow](https://wp-modula.com/kb/lightbox-slideshow/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Lightbox+slideshow)**: Improve the user experience with your galleries by presenting the images in a stunning slideshow.
+* **[Slider gallery](https://wp-modula.com/kb/modula-slider/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Slider+gallery)**: This helps display your gallery images in a new format type: slider. It can be synced with a thumbnail strip below it. You can switch it up by adding different elements to the slider: dots, arrows, a fade effect, infinite loop, center mode, and more.
+* **[Gallery Filters](https://wp-modula.com/kb/use-filters-in-modula/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Gallery+filters)**: Apply one or more filters to your images to allow your website’s visitors to easily sort through your gallery.
+* **[Albums](https://wp-modula.com/kb/modula-albums/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Albums)**: Let’s say you are going on a holiday trip and wish to document each day in a separate gallery. The Albums extension will allow you to group up all your holiday galleries in a single listing, enabling easy access to your precious memories.
+* Multiple dynamic effects: [Loading Effects](https://wp-modula.com/kb/modula-loading-effects/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Loading+effects), [Hover effects](https://wp-modula.com/kb/modula-hover-effects/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Hover+effects) and [Zoom effects](https://wp-modula.com/kb/modula-zoom/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Zoom+effects)
+* **[Watermark images](https://wp-modula.com/kb/modula-watermark/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Watermark+images)**: Protect your photos by adding custom watermarks.
+* **[Right-Click Protection](https://wp-modula.com/kb/right-click-protection/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Right+click+protection)**: Use it to prevent visitors from downloading your images with right-click protection. It also turns off keyboard shortcuts for downloading images.
+* **[Speed UP](https://wp-modula.com/kb/modula-speed-up/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Speed+up)**: Using this extension, you can optimize your images by reducing their file sizes, resizing them through ShortPixel’s image optimization algorithms, and serving them from StackPath’s CDN (content delivery network). The result? A fast website without the high costs associated with it.
+* **[Whitelabel](https://wp-modula.com/kb/modula-whitelabel/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Whitelabel)**: This extension helps you remove all mentions of Modula from the plugin and customize it with your own brand, logo, and text.
+* Support and updates are included with each purchase for one year.
 
-This repository exists for opening up new issues, reporting existing bugs, and anything else related to development. This is not the place to ask for support, so please [reach out to us](https://wp-modula.com/contact-us/) and we'll happily assist you.
+## How-to Guides:
+Here are a couple of quick tutorials on how to create your dream gallery using the free version:
+* [WordPress Image Gallery](https://wp-modula.com/how-to-create-an-image-gallery-in-wordpress?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=wordpress+image+gallery)
+* [Custom grid Gallery](https://wp-modula.com/grid-gallery?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=custom+grid+gallery)
+* [Masonry Image Gallery](https://wp-modula.com/masonry-image-gallery/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=masonry+image+gallery)
+* [Mobile responsive Gallery](https://wp-modula.com/mobile-responsive-gallery/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=mobile+responsive+gallery)
+* [Beaver Builder Gallery](https://wp-modula.com/create-beaver-builder-gallery?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=beaver+builder+gallery)
+* [Elementor Image Gallery](https://wp-modula.com/add-gallery-in-elementor?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=elementor+image+gallery)
+* [Divi Builder Gallery](https://wp-modula.com/how-to-add-a-photo-gallery-in-divi?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=divi+builder+gallery)
 
- ## 🙋 Support
+When using the Pro version, you can also create:
+* [Video Galleries in WordPress](https://wp-modula.com/add-video-wordpress-page?utm_source=wordpress.org&utm_medium=web&utm_campaign=description&utm_term=Video+gallery)
+* [Gallery Sliders in WordPress](https://wp-modula.com/wordpress-image-carousel/?utm_source=wordpress.org&utm_medium=web&utm_campaign=description&utm_term=Slider+gallery)
+* [Galleries with Hover Effects](https://demo.wp-modula.com/demo/hover-effects/pufrobo/?utm_source=wordpress.org&utm_medium=web&utm_campaign=description&utm_term=Hover+effects)
+* [Albums](https://wp-modula.com/online-photo-album/?utm_source=wordpress.org&utm_medium=web&utm_campaign=description&utm_term=Albums)
 
- This repository is not suitable for WordPress support. Please don't use GitHub issues for non-development related support requests. Don't get us wrong, we're more than happy to help you! However, to get the support you need please use the following channels:
+## Help & Support
+* **Guides & Help Articles:** [Read documentation](https://wp-modula.com/kb/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=knowledge+base)
+* **Ask a Question:** [Support forum](https://wordpress.org/support/plugin/modula-best-grid-gallery/)
+* **Need Extra Help?** [Contact Us](https://wp-modula.com/contact-us/?utm_source=wordpress.org&utm_medium=web&utm_campaign=description&utm_term=contact+us)
+* Do you have galleries already created in **NextGen**, **Envira**, **Final Tiles Grid Gallery** or **FooGallery** and want to migrate them to **Modula**?
+Use our dedicated tools:
+* [Migrate away from NextGEN Gallery](https://wordpress.org/plugins/modula-nextgen-migrator/?utm_source=wordpress.org&utm_medium=web&utm_campaign=description&utm_term=migrate+nextgen)
+* [Migrate away from FooGallery](https://wordpress.org/plugins/modula-foo-migrator/?utm_source=wordpress.org&utm_medium=web&utm_campaign=description&utm_term=migrate+foogallery)
+* [Migrate away from Envira Gallery](https://wordpress.org/plugins/modula-envira-migrator/?utm_source=wordpress.org&utm_medium=web&utm_campaign=description&utm_term=migrate+envira)
+* [Migrate away from Final Tiles](https://wordpress.org/plugins/modula-final-tiles-migrator/?utm_source=wordpress.org&utm_medium=web&utm_campaign=description&utm_term=migrate+final+tiles)
+* [Migrate away from Photoblocks Gallery](https://wordpress.org/plugins/modula-photoblocks-gallery-migrator/?utm_source=wordpress.org&utm_medium=web&utm_campaign=description&utm_term=migrate+photoblocks)
 
-* [WP.org Support Forums](https://wordpress.org/support/plugin/modula-best-grid-gallery) - for all **free** users.
-* [Priority Support](https://wp-modula.com/contact-us/) - exclusively for our **customers**.
-* [Modula Documentation](https://wp-modula.com/knowledge-base/) - for everyone
+== 3rd party or external service disclaimer ==
 
-## 🌱 Getting Started
+The plugin connects to our website through an API call (https://wp-modula.com/wp-json/mt/v1/get-all-extensions) in order to request a list of available extensions.
 
-If you're looking to contribute to Modula, welcome! We're glad you're here. Please ⭐️ this repository and fork it to begin local development.
+IT DOES NOT SEND ANY DATA NOR DO WE COLLECT INFORMATION FROM THE REQUEST
 
-Most of us are using [Local by Flywheel](https://localbyflywheel.com/) to develop on WordPress, which makes set up quick and easy. If you prefer [Docker](https://www.docker.com/), [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV), or another flavor of local development that's cool too!
+Our privacy policy can be found at this URL https://wp-modula.com/privacy-policy/
 
-## ✅ Prerequisites
-* [Node.js](https://nodejs.org/en/) as JavaScript engine.
-* [NPM](https://docs.npmjs.com/) npm command globally available in CLI.
-* [WP CLI](https://wp-cli.org) wp-cli command globally available (Local by Flywheel has this built-in).
+== Frequently Asked Questions ==
 
-## 💻 Local Development
+= How do I show a Modula gallery =
+Follow [this easy guide](https://wp-modula.com/how-to-add-modula-to-page/?utm_source=wordpress.org&utm_medium=web&utm_campaign=description&utm_term=add+to+page).
 
-To get started developing you will need to perform the following steps:
+= Can I move my old galleries to Modula? =
+Yes! If you use NextGEN, FooGallery, Envira, Final Tiles, or Photoblocks, you can **switch to Modula easily**.
+[Migrate away from NextGEN Gallery](https://wordpress.org/plugins/modula-nextgen-migrator/)
+[Migrate away from FooGallery](https://wordpress.org/plugins/modula-foo-migrator/)
+[Migrate away from Envira Gallery](https://wordpress.org/plugins/modula-envira-migrator/)
+[Migrate away from Final Tiles](https://wordpress.org/plugins/modula-final-tiles-migrator/)
+[Migrate away from Photoblocks Gallery](https://wordpress.org/plugins/modula-photoblocks-gallery-migrator/)
 
-1. Create a new WordPress site using your favorite local development software.
-2. `cd` into your local plugins directory: `/wp-content/plugins/`
-3. Fork this repository from GitHub and then clone that into your plugins directory in a new `modula-best-grid-gallery` directory
-4. Run `npm install` to get the necessary npm packages
-5. Activate the plugin in WordPress
-7. Run `npm run scss` to start the watch process which will build the sass and script files and live reload using [Browsersync](https://www.browsersync.io/)
+= Why do some images look blurry? =
+If photos don’t look clear, try increasing the **Minimum Image Width** in the settings, General section.
 
-That's it. You're now ready to start development.
+= How can I get help? =
+* Free users: [Ask in our forum](https://wordpress.org/support/plugin/modula-best-grid-gallery/)
+* Pro users: [Get priority help](https://wp-modula.com/contact-us/?utm_source=wordpress.org&utm_medium=web&utm_campaign=description&utm_term=contact+us)
 
-**Available commands**
+== Installation ==
+### **Automatic installation:**
 
-| Command             | Description  |
-| :------------- | :------------ |
-| `npm run min:js`      | Use this command to minify plugin JavaScript files (note: this command does not minify Gutengerg assets).  |
-| `npm run min:css`      |    Use this command to minify plugin CSS files (note: this command does not minify Gutengerg assets). This command will also concat files from the /front/ folder into front.css |
-| `npm run pot` |  Use this command to build the .POT file for the plugin. Scans all of the plugin's files (includig JS files) and builds the .POT file. |
-| `npm run wpchill` |  Use this command to minify all of the plugin's assets and generate the .POT file. |
-| `npm run plugin-zip` |  Use this command to build a ZIP of the entire plugin folder, omitting node_modules, .dotfiles and .dotfolders |
-| `npm run build` |  Official documentation: https://developer.wordpress.org/block-editor/reference-guides/packages/packages-scripts/#build |
-| `npm run start` |  Official documentation: https://developer.wordpress.org/block-editor/reference-guides/packages/packages-scripts/#start |
-| `npm run lint:css` |  Official documentation: https://developer.wordpress.org/block-editor/reference-guides/packages/packages-scripts/#lint-style |
-| `npm run lint:js` |  Official documentation: https://developer.wordpress.org/block-editor/reference-guides/packages/packages-scripts/#lint-js |
+The simplest way to install is to click on \'Plugins\' then \'Add\' and type \'Modula\' in the search field.
 
-**Development Notes**
+### **Manual installation 1:**
 
-* Ensure that you have `SCRIPT_DEBUG` enabled within your wp-config.php file. Here's a good example of wp-config.php for debugging:
-    ```
-     // Enable WP_DEBUG mode
-    define( 'WP_DEBUG', true );
+1. Login to your website and go to the Plugins section of your admin panel.
+2. Click the Add New button.
+3. Under Install Plugins, click the Upload link.
+4. Select the plugin zip file (modula.x.x.x.zip) from your computer then click the Install Now button.
+5. You should see a message stating that the plugin was installed successfully.
+6. Click the Activate Plugin link.
 
-    // Enable Debug logging to the /wp-content/debug.log file
-    define( 'WP_DEBUG_LOG', true );
+### **Manual installation 2:**
 
-    // Loads unminified core files
-    define( 'SCRIPT_DEBUG', true );
-    ```
-* Commit the `package.lock` file. Read more about why [here](https://docs.npmjs.com/files/package-lock.json).
-* Your editor should recognize the `.eslintrc` and `.editorconfig` files within the Repo's root directory. Please only submit PRs following those coding style rulesets.
+1. You should have access to the server where WordPress is installed. If you don\'t, see your system administrator.
+2. Copy the plugin zip file (modula.x.x.x.zip) up to your server and unzip it somewhere on the file system.
+3. Copy the \"modula-lite\" folder into the /wp-content/plugins directory of your WordPress installation.
+4. Login to your website and go to the Plugins section of your admin panel.
+5. Look for \"Modula\" and click Activate.
+
+== Screenshots ==
+
+1. Custom Grid – Freely resize images
+2. Custom Grid – Helper Grid
+3. Back-end Options UI Walkthrough
+4. Responsive galleries created with Modula
+
+== Changelog ==
+= 2.12.6 - 11.03.2025 =
+Update: Notification system to WPChill Notification System.
+Fixed: Custom galleries preview images wrong scaling after image/bulk edit.
+Added: Upsells for Modula Comments.
+Fixed: Fixed: PHP Warning
+
+= 2.12.5 - 07.03.2025 =
+Fixed: Escaping of links in image's title & caption.
+
+= 2.12.4 - 06.03.2025 =
+Fixed: Not displaying image metadata properly
+Fixed: Saving image metadata on gallery edit
+
+= 2.12.3 - 05.03.2025 =
+Fixed: Do not strip image's title & caption html tags on image edit.
+
+= 2.12.2 - 05.03.2025 =
+Fixed: Plugin loading order.
+
+= 2.12.1 – 03.03.2025 =
+Fixed: AI Image Optimizer update method.
+
+= 2.12.0 – 28.02.2025 =
+Added: AI Image Optimizer.
+
+= 2.11.11 – 07.01.2025 =
+Fixed: ZIP file vulnerability fix.
+
+See the full changelog [here](https://github.com/WPChill/modula-lite/blob/master/changelog.txt).
+
+== Upgrade Notice ==
+
+= 2.11.11 =
+This update resolved a vulnerability for ZIP files!

@@ -2,9 +2,9 @@
 Contributors: wpchill, silkalns  
 Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPress gallery plugin  
 Requires at least: 5.3  
-Tested up to: 6.7  
+Tested up to: 6.8
 Requires PHP: 5.6  
-Stable tag: 2.12.11
+Stable tag: 2.12.12
 
 License: GNU General Public License v3.0 or later  
 
@@ -127,9 +127,12 @@ The simplest way to install is to click on \'Plugins\' then \'Add\' and type \'M
 4. Responsive galleries created with Modula
 
 == Changelog ==
+= 2.12.12 - 13.05.2025 =
+Fixed: Security update
+
 = 2.12.11 - 26.03.2025 =
 Fixed: Import sources are now queried only on the Modula settings page.
-Update: Improved code formatting for the gallery template. 
+Update: Improved code formatting for the gallery template.
 
 = 2.12.10 - 19.03.2025 =
 Updated: Twitter icon to X icon.

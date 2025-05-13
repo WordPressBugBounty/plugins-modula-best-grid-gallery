@@ -1,6 +1,6 @@
 = 2.12.11 - 26.03.2025 =
 Fixed: Import sources are now queried only on the Modula settings page.
-Update: Improved code formatting for the gallery template. 
+Update: Improved code formatting for the gallery template.
 
 = 2.12.10 - 19.03.2025 =
 Updated: Twitter icon to X icon.

@@ -4,7 +4,7 @@ Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPres
 Requires at least: 5.3  
 Tested up to: 6.8
 Requires PHP: 5.6  
-Stable tag: 2.12.12
+Stable tag: 2.12.13
 
 License: GNU General Public License v3.0 or later  
 
@@ -23,17 +23,17 @@ License: GNU General Public License v3.0 or later
 https://www.youtube.com/watch?v=Ah1vHSTEW-c
 
 ## What you get extra in Modula Pro when making a purchase:
-* **[Comments for images](https://wp-modula.com/kb/modula-comments/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Comments)**: Allow your site users to add comments for your gallery images, boosting your engagement and interaction with your audience.
+* **[Comments for images](https://wp-modula.com/modula-comments/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Comments)**: Allow your site users to add comments for your gallery images, boosting your engagement and interaction with your audience.
 * **[Image proofing](https://wp-modula.com/image-proofing?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Image+Proofing)**: Make it easy for customers to choose the photos they want edited with proofing galleries on your website. They can pick their favorites and send their choices directly through the site. No more long email chains or back-and-forth—everything is handled in one place!
 * **[Instagram](https://wp-modula.com/modula-instagram/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Instagram)**: Easily link your Instagram account to your Modula Gallery. With this connection you will then be able to import Instagram images directly in your gallery, enriching your website with your Instagram content.
 * **[Defaults](https://wp-modula.com/modula-defaults/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Defaults)**: Are you tired of going through each gallery and setting up the same settings repeatedly? Use the Defaults extension to define a basic set of options for your galleries, then simply add this to each new gallery you create. It saves a lot of time!
 * **[Content Galleries](https://wp-modula.com/modula-content-galleries/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Content+Galleries)**: Take your gallery creation to the next level, with this add-on you will be able to generate a new gallery from your current posts, pages or custom post types. Even more, each gallery is synched with the original source, changes to the original content will also be reflected in the gallery.
 * **[Bulk Edit](https://wp-modula.com/bulk-edit/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Bulk+edit)**: Easily edit multiple images at once, saving up precious configuration time.
-* **[Video gallery](https://wp-modula.com/kb/modula-video/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Video+gallery)**: Use the Video extension to combine videos with images in your galleries. It works with YouTube, Vimeo, and self-hosted videos.
+* **[Video gallery](https://wp-modula.com/modula-video/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Video+gallery)**: Use the Video extension to combine videos with images in your galleries. It works with YouTube, Vimeo, and self-hosted videos.
 * **[Lightbox slideshow](https://wp-modula.com/kb/lightbox-slideshow/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Lightbox+slideshow)**: Improve the user experience with your galleries by presenting the images in a stunning slideshow.
-* **[Slider gallery](https://wp-modula.com/kb/modula-slider/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Slider+gallery)**: This helps display your gallery images in a new format type: slider. It can be synced with a thumbnail strip below it. You can switch it up by adding different elements to the slider: dots, arrows, a fade effect, infinite loop, center mode, and more.
+* **[Slider gallery](https://wp-modula.com/modula-slider/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Slider+gallery)**: This helps display your gallery images in a new format type: slider. It can be synced with a thumbnail strip below it. You can switch it up by adding different elements to the slider: dots, arrows, a fade effect, infinite loop, center mode, and more.
 * **[Gallery Filters](https://wp-modula.com/kb/use-filters-in-modula/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Gallery+filters)**: Apply one or more filters to your images to allow your website’s visitors to easily sort through your gallery.
-* **[Albums](https://wp-modula.com/kb/modula-albums/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Albums)**: Let’s say you are going on a holiday trip and wish to document each day in a separate gallery. The Albums extension will allow you to group up all your holiday galleries in a single listing, enabling easy access to your precious memories.
+* **[Albums](https://wp-modula.com/modula-albums/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Albums)**: Let’s say you are going on a holiday trip and wish to document each day in a separate gallery. The Albums extension will allow you to group up all your holiday galleries in a single listing, enabling easy access to your precious memories.
 * Multiple dynamic effects: [Loading Effects](https://wp-modula.com/kb/modula-loading-effects/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Loading+effects), [Hover effects](https://wp-modula.com/kb/modula-hover-effects/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Hover+effects) and [Zoom effects](https://wp-modula.com/kb/modula-zoom/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Zoom+effects)
 * **[Watermark images](https://wp-modula.com/kb/modula-watermark/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Watermark+images)**: Protect your photos by adding custom watermarks.
 * **[Right-Click Protection](https://wp-modula.com/kb/right-click-protection/?utm_source=wordpress.org&utm_medium=link&utm_campaign=description&utm_term=Right+click+protection)**: Use it to prevent visitors from downloading your images with right-click protection. It also turns off keyboard shortcuts for downloading images.
@@ -127,6 +127,9 @@ The simplest way to install is to click on \'Plugins\' then \'Add\' and type \'M
 4. Responsive galleries created with Modula
 
 == Changelog ==
+= 2.12.13 - 24.06.2025 =
+Added: Compatibility with Imagify.
+
 = 2.12.12 - 13.05.2025 =
 Fixed: Security update
 

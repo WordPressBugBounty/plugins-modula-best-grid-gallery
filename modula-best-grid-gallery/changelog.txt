@@ -1,3 +1,6 @@
+= 2.14.4 - 06.02.2026 =
+Fixed: Various issues and bugs.
+
 = 2.14.3 - 06.02.2026 =
 Fixed: Various issues and bugs.
 

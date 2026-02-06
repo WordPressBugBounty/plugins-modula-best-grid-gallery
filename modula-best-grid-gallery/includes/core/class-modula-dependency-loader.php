@@ -43,7 +43,6 @@ class Modula_Dependency_Loader {
 			'admin/assets/class-modula-admin-assets.php',
 			'admin/media/class-modula-media.php',
 			'admin/editor/class-modula-editor.php',
-			'admin/offers/class-modula-offers.php',
 		),
 		'public'            => array(
 			'public/shortcode/class-modula-shortcode.php',

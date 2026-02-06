@@ -16,7 +16,7 @@ class Modula_Beaver_Block extends FLBuilderModule {
 					'category'        => esc_html__( 'Modula', 'modula-best-grid-gallery' ),
 					'icon'            => 'format-image.svg',
 					'dir'             => MODULA_PATH . 'includes/features/third-party-builders/modula-beaver-block/',
-					'url'             => MODULA_URL . 'includes/modula-beaver-block/',
+					'url'             => MODULA_URL . 'includes/features/third-party-builders/modula-beaver-block/',
 					'partial_refresh' => true,
 				)
 			)

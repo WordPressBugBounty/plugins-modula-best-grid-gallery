@@ -1,3 +1,10 @@
+<?php 
+$settings = array(
+	'classes'     => '',
+	'dismissible' => true,
+	'id'          => 'modula-modal-video-upgrade-' . get_the_ID(),
+);
+?>
 <div class='modula-modal__overlay video'>
 	<div class="modula-modal__frame <?php
 	echo esc_attr( $settings['classes'] ); ?>" <?php

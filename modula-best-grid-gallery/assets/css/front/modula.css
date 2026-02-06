@@ -22,7 +22,7 @@ html body .modula .modula-items .modula-item .modula-item-content>a {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 10;
+    z-index: 1;
     background: transparent;
 }
 
@@ -38,7 +38,8 @@ html body .modula .modula-items .modula-item .jtg-social {
 
 html body .modula:not(.modula-loaded-scale).modula-gallery-initialized .modula-items .modula-item.tg-loaded .modula-item-content,
 html body .modula:not(.modula-loaded-scale).modula-gallery-initialized .modula-items.justified-gallery .modula-item .modula-item-content,
-html body .modula.modula-columns:not(.modula-loaded-scale):not(.modula-is-lazy).modula-gallery-initialized .modula-items .modula-item .modula-item-content {
+html body .modula.modula-columns:not(.modula-loaded-scale):not(.modula-is-lazy).modula-gallery-initialized .modula-items .modula-item .modula-item-content,
+html body .modula.modula-gallery-bnb:not(.modula-loaded-scale):not(.modula-is-lazy).modula-gallery-initialized .modula-items .modula-item .modula-item-content {
     transform: scale(1) translate(0, 0) rotate(0deg) !important;
     opacity: 1;
 }
@@ -53,7 +54,7 @@ html body .modula .modula-items .modula-item img.pic {
     transition: width .3s, height .3s, transform .3s linear, opacity .2s linear;
 }
 
-html body .modula .modula-items .modula-item picture.pic img {
+html body .modula .modula-items.justified-gallery .modula-item picture.pic img {
     max-width: 999em;
     height: 100%;
 }
@@ -142,10 +143,6 @@ html body .modula .jtg-social svg {
     height: 16px;
 }
 
-html body .modula .modula-items .modula-item .jtg-title {
-    margin: 0;
-}
-
 html body .modula .modula-items .modula-item p {
     margin: 0;
     padding: 0;
@@ -215,11 +212,13 @@ html body .modula .modula-items .jtg-social a:last-of-type {
     margin-right: 0;
 }
 
-html body .modula .modula-item.effect-pufrobo p.description {
+html body .modula .modula-item.effect-pufrobo p.description,
+html body .modula-gallery .modula-item.effect-pufrobo .jtg-description {
     margin-bottom: 2em;
 }
 
-html body .et_pb_module_inner .modula .modula-item.effect-pufrobo p.description {
+html body .et_pb_module_inner .modula .modula-item.effect-pufrobo p.description,
+html body .et_pb_module_inner .modula .modula-item.effect-pufrobo .jtg-description {
     -webkit-transition: -webkit-transform 0.35s !important;
     transition: transform 0.35s !important;
 }
@@ -229,7 +228,8 @@ html body .modula .modula-item.effect-pufrobo .figc {
 }
 
 html body .modula .modula-item.effect-pufrobo .jtg-title,
-html body .modula .modula-item.effect-pufrobo p {
+html body .modula .modula-item.effect-pufrobo p,
+html body .modula .modula-item.effect-pufrobo .jtg-description {
     position: absolute;
     right: 5%;
     left: 5%;
@@ -244,7 +244,8 @@ html body .modula.modula-gallery-initialized .modula-items .modula-item.tg-loade
 
 /*.modula .modula-item { background-color:#000; }*/
 
-html body .modula .modula-item.effect-pufrobo p {
+html body .modula .modula-item.effect-pufrobo p,
+html body .modula .modula-item.effect-pufrobo .jtg-description {
     bottom: 20%;
     line-height: 1.5;
     -webkit-transform: translate3d(0, 100%, 0);
@@ -284,14 +285,16 @@ html body .modula .modula-item.effect-pufrobo .jtg-title::after {
 }
 
 html body .modula .modula-item.effect-pufrobo .jtg-title::after,
-html body .modula .modula-item.effect-pufrobo p {
+html body .modula .modula-item.effect-pufrobo p,
+html body .modula .modula-item.effect-pufrobo .jtg-description{
     opacity: 0;
     -webkit-transition: opacity 0.35s, -webkit-transform 0.35s;
     transition: opacity 0.35s, transform 0.35s;
 }
 
 html body .modula .modula-item.effect-pufrobo:hover .jtg-title::after,
-html body .modula .modula-item.effect-pufrobo:hover p {
+html body .modula .modula-item.effect-pufrobo:hover p,
+html body .modula .modula-item.effect-pufrobo:hover .jtg-description {
     margin-top: 10px;
     margin-bottom: 5px;
     opacity: 1;
@@ -621,6 +624,11 @@ html body div.modula-powered svg.modula-logo {
     display: none;
 }
 
+.modula-best-grid-gallery .f-button:not([disabled]) {
+    color: var(--f-button-hover-color);
+    background-color: var(--f-button-hover-bg);
+}
+
 html body .modula-items .modula-item .jtg-social-expandable {
     display: none;
 }
@@ -783,4 +791,18 @@ html body .modula-items .modula-item .jtg-social-desktop-collapsed.jtg-social-ex
 
 html body .modula-fancybox-container button.f-button {
     padding: 0px;
+}
+
+html body .modula.modula-gallery .modula-item-link:focus-visible {
+    outline: 2px solid #005fcc;
+    outline-offset: -2px;
+}
+
+/* Allows text selection for hover effects titles and captions */
+html body .modula .figc *:not(:has(*)),
+html body .modula .figc .jtg-description,
+html body .modula .figc .jtg-title,
+html body .modula .figc .jtg-description:has(a) {
+    position: relative;
+    z-index: 2;
 }

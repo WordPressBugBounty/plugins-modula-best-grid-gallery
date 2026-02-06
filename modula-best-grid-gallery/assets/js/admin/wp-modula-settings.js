@@ -3,6 +3,10 @@ wp.Modula = 'undefined' === typeof wp.Modula ? {} : wp.Modula;
 (function ($, modula) {
 	var modulaSettings = Backbone.Model.extend({
 		initialize: function (args) {
+			if (!document.getElementById('modula-settings')) {
+				return;
+			}
+
 			var model = this;
 			$.each(args, function (att, value) {
 				model.set(att, value);

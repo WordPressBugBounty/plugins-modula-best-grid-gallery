@@ -5,6 +5,14 @@
  *  Author: WP Modula
  */
 
+if (
+	typeof jQuery !== 'undefined' &&
+	window.ModulaIsotope &&
+	typeof jQuery.fn.modulaisotope === 'undefined'
+) {
+	jQueryBridget('modulaisotope', window.ModulaIsotope, jQuery);
+}
+
 // Compatibility with WPBakery Page Builder( reset modula after section go full width )
 jQuery(document).on(
 	'vc-full-width-row-single vc-full-width-row',
@@ -32,57 +40,59 @@ jQuery(window).on('elementor/frontend/init', function () {
 (function ($, window, document, undefined) {
 	// Create the defaults once
 	var pluginName = 'modulaGallery',
-		defaults   = {
-			resizer        : '/',
-			keepArea       : true,
-			type           : 'creative-gallery',
-			columns        : 12,
-			height         : 800,
-			desktopHeight  : 800,
-			mobileHeight   : 800,
-			tabletHeight   : 800,
-			gutter         : 10,
-			desktopGutter  : 10,
-			mobileGutter   : 10,
-			tabletGutter   : 10,
-			enableTwitter  : false,
-			enableFacebook : false,
-			enableWhatsapp : false,
+		defaults = {
+			resizer: '/',
+			keepArea: true,
+			type: 'creative-gallery',
+			columns: 12,
+			height: 800,
+			desktopHeight: 800,
+			mobileHeight: 800,
+			tabletHeight: 800,
+			gutter: 10,
+			desktopGutter: 10,
+			mobileGutter: 10,
+			tabletGutter: 10,
+			enableTwitter: false,
+			enableFacebook: false,
+			enableWhatsapp: false,
 			enablePinterest: false,
-			enableLinkedin : false,
-			enableEmail    : false,
-			lazyLoad       : 0,
-			initLightbox   : false,
-			lightbox       : 'fancybox',
-			lightboxOpts   : {
+			enableLinkedin: false,
+			enableEmail: false,
+			lazyLoad: 0,
+			initLightbox: false,
+			lightbox: 'fancybox',
+			lightboxOpts: {
 				Toolbar: {
-					parentEl: function(toolbar){
-						return toolbar.instance.container.querySelector(".fancybox__col");
-					}
-				}
+					parentEl: function (toolbar) {
+						return toolbar.instance.container.querySelector(
+							'.fancybox__col'
+						);
+					},
+				},
 			},
-			inView         : false,
-			originLeft     : true,
+			inView: false,
+			originLeft: true,
 		};
 
 	// The actual plugin constructor
 	function Plugin(element, options) {
-		this.element   = element;
-		this.$element  = $(element);
+		this.element = element;
+		this.$element = $(element);
 		this.$itemsCnt = this.$element.find('.modula-items');
-		this.$items    = this.$itemsCnt.find('.modula-item');
+		this.$items = this.$itemsCnt.find('.modula-item');
 
 		this.options = $.extend({}, defaults, options);
 
 		this._defaults = defaults;
-		this._name     = pluginName;
+		this._name = pluginName;
 
-		this.tiles        = [];
-		this.$tilesCnt    = null;
-		this.completed    = false;
-		this.lastWidth    = 0;
-		this.resizeTO     = 0;
-		this.isIsotope    = false;
+		this.tiles = [];
+		this.$tilesCnt = null;
+		this.completed = false;
+		this.lastWidth = 0;
+		this.resizeTO = 0;
+		this.isIsotope = false;
 		this.isLazyLoaded = true;
 
 		// Initiate Gallery
@@ -124,31 +134,54 @@ jQuery(window).on('elementor/frontend/init', function () {
 			instance.onResize(instance);
 		}
 
+		let resizeTimeout;
+		let resizeObserverTimeout;
+
 		$(window).resize(function () {
-			instance.onResize(instance);
+			clearTimeout(resizeTimeout);
+			resizeTimeout = setTimeout(function () {
+				instance.onResize(instance);
+			}, 150);
 		});
 
 		const resizeObserver = new ResizeObserver((entries) => {
-			instance.onResize(instance);
+			clearTimeout(resizeObserverTimeout);
+			resizeObserverTimeout = setTimeout(() => {
+				instance.onResize(instance);
+			}, 150);
 		});
+
 		resizeObserver.observe(instance.$element[0]);
 
 		$(window).on('modula-update', function () {
 			instance.onResize(instance);
 		});
 
-		$(document).on('lazyloaded', function (evt) {
+		$(document).on('lazyloaded lazyload', function (evt) {
+			
 			var element = $(evt.target),
 				parent,
-				index;
+				index,
+				picElement;
 
-			if ('modula' == element.data('source')) {
+			if ('modula' == element.data('source') || 'a3-lazyload' == element.data('source')) {
+				
 				element.data('size', {
-					width : element.width(),
+					width: element.width(),
 					height: element.height(),
 				});
 				parent = element.parents('.modula-item');
 				parent.addClass('tg-loaded');
+
+				// Support for picture element - add class to both img and picture parent
+				picElement = element.closest('.pic');
+				if (
+					picElement.length &&
+					picElement.prop('tagName') === 'PICTURE'
+				) {
+					picElement.addClass('tg-loaded');
+				}
+
 				index = instance.$items.not('.jtg-hidden').index(parent);
 				instance.placeImage(index);
 
@@ -161,7 +194,11 @@ jQuery(window).on('elementor/frontend/init', function () {
 					}
 				}
 
-				if ('grid' == instance.options.type && 'undefined' === typeof window.elementorFrontend && 'automatic' == instance.options.grid_type) {
+				if (
+					'grid' == instance.options.type &&
+					'undefined' === typeof window.elementorFrontend &&
+					'automatic' == instance.options.grid_type
+				) {
 					instance.$itemsCnt.justifiedGallery();
 				}
 			}
@@ -203,6 +240,14 @@ jQuery(window).on('elementor/frontend/init', function () {
 
 		// Trigger event after init
 		$(document).trigger('modula_api_after_init', [instance]);
+
+		setTimeout(() => {
+			document.dispatchEvent(
+				new Event('modula_gallery_initialized', {
+					detail: { instance: instance },
+				})
+			);
+		}, 100);
 	};
 
 	// function wich collect all the images for lightbox and initialize the lightbox.
@@ -223,24 +268,24 @@ jQuery(window).on('elementor/frontend/init', function () {
 				}
 				evt.preventDefault();
 				var clickedLink = jQuery(this);
-				var links       = $.map(self.$items, function (o) {
+				var links = $.map(self.$items, function (o) {
 						if (
 							jQuery(o).find(
 								'.modula-item-link:not( .modula-no-follow )'
 							).length > 0
 						) {
-							var link  = jQuery(o).find(
+							var link = jQuery(o).find(
 									'.modula-item-link:not( .modula-simple-link )'
 								),
 								image = jQuery(o).find('.pic');
 							return {
-								src    : image.data('full'),
-								opts   : {
-									$thumb  : image.parents('.modula-item'),
-									caption : link.data('caption'),
-									alt     : image.attr('alt'),
+								src: image.data('full'),
+								opts: {
+									$thumb: image.parents('.modula-item'),
+									caption: link.data('caption'),
+									alt: image.attr('alt'),
 									image_id: link.attr('data-image-id'),
-									title   : image.attr('title'),
+									title: image.attr('title'),
 								},
 								current: jQuery(o).is(
 									clickedLink.parents('.modula-item')
@@ -248,12 +293,12 @@ jQuery(window).on('elementor/frontend/init', function () {
 							};
 						}
 					}),
-					index       = $.map(links, function (element, myIndex) {
+					index = $.map(links, function (element, myIndex) {
 						if (element.current) {
 							return myIndex;
 						}
 					})[0];
-					
+
 				jQuery.modulaFancybox.open(
 					links,
 					self.options.lightboxOpts,
@@ -276,12 +321,12 @@ jQuery(window).on('elementor/frontend/init', function () {
 
 	// Create custom grid gallery based on packery.
 	Plugin.prototype.createCustomGallery = function () {
-		var instance       = this,
+		var instance = this,
 			size,
 			containerWidth = this.$element.find('.modula-items').width(),
-			plugin         = this,
-			columns        = this.options.columns,
-			viewport       = document.documentElement.clientWidth;
+			plugin = this,
+			columns = this.options.columns,
+			viewport = document.documentElement.clientWidth;
 
 		if ('1' == this.options.enableResponsive) {
 			if (viewport <= 568) {
@@ -306,7 +351,7 @@ jQuery(window).on('elementor/frontend/init', function () {
 				auxWidth,
 				auxHeight;
 
-			widthColumns  = $(item).data('width');
+			widthColumns = $(item).data('width');
 			heightColumns = $(item).data('height');
 
 			if (widthColumns > 12) {
@@ -314,11 +359,11 @@ jQuery(window).on('elementor/frontend/init', function () {
 			}
 
 			if ('1' == plugin.options.enableResponsive) {
-				auxWidth  = widthColumns;
+				auxWidth = widthColumns;
 				auxHeight = heightColumns;
 
 				if (1 == columns) {
-					widthColumns  = 1;
+					widthColumns = 1;
 					heightColumns = (widthColumns * auxHeight) / auxWidth;
 				} else {
 					widthColumns = Math.round((columns * auxWidth) / 12);
@@ -335,7 +380,7 @@ jQuery(window).on('elementor/frontend/init', function () {
 				}
 			}
 
-			slot.width  =
+			slot.width =
 				size * widthColumns +
 				plugin.options.gutter * (widthColumns - 1);
 			slot.height =
@@ -352,9 +397,9 @@ jQuery(window).on('elementor/frontend/init', function () {
 			$(item)
 				.find('.figc')
 				.css({
-						 width : $(item).data('size').width,
-						 height: $(item).data('size').height,
-					 });
+					width: $(item).data('size').width,
+					height: $(item).data('size').height,
+				});
 
 			// Load Images
 			instance.loadImage(i);
@@ -362,9 +407,9 @@ jQuery(window).on('elementor/frontend/init', function () {
 
 		var packery_args = {
 			itemSelector: '.modula-item',
-			layoutMode  : 'packery',
-			originLeft  : plugin.options.originLeft,
-			packery     : {
+			layoutMode: 'packery',
+			originLeft: plugin.options.originLeft,
+			packery: {
 				gutter: parseInt(plugin.options.gutter),
 			},
 		};
@@ -420,14 +465,14 @@ jQuery(window).on('elementor/frontend/init', function () {
 				.data('position');
 
 			$(item).css({
-							width : slot.width,
-							height: slot.height,
-						});
+				width: slot.width,
+				height: slot.height,
+			});
 
 			$(item).find('.figc').css({
-										  width : slot.width,
-										  height: slot.height,
-									  });
+				width: slot.width,
+				height: slot.height,
+			});
 
 			instance.loadImage(i);
 		});
@@ -435,10 +480,10 @@ jQuery(window).on('elementor/frontend/init', function () {
 		if (!this.isIsotope) {
 			var packery_args = {
 				resizesContainer: false,
-				itemSelector    : '.modula-item',
-				layoutMode      : 'packery',
-				originLeft      : instance.options.originLeft,
-				packery         : {
+				itemSelector: '.modula-item',
+				layoutMode: 'packery',
+				originLeft: instance.options.originLeft,
+				packery: {
 					gutter: parseInt(instance.options.gutter),
 				},
 			};
@@ -453,15 +498,15 @@ jQuery(window).on('elementor/frontend/init', function () {
 		var plugin = this;
 
 		this.$itemsCnt.justifiedGallery({
-											rowHeight              : this.options.rowHeight,
-											margins                : this.options.gutter,
-											lastRow                : this.options.lastRow,
-											captions               : false,
-											border                 : 0,
-											imgSelector            : 'img.pic, picture.pic img',
-											cssAnimation           : true,
-											imagesAnimationDuration: 700,
-										});
+			rowHeight: this.options.rowHeight,
+			margins: this.options.gutter,
+			lastRow: this.options.lastRow,
+			captions: false,
+			border: 0,
+			imgSelector: 'img.pic, picture.pic img',
+			cssAnimation: true,
+			imagesAnimationDuration: 700,
+		});
 	};
 
 	// create the mansonry gallery
@@ -469,16 +514,16 @@ jQuery(window).on('elementor/frontend/init', function () {
 		var instance = this;
 
 		this.$itemsCnt.modulaisotope({
-										 // set itemSelector so .grid-sizer is not used in layout
-										 itemSelector: '.modula-item',
-										 // percentPosition: true,
-										 layoutMode: 'packery',
-										 originLeft: this.options.originLeft,
-										 packery   : {
-											 // use element for option
-											 gutter: parseInt(this.options.gutter),
-										 },
-									 });
+			// set itemSelector so .grid-sizer is not used in layout
+			itemSelector: '.modula-item',
+			// percentPosition: true,
+			layoutMode: 'packery',
+			originLeft: this.options.originLeft,
+			packery: {
+				// use element for option
+				gutter: parseInt(this.options.gutter),
+			},
+		});
 
 		// Load Images
 		this.$items.each(function (index, el) {
@@ -493,11 +538,11 @@ jQuery(window).on('elementor/frontend/init', function () {
 	Plugin.prototype.getSlot = function () {
 		if (this.tiles.length == 0) {
 			var tile = {
-				top     : 0,
-				left    : 0,
-				width   : this.$itemsCnt.width(),
-				height  : this.options.height,
-				area    : this.$itemsCnt.width() * this.options.height,
+				top: 0,
+				left: 0,
+				width: this.$itemsCnt.width(),
+				height: this.options.height,
+				area: this.$itemsCnt.width() * this.options.height,
 				position: 0,
 			};
 
@@ -518,18 +563,18 @@ jQuery(window).on('elementor/frontend/init', function () {
 
 		if (maxTileData.width > maxTileData.height) {
 			var randomMaxDelta =
-					(maxTileData.width / 2) * this.options.randomFactor;
+				(maxTileData.width / 2) * this.options.randomFactor;
 
 			maxTileData.prevWidth = maxTileData.width;
-			maxTileData.width     = Math.floor(
+			maxTileData.width = Math.floor(
 				maxTileData.width / 2 + randomMaxDelta * (Math.random() - 0.5)
 			);
 
 			tile = {
-				top   : maxTileData.top,
-				left  :
+				top: maxTileData.top,
+				left:
 					maxTileData.left + maxTileData.width + this.options.gutter,
-				width :
+				width:
 					maxTileData.prevWidth -
 					maxTileData.width -
 					this.options.gutter,
@@ -537,17 +582,17 @@ jQuery(window).on('elementor/frontend/init', function () {
 			};
 		} else {
 			var randomMaxDelta =
-					(maxTileData.height / 2) * this.options.randomFactor;
+				(maxTileData.height / 2) * this.options.randomFactor;
 
 			maxTileData.prevHeight = maxTileData.height;
-			maxTileData.height     = Math.floor(
+			maxTileData.height = Math.floor(
 				maxTileData.height / 2 + randomMaxDelta * (Math.random() - 0.5)
 			);
 
 			tile = {
-				left  : maxTileData.left,
-				top   : maxTileData.top + maxTileData.height + this.options.gutter,
-				width : maxTileData.width,
+				left: maxTileData.left,
+				top: maxTileData.top + maxTileData.height + this.options.gutter,
+				width: maxTileData.width,
 				height:
 					maxTileData.prevHeight -
 					maxTileData.height -
@@ -555,12 +600,12 @@ jQuery(window).on('elementor/frontend/init', function () {
 			};
 		}
 
-		tile.area     = tile.width * tile.height;
+		tile.area = tile.width * tile.height;
 		tile.position = tile.top * 1000 + tile.left;
 
 		maxTileData.position = maxTileData.top * 1000 + maxTileData.left;
 
-		this.tiles[maxTileIdx]      = maxTileData;
+		this.tiles[maxTileIdx] = maxTileData;
 		this.tiles[maxTileIdx].area = maxTileData.width * maxTileData.height;
 
 		return tile;
@@ -568,7 +613,7 @@ jQuery(window).on('elementor/frontend/init', function () {
 
 	// Re-initialize the gallery
 	Plugin.prototype.reset = function () {
-		var instance   = this;
+		var instance = this;
 		instance.tiles = [];
 
 		if ('custom-grid' === this.options.type) {
@@ -614,13 +659,13 @@ jQuery(window).on('elementor/frontend/init', function () {
 
 			if (instance.isIsotope) {
 				instance.$itemsCnt
-						.modulaisotope({
-										   packery: {
-											   originLeft: instance.options.originLeft,
-											   gutter: parseInt(instance.options.gutter),
-										   },
-									   })
-						.modulaisotope('layout');
+					.modulaisotope({
+						packery: {
+							originLeft: instance.options.originLeft,
+							gutter: parseInt(instance.options.gutter),
+						},
+					})
+					.modulaisotope('layout');
 			}
 		}, 100);
 	};
@@ -628,17 +673,21 @@ jQuery(window).on('elementor/frontend/init', function () {
 	// load the image in order to get the width and heoght of the picture.
 	Plugin.prototype.loadImage = function (index) {
 		var instance = this,
-			source   = instance.$items.not('.jtg-hidden').eq(index).find('.pic'),
-			size     = {};
+			picElement = instance.$items
+				.not('.jtg-hidden')
+				.eq(index)
+				.find('.pic'),
+			source = picElement.is('img') ? picElement : picElement.find('img'),
+			size = {};
 
 		if ('0' != instance.options.lazyLoad) {
 			instance.placeImage(index);
 			return;
 		}
 
-		var img    = new Image();
+		var img = new Image();
 		img.onload = function () {
-			size = {width: this.width, height: this.height};
+			size = { width: this.width, height: this.height };
 			source.data('size', size);
 			instance.placeImage(index);
 		};
@@ -656,8 +705,11 @@ jQuery(window).on('elementor/frontend/init', function () {
 			return;
 		}
 
-		var $tile  = this.$items.not('.jtg-hidden').eq(index);
-		var $image = $tile.find('.pic');
+		var $tile = this.$items.not('.jtg-hidden').eq(index);
+		var $picElement = $tile.find('.pic');
+		var $image = $picElement.is('img')
+			? $picElement
+			: $picElement.find('img');
 
 		var tSize = $tile.data('size');
 		var iSize = $image.data('size');
@@ -665,6 +717,7 @@ jQuery(window).on('elementor/frontend/init', function () {
 		if (typeof tSize == 'undefined') {
 			return;
 		}
+
 		if (typeof iSize == 'undefined') {
 			return;
 		}
@@ -676,13 +729,13 @@ jQuery(window).on('elementor/frontend/init', function () {
 		var halign = $image.data('halign') ? $image.data('halign') : 'center';
 
 		var cssProps = {
-			top     : 'auto',
-			bottom  : 'auto',
-			left    : 'auto',
-			right   : 'auto',
-			width   : 'auto',
-			height  : 'auto',
-			margin  : '0',
+			top: 'auto',
+			bottom: 'auto',
+			left: 'auto',
+			right: 'auto',
+			width: 'auto',
+			height: 'auto',
+			margin: '0',
 			maxWidth: '999em',
 		};
 
@@ -690,7 +743,7 @@ jQuery(window).on('elementor/frontend/init', function () {
 
 		if (newHeight > tSize.height) {
 			cssProps.width = tSize.width;
-			cssProps.left  = 0;
+			cssProps.left = 0;
 
 			switch (valign) {
 				case 'top':
@@ -706,7 +759,7 @@ jQuery(window).on('elementor/frontend/init', function () {
 			}
 		} else {
 			cssProps.height = tSize.height;
-			cssProps.top    = 0;
+			cssProps.top = 0;
 
 			switch (halign) {
 				case 'left':
@@ -729,11 +782,23 @@ jQuery(window).on('elementor/frontend/init', function () {
 
 		$image.css(cssProps);
 		this.$items.not('.jtg-hidden').eq(index).addClass('tg-loaded');
+
+		// Support for picture element - add class to picture parent if it exists
+		if ($image.parent().prop('tagName') === 'PICTURE') {
+			$image.parent().addClass('tg-loaded');
+		}
 	};
 
 	// based on settings set the needed socials.
 	Plugin.prototype.setupSocial = function () {
-		if(this.options.enableTwitter || this.options.enableFacebook || this.options.enablePinterest || this.options.enableLinkedin || this.options.enableWhatsapp || this.options.enableEmail){
+		if (
+			this.options.enableTwitter ||
+			this.options.enableFacebook ||
+			this.options.enablePinterest ||
+			this.options.enableLinkedin ||
+			this.options.enableWhatsapp ||
+			this.options.enableEmail
+		) {
 			setupSocials(this.$items);
 		}
 		if (this.options.enableTwitter) {
@@ -768,7 +833,7 @@ jQuery(window).on('elementor/frontend/init', function () {
 	var qualifyURL = function (url) {
 		var img = document.createElement('img');
 		img.src = url; // set string url
-		url     = img.src; // get qualified url
+		url = img.src; // get qualified url
 		img.src = null; // no server request
 		return url;
 	};
@@ -778,22 +843,25 @@ jQuery(window).on('elementor/frontend/init', function () {
 		$tiles.find('.modula-icon-twitter').click(function (e) {
 			e.preventDefault();
 
-			let socialLink     = $(this),
-				image          = $(this).parents('.modula-item').find('img.pic'),
-				imageUrl       = socialLink.data('modula-image-src'),
+			let socialLink = $(this),
+				image = $(this).parents('.modula-item').find('img.pic'),
+				imageUrl = socialLink.data('modula-image-src'),
 				currentPageUrl = window.location.href,
-				imageID        = socialLink.data('modula-item-id'),
-				galleryID      = socialLink.data('modula-gallery-id');
-			var $caption       = image.data('caption');
-			var $title         = image.attr('title');
-			var text           = document.title;
+				imageID = socialLink.data('modula-item-id'),
+				galleryID = socialLink.data('modula-gallery-id');
+			var $caption = image.data('caption');
+			var $title = image.attr('title');
+			var text = document.title;
 			// Create a URL object from the original URL
-			const urlObj       = new URL(currentPageUrl);
-			const urlParams    = new URLSearchParams(urlObj.search);
+			const urlObj = new URL(currentPageUrl);
+			const urlParams = new URLSearchParams(urlObj.search);
 
 			// Update the parameters
 			if ('undefined' !== typeof galleryID) {
-				urlParams.set('modula_gallery_id', encodeURIComponent(galleryID));
+				urlParams.set(
+					'modula_gallery_id',
+					encodeURIComponent(galleryID)
+				);
 			}
 			if ('undefined' !== typeof imageID) {
 				urlParams.set('modula_image_id', encodeURIComponent(imageID));
@@ -817,14 +885,18 @@ jQuery(window).on('elementor/frontend/init', function () {
 			document.dispatchEvent(
 				new CustomEvent('modula_social_url_params', {
 					detail: {
-						'url': urlObj,
-						'params': urlParams,
-						'meta': modulaMetaVars
-					}
+						url: urlObj,
+						params: urlParams,
+						meta: modulaMetaVars,
+					},
 				})
 			);
 			// Reconstruct the URL with the updated parameters
-			const newUrl = urlObj.origin + urlObj.pathname + '?' + decodeURIComponent( urlParams.toString() );
+			const newUrl =
+				urlObj.origin +
+				urlObj.pathname +
+				'?' +
+				decodeURIComponent(urlParams.toString());
 
 			if ($title.length > 0 && $caption.length > 0) {
 				text = $.trim($title) + ' - ' + $.trim($caption);
@@ -836,9 +908,9 @@ jQuery(window).on('elementor/frontend/init', function () {
 
 			var w = window.open(
 				'https://twitter.com/intent/tweet?url=' +
-				encodeURIComponent(newUrl) +
-				'&text=' +
-				encodeURI(text),
+					encodeURIComponent(newUrl) +
+					'&text=' +
+					encodeURI(text),
 				'ftgw',
 				'location=1,status=1,scrollbars=1,width=600,height=400'
 			);
@@ -852,19 +924,22 @@ jQuery(window).on('elementor/frontend/init', function () {
 		$tiles.find('.modula-icon-facebook').click(function (e) {
 			e.preventDefault();
 
-			let socialLink     = $(this),
-				image          = $(this).parents('.modula-item').find('img.pic'),
-				imageUrl       = socialLink.data('modula-image-src'),
+			let socialLink = $(this),
+				image = $(this).parents('.modula-item').find('img.pic'),
+				imageUrl = socialLink.data('modula-image-src'),
 				currentPageUrl = window.location.href,
-				imageID        = socialLink.data('modula-item-id'),
-				galleryID      = socialLink.data('modula-gallery-id');
+				imageID = socialLink.data('modula-item-id'),
+				galleryID = socialLink.data('modula-gallery-id');
 			// Create a URL object from the original URL
-			const urlObj       = new URL(currentPageUrl);
-			const urlParams    = new URLSearchParams(urlObj.search);
+			const urlObj = new URL(currentPageUrl);
+			const urlParams = new URLSearchParams(urlObj.search);
 
 			// Update the parameters
 			if ('undefined' !== typeof galleryID) {
-				urlParams.set('modula_gallery_id', encodeURIComponent(galleryID));
+				urlParams.set(
+					'modula_gallery_id',
+					encodeURIComponent(galleryID)
+				);
 			}
 			if ('undefined' !== typeof imageID) {
 				urlParams.set('modula_image_id', encodeURIComponent(imageID));
@@ -888,16 +963,21 @@ jQuery(window).on('elementor/frontend/init', function () {
 			document.dispatchEvent(
 				new CustomEvent('modula_social_url_params', {
 					detail: {
-						'url': urlObj,
-						'params': urlParams,
-						'meta': modulaMetaVars
-					}
+						url: urlObj,
+						params: urlParams,
+						meta: modulaMetaVars,
+					},
 				})
 			);
 			// Reconstruct the URL with the updated parameters
-			const newUrl = urlObj.origin + urlObj.pathname + '?' + decodeURIComponent( urlParams.toString() );
+			const newUrl =
+				urlObj.origin +
+				urlObj.pathname +
+				'?' +
+				decodeURIComponent(urlParams.toString());
 
-			var url = '//www.facebook.com/sharer.php?u=' + encodeURIComponent(newUrl);
+			var url =
+				'//www.facebook.com/sharer.php?u=' + encodeURIComponent(newUrl);
 
 			var w = window.open(
 				url,
@@ -913,19 +993,22 @@ jQuery(window).on('elementor/frontend/init', function () {
 	var setupWhatsapp = function ($tiles, plugin) {
 		$tiles.find('.modula-icon-whatsapp').click(function (e) {
 			e.preventDefault();
-			let socialLink     = $(this),
-				image          = $(this).parents('.modula-item').find('img.pic'),
-				imageUrl       = socialLink.data('modula-image-src'),
+			let socialLink = $(this),
+				image = $(this).parents('.modula-item').find('img.pic'),
+				imageUrl = socialLink.data('modula-image-src'),
 				currentPageUrl = window.location.href,
-				imageID        = socialLink.data('modula-item-id'),
-				galleryID      = socialLink.data('modula-gallery-id');
+				imageID = socialLink.data('modula-item-id'),
+				galleryID = socialLink.data('modula-gallery-id');
 			// Create a URL object from the original URL
-			const urlObj       = new URL(currentPageUrl);
-			const urlParams    = new URLSearchParams(urlObj.search);
+			const urlObj = new URL(currentPageUrl);
+			const urlParams = new URLSearchParams(urlObj.search);
 
 			// Update the parameters
 			if ('undefined' !== typeof galleryID) {
-				urlParams.set('modula_gallery_id', encodeURIComponent(galleryID));
+				urlParams.set(
+					'modula_gallery_id',
+					encodeURIComponent(galleryID)
+				);
 			}
 			if ('undefined' !== typeof imageID) {
 				urlParams.set('modula_image_id', encodeURIComponent(imageID));
@@ -949,19 +1032,23 @@ jQuery(window).on('elementor/frontend/init', function () {
 			document.dispatchEvent(
 				new CustomEvent('modula_social_url_params', {
 					detail: {
-						'url': urlObj,
-						'params': urlParams,
-						'meta': modulaMetaVars
-					}
+						url: urlObj,
+						params: urlParams,
+						meta: modulaMetaVars,
+					},
 				})
 			);
 			// Reconstruct the URL with the updated parameters
-			const newUrl = urlObj.origin + urlObj.pathname + '?' + decodeURIComponent( urlParams.toString() );
+			const newUrl =
+				urlObj.origin +
+				urlObj.pathname +
+				'?' +
+				decodeURIComponent(urlParams.toString());
 
 			var w = window.open(
 				'https://api.whatsapp.com/send?text=' +
-				encodeURIComponent(newUrl) +
-				'&preview_url=true',
+					encodeURIComponent(newUrl) +
+					'&preview_url=true',
 				'ftgw',
 				'location=1,status=1,scrollbars=1,width=600,height=400'
 			);
@@ -975,21 +1062,24 @@ jQuery(window).on('elementor/frontend/init', function () {
 		$tiles.find('.modula-icon-pinterest').click(function (e) {
 			e.preventDefault();
 
-			let socialLink     = $(this),
-				image          = $(this).parents('.modula-item').find('img.pic'),
-				imageUrl       = socialLink.data('modula-image-src'),
+			let socialLink = $(this),
+				image = $(this).parents('.modula-item').find('img.pic'),
+				imageUrl = socialLink.data('modula-image-src'),
 				currentPageUrl = window.location.href,
-				imageID        = socialLink.data('modula-item-id'),
-				galleryID      = socialLink.data('modula-gallery-id');
+				imageID = socialLink.data('modula-item-id'),
+				galleryID = socialLink.data('modula-gallery-id');
 			var $caption = image.data('caption');
-			var $title   = image.attr('title');
+			var $title = image.attr('title');
 			// Create a URL object from the original URL
-			const urlObj       = new URL(currentPageUrl);
-			const urlParams    = new URLSearchParams(urlObj.search);
+			const urlObj = new URL(currentPageUrl);
+			const urlParams = new URLSearchParams(urlObj.search);
 
 			// Update the parameters
 			if ('undefined' !== typeof galleryID) {
-				urlParams.set('modula_gallery_id', encodeURIComponent(galleryID));
+				urlParams.set(
+					'modula_gallery_id',
+					encodeURIComponent(galleryID)
+				);
 			}
 			if ('undefined' !== typeof imageID) {
 				urlParams.set('modula_image_id', encodeURIComponent(imageID));
@@ -1013,14 +1103,18 @@ jQuery(window).on('elementor/frontend/init', function () {
 			document.dispatchEvent(
 				new CustomEvent('modula_social_url_params', {
 					detail: {
-						'url': urlObj,
-						'params': urlParams,
-						'meta': modulaMetaVars
-					}
+						url: urlObj,
+						params: urlParams,
+						meta: modulaMetaVars,
+					},
 				})
 			);
 			// Reconstruct the URL with the updated parameters
-			const newUrl = urlObj.origin + urlObj.pathname + '?' + decodeURIComponent( urlParams.toString() );
+			const newUrl =
+				urlObj.origin +
+				urlObj.pathname +
+				'?' +
+				decodeURIComponent(urlParams.toString());
 
 			var text = document.title;
 
@@ -1031,10 +1125,10 @@ jQuery(window).on('elementor/frontend/init', function () {
 			}
 
 			var url =
-					'http://pinterest.com/pin/create/button/?url=' +
-					encodeURIComponent(newUrl) +
-					'&description=' +
-					encodeURI(text);
+				'http://pinterest.com/pin/create/button/?url=' +
+				encodeURIComponent(newUrl) +
+				'&description=' +
+				encodeURI(text);
 
 			if ('undefined' !== typeof imageUrl && imageUrl.length > 0) {
 				url += '&media=' + qualifyURL(imageUrl);
@@ -1055,19 +1149,22 @@ jQuery(window).on('elementor/frontend/init', function () {
 		$tiles.find('.modula-icon-linkedin').click(function (e) {
 			e.preventDefault();
 
-			let socialLink     = $(this),
-				image          = $(this).parents('.modula-item').find('img.pic'),
-				imageUrl       = socialLink.data('modula-image-src'),
+			let socialLink = $(this),
+				image = $(this).parents('.modula-item').find('img.pic'),
+				imageUrl = socialLink.data('modula-image-src'),
 				currentPageUrl = window.location.href,
-				imageID        = socialLink.data('modula-item-id'),
-				galleryID      = socialLink.data('modula-gallery-id');
+				imageID = socialLink.data('modula-item-id'),
+				galleryID = socialLink.data('modula-gallery-id');
 			// Create a URL object from the original URL
-			const urlObj       = new URL(currentPageUrl);
-			const urlParams    = new URLSearchParams(urlObj.search);
+			const urlObj = new URL(currentPageUrl);
+			const urlParams = new URLSearchParams(urlObj.search);
 
 			// Update the parameters
 			if ('undefined' !== typeof galleryID) {
-				urlParams.set('modula_gallery_id', encodeURIComponent(galleryID));
+				urlParams.set(
+					'modula_gallery_id',
+					encodeURIComponent(galleryID)
+				);
 			}
 			if ('undefined' !== typeof imageID) {
 				urlParams.set('modula_image_id', encodeURIComponent(imageID));
@@ -1091,18 +1188,22 @@ jQuery(window).on('elementor/frontend/init', function () {
 			document.dispatchEvent(
 				new CustomEvent('modula_social_url_params', {
 					detail: {
-						'url': urlObj,
-						'params': urlParams,
-						'meta': modulaMetaVars
-					}
+						url: urlObj,
+						params: urlParams,
+						meta: modulaMetaVars,
+					},
 				})
 			);
 			// Reconstruct the URL with the updated parameters
-			const newUrl = urlObj.origin + urlObj.pathname + '?' + decodeURIComponent( urlParams.toString() );
+			const newUrl =
+				urlObj.origin +
+				urlObj.pathname +
+				'?' +
+				decodeURIComponent(urlParams.toString());
 
 			var url =
-					'//linkedin.com/shareArticle?mini=true&url=' +
-					encodeURIComponent(newUrl);
+				'//linkedin.com/shareArticle?mini=true&url=' +
+				encodeURIComponent(newUrl);
 
 			var w = window.open(
 				url,
@@ -1119,19 +1220,22 @@ jQuery(window).on('elementor/frontend/init', function () {
 		$tiles.find('.modula-icon-email').click(function (e) {
 			var subject = plugin.options.email_subject;
 
-			let socialLink     = $(this),
-				image          = $(this).parents('.modula-item').find('img.pic'),
-				imageUrl       = socialLink.data('modula-image-src'),
+			let socialLink = $(this),
+				image = $(this).parents('.modula-item').find('img.pic'),
+				imageUrl = socialLink.data('modula-image-src'),
 				currentPageUrl = window.location.href,
-				imageID        = socialLink.data('modula-item-id'),
-				galleryID      = socialLink.data('modula-gallery-id');
+				imageID = socialLink.data('modula-item-id'),
+				galleryID = socialLink.data('modula-gallery-id');
 			// Create a URL object from the original URL
-			const urlObj       = new URL(currentPageUrl);
-			const urlParams    = new URLSearchParams(urlObj.search);
+			const urlObj = new URL(currentPageUrl);
+			const urlParams = new URLSearchParams(urlObj.search);
 
 			// Update the parameters
 			if ('undefined' !== typeof galleryID) {
-				urlParams.set('modula_gallery_id', encodeURIComponent(galleryID));
+				urlParams.set(
+					'modula_gallery_id',
+					encodeURIComponent(galleryID)
+				);
 			}
 			if ('undefined' !== typeof imageID) {
 				urlParams.set('modula_image_id', encodeURIComponent(imageID));
@@ -1155,20 +1259,28 @@ jQuery(window).on('elementor/frontend/init', function () {
 			document.dispatchEvent(
 				new CustomEvent('modula_social_url_params', {
 					detail: {
-						'url': urlObj,
-						'params': urlParams,
-						'meta': modulaMetaVars
-					}
+						url: urlObj,
+						params: urlParams,
+						meta: modulaMetaVars,
+					},
 				})
 			);
 			// Reconstruct the URL with the updated parameters
-			const newUrl = urlObj.origin + urlObj.pathname + '?' + decodeURIComponent(urlParams.toString());
+			const newUrl =
+				urlObj.origin +
+				urlObj.pathname +
+				'?' +
+				decodeURIComponent(urlParams.toString());
 
 			var email = plugin.options.email_message
 				.replace('%%image_link%%', imageUrl)
 				.replace('%%gallery_link%%', newUrl);
 
-			var url = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(email);
+			var url =
+				'mailto:?subject=' +
+				encodeURIComponent(subject) +
+				'&body=' +
+				encodeURIComponent(email);
 
 			var w = window.open(
 				url,
@@ -1185,34 +1297,35 @@ jQuery(window).on('elementor/frontend/init', function () {
 		$tiles.find('.jtg-social-expandable').on('click', function (e) {
 			e.preventDefault();
 			e.stopPropagation();
-	
+
 			var $parent = $(this).parent();
-			var $icons  = $parent.children('.jtg-social-expandable-icons');
-	
-			$tiles.find('.jtg-social-expandable-icons').not($icons)
-				  .removeClass('modula-show-socials');
-	
+			var $icons = $parent.children('.jtg-social-expandable-icons');
+
+			$tiles
+				.find('.jtg-social-expandable-icons')
+				.not($icons)
+				.removeClass('modula-show-socials');
+
 			$icons.toggleClass('modula-show-socials');
 
-			if ($icons.hasClass('modula-show-socials') &&
-				isElementOutOfHorizontalViewport($icons)) {
+			if (
+				$icons.hasClass('modula-show-socials') &&
+				isElementOutOfHorizontalViewport($icons)
+			) {
 				$icons.addClass('modula-socials-right');
 			} else {
 				$icons.removeClass('modula-socials-right');
 			}
 		});
 	};
-	
 
-	var  isElementOutOfHorizontalViewport = function (el) {
+	var isElementOutOfHorizontalViewport = function (el) {
 		var rect = el[0].getBoundingClientRect();
-		var windowWidth = (window.innerWidth || document.documentElement.clientWidth);
+		var windowWidth =
+			window.innerWidth || document.documentElement.clientWidth;
 
-		return (
-			rect.left < 0 || 
-			rect.right > windowWidth
-		);
-	}
+		return rect.left < 0 || rect.right > windowWidth;
+	};
 
 	$.fn[pluginName] = function (options) {
 		var args = arguments;
@@ -1295,10 +1408,12 @@ function modulaInViewport(element) {
 	}
 
 	var elementBounds = element.getBoundingClientRect();
+	var winHeight = jQuery(window).height();
 
 	return (
-		(elementBounds.top - jQuery(window).height() <= -100 &&
-		 elementBounds.top - jQuery(window).height() >= -400) ||
-		elementBounds.bottom <= jQuery(window).height()
+		(elementBounds.top - winHeight <= -100 &&
+			elementBounds.top - winHeight >= -400) ||
+		elementBounds.bottom <= winHeight ||
+		(elementBounds.top < winHeight && elementBounds.bottom > 0)
 	);
 }

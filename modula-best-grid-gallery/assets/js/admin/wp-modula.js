@@ -61,11 +61,26 @@ wp.Modula.upload =
 	// Copy shortcode functionality
 	$('.copy-modula-shortcode').click(function (e) {
 		e.preventDefault();
-		var gallery_shortcode = $(this).parent().find('input');
+		var gallery_shortcode = $(this).parent().find('input').first();
 		gallery_shortcode.focus();
 		gallery_shortcode.select();
 		document.execCommand('copy');
-		$(this).next('span').text('Shortcode copied');
+		var $feedback = $(this).next('.copy-feedback');
+		$feedback.text('Shortcode copied').fadeIn();
+		setTimeout(function() {
+			$feedback.fadeOut();
+		}, 2000);
+	});
+
+	// Toggle shortcode dropdown
+	$('.modula-shortcode-dropdown-toggle').on('click', function(e) {
+		e.preventDefault();
+		var $button = $(this);
+		var $dropdown = $button.closest('.inside').find('.modula-shortcode-dropdown');
+		var isExpanded = $button.attr('aria-expanded') === 'true';
+
+		$button.attr('aria-expanded', !isExpanded);
+		$dropdown.slideToggle(200);
 	});
 
 	jQuery(document).on(

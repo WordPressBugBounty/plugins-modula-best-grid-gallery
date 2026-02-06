@@ -18,11 +18,14 @@
 <script type="text/html" id="tmpl-modula-image-editor">
 	<div class="modula-ai-report">
 		<button class="modula-ai-report-button button button-primary media-button button-large" id="modula-ai-report-generate-button" data-action="<# if ( data.report ) { #>refresh<# } else { #>generate<# } #>">
-			<# if ( data.report ) { #>
-				<?php esc_html_e( 'Refresh AI Report', 'modula-best-grid-gallery' ); ?>
+		<?php echo Modula_Helper::get_icon( 'ai' ); ?>
+		<span class="modula-ai-btn-text">
+		<# if ( data.report ) { #>
+				<?php esc_html_e( 'Regenerate with Modula AI', 'modula-best-grid-gallery' ); ?>
 			<# } else { #>
-				<?php esc_html_e( 'Generate AI Report', 'modula-best-grid-gallery' ); ?>
+				<?php esc_html_e( 'Generate with Modula AI', 'modula-best-grid-gallery' ); ?>
 			<# } #>
+		</span>
 		</button>
 	</div>
 	<div class="edit-media-header">
@@ -49,34 +52,34 @@
 					<input type="hidden" name="id" value="{{ data.id }}" />
 					
 					<!-- Image Title -->
-					<label class="setting">
-						<span class="name"><?php esc_html_e( 'Title', 'modula-best-grid-gallery' ); ?></span>
+					<div class="setting">
+						<label for="title" class="name"><?php esc_html_e( 'Title', 'modula-best-grid-gallery' ); ?></label>
 						<input type="text" name="title" value="{{ data.title }}" />
 						<div class="description">
 							<?php esc_html_e( 'Image titles can take any type of HTML.', 'modula-best-grid-gallery' ); ?>
 						</div>
-					</label>
+					</div>
 				  
 					
 					<!-- Alt Text -->
-					<label class="setting">
-						<span class="name"><?php esc_html_e( 'Alt Text', 'modula-best-grid-gallery' ); ?></span>
+					<div class="setting">
+						<label for="alt" class="name"><?php esc_html_e( 'Alt Text', 'modula-best-grid-gallery' ); ?></label>
 						<input type="text" name="alt" value="{{ data.alt }}" />
 						<div class="description">
 							<?php esc_html_e( 'Very important for SEO, the Alt Text describes the image.', 'modula-best-grid-gallery' ); ?>
 						</div>
-					</label>
+					</div>
 
 					<!-- Caption Text -->
-					<label class="setting">
-						<span class="name"><?php esc_html_e( 'Caption Text', 'modula-best-grid-gallery' ); ?></span>
-						<textarea name="description">{{ data.description }}</textarea>
-					</label>
+					<div class="setting">
+						<label for="description" class="name"><?php esc_html_e( 'Caption Text', 'modula-best-grid-gallery' ); ?></label>
+						<textarea id="modula_gallery_description" name="description">{{ data.description }}</textarea>
+					</div>
 
 					<!-- Alignment -->
 					<?php if ( apply_filters( 'modula_show_alignment_options', false ) ) : ?>
 						<div class="setting">
-							<span class="name"><?php esc_html_e( 'Alignment', 'modula-best-grid-gallery' ); ?></span>
+							<label for="halign" class="name"><?php esc_html_e( 'Alignment', 'modula-best-grid-gallery' ); ?></label>
 							<select name="halign" class="inline-input">
 								<option <# if ( 'left' == data.halign ) { #> selected <# } #>><?php esc_html_e( 'left', 'modula-best-grid-gallery' ); ?></option>
 								<option <# if ( 'center' == data.halign ) { #> selected <# } #>><?php esc_html_e( 'center', 'modula-best-grid-gallery' ); ?></option>
@@ -92,30 +95,29 @@
 
 					<!-- Link -->
 					<div class="setting modula-link">
-						<label class="">
-							<span class="name"><?php esc_html_e( 'URL', 'modula-best-grid-gallery' ); ?></span>
+						<div>
+							<label for="link" class="name"><?php esc_html_e( 'URL', 'modula-best-grid-gallery' ); ?></label>
 							<input type="text" name="link" value="{{ data.link }}" />
 							<span class="dashicons dashicons-editor-break"></span>
 							<span class="description">
 								<?php esc_html_e( ' You can start typing the first 3 letter and we will autocomplete the rest !', 'modula-best-grid-gallery' ); ?>
 								<?php esc_html_e( 'Enter a hyperlink if you wish to link this image to somewhere other than the general selected action.', 'modula-best-grid-gallery' ); ?>
 								<?php esc_html_e( '( Doesn\'t work for Direct link to image or No link )', 'modula-best-grid-gallery' ); ?>
-
 							</span>
-						</label>
-						<label>
-						<span class="description">
-							<input type="checkbox" name="target" value="1"<# if ( data.target == '1' ) { #> checked <# } #> />
-							<span><?php esc_html_e( 'Opens your image links in a new browser window / tab.', 'modula-best-grid-gallery' ); ?></span>
-						</span>
-						</label>
+						</div>
+						<div>
+							<span class="description">
+								<input type="checkbox" name="target" value="1"<# if ( data.target == '1' ) { #> checked <# } #> />
+								<span><?php esc_html_e( 'Opens your image links in a new browser window / tab.', 'modula-best-grid-gallery' ); ?></span>
+							</span>
+						</div>
 					</div>
 
 					<!-- Hide from lightbox -->
 					<div class="setting modula-toggle-lightbox">
 						<div class="modula-toggle">
-							<label class="">
-								<span class="name"><?php esc_html_e( 'Hide image from lightbox', 'modula-best-grid-gallery' ); ?></span>
+							<div class="">
+								<label for="togglelightbox" class="name"><?php esc_html_e( 'Hide image from lightbox', 'modula-best-grid-gallery' ); ?></label>
 								<input class="modula-toggle__input" type="checkbox" name="togglelightbox" value="1"<# if ( data.togglelightbox == '1' ) { #> checked <# } #> />
 								<div class="modula-toggle__items">
 									<span class="modula-toggle__track"></span>
@@ -133,33 +135,31 @@
 										<path d="M0 0h2v6H0z"></path>
 									</svg>
 								</div>
-							</label>
+							</div>
 						</div>
 					</div>
 
 					<!-- Hide from lightbox -->
 					<div class="setting modula-toggle-lightbox">
 						<div class="modula-toggle">
-							<label class="">
-								<span class="name"><?php esc_html_e( 'Hide Title', 'modula-best-grid-gallery' ); ?></span>
-								<input class="modula-toggle__input" type="checkbox" name="hide_title" value="1"<# if ( data.hide_title == '1' ) { #> checked <# } #> />
-								<div class="modula-toggle__items">
-									<span class="modula-toggle__track"></span>
-									<span class="modula-toggle__thumb"></span>
-									<svg class="modula-toggle__off" width="6" height="6" aria-hidden="true"
-											role="img"
-											focusable="false"
-											viewBox="0 0 6 6">
-										<path d="M3 1.5c.8 0 1.5.7 1.5 1.5S3.8 4.5 3 4.5 1.5 3.8 1.5 3 2.2 1.5 3 1.5M3 0C1.3 0 0 1.3 0 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z"></path>
-									</svg>
-									<svg class="modula-toggle__on" width="2" height="6" aria-hidden="true"
-											role="img"
-											focusable="false"
-											viewBox="0 0 2 6">
-										<path d="M0 0h2v6H0z"></path>
-									</svg>
-								</div>
-							</label>
+							<label for="hide_title" class="name"><?php esc_html_e( 'Hide Title', 'modula-best-grid-gallery' ); ?></label>
+							<input class="modula-toggle__input" type="checkbox" name="hide_title" value="1"<# if ( data.hide_title == '1' ) { #> checked <# } #> />
+							<div class="modula-toggle__items">
+								<span class="modula-toggle__track"></span>
+								<span class="modula-toggle__thumb"></span>
+								<svg class="modula-toggle__off" width="6" height="6" aria-hidden="true"
+										role="img"
+										focusable="false"
+										viewBox="0 0 6 6">
+									<path d="M3 1.5c.8 0 1.5.7 1.5 1.5S3.8 4.5 3 4.5 1.5 3.8 1.5 3 2.2 1.5 3 1.5M3 0C1.3 0 0 1.3 0 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z"></path>
+								</svg>
+								<svg class="modula-toggle__on" width="2" height="6" aria-hidden="true"
+										role="img"
+										focusable="false"
+										viewBox="0 0 2 6">
+									<path d="M0 0h2v6H0z"></path>
+								</svg>
+							</div>
 						</div>
 					</div>
 

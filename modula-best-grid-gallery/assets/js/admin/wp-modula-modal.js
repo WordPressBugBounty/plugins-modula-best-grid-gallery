@@ -9,7 +9,9 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
         },
 
         initialize: function( args ){
-
+            if(!args){
+                return;
+            }
             var modalView = new modula.modal['view']({
                 'model': this,
                 'childViews' : args.childViews
@@ -43,8 +45,8 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
             // Open wpMediaView
             wpMediaView.open();
 
-        }
-
+            modulaModal.initEditor();
+        },
     } );
 
     var modulaModalView = Backbone.View.extend( {
@@ -156,6 +158,8 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
                     }, this );
                 }
             }
+
+            this.initEditor();
 
             // Enable / disable the buttons depending on the index
             if ( this.attachment_index == 0 ) {
@@ -305,6 +309,10 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
             var saved = this.$el.find( '.saved' );
             saved.fadeIn();
 
+            if ( typeof tinymce !== 'undefined' && tinymce.get('modula_gallery_description') ) {
+                this.item.set( 'description', wp.editor.getContent('modula_gallery_description') );
+            }
+
             wp.Modula.Save.saveImages( function(){
                 // Tell the view we've finished successfully
                 self.trigger( 'loaded loaded:success' );
@@ -321,6 +329,10 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
 
             // Tell the View we're loading
             this.trigger( 'loading' );
+
+            if ( typeof tinymce !== 'undefined' && tinymce.get('modula_gallery_description') ) {
+                this.item.set( 'description', wp.editor.getContent('modula_gallery_description') );
+            }
 
             clearInterval( wp.Modula.Save.updateInterval );
             wp.Modula.Save.saveImages( function(){
@@ -387,7 +399,7 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
             // Add loading state to the button
             var $button = this.$el.find('#modula-ai-report-generate-button');
             $button.addClass('loading').prop('disabled', true);
-            $button.text(modulaHelper.strings.generating_alt_text);
+            $button.find('.modula-ai-btn-text').text(modulaHelper.strings.generating_alt_text);
 
             this.item.set('report', {});
         },
@@ -395,10 +407,10 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
         onReportSuccess: function(result) {
             var $button = this.$el.find('#modula-ai-report-generate-button');
             $button.removeClass('loading').prop('disabled', false);
-            $button.text(modulaHelper.strings.alt_text_generated);
+            $button.find('.modula-ai-btn-text').text(modulaHelper.strings.alt_text_generated);
 
             setTimeout(() => {
-                $button.text(modulaHelper.strings.refresh_report);
+                $button.find('.modula-ai-btn-text').text(modulaHelper.strings.refresh_report);
             }, 2500)
 
             // Update the report
@@ -442,7 +454,7 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
                 const isKeyValid = response?.readonly?.valid_key ?? false;
                 
                 if (!isKeyValid) {
-                    $button.text(modulaHelper.strings.configure_api_key || 'Configure API Key');
+                    $button.find('.modula-ai-btn-text').text(modulaHelper.strings.configure_api_key || 'Configure API Key');
                     $button.addClass('configure-api');
                     self.isApiConfigured = false;
                 } else {
@@ -451,12 +463,41 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
                 }
             } catch (error) {
                 console.error('API check failed:', error);
-                const $button = self.$el.find('#modula-ai-report-generate-button');
+                const $button = self.$el.find('#modula-ai-report-generate-button .modula-ai-btn-text');
                 $button.text(modulaHelper.strings.configure_api_key || 'Configure API Key');
                 $button.addClass('configure-api');
                 self.isApiConfigured = false;
             }
-        }
+        },
+
+        initEditor: function(){
+            
+            if ( typeof tinymce !== 'undefined' && tinymce.get('modula_gallery_description') ) {
+                tinymce.get('modula_gallery_description').remove();
+            }
+
+            if ( typeof wp.editor !== 'undefined' ) {
+                wp.editor.initialize('modula_gallery_description', {
+                    tinymce: {
+						resize: false,
+						quicktags: false,
+						branding: false,
+						menubar: false,
+						wpautop: false,
+						statusbar: false,
+						forced_root_block: false,
+						forced_br_newlines: true,
+						force_p_newlines: false,
+						convert_newlines_to_brs: true,
+						remove_linebreaks: false,
+						plugins: 'lists link',
+						toolbar1:
+							'bold italic underline strikethrough | bullist numlist | link unlink',
+                    },
+                    quicktags: false
+                });
+            }
+        },
     } );
 
 

@@ -1,10 +1,15 @@
 (function () {
-	tinymce.create('tinymce.plugins.Modula', {
+		tinymce.create('tinymce.plugins.Modula', {
 		init: function (ed, url) {
 			ed.addCommand('modula_shortcode_editor', function () {
+				var nonce = typeof modulaEditorNonce !== 'undefined' ? modulaEditorNonce : '';
+				var ajaxUrl = ajaxurl + '?action=modula_shortcode_editor';
+				if (nonce) {
+					ajaxUrl += '&nonce=' + encodeURIComponent(nonce);
+				}
 				ed.windowManager.open(
 					{
-						file: ajaxurl + '?action=modula_shortcode_editor',
+						file: ajaxUrl,
 						width:
 							900 + parseInt(ed.getLang('button.delta_width', 0)),
 						height:

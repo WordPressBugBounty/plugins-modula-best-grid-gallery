@@ -1,3 +1,10 @@
+<?php
+$settings = array(
+	'classes'     => '',
+	'dismissible' => true,
+	'id'          => 'modula-modal-image-proofing-upgrade-' . get_the_ID(),
+);
+?>
 <div class="modula-modal__overlay image-proofing">
 	<div class="modula-modal__frame <?php echo esc_attr($settings['classes']); ?>" <?php if ( $settings['dismissible'] ) : ?>data-modula-modal-dismissible data-modula-modal-id="<?php echo esc_attr($id); ?>"<?php endif; ?>>
 		<div class="modula-modal__header">

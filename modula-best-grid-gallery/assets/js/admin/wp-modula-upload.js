@@ -273,7 +273,7 @@ wp.Modula = 'undefined' === typeof wp.Modula ? {} : wp.Modula;
 				modula_files_count = 0;
 
 			uploader = new wp.Uploader(modulaGalleryObject.uploaderOptions);
-			if( ! uploader.uploader ) {
+			if (!uploader.uploader) {
 				return;
 			}
 			// Uploader events
@@ -306,10 +306,10 @@ wp.Modula = 'undefined' === typeof wp.Modula ? {} : wp.Modula;
 				// Show message
 				modulaGalleryObject.errorContainer.html(
 					'<div class="error fade"><p>' +
-					err.file.name +
-					': ' +
-					err.message +
-					'</p></div>'
+						err.file.name +
+						': ' +
+						err.message +
+						'</p></div>'
 				);
 				up.refresh();
 			});
@@ -369,14 +369,18 @@ wp.Modula = 'undefined' === typeof wp.Modula ? {} : wp.Modula;
 					sorting;
 				// Get the upload position this way, as the user may have changed it
 				// and we need to respect the position without saving the settings
-				const uploadPosition = $('[name="modula-settings[upload_position]"]:checked').val();
+				const uploadPosition = $(
+					'[name="modula-settings[upload_position]"]:checked'
+				).val();
 
-				if ( 'start' === uploadPosition ) {
+				if ('start' === uploadPosition) {
 					if (oldItemsCollection.length) {
+						sorting = selection.slice(
+							oldItemsCollection.length,
+							selection.length
+						);
 
-						sorting = selection.slice(oldItemsCollection.length, selection.length);
-
-						if (sorting ) {
+						if (sorting) {
 							jQuery.each(sorting, function (index, model) {
 								selection.remove(model);
 								selection.add(model, { at: 0 });
@@ -389,21 +393,26 @@ wp.Modula = 'undefined' === typeof wp.Modula ? {} : wp.Modula;
 				// Iterate through selected images, building an images array
 				selection.each(function (attachment) {
 					var attachmentAtts = attachment.toJSON(),
-						currentModel = oldItemsCollection.get(attachmentAtts['id']);
+						currentModel = oldItemsCollection.get(
+							attachmentAtts['id']
+						);
 					if (currentModel) {
 						wp.Modula.Items.addItem(currentModel);
 						oldItemsCollection.remove(currentModel);
 						modula.Items.trigger('collectionUpdated', currentModel);
 					} else {
-						const newModel = modulaGalleryObject.generateSingleImage(attachmentAtts);
-						if ( 'start' === uploadPosition ) {
+						const newModel =
+							modulaGalleryObject.generateSingleImage(
+								attachmentAtts
+							);
+						if ('start' === uploadPosition) {
 							modula.Items.add(newModel, { at: 0 });
 							modula.Items.trigger('newItemAdded', newModel);
 						}
 					}
 				}, this);
 
-				while (model = oldItemsCollection.first()) {
+				while ((model = oldItemsCollection.first())) {
 					model.delete();
 				}
 				modula.GalleryView.render();
@@ -455,15 +464,17 @@ wp.Modula = 'undefined' === typeof wp.Modula ? {} : wp.Modula;
 
 			// Get the number of files to be uploaded
 			modulaGalleryObject.modula_files_count = files.length;
-			modulaGalleryObject.progressMode = new ModulaProgress( false, false );
-			modulaGalleryObject.progressMode.initNoModal( files );
+			modulaGalleryObject.progressMode = new ModulaProgress(false, false);
+			modulaGalleryObject.progressMode.initNoModal(files);
 			modulaGalleryObject.progressMode.noModalShowBar();
 		},
 
 		// File Uploading - update progress bar
 		fileuploading: function (up, file) {
 			var modulaGalleryObject = this;
-			modulaGalleryObject.progressMode.noModalProgress( modulaGalleryObject.modula_files_count - up.total.queued + 1 );
+			modulaGalleryObject.progressMode.noModalProgress(
+				modulaGalleryObject.modula_files_count - up.total.queued + 1
+			);
 		},
 
 		// File Uploaded - add images to the screen
@@ -471,12 +482,16 @@ wp.Modula = 'undefined' === typeof wp.Modula ? {} : wp.Modula;
 			var modulaGalleryObject = this,
 				response = JSON.parse(info.response);
 
-			var newModel = modulaGalleryObject.generateSingleImage(response['data']);
+			var newModel = modulaGalleryObject.generateSingleImage(
+				response['data']
+			);
 			// Get the upload position this way, as the user may have changed it
 			// and we need to respect the position without saving the settings
-			const uploadPosition = $('[name="modula-settings[upload_position]"]:checked').val();
+			const uploadPosition = $(
+				'[name="modula-settings[upload_position]"]:checked'
+			).val();
 
-			if ( 'start' === uploadPosition ) {
+			if ('start' === uploadPosition) {
 				modula.Items.add(newModel, { at: 0 });
 				modula.Items.trigger('newItemAdded', newModel);
 				modula.GalleryView.render();

@@ -3,12 +3,16 @@ wp.Modula = 'undefined' === typeof wp.Modula ? {} : wp.Modula;
 jQuery.fn.setting_state = function (el, state) {
 	if (state == 'off') {
 		this.css('opacity', '0.5');
-		this.find('input, textarea, select, button').addClass('modula-no-pointer');
+		this.find('input, textarea, select, button').addClass(
+			'modula-no-pointer'
+		);
 		this.hide();
 	}
 	if (state == 'on') {
 		this.css('opacity', '1');
-		this.find('input, textarea, select, button').removeClass('modula-no-pointer');
+		this.find('input, textarea, select, button').removeClass(
+			'modula-no-pointer'
+		);
 		this.show();
 	}
 };
@@ -72,11 +76,7 @@ var modulaGalleryConditions = Backbone.Model.extend({
 			'toggleAccordeon:enableSocial',
 			this.toggleSocial
 		);
-		this.listenTo(
-			wp.Modula.Settings,
-			'change:cursor',
-			this.changeCursor
-		);
+		this.listenTo(wp.Modula.Settings, 'change:cursor', this.changeCursor);
 	},
 
 	initValues: function () {
@@ -95,7 +95,7 @@ var modulaGalleryConditions = Backbone.Model.extend({
 			false,
 			wp.Modula.Settings.get('grid_image_size')
 		);
-		this.changeCursor( false, wp.Modula.Settings.get( 'cursor' ) );
+		this.changeCursor(false, wp.Modula.Settings.get('cursor'));
 	},
 
 	changedType: function (settings, value) {
@@ -124,6 +124,9 @@ var modulaGalleryConditions = Backbone.Model.extend({
 				'[data-container="grid_type"], [data-container="grid_row_height"], [data-container="grid_max_row_height"], [data-container="grid_row_height"], [data-container="grid_justify_last_row"]'
 			).hide();
 
+			rows.filter(
+				'[data-container="shadowSize"],[data-container="shadowColor"]'
+			).show();
 		} else if ('creative-gallery' == value) {
 			// Hide Responsive tab
 			tabs.filter('[data-tab="modula-responsive"]').hide();
@@ -141,6 +144,9 @@ var modulaGalleryConditions = Backbone.Model.extend({
 				'[data-container="grid_type"], [data-container="grid_row_height"], [data-container="grid_max_row_height"], [data-container="grid_row_height"], [data-container="grid_justify_last_row"]'
 			).hide();
 
+			rows.filter(
+				'[data-container="shadowSize"],[data-container="shadowColor"]'
+			).show();
 		} else if ('grid' == value) {
 			rows.filter(
 				'[data-container="grid_type"], [data-container="width"],[data-container="grid_row_height"], [data-container="grid_max_row_height"], [data-container="grid_row_height"], [data-container="grid_justify_last_row"], [data-container="gutter"],[data-container="maxImagesCount"],[data-container="shuffle"]'
@@ -152,6 +158,10 @@ var modulaGalleryConditions = Backbone.Model.extend({
 			rows.filter(
 				'[data-container="height"], [data-container="randomFactor"]'
 			).hide();
+
+			rows.filter(
+				'[data-container="shadowSize"],[data-container="shadowColor"]'
+			).show();
 
 			tabs.filter('[data-tab="modula-responsive"]').show();
 
@@ -177,10 +187,10 @@ var modulaGalleryConditions = Backbone.Model.extend({
 	},
 
 	changeCursor: function (settings, value) {
-        if ( 'custom' != value ) {
-			var cursorBox = jQuery( '.modula-effects-preview > div' );
-            cursorBox.css('cursor', wp.Modula.Settings.get( 'cursor' ) );
-        }
+		if ('custom' != value) {
+			var cursorBox = jQuery('.modula-effects-preview > div');
+			cursorBox.css('cursor', wp.Modula.Settings.get('cursor'));
+		}
 	},
 
 	changedLightbox: function (settings, value) {
@@ -223,7 +233,9 @@ var modulaGalleryConditions = Backbone.Model.extend({
 				child.hide();
 			} else {
 				child.css('opacity', '1');
-				child.find('input, textarea, select, button').removeAttr('disabled');
+				child
+					.find('input, textarea, select, button')
+					.removeAttr('disabled');
 				child.show();
 			}
 		});
@@ -263,16 +275,15 @@ var modulaGalleryConditions = Backbone.Model.extend({
 
 		jQuery.each(children, function (index, item) {
 			var child = jQuery('[data-container="' + item + '"]');
-			
-			if (
-				0 == value ||
-				0 == wp.Modula.Settings.get('enableSocial')
-			) {
+
+			if (0 == value || 0 == wp.Modula.Settings.get('enableSocial')) {
 				child.hide();
 			} else {
 				child.show();
 				child.css('opacity', '1');
-				child.find('input, textarea, select, button').removeAttr('disabled');
+				child
+					.find('input, textarea, select, button')
+					.removeAttr('disabled');
 			}
 		});
 
@@ -296,7 +307,9 @@ var modulaGalleryConditions = Backbone.Model.extend({
 			} else {
 				child.show();
 				child.css('opacity', '1');
-				child.find('input, textarea, select, button').removeAttr('disabled');
+				child
+					.find('input, textarea, select, button')
+					.removeAttr('disabled');
 			}
 		});
 
@@ -322,19 +335,20 @@ var modulaGalleryConditions = Backbone.Model.extend({
 			} else {
 				child.show();
 				child.css('opacity', '1');
-				child.find('input, textarea, select, button').removeAttr('disabled');
+				child
+					.find('input, textarea, select, button')
+					.removeAttr('disabled');
 			}
 		});
 
 		if (1 != value) {
 			currentRow.addClass('modula_accordion_open');
-		}else{
+		} else {
 			currentRow.removeClass('modula_accordion_open');
 		}
 	},
 
 	hideCaption: function (settings, value) {
-
 		var rows = this.get('rows'),
 			currentRow = rows.filter('[data-container="hide_description"]'),
 			children = currentRow.data('children');
@@ -344,18 +358,20 @@ var modulaGalleryConditions = Backbone.Model.extend({
 		jQuery.each(children, function (index, item) {
 			var child = jQuery('[data-container="' + item + '"]');
 
-			 if (1 == value) {
+			if (1 == value) {
 				child.hide();
 			} else {
 				child.show();
 				child.css('opacity', '1');
-				child.find('input, textarea, select, button').removeAttr('disabled');
+				child
+					.find('input, textarea, select, button')
+					.removeAttr('disabled');
 			}
 		});
 
 		if (1 != value) {
 			currentRow.addClass('modula_accordion_open');
-		}else{
+		} else {
 			currentRow.removeClass('modula_accordion_open');
 		}
 	},

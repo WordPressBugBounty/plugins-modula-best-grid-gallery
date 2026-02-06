@@ -6615,7 +6615,7 @@ html body .modula-gallery.modula-custom-grid .modula-items .modula-item.effect-u
 	display: flex;
 	flex-direction: column;
 }
-.modula-gallery .modula-items .modula-item.effect-under .modula-item-image-continer {
+.modula-gallery .modula-items .modula-item.effect-under .modula-item-image-container {
 	flex-grow: 1;
 	width: 100%;
 	position: relative;
@@ -6628,7 +6628,7 @@ html body .modula-gallery.modula-custom-grid .modula-items .modula-item.effect-u
 	position: relative;
 }
 
-.modula-gallery .modula-items .modula-item.effect-under .modula-item-image-continer img {
+.modula-gallery .modula-items .modula-item.effect-under .modula-item-image-container img {
 	margin:0 auto !important;
 }
 .modula-gallery .modula-items .modula-item.effect-under .figc-inner {

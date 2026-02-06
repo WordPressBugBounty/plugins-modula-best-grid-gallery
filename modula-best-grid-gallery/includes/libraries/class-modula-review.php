@@ -6,8 +6,8 @@ class Modula_Review {
 	private $messages;
 	private $link = 'https://wordpress.org/support/plugin/%s/reviews/#new-post';
 	private $slug = 'modula-best-grid-gallery';
-	
-	function __construct() {
+
+	public function __construct() {
 		add_action( 'init', array( $this, 'init' ) );
 	}
 
@@ -35,17 +35,14 @@ class Modula_Review {
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
 			add_action( 'admin_print_footer_scripts', array( $this, 'ajax_script' ) );
 		}
-
 	}
 
 	private function check() {
-
-		if ( ! current_user_can('manage_options') ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
 			return false;
 		}
 
 		return( time() > $this->value );
-
 	}
 
 	private function value() {
@@ -69,10 +66,10 @@ class Modula_Review {
 		$this->messages = apply_filters( 'modula_review_messages', $this->messages );
 
 		$notice = array(
-			'title'   	  => 'Rate Us',
-			'message' 	  => sprintf( esc_html( $this->messages['notice'] ), esc_html( $this->value ) ),
-			'status'  	  => 'success',
-			'source'  => array(
+			'title'       => 'Rate Us',
+			'message'     => sprintf( esc_html( $this->messages['notice'] ), esc_html( $this->value ) ),
+			'status'      => 'success',
+			'source'      => array(
 				'slug' => 'modula',
 				'name' => 'Modula',
 			),
@@ -80,26 +77,26 @@ class Modula_Review {
 			'timestamp'   => false,
 			'actions'     => array(
 				array(
-					'label'   => esc_html( $this->messages['rated'] ),
-					'id'     => 'epsilon-later',
-					'class'   => 'epsilon-review-button',
-					'dismiss' => true,
+					'label'    => esc_html( $this->messages['rated'] ),
+					'id'       => 'epsilon-later',
+					'class'    => 'epsilon-review-button',
+					'dismiss'  => true,
 					'callback' => 'handleButtonClick',
 				),
 				array(
-					'label'   => esc_html( $this->messages['no_rate'] ),
-					'id'     => 'epsilon-no-rate',
-					'class'   => 'epsilon-review-button',
-					'dismiss' => true,
+					'label'    => esc_html( $this->messages['no_rate'] ),
+					'id'       => 'epsilon-no-rate',
+					'class'    => 'epsilon-review-button',
+					'dismiss'  => true,
 					'callback' => 'handleButtonClick',
 				),
 				array(
-					'label'   => esc_html( $this->messages['rate'] ),
-					'url'     => esc_url( $url ),
-					'class'   => 'epsilon-review-button',
-					'variant' => 'primary',
-					'target'  => '_BLANK',
-					'dismiss' => true,
+					'label'    => esc_html( $this->messages['rate'] ),
+					'url'      => esc_url( $url ),
+					'class'    => 'epsilon-review-button',
+					'variant'  => 'primary',
+					'target'   => '_BLANK',
+					'dismiss'  => true,
 					'callback' => 'handleButtonClick',
 				),
 			),
@@ -133,7 +130,7 @@ class Modula_Review {
 	}
 
 	public function ajax_script() {
-		$ajax_nonce = wp_create_nonce( "epsilon-modula-review" );
+		$ajax_nonce = wp_create_nonce( 'epsilon-modula-review' );
 		?>
 	
 		<script type="text/javascript">

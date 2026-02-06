@@ -1110,8 +1110,9 @@ tr[data-container="effect"] > td {
     border-bottom: 1px solid #ddd;
 }
 
-.media-modal .modula-edit-popup .attachment-details .attachment-info .settings .setting span.name {
+.media-modal .modula-edit-popup .attachment-details .attachment-info .settings .setting .name {
     display: block;
+    float: none;
     width: 100%;
     min-width: 100%;
     margin: 0;
@@ -1577,7 +1578,71 @@ tr.troubleshoot-subfield.hide {
     height: 30px;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+}
 
+.modula-shortcode-dropdown-toggle {
+    background: #f0f0f1;
+    border: 1px solid #8c8f94;
+    border-left: none;
+    border-right: none;
+    cursor: pointer;
+    padding: 0 8px;
+    height: 30px;
+    width: 40px;
+    display: none;
+    align-items: center;
+    transition: all 0.2s;
+    margin: 0;
+}
+
+.modula-shortcode-dropdown-toggle:hover {
+    background: #e0e0e1;
+}
+
+.modula-shortcode-dropdown-toggle[aria-expanded="true"] .dashicons {
+    transform: rotate(180deg);
+}
+
+.modula-shortcode-dropdown-toggle .dashicons {
+    transition: transform 0.2s;
+}
+
+.modula-shortcode-dropdown {
+    width: 100%;
+    border-top: 1px solid #ddd;
+    background: #fff;
+    display: none;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+.modula-shortcode-dropdown-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.modula-shortcode-dropdown-item:last-child {
+    margin-bottom: 0;
+}
+
+.modula-shortcode-dropdown-item input {
+    flex-grow: 1;
+    margin: 0;
+    border-radius: 4px 0 0 4px;
+}
+
+.modula-shortcode-dropdown-item .copy-shortcode-btn {
+    margin-left: 0;
+    height: 30px;
+    border-radius: 0 4px 4px 0;
+    border-left: none;
+}
+
+.modula-shortcode-dropdown-item .copy-feedback {
+    margin-left: 8px;
+    color: #00a32a;
+    font-size: 12px;
 }
 
 /*
@@ -1872,7 +1937,6 @@ Scaling Effect Preview
 
 .shortcode-description {
     margin: 10px 0 0 0;
-    border-bottom: 1px solid #DDD;
     color: #696969;
     padding-bottom: 10px;
 }
@@ -2681,4 +2745,10 @@ Some responsive fixes
 
 .modula-add-new-wrapper {
     position:relative;
+}
+
+/* Required so tinyMce link insertion dialogs show */
+html body.post-type-modula-gallery .mce-floatpanel,
+html body.post-type-modula-album .mce-floatpanel{
+    z-index: 160001 !important;
 }

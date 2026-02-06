@@ -4,7 +4,7 @@
 * Plugin URI:               https://wp-modula.com/
 * Description:              Modula is the most powerful, user-friendly WordPress gallery plugin. Add galleries, masonry grids and more in a few clicks.
 * Author:                   WPChill
-* Version:                  2.12.25
+* Version:                  2.14.1
 * Author URI:               https://www.wpchill.com/
 * License:                  GPLv3 or later
 * License URI:              http://www.gnu.org/licenses/gpl-3.0.html
@@ -47,7 +47,7 @@
  * @since    2.0.2
  */
 
-define( 'MODULA_LITE_VERSION', '2.12.25' );
+define( 'MODULA_LITE_VERSION', '2.14.1' );
 define( 'MODULA_PATH', plugin_dir_path( __FILE__ ) );
 define( 'MODULA_URL', plugin_dir_url( __FILE__ ) );
 defined( 'MODULA_PRO_STORE_URL' ) || define( 'MODULA_PRO_STORE_URL', 'https://wp-modula.com' );
@@ -63,11 +63,7 @@ define( 'MODULA_AI_ENDPOINT', 'https://api.imageseo.com' );
  * The code that runs during plugin activation.
  * This action is documented in includes/class-modula-activator.php
  */
-function modula_activate() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-modula-upgrades.php';
-	$upgrades = Modula_Upgrades::get_instance();
-	$upgrades->check_on_activate();
-}
+function modula_activate() {}
 
 register_activation_hook( __FILE__, 'modula_activate' );
 
@@ -79,7 +75,35 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-modula.php';
 
 // Action Scheduler
 require_once plugin_dir_path( __FILE__ ) . 'includes/libraries/action-scheduler/action-scheduler.php';
+/**
+ * Ensures Modula Pro (modula/Modula.php) loads right after Lite so extensions
+ * that depend on Modula_Pro do not run before the class exists.
+ * Runs on every request when Lite loads first; updates DB for the next request.
+ *
+ * @since 2.14.0
+ */
+function modula_ensure_pro_loads_after_lite() {
+	$lite = 'modula-best-grid-gallery/Modula.php';
+	$pro  = 'modula/Modula.php';
+	$list = (array) get_option( 'active_plugins', array() );
 
+	$key_lite = array_search( $lite, $list, true );
+	$key_pro  = array_search( $pro, $list, true );
+
+	if ( false === $key_pro ) {
+		return;
+	}
+
+	$want_pro_index = ( false !== $key_lite ) ? 1 : 0;
+	if ( $key_pro === $want_pro_index ) {
+		return;
+	}
+	unset( $list[ $key_pro ] );
+	$list = array_values( $list );
+	array_splice( $list, $want_pro_index, 0, array( $pro ) );
+
+	update_option( 'active_plugins', $list );
+}
 /**
  * Begins execution of the plugin.
  *
@@ -90,6 +114,7 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/libraries/action-scheduler/
  * @since    2.0.0
  */
 function modula_run() {
+	modula_ensure_pro_loads_after_lite();
 	new Modula();
 }
 

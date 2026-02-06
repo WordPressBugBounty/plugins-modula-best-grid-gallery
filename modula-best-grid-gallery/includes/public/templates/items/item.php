@@ -34,7 +34,7 @@
 					<div class='jtg-title'><?php echo wp_kses_post( $data->title ); ?></div>
 				<?php endif ?>
 				<?php if ( ! $data->hide_description && '' != $data->description ) : ?>
-					<p class="description"><?php echo wp_kses_post( $data->description ); ?></p>
+					<div class="jtg-description"><?php echo wp_kses_post( $data->description ); ?></div>
 				<?php endif ?>
 				<?php if ( ! $data->hide_socials && ! $data->socialDesktopCollapsed ) : ?>
 					<div class="jtg-social">

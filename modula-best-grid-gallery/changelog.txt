@@ -1,3 +1,12 @@
+= 2.14.3 - 06.02.2026 =
+Fixed: Various issues and bugs.
+
+= 2.14.2 - 05.02.2026 =
+Fixed: Various issues and bugs.
+
+= 2.14.1 - 05.02.2026 =
+Fixed: Various issues and bugs.
+
 = 2.14.0 - 05.02.2026 =
 Changed: Multiple improvements to the codebase.
 Added: Support for extensions bundled in pro

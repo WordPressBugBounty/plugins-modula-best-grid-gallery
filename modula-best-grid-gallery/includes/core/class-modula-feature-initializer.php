@@ -20,16 +20,6 @@ class Modula_Feature_Initializer {
 	}
 
 	/**
-	 * Initialize offers system.
-	 *
-	 * @since 2.0.0
-	 * @return void
-	 */
-	public function init_offers(): void {
-		( new Modula_Offers() )->register();
-	}
-
-	/**
 	 * Check for compatibility issues.
 	 *
 	 * @since 2.11.0

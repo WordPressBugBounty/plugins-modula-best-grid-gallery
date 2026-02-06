@@ -99,7 +99,6 @@ class Modula {
 
 		// Initialize features
 		$this->feature_initializer->check_compatibility();
-		$this->feature_initializer->init_offers();
 		$this->feature_initializer->init_telemetry();
 	}
 

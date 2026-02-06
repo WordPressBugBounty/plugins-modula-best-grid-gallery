@@ -35,6 +35,7 @@ class Modula_Dependency_Loader {
 			'admin/class-modula-admin.php',
 			'admin/notifications/class-modula-notifications.php',
 			'admin/wpchill/class-wpchill-notifications.php',
+			'admin/wpchill/class-wpchill-remote-upsells.php',
 			'admin/wpchill/class-wpchill-about-us.php',
 			'admin/listing/class-gallery-listing-output.php',
 			'admin/rest-api/class-modula-rest-api.php',

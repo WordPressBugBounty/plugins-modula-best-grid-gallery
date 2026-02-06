@@ -9,9 +9,10 @@ class WPChill_Telemetry_Core {
 	/**
 	 * Option names
 	 */
-	const INSTALL_UUID_OPTION = 'wpchill_telemetry_install_uuid';
-	const CONSENT_OPTION      = 'wpchill_telemetry_consent';
-	const LAST_SEND_OPTION    = 'wpchill_telemetry_last_send';
+	const INSTALL_UUID_OPTION   = 'wpchill_telemetry_install_uuid';
+	const CONSENT_OPTION        = 'wpchill_telemetry_consent';
+	const CONSENT_DISMISSED_OPTION = 'wpchill_telemetry_consent_dismissed';
+	const LAST_SEND_OPTION      = 'wpchill_telemetry_last_send';
 	const QUEUE_OPTION        = 'wpchill_telemetry_queue';
 	const CLIENT_VERSION      = '1.0.0';
 
@@ -122,6 +123,7 @@ class WPChill_Telemetry_Core {
 
 		add_action( 'wp_ajax_wpchill_telemetry_opt_in', array( $this, 'ajax_opt_in' ) );
 		add_action( 'wp_ajax_wpchill_telemetry_opt_out', array( $this, 'ajax_opt_out' ) );
+		add_action( 'wp_ajax_wpchill_telemetry_dismiss_consent', array( $this, 'ajax_dismiss_consent' ) );
 
 		add_action( 'admin_footer', array( $this, 'add_consent_script' ) );
 	}
@@ -175,8 +177,9 @@ class WPChill_Telemetry_Core {
 			return false;
 		}
 
-		$consent = get_option( self::CONSENT_OPTION, null );
-		if ( null === $consent ) {
+		$consent   = get_option( self::CONSENT_OPTION, null );
+		$dismissed = get_option( self::CONSENT_DISMISSED_OPTION, false );
+		if ( null === $consent && ! $dismissed ) {
 			add_action( 'admin_notices', array( $this, 'show_consent_notice' ) );
 			return false;
 		}
@@ -192,13 +195,18 @@ class WPChill_Telemetry_Core {
 			return;
 		}
 
+		if ( get_option( self::CONSENT_DISMISSED_OPTION, false ) ) {
+			return;
+		}
+
 		$screen = get_current_screen();
 		if ( ! $screen || ! in_array( $screen->id, array( 'dashboard', 'plugins', 'toplevel_page_modula' ), true ) ) {
 			return;
 		}
 
 		?>
-		<div class="notice notice-info wpchill-telemetry-consent">
+		<div class="notice notice-info wpchill-telemetry-consent is-dismissible">
+			<button type="button" class="notice-dismiss wpchill-telemetry-dismiss" aria-label="<?php esc_attr_e( 'Dismiss', 'modula-best-grid-gallery' ); ?>"><span class="screen-reader-text"><?php esc_html_e( 'Dismiss', 'modula-best-grid-gallery' ); ?></span></button>
 			<p>
 			<strong><?php esc_html_e( 'Help us improve Modula!', 'modula-best-grid-gallery' ); ?></strong>
 		<?php esc_html_e( 'We\'d like to collect anonymous usage data to improve our plugins. This helps us understand how you use our products and make them better.', 'modula-best-grid-gallery' ); ?>
@@ -680,6 +688,20 @@ class WPChill_Telemetry_Core {
 	}
 
 	/**
+	 * AJAX handler for dismissing consent notice (persistent – notice won't show again)
+	 */
+	public function ajax_dismiss_consent() {
+		check_ajax_referer( 'wpchill_telemetry_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Unauthorized' );
+		}
+
+		update_option( self::CONSENT_DISMISSED_OPTION, true );
+		wp_send_json_success( 'Notice dismissed' );
+	}
+
+	/**
 	 * Add inline script for consent buttons
 	 */
 	public function add_consent_script() {
@@ -710,6 +732,19 @@ class WPChill_Telemetry_Core {
 				}, function(response) {
 					if (response.success) {
 						location.reload();
+					}
+				});
+			});
+
+			$('.wpchill-telemetry-consent .wpchill-telemetry-dismiss, .wpchill-telemetry-consent .notice-dismiss').on('click', function(e) {
+				e.preventDefault();
+				var notice = $(this).closest('.wpchill-telemetry-consent');
+				$.post(ajaxurl, {
+					action: 'wpchill_telemetry_dismiss_consent',
+					nonce: '<?php echo wp_create_nonce( 'wpchill_telemetry_nonce' ); ?>'
+				}, function(response) {
+					if (response.success) {
+						notice.slideUp(function() { $(this).remove(); });
 					}
 				});
 			});
@@ -750,6 +785,7 @@ class WPChill_Telemetry_Core {
 
 		delete_option( self::INSTALL_UUID_OPTION );
 		delete_option( self::CONSENT_OPTION );
+		delete_option( self::CONSENT_DISMISSED_OPTION );
 		delete_option( self::LAST_SEND_OPTION );
 		delete_option( self::QUEUE_OPTION );
 		delete_option( 'wpchill_telemetry_event_queue' );

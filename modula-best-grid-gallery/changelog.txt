@@ -1,3 +1,6 @@
+= 2.14.7 - 09.02.2026 =
+Fixed: Various issues and bugs.
+
 = 2.14.6 - 07.02.2026 =
 Fixed: Beaver Builder block directory path.
 

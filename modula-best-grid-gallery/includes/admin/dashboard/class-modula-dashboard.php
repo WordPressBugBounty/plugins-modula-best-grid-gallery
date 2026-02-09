@@ -563,7 +563,7 @@ class Modula_Dashboard {
 					<?php endif; ?>
 				<?php else : ?>
 					<a href="<?php echo $addon['url']; ?> "
-						class="button"><?php esc_html_e( 'Find more', 'modula-best-grid-gallery' ); ?> </a>
+						class="button" target="_blank"><?php esc_html_e( 'Find more', 'modula-best-grid-gallery' ); ?> </a>
 				<?php endif; ?>
 				</div>
 				</div>

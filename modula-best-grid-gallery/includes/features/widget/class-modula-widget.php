@@ -31,7 +31,7 @@ class Modula_Widget extends WP_Widget {
 			return;
 		}
 
-		echo esc_html( $args['before_widget'] );
+		echo wp_kses_post( $args['before_widget'] );
 
 		$title = isset( $instance['title'] ) ? apply_filters( 'widget_title', $instance['title'] ) : '';
 
@@ -42,7 +42,7 @@ class Modula_Widget extends WP_Widget {
 		// Output Modula Gallery
 		echo isset( $instance['gallery-id'] ) ? do_shortcode( '[modula id="' . absint( $instance['gallery-id'] ) . '"]' ) : '';
 
-		echo esc_html( $args['after_widget'] );
+		echo wp_kses_post( $args['after_widget'] );
 	}
 
 	/**

@@ -4,7 +4,7 @@ Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPres
 Requires at least: 5.3
 Tested up to: 6.9
 Requires PHP: 5.6
-Stable tag: 2.14.6
+Stable tag: 2.14.7
 
 License: GNU General Public License v3.0 or later  
 
@@ -325,6 +325,12 @@ The simplest way to install is to click on 'Plugins' then 'Add' and type 'Modula
 4. Mobile Responsive Image Galleries - Galleries automatically adapt to smartphone and tablet screen sizes
 
 == Changelog ==
+= 2.14.7 - 09.02.2026 =
+Fixed: Various issues and bugs.
+
+= 2.14.6 - 07.02.2026 =
+Fixed: Beaver Builder block directory path.
+
 = 2.14.5 - 06.02.2026 =
 Fixed: Telemetry dismiss notice was not working correctly.
 Added: Extensions page design improvements.

@@ -1244,6 +1244,11 @@ class Modula_Settings {
 					esc_html__( 'Use AI Features', 'modula-best-grid-gallery' ),
 					$enabled
 				),
+				$this->build_paragraph_field(
+					'modula_ai_description',
+					'',
+					esc_html__( 'This is a powerful feature designed to optimize images within your galleries by automatically adding alt texts, titles, and captions. You no longer need to edit all these details manually, instead you can generate these with the help of AI.', 'modula-best-grid-gallery' ),
+				),
 				$this->build_field(
 					self::FIELD_TYPE_MODULA_AI,
 					'',

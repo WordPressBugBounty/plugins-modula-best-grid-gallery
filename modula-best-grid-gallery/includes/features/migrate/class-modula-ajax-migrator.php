@@ -48,9 +48,8 @@ class Modula_Ajax_Migrator {
 		$source          = sanitize_text_field( wp_unslash( $_POST['source'] ) );
 		$response        = array();
 		$galery_atts = array();
-		// Need to make replace so we can search our shortcode in content
-		$galery_atts['id']        = absint( $_POST['id']['id'] );
-		$galery_atts['shortcode'] = str_replace( '\"', '"', sanitize_text_field( $_POST['id']['shortcode'] ) );
+		$galery_atts = json_decode( stripslashes( $_POST['id'] ), true );
+
 		$chunk           = isset( $_POST['chunk'] ) ? absint( $_POST['chunk'] ) : 0;
 		$modula_importer = Modula_Importer::get_instance();
 

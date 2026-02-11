@@ -50,6 +50,8 @@ class Modula_Backward_Compatibility {
 		// Backwards compatibility social icons collapsed
 		add_filter( 'modula_admin_field_value', array( $this, 'backward_compatibility_admin_social_icons_collapsed' ), 10, 3 );
 		add_filter( 'modula_backwards_compatibility_front', array( $this, 'backward_compatibility_front_social_icons_collapsed' ), 10 );
+
+		add_action( 'init', array( $this, 'plugin_updater' ) );
 	}
 
 	public function backward_compatibility_admin_margin( $value, $key, $settings ) {
@@ -751,6 +753,32 @@ class Modula_Backward_Compatibility {
 		}
 
 		return $settings;
+	}
+
+	public function plugin_updater() {
+
+		if ( ! is_admin() || ! class_exists( 'Modula_Pro\Updater\Base_Updater' ) || ! defined( 'MODULA_PRO_VERSION' ) ) {
+			return;
+		}
+
+		if ( version_compare( MODULA_PRO_VERSION, '2.9.0', '<' ) || version_compare( MODULA_PRO_VERSION, '2.9.6', '>' ) ) {
+			return;
+		}
+
+		$license_key = trim( get_option( 'modula_pro_license_key' ) );
+
+		// setup the updater
+		new Modula_Pro\Updater\Base_Updater(
+			MODULA_PRO_STORE_URL,
+			'modula/Modula.php',
+			array(
+				'version' => MODULA_PRO_VERSION,
+				'license' => $license_key,
+				'item_id' => 212,
+				'author'  => 'WPChill',
+				'beta'    => false,
+			)
+		);
 	}
 }
 

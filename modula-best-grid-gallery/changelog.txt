@@ -1,3 +1,6 @@
+= 2.14.10 - 12.02.2026 =
+Fixed: Various issues and bugs.
+
 = 2.14.9 - 11.02.2026 =
 Fixed: Various issues and bugs.
 

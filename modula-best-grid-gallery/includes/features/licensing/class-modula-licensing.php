@@ -19,7 +19,7 @@ class Modula_Licensing {
 
 		add_action( 'modula_after_gallery', array( $this, 'display_licensing_license' ) );
 		add_action( 'modula_shortcode_after_item', array( $this, 'generate_licensing_ld_json' ), 10, 2 );
-		add_action( 'modula_shortcode_after_items', array( $this, 'display_licensing_ld_json' ) );
+		add_action( 'wp_footer', array( $this, 'display_licensing_ld_json' ), 10 );
 	}
 
 
@@ -78,7 +78,9 @@ class Modula_Licensing {
 	}
 
 	/**
-	 * Display the image licensing under each gallery.
+	 * Display the image licensing ld+json in the footer.
+	 *
+	 * Output is hooked to wp_footer so the script is printed in the page footer.
 	 *
 	 * @return void
 	 * @since 2.7.5
@@ -88,17 +90,15 @@ class Modula_Licensing {
 		if ( empty( $this->ld_json ) ) {
 			return;
 		}
-		ob_start();
-		?>
-
-		<script type="application/ld+json">
-			<?php echo json_encode( $this->ld_json, JSON_PRETTY_PRINT ); ?>
-
-
-		</script>
-
-		<?php
-		echo ob_get_clean();
+		$json = wp_json_encode( $this->ld_json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		if ( false === $json ) {
+			return;
+		}
+		printf(
+			"<script type=\"application/ld+json\">\n%s\n</script>\n",
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON-encoded data for ld+json script.
+			$json
+		);
 	}
 }
 

@@ -7,7 +7,14 @@ class Modula_Shortcode {
 
 	private $loader;
 
-	function __construct() {
+	/**
+	 * Collected gallery CSS to be printed in the footer (keyed by gallery_id).
+	 *
+	 * @var array<string>
+	 */
+	private static $footer_css = array();
+
+	public function __construct() {
 
 		$this->loader = new Modula_Template_Loader();
 
@@ -16,6 +23,7 @@ class Modula_Shortcode {
 
 		add_shortcode( 'modula-make-money', array( $this, 'affiliate_shortcode_handler' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'add_gallery_scripts' ) );
+		add_action( 'wp_footer', array( $this, 'print_gallery_css_in_footer' ), 10 );
 
 		// Add shortcode related hooks
 		add_filter( 'modula_shortcode_item_data', 'modula_generate_image_links', 10, 3 );
@@ -239,7 +247,8 @@ class Modula_Shortcode {
 		$template_data = apply_filters( 'modula_gallery_template_data', $template_data );
 		$template_name = apply_filters( 'modula_gallery_template_name', 'gallery', $type );
 
-		echo $this->generate_gallery_css( $gallery_id, $settings );
+		// Queue gallery CSS for footer output via wp_footer.
+		self::$footer_css[ $gallery_id ] = $this->generate_gallery_css( $gallery_id, $settings );
 		do_action( 'modula_before_gallery', $settings );
 		$this->loader->set_template_data( $template_data );
 		$this->loader->get_template_part( 'modula', $template_name );
@@ -292,9 +301,25 @@ class Modula_Shortcode {
 		return $js_config;
 	}
 
+	/**
+	 * Print collected gallery CSS in the footer.
+	 *
+	 * Uses the wp_footer action so gallery styles load in the footer
+	 * instead of inline with the shortcode output.
+	 */
+	public function print_gallery_css_in_footer() {
+		if ( empty( self::$footer_css ) ) {
+			return;
+		}
+		echo '<style id="modula-gallery-styles">' . "\n";
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSS is built from sanitized values in generate_gallery_css.
+		echo implode( "\n", self::$footer_css );
+		echo "\n" . '</style>' . "\n";
+	}
+
 	private function generate_gallery_css( $gallery_id, $settings ) {
 
-		$css = '<style>';
+		$css = '';
 
 		if ( $settings['borderSize'] ) {
 			$css .= "#{$gallery_id} .modula-item { border: " . absint( $settings['borderSize'] ) . 'px solid ' . Modula_Helper::sanitize_rgba_colour( $settings['borderColor'] ) . '; }';
@@ -404,8 +429,6 @@ class Modula_Shortcode {
 		if ( 'none' == $settings['effect'] ) {
 			$css .= "#{$gallery_id} .modula-items .modula-item:hover img{opacity:1;}";
 		}
-
-		$css .= "</style>\n";
 
 		return $css;
 	}

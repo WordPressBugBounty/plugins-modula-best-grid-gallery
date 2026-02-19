@@ -4,7 +4,7 @@ Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPres
 Requires at least: 5.3
 Tested up to: 6.9
 Requires PHP: 5.6
-Stable tag: 2.14.12
+Stable tag: 2.14.13
 
 License: GNU General Public License v3.0 or later  
 
@@ -325,7 +325,10 @@ The simplest way to install is to click on 'Plugins' then 'Add' and type 'Modula
 4. Mobile Responsive Image Galleries - Galleries automatically adapt to smartphone and tablet screen sizes
 
 == Changelog ==
-= 2.14.12 - 16.02.2026 =
+= 2.14.13 - 19.02.2026 =
+Fixed: Z-index issue with lightbox.
+
+= 2.14.12 - 17.02.2026 =
 Fixed: Modula shortcode button in tinymce editors.
 
 = 2.14.11 - 13.02.2026 =

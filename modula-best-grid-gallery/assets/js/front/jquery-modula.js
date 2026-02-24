@@ -158,14 +158,15 @@ jQuery(window).on('elementor/frontend/init', function () {
 		});
 
 		$(document).on('lazyloaded lazyload', function (evt) {
-			
 			var element = $(evt.target),
 				parent,
 				index,
 				picElement;
 
-			if ('modula' == element.data('source') || 'a3-lazyload' == element.data('source')) {
-				
+			if (
+				'modula' == element.data('source') ||
+				'a3-lazyload' == element.data('source')
+			) {
 				element.data('size', {
 					width: element.width(),
 					height: element.height(),

@@ -369,6 +369,13 @@ class Modula_CPT_Fields_Helper {
 						'priority'  => 2,
 						'data_type' => 'bool',
 					),
+					'lightbox_touch'   => array(
+						'name'      => esc_html__( 'Touch navigation', 'modula-best-grid-gallery' ),
+						'type'      => 'toggle',
+						'default'   => 1,
+						'priority'  => 3,
+						'data_type' => 'bool',
+					),
 				),
 				'captions'             => array(
 					'hide_title'            => array(
@@ -737,6 +744,7 @@ class Modula_CPT_Fields_Helper {
 				'height'                 => 800,
 				'randomFactor'           => 50,
 				'lightbox'               => 'fancybox',
+				'lightbox_touch'         => 1,
 				'show_navigation'        => 1,
 				'shuffle'                => 0,
 				'titleColor'             => '#ffffff',

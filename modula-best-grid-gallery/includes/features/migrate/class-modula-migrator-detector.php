@@ -59,6 +59,22 @@ class Modula_Migrator_Detector {
 	);
 
 	/**
+	 * Cache key for computed migrator needs.
+	 *
+	 * @since 2.15.0
+	 * @var string
+	 */
+	private static $needed_migrators_cache_key = 'modula_needed_migrators';
+
+	/**
+	 * Cache TTL for computed migrator needs.
+	 *
+	 * @since 2.15.0
+	 * @var int
+	 */
+	private static $needed_migrators_cache_ttl = DAY_IN_SECONDS;
+
+	/**
 	 * Constructor. Registers filter and admin hook for migrator notification.
 	 *
 	 * @since 2.2.7
@@ -67,6 +83,10 @@ class Modula_Migrator_Detector {
 		if ( is_admin() ) {
 			add_action( 'admin_init', array( $this, 'maybe_add_migrator_notification' ), 20 );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_migrator_notification_script' ), 21 );
+
+			// Invalidate cached detection when plugins change.
+			add_action( 'activated_plugin', array( $this, 'invalidate_needed_migrators_cache' ) );
+			add_action( 'deactivated_plugin', array( $this, 'invalidate_needed_migrators_cache' ) );
 		}
 	}
 
@@ -249,19 +269,81 @@ class Modula_Migrator_Detector {
 	}
 
 	/**
+	 * Invalidate the migrator detection cache.
+	 *
+	 * @since 2.15.0
+	 * @return void
+	 */
+	public function invalidate_needed_migrators_cache() {
+		delete_transient( self::$needed_migrators_cache_key );
+	}
+
+	/**
+	 * Determine if current request is a Modula admin request where notification checks are relevant.
+	 *
+	 * @since 2.15.0
+	 * @return bool
+	 */
+	private function is_modula_admin_request() {
+		if ( ! is_admin() ) {
+			return false;
+		}
+
+		if ( wp_doing_ajax() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+			return false;
+		}
+
+		$post_type = isset( $_GET['post_type'] ) ? sanitize_key( wp_unslash( $_GET['post_type'] ) ) : '';
+		$page      = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+
+		if ( 'modula-gallery' === $post_type ) {
+			return true;
+		}
+
+		if ( in_array( $page, array( 'modula', 'modula-addons', 'wpchill-dashboard' ), true ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get cached needed migrators and refresh cache when missing.
+	 *
+	 * @since 2.15.0
+	 * @return array
+	 */
+	private function get_cached_needed_migrators() {
+		$needed = get_transient( self::$needed_migrators_cache_key );
+
+		if ( false !== $needed && is_array( $needed ) ) {
+			return $needed;
+		}
+
+		$needed = $this->get_needed_migrators();
+		set_transient( self::$needed_migrators_cache_key, $needed, self::$needed_migrators_cache_ttl );
+
+		return $needed;
+	}
+
+	/**
 	 * Add a notification when migrator need is detected and at least one migrator is not active.
 	 *
 	 * @since 2.2.7
 	 * @return void
 	 */
 	public function maybe_add_migrator_notification() {
+		if ( ! $this->is_modula_admin_request() ) {
+			return;
+		}
+
 		if ( ! current_user_can( 'install_plugins' ) ) {
 			return;
 		}
 		if ( ! class_exists( 'Modula_Notifications' ) ) {
 			return;
 		}
-		$needed = $this->get_needed_migrators();
+		$needed = $this->get_cached_needed_migrators();
 		if ( empty( $needed ) ) {
 			return;
 		}

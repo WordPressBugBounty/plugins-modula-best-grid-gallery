@@ -68,7 +68,7 @@ class Modula_Script_Manager {
 
 			foreach ( $styles as $style ) {
 				if ( ! wp_style_is( $style, 'enqueued' ) && ! empty( $style ) ) {
-						wp_enqueue_style( $script );
+						wp_enqueue_style( $style );
 				}
 			}
 		} else {
@@ -79,7 +79,7 @@ class Modula_Script_Manager {
 			}
 			foreach ( $this->styles as $style ) {
 				if ( ! wp_style_is( $style, 'enqueued' ) ) {
-						wp_enqueue_script( $style );
+						wp_enqueue_style( $style );
 				}
 			}
 		}

@@ -23,6 +23,7 @@ class Modula_Shortcode {
 
 		add_shortcode( 'modula-make-money', array( $this, 'affiliate_shortcode_handler' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'add_gallery_scripts' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_front_styles_early' ), 20 );
 		add_action( 'wp_footer', array( $this, 'print_gallery_css_in_footer' ), 10 );
 
 		// Add shortcode related hooks
@@ -69,6 +70,27 @@ class Modula_Shortcode {
 		wp_register_script( 'modula', MODULA_URL . 'assets/js/front/jquery-modula' . $suffix . '.js', array( 'jquery', 'modula-isotope' ), MODULA_LITE_VERSION, true );
 	}
 
+	/**
+	 * Enqueue Modula front styles in the head when the content has [modula] shortcode.
+	 * Ensures styles load even when the shortcode runs after wp_head (e.g. with some themes or page builders).
+	 */
+	public function maybe_enqueue_front_styles_early() {
+		if ( ! is_singular() ) {
+			return;
+		}
+
+		$post = get_queried_object();
+		if ( ! $post instanceof \WP_Post || empty( $post->post_content ) ) {
+			return;
+		}
+
+		if ( ! has_shortcode( $post->post_content, 'modula' ) && ! has_shortcode( $post->post_content, 'Modula' ) ) {
+			return;
+		}
+
+		wp_enqueue_style( 'modula' );
+		wp_enqueue_style( 'modula-fancybox' );
+	}
 
 
 	public function gallery_shortcode_handler( $atts ) {

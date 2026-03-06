@@ -430,6 +430,9 @@ class Modula_CPT {
 			$new_title       = isset( $image['title'] ) ? wp_kses_post( stripslashes( $image['title'] ) ) : null;
 			$new_description = isset( $image['description'] ) ? wp_kses_post( stripslashes( $image['description'] ) ) : null;
 			$new_alt         = isset( $image['alt'] ) ? sanitize_text_field( wp_unslash( $image['alt'] ) ) : null;
+			if ( null !== $new_alt && is_serialized( $new_alt ) ) {
+				$new_alt = '';
+			}
 
 			// Compare posts fields
 			$needs_post_update = false;

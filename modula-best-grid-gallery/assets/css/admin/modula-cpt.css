@@ -2750,5 +2750,5 @@ Some responsive fixes
 /* Required so tinyMce link insertion dialogs show */
 html body.post-type-modula-gallery .mce-floatpanel,
 html body.post-type-modula-album .mce-floatpanel{
-    z-index: 160001 !important;
+    z-index: 2000002 !important;
 }

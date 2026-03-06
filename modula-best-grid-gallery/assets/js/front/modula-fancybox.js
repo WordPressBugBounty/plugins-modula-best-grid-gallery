@@ -63,7 +63,8 @@ var modulaFancybox = {
 		links.forEach(function (value, index) {
 			if (typeof value.opts.caption !== 'undefined') {
 				links[index]['caption'] = DOMPurify.sanitize(
-					value.opts.caption
+					value.opts.caption,
+					{ ADD_ATTR: ['target'] }
 				);
 			}
 			if (typeof value.opts.thumb !== 'undefined') {

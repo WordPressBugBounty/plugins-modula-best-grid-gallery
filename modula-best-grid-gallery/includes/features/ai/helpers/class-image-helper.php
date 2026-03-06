@@ -41,6 +41,10 @@ class Image_Helper {
 
 			// Update alt text
 			if ( isset( $image['alt'] ) ) {
+				$alt = sanitize_text_field( wp_unslash( $image['alt'] ) );
+				if ( is_serialized( $alt ) ) {
+					$alt = '';
+				}
 				// First delete any existing meta for this key to prevent duplicates
 				$meta_updates[] = $wpdb->prepare(
 					"DELETE FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_wp_attachment_image_alt'",
@@ -50,7 +54,7 @@ class Image_Helper {
 				$meta_updates[] = $wpdb->prepare(
 					"INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) VALUES (%d, '_wp_attachment_image_alt', %s)",
 					$image['id'],
-					$image['alt']
+					$alt
 				);
 			}
 		}

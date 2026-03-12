@@ -2749,6 +2749,8 @@ Some responsive fixes
 
 /* Required so tinyMce link insertion dialogs show */
 html body.post-type-modula-gallery .mce-floatpanel,
-html body.post-type-modula-album .mce-floatpanel{
+html body.post-type-modula-album .mce-floatpanel,
+html body.post-type-modula-gallery #wp-link-wrap,
+html body.post-type-modula-album #wp-link-wrap{
     z-index: 2000002 !important;
 }

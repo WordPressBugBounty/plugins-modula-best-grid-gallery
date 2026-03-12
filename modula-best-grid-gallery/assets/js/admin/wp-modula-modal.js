@@ -490,11 +490,12 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
 						force_p_newlines: false,
 						convert_newlines_to_brs: true,
 						remove_linebreaks: false,
-						plugins: 'lists link',
+						plugins: 'lists link textcolor colorpicker code',
 						toolbar1:
-							'bold italic underline strikethrough | bullist numlist | link unlink',
+							'bold italic underline strikethrough | bullist numlist | link unlink | forecolor | code',
+						content_style: 'a[data-mce-selected] { box-shadow: none !important; background-color: transparent !important; }',
                     },
-                    quicktags: false
+                    quicktags: true
                 });
             }
         },

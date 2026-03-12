@@ -138,10 +138,10 @@ class Modula_WP_Core_Gallery_Importer {
 
 		if ( $result && $result > 0 ) {
 			foreach ( $matches[0] as $sc ) {
-				$modula_images = array();
-				$pattern       = '/ids\s*=\s*["\']([^"\']+)["\']/';
-				$result        = preg_match( $pattern, $sc, $gallery_ids );
+				$modula_images     = array();
+				$pattern           = '/ids\s*=\s*["\']([^"\']+)["\']/';
 
+				$result            = preg_match( $pattern, $sc, $gallery_ids );
 				$image_ids         = $modula_importer->prepare_images( 'wp_core', $gallery_ids[1] );
 				$gallery_image_ids = $gallery_ids[0];
 

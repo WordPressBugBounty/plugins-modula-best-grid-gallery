@@ -1,3 +1,8 @@
+= 2.14.20 - 12.03.2026 =
+Fixed: License key cannot be changed.
+Fixed: Core gallery importer.
+Added: Color selector & code tab in image description TinyMCE editor.
+
 = 2.14.19 - 06.03.2026 =
 Fixed: Security issues
 Fixed: TinyMCE editor floatpanel compatibility with Divi theme.

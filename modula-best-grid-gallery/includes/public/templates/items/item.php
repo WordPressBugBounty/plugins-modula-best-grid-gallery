@@ -3,28 +3,11 @@
 
 	<div class="modula-item-content">
 
-		<?php do_action( 'modula_item_before_link', $data ); ?>
-		
-		<?php if ( 'no-link' != $data->lightbox ) : ?>
-			<a<?php echo Modula_Helper::generate_attributes( $data->link_attributes ); ?> class="<?php echo esc_attr( implode( ' ', $data->link_classes ) ); ?>"></a>
-		<?php endif ?>
-
 		<?php
-		/**
-		 * Hook: modula_item_after_link
-		 */
+		do_action( 'modula_item_before_link', $data );
+		if ( 'no-link' != $data->lightbox ) : ?><a<?php echo Modula_Helper::generate_attributes( $data->link_attributes ); ?> class="<?php echo esc_attr( implode( ' ', $data->link_classes ) ); ?>"></a><?php endif;
 		do_action( 'modula_item_after_link', $data );
-
-		/**
-		 *Hook : modula_item_template_image
-		 *
-		 * @hooked: modula_sources_and_sizes
-		 */
 		do_action( 'modula_item_template_image', $data );
-
-		/**
-		 * Hook: modula_item_after_image
-		 */
 		do_action( 'modula_item_after_image', $data );
 		?>
 

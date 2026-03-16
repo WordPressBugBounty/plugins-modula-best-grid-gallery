@@ -1008,12 +1008,3 @@ html body .modula.modula-gallery .modula-item-link:focus-visible {
 	outline: 2px solid #005fcc;
 	outline-offset: -2px;
 }
-
-/* Allows text selection for hover effects titles and captions */
-html body .modula .figc *:not(:has(*)),
-html body .modula .figc .jtg-description,
-html body .modula .figc .jtg-title,
-html body .modula .figc .jtg-description:has(a) {
-	position: relative;
-	z-index: 2;
-}

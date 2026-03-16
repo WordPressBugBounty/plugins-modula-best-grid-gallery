@@ -1,3 +1,9 @@
+= 2.14.21 - 16.03.2026 =
+Fixed: JavaScript error in image edit screen.
+Fixed: Sometimes the telemetry notice prompt could not be dissmissed.
+Fixed: An issue where large captions and hover effects disrupted the lightbox functionality.
+Added: A filter to enqueue front styles early if a gallery shortcode is detected in a page.
+
 = 2.14.20 - 12.03.2026 =
 Fixed: License key cannot be changed.
 Fixed: Core gallery importer.

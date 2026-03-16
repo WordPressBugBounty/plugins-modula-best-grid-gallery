@@ -75,21 +75,60 @@ class Modula_Shortcode {
 	 * Ensures styles load even when the shortcode runs after wp_head (e.g. with some themes or page builders).
 	 */
 	public function maybe_enqueue_front_styles_early() {
+		if ( ! apply_filters( 'modula_maybe_enqueue_front_styles_early', false ) ) {
+			return;
+		}
+
 		if ( ! is_singular() ) {
 			return;
 		}
 
 		$post = get_queried_object();
-		if ( ! $post instanceof \WP_Post || empty( $post->post_content ) ) {
+		if ( ! $post instanceof \WP_Post ) {
 			return;
 		}
 
-		if ( ! has_shortcode( $post->post_content, 'modula' ) && ! has_shortcode( $post->post_content, 'Modula' ) ) {
+		// Collect content to search: post_content + standard WP widget content.
+		$content_to_search = $post->post_content;
+		foreach ( array(
+			'widget_text'        => 'text',
+			'widget_custom_html' => 'content',
+		) as $option => $key ) {
+			foreach ( get_option( $option, array() ) as $instance ) {
+				if ( ! empty( $instance[ $key ] ) ) {
+					$content_to_search .= ' ' . $instance[ $key ];
+				}
+			}
+		}
+
+		if ( ! has_shortcode( $content_to_search, 'modula' ) && ! has_shortcode( $content_to_search, 'Modula' ) ) {
 			return;
 		}
 
 		wp_enqueue_style( 'modula' );
 		wp_enqueue_style( 'modula-fancybox' );
+
+		$pattern = get_shortcode_regex( array( 'modula', 'Modula' ) );
+
+		if ( preg_match_all( '/' . $pattern . '/s', $content_to_search, $matches ) ) {
+			foreach ( $matches[3] as $atts_string ) {
+				$atts = shortcode_parse_atts( $atts_string );
+				if ( empty( $atts['id'] ) ) {
+					continue;
+				}
+
+				$settings = get_post_meta( absint( $atts['id'] ), 'modula-settings', true );
+				if ( empty( $settings ) || ! is_array( $settings ) ) {
+					$settings = array();
+				}
+
+				foreach ( apply_filters( 'modula_necessary_styles', array(), $settings ) as $style_slug ) {
+					if ( ! wp_style_is( $style_slug, 'enqueued' ) ) {
+						wp_enqueue_style( $style_slug );
+					}
+				}
+			}
+		}
 	}
 
 
@@ -430,6 +469,12 @@ class Modula_Shortcode {
 		if ( ! isset( $settings['lightbox'] ) || 'no-link' != $settings['lightbox'] ) {
 			$css .= "#{$gallery_id}.modula-gallery .modula-item > a, #{$gallery_id}.modula-gallery .modula-item a.modula-item-link, #{$gallery_id}.modula-gallery .modula-item-content > a:not(.modula-no-follow) { cursor:" . esc_attr( $settings['cursor'] ) . '; } ';
 		}
+
+		if ( isset( $settings['lightbox'] ) && 'no-link' === $settings['lightbox'] ) {
+			/* Allows text selection for hover effects titles and captions */
+			$css .= "#{$gallery_id}.modula-gallery .figc *:not(:has(*)), #{$gallery_id}.modula-gallery .figc .jtg-description, #{$gallery_id}.modula-gallery .figc .jtg-title, #{$gallery_id}.modula-gallery .figc .jtg-description:has(a) { position: relative; z-index: 2; }";
+		}
+
 		$css .= "#{$gallery_id}.modula-gallery .modula-item-content .modula-no-follow { cursor: default; } ";
 		$css  = apply_filters( 'modula_shortcode_css', $css, $gallery_id, $settings );
 

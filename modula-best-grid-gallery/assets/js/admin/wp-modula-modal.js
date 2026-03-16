@@ -422,7 +422,11 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
 
             // Update the caption
             this.item.set('description', result.caption);
-            this.$el.find('textarea[name="description"]').val(result.caption);
+            if ( typeof tinymce !== 'undefined' && tinymce.get('modula_gallery_description') ) {
+                tinymce.get('modula_gallery_description').setContent(result.caption);
+            } else {
+                this.$el.find('textarea[name="description"]').val(result.caption);
+            }
 
             // Update the title
             this.item.set('title', result.title);
@@ -471,9 +475,11 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
         },
 
         initEditor: function(){
-            
-            if ( typeof tinymce !== 'undefined' && tinymce.get('modula_gallery_description') ) {
-                tinymce.get('modula_gallery_description').remove();
+
+            if ( typeof wp.editor !== 'undefined' ) {
+                wp.editor.remove( 'modula_gallery_description' );
+            } else if ( typeof tinymce !== 'undefined' && tinymce.get( 'modula_gallery_description' ) ) {
+                tinymce.get( 'modula_gallery_description' ).remove();
             }
 
             if ( typeof wp.editor !== 'undefined' ) {
@@ -490,7 +496,7 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
 						force_p_newlines: false,
 						convert_newlines_to_brs: true,
 						remove_linebreaks: false,
-						plugins: 'lists link textcolor colorpicker code',
+						plugins: 'lists link textcolor colorpicker',
 						toolbar1:
 							'bold italic underline strikethrough | bullist numlist | link unlink | forecolor | code',
 						content_style: 'a[data-mce-selected] { box-shadow: none !important; background-color: transparent !important; }',

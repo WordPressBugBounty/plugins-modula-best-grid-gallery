@@ -4,7 +4,7 @@
 * Plugin URI:               https://wp-modula.com/
 * Description:              Modula is the most powerful, user-friendly WordPress gallery plugin. Add galleries, masonry grids and more in a few clicks.
 * Author:                   WPChill
-* Version:                  2.14.20
+* Version:                  2.14.21
 * Author URI:               https://www.wpchill.com/
 * License:                  GPLv3 or later
 * License URI:              http://www.gnu.org/licenses/gpl-3.0.html
@@ -47,7 +47,7 @@
  * @since    2.0.2
  */
 
-define( 'MODULA_LITE_VERSION', '2.14.20' );
+define( 'MODULA_LITE_VERSION', '2.14.21' );
 define( 'MODULA_PATH', plugin_dir_path( __FILE__ ) );
 define( 'MODULA_URL', plugin_dir_url( __FILE__ ) );
 defined( 'MODULA_PRO_STORE_URL' ) || define( 'MODULA_PRO_STORE_URL', 'https://wp-modula.com' );
@@ -94,12 +94,17 @@ function modula_ensure_pro_loads_after_lite() {
 		return;
 	}
 
-	$want_pro_index = ( false !== $key_lite ) ? 1 : 0;
+	$want_pro_index = ( false !== $key_lite ) ? $key_lite + 1 : 0;
 	if ( $key_pro === $want_pro_index ) {
 		return;
 	}
+
 	unset( $list[ $key_pro ] );
 	$list = array_values( $list );
+
+	$key_lite_new   = ( false !== $key_lite ) ? array_search( $lite, $list, true ) : false;
+	$want_pro_index = ( false !== $key_lite_new ) ? $key_lite_new + 1 : 0;
+
 	array_splice( $list, $want_pro_index, 0, array( $pro ) );
 
 	update_option( 'active_plugins', $list );

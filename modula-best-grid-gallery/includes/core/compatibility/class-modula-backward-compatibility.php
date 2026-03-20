@@ -748,7 +748,7 @@ class Modula_Backward_Compatibility {
 	 */
 	public function backward_compatibility_front_social_icons_collapsed( $settings ) {
 
-		if ( ! isset( $settings['socialDesktopCollapsed'] ) ) {
+		if ( is_array( $settings ) && ! isset( $settings['socialDesktopCollapsed'] ) ) {
 			$settings['socialDesktopCollapsed'] = 0;
 		}
 

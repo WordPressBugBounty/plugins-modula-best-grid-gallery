@@ -315,6 +315,11 @@ function modula_sources_and_sizes( $data ) {
 		return;
 	}
 
+	if ( isset( $data->gallery_type ) && 'slider' === $data->gallery_type && isset( $data->img_attributes['crop'] ) && $data->img_attributes['crop'] ) {
+		echo $image;
+		return;
+	}
+
 	$image_meta = array();
 	// Get the imag meta
 	if ( isset( $data->link_attributes['data-image-id'] ) ) {

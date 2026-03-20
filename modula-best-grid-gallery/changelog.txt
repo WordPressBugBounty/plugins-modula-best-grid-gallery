@@ -1,3 +1,6 @@
+= 2.14.22 - 20.03.2026 =
+Fixed: No srcset for cropped images.
+
 = 2.14.21 - 16.03.2026 =
 Fixed: JavaScript error in image edit screen.
 Fixed: Sometimes the telemetry notice prompt could not be dissmissed.

@@ -11,6 +11,7 @@
 	border-bottom-right-radius: 0;
 	flex-grow: 1;
 	width: calc(100% - 80px);
+	border-right: 0;
 }
 
 .modula-copy-shortcode span {
@@ -18,9 +19,9 @@
 }
 
 .wp-core-ui .modula-copy-shortcode a.button-primary {
-	height: 30px;
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
+	padding: 0;
 }
 
 .column-shortcode .modula-copy-shortcode {

@@ -227,7 +227,7 @@ class Modula_Field_Builder {
 		do_action( 'modula_admin_before_shortcode_metabox', $post );
 
 		echo '<div class="modula-copy-shortcode">';
-		echo '<input type="text" value="' . esc_attr( $shortcode ) . '"  onclick="select()" readonly>';
+		echo '<input type="text" value=" ' . esc_attr( $shortcode ) . ' "  onclick="select()" readonly>';
 		if ( ! empty( $shortcodes ) ) {
 			echo '<button type="button" class="modula-shortcode-dropdown-toggle" aria-expanded="false" aria-label="' . esc_attr__( 'Toggle additional shortcodes', 'modula-best-grid-gallery' ) . '" style="display:flex;" >';
 			echo '<span class="dashicons dashicons-arrow-down-alt2"></span>';
@@ -246,7 +246,7 @@ class Modula_Field_Builder {
 			foreach ( $shortcodes as $sh ) {
 				echo '<div class="modula-shortcode-dropdown" style="display:none;">';
 				echo '<div class="modula-copy-shortcode">';
-				echo '<input type="text" value="' . esc_attr( $sh['code'] ) . '" onclick="select()" readonly="">';
+				echo '<input type="text" value=" ' . esc_attr( $sh['code'] ) . ' " onclick="select()" readonly="">';
 				echo '<a href="#" title="Copy shortcode" class="copy-modula-shortcode button button-primary dashicons dashicons-format-gallery" style="width:40px"></a>';
 				echo '<span></span>';
 				echo '<p>' . wp_kses_post( $sh['description'] ) . '</p></div>';

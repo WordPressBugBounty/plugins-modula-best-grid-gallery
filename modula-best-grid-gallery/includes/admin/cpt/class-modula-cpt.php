@@ -943,7 +943,7 @@ class Modula_CPT {
 		if ( 'shortcode' === $column ) {
 			$shortcode = '[modula id="' . $post_id . '"]';
 			echo '<div class="modula-copy-shortcode">';
-			echo '<input type="text" value="' . esc_attr( $shortcode ) . '"  onclick="select()" readonly>';
+			echo '<input type="text" value=" ' . esc_attr( $shortcode ) . ' "  onclick="select()" readonly>';
 			echo '<a href="#" title="' . esc_attr__( 'Copy shortcode', 'modula-best-grid-gallery' ) . '" class="copy-modula-shortcode button button-primary dashicons dashicons-format-gallery" style="width:40px;"></a><span></span>';
 			echo '</div>';
 		}

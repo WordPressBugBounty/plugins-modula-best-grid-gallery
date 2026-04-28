@@ -1526,7 +1526,7 @@ body .media-modal-content .attachment-details .modula-toggle__track {
 
 .modula-toggle__input[type=radio]:checked + .modula-toggle__items .modula-toggle__track,
 .modula-toggle__input[type=checkbox]:checked + .modula-toggle__items .modula-toggle__track {
-    background-color: #11a0d2;
+    background-color: var(--wp-admin-theme-color, #2271b1);
     border: 9px solid transparent;
 }
 
@@ -1591,7 +1591,7 @@ tr.troubleshoot-subfield.hide {
     border-right: none;
     cursor: pointer;
     padding: 0 8px;
-    height: 30px;
+    height: 40px;
     width: 40px;
     display: none;
     align-items: center;
@@ -2168,7 +2168,7 @@ html body .modula-settings-container .modula-tab-content tr[data-container] inpu
 }
 
 .modula-preview-item-container .modula-selected-effect-badge {
-    background: #2271b1;
+    background-color: var(--wp-admin-theme-color, #2271b1);
     color: #fff;
     padding: 5px 10px;
     position: absolute;
@@ -2652,21 +2652,21 @@ Some responsive fixes
 }
 
 /*
-* Modula Andrei toggle example
+* Modula toggle
 */
-.modula-andrei-ex-toggle {
+.modula-position-toggle {
     margin-left: 10px;
     position: relative;
     user-select: none;
     display: inline-block;
 }
 
-.modula-andrei-ex-toggle .modula-andrei-ex-toggle__input {
+.modula-position-toggle .modula-position-toggle__input {
     display:inline-block;
     position:relative;
 }
 
-.modula-andrei-ex-toggle input {
+.modula-position-toggle input {
     border-radius: 2px;
     border: 2px solid #6c7781;
     margin-right: 12px;
@@ -2683,10 +2683,10 @@ Some responsive fixes
     border-color:red;
 }
 
-.modula-andrei-ex-toggle label {
+.modula-position-toggle label {
     background: white;
-    color: #2271b1;
-    border: 1px solid #2271b1;
+    color: var(--wp-admin-theme-color, #2271b1);
+    border: 1px solid var(--wp-admin-theme-color, #2271b1);
     font-size: 13px;
     line-height: 2.15384615;
     min-height: 30px;
@@ -2699,20 +2699,20 @@ Some responsive fixes
     display:inline-block;
 }
 
-.modula-andrei-ex-toggle .modula-andrei-ex-toggle__input:first-child label {
+.modula-position-toggle .modula-position-toggle__input:first-child label {
     border-top-left-radius: 3px;
     border-bottom-left-radius: 3px;
     border-right: 0;
 }
 
-.modula-andrei-ex-toggle .modula-andrei-ex-toggle__input:last-child label {
+.modula-position-toggle .modula-position-toggle__input:last-child label {
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
 }
 
-.modula-andrei-ex-toggle input:checked + label {
-    background: #2271b1;
-    border-color:#2271b1;
+.modula-position-toggle input:checked + label {
+    background: var(--wp-admin-theme-color, #2271b1);
+    border-color: var(--wp-admin-theme-color, #2271b1);
     color: white;
 }
 

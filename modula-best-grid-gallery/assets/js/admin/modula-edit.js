@@ -72,12 +72,6 @@
 
 				const $overlay = $('.modula-modal__overlay.' + upsell);
 
-				$overlay.on('click', { upsell }, function (e) {
-					if (e.target === this) {
-						modulaCloseModal(e);
-					}
-				});
-
 				$overlay.find('.modula-modal__dismiss').on('click', { upsell }, modulaCloseModal);
 			}
 		);

@@ -1261,7 +1261,7 @@ class Modula_CPT {
 			$link = $link . '#!modula-general';
 		}
 
-		return $link;
+		return esc_url( $link );
 	}
 
 	/**
@@ -1278,6 +1278,10 @@ class Modula_CPT {
 
 		// Check if post exists and is modula-gallery CPT
 		if ( ! get_post_type( $id ) || 'modula-gallery' !== get_post_type( $id ) ) {
+			wp_send_json( array( 'status' => 'failed' ) );
+		}
+
+		if ( ! current_user_can( 'edit_post', $id ) ) {
 			wp_send_json( array( 'status' => 'failed' ) );
 		}
 

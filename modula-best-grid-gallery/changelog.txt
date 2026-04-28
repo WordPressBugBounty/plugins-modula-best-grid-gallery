@@ -1,3 +1,7 @@
+= 2.14.24 - 28.04.2026 =
+Fixed: Admin CSS adjustments.
+Fixed: Security issue.
+
 = 2.14.23 - 09.04.2026 =
 Fixed: Admin styles compatibility with WordPress 7.0.
 

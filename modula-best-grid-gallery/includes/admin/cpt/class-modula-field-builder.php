@@ -107,7 +107,7 @@ class Modula_Field_Builder {
 			echo '</div>';
 			echo '</div>';
 			echo '<div class="buttons">';
-			echo '<div class="modula-add-new-wrapper"><button class="button button-primary" id="modula_gallery_add_action_button" ><span class="dashicons dashicons-plus"></span>' . esc_html__( 'Add New', 'modula-best-grid-gallery' ) . ' <span class="dashicons dashicons-arrow-down"></span></button>';
+			echo '<div class="modula-add-new-wrapper"><button class="button button-compact button-primary" id="modula_gallery_add_action_button" ><span class="dashicons dashicons-plus"></span>' . esc_html__( 'Add New', 'modula-best-grid-gallery' ) . ' <span class="dashicons dashicons-arrow-down"></span></button>';
 			echo '<ul id="modula_gallery_add_action" style="display:none;">';
 			echo '<li id="modula-uploader-browser">' . esc_html__( 'Upload', 'modula-best-grid-gallery' ) . '</li>';
 			echo '<li id="modula-wp-gallery">' . esc_html__( 'From Library', 'modula-best-grid-gallery' ) . '</li>';
@@ -280,11 +280,11 @@ class Modula_Field_Builder {
 		 */
 		do_action( 'modula_admin_before_upload_position_metabox', $post );
 		echo '<span>' . esc_html__( 'Add new images to gallery at ', 'modula-best-grid-gallery' ) . ' </span>';
-		echo '<div class="modula-andrei-ex-toggle">';
-		echo '<div class="modula-andrei-ex-toggle__input">';
+		echo '<div class="modula-position-toggle">';
+		echo '<div class="modula-position-toggle__input">';
 		echo '<input type="radio" id="modula-upload-position-start" name="modula-settings[upload_position]" value="start" ' . checked( $option, 'start', false ) . '>';
 		echo '<label for="modula-upload-position-start">' . esc_html__( 'Start', 'modula-best-grid-gallery' ) . '</label>';
-		echo '</div><div class="modula-andrei-ex-toggle__input">';
+		echo '</div><div class="modula-position-toggle__input">';
 		echo '<input type="radio" id="modula-upload-position-end" name="modula-settings[upload_position]" value="end" ' . checked( $option, 'end', false ) . '>';
 		echo '<label for="modula-upload-position-end">' . esc_html__( 'End', 'modula-best-grid-gallery' ) . '</label>';
 		echo '</div></div>';

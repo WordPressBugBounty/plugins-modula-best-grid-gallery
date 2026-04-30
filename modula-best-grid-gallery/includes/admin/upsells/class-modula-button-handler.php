@@ -69,6 +69,6 @@ class Modula_Button_Handler extends Modula_Upsell_Base {
 		if ( ! $this->extensions->is_upgradable_addon( 'modula' ) ) {
 			return;
 		}
-		echo '<div id="modula-pro-bulk-editor-upsell" data-gallery-id="' . esc_attr( get_the_ID() ) . '"><a href="#" class="button modula-pro-bulk-editor-button">' . esc_html__( 'Bulk Editor', 'modula-best-grid-gallery' ) . '</a></div>';
+		echo '<div id="modula-pro-bulk-editor-upsell" data-gallery-id="' . esc_attr( get_the_ID() ) . '"><a href="#" class="button button-compact modula-pro-bulk-editor-button">' . esc_html__( 'Bulk Editor', 'modula-best-grid-gallery' ) . '</a></div>';
 	}
 }

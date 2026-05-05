@@ -220,21 +220,42 @@ function modula_add_align_classes( $template_data ) {
 	return $template_data;
 }
 
-function modula_show_schemaorg() {
+function modula_show_schemaorg( $settings = array() ) {
 	global $wp;
 	global $post;
 
-	$current_url = is_wp_error( $post ) || empty( $post )
+	static $rendered_schema_ids = array();
+
+	$should_output = apply_filters( 'modula_enable_schemaorg', true, $post );
+	if ( ! $should_output ) {
+		return;
+	}
+
+	$page_url = is_wp_error( $post ) || empty( $post )
 		? home_url( add_query_arg( array(), $wp->request ) )
 		: get_the_permalink( $post->ID );
+
+	$schema_id = trailingslashit( $page_url );
+	if ( isset( $settings['gallery_id'] ) && is_string( $settings['gallery_id'] ) ) {
+		$gallery_id = absint( preg_replace( '/[^0-9]/', '', $settings['gallery_id'] ) );
+		if ( $gallery_id > 0 ) {
+			$schema_id = trailingslashit( $page_url ) . '#modula-gallery-' . $gallery_id;
+		}
+	}
+
+	if ( isset( $rendered_schema_ids[ $schema_id ] ) ) {
+		return;
+	}
+
+	$rendered_schema_ids[ $schema_id ] = true;
 	?>
 
 	<script type="application/ld+json">
 	{
-		"@context": "http://schema.org",
+		"@context": "https://schema.org",
 		"@type"   : "ImageGallery",
-		"id"      : "<?php echo esc_url( trailingslashit( $current_url ) ); ?>",
-		"url"     : "<?php echo esc_url( trailingslashit( $current_url ) ); ?>"
+		"id"      : "<?php echo esc_url( $schema_id ); ?>",
+		"url"     : "<?php echo esc_url( trailingslashit( $page_url ) ); ?>"
 	}
 
 	</script>

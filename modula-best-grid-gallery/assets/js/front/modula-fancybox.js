@@ -367,12 +367,21 @@ document.addEventListener(
 document.addEventListener('modula_fancybox_resize', modulaAlbumsMoveCaption);
 
 function modulaAlbumsMoveCaption() {
-	document.querySelectorAll('.fancybox__slide').forEach(function (slide) {
-		var content = slide.querySelector('.fancybox__content');
-		var caption = slide.querySelector('.fancybox__caption');
-
-		if (content && caption && !content.contains(caption)) {
-			content.appendChild(caption);
-		}
+	requestAnimationFrame(function () {
+		document.querySelectorAll('.fancybox__slide.has-image.has-caption').forEach(function (slide) {
+			var content = slide.querySelector('.fancybox__content');
+			var caption = slide.querySelector('.fancybox__caption');
+			if (!content || !caption) return;
+			var w = content.offsetWidth;
+			if (w > 0) {
+				caption.style.width = w + 'px';
+				caption.style.maxWidth = w + 'px';
+			} else {
+				var img = content.querySelector('img');
+				if (img) {
+					img.addEventListener('load', modulaAlbumsMoveCaption, { once: true });
+				}
+			}
+		});
 	});
 }

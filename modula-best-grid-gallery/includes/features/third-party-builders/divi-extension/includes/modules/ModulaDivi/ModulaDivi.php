@@ -48,7 +48,7 @@ class Modula_Divi_Module extends ET_Builder_Module {
 				'type'             => 'select',
 				'description'      => esc_html__( 'Content entered here will appear inside the module.', 'modula-best-grid-gallery' ),
 				'toggle_slug'      => 'main_content',
-				'options'          => ( ( function_exists( 'et_core_is_fb_enabled' ) && et_core_is_fb_enabled() ) ) ? Modula_Helper::get_galleries() : array(),
+				'options'          => Modula_Helper::get_galleries(),
 				'default'          => 'none',
 				'computed_affects' => array(
 					'__gallery',
@@ -90,11 +90,16 @@ class Modula_Divi_Module extends ET_Builder_Module {
 
 	public function render( $attrs, $content = null, $render_slug = null ) {
 
-		$gallery_id = $post_type = $this->props['gallery_select'];
-		$gallery    = get_post( $gallery_id );
+		$gallery_id = $this->props['gallery_select'];
 
-		if ( !$gallery ) {
-			return esc_html__( 'There are no Modula galleries', 'modula-best-grid-gallery' );
+		if ( empty( $gallery_id ) || 'none' === $gallery_id ) {
+			return esc_html__( 'Please select a Modula gallery.', 'modula-best-grid-gallery' );
+		}
+
+		$gallery = get_post( $gallery_id );
+
+		if ( ! $gallery ) {
+			return esc_html__( 'Please select a Modula gallery.', 'modula-best-grid-gallery' );
 		}
 
 		if ( 'modula-gallery' != $gallery->post_type ) {
@@ -103,6 +108,7 @@ class Modula_Divi_Module extends ET_Builder_Module {
 
 		return do_shortcode( '[modula id="' . absint( $gallery_id ) . '"]' );
 	}
+
 
 	static function enqueue_scripts( $args = array(), $conditional_tags = array(), $current_page = array() ) {
 		$suffix = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? '' : '.min';

@@ -1,3 +1,8 @@
+= 2.14.27 - 12.05.2026 =
+Changed: Moved several lightbox settings to base plugin.
+Fixed: Copy caption on double tap not working on mobile.
+Fixed: Large captions in lightbox pushing image out of view.
+
 = 2.14.26 - 05.05.2026 =
 Fixed: Schema.org markup now generates a unique ID per gallery when multiple galleries are present on the same page.
 Added: Filter to disable gallery schema.org display.

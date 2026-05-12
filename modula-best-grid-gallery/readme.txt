@@ -4,7 +4,7 @@ Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPres
 Requires at least: 5.3
 Tested up to: 7.0
 Requires PHP: 5.6
-Stable tag: 2.14.26
+Stable tag: 2.14.27
 
 License: GNU General Public License v3.0 or later  
 
@@ -325,6 +325,11 @@ The simplest way to install is to click on 'Plugins' then 'Add' and type 'Modula
 4. Mobile Responsive Image Galleries - Galleries automatically adapt to smartphone and tablet screen sizes
 
 == Changelog ==
+= 2.14.27 - 12.05.2026 =
+Changed: Moved several lightbox settings to base plugin.
+Fixed: Copy caption on double tap not working on mobile.
+Fixed: Large captions in lightbox pushing image out of view.
+
 = 2.14.26 - 05.05.2026 =
 Fixed: Schema.org markup now generates a unique ID per gallery when multiple galleries are present on the same page.
 Added: Filter to disable gallery schema.org display.

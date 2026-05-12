@@ -523,10 +523,6 @@ class Modula_Backward_Compatibility {
 		unset( $options['video'], $options['youtube'], $options['vimeo'] );
 		// END Video Backwards comp.
 
-		if ( isset( $settings['lightbox_touch'] ) && $settings['lightbox_touch'] ) {
-			$options['Carousel']['Panzoom']['touch'] = true;
-		}
-
 		if ( isset( $settings['lightbox_transitionEffect'] ) ) {
 			$options['Carousel']['transition'] = ( 'false' === $settings['lightbox_transitionEffect'] ) ? 'fade' : $settings['lightbox_transitionEffect'];
 		}

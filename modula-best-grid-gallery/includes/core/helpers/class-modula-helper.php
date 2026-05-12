@@ -228,6 +228,9 @@ class Modula_Helper {
 	}
 
 	public static function lightbox_default_options() {
+		$lightbox_touch      = apply_filters( 'modula_lightbox_touch', true );
+		$lightbox_click_slide = apply_filters( 'modula_lightbox_click_slide', true );
+
 		$fancybox_options = array(
 			'animated'      => true,
 			'Thumbs'        => array(
@@ -242,13 +245,15 @@ class Modula_Helper {
 			),
 			'Carousel'      => array(
 				'Panzoom'  => array(
-					'touch' => false,
+					'touch' => $lightbox_touch,
 				),
 				'infinite' => false,
 			),
-			'keyboard'      => false,
-			'touch'         => false,
-			'backdropClick' => false, //The action to perform when the user clicks on the backdrop
+			'keyboard'      => apply_filters( 'modula_lightbox_keyboard', true ),
+			'wheel'         => apply_filters( 'modula_lightbox_wheel', true ),
+			'touch'         => $lightbox_touch,
+			'clickSlide'    => $lightbox_click_slide ? 'close' : false,
+			'backdropClick' => $lightbox_click_slide ? 'close' : false,
 			'l10n'          => array(
 				'CLOSE'             => esc_html__( 'Close', 'modula-best-grid-gallery' ),
 				'NEXT'              => esc_html__( 'Next', 'modula-best-grid-gallery' ),

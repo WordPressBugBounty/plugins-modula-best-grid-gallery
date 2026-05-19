@@ -1,3 +1,6 @@
+= 2.14.28 - 19.05.2026 =
+Fixed: Fatal error on frontend when gallery settings are invalid.
+
 = 2.14.27 - 12.05.2026 =
 Changed: Moved several lightbox settings to base plugin.
 Fixed: Copy caption on double tap not working on mobile.

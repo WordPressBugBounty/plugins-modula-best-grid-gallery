@@ -295,6 +295,10 @@ function modula_add_scripts( $scripts, $settings ) {
 
 	$needed_scripts = array();
 
+	if ( ! is_array( $settings ) ) {
+		return $scripts;
+	}
+
 	if ( apply_filters( 'modula_lazyload_compatibility_script', modula_run_lazy_load( $settings ), $settings ) ) {
 		$needed_scripts[] = 'modula-lazysizes';
 	}

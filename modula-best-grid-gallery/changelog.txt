@@ -1,3 +1,6 @@
+= 2.14.29 - 12.06.2026 =
+Fixed: Image caption changes no longer affect the description in media library.
+
 = 2.14.28 - 19.05.2026 =
 Fixed: Fatal error on frontend when gallery settings are invalid.
 

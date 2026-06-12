@@ -364,7 +364,7 @@ class Modula_CPT {
 		// 2) Fetch the existing posts data in one query
 		$ids_placeholder = implode( ',', $attachment_ids );
 		$sql_posts       = "
-        SELECT ID, post_title, post_excerpt, post_content
+        SELECT ID, post_title, post_excerpt
         FROM {$wpdb->posts}
         WHERE ID IN ( $ids_placeholder )
     	";
@@ -399,7 +399,7 @@ class Modula_CPT {
 		}
 
 		// Prepare arrays for the final batch updates
-		$post_sql_values = array();  // For post_title, post_excerpt, post_content
+		$post_sql_values = array();  // For post_title, post_excerpt
 		$meta_delete_ids = array();  // We'll delete old alt rows in one go
 		$meta_inserts    = array();  // We'll insert the new alt rows
 
@@ -440,7 +440,6 @@ class Modula_CPT {
 			// Default to existing
 			$updated_title   = $existing_post->post_title;
 			$updated_excerpt = $existing_post->post_excerpt;
-			$updated_content = $existing_post->post_content;
 
 			if ( null !== $new_title && $new_title !== $existing_post->post_title ) {
 				$updated_title     = $new_title;
@@ -448,13 +447,8 @@ class Modula_CPT {
 			}
 
 			if ( null !== $new_description ) {
-				// If the new desc is different from existing excerpt OR content, update both
-				if (
-				$new_description !== $existing_post->post_excerpt
-				|| $new_description !== $existing_post->post_content
-				) {
+				if ( $new_description !== $existing_post->post_excerpt ) {
 					$updated_excerpt   = $new_description;
-					$updated_content   = $new_description;
 					$needs_post_update = true;
 				}
 			}
@@ -462,11 +456,10 @@ class Modula_CPT {
 			if ( $needs_post_update ) {
 				// We'll add one row for the bulk "INSERT ... ON DUPLICATE KEY UPDATE"
 				$post_sql_values[] = $wpdb->prepare(
-					'(%d, %s, %s, %s)',
+					'(%d, %s, %s)',
 					$attachment_id,
 					$updated_title,
-					$updated_excerpt,
-					$updated_content
+					$updated_excerpt
 				);
 			}
 
@@ -493,12 +486,11 @@ class Modula_CPT {
 		// (A) Update posts
 		if ( ! empty( $post_sql_values ) ) {
 			$sql_posts = "
-            INSERT INTO {$wpdb->posts} (ID, post_title, post_excerpt, post_content)
+            INSERT INTO {$wpdb->posts} (ID, post_title, post_excerpt)
             VALUES " . implode( ',', $post_sql_values ) . '
-            ON DUPLICATE KEY UPDATE 
+            ON DUPLICATE KEY UPDATE
                 post_title   = VALUES(post_title),
-                post_excerpt = VALUES(post_excerpt),
-                post_content = VALUES(post_content)
+                post_excerpt = VALUES(post_excerpt)
         ';
 			// Prepared at line 361
 			//phpcs:ignore WordPress.DB

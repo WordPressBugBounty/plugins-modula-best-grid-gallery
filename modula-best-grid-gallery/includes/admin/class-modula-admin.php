@@ -22,8 +22,8 @@ class Modula_Admin {
 		// WP Media( list view ) add images to gallery bulk action
 		add_filter( 'bulk_actions-upload', array( $this, 'modula_media_lib_bulk_actions' ), 15 );
 		add_filter( 'handle_bulk_actions-upload', array( $this, 'modula_media_handle_bulk' ), 15, 3 );
-		add_filter( 'admin_init', array( $this, 'modula_media_do_bulk' ), 15 );
-		add_action( 'admin_notices', array( $this, 'media_add_notice' ) );
+		add_action( 'admin_init', array( $this, 'modula_media_notice_redirect' ), 15 );
+		add_action( 'admin_notices', array( $this, 'modula_media_bulk_notice' ) );
 	}
 
 	public function delete_resized_image( $post_id ) {
@@ -366,8 +366,11 @@ class Modula_Admin {
 	 */
 	public function modula_media_handle_bulk( $location, $doaction, $post_ids ) {
 
-		// Only allow admins to do this.
 		if ( ! current_user_can( 'manage_options' ) ) {
+			return $location;
+		}
+
+		if ( 'modula_add_to_gallery' !== $doaction ) {
 			return $location;
 		}
 
@@ -379,20 +382,50 @@ class Modula_Admin {
 			return $location;
 		}
 
-		if ( 'modula_add_to_gallery' === $doaction ) {
-			return admin_url(
-				add_query_arg(
-					array(
-						'modula_bulk_action' => $doaction,
-						'gallery_id'         => $gallery_id,
-						'posts'              => $post_ids,
-					),
-					'/upload.php'
-				)
-			);
+		if ( 'modula-gallery' !== get_post_type( $gallery_id ) ) {
+			return $location;
 		}
 
-		return $location;
+		$data = array(
+			'old_images' => array(),
+			'counter'    => array(
+				'added'   => 0,
+				'skipped' => 0,
+			),
+		);
+
+		$data['old_images'] = get_post_meta( $gallery_id, 'modula-images', true );
+		if ( ! is_array( $data['old_images'] ) ) {
+			$data['old_images'] = array();
+		}
+		$current_images = array_column( $data['old_images'], 'id' );
+
+		foreach ( $post_ids as $post_id ) {
+			if ( ! isset( $post_id ) || in_array( $post_id, $current_images ) ) {
+				++$data['counter']['skipped'];
+				continue;
+			}
+
+			$post = get_post( $post_id, ARRAY_A );
+			if ( ! isset( $post ) || ! isset( $post['post_mime_type'] ) || false === strpos( $post['post_mime_type'], 'image' ) ) {
+				++$data['counter']['skipped'];
+				continue;
+			}
+
+			$data['old_images'][] = Modula_Admin_Helpers::sanitize_image( $this->get_modula_image_data( $post ) );
+			++$data['counter']['added'];
+		}
+
+		$data = apply_filters( 'modula_bulk_add_images_to_gallery', $data, $post_ids, $gallery_id, $current_images );
+		update_post_meta( $gallery_id, 'modula-images', $data['old_images'] );
+
+		return add_query_arg(
+			array(
+				'modula_media_added'   => absint( $data['counter']['added'] ),
+				'modula_media_skipped' => absint( $data['counter']['skipped'] ),
+			),
+			admin_url( 'upload.php' )
+		);
 	}
 
 	/**
@@ -514,19 +547,19 @@ class Modula_Admin {
 		return $new_image;
 	}
 
-	public function media_add_notice() {
-		$screen = get_current_screen();
+	public function modula_media_notice_redirect() {
+		global $pagenow;
 
-		if ( 'upload' !== $screen->base && 'media_page_upload' !== $screen->base ) {
+		if ( 'upload.php' !== $pagenow ) {
 			return;
 		}
 
-		if ( isset( $_GET['modula_media_added'] ) && isset( $_GET['modula_media_skipped'] ) ) {
-			$added   = absint( $_GET['modula_media_added'] );
-			$skipped = absint( $_GET['modula_media_skipped'] );
-		} else {
+		if ( ! isset( $_GET['modula_media_added'] ) || ! isset( $_GET['modula_media_skipped'] ) ) {
 			return;
 		}
+
+		$added   = absint( $_GET['modula_media_added'] );
+		$skipped = absint( $_GET['modula_media_skipped'] );
 
 		$added_text   = _n( 'image was', 'images were', $added, 'modula-best-grid-gallery' );
 		$skipped_text = _n( 'image was', 'images were', $skipped, 'modula-best-grid-gallery' );
@@ -552,8 +585,26 @@ class Modula_Admin {
 
 		Modula_Notifications::add_notification( 'media-add-notice', $notice );
 
+		set_transient( 'modula_bulk_notice_' . get_current_user_id(), $message, 60 );
+
 		wp_safe_redirect( remove_query_arg( array( 'modula_media_added', 'modula_media_skipped' ) ) );
 		exit;
+	}
+
+	public function modula_media_bulk_notice() {
+		$transient_key = 'modula_bulk_notice_' . get_current_user_id();
+		$message       = get_transient( $transient_key );
+
+		if ( ! $message ) {
+			return;
+		}
+
+		delete_transient( $transient_key );
+
+		printf(
+			'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+			esc_html( $message )
+		);
 	}
 
 	public function add_settings_react_root() {

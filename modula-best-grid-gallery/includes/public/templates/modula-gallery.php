@@ -5,6 +5,8 @@
 	<div <?php echo Modula_Helper::generate_attributes( $data->items_container ); ?>>
 		<?php
 
+		$item_data = array();
+
 		foreach ( $data->images as $image ) {
 			$image_object = get_post( $image['id'] );
 

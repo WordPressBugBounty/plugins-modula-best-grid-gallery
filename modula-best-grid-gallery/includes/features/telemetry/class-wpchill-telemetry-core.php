@@ -398,7 +398,7 @@ class WPChill_Telemetry_Core {
 
 		$json_size = strlen( wp_json_encode( $settings ) );
 		if ( $json_size > self::MAX_PAYLOAD_SIZE ) {
-			$settings = array_slice( $settings, 0, count( $settings ) / 2, true );
+			$settings = array_slice( $settings, 0, (int) ( count( $settings ) / 2 ), true );
 		}
 
 		return $settings;
@@ -494,7 +494,6 @@ class WPChill_Telemetry_Core {
 		$body        = wp_remote_retrieve_body( $response );
 
 		if ( $status_code >= 400 ) {
-			$this->enqueue_for_retry( $endpoint, $payload );
 			return new WP_Error( 'http_error', 'HTTP ' . $status_code . ': ' . $body );
 		}
 

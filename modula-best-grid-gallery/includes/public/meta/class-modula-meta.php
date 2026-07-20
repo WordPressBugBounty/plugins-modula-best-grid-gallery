@@ -170,7 +170,7 @@ class Modula_Meta {
 			 *
 			 * @since 2.8.0
 			 */
-			'const modulaMetaVars = ' . wp_json_encode( apply_filters( 'modula_jquery_vars', array() ) ) . ';',
+			'var modulaMetaVars = ' . wp_json_encode( apply_filters( 'modula_jquery_vars', array() ) ) . ';',
 			'before'
 		);
 	}

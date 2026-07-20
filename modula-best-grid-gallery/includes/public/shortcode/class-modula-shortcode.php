@@ -63,7 +63,7 @@ class Modula_Shortcode {
 		wp_register_script( 'modula-grid-justified-gallery', MODULA_URL . 'assets/js/front/justifiedGallery' . $suffix . '.js', array( 'jquery' ), MODULA_LITE_VERSION, true );
 		wp_register_script( 'modula-fancybox', MODULA_URL . 'assets/js/front/fancybox' . $suffix . '.js', array( 'jquery', 'modulaFancybox' ), MODULA_LITE_VERSION, true );
 		wp_register_script( 'modulaFancybox', MODULA_URL . 'assets/js/front/modula-fancybox' . $suffix . '.js', array( 'dompurify' ), MODULA_LITE_VERSION, true );
-		wp_add_inline_script( 'modulaFancybox', "const ModulaShareButtons = '" . addslashes( wp_json_encode( Modula_Helper::render_lightbox_share_template() ) ) . "';", 'before' );
+		wp_add_inline_script( 'modulaFancybox', "var ModulaShareButtons = '" . addslashes( wp_json_encode( Modula_Helper::render_lightbox_share_template() ) ) . "';", 'before' );
 		wp_register_script( 'modula-lazysizes', MODULA_URL . 'assets/js/front/lazysizes' . $suffix . '.js', array( 'jquery' ), MODULA_LITE_VERSION, true );
 
 		// @todo: minify all css & js for a better optimization.

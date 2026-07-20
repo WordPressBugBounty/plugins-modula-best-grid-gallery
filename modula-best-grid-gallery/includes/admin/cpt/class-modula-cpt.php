@@ -1248,12 +1248,12 @@ class Modula_CPT {
 		$settings = get_post_meta( $id, 'modula-settings', true );
 
 		if ( isset( $settings['last_visited_tab'] ) && '' !== $settings['last_visited_tab'] ) {
-			$link = $link . '#!' . $settings['last_visited_tab'];
+			$tab = sanitize_key( $settings['last_visited_tab'] );
 		} else {
-			$link = $link . '#!modula-general';
+			$tab = 'modula-general';
 		}
 
-		return $link;
+		return $link . '#!' . $tab;
 	}
 
 	/**

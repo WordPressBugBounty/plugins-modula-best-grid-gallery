@@ -195,11 +195,16 @@ class Modula_Admin_Assets {
 
 		wp_enqueue_media();
 
+		// TinyMCE (Visual) + CodeMirror (Code) for HTML settings fields.
+		wp_enqueue_editor();
+		wp_enqueue_code_editor( array( 'type' => 'text/html' ) );
+
 		$scripts = Modula\Scripts::get_instance();
 
 		$scripts->load_js_asset(
 			'modula-settings',
 			'assets/js/admin/general-settings',
+			array( 'editor' )
 		);
 
 		$scripts->load_css_asset(

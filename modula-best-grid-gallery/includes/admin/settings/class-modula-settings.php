@@ -33,6 +33,8 @@ class Modula_Settings {
 	const FIELD_TYPE_TOGGLE            = 'toggle';
 	const FIELD_TYPE_OPTIONS_TOGGLE    = 'options_toggle';
 	const FIELD_TYPE_TEXT              = 'text';
+	const FIELD_TYPE_TEXTAREA          = 'textarea';
+	const FIELD_TYPE_CODE_EDITOR       = 'code_editor';
 	const FIELD_TYPE_SELECT            = 'select';
 	const FIELD_TYPE_COMBO             = 'combo';
 	const FIELD_TYPE_NUMBER            = 'number';
@@ -280,6 +282,61 @@ class Modula_Settings {
 					'label'        => $label,
 					'default'      => $default,
 					'sanitization' => array( 'text' ),
+				),
+				$args
+			)
+		);
+	}
+
+	/**
+	 * Build a textarea field
+	 *
+	 * @param string $name    Field name.
+	 * @param string $label   Field label.
+	 * @param mixed  $default Default value.
+	 * @param array  $args    Additional field arguments.
+	 *
+	 * @return array Field definition array
+	 *
+	 * @since 2.13.0
+	 */
+	private function build_textarea_field( $name, $label, $default, $args = array() ) {
+		return $this->build_field(
+			self::FIELD_TYPE_TEXTAREA,
+			$name,
+			array_merge(
+				array(
+					'label'        => $label,
+					'default'      => $default,
+					'sanitization' => array( 'html' ),
+				),
+				$args
+			)
+		);
+	}
+
+	/**
+	 * Build a code editor field (CodeMirror).
+	 *
+	 * @param string $name    Field name.
+	 * @param string $label   Field label.
+	 * @param mixed  $default Default value.
+	 * @param array  $args    Additional field arguments.
+	 *
+	 * @return array Field definition array
+	 *
+	 * @since 2.14.32
+	 */
+	private function build_code_editor_field( $name, $label, $default, $args = array() ) {
+		return $this->build_field(
+			self::FIELD_TYPE_CODE_EDITOR,
+			$name,
+			array_merge(
+				array(
+					'label'        => $label,
+					'default'      => $default,
+					'mode'         => 'htmlmixed',
+					'sanitization' => array( 'email_html' ),
 				),
 				$args
 			)

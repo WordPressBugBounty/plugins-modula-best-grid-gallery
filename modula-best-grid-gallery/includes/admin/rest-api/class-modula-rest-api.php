@@ -10,6 +10,7 @@ class Modula_Rest_Api {
 
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
+		add_filter( 'rest_request_after_callbacks', array( $this, 'prevent_response_caching' ), 10, 3 );
 
 		Modula_Extensions_Base::get_instance();
 
@@ -19,6 +20,27 @@ class Modula_Rest_Api {
 			require_once MODULA_PATH . 'includes/admin/rest-api/class-modula-migrator-rest.php';
 			new Modula_Migrator_Rest();
 		}
+	}
+
+	/**
+	 * Exclude this namespace's routes from page caching plugins (stale admin state otherwise).
+	 *
+	 * @param \WP_REST_Response|\WP_Error $response Result to send to the client.
+	 * @param array                       $handler  Route handler used for the request.
+	 * @param \WP_REST_Request            $request  Request used to generate the response.
+	 *
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function prevent_response_caching( $response, $handler, $request ) {
+		if ( 0 !== strpos( $request->get_route(), '/' . $this->namespace ) ) {
+			return $response;
+		}
+
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( 'DONOTCACHEPAGE', true );
+		}
+
+		return $response;
 	}
 
 	public function register_routes() {

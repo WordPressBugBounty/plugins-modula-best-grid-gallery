@@ -476,7 +476,7 @@ function modula_href_required() {
 
 function modula_mobile_share( $data ) {
 
-	$any_social = $data->enableTwitter || $data->enableFacebook || $data->enableWhatsapp || $data->enablePinterest || $data->enableLinkedin || $data->enableEmail;
+	$any_social = $data->enableTwitter || $data->enableFacebook || $data->enableWhatsapp || $data->enablePinterest || $data->enableLinkedin || $data->enableEmail || ! empty( $data->download['download_button'] );
 
 	if ( ! $any_social ) {
 		return;

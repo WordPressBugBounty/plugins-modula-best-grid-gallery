@@ -1,3 +1,9 @@
+= 2.14.33 - 29.07.2026 =
+Fixed: Extensions REST endpoint being cached by page caching plugins, causing stale extension states.
+
+= 2.14.32 - 28.07.2026 =
+Added: Code editor field for HTML based settings.
+
 = 2.14.31 - 20.07.2026 =
 Fixed: Security issue.
 

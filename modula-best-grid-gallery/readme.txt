@@ -4,7 +4,7 @@ Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPres
 Requires at least: 5.3
 Tested up to: 7.0
 Requires PHP: 5.6
-Stable tag: 2.14.33
+Stable tag: 2.14.34
 
 License: GNU General Public License v3.0 or later  
 
@@ -325,6 +325,11 @@ The simplest way to install is to click on 'Plugins' then 'Add' and type 'Modula
 4. Mobile Responsive Image Galleries - Galleries automatically adapt to smartphone and tablet screen sizes
 
 == Changelog ==
+= 2.14.34 - 30.07.2026 =
+Added: email_html sanitizer for full HTML email templates in settings.
+Changed: Image select field upload button label can be customized per field.
+Fixed: Strip leading empty paragraphs from email HTML on save to avoid unwanted top spacing.
+
 = 2.14.33 - 29.07.2026 =
 Fixed: Extensions REST endpoint being cached by page caching plugins, causing stale extension states.
 

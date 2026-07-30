@@ -136,7 +136,23 @@ class Modula_Settings_Sanitizer {
 			$sanitized = "<!DOCTYPE html>\n" . ltrim( $sanitized );
 		}
 
+		$sanitized = $this->strip_leading_empty_paragraphs( $sanitized );
+
 		return $sanitized;
+	}
+
+	/**
+	 * Remove empty paragraphs TinyMCE often inserts above the real content.
+	 *
+	 * @param string $html HTML content.
+	 * @return string
+	 */
+	private function strip_leading_empty_paragraphs( $html ) {
+		$pattern = '/(<body[^>]*>)(\s*<p>\s*(?:&nbsp;|\xc2\xa0|\s|<br\s*\/?>)*\s*<\/p>\s*)+/is';
+
+		$stripped = preg_replace( $pattern, '$1', $html, 1 );
+
+		return is_string( $stripped ) ? $stripped : $html;
 	}
 
 	/**

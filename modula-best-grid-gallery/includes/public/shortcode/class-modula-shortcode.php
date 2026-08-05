@@ -183,7 +183,9 @@ class Modula_Shortcode {
 		$settings = apply_filters( 'modula_backwards_compatibility_front', get_post_meta( $atts['id'], 'modula-settings', true ), $atts );
 
 		unset( $raw_atts['id'], $raw_atts['align'] );
-
+		if ( empty( $settings ) || ! is_array( $settings ) ) {
+			$settings = array();
+		}
 		// Override existing settings with shortcode atts (only if the key already exists).
 		foreach ( $raw_atts as $attr_key => $value ) {
 			$camel_key = Modula_Helper::snake_to_camel( $attr_key );

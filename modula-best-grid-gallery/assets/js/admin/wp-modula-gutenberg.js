@@ -477,6 +477,8 @@ const ModulaGalleryImage = props => {
         "data-src": img.src,
         "data-valign": "middle",
         "data-halign": "center",
+        width: img.img_width,
+        height: img.img_height,
         src: img.src
       });
     } else if (img.video_template == '1' && 'undefined' != typeof img.video_thumbnail && '' != img.video_thumbnail) {
@@ -764,7 +766,8 @@ const ModulaGallery = props => {
     settings,
     checkHoverEffect,
     modulaRun,
-    modulaCarouselRun
+    modulaCarouselRun,
+    galleryElRef
   } = props;
   const galleryRef = useRef(null);
   ModulaGallery_useEffect(() => {
@@ -778,7 +781,7 @@ const ModulaGallery = props => {
     if ('slider' !== settings.type) {
       modulaRun(jsConfig);
     } else {
-      modulaCarouselRun(id);
+      modulaCarouselRun();
     }
   }, []);
   let galleryClassNames = 'modula modula-gallery ';
@@ -803,6 +806,7 @@ const ModulaGallery = props => {
     settings: settings
   }), /*#__PURE__*/React.createElement("div", {
     id: `jtg-${id}`,
+    ref: galleryElRef,
     className: `${galleryClassNames} ${props.attributes.modulaDivClassName != undefined ? props.attributes.modulaDivClassName : ''}`,
     "data-config": JSON.stringify(jsConfig)
   }, settings.type == 'grid' && 'automatic' != settings.grid_type && /*#__PURE__*/React.createElement("div", {
@@ -1956,6 +1960,7 @@ const ModulaEdit = props => {
   const [alignmentCheck, setAlignment] = useState(props.attributes.align);
   const [idCheck, setIdCheck] = useState(id);
   const modulaInstanceRef = edit_useRef(null);
+  const galleryElRef = edit_useRef(null);
   edit_useEffect(() => {
     if (id !== 0) {
       onIdChange(id);
@@ -2032,32 +2037,32 @@ const ModulaEdit = props => {
     });
   };
   const modulaRun = checker => {
-    if (checker != undefined) {
+    if (checker != undefined && galleryElRef.current) {
       setAttributes({
         status: 'ready'
       });
-      const modulaGalleries = jQuery('.modula.modula-gallery');
-      jQuery.each(modulaGalleries, function () {
-        const modulaID = jQuery(this).attr('id'),
-          modulaSettings = jQuery(this).data('config');
-        modulaSettings.lazyLoad = 0;
-        jQuery(this).modulaGallery(modulaSettings);
-      });
+      const $gallery = jQuery(galleryElRef.current);
+      const modulaSettings = $gallery.data('config');
+      modulaSettings.lazyLoad = 0;
+      $gallery.modulaGallery(modulaSettings);
     }
   };
-  const modulaCarouselRun = id => {
-    id = `jtg-${id}`;
+  const modulaCarouselRun = () => {
     setAttributes({
       status: 'ready'
     });
-    const modulaSliders = jQuery('.modula-slider');
-    if (modulaSliders.length > 0 && 'function' === typeof ModulaCarousel) {
-      const config = jQuery(`#${id}`).data('config'),
-        main = jQuery(`#${id}`).find('.modula-items');
+    if (!galleryElRef.current) {
+      return;
+    }
+    const $gallery = jQuery(galleryElRef.current);
+    if (!$gallery.hasClass('modula-slider')) {
+      return;
+    }
+    const config = $gallery.data('config'),
+      main = $gallery.find('.modula-items');
+    if ('function' === typeof ModulaCarousel) {
       new ModulaCarousel(main[0], config.slider_settings);
-    } else if (modulaSliders.length > 0 && 'undefined' !== typeof jQuery.fn.slick) {
-      const config = jQuery(`#${id}`).data('config'),
-        main = jQuery(`#${id}`).find('.modula-items');
+    } else if ('undefined' !== typeof jQuery.fn.slick) {
       main.slick(config.slider_settings);
     }
   };
@@ -2179,7 +2184,8 @@ const ModulaEdit = props => {
       modulaRun: modulaRun,
       modulaCarouselRun: modulaCarouselRun,
       checkHoverEffect: checkHoverEffect,
-      galleryId: galleryId
+      galleryId: galleryId,
+      galleryElRef: galleryElRef
     })));
   }
   return null;

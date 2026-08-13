@@ -24,7 +24,7 @@ class Modula_Gutenberg {
 
 		add_action( 'init', array( $this, 'register_block_type' ) );
 		add_action( 'init', array( $this, 'generate_js_vars' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_block_assets' ), 1 );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_block_assets' ) );
 		add_action( 'wp_ajax_modula_get_gallery', array( $this, 'get_gallery' ) );
 		add_action( 'wp_ajax_modula_get_jsconfig', array( $this, 'get_jsconfig' ) );
 		add_action( 'wp_ajax_modula_check_hover_effect', array( $this, 'check_hover_effect' ) );
@@ -43,13 +43,14 @@ class Modula_Gutenberg {
 		wp_register_script( 'modula-gutenberg', MODULA_URL . 'assets/js/admin/wp-modula-gutenberg.js', array( 'wp-blocks', 'wp-element', 'wp-data', 'jquery-ui-autocomplete', 'wp-api-fetch' ), MODULA_LITE_VERSION, true );
 
 		wp_register_style( 'modula-gutenberg', MODULA_URL . 'assets/css/admin/modula-gutenberg.css', array(), true );
+		wp_register_style( 'modula-front-editor', MODULA_URL . 'assets/css/front.css', array(), MODULA_LITE_VERSION );
 
 		register_block_type(
 			'modula/gallery',
 			array(
 				'render_callback' => array( $this, 'render_modula_gallery' ),
 				'editor_script'   => 'modula-gutenberg',
-				'editor_style'    => 'modula-gutenberg',
+				'editor_style'    => array( 'modula-gutenberg', 'modula-front-editor' ),
 			)
 		);
 	}
@@ -60,6 +61,10 @@ class Modula_Gutenberg {
 	 * @since 2.5.0
 	 */
 	public function enqueue_block_assets() {
+		if ( ! is_admin() ) {
+			return;
+		}
+
 		global $pagenow;
 		$screen = get_current_screen();
 
@@ -257,6 +262,8 @@ class Modula_Gutenberg {
 				}
 
 				$data['modulaImages'][ $key ]['src']         = $image_obj[0];
+				$data['modulaImages'][ $key ]['img_width']   = $image_obj[1];
+				$data['modulaImages'][ $key ]['img_height']  = $image_obj[2];
 				$data['modulaImages'][ $key ]['width']       = isset( $image['width'] ) ? $image['width'] : $image_obj[1];
 				$data['modulaImages'][ $key ]['height']      = isset( $image['height'] ) ? $image['height'] : $image_obj[2];
 				$data['modulaImages'][ $key ]['data-width']  = $data['modulaImages'][ $key ]['width'];

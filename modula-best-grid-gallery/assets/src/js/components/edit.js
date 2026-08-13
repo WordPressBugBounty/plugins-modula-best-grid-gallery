@@ -34,6 +34,7 @@ export const ModulaEdit = ( props ) => {
 	const [ idCheck, setIdCheck ] = useState( id );
 
 	const modulaInstanceRef = useRef( null );
+	const galleryElRef = useRef( null );
 
 	useEffect( () => {
 		if ( id !== 0 ) {
@@ -126,33 +127,31 @@ export const ModulaEdit = ( props ) => {
 	};
 
 	const modulaRun = ( checker ) => {
-		if ( checker != undefined ) {
+		if ( checker != undefined && galleryElRef.current ) {
 			setAttributes( { status: 'ready' } );
-			const modulaGalleries = jQuery( '.modula.modula-gallery' );
+			const $gallery = jQuery( galleryElRef.current );
+			const modulaSettings = $gallery.data( 'config' );
+			modulaSettings.lazyLoad = 0;
 
-			jQuery.each( modulaGalleries, function() {
-				const modulaID = jQuery( this ).attr( 'id' ),
-					modulaSettings = jQuery( this ).data( 'config' );
-				modulaSettings.lazyLoad = 0;
-
-				jQuery( this ).modulaGallery( modulaSettings );
-			} );
+			$gallery.modulaGallery( modulaSettings );
 		}
 	};
 
-	const modulaCarouselRun = ( id ) => {
-		id = `jtg-${ id }`;
+	const modulaCarouselRun = () => {
 		setAttributes( { status: 'ready' } );
-		const modulaSliders = jQuery( '.modula-slider' );
-		if ( modulaSliders.length > 0 && 'function' === typeof ModulaCarousel ) {
-			const config = jQuery( `#${ id }` ).data( 'config' ),
-				main = jQuery( `#${ id }` ).find( '.modula-items' );
+		if ( ! galleryElRef.current ) {
+			return;
+		}
+		const $gallery = jQuery( galleryElRef.current );
+		if ( ! $gallery.hasClass( 'modula-slider' ) ) {
+			return;
+		}
+		const config = $gallery.data( 'config' ),
+			main = $gallery.find( '.modula-items' );
 
+		if ( 'function' === typeof ModulaCarousel ) {
 			new ModulaCarousel( main[ 0 ], config.slider_settings );
-		} else if ( modulaSliders.length > 0 && 'undefined' !== typeof jQuery.fn.slick ) {
-			const config = jQuery( `#${ id }` ).data( 'config' ),
-				main = jQuery( `#${ id }` ).find( '.modula-items' );
-
+		} else if ( 'undefined' !== typeof jQuery.fn.slick ) {
 			main.slick( config.slider_settings );
 		}
 	};
@@ -349,6 +348,7 @@ export const ModulaEdit = ( props ) => {
 					modulaCarouselRun={ modulaCarouselRun }
 					checkHoverEffect={ checkHoverEffect }
 					galleryId={ galleryId }
+					galleryElRef={ galleryElRef }
 				/>
 			</Fragment>
 

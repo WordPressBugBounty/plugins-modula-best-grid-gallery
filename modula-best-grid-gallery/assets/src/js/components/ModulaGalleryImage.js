@@ -20,6 +20,8 @@ const ModulaGalleryImage = (props) => {
 					data-src={img.src}
 					data-valign="middle"
 					data-halign="center"
+					width={img.img_width}
+					height={img.img_height}
 					src={img.src}
 				/>
 			);

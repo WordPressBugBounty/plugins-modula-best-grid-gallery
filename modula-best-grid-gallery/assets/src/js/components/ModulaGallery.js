@@ -6,7 +6,7 @@ import ModulaItemsExtraComponent from './ModulaItemsExtraComponent';
 
 export const ModulaGallery = (props) => {
 	const { images, jsConfig, id } = props.attributes;
-	const { settings, checkHoverEffect, modulaRun, modulaCarouselRun } = props;
+	const { settings, checkHoverEffect, modulaRun, modulaCarouselRun, galleryElRef } = props;
 	const galleryRef = useRef(null);
 
 	useEffect(() => {
@@ -20,7 +20,7 @@ export const ModulaGallery = (props) => {
 		if ('slider' !== settings.type) {
 			modulaRun(jsConfig);
 		} else {
-			modulaCarouselRun(id);
+			modulaCarouselRun();
 		}
 	}, []);
 
@@ -47,6 +47,7 @@ export const ModulaGallery = (props) => {
 			<ModulaStyle id={id} settings={settings} />
 			<div
 				id={`jtg-${id}`}
+				ref={galleryElRef}
 				className={`${galleryClassNames} ${
 					props.attributes.modulaDivClassName != undefined
 						? props.attributes.modulaDivClassName

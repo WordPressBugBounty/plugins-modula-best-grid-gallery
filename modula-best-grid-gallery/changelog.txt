@@ -1,3 +1,6 @@
+= 2.14.36 - 13.08.2026 =
+Fixed: Compatibility with WordPress 7.1
+
 = 2.14.35 - 05.08.2026 =
 Fixed: Undefined index notice when gallery settings are empty.
 

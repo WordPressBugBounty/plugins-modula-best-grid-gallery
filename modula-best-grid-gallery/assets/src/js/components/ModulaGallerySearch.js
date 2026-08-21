@@ -1,7 +1,8 @@
-const { useEffect } = wp.element;
+const { useEffect, useRef } = wp.element;
 
 export const ModulaGallerySearch = (props) => {
 	const { onIdChange, id, options, galleries } = props;
+	const inputRef = useRef(null);
 
 	useEffect(() => {
 		let galleriesArray = [];
@@ -13,7 +14,7 @@ export const ModulaGallerySearch = (props) => {
 				});
 			});
 		}
-		jQuery('.modula-gallery-input').selectize({
+		jQuery(inputRef.current).selectize({
 			valueField: 'value',
 			labelField: 'label',
 			searchField: ['label', 'value'],
@@ -63,6 +64,7 @@ export const ModulaGallerySearch = (props) => {
 
 	return (
 		<input
+			ref={inputRef}
 			className="modula-gallery-input"
 			defaultValue={'0' == id ? '' : id}
 		/>

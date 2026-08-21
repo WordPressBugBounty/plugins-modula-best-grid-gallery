@@ -13,7 +13,7 @@ const { __ } = wp.i18n;
 const { Fragment, useEffect, useState, useRef } = wp.element;
 const { withSelect } = wp.data;
 const { Button, Spinner, ToolbarGroup, ToolbarItem } = wp.components;
-const { BlockControls } = wp.blockEditor;
+const { BlockControls, useBlockProps } = wp.blockEditor;
 const { compose } = wp.compose;
 
 export const ModulaEdit = ( props ) => {
@@ -35,6 +35,7 @@ export const ModulaEdit = ( props ) => {
 
 	const modulaInstanceRef = useRef( null );
 	const galleryElRef = useRef( null );
+	const blockProps = useBlockProps();
 
 	useEffect( () => {
 		if ( id !== 0 ) {
@@ -221,7 +222,7 @@ export const ModulaEdit = ( props ) => {
 
 	if ( id == 0 && 'none' === attributes.galleryType ) {
 		return (
-			<Fragment>
+			<div { ...blockProps }>
 				<div className="modula-block-preview">
 					<div className="modula-block-preview__content">
 						<div className="modula-block-preview__logo" />
@@ -271,16 +272,18 @@ export const ModulaEdit = ( props ) => {
 						</div>
 					</div>
 				</div>
-			</Fragment>
+			</div>
 		);
 	}
 
 	if ( status === 'loading' ) {
 		return (
-			<div className="modula-block-preview">
-				<div className="modula-block-preview__content">
-					<div className="modula-block-preview__logo" />
-					<Spinner />
+			<div { ...blockProps }>
+				<div className="modula-block-preview">
+					<div className="modula-block-preview__content">
+						<div className="modula-block-preview__logo" />
+						<Spinner />
+					</div>
 				</div>
 			</div>
 		);
@@ -295,6 +298,7 @@ export const ModulaEdit = ( props ) => {
 					{ ...props }
 				/>
 
+				<div { ...blockProps }>
 				<div className="modula-block-preview">
 					<div className="modula-block-preview__content">
 						<div className="modula-block-preview__logo" />
@@ -327,6 +331,7 @@ export const ModulaEdit = ( props ) => {
 						) }
 					</div>
 				</div>
+			</div>
 			</Fragment>
 		);
 	}
@@ -340,16 +345,18 @@ export const ModulaEdit = ( props ) => {
 					} }
 					{ ...props }
 				/>
-				<ModulaGallery
-					{ ...props }
-					settings={ settings }
-					jsConfig={ jsConfig }
-					modulaRun={ modulaRun }
-					modulaCarouselRun={ modulaCarouselRun }
-					checkHoverEffect={ checkHoverEffect }
-					galleryId={ galleryId }
-					galleryElRef={ galleryElRef }
-				/>
+				<div { ...blockProps }>
+					<ModulaGallery
+						{ ...props }
+						settings={ settings }
+						jsConfig={ jsConfig }
+						modulaRun={ modulaRun }
+						modulaCarouselRun={ modulaCarouselRun }
+						checkHoverEffect={ checkHoverEffect }
+						galleryId={ galleryId }
+						galleryElRef={ galleryElRef }
+					/>
+				</div>
 			</Fragment>
 
 		);

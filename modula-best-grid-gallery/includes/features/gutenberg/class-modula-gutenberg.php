@@ -48,6 +48,7 @@ class Modula_Gutenberg {
 		register_block_type(
 			'modula/gallery',
 			array(
+				'api_version'     => 3,
 				'render_callback' => array( $this, 'render_modula_gallery' ),
 				'editor_script'   => 'modula-gutenberg',
 				'editor_style'    => array( 'modula-gutenberg', 'modula-front-editor' ),

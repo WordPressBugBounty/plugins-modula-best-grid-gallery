@@ -123,7 +123,8 @@ var react = __webpack_require__(540);
 ;// ./assets/src/js/components/ModulaGallerySearch.js
 
 const {
-  useEffect
+  useEffect,
+  useRef
 } = wp.element;
 const ModulaGallerySearch = props => {
   const {
@@ -132,6 +133,7 @@ const ModulaGallerySearch = props => {
     options,
     galleries
   } = props;
+  const inputRef = useRef(null);
   useEffect(() => {
     let galleriesArray = [];
     if (galleries != undefined && 0 == galleriesArray.length) {
@@ -142,7 +144,7 @@ const ModulaGallerySearch = props => {
         });
       });
     }
-    jQuery('.modula-gallery-input').selectize({
+    jQuery(inputRef.current).selectize({
       valueField: 'value',
       labelField: 'label',
       searchField: ['label', 'value'],
@@ -181,6 +183,7 @@ const ModulaGallerySearch = props => {
     });
   }, []);
   return /*#__PURE__*/React.createElement("input", {
+    ref: inputRef,
     className: "modula-gallery-input",
     defaultValue: '0' == id ? '' : id
   });
@@ -751,7 +754,7 @@ const ModulaItemsExtraComponent = props => {
 const {
   Fragment: ModulaGallery_Fragment,
   useEffect: ModulaGallery_useEffect,
-  useRef
+  useRef: ModulaGallery_useRef
 } = wp.element;
 
 
@@ -769,7 +772,7 @@ const ModulaGallery = props => {
     modulaCarouselRun,
     galleryElRef
   } = props;
-  const galleryRef = useRef(null);
+  const galleryRef = ModulaGallery_useRef(null);
   ModulaGallery_useEffect(() => {
     if (galleryRef.current) {
       galleryRef.current = true;
@@ -1936,7 +1939,8 @@ const {
   ToolbarItem
 } = wp.components;
 const {
-  BlockControls
+  BlockControls,
+  useBlockProps
 } = wp.blockEditor;
 const {
   compose
@@ -1961,6 +1965,7 @@ const ModulaEdit = props => {
   const [idCheck, setIdCheck] = useState(id);
   const modulaInstanceRef = edit_useRef(null);
   const galleryElRef = edit_useRef(null);
+  const blockProps = useBlockProps();
   edit_useEffect(() => {
     if (id !== 0) {
       onIdChange(id);
@@ -2112,7 +2117,7 @@ const ModulaEdit = props => {
     target: "_blank"
   }))));
   if (id == 0 && 'none' === attributes.galleryType) {
-    return /*#__PURE__*/React.createElement(edit_Fragment, null, /*#__PURE__*/React.createElement("div", {
+    return /*#__PURE__*/React.createElement("div", blockProps, /*#__PURE__*/React.createElement("div", {
       className: "modula-block-preview"
     }, /*#__PURE__*/React.createElement("div", {
       className: "modula-block-preview__content"
@@ -2138,13 +2143,13 @@ const ModulaEdit = props => {
     }, edit_('Upgrade to PRO to create galleries using a preset ( fastest way )', 'modula-best-grid-gallery'))))));
   }
   if (status === 'loading') {
-    return /*#__PURE__*/React.createElement("div", {
+    return /*#__PURE__*/React.createElement("div", blockProps, /*#__PURE__*/React.createElement("div", {
       className: "modula-block-preview"
     }, /*#__PURE__*/React.createElement("div", {
       className: "modula-block-preview__content"
     }, /*#__PURE__*/React.createElement("div", {
       className: "modula-block-preview__logo"
-    }), /*#__PURE__*/React.createElement(Spinner, null)));
+    }), /*#__PURE__*/React.createElement(Spinner, null))));
   }
   if (id == 0 || images.length === 0) {
     return /*#__PURE__*/React.createElement(edit_Fragment, {
@@ -2152,7 +2157,7 @@ const ModulaEdit = props => {
     }, /*#__PURE__*/React.createElement(inspector, _extends({
       onIdChange: id => onIdChange(id),
       selectOptions: selectOptions
-    }, props)), /*#__PURE__*/React.createElement("div", {
+    }, props)), /*#__PURE__*/React.createElement("div", blockProps, /*#__PURE__*/React.createElement("div", {
       className: "modula-block-preview"
     }, /*#__PURE__*/React.createElement("div", {
       className: "modula-block-preview__content"
@@ -2169,7 +2174,7 @@ const ModulaEdit = props => {
       target: "_blank",
       href: modulaVars.adminURL + 'post.php?post=' + id + '&action=edit',
       isPrimary: true
-    }, edit_('Edit Gallery'))))));
+    }, edit_('Edit Gallery')))))));
   }
   if (settings) {
     return /*#__PURE__*/React.createElement(edit_Fragment, {
@@ -2178,7 +2183,7 @@ const ModulaEdit = props => {
       onIdChange: id => {
         onIdChange(id);
       }
-    }, props)), /*#__PURE__*/React.createElement(components_ModulaGallery, _extends({}, props, {
+    }, props)), /*#__PURE__*/React.createElement("div", blockProps, /*#__PURE__*/React.createElement(components_ModulaGallery, _extends({}, props, {
       settings: settings,
       jsConfig: jsConfig,
       modulaRun: modulaRun,
@@ -2186,7 +2191,7 @@ const ModulaEdit = props => {
       checkHoverEffect: checkHoverEffect,
       galleryId: galleryId,
       galleryElRef: galleryElRef
-    })));
+    }))));
   }
   return null;
 };

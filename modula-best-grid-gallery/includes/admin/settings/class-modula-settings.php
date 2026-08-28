@@ -96,6 +96,20 @@ class Modula_Settings {
 	 */
 	public function __construct() {
 		add_action( 'modula_settings_api_update_modula_roles', array( $this, 'set_capabilities' ) );
+
+		add_action( 'modula_settings_api_update_' . self::OPTION_STANDALONE, array( $this, 'schedule_rewrite_flush' ) );
+		add_action( 'init', array( $this, 'maybe_flush_rewrite_rules' ), 999 );
+	}
+
+	public function schedule_rewrite_flush() {
+		update_option( 'modula_flush_rewrite_rules', 1 );
+	}
+
+	public function maybe_flush_rewrite_rules() {
+		if ( get_option( 'modula_flush_rewrite_rules' ) ) {
+			flush_rewrite_rules();
+			delete_option( 'modula_flush_rewrite_rules' );
+		}
 	}
 
 	// =============================================================================

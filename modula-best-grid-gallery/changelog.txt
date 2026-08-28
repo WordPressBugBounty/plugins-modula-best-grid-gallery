@@ -1,3 +1,7 @@
+= 2.14.38 - 28.08.2026 =
+Fixed: Gallery migration issue.
+Fixed: Permalinks not refreshing after changing gallery/album URL settings.
+
 = 2.14.37 - 21.08.2026 =
 Fixed: Minor block editor compatibility improvements.
 

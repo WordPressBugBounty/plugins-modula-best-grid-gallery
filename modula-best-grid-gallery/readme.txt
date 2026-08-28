@@ -4,7 +4,7 @@ Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPres
 Requires at least: 5.3
 Tested up to: 7.1
 Requires PHP: 5.6
-Stable tag: 2.14.37
+Stable tag: 2.14.38
 
 License: GNU General Public License v3.0 or later  
 
@@ -325,6 +325,11 @@ The simplest way to install is to click on 'Plugins' then 'Add' and type 'Modula
 4. Mobile Responsive Image Galleries - Galleries automatically adapt to smartphone and tablet screen sizes
 
 == Changelog ==
+
+= 2.14.38 - 28.08.2026 =
+Fixed: Gallery migration issue.
+Fixed: Permalinks not refreshing after changing gallery/album URL settings.
+
 = 2.14.37 - 21.08.2026 =
 Fixed: Minor block editor compatibility improvements.
 

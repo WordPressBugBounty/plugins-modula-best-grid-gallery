@@ -1,8 +1,6 @@
 <div class="<?php echo esc_attr( implode( ' ', $data->item_classes ) ); ?>"<?php echo Modula_Helper::generate_attributes( $data->item_attributes ); ?> >
 	<div class="modula-item-overlay"></div>
-
 	<div class="modula-item-content">
-
 		<?php
 		do_action( 'modula_item_before_link', $data );
 		if ( 'no-link' != $data->lightbox ) : ?><a<?php echo Modula_Helper::generate_attributes( $data->link_attributes ); ?> class="<?php echo esc_attr( implode( ' ', $data->link_classes ) ); ?>"></a><?php endif;
@@ -10,7 +8,6 @@
 		do_action( 'modula_item_template_image', $data );
 		do_action( 'modula_item_after_image', $data );
 		?>
-
 		<div class="figc<?php echo '' == $data->title ? ' no-title' : ''; ?><?php echo '' == $data->description ? ' no-description' : ''; ?>">
 			<div class="figc-inner">
 				<?php if ( ! $data->hide_title ) : ?>
@@ -48,7 +45,5 @@
 				<?php endif ?>
 			</div>
 		</div>
-
 	</div>
-
 </div>

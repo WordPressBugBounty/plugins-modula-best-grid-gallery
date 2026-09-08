@@ -1003,9 +1003,8 @@ html
 html body .modula-fancybox-container button.f-button {
 	padding: 0px;
 }
-
+html body .modula.modula-gallery .modula-simple-link:focus-visible,
 html body .modula.modula-gallery .modula-item-link:focus-visible {
 	outline: 2px solid #005fcc;
 	outline-offset: -2px;
 }
-

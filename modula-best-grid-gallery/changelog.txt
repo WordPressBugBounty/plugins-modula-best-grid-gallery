@@ -1,3 +1,10 @@
+= 2.14.39 - 08.09.2026 =
+Fixed: Gutenberg gallery block could display as raw, unrendered shortcode text on the frontend with some themes.
+Fixed: Some themes injected stray <p> tags into the gallery markup, breaking the layout.
+Fixed: Large gallery imports could time out on bigger sites.
+Added: Search box and "already imported" status in the gallery import list.
+Fixed: Missing keyboard focus outline on non-lightbox gallery links.
+
 = 2.14.38 - 28.08.2026 =
 Fixed: Gallery migration issue.
 Fixed: Permalinks not refreshing after changing gallery/album URL settings.

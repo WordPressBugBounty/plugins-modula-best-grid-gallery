@@ -141,7 +141,7 @@ class Modula_Gutenberg {
 
 			return $html;
 		} else {
-			return '[modula id=' . absint( $atts['id'] ) . ' align=' . esc_attr( $atts['align'] ) . ']';
+			return do_shortcode( '[modula id=' . absint( $atts['id'] ) . ' align=' . esc_attr( $atts['align'] ) . ']' );
 		}
 	}
 

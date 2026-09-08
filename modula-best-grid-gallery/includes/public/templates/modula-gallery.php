@@ -1,7 +1,5 @@
 <div <?php echo Modula_Helper::generate_attributes( $data->gallery_container ); ?>>
-
 	<?php do_action( 'modula_shortcode_before_items', $data->settings ); ?>
-
 	<div <?php echo Modula_Helper::generate_attributes( $data->items_container ); ?>>
 		<?php
 
@@ -139,10 +137,7 @@
 		}
 
 		?>
-		
 	</div>
-
-	
 	<?php
 
 	/**
@@ -155,5 +150,4 @@
 	 */
 	do_action( 'modula_shortcode_after_items', $data->settings, $item_data, $data->images );
 	?>
-
 </div>

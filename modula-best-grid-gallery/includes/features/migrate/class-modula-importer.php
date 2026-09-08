@@ -250,6 +250,7 @@ class Modula_Importer {
 		foreach ( $galleries['valid_galleries'] as $key => $gallery ) {
 			$imported         = false;
 			$importing_status = '';
+			$value            = false;
 			switch ( $source ) {
 				case 'wp_core':
 					$value     = wp_json_encode(
@@ -276,8 +277,9 @@ class Modula_Importer {
 			$id           = ( 'wp_core' === $source ) ? sanitize_text_field( $g_gallery['id'] ) : absint( $g_gallery['id'] );
 
 			$data[] = array(
-				'label' => wp_strip_all_tags( $g_gallery['title'] ),
-				'value' => $val,
+				'label'    => wp_strip_all_tags( $g_gallery['title'] ),
+				'value'    => $val,
+				'imported' => ! empty( $g_gallery['imported'] ),
 			);
 		}
 

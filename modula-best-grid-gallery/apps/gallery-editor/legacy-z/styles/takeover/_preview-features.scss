@@ -1,0 +1,12 @@
+// Reference list for lazy-loaded preview feature partials (not @use'd from takeover.scss).
+// Feature SCSS is imported from the JS/JSX that owns the UI (or from Pro extension bundles).
+@use 'preview/aux-form-field';
+@use 'preview/image-metadata-modal';
+@use 'preview/focus-point-modal';
+@use 'preview/content-block-edit';
+@use 'preview/bulk-edit';
+@use 'preview/hover-effect-builder';
+@use 'preview/lightbox-preview';
+@use 'preview/custom-css-ai-modal';
+@use 'preview/import-dialog-shell';
+@use 'preview/gallery-modal';

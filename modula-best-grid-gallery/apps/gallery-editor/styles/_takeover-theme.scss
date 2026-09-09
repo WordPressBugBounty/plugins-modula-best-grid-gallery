@@ -1,0 +1,223 @@
+/**
+ * Takeover / FSE-style workspace theme tokens.
+ * Override before importing app styles, e.g.:
+ *   @use 'takeover-theme' with ($mod-takeover-canvas-bg: #0a0a0a);
+ *
+ * Style-kit values: docs/contributors/23-style-guide.md
+ */
+@use 'radii' as *;
+@use 'spacing' as *;
+
+// ---------------------------------------------------------------------------
+// Layout (style kit)
+// ---------------------------------------------------------------------------
+$mod-se-gut: $mod-space-20 !default;
+$mod-se-rail-w: 232px !default;
+$mod-se-panel-w: 404px !default;
+$mod-se-ease-space: cubic-bezier(0.32, 0.72, 0, 1) !default;
+
+// ---------------------------------------------------------------------------
+// Canvas (gutter behind sidebar + preview cards) — style kit --stage
+// ---------------------------------------------------------------------------
+$mod-takeover-canvas-bg: #e9e9e5 !default;
+// Horizontal inset after the sidebar and gap between aux + preview — use the same value so spacing is even.
+$mod-takeover-canvas-gap: $mod-space-12 !default;
+
+// ---------------------------------------------------------------------------
+// Dark UI: sidebar body, menus, preview chrome band — style kit --chrome / --line
+// ---------------------------------------------------------------------------
+$mod-takeover-sidebar-bg: #17181b !default;
+$mod-takeover-chrome-bg: #17181b !default;
+$mod-takeover-chrome-border: #2c2e34 !default;
+$mod-takeover-menu-surface-bg: #1d1e22 !default;
+
+// Primary category list + Layout hub drill rows (same vertical rhythm).
+$mod-takeover-sidebar-list-row-pad-y: $mod-space-10 !default;
+$mod-takeover-sidebar-list-row-min-height: $mod-space-48 !default;
+
+// Match top-level nav: `.nav-btn` uses this horizontal padding; hub list uses the same.
+$mod-takeover-sidebar-list-pad-x: $mod-space-14 !default;
+
+// Settings body horizontal inset (keep in sync with hub submenu bleed margins).
+$mod-takeover-sidebar-settings-inner-pad-x: $mod-takeover-sidebar-list-pad-x !default;
+
+// ---------------------------------------------------------------------------
+// Dark chrome — text on near-black surfaces
+// ---------------------------------------------------------------------------
+$mod-takeover-ink-on-dark: #fff !default;
+$mod-takeover-ink-on-dark-strong: rgb(255 255 255 / 92%) !default;
+$mod-takeover-ink-on-dark-primary: rgb(255 255 255 / 88%) !default;
+$mod-takeover-ink-on-dark-secondary: rgb(255 255 255 / 65%) !default;
+$mod-takeover-ink-on-dark-muted: rgb(255 255 255 / 55%) !default;
+$mod-takeover-ink-on-dark-label: rgb(255 255 255 / 45%) !default;
+$mod-takeover-ink-on-dark-disabled: rgb(255 255 255 / 42%) !default;
+$mod-takeover-ink-on-dark-faint: rgb(255 255 255 / 35%) !default;
+
+// ---------------------------------------------------------------------------
+// Dark chrome — fills, borders, hovers
+// ---------------------------------------------------------------------------
+$mod-takeover-dark-hover-overlay: rgb(255 255 255 / 8%) !default;
+$mod-takeover-dark-hover-overlay-soft: rgb(255 255 255 / 6%) !default;
+$mod-takeover-dark-press-overlay: rgb(255 255 255 / 12%) !default;
+$mod-takeover-dark-backdrop: rgb(0 0 0 / 20%) !default;
+$mod-takeover-dark-backdrop-strong: rgb(0 0 0 / 35%) !default;
+$mod-takeover-dark-border-subtle: rgb(255 255 255 / 8%) !default;
+$mod-takeover-dark-border-medium: rgb(255 255 255 / 12%) !default;
+$mod-takeover-dark-border-strong: rgb(255 255 255 / 22%) !default;
+$mod-takeover-dark-divider: rgb(255 255 255 / 20%) !default;
+$mod-takeover-dark-divider-strong: rgb(255 255 255 / 28%) !default;
+$mod-takeover-dark-focus-inset: rgb(255 255 255 / 85%) !default;
+
+// Pressed / overlay on accent buttons (Add New primary split)
+$mod-takeover-accent-split-hover: rgb(0 0 0 / 12%) !default;
+
+// Split controls (Add New, Sorting) on dark chrome
+$mod-takeover-split-inner-shadow: 0 1px 0 rgb(0 0 0 / 12%) !default;
+
+// ---------------------------------------------------------------------------
+// Light surfaces — preview card, aux panel, reorder panel (style kit)
+// ---------------------------------------------------------------------------
+$mod-takeover-surface-raised: #fff !default;
+$mod-takeover-surface-muted: #f0f0ed !default;
+$mod-takeover-surface-subtle: #f6f6f4 !default;
+
+// ---------------------------------------------------------------------------
+// Light theme — borders & typography (style kit ink / line)
+// ---------------------------------------------------------------------------
+$mod-takeover-border-light: #e3e3de !default;
+$mod-takeover-border-light-muted: #edede8 !default;
+$mod-takeover-border-dashed: #c8c8cd !default;
+$mod-takeover-text-strong: #16161a !default;
+$mod-takeover-text-base: #56565e !default;
+$mod-takeover-text-muted: #56565e !default;
+$mod-takeover-text-subtle: #8b8b93 !default;
+$mod-takeover-thumb-bg: #ddd !default;
+$mod-takeover-placeholder-stripe-a: #e8e8e8 !default;
+$mod-takeover-placeholder-stripe-b: #f0f0f0 !default;
+$mod-takeover-light-hover-overlay: rgb(0 0 0 / 6%) !default;
+// Sidebar “Editing / Layout” context band — lighter than hover overlay on white chrome.
+$mod-takeover-light-sidebar-context-bg: $mod-takeover-surface-subtle !default;
+$mod-takeover-dark-sidebar-context-bg: rgb(255 255 255 / 4%) !default;
+
+// ---------------------------------------------------------------------------
+// Preview card toolbar + dropdowns (flush white with aux / gallery — chips use muted for contrast)
+// ---------------------------------------------------------------------------
+$mod-takeover-preview-toolbar-bg: $mod-takeover-surface-raised !default;
+$mod-takeover-preview-toolbar-border: $mod-takeover-border-light !default;
+$mod-takeover-preview-toolbar-label-ink: $mod-takeover-text-subtle !default;
+$mod-takeover-preview-toolbar-insert-ink: $mod-takeover-text-muted !default;
+$mod-takeover-preview-segment-bg: $mod-takeover-surface-muted !default;
+$mod-takeover-preview-segment-border: $mod-takeover-border-light !default;
+$mod-takeover-preview-segment-btn-ink: $mod-takeover-text-base !default;
+$mod-takeover-preview-segment-btn-ink-active: $mod-takeover-text-strong !default;
+$mod-takeover-preview-segment-hover-bg: $mod-takeover-light-hover-overlay !default;
+$mod-takeover-preview-segment-active-bg: rgb(0 0 0 / 8%) !default;
+$mod-takeover-preview-flyout-bg: $mod-takeover-surface-raised !default;
+$mod-takeover-preview-flyout-border: $mod-takeover-border-light !default;
+$mod-takeover-preview-flyout-shadow: 0 4px 14px rgb(0 0 0 / 11%),
+	0 0 0 1px rgb(0 0 0 / 5%) !default;
+$mod-takeover-preview-flyout-row-hover: $mod-takeover-surface-muted !default;
+$mod-takeover-preview-flyout-ink: $mod-takeover-text-strong !default;
+$mod-takeover-preview-flyout-ink-disabled: $mod-takeover-text-subtle !default;
+$mod-takeover-preview-flyout-badge-muted-bg: $mod-takeover-surface-muted !default;
+$mod-takeover-preview-flyout-badge-muted-border: $mod-takeover-border-light !default;
+$mod-takeover-preview-flyout-badge-muted-ink: $mod-takeover-text-muted !default;
+$mod-takeover-preview-flyout-badge-shadow: 0 1px 0 rgb(0 0 0 / 6%) !default;
+
+// ---------------------------------------------------------------------------
+// Workspace: reorder panel head + preview chrome (aligned top → first border)
+// ---------------------------------------------------------------------------
+$mod-takeover-workspace-panel-head-min-height: $mod-space-48 !default;
+$mod-takeover-workspace-panel-head-padding-x: $mod-space-16 !default;
+$mod-takeover-workspace-panel-head-inner-gap: $mod-space-8 !default;
+
+// ---------------------------------------------------------------------------
+// Preview floating card
+// ---------------------------------------------------------------------------
+$mod-takeover-preview-card-border: #e3e3de !default;
+$mod-takeover-preview-card-shadow: 0 4px 22px rgb(0 0 0 / 12%), 0 0 0 1px rgb(0 0 0 / 4%) !default;
+$mod-takeover-preview-card-filter-light: none !default;
+$mod-takeover-preview-card-filter-dark: none !default;
+$mod-takeover-radius-preview-card: 0 !default;
+
+// ---------------------------------------------------------------------------
+// Aux (reorder) panel shell
+// ---------------------------------------------------------------------------
+$mod-takeover-aux-border: #e3e3de !default;
+$mod-takeover-aux-shadow: 0 4px 18px rgb(0 0 0 / 12%), 0 0 0 1px rgb(0 0 0 / 4%) !default;
+$mod-takeover-radius-aux: 0 !default;
+
+// ---------------------------------------------------------------------------
+// Dropdowns / flyouts on dark chrome
+// ---------------------------------------------------------------------------
+$mod-takeover-menu-shadow: 0 4px 16px rgb(0 0 0 / 35%),
+	0 0 0 1px rgb(0 0 0 / 20%) !default;
+$mod-takeover-menu-badge-shadow: 0 1px 0 rgb(0 0 0 / 22%) !default;
+
+// ---------------------------------------------------------------------------
+// Reorder row — dragging elevation
+// ---------------------------------------------------------------------------
+$mod-takeover-reorder-drag-shadow: 0 4px 16px rgb(0 0 0 / 12%) !default;
+
+// ---------------------------------------------------------------------------
+// Shell chrome — skip link, loading text
+// ---------------------------------------------------------------------------
+$mod-takeover-shell-ink: #1d2327 !default;
+$mod-takeover-skip-bg: #1d2327 !default;
+$mod-takeover-skip-ink: #fff !default;
+$mod-takeover-skip-shadow: 0 2px 8px rgb(0 0 0 / 35%) !default;
+$mod-takeover-status-muted: #646970 !default;
+
+// ---------------------------------------------------------------------------
+// Sidebar version pill
+// ---------------------------------------------------------------------------
+$mod-takeover-version-pill-bg: #dcdcde !default;
+$mod-takeover-version-pill-ink: #1d2327 !default;
+
+// ---------------------------------------------------------------------------
+// Warnings / errors on dark footer
+// ---------------------------------------------------------------------------
+$mod-takeover-warning-ink: #f0b849 !default;
+
+// ---------------------------------------------------------------------------
+// Focus ring (keyboard), non-accent
+// ---------------------------------------------------------------------------
+$mod-takeover-focus-ring-neutral: #9ec2e6 !default;
+
+// ---------------------------------------------------------------------------
+// Pro upsell badge (sorting / Add New pills)
+// ---------------------------------------------------------------------------
+$mod-takeover-pro-badge-bg-mix: #2271b1 !default;
+$mod-takeover-pro-badge-border-mix: #3582c4 !default;
+$mod-takeover-pro-badge-ink: #eaf4ff !default;
+
+// “Plan / upgrade” badge (extension upsell)
+$mod-takeover-plan-badge-violet: #7c3acd !default;
+$mod-takeover-plan-badge-lilac: #a78bfa !default;
+$mod-takeover-badge-muted-bg: $mod-takeover-dark-backdrop-strong !default;
+$mod-takeover-badge-muted-border: rgb(255 255 255 / 10%) !default;
+$mod-takeover-badge-muted-ink: rgb(255 255 255 / 50%) !default;
+
+// ---------------------------------------------------------------------------
+// Live preview — admin controls on image tiles (dark stack)
+// ---------------------------------------------------------------------------
+$mod-takeover-admin-tile-shade: rgb(0 0 0 / 42%) !default;
+$mod-takeover-admin-trigger-surface: rgb(255 255 255 / 94%) !default;
+$mod-takeover-admin-trigger-ink: #1d2327 !default;
+$mod-takeover-admin-trigger-shadow: 0 1px 4px rgb(0 0 0 / 22%),
+	0 0 0 1px rgb(0 0 0 / 8%) !default;
+
+// ---------------------------------------------------------------------------
+// Modal shell (content-block edit, etc.)
+// ---------------------------------------------------------------------------
+$mod-takeover-modal-backdrop: rgb(0 0 0 / 55%) !default;
+$mod-takeover-modal-panel-shadow: 0 25px 50px -12px rgb(0 0 0 / 28%),
+	0 0 0 1px rgb(0 0 0 / 6%) !default;
+$mod-takeover-modal-radius: 0 !default;
+$mod-takeover-surface-elevated-hover: #f0f0f1 !default;
+
+// ---------------------------------------------------------------------------
+// Motion (FSE panel + card)
+// ---------------------------------------------------------------------------
+$mod-takeover-transition-workspace: 0.12s ease !default;
+$mod-takeover-transition-panel: 0.22s cubic-bezier(0.32, 0.72, 0, 1) !default;

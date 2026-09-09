@@ -21,6 +21,7 @@ class Modula_Modal_Handler extends Modula_Upsell_Base {
 		'content-galleries' => 'modula-modal-content-galleries-upgrade.php',
 		'instagram'         => 'modula-modal-instagram-upgrade.php',
 		'video'             => 'modula-modal-video-upgrade.php',
+		'bound-gallery'     => 'modula-modal-bound-gallery-upgrade.php',
 	);
 
 	/**
@@ -38,6 +39,7 @@ class Modula_Modal_Handler extends Modula_Upsell_Base {
 		'content-galleries' => 'modula-content-galleries',
 		'instagram'         => 'modula-instagram',
 		'video'             => 'modula-video',
+		'bound-gallery'     => 'modula',
 	);
 
 	/**
@@ -76,6 +78,9 @@ class Modula_Modal_Handler extends Modula_Upsell_Base {
 
 		// Modula Video modal
 		add_action( 'wp_ajax_modula_modal-video_upgrade', array( $this, 'get_modal_video_upgrade' ) );
+
+		// Bound gallery modal
+		add_action( 'wp_ajax_modula_modal-bound-gallery_upgrade', array( $this, 'get_modal_bound_gallery_upgrade' ) );
 	}
 
 	/**
@@ -157,6 +162,13 @@ class Modula_Modal_Handler extends Modula_Upsell_Base {
 	 */
 	public function get_modal_video_upgrade() {
 		$this->render_modal( 'video' );
+	}
+
+	/**
+	 * Show the bound gallery modal to upgrade
+	 */
+	public function get_modal_bound_gallery_upgrade() {
+		$this->render_modal( 'bound-gallery' );
 	}
 
 	/**

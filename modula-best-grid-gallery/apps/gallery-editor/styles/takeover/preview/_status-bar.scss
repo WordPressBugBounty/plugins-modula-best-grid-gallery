@@ -1,0 +1,93 @@
+@use "../../variables" as *;
+
+/* Styleguide `.statusbar` — canvas chrome under the artboard stage. */
+$mod-status-bar-h: 34px;
+
+.modula-gallery-takeover__status-bar {
+	flex: none;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	height: $mod-status-bar-h;
+	min-height: $mod-status-bar-h;
+	padding: 0 16px;
+	box-sizing: border-box;
+	border-top: 1px solid var(--mod-se-line, #{$mod-takeover-chrome-border});
+	background: var(--mod-se-chrome, #{$mod-takeover-chrome-bg});
+	font-size: 12px;
+	line-height: 1.5;
+	font-weight: 400;
+	color: var(--mod-se-ink-3, #{$mod-takeover-text-muted});
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.modula-gallery-takeover__status-bar>* {
+	flex: none;
+}
+
+.modula-gallery-takeover__status-bar-sep {
+	color: var(--mod-se-ink-3, #{$mod-takeover-text-muted});
+	opacity: 0.6;
+}
+
+.modula-gallery-takeover__status-bar-spacer {
+	flex: 1 1 auto !important;
+	min-width: 8px;
+}
+
+.modula-gallery-takeover__status-bar-history {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	min-width: 0;
+	margin-inline-start: auto;
+}
+
+.modula-gallery-takeover__status-bar-step {
+	min-width: 0;
+	max-width: min(280px, 36vw);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: var(--mod-se-ink-3, #{$mod-takeover-text-muted});
+}
+
+.modula-gallery-takeover__status-bar-hbtn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 22px;
+	height: 22px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	color: var(--mod-se-ink-3, #{$mod-takeover-text-muted});
+	cursor: pointer;
+
+	&:hover:not(:disabled) {
+		color: var(--mod-se-ink, #{$mod-takeover-text-strong});
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--modula-takeover-accent, #{$modula-takeover-accent}) 70%, transparent);
+	}
+
+	&:disabled {
+		opacity: 0.4;
+		cursor: default;
+	}
+
+	svg {
+		display: block;
+		fill: none;
+		stroke: currentColor;
+	}
+}

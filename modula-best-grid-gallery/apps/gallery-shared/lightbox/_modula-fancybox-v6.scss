@@ -1,0 +1,595 @@
+/**
+ * Modula overrides for @fancyapps/ui v6 Fancybox carousel transitions.
+ *
+ * Fancybox uses `.fancybox__carousel` (not `.f-carousel`), so the default
+ * `--f-carousel-slide-width: 100%` from carousel.css does not apply.
+ * Without full-width slides, Carousel.transition "fade" falls back to pan tween (looks like slide).
+ */
+.modula-fancybox-container {
+	--f-carousel-slide-width: 100%;
+	--f-carousel-slide-height: 100%;
+	/* Keep a small gutter so images are not flush against the viewport/toolbar. */
+	--f-carousel-slide-padding: clamp(12px, 2.5vh, 28px);
+	--f-carousel-gap: 0;
+	--modula-lightbox-caption-gutter: clamp(16px, 4vw, 40px);
+
+	/*
+	 * Caption width uses viewport gutters (not image bounds) so left/right/center
+	 * stay readable without spanning edge-to-edge.
+	 */
+	.f-caption,
+	.fancybox__caption {
+		box-sizing: border-box;
+		width: auto;
+		max-width: calc(100% - 2 * var(--modula-lightbox-caption-gutter));
+		margin-inline: var(--modula-lightbox-caption-gutter);
+		align-self: var(--modula-lightbox-caption-align, flex-start);
+		text-align: var(--modula-lightbox-caption-text-align, left);
+		overflow-wrap: anywhere;
+	}
+
+	/*
+	 * Empty Pro title/description wrappers still produce a padded caption box,
+	 * which eats Fancybox slide auto-margins and pins the image to the top.
+	 */
+	.f-caption:where(:has(.modula-caption-title),
+		:has(.modula-caption-description)):not(:has(.modula-caption-title:not(:empty))):not(:has(.modula-caption-description:not(:empty))) {
+		display: none;
+		padding: 0;
+		margin: 0;
+		height: 0;
+		overflow: hidden;
+		visibility: hidden;
+		pointer-events: none;
+	}
+
+	/*
+	 * Image Guardian right-click protection (legacy Fancybox Images.protected).
+	 * Overlay sits on the panzoom surface so “Save image as…” hits the shield.
+	 */
+	&.modula-fancybox-images-protected {
+
+		img,
+		video {
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			user-select: none;
+		}
+
+		.f-panzoom,
+		.f-zoomable {
+			position: relative;
+		}
+
+		.fancybox-protected {
+			position: absolute;
+			inset: 0;
+			z-index: 40;
+			-webkit-user-select: none;
+			user-select: none;
+			-webkit-touch-callout: none;
+		}
+	}
+}
+
+/* Pro Comments: Fancybox v6 sidebar grid + full-height panel (not a floating bar). */
+.fancybox__container.has-modula-comments {
+	--sidebar-width: min(400px, 38vw);
+	--modula-comments-panel-padding-x: 24px;
+	--modula-comments-panel-padding-y: 20px;
+
+	.fancybox__carousel {
+		min-height: 0;
+	}
+
+	.fancybox__grid {
+		flex: 1 1 auto;
+		min-height: 0;
+		height: 100%;
+	}
+
+	.fancybox__column.with-sidebar {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		padding: 0;
+		background: #fff;
+		color: #1a1a1a;
+		border-left: 1px solid #ddd;
+	}
+
+	/* Keep the lightbox toolbar on the media column only (Fancybox v6 uses f-carousel__toolbar). */
+	.f-carousel__toolbar.is-absolute,
+	.fancybox__toolbar.is-absolute,
+	&.is-compact .f-carousel__toolbar,
+	&.is-compact .fancybox__toolbar {
+		right: var(--sidebar-container-width) !important;
+		width: auto;
+	}
+
+	.fancybox__column.with-viewport {
+		position: relative;
+		z-index: 1;
+	}
+
+	.fancybox__column.with-sidebar {
+		position: relative;
+		z-index: 2;
+	}
+
+	&.sidebar-hidden {
+		--sidebar-container-width: 0px;
+
+		.fancybox__column.with-sidebar {
+			overflow: hidden;
+			padding: 0;
+			border-left: 0;
+		}
+
+		#modula-comments-wrapper {
+			visibility: hidden;
+		}
+
+		.f-carousel__toolbar.is-absolute,
+		.fancybox__toolbar.is-absolute,
+		&.is-compact .f-carousel__toolbar,
+		&.is-compact .fancybox__toolbar {
+			right: 0 !important;
+		}
+	}
+
+	#modula-comments-wrapper.modula-comments-sidebar {
+		position: relative;
+		inset: auto;
+		top: auto;
+		right: auto;
+		bottom: auto;
+		left: auto;
+		flex: 1 1 auto;
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		max-width: none;
+		min-height: 0;
+		height: 100%;
+		margin: 0;
+		padding: var(--modula-comments-panel-padding-y) var(--modula-comments-panel-padding-x);
+		z-index: auto;
+		overflow: hidden;
+		background: #fff;
+		color: #1a1a1a;
+		--fancybox-color: #1a1a1a;
+		box-sizing: border-box;
+	}
+
+	#modula-gallery-comments-root {
+		display: flex;
+		flex-direction: column;
+		flex: 1 1 auto;
+		min-height: 0;
+		height: 100%;
+	}
+
+	/* Bottom thumbnail strip lives outside the grid; stretch comments over full container height. */
+	&.has-thumbs {
+		/* Never use position: relative here — it shrinks the shell to carousel+thumbs height. */
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+
+		.fancybox__carousel {
+			position: static;
+			flex: 1 1 auto;
+			min-height: 0;
+		}
+
+		.fancybox__grid {
+			flex: 1 1 auto;
+			min-height: 0;
+			height: 100%;
+		}
+
+		.fancybox__column.with-sidebar {
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			width: var(--sidebar-container-width);
+			height: auto;
+			z-index: 2;
+		}
+
+		#modula-comments-wrapper.modula-comments-sidebar {
+			height: 100%;
+		}
+	}
+}
+
+@media (max-width: 768px) {
+	.fancybox__container.has-modula-comments.has-thumbs {
+		.fancybox__column.with-sidebar {
+			position: relative;
+			top: auto;
+			right: auto;
+			bottom: auto;
+			width: auto;
+			height: auto;
+		}
+	}
+}
+
+/* Legacy thumb-strip sidebar rules must not apply to the Pro comments panel. */
+.modula-best-grid-gallery .fancybox__container.has-modula-comments {
+
+	#modula-comments-wrapper.fancybox__sidebar,
+	#modula-comments-wrapper.modula-comments-sidebar {
+		position: relative;
+		top: auto;
+		right: auto;
+		bottom: auto;
+		left: auto;
+		width: 100%;
+		max-width: none;
+		z-index: auto;
+	}
+
+	.f-carousel__toolbar.is-absolute,
+	.fancybox__toolbar.is-absolute,
+	&.is-compact .f-carousel__toolbar,
+	&.is-compact .fancybox__toolbar {
+		right: var(--sidebar-container-width) !important;
+		width: auto;
+	}
+
+	&.sidebar-hidden {
+
+		.f-carousel__toolbar.is-absolute,
+		.fancybox__toolbar.is-absolute,
+		&.is-compact .f-carousel__toolbar,
+		&.is-compact .fancybox__toolbar {
+			right: 0 !important;
+		}
+	}
+
+	&.has-thumbs-sidebar {
+		.fancybox__sidebar[data-modula-thumbs-sidebar] {
+			position: absolute;
+			top: 45px;
+			bottom: 0;
+			width: 115px;
+			z-index: 20;
+			overflow: hidden;
+		}
+
+		.fancybox__sidebar[data-modula-thumbs-sidebar='left'] {
+			left: 10px;
+		}
+
+		.fancybox__sidebar[data-modula-thumbs-sidebar='right'] {
+			right: calc(var(--sidebar-container-width, 0px) + 10px);
+		}
+
+		.fancybox__sidebar[data-modula-thumbs-sidebar] .fancybox__thumbs,
+		.fancybox__sidebar[data-modula-thumbs-sidebar] .f-thumbs {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+		}
+	}
+}
+
+/* Compact toolbar: secondary actions live in an overflow menu on narrow viewports. */
+.fancybox__container.has-modula-compact-toolbar,
+.modula-fancybox-container.has-modula-compact-toolbar {
+
+	.f-carousel__toolbar__column.is-right,
+	.fancybox__toolbar__column.is-right {
+		position: relative;
+		flex-wrap: nowrap;
+		gap: 0;
+	}
+
+	.modula-lightbox-toolbar-overflow-host {
+		position: relative;
+	}
+
+	.modula-lightbox-toolbar-overflow {
+		position: absolute;
+		top: calc(100% + 4px);
+		right: 0;
+		z-index: 40;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		min-width: min(240px, calc(100vw - 24px));
+		padding: 6px;
+		border-radius: 10px;
+		background: rgba(24, 24, 27, 0.94);
+		box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
+		pointer-events: auto;
+	}
+
+	.modula-lightbox-toolbar-overflow__item {
+		display: flex;
+		width: 100%;
+	}
+
+	.modula-lightbox-toolbar-overflow .f-button,
+	.modula-lightbox-toolbar-overflow a.f-button {
+		--f-button-width: 100%;
+		--f-button-height: 48px;
+		width: 100%;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-start;
+		gap: 12px;
+		padding: 0 14px;
+		pointer-events: auto;
+		text-align: left;
+	}
+
+	.modula-lightbox-toolbar-overflow__row svg {
+		flex: 0 0 auto;
+	}
+
+	.modula-lightbox-toolbar-overflow__label {
+		flex: 1 1 auto;
+		font-size: 15px;
+		font-weight: 500;
+		line-height: 1.25;
+		letter-spacing: 0.01em;
+		color: inherit;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.modula-lightbox-toolbar-overflow .modula-fancybox-button.download-all svg {
+		width: 18px !important;
+		height: 18px !important;
+	}
+}
+
+/*
+ * Modula open/close animation classes (lightbox.animationEffect → showClass/hideClass).
+ * Scoped to `.modula-fancybox-container` because Fancybox mounts outside the gallery DOM.
+ */
+.modula-fancybox-container {
+	.m-zoomIn {
+		animation: var(--f-transition-duration, 0.2s) ease both m-zoomIn;
+		z-index: 2;
+	}
+
+	.m-zoomOut {
+		animation: var(--f-transition-duration, 0.2s) ease both m-zoomOut;
+		z-index: 1;
+	}
+
+	.m-zoom-in-outIn {
+		animation: var(--f-transition-duration, 0.2s) ease both m-zoomIn;
+	}
+
+	.m-zoom-in-outOut {
+		animation: var(--f-transition-duration, 0.2s) ease both m-zoomInAndOut;
+	}
+
+	.m-fadeIn {
+		animation: var(--f-transition-duration, 0.2s) ease both m-fadeIn;
+	}
+
+	.m-fadeOut {
+		animation: var(--f-transition-duration, 0.2s) ease both m-fadeOut;
+	}
+}
+
+@keyframes m-zoomIn {
+	0% {
+		transform: scale(0.7);
+		opacity: 0;
+	}
+
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+@keyframes m-zoomInAndOut {
+	0% {
+		transform: scale(1);
+		opacity: 1;
+	}
+
+	100% {
+		transform: scale(2);
+		opacity: 0;
+	}
+}
+
+@keyframes m-zoomOut {
+	0% {
+		transform: scale(1);
+		opacity: 1;
+	}
+
+	100% {
+		transform: scale(0.7);
+		opacity: 0;
+	}
+}
+
+@keyframes m-fadeIn {
+	0% {
+		opacity: 0;
+	}
+
+	100% {
+		opacity: 1;
+	}
+}
+
+@keyframes m-fadeOut {
+	0% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+	}
+}
+
+/*
+ * Fancybox mounts outside `.modula-gallery`. When open pipeline adds
+ * `.modula-respect-reduced-motion` + OS reduce, kill leftover CSS animations.
+ */
+.modula-fancybox-container.modula-respect-reduced-motion {
+	@media (prefers-reduced-motion: reduce) {
+
+		*,
+		*::before,
+		*::after {
+			animation: none !important;
+			animation-duration: 0.01ms !important;
+			transition: none !important;
+			transition-duration: 0.01ms !important;
+		}
+	}
+}
+
+/*
+ * Lightbox share dialog (React stack). Legacy styles lived in assets/css/front/fancybox.css
+ * which is not loaded for v2 galleries — without this, buttons/icons are invisible.
+ */
+.modula-fancybox-container .modula-fancybox-share {
+	background: #f4f4f4;
+	border-radius: 3px;
+	max-width: 90%;
+	padding: 30px;
+	text-align: center;
+	color: #222;
+	box-sizing: border-box;
+
+	h1 {
+		color: #222;
+		font-size: 35px;
+		font-weight: 700;
+		margin: 0 0 20px;
+
+		&::before,
+		&::after {
+			display: none;
+		}
+	}
+
+	p {
+		margin: 0;
+		padding: 0;
+	}
+}
+
+.modula-fancybox-container .modula-fancybox-share__button {
+	border: 0;
+	border-radius: 3px;
+	display: inline-block;
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 40px;
+	margin: 0 5px 10px;
+	min-width: 130px;
+	padding: 0 15px;
+	text-decoration: none;
+	transition: all 0.2s;
+	user-select: none;
+	white-space: nowrap;
+	color: #fff;
+
+	&:visited,
+	&:link {
+		color: #fff;
+	}
+
+	&:hover {
+		text-decoration: none;
+		color: #fff;
+	}
+
+	svg {
+		height: 25px;
+		width: 25px;
+		margin-right: 7px;
+		position: relative;
+		top: -1px;
+		vertical-align: middle;
+		display: inline-block;
+	}
+
+	svg path,
+	svg polygon {
+		fill: #fff;
+	}
+}
+
+.modula-fancybox-container .modula-fancybox-share__button--fb {
+	background: #3b5998;
+
+	&:hover {
+		background: #344e86;
+	}
+}
+
+.modula-fancybox-container .modula-fancybox-share__button--tw {
+	background: #1da1f2;
+
+	&:hover {
+		background: #0d95e8;
+	}
+}
+
+.modula-fancybox-container .modula-fancybox-share__button--pt {
+	background: #bd081d;
+
+	&:hover {
+		background: #aa0719;
+	}
+}
+
+.modula-fancybox-container .modula-fancybox-share__button--wa {
+	background: #25d366;
+
+	&:hover {
+		background: #1ebe57;
+	}
+}
+
+.modula-fancybox-container .modula-fancybox-share__button--li {
+	background: #0e76a8;
+
+	&:hover {
+		background: #0c6590;
+	}
+}
+
+.modula-fancybox-container .modula-fancybox-share__button--email {
+	background: #99cc33;
+
+	&:hover {
+		background: #7aa329;
+	}
+}
+
+.modula-fancybox-container .modula-fancybox-share__input {
+	background: transparent;
+	border: 0;
+	border-bottom: 1px solid #d7d7d7;
+	border-radius: 0;
+	color: #5d5b5b;
+	font-size: 14px;
+	margin: 10px 0 0;
+	outline: none;
+	padding: 10px 15px;
+	width: 100%;
+	box-sizing: border-box;
+}

@@ -1,0 +1,328 @@
+@use "../../variables" as *;
+
+@use "@fancyapps/ui/dist/fancybox/fancybox.css";
+@use "@fancyapps/ui/dist/fancybox/fancybox.sidebar.css" as fancybox-sidebar;
+@use "../../../../gallery-shared/lightbox/modula-fancybox-v6";
+
+.modula-gallery-takeover__live-preview-body--lightbox-preview {
+	position: relative;
+	flex: 1;
+	min-height: 320px;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	background: var(--mod-se-preview-bg, #{$mod-takeover-surface-raised});
+}
+
+.modula-gallery-takeover__lightbox-preview-wrap {
+	position: relative;
+	flex: 1;
+	min-height: 280px;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.modula-gallery-takeover__lightbox-preview {
+	position: relative;
+	flex: 1;
+	min-height: 280px;
+	width: 100%;
+	overflow: hidden;
+}
+
+.modula-gallery-takeover__lightbox-preview--empty,
+.modula-gallery-takeover__lightbox-preview--fallback,
+.modula-gallery-takeover__lightbox-preview--gated,
+.modula-gallery-takeover__lightbox-preview--loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: $mod-space-12;
+	padding: $mod-space-24 $mod-space-16;
+	text-align: center;
+	color: $mod-takeover-text-muted;
+}
+
+.modula-gallery-takeover__lightbox-preview-sample {
+	max-width: min(100%, 280px);
+	max-height: 180px;
+	object-fit: contain;
+	border-radius: 4px;
+	box-shadow: 0 2px 12px rgb(0 0 0 / 12%);
+}
+
+.modula-gallery-takeover__lightbox-preview--hide-nav {
+
+	.f-button.is-arrow.is-prev,
+	.f-button.is-arrow.is-next,
+	.fancybox__nav,
+	.f-carousel__nav {
+		display: none !important;
+	}
+}
+
+// Download-all toolbar icon (parity with modula-pro download extension front CSS).
+.modula-gallery-takeover__lightbox-preview {
+
+	.fancybox__toolbar .f-button:not([data-fancybox-toggle-thumbs]),
+	.fancybox__toolbar a.f-button:not([data-fancybox-toggle-thumbs]) {
+		cursor: default;
+	}
+
+	.modula-fancybox-button.download-all {
+		fill: #ccc;
+	}
+
+	.modula-fancybox-button.download-all svg {
+		width: 15px !important;
+		height: 23px !important;
+		fill: #ccc;
+	}
+
+	.modula-fancybox-button.download-all .cls-2 {
+		fill: #000;
+	}
+}
+
+// Fancybox front CSS is scoped under `.modula-best-grid-gallery`; host carries that class.
+.modula-best-grid-gallery.modula-gallery-takeover__lightbox-preview {
+
+	// Fancybox v6 renders captions as `.f-caption` (legacy markup used `.fancybox__caption`).
+	.f-caption,
+	.fancybox__caption {
+		--modula-lightbox-caption-gutter: clamp(16px, 4vw, 40px);
+		box-sizing: border-box;
+		width: auto;
+		max-width: calc(100% - 2 * var(--modula-lightbox-caption-gutter));
+		margin-inline: var(--modula-lightbox-caption-gutter);
+		align-self: var(--modula-lightbox-caption-align, flex-start);
+		text-align: var(--modula-lightbox-caption-text-align, left);
+		overflow-wrap: anywhere;
+	}
+
+	.modula-gallery-takeover__lightbox-preview-container.fancybox__container,
+	.fancybox__container,
+	.fancybox__dialog {
+		position: absolute !important;
+		inset: 0;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 5;
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		height: 100%;
+		max-width: none;
+		max-height: none;
+		margin: 0;
+		padding: 0;
+		border: none;
+		background: transparent;
+		--fancybox-opacity: 1;
+		transform: none;
+		--fancybox-bg: inherit;
+	}
+
+	.fancybox__backdrop {
+		position: absolute !important;
+		inset: 0;
+		background: var(--fancybox-backdrop-bg,
+				var(--fancybox-bg, rgba(24, 24, 27, 0.98)));
+	}
+
+	.fancybox__carousel {
+		flex: 1 1 auto;
+		min-height: 0;
+	}
+
+	// Embedded preview: clip viewport overflow so v6 fade transition path is not skipped.
+	.fancybox__viewport {
+		width: 100%;
+		height: 100%;
+		overflow-x: clip;
+	}
+
+	.fancybox__track {
+		height: 100%;
+	}
+
+	// Bottom "modern" thumbnail strip (horizontal under carousel).
+	.fancybox__container.has-thumbs:not(.has-vertical-thumbs):not(.has-sidebar) {
+		.fancybox__carousel {
+			flex: 1 1 auto;
+			min-height: 0;
+		}
+
+		.fancybox__thumbs.f-thumbs.is-modern {
+			flex: 0 0 auto;
+			width: 100%;
+			max-width: 100%;
+		}
+	}
+
+	// Comments + bottom thumbs: keep strip full-width; sidebar full-height via modula-fancybox-v6.
+	.fancybox__container.has-modula-comments.has-thumbs:not(.has-vertical-thumbs) {
+		position: absolute !important;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		min-height: 0;
+
+		.fancybox__carousel {
+			flex: 1 1 auto;
+			min-height: 0;
+		}
+
+		.fancybox__thumbs.f-thumbs.is-modern {
+			flex: 0 0 auto;
+			width: 100%;
+			max-width: 100%;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.fancybox__container.has-modula-comments.has-thumbs {
+			.fancybox__column.with-sidebar {
+				position: relative;
+				top: auto;
+				right: auto;
+				bottom: auto;
+				width: auto;
+				height: auto;
+			}
+		}
+	}
+
+	// Left/right sidebar thumbnail strip (parity with assets/css/front/fancybox.css).
+	.fancybox__sidebar {
+		position: absolute;
+		top: 45px;
+		bottom: 0;
+		width: 115px;
+		z-index: 20;
+		overflow: hidden;
+	}
+
+	.fancybox__sidebar.right {
+		right: 10px;
+	}
+
+	.fancybox__sidebar.left {
+		left: 10px;
+	}
+
+	.fancybox__container.has-sidebar .f-button.is-arrow.is-prev,
+	.fancybox__container.has-sidebar .f-button.is-arrow.is-next {
+		--f-arrow-pos: 8rem;
+	}
+
+	.fancybox__container.has-sidebar .fancybox__caption,
+	.f-caption {
+		margin-inline: var(--modula-lightbox-caption-gutter, clamp(16px, 4vw, 40px));
+	}
+
+	.fancybox__sidebar .fancybox__thumbs,
+	.fancybox__sidebar .f-thumbs {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		max-height: none !important;
+	}
+
+	.fancybox__sidebar .fancybox__thumbs.is-classic.is-vertical,
+	.fancybox__sidebar .f-thumbs.is-classic.is-vertical {
+		height: 100%;
+
+		.f-thumbs__viewport {
+			height: 100%;
+		}
+	}
+
+	// Modula open/close animation classes (parity with gallery-shared/_modula-fancybox-v6.scss).
+	.m-zoomIn {
+		animation: var(--f-transition-duration, 0.2s) ease both m-zoomIn;
+		z-index: 2;
+	}
+
+	.m-zoomOut {
+		animation: var(--f-transition-duration, 0.2s) ease both m-zoomOut;
+		z-index: 1;
+	}
+
+	.m-zoom-in-outIn {
+		animation: var(--f-transition-duration, 0.2s) ease both m-zoomIn;
+	}
+
+	.m-zoom-in-outOut {
+		animation: var(--f-transition-duration, 0.2s) ease both m-zoomInAndOut;
+	}
+
+	.m-fadeIn {
+		animation: var(--f-transition-duration, 0.2s) ease both m-fadeIn;
+	}
+
+	.m-fadeOut {
+		animation: var(--f-transition-duration, 0.2s) ease both m-fadeOut;
+	}
+
+	@keyframes m-zoomIn {
+		0% {
+			transform: scale(0.7);
+			opacity: 0;
+		}
+
+		100% {
+			transform: scale(1);
+			opacity: 1;
+		}
+	}
+
+	@keyframes m-zoomInAndOut {
+		0% {
+			transform: scale(1);
+			opacity: 1;
+		}
+
+		100% {
+			transform: scale(2);
+			opacity: 0;
+		}
+	}
+
+	@keyframes m-zoomOut {
+		0% {
+			transform: scale(1);
+			opacity: 1;
+		}
+
+		100% {
+			transform: scale(0.7);
+			opacity: 0;
+		}
+	}
+
+	@keyframes m-fadeIn {
+		0% {
+			opacity: 0;
+		}
+
+		100% {
+			opacity: 1;
+		}
+	}
+
+	@keyframes m-fadeOut {
+		0% {
+			opacity: 1;
+		}
+
+		100% {
+			opacity: 0;
+		}
+	}
+}

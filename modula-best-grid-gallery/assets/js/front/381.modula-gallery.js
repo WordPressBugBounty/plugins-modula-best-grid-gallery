@@ -1,0 +1,1 @@
+"use strict";(this.webpackChunkModulaGallery=this.webpackChunkModulaGallery||[]).push([[381],{381:(a,u,r)=>{r.r(u),r.d(u,{default:()=>l}),r(6540);var t=r(3781),e=r(4848);function l(){return(0,e.jsx)(t.A,{variant:"uniform"})}}}]);

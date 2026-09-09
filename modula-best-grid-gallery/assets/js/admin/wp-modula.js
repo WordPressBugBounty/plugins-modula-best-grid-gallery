@@ -67,16 +67,18 @@ wp.Modula.upload =
 		document.execCommand('copy');
 		var $feedback = $(this).next('.copy-feedback');
 		$feedback.text('Shortcode copied').fadeIn();
-		setTimeout(function() {
+		setTimeout(function () {
 			$feedback.fadeOut();
 		}, 2000);
 	});
 
 	// Toggle shortcode dropdown
-	$('.modula-shortcode-dropdown-toggle').on('click', function(e) {
+	$('.modula-shortcode-dropdown-toggle').on('click', function (e) {
 		e.preventDefault();
 		var $button = $(this);
-		var $dropdown = $button.closest('.inside').find('.modula-shortcode-dropdown');
+		var $dropdown = $button
+			.closest('.inside')
+			.find('.modula-shortcode-dropdown');
 		var isExpanded = $button.attr('aria-expanded') === 'true';
 
 		$button.attr('aria-expanded', !isExpanded);
@@ -177,7 +179,7 @@ wp.Modula.upload =
 	// search for modula in hash so we won't do the function on every hash
 	if (
 		window.location.hash.length != 0 &&
-		window.location.hash.indexOf('modula')
+		window.location.hash.indexOf('modula') >= 0
 	) {
 		var modulaTabHash = window.location.hash.split('#!')[1];
 		$('.modula-tabs,.modula-tabs-content')

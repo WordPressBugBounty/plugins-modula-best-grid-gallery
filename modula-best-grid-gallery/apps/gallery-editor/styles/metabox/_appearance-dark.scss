@@ -1,0 +1,99 @@
+@use '../variables' as *;
+
+// Metabox shell when user selects dark appearance (takeover uses separate chrome).
+.modula-settings-editor__app[data-appearance='dark'] {
+
+	&.modula-settings-editor__app,
+	.modula-settings-editor-mount {
+		color: var(--mod-se-metabox-ink);
+	}
+
+	.modula-settings-editor__save-bar {
+		border-bottom-color: var(--mod-se-metabox-border);
+	}
+
+	.modula-settings-editor__intro {
+		border-bottom-color: var(--mod-se-metabox-tab-border);
+	}
+
+	.modula-settings-editor__lede {
+		color: var(--mod-se-sidebar-ink-muted);
+	}
+
+	.modula-settings-editor__id-pill {
+		color: var(--mod-se-chrome-ink-secondary);
+		background: var(--mod-se-menu-surface-bg);
+		border-color: var(--mod-se-metabox-tab-border);
+
+		strong {
+			color: var(--mod-se-metabox-ink);
+		}
+	}
+
+	.modula-settings-editor__footer-hint {
+		color: var(--mod-se-sidebar-ink-muted);
+	}
+
+	.components-tab-panel__tabs {
+		border-bottom-color: var(--mod-se-metabox-tab-border);
+	}
+
+	.components-tab-panel__tabs-item {
+		color: var(--mod-se-chrome-ink-secondary);
+
+		&.is-active {
+			color: var(--mod-se-metabox-ink);
+			box-shadow: inset 0 -2px 0 var(--modula-takeover-accent, #2271b1);
+		}
+
+		&:hover:not(.is-active) {
+			color: var(--mod-se-metabox-ink);
+			background: var(--mod-se-hover-overlay);
+		}
+	}
+
+	.modula-settings-editor__section {
+		border-color: var(--mod-se-metabox-tab-border);
+		background: var(--mod-se-chrome-bg);
+	}
+
+	.modula-settings-editor__section-title {
+		color: var(--mod-se-metabox-ink);
+	}
+
+	.modula-settings-editor__field-label {
+		color: var(--mod-se-chrome-ink-secondary);
+	}
+
+	/* Help-tip wraps SettingsRow copy in field-label; keep row ink, not metabox secondary. */
+	.modula-ui-settings-row .modula-settings-editor__field-label {
+		color: inherit;
+	}
+}
+
+.components-button.modula-settings-editor__appearance-toggle svg {
+	display: block;
+	flex-shrink: 0;
+	overflow: visible;
+	box-sizing: content-box;
+	width: $mod-space-16;
+	height: $mod-space-16;
+	min-width: $mod-space-16;
+	min-height: $mod-space-16;
+	fill: none;
+	stroke: currentColor;
+
+	circle,
+	path {
+		fill: none;
+		stroke: currentColor;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+}
+
+.modula-settings-editor__appearance-toggle--metabox {
+	.modula-settings-editor__appearance-toggle-label {
+		margin-left: $mod-space-4;
+	}
+}

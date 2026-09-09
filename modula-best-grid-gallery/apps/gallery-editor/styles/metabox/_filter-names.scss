@@ -1,0 +1,79 @@
+// Filters tab: gallery filter names as chips (+ New filter).
+@use '../variables' as *;
+
+.modula-settings-editor__filter-name-list {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: $mod-space-8;
+	max-width: 100%;
+	padding-bottom: $mod-space-12;
+}
+
+.modula-settings-editor__filter-name-list-empty {
+	margin: 0;
+	padding: $mod-space-12 $mod-space-16;
+	border: 1px dashed var(--mod-se-line, #c3c4c7);
+	background: var(--mod-se-chrome-2, #f6f7f7);
+}
+
+.modula-settings-editor__filter-name-list-empty-title {
+	margin: 0 0 $mod-space-4;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.4;
+	color: var(--mod-se-ink, #1d2327);
+}
+
+.modula-settings-editor__filter-name-list-empty-desc {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--mod-se-ink-2, #646970);
+}
+
+.modula-settings-editor__filter-name-list-chips {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: $mod-space-8;
+}
+
+.modula-settings-editor__filter-name-list-chip-wrap {
+	display: inline-flex;
+	max-width: 100%;
+}
+
+.modula-settings-editor__filter-name-list-chip-edit {
+	display: inline-flex;
+	min-width: 120px;
+	max-width: 220px;
+}
+
+.modula-settings-editor__filter-name-list-add-chip {
+	border-style: dashed !important;
+	border-color: var(--mod-se-line, #c3c4c7) !important;
+	color: var(--mod-se-ink-2, #646970) !important;
+	background: transparent !important;
+
+	&:hover:not(:disabled) {
+		border-color: var(--mod-se-ink-3, #8b8b93) !important;
+		color: var(--mod-se-ink, #1d2327) !important;
+		background: var(--mod-se-chrome-2, transparent) !important;
+	}
+}
+
+.modula-settings-editor__filter-name-list-help {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--mod-se-ink-3, #8b8b93);
+}
+
+// Legacy row list (kept for metabox / older markup if still referenced).
+.modula-settings-editor__filter-name-list-box {
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-8;
+	margin: 0;
+}

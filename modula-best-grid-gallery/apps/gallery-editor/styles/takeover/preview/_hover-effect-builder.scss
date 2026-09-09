@@ -1,0 +1,1273 @@
+@use '../../variables' as *;
+@use '../mixins' as *;
+@use '../../shared/range-control-layout' as range-layout;
+@use '../../../../frontend-gallery/hover-v2';
+
+.modula-gallery-takeover__hover-builder-below-image-notice {
+	flex: 0 0 auto;
+	width: 100%;
+	max-width: min(1160px, calc(100% - #{$mod-space-32}));
+	margin: 0 auto $mod-space-12;
+	box-sizing: border-box;
+
+	&.modula-gallery-takeover__hover-builder-below-image-notice--sidebar {
+		max-width: none;
+		margin: 0 0 $mod-space-12;
+	}
+
+	&.modula-gallery-takeover__hover-builder-below-image-notice--compact {
+		.components-notice__content {
+			font-size: 12px;
+			line-height: 1.45;
+		}
+	}
+}
+
+.modula-gallery-takeover__live-preview-body--hover-builder {
+	>.modula-gallery-takeover__hover-builder-below-image-notice {
+		padding: 0 $mod-space-16;
+	}
+}
+
+.modula-gallery-takeover__hover-builder-preview {
+	display: flex;
+	flex: 1;
+	width: 100%;
+	align-items: center;
+	justify-content: center;
+	min-height: 0;
+	padding: $mod-space-24;
+	box-sizing: border-box;
+
+	.modula-items {
+		display: flex;
+		width: 100%;
+		justify-content: center;
+	}
+}
+
+/*
+ * __live-preview-body sets .modula-item-content { pointer-events: none } so grid admin
+ * toolbars receive hover; re-enable interaction for the hover builder card only.
+ */
+.modula-gallery-takeover__hover-builder-preview .modula-item .modula-item-content {
+	pointer-events: auto;
+}
+
+/*
+ * Hover aux panel: same chrome as Sort & order (`reorder-panel--setup`).
+ * Cap list height so both sections fit smaller viewports.
+ */
+.modula-gallery-takeover__reorder-panel--hover-builder {
+	@include modula-sidebar-v2-flat-form-controls;
+	// Match sidebar V2: no extra wrapper padding — thumb bleeds into setup block padding
+	// (8px wrapper padding + overflow-x:hidden on reorder-body clipped the knob).
+	@include range-layout.modula-sidebar-v2-range-control-inline-layout;
+
+	.modula-gallery-takeover__reorder-body--setup {
+		display: flex;
+		flex-direction: column;
+		gap: $mod-space-28;
+		padding: $mod-space-16 0 $mod-space-20;
+		min-height: 0;
+		flex: 1;
+		/* Keep x clipped (range thumbs); y must scroll — Customize is taller than the aux column. */
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
+
+	.modula-gallery-takeover__reorder-setup-block {
+		padding: 0;
+	}
+
+	.modula-gallery-takeover__reorder-setup-title {
+		margin-bottom: $mod-space-8;
+	}
+
+	.modula-gallery-takeover__hover-builder-layer-help {
+		margin: 0 0 $mod-space-12;
+		line-height: 1.5;
+	}
+
+	.modula-gallery-takeover__hover-builder-mode-nav {
+		box-sizing: border-box;
+		padding-inline: $mod-space-16;
+		margin-bottom: $mod-space-12;
+	}
+
+	.modula-gallery-takeover__hover-builder-mode-nav--canvas {
+		margin-top: $mod-space-4;
+		margin-bottom: $mod-space-8;
+	}
+
+	.modula-gallery-takeover__hover-builder-canvas-hint {
+		box-sizing: border-box;
+		padding-inline: $mod-space-16;
+		margin: $mod-space-4 0 $mod-space-16;
+		line-height: 1.5;
+	}
+
+	.modula-gallery-takeover__hover-builder-layer-list {
+		gap: 0;
+	}
+
+	.modula-gallery-takeover__reorder-setup-sort-btn {
+		padding: $mod-space-12 $mod-space-12;
+		min-height: $mod-space-40;
+	}
+
+	.modula-gallery-takeover__hover-builder-layer-list,
+	.modula-gallery-takeover__hover-builder-motion-list {
+		max-height: min(38vh, 320px);
+		overflow: auto;
+	}
+
+	.modula-gallery-takeover__hover-builder-link-overlay-actions {
+		margin: 0 0 $mod-space-12;
+	}
+
+	.modula-gallery-takeover__hover-builder-link-fields {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+		margin: 0 0 $mod-space-4;
+		margin-inline: -$mod-space-16;
+		width: calc(100% + #{$mod-space-16 * 2});
+	}
+
+	.modula-gallery-takeover__hover-builder-link-row {
+		padding-left: $mod-space-16;
+		padding-right: $mod-space-16;
+		min-height: 44px;
+		border-bottom-color: var(--mod-se-line-soft, var(--mod-ui-line-soft));
+
+		&:last-child {
+			border-bottom: none;
+		}
+
+		.modula-ui-settings-row__end {
+			width: auto;
+			min-width: 40px;
+			height: auto;
+			justify-content: flex-end;
+		}
+
+		.modula-ui-switch {
+			display: inline-flex;
+			flex-direction: row;
+			align-items: center;
+		}
+	}
+
+	.modula-gallery-takeover__hover-builder-link-overlay-help {
+		margin: $mod-space-12 0 0;
+		font-size: 12px;
+		line-height: 1.5;
+		color: var(--mod-se-ink-3, var(--mod-se-aux-ink-muted, #{$mod-takeover-text-muted}));
+	}
+
+	.modula-gallery-takeover__hover-builder-motion-head {
+		margin-bottom: $mod-space-4;
+
+		.modula-gallery-takeover__reorder-setup-title {
+			margin-bottom: 0;
+		}
+	}
+
+	.modula-gallery-takeover__hover-builder-motion-badge-wrap {
+		margin: 0 0 $mod-space-8;
+	}
+
+	.modula-gallery-takeover__hover-builder-motion {
+		display: flex;
+		flex-direction: column;
+		gap: $mod-space-12;
+
+		.modula-ui-field-stack__label {
+			font-size: 11px;
+			font-weight: 700;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			color: var(--mod-se-ink-3, var(--mod-se-aux-ink-muted, #{$mod-takeover-text-muted}));
+		}
+	}
+
+	.modula-gallery-takeover__hover-builder-presets-panel {
+		.modula-gallery-takeover__hover-builder-layer-help {
+			margin-bottom: $mod-space-12;
+		}
+	}
+
+	.modula-gallery-takeover__hover-builder-presets {
+		gap: $mod-space-4;
+	}
+
+	.modula-gallery-takeover__hover-builder-preset-btn {
+		padding: $mod-space-12;
+	}
+
+	.modula-gallery-takeover__hover-builder-preset-json-btn {
+		margin-top: $mod-space-4;
+	}
+}
+
+.modula-gallery-takeover__hover-builder-link-overlay-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: $mod-space-8;
+}
+
+.modula-gallery-takeover__hover-builder-link-overlay-title,
+.modula-gallery-takeover__hover-builder-motion-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: $mod-space-8;
+}
+
+.modula-gallery-takeover__hover-builder-motion-badge-wrap {
+	display: flex;
+	justify-content: flex-start;
+}
+
+.modula-gallery-takeover__hover-builder-inline-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: $mod-space-2 $mod-space-8;
+	border-radius: 0;
+	border: 1px solid var(--mod-se-accent);
+	background: var(--mod-se-accent-soft);
+	color: var(--mod-se-accent-ink);
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.2;
+	white-space: nowrap;
+}
+
+.modula-gallery-takeover__hover-builder-inline-badge--subtle {
+	background: var(--mod-se-accent-soft);
+	border-color: color-mix(in srgb, var(--mod-se-accent) 35%, transparent);
+	font-size: 10px;
+	padding: $mod-space-2 $mod-space-4;
+}
+
+.modula-gallery-takeover__hover-builder-layer-help {
+	margin: 0 0 $mod-space-8;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--mod-se-aux-ink-muted, #{$mod-takeover-text-muted});
+}
+
+.modula-gallery-takeover__hover-builder-presets-panel {
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	flex: 1 1 auto;
+}
+
+.modula-gallery-takeover__hover-builder-mode-nav {
+	flex-shrink: 0;
+	box-sizing: border-box;
+	margin: 0 0 $mod-space-12;
+	padding-inline: $mod-space-16;
+	width: 100%;
+
+	&.modula-gallery-takeover__hover-builder-mode-nav--canvas {
+		margin-top: $mod-space-4;
+		margin-bottom: $mod-space-8;
+	}
+}
+
+.modula-gallery-takeover__hover-builder-canvas-hint {
+	box-sizing: border-box;
+	margin: $mod-space-4 0 $mod-space-16;
+	padding-inline: $mod-space-16;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--mod-se-ink-3, var(--mod-se-aux-ink-muted, #{$mod-takeover-text-muted}));
+}
+
+.modula-gallery-takeover__hover-builder-presets {
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-4;
+	min-height: 0;
+	flex: 1 1 auto;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+.modula-gallery-takeover__hover-builder-preset-btn {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: $mod-space-4;
+	width: 100%;
+	box-sizing: border-box;
+	margin: 0;
+	padding: $mod-space-12 $mod-space-8;
+	border-radius: 0;
+	border: none;
+	background: transparent;
+	color: var(--mod-se-ink, var(--mod-se-aux-ink, #{$mod-takeover-text-strong}));
+	text-align: left;
+	cursor: pointer;
+	transition: background var(--mod-se-duration-fast, 0.12s) ease;
+
+	&:hover:not(:disabled):not(.is-active) {
+		background: var(--mod-se-chrome-2);
+	}
+
+	&.is-active {
+		background: var(--mod-se-accent-soft);
+		box-shadow: none;
+
+		.modula-gallery-takeover__hover-builder-preset-label {
+			color: var(--mod-se-accent-ink);
+			font-weight: 600;
+		}
+
+		.modula-gallery-takeover__hover-builder-preset-description {
+			color: color-mix(in srgb,
+					var(--mod-se-accent-ink) 72%,
+					transparent);
+		}
+	}
+
+	&.is-locked,
+	&:disabled {
+		cursor: not-allowed;
+		opacity: 0.45;
+		background: transparent;
+		box-shadow: none;
+	}
+
+	&.is-locked:hover,
+	&:disabled:hover {
+		background: transparent;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: 0 0 0 3px var(--mod-se-accent-soft);
+	}
+}
+
+.modula-gallery-takeover__hover-builder-preset-label-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: $mod-space-8;
+	width: 100%;
+}
+
+.modula-gallery-takeover__hover-builder-preset-label {
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--mod-se-ink, var(--mod-se-aux-ink, #{$mod-takeover-text-strong}));
+}
+
+.modula-gallery-takeover__hover-builder-inline-badge--pro {
+	background: var(--mod-se-accent-soft);
+	border-color: color-mix(in srgb, var(--mod-se-accent) 40%, transparent);
+	color: var(--mod-se-accent-ink);
+}
+
+.modula-gallery-takeover__hover-builder-preset-description {
+	font-size: 12px;
+	line-height: 1.4;
+	color: var(--mod-se-ink-3, var(--mod-se-aux-ink-muted, #{$mod-takeover-text-muted}));
+}
+
+.modula-hover-builder-card-wrap {
+	flex: 0 1 min(520px, 100%);
+	max-width: min(520px, 100%);
+	width: min(520px, 100%);
+}
+
+.modula-hover-builder-card-shell {
+	position: relative;
+	width: 100%;
+	border-radius: 10px;
+}
+
+/*
+ * Build: card stays in “rest” state — no :hover / :focus-within reactions so chips are easy to drag.
+ * (Overrides any gallery hover-v2 rules loaded in the editor.)
+ */
+.modula-hover-builder-card-shell.is-build-mode {
+
+	.modula-hover-v2.modula-hover-card--zoom .modula-item-hover-media,
+	.modula-hover-v2.modula-hover-card--zoom .modula-showcase__hover-media,
+	.modula-hover-v2.modula-hover-card--zoom .modula-item-content img {
+		transform: scale(1) !important;
+		transition: none !important;
+	}
+
+	.modula-hover-v2.modula-hover-card--grayscale .modula-item-content img {
+		filter: none !important;
+		transition: none !important;
+	}
+
+	.modula-hover-v2.modula-hover-card--lift.modula-item {
+		transform: none !important;
+		box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35) !important;
+		transition: none !important;
+	}
+
+	.modula-hover-v2.modula-hover-card--dim .modula-item-overlay,
+	.modula-hover-v2.modula-hover-card--dim-addon .modula-item-overlay {
+		opacity: 0 !important;
+		transition: none !important;
+	}
+
+	.modula-hover-builder-card__image-slot .modula-title,
+	.modula-hover-builder-card__image-slot .jtg-description,
+	.modula-hover-builder-card__image-slot .modula-social {
+		opacity: 1 !important;
+		transform: none !important;
+		filter: none !important;
+		transition: none !important;
+	}
+
+	/*
+	 * Build: stronger chip tray; move-grip is a slim inlay (see base __image-slot-handle).
+	 */
+	.modula-hover-builder-card__image-slot {
+		background: rgba(10, 12, 16, 0.82);
+		border: 1px solid rgba(255, 255, 255, 0.34);
+		box-shadow: 0 2px 14px rgba(0, 0, 0, 0.42);
+
+		&.is-selected {
+			border: 1px solid rgba(130, 190, 255, 1);
+			box-shadow: 0 2px 14px rgba(0, 0, 0, 0.42);
+		}
+	}
+}
+
+.modula-hover-builder-card__select-card {
+	position: relative;
+	z-index: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: inherit;
+	cursor: pointer;
+	background: transparent;
+	text-align: inherit;
+	font: inherit;
+	color: inherit;
+
+	img,
+	.modula-hover-builder-card__media-placeholder {
+		pointer-events: none;
+	}
+}
+
+.modula-hover-builder-card__media {
+	position: relative;
+	overflow: hidden;
+	border-radius: 8px;
+	background: #1d2327;
+	container-type: size;
+
+	/*
+	 * Dim overlay sits on the image only (z-index 1). Slots + graphic (::before) use z-index 2
+	 * so they match frontend `.figc` stacking — graphic was previously on select-card under overlay.
+	 */
+	.modula-item-overlay {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		pointer-events: none;
+	}
+
+	img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+}
+
+/*
+ * Build canvas: alignment grid (8×8) + center crosshair; under slot chips, no pointer capture.
+ */
+.modula-hover-builder-card__build-grid {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	pointer-events: none;
+	overflow: hidden;
+	border-radius: 8px;
+	/* Slight veil so grid is readable even over bright images. */
+	background-color: rgba(8, 10, 14, 0.12);
+	background-image:
+		repeating-linear-gradient(90deg,
+			rgba(0, 0, 0, 0.001),
+			rgba(0, 0, 0, 0.001) calc(12.5% - 1px),
+			rgba(255, 255, 255, 0.3) calc(12.5% - 1px),
+			rgba(255, 255, 255, 0.3) 12.5%),
+		repeating-linear-gradient(0deg,
+			rgba(0, 0, 0, 0.001),
+			rgba(0, 0, 0, 0.001) calc(12.5% - 1px),
+			rgba(255, 255, 255, 0.3) calc(12.5% - 1px),
+			rgba(255, 255, 255, 0.3) 12.5%);
+
+	&::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 50%;
+		width: 1px;
+		margin-left: -0.5px;
+		background: rgba(130, 190, 255, 0.9);
+		box-shadow:
+			0 0 0 1px rgba(0, 0, 0, 0.35),
+			0 0 6px rgba(130, 190, 255, 0.45);
+	}
+
+	&::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 50%;
+		height: 1px;
+		margin-top: -0.5px;
+		background: rgba(130, 190, 255, 0.9);
+		box-shadow:
+			0 0 0 1px rgba(0, 0, 0, 0.35),
+			0 0 6px rgba(130, 190, 255, 0.45);
+	}
+}
+
+.modula-hover-builder-card__media-placeholder {
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(135deg, #2c3338 0%, #101517 100%);
+}
+
+.modula-hover-builder-card .modula-item {
+	position: relative;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.modula-hover-builder-card .modula-item-content {
+	position: relative;
+	display: block;
+}
+
+/* Slots live on the image (absolute % positions). */
+.modula-hover-builder-card__image-slot {
+	position: absolute;
+	z-index: 2;
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: $mod-space-4;
+	/*
+	 * width: max-content — with left:% + width:auto, shrink-to-fit used “remaining width”
+	 * from left to the right edge, so dragging right squeezed the chip. max-content uses intrinsic width.
+	 */
+	width: max-content;
+	max-width: min(var(--modula-hover-slot-max-width, 50%), calc(100% - 12px));
+	min-width: 0;
+	box-sizing: border-box;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+	padding: $mod-space-4 $mod-space-6;
+	border-radius: 6px;
+	background: rgba(0, 0, 0, 0.42);
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	color: #fff;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+	transform: translate(var(--modula-hover-slot-anchor-x, 0%), -50%);
+	transition:
+		border-color 0.15s ease,
+		box-shadow 0.15s ease;
+
+	/* Single accent ring (Build mode overrides above for stronger tray). */
+	&.is-selected {
+		border: 1px solid rgba(120, 185, 255, 1);
+		box-shadow: none;
+	}
+
+	&.is-build {
+		/*
+		 * Cap chip width in the canvas so long captions never span the full preview
+		 * (which locked drag when clamping used chip bounding box). Frontend uses
+		 * per-anchor max-width from hoverSlotRails; builder uses a fixed preview cap.
+		 */
+		max-width: min(56%, calc(100% - 12px));
+		padding: $mod-space-8 $mod-space-5 $mod-space-3;
+		touch-action: none;
+
+		.modula-hover-builder-card__image-slot-main {
+			align-self: auto;
+			max-width: 100%;
+		}
+
+		.modula-hover-builder-card__image-slot .modula-title,
+		.modula-hover-builder-card__image-slot .jtg-description {
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			-webkit-line-clamp: 2;
+			line-clamp: 2;
+		}
+	}
+
+	&.is-build.is-dragging {
+		.modula-hover-builder-card__image-slot-handle {
+			opacity: 1;
+			pointer-events: auto;
+		}
+	}
+}
+
+.modula-hover-builder-card__image-slot-main {
+	flex: 0 1 auto;
+	min-width: 0;
+	/*
+	 * Cap to the slot width so a long single-line caption can't grow the box past
+	 * the media (Build/Preview modes set their own cap; the plain Presets preview
+	 * previously had none, so the caption spanned the full canvas and overflowed).
+	 */
+	max-width: 100%;
+	display: block;
+	height: auto;
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 4px;
+	background: transparent;
+	color: inherit;
+	text-align: inherit;
+	cursor: pointer;
+	font: inherit;
+	line-height: inherit;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+/* Clamp on text nodes — not on the button wrapper (block child breaks button line-clamp). */
+.modula-hover-builder-card__image-slot .modula-title,
+.modula-hover-builder-card__image-slot .jtg-description {
+	line-height: 1.35;
+	max-width: 100%;
+	margin: 0;
+}
+
+.modula-hover-builder-card__image-slot-handle {
+	position: absolute;
+	top: 50%;
+	z-index: 3;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	margin: 0;
+	padding: 0;
+	border: 1px solid rgba(130, 190, 255, 0.55);
+	border-radius: 999px;
+	color: rgba(255, 255, 255, 0.92);
+	background: rgba(22, 28, 36, 0.94);
+	cursor: grab;
+	touch-action: none;
+	opacity: 0;
+	pointer-events: none;
+	transform: translate(-50%, -50%);
+	transition:
+		opacity 0.15s ease,
+		border-color 0.15s ease,
+		background 0.15s ease,
+		box-shadow 0.15s ease;
+	box-shadow:
+		0 1px 0 rgba(255, 255, 255, 0.12) inset,
+		0 1px 4px rgba(0, 0, 0, 0.45);
+
+	.modula-hover-builder-card__move-glyph {
+		display: block;
+		flex-shrink: 0;
+		width: 14px;
+		height: 14px;
+		opacity: 0.95;
+	}
+
+	svg {
+		fill: none;
+		stroke: currentColor;
+	}
+
+	&:active {
+		cursor: grabbing;
+	}
+
+	&:hover {
+		color: #fff;
+		background: rgba(28, 36, 46, 0.98);
+		border-color: rgba(160, 210, 255, 0.95);
+		box-shadow:
+			0 0 0 2px rgba(130, 190, 255, 0.35),
+			0 1px 4px rgba(0, 0, 0, 0.45);
+	}
+
+	&--left {
+		left: 0;
+	}
+
+	&--center {
+		left: 50%;
+	}
+
+	&--right {
+		left: 100%;
+	}
+}
+
+.modula-hover-builder-card__image-slot.is-build:hover .modula-hover-builder-card__image-slot-handle,
+.modula-hover-builder-card__image-slot.is-build.is-selected .modula-hover-builder-card__image-slot-handle {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.modula-hover-builder-card__slot-muted {
+	font-size: 0.75rem;
+	opacity: 0.75;
+	font-style: italic;
+}
+
+.modula-hover-builder-card__social-preview {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	line-height: 0;
+
+	a,
+	button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		color: inherit;
+		text-decoration: none;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		pointer-events: none;
+		line-height: 0;
+	}
+
+	svg {
+		display: block;
+		fill: currentColor;
+	}
+}
+
+.modula-hover-builder-card__social-preview-fallback {
+	opacity: 0.65;
+}
+
+/*
+ * Preview: simulate the hovered card via `.is-forced-hover` (Preview tab) plus real
+ * :hover / :focus-within. Disable editing only on controls.
+ * Slot chips live in __image-slot (not .figc) — mirror entrance presets for that DOM.
+ */
+.modula-hover-builder-card-shell.is-preview-mode {
+	user-select: none;
+	cursor: default;
+
+	$chip: '.modula-item.modula-hover-v2--free-slots';
+
+	/* Keep slot layer mounted; child opacity follows visibility/enter rules. */
+	.modula-hover-builder-card__image-slot {
+		visibility: visible;
+	}
+
+	.modula-hover-builder-card__select-card,
+	.modula-hover-builder-card__image-slot {
+		pointer-events: none;
+	}
+
+	/* Preview tab is the hovered card — dim + zoom without requiring a mouse hover. */
+	.modula-item.modula-hover-v2.modula-hover-card--dim .modula-item-overlay,
+	.modula-item.modula-hover-v2.modula-hover-card--dim-addon .modula-item-overlay {
+		background-color: var(--modula-hover-overlay-tint, rgba(0, 0, 0, 0.55));
+		opacity: 0;
+		transition: opacity var(--modula-hover-card-enter-duration, 300ms) ease;
+	}
+
+	.modula-item.modula-hover-v2.modula-hover-card--dim:is(:hover, .is-forced-hover) .modula-item-overlay,
+	.modula-item.modula-hover-v2.modula-hover-card--dim-addon:is(:hover, .is-forced-hover) .modula-item-overlay,
+	.modula-item.modula-hover-v2.modula-hover-card--dim:focus-within:has(:focus-visible) .modula-item-overlay,
+	.modula-item.modula-hover-v2.modula-hover-card--dim-addon:focus-within:has(:focus-visible) .modula-item-overlay {
+		opacity: var(--modula-hover-dim-active-opacity, 0.55);
+	}
+
+	.modula-item.modula-hover-v2.modula-hover-card--zoom .modula-hover-builder-card__media img {
+		transition: transform var(--modula-hover-card-enter-duration, 350ms) ease;
+		transform: scale(1);
+	}
+
+	.modula-item.modula-hover-v2.modula-hover-card--zoom:is(:hover, .is-forced-hover) .modula-hover-builder-card__media img,
+	.modula-item.modula-hover-v2.modula-hover-card--zoom:focus-within:has(:focus-visible) .modula-hover-builder-card__media img {
+		transform: scale(1.06);
+	}
+
+	/*
+	 * Strip builder chip frame in Preview — same idea as free slots on the front
+	 * (text over the image, no grey box / border).
+	 */
+	.modula-hover-builder-card__image-slot {
+		gap: 0;
+		padding: 0;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+		box-shadow: none;
+
+		&.is-selected {
+			border-color: transparent;
+			box-shadow: none;
+		}
+	}
+
+	.modula-hover-builder-card__image-slot-main {
+		cursor: default;
+	}
+
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--frame .modula-hover-builder-card__media::before,
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--diamond .modula-hover-builder-card__media::before {
+		content: '';
+		position: absolute;
+		border: 2px solid rgba(255, 255, 255, 0.92);
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 220ms ease, transform 220ms ease;
+		z-index: 2;
+	}
+
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--frame .modula-hover-builder-card__media::before {
+		inset: 10%;
+	}
+
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--diamond .modula-hover-builder-card__media::before {
+		inset: auto;
+		left: 50%;
+		top: 50%;
+		width: min(64cqw, 64cqh);
+		height: min(64cqw, 64cqh);
+		transform: translate(-50%, -50%) rotate(45deg) scale(0.92);
+	}
+
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--frame:is(:hover, .is-forced-hover) .modula-hover-builder-card__media::before,
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--frame:focus-within:has(:focus-visible) .modula-hover-builder-card__media::before {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--diamond:is(:hover, .is-forced-hover) .modula-hover-builder-card__media::before,
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--diamond:focus-within:has(:focus-visible) .modula-hover-builder-card__media::before {
+		opacity: 1;
+		transform: translate(-50%, -50%) rotate(45deg) scale(1);
+	}
+
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic-visibility--always.modula-hover-graphic--frame .modula-hover-builder-card__media::before,
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic-visibility--always.modula-hover-graphic--diamond .modula-hover-builder-card__media::before {
+		opacity: 1;
+	}
+
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic-visibility--always.modula-hover-graphic--frame .modula-hover-builder-card__media::before {
+		transform: scale(1);
+	}
+
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic-visibility--always.modula-hover-graphic--diamond .modula-hover-builder-card__media::before {
+		transform: translate(-50%, -50%) rotate(45deg) scale(1);
+	}
+
+	.modula-hover-builder-card__image-slot .modula-title,
+	.modula-hover-builder-card__image-slot .jtg-description,
+	.modula-hover-builder-card__image-slot .modula-social {
+		color: #fff;
+		text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+		transition:
+			opacity var(--modula-hover-enter-duration, 280ms) ease,
+			transform var(--modula-hover-enter-duration, 280ms) ease,
+			filter var(--modula-hover-enter-duration, 280ms) ease;
+	}
+
+	/*
+	 * Preview: clamp long / large-font title & caption so they can't grow past the media
+	 * box (which is overflow: hidden) and get hard-cut. Ellipsis on the text node —
+	 * same as Build mode (never on __image-slot-main; block wrapper breaks line-clamp).
+	 */
+	.modula-hover-builder-card__image-slot .modula-title,
+	.modula-hover-builder-card__image-slot .jtg-description {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.modula-hover-builder-card__image-slot .modula-title {
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+	}
+
+	.modula-hover-builder-card__image-slot .jtg-description {
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+	}
+
+	.modula-hover-builder-card__image-slot .modula-title {
+		--modula-hover-enter-duration: var(--modula-hover-enter-duration-title, 280ms);
+		transition-delay: var(--modula-hover-enter-delay-title, 0ms);
+	}
+
+	.modula-hover-builder-card__image-slot .jtg-description {
+		--modula-hover-enter-duration: var(--modula-hover-enter-duration-caption, 280ms);
+		transition-delay: var(--modula-hover-enter-delay-caption, 0ms);
+	}
+
+	.modula-hover-builder-card__image-slot .modula-social {
+		--modula-hover-enter-duration: var(--modula-hover-enter-duration-social, 280ms);
+		transition-delay: var(--modula-hover-enter-delay-social, 0ms);
+	}
+
+	/* Show on hover in builder preview (matches frontend free-slots). */
+	#{$chip}.modula-hover-visibility--title--on-hover:not(:is(:hover, .is-forced-hover)):not(:focus-within:has(:focus-visible)) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-visibility--caption--on-hover:not(:is(:hover, .is-forced-hover)):not(:focus-within:has(:focus-visible)) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-visibility--social--on-hover:not(:is(:hover, .is-forced-hover)):not(:focus-within:has(:focus-visible)) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	#{$chip}.modula-hover-visibility--title--on-hover:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-visibility--title--on-hover:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-visibility--caption--on-hover:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-visibility--caption--on-hover:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-visibility--social--on-hover:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-visibility--social--on-hover:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	#{$chip}.modula-hover-enter--title--fade .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--caption--fade .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--social--fade .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+	}
+
+	#{$chip}.modula-hover-enter--title--fade:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--title--fade:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--caption--fade:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--caption--fade:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--social--fade:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-enter--social--fade:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 1;
+	}
+
+	#{$chip}.modula-hover-enter--title--slide-up .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--caption--slide-up .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--social--slide-up .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+
+	#{$chip}.modula-hover-enter--title--slide-up:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--title--slide-up:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--caption--slide-up:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--caption--slide-up:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--social--slide-up:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-enter--social--slide-up:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	#{$chip}.modula-hover-enter--title--slide-down .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--caption--slide-down .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--social--slide-down .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+		transform: translateY(-12px);
+	}
+
+	#{$chip}.modula-hover-enter--title--slide-down:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--title--slide-down:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--caption--slide-down:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--caption--slide-down:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--social--slide-down:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-enter--social--slide-down:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	#{$chip}.modula-hover-enter--title--scale .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--caption--scale .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--social--scale .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+		transform: scale(0.94);
+	}
+
+	#{$chip}.modula-hover-enter--title--scale:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--title--scale:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--caption--scale:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--caption--scale:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--social--scale:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-enter--social--scale:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	#{$chip}.modula-hover-enter--title--slide-left .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--caption--slide-left .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--social--slide-left .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+		transform: translateX(16px);
+	}
+
+	#{$chip}.modula-hover-enter--title--slide-left:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--title--slide-left:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--caption--slide-left:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--caption--slide-left:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--social--slide-left:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-enter--social--slide-left:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 1;
+		transform: translateX(0);
+	}
+
+	#{$chip}.modula-hover-enter--title--slide-right .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--caption--slide-right .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--social--slide-right .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+		transform: translateX(-16px);
+	}
+
+	#{$chip}.modula-hover-enter--title--slide-right:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--title--slide-right:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--caption--slide-right:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--caption--slide-right:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--social--slide-right:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-enter--social--slide-right:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 1;
+		transform: translateX(0);
+	}
+
+	#{$chip}.modula-hover-enter--title--blur-in .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--caption--blur-in .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--social--blur-in .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+		filter: blur(5px);
+	}
+
+	#{$chip}.modula-hover-enter--title--blur-in:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--title--blur-in:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-enter--caption--blur-in:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--caption--blur-in:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-enter--social--blur-in:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-enter--social--blur-in:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 1;
+		filter: blur(0);
+	}
+
+	#{$chip}.modula-hover-visibility--title--always .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-visibility--caption--always .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-visibility--social--always .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 1;
+	}
+
+	#{$chip}.modula-hover-visibility--title--hidden .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-visibility--caption--hidden .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-visibility--social--hidden .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+		pointer-events: none;
+		visibility: hidden;
+	}
+
+	#{$chip}.modula-hover-visibility--title--hide-on-hover .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-visibility--caption--hide-on-hover .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-visibility--social--hide-on-hover .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 1;
+	}
+
+	#{$chip}.modula-hover-visibility--title--hide-on-hover:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-visibility--title--hide-on-hover:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-visibility--caption--hide-on-hover:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-visibility--caption--hide-on-hover:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-visibility--social--hide-on-hover:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-visibility--social--hide-on-hover:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+	}
+
+	#{$chip}.modula-hover-exit--title--fade:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-exit--title--fade:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-exit--caption--fade:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-exit--caption--fade:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-exit--social--fade:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-exit--social--fade:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+		transition-delay: 0ms;
+	}
+
+	#{$chip}.modula-hover-exit--title--slide-up:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-exit--title--slide-up:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-exit--caption--slide-up:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-exit--caption--slide-up:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-exit--social--slide-up:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-exit--social--slide-up:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+		transform: translateY(-12px);
+		transition-delay: 0ms;
+	}
+
+	#{$chip}.modula-hover-exit--title--slide-down:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-exit--title--slide-down:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-exit--caption--slide-down:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-exit--caption--slide-down:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-exit--social--slide-down:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-exit--social--slide-down:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+		transform: translateY(12px);
+		transition-delay: 0ms;
+	}
+
+	#{$chip}.modula-hover-exit--title--slide-left:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-exit--title--slide-left:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-exit--caption--slide-left:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-exit--caption--slide-left:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-exit--social--slide-left:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-exit--social--slide-left:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+		transform: translateX(-16px);
+		transition-delay: 0ms;
+	}
+
+	#{$chip}.modula-hover-exit--title--slide-right:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-exit--title--slide-right:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-exit--caption--slide-right:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-exit--caption--slide-right:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-exit--social--slide-right:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-exit--social--slide-right:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+		transform: translateX(16px);
+		transition-delay: 0ms;
+	}
+
+	#{$chip}.modula-hover-exit--title--blur-in:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-exit--title--blur-in:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-exit--caption--blur-in:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-exit--caption--blur-in:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-exit--social--blur-in:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-exit--social--blur-in:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+		filter: blur(5px);
+		transition-delay: 0ms;
+	}
+
+	#{$chip}.modula-hover-exit--title--scale:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-exit--title--scale:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-title,
+	#{$chip}.modula-hover-exit--caption--scale:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-exit--caption--scale:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .jtg-description,
+	#{$chip}.modula-hover-exit--social--scale:is(:hover, .is-forced-hover) .modula-hover-builder-card__image-slot .modula-social,
+	#{$chip}.modula-hover-exit--social--scale:focus-within:has(:focus-visible) .modula-hover-builder-card__image-slot .modula-social {
+		opacity: 0;
+		transform: scale(0.94);
+		transition-delay: 0ms;
+	}
+}
+
+.modula-settings-editor__app[data-appearance='dark'] {
+	.modula-gallery-takeover__reorder-panel--hover-builder {
+		color-scheme: dark;
+
+		@include modula-takeover-range-control-appearance;
+
+		.components-base-control__label,
+		.components-input-control__label,
+		.components-toggle-control__label {
+			color: var(--mod-se-aux-ink, #{$mod-takeover-ink-on-dark-strong});
+		}
+
+		.components-base-control__help,
+		.components-form-toggle__help {
+			color: var(--mod-se-aux-ink-muted, #{$mod-takeover-ink-on-dark-muted});
+		}
+
+		.components-range-control__wrapper {
+			color: var(--mod-se-aux-ink-muted, #{$mod-takeover-ink-on-dark-muted});
+		}
+
+		.components-select-control {
+			color: rgba(255, 255, 255, 0.88) !important;
+		}
+
+		.components-select-control .components-input-control__suffix {
+			color: rgba(255, 255, 255, 0.88) !important;
+		}
+
+		.components-select-control .components-input-control__suffix svg path {
+			fill: rgba(255, 255, 255, 0.78) !important;
+		}
+
+		.components-input-control__suffix svg path,
+		.components-input-control__prefix svg path {
+			fill: rgba(255, 255, 255, 0.78) !important;
+		}
+
+		.components-range-control__number input,
+		.components-range-control__number .components-input-control__input {
+			color: rgba(255, 255, 255, 0.92) !important;
+			background: transparent !important;
+			border: none !important;
+		}
+
+		.modula-gallery-takeover__hover-builder-link-fields {
+			.components-checkbox-control__label {
+				color: rgba(255, 255, 255, 0.88);
+			}
+
+			.components-checkbox-control__input[type='checkbox'] {
+				background: var(--mod-se-control-bg, #1e1e1e);
+				border-color: var(--mod-se-control-border, #50575e);
+				box-shadow: none;
+			}
+
+			.components-checkbox-control__input[type='checkbox']:checked {
+				background: var(--wp-admin-theme-color, #2271b1);
+				border-color: var(--wp-admin-theme-color, #2271b1);
+			}
+
+			.components-checkbox-control__input[type='checkbox']:focus {
+				border-color: var(--wp-admin-theme-color, #2271b1);
+				box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #2271b1);
+				outline: none;
+			}
+		}
+
+		.modula-gallery-takeover__hover-builder-link-overlay-actions {
+			.components-button.is-tertiary {
+				color: rgba(255, 255, 255, 0.78);
+
+				&:hover:not(:disabled) {
+					color: rgba(255, 255, 255, 0.95);
+				}
+			}
+		}
+	}
+}

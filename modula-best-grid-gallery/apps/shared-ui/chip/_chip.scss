@@ -1,0 +1,126 @@
+.modula-ui-chip {
+	box-sizing: border-box;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	min-height: 28px;
+	height: 28px;
+	padding: 0 10px;
+	border: 1px solid var(--mod-ui-line);
+	border-radius: 0;
+	background: var(--mod-ui-surface);
+	color: var(--mod-ui-ink);
+	font-family: var(--mod-ui-font-ui, inherit);
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1;
+
+	&.is-active {
+		background: var(--mod-ui-accent-soft);
+		border-color: var(--mod-ui-accent);
+		color: var(--mod-ui-accent-ink);
+	}
+
+	&.is-dismissible {
+		padding-right: 4px;
+	}
+
+	&.is-interactive {
+		margin: 0;
+		cursor: pointer;
+
+		&:hover:not(:disabled) {
+			background: var(--mod-ui-chrome-2);
+		}
+
+		&:disabled {
+			opacity: 0.45;
+			cursor: not-allowed;
+		}
+
+		&:focus {
+			outline: none;
+		}
+
+		&:focus-visible {
+			box-shadow: 0 0 0 3px var(--mod-ui-accent-soft, transparent);
+		}
+	}
+}
+
+.modula-ui-chip__label {
+	min-width: 0;
+}
+
+.modula-ui-chip__body {
+	box-sizing: border-box;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	line-height: inherit;
+	cursor: inherit;
+
+	&:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: 0 0 0 3px var(--mod-ui-accent-soft, transparent);
+	}
+}
+
+.modula-ui-chip__count {
+	color: var(--mod-ui-ink-3);
+	font-variant-numeric: tabular-nums;
+}
+
+.modula-ui-chip.is-active .modula-ui-chip__count {
+	color: var(--mod-ui-accent-ink);
+}
+
+.modula-ui-chip__dismiss {
+	box-sizing: border-box;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0;
+	padding: 0;
+	width: 20px;
+	height: 20px;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	color: var(--mod-ui-ink-3);
+	font-size: 16px;
+	line-height: 1;
+	cursor: pointer;
+
+	&:hover:not(:disabled) {
+		color: var(--mod-ui-ink);
+	}
+
+	&:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: 0 0 0 3px var(--mod-ui-accent-soft, transparent);
+	}
+}

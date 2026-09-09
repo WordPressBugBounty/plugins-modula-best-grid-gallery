@@ -1,0 +1,137 @@
+/**
+ * Shared gallery mount shell (loader + bootstrap bundle).
+ *
+ * @package
+ */
+@use '../shared-styles/spacing' as *;
+@use '../shared-styles/radii' as *;
+
+/*
+ * Visually hide SSR tiles until React has painted real layout markup.
+ * (sr-only pattern — keeps nodes in DOM for SEO/crawlers.)
+ */
+%modula-gallery-ssr-items-hidden {
+	visibility: hidden;
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+	pointer-events: none;
+}
+
+.modula {
+	&.modula-gallery {
+		opacity: 0;
+		visibility: hidden;
+
+		&:not(.modula-gallery-initialized) {
+
+			.modula-items,
+			.filters,
+			.modula-pagination,
+			a.post-edit-link {
+				@extend %modula-gallery-ssr-items-hidden;
+			}
+		}
+
+		&.modula-gallery--bootstrap-pending {
+			opacity: 1;
+			visibility: visible;
+			min-height: 120px;
+			position: relative;
+		}
+
+		&.modula-gallery-initialized {
+			opacity: 1;
+			visibility: visible;
+
+			/*
+			 * Lazy layout chunks (custom grid, masonry, etc.) mount after init;
+			 * stay hidden until at least one tile exists to avoid the white flash.
+			 */
+			&:not(:has(.modula-items .modula-item)) {
+				opacity: 0;
+				visibility: hidden;
+				min-height: 120px;
+			}
+		}
+
+		/*
+		 * Filter/pagination chrome mounts with React; keep hidden until styles are ready.
+		 */
+		&.modula-gallery-initialized:not(.modula-gallery-chrome-ready) {
+
+			.filters,
+			.modula-pagination {
+				visibility: hidden !important;
+			}
+		}
+
+		/*
+		 * Progressive reveal while a load-in animation is armed. inView ON waits for
+		 * `.modula-loaded-scale` (gallery entered viewport); inView OFF uses
+		 * `.modula-loaded-effects` from mount so each tile animates on image load.
+		 */
+		&.modula-gallery-initialized.modula-loaded-scale .modula-items .modula-item:not(.modula-item--embedded):not(.tg-loaded) .modula-item-content,
+		&.modula-gallery-initialized.modula-loaded-scale .modula-items .modula-item:not(.modula-item--embedded):not(.tg-loaded) .modula-item-picture-stack,
+		&.modula-gallery-initialized.modula-loaded-effects .modula-items .modula-item:not(.modula-item--embedded):not(.tg-loaded) .modula-item-content,
+		&.modula-gallery-initialized.modula-loaded-effects .modula-items .modula-item:not(.modula-item--embedded):not(.tg-loaded) .modula-item-picture-stack {
+			opacity: 0;
+		}
+	}
+}
+
+.modula-gallery__bootstrap-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: $mod-space-12;
+	min-height: 6rem;
+	padding: $mod-space-24;
+	font-size: 0.9375rem;
+	color: #646970;
+}
+
+.modula-gallery__bootstrap-retry {
+	appearance: none;
+	border: 1px solid #c3c4c7;
+	border-radius: $mod-radius-4;
+	background: #fff;
+	color: #1d2327;
+	cursor: pointer;
+	font-size: 0.875rem;
+	line-height: 1.4;
+	padding: $mod-space-8 $mod-space-16;
+
+	&:hover {
+		border-color: #8c8f94;
+	}
+}
+
+.modula-gallery__error-boundary,
+.modula-gallery__lightbox-error {
+	padding: $mod-space-16 $mod-space-24;
+	color: #646970;
+	font-size: 0.9375rem;
+	text-align: center;
+}
+
+.modula-gallery__error-boundary-retry {
+	appearance: none;
+	border: 1px solid #c3c4c7;
+	border-radius: $mod-radius-4;
+	background: #fff;
+	color: #1d2327;
+	cursor: pointer;
+	font-size: 0.875rem;
+	margin-top: $mod-space-12;
+	padding: $mod-space-8 $mod-space-16;
+}
+
+.modula-gallery__chunk-loading {
+	min-height: 1px;
+}

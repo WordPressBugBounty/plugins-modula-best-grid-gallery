@@ -1,0 +1,268 @@
+/**
+ * Showcase gallery — portfolio horizontal strip.
+ *
+ * Layout boxes stay neighbor-sized (stable translate). Active grow is CSS
+ * scale on an inner wrapper so hover-v2 card treatments (lift, etc.) can still
+ * apply on `.modula-item`.
+ */
+
+.modula .modula-items.modula-showcase {
+	position: relative;
+	display: block;
+	width: 100%;
+	overflow: visible;
+	touch-action: pan-y;
+
+	/* Beat global `.modula-item { overflow: hidden }` and FOUC flex widths.
+	 * Legacy `modula.css` forces `position:absolute` on every `.modula-item` /
+	 * `img.pic` — without relative flow the strip cannot size the active slide. */
+	.modula-item.modula-showcase__slide {
+		position: relative !important;
+		inset: auto !important;
+		top: auto !important;
+		left: auto !important;
+		right: auto !important;
+		bottom: auto !important;
+		overflow: visible !important;
+		max-width: none !important;
+		flex: 0 0 auto !important;
+	}
+
+	.modula-showcase__viewport {
+		position: relative;
+		width: 100%;
+		overflow-x: hidden;
+		overflow-y: visible;
+		outline: none;
+		cursor: grab;
+		user-select: none;
+		-webkit-user-select: none;
+		box-sizing: border-box;
+
+		&:focus-visible {
+			outline: 2px solid currentColor;
+			outline-offset: 4px;
+		}
+	}
+
+	&.is-dragging .modula-showcase__viewport {
+		cursor: grabbing;
+	}
+
+	.modula-showcase__track {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		width: max-content;
+		max-width: none;
+		gap: var(--modula-showcase-gap, 32px);
+		will-change: transform;
+	}
+
+	/*
+	 * Drag + infinite loop snap: never animate slide scale while the track
+	 * teleports between clones (that flash is the visible “redraw”).
+	 */
+	&.is-dragging .modula-showcase__scale,
+	&.is-loop-snap .modula-showcase__scale {
+		transition: none !important;
+	}
+
+	.modula-showcase__slide {
+		position: relative !important;
+		flex: 0 0 auto !important;
+		overflow: visible !important;
+		background: transparent;
+		z-index: 1;
+
+		&.is-active {
+			z-index: 2;
+		}
+	}
+
+	.modula-showcase__scale {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		/*
+		 * Layout size stays neighbor-height × AR (stable). Active “grow” is
+		 * CSS scale so mixed ARs do not jump the flex widths mid-translate.
+		 */
+		transform: scale(1);
+		transform-origin: center center;
+		transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+		will-change: transform;
+
+		&.is-active {
+			transform: scale(var(--modula-showcase-center-scale, 1.4));
+		}
+
+		/*
+		 * Hover card zoom scales this shell (img + overlay + figc together).
+		 * Scaling only the <img> desyncs dim tint from the visible photo.
+		 */
+		.modula-showcase__hover-media {
+			position: absolute;
+			inset: 0;
+			overflow: hidden;
+			transform-origin: center center;
+		}
+
+		/*
+		 * Same stack as grids: media (0) → dim overlay (1) → hover chrome (6).
+		 * Transparent hit link (5) stays a sibling above this shell.
+		 */
+		.modula-item-overlay {
+			z-index: 1;
+			pointer-events: none;
+		}
+
+		.modula-item-content {
+			z-index: 6;
+			pointer-events: none;
+		}
+
+		.figc .modula-social,
+		.figc .modula-social a {
+			pointer-events: auto;
+		}
+	}
+
+	.modula-showcase__img {
+		display: block;
+		position: absolute !important;
+		inset: 0 !important;
+		top: 0 !important;
+		left: 0 !important;
+		right: 0 !important;
+		bottom: 0 !important;
+		width: 100% !important;
+		height: 100% !important;
+		max-width: none !important;
+		object-fit: contain;
+		object-position: center center;
+		pointer-events: none;
+		z-index: 0;
+		/* Kill global `.modula img { transition: … transform }` fighting size. */
+		transition: none !important;
+	}
+
+	.modula-item-link.tile-inner,
+	.modula-showcase__hit {
+		display: block;
+		position: absolute;
+		inset: 0;
+		width: auto;
+		height: auto;
+		padding: 0;
+		margin: 0;
+		border: 0;
+		background: transparent;
+		cursor: inherit;
+		overflow: visible;
+		z-index: 5;
+		/* Kill sticky mouse/drag focus ring; keyboard still gets :focus-visible. */
+		outline: none;
+		box-shadow: none;
+		-webkit-tap-highlight-color: transparent;
+
+		&:focus,
+		&:focus-visible,
+		&:active {
+			outline: none;
+			box-shadow: none;
+		}
+	}
+
+	.modula-showcase__arrows {
+		display: flex;
+		gap: 8px;
+		margin-top: 20px;
+		pointer-events: auto;
+	}
+
+	.modula-showcase__arrow {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		padding: 0;
+		border: 1px solid rgba(0, 0, 0, 0.18);
+		border-radius: 999px;
+		background: #fff;
+		color: #111;
+		line-height: 0;
+		cursor: pointer;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+
+		&:hover,
+		&:focus-visible {
+			border-color: rgba(0, 0, 0, 0.4);
+			outline: none;
+		}
+	}
+
+	.modula-showcase__arrow-icon {
+		display: block;
+		flex: 0 0 auto;
+		width: 14px;
+		height: 14px;
+	}
+
+	.modula-showcase__arrow--prev .modula-showcase__arrow-icon {
+		transform: translateX(-0.5px);
+	}
+
+	.modula-showcase__arrow--next .modula-showcase__arrow-icon {
+		transform: translateX(0.5px);
+	}
+
+	&.modula-showcase--arrows-bottom-right .modula-showcase__arrows {
+		justify-content: flex-end;
+	}
+
+	&.modula-showcase--arrows-bottom-left .modula-showcase__arrows {
+		justify-content: flex-start;
+	}
+
+	&.modula-showcase--arrows-sides {
+		.modula-showcase__arrows {
+			position: absolute;
+			inset: 0;
+			margin: 0;
+			pointer-events: none;
+		}
+
+		.modula-showcase__arrow {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			pointer-events: auto;
+			z-index: 3;
+		}
+
+		.modula-showcase__arrow--prev {
+			left: 12px;
+		}
+
+		.modula-showcase__arrow--next {
+			right: 12px;
+		}
+	}
+
+	.modula-showcase__slide {
+
+		.modula-social-expandable,
+		.modula-social-expandable-icons {
+			z-index: 5;
+			pointer-events: auto;
+		}
+	}
+
+	&.modula-showcase--mobile {
+		.modula-showcase__scale {
+			transition-duration: 0.35s;
+		}
+	}
+}

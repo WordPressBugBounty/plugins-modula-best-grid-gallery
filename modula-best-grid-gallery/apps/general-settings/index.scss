@@ -1,0 +1,10 @@
+#wpcontent {
+    padding-left: 0;
+}
+
+#modula-settings-app {
+    .components-button:focus:not(:disabled) {
+        outline: none;
+        box-shadow: none;
+    }
+}

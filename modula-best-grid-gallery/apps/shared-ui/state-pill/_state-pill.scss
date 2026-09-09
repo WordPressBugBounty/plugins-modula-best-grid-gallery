@@ -1,0 +1,26 @@
+.modula-ui-state-pill {
+	box-sizing: border-box;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	min-height: 20px;
+	height: 20px;
+	padding: 0 8px;
+	border: 1px solid var(--mod-ui-line);
+	border-radius: 0;
+	background: var(--mod-ui-chrome-2);
+	color: var(--mod-ui-ink-2);
+	font-family: var(--mod-ui-font-ui, inherit);
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1;
+	letter-spacing: 0.02em;
+	white-space: nowrap;
+
+	&.is-active {
+		border-color: transparent;
+		background: var(--mod-ui-accent-soft);
+		color: var(--mod-ui-accent-ink);
+	}
+}

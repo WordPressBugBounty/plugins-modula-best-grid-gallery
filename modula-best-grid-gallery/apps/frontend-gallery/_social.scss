@@ -1,0 +1,233 @@
+/**
+ * Listing socials — expandable FAB / popover + inline hover bar (React frontend).
+ * Class names match legacy markup for hover + icon styling continuity.
+ */
+
+.modula .modula-items .modula-item {
+
+	/*
+	 * Inline share strip inside .figc (folded bar Off). Default ink is white like
+	 * legacy modula.css — SVGs need fill:currentColor or they stay black on dim overlays.
+	 */
+	.figc .modula-social {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.35em;
+		color: #fff;
+		z-index: 10;
+		font-size: 0;
+
+		a {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			text-decoration: none;
+			color: inherit;
+			border: 0;
+			padding: 0;
+			margin: 0;
+			box-shadow: none;
+			pointer-events: auto;
+			position: relative;
+			z-index: 1;
+
+			svg,
+			path {
+				fill: currentColor;
+			}
+		}
+	}
+
+	.modula-social-expandable,
+	.modula-social-expandable-icons {
+		pointer-events: auto;
+	}
+
+	.modula-social-expandable {
+		display: none;
+	}
+
+	.modula-social-expandable-icons:not(.modula-show-socials) {
+		display: none;
+	}
+
+	.modula-social-expandable-icons {
+		padding: 10px 15px;
+		background-color: #000;
+		border-radius: 20px;
+		position: absolute;
+		bottom: 58px;
+		display: inline-flex;
+		z-index: 99;
+		right: 0;
+		flex-wrap: wrap;
+		box-sizing: border-box;
+		max-width: calc(100% - 20px);
+		justify-content: space-evenly;
+		margin-right: 8px;
+		/* Default ink on black pill — GalleryDynamicStyle may override via socialIconColor. */
+		color: #fff;
+
+		&::before {
+			content: '';
+			position: absolute;
+			width: 0;
+			height: 0;
+			border-left: 10px solid transparent;
+			border-right: 10px solid transparent;
+			border-top: 10px solid #000;
+			bottom: -8px;
+			right: 10px;
+		}
+
+		&.modula-socials-right {
+			left: 0;
+			right: unset;
+
+			&::before {
+				right: unset;
+				left: 10px;
+			}
+		}
+
+		a {
+			justify-content: center;
+			align-items: center;
+			display: flex;
+			flex: 0 0 auto;
+			color: inherit;
+			text-decoration: none;
+
+			svg,
+			path {
+				fill: currentColor;
+			}
+		}
+	}
+
+	.modula-social-desktop-collapsed.modula-social-expandable {
+		padding: 10px;
+		background-color: #000;
+		border-radius: 50%;
+		cursor: pointer;
+		position: absolute;
+		right: 10px;
+		bottom: 10px;
+		z-index: 999;
+		display: block;
+		color: #fff;
+		fill: currentColor;
+
+		a.modula-icon-share {
+			pointer-events: none;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			border-radius: 50%;
+			text-decoration: none;
+			color: inherit;
+
+			svg,
+			path {
+				fill: currentColor;
+			}
+		}
+	}
+
+	.modula-social-desktop-collapsed.modula-social-expandable-icons:not(.modula-show-socials) {
+		display: none;
+	}
+}
+
+@media (max-width: 992px) {
+	.modula .modula-items .modula-item {
+		.modula-social {
+			display: none;
+		}
+
+		.modula-social-expandable {
+			padding: 10px;
+			background-color: #000;
+			border-radius: 50%;
+			cursor: pointer;
+			position: absolute;
+			right: 10px;
+			bottom: 10px;
+			z-index: 999;
+			display: block;
+			color: #fff;
+			fill: currentColor;
+
+			a.modula-icon-share {
+				pointer-events: none;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				border-radius: 50%;
+				text-decoration: none;
+				color: inherit;
+
+				svg,
+				path {
+					fill: currentColor;
+				}
+			}
+		}
+
+		.modula-social-expandable-icons {
+			padding: 10px 15px;
+			background-color: #000;
+			border-radius: 20px;
+			position: absolute;
+			bottom: 58px;
+			display: inline-flex;
+			z-index: 99;
+			right: 0;
+			flex-wrap: wrap;
+			box-sizing: border-box;
+			max-width: calc(100% - 20px);
+			justify-content: space-evenly;
+			margin-right: 8px;
+			color: #fff;
+
+			&:not(.modula-show-socials) {
+				display: none;
+			}
+
+			&::before {
+				content: '';
+				position: absolute;
+				width: 0;
+				height: 0;
+				border-left: 10px solid transparent;
+				border-right: 10px solid transparent;
+				border-top: 10px solid #000;
+				bottom: -8px;
+				right: 10px;
+			}
+
+			&.modula-socials-right {
+				left: 0;
+				right: unset;
+
+				&::before {
+					right: unset;
+					left: 10px;
+				}
+			}
+
+			a {
+				justify-content: center;
+				align-items: center;
+				display: flex;
+				color: inherit;
+
+				svg,
+				path {
+					fill: currentColor;
+				}
+			}
+		}
+	}
+}

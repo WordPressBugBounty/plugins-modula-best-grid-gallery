@@ -1,0 +1,57 @@
+.modula-ui-segmented {
+	display: inline-flex;
+	align-items: stretch;
+	box-sizing: border-box;
+	width: 100%;
+	padding: 2px;
+	gap: 0;
+	background: var(--mod-ui-chrome-2);
+	border: 1px solid var(--mod-ui-line);
+	border-radius: 0;
+}
+
+.modula-ui-segmented__btn {
+	flex: 1 1 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0;
+	min-height: 32px;
+	height: 32px;
+	padding: 0 12px;
+	border: none;
+	border-radius: 0;
+	background: transparent;
+	color: var(--mod-ui-ink-2);
+	font-family: var(--mod-ui-font-ui, inherit);
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+	transition:
+		background var(--mod-ui-duration-fast, 0.12s) ease,
+		color var(--mod-ui-duration-fast, 0.12s) ease,
+		box-shadow var(--mod-ui-duration-fast, 0.12s) ease;
+
+	&:hover:not(:disabled):not(.is-active) {
+		background: rgb(0 0 0 / 4%);
+	}
+
+	&.is-active {
+		background: var(--mod-ui-surface);
+		color: var(--mod-ui-ink);
+		box-shadow: var(--mod-ui-shadow-sm, none);
+	}
+
+	&:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: 0 0 0 3px var(--mod-ui-accent-soft, transparent);
+	}
+}

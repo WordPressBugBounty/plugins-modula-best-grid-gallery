@@ -69,6 +69,15 @@ class Modula_Admin {
 	public function register_submenus() {
 		$links = array();
 
+		$links['moduladefaults'] = array(
+			'page_title' => esc_html__( 'Gallery presets (legacy)', 'modula-best-grid-gallery' ),
+			'menu_title' => esc_html__( 'Gallery presets (legacy)', 'modula-best-grid-gallery' ),
+			'capability' => 'manage_options',
+			'menu_slug'  => '#gallery-defaults',
+			'function'   => '__return_null',
+			'priority'   => 2,
+		);
+
 		$links['modulaalbums'] = array(
 			'page_title' => esc_html__( 'Albums', 'modula-best-grid-gallery' ),
 			'menu_title' => esc_html__( 'Albums', 'modula-best-grid-gallery' ),
@@ -78,18 +87,9 @@ class Modula_Admin {
 			'priority'   => 3,
 		);
 
-		$links['moduladefaults'] = array(
-			'page_title' => esc_html__( 'Defaults', 'modula-best-grid-gallery' ),
-			'menu_title' => esc_html__( 'Defaults', 'modula-best-grid-gallery' ),
-			'capability' => 'manage_options',
-			'menu_slug'  => '#gallery-defaults',
-			'function'   => '__return_null',
-			'priority'   => 1,
-		);
-
 		$links['albumsdefaults'] = array(
-			'page_title' => esc_html__( 'Defaults', 'modula-best-grid-gallery' ),
-			'menu_title' => esc_html__( 'Defaults', 'modula-best-grid-gallery' ),
+			'page_title' => esc_html__( 'Album presets (legacy)', 'modula-best-grid-gallery' ),
+			'menu_title' => esc_html__( 'Album presets (legacy)', 'modula-best-grid-gallery' ),
 			'capability' => 'manage_options',
 			'menu_slug'  => '#albums-defaults',
 			'function'   => '__return_null',
@@ -133,18 +133,6 @@ class Modula_Admin {
 			'function'   => array( $this, 'add_settings_react_root' ),
 			'priority'   => 31,
 		);
-
-		$instance = Modula_Extensions_Base::get_instance();
-		if ( ! $instance->is_upgradable_addon( 'modula-image-proofing' ) ) {
-			$links['image-proofing'] = array(
-				'page_title' => esc_html__( 'Image Proofing', 'modula-best-grid-gallery' ),
-				'menu_title' => esc_html__( 'Proofing', 'modula-best-grid-gallery' ),
-				'capability' => 'manage_options',
-				'menu_slug'  => '#image-proofing',
-				'function'   => array( $this, 'modula_image_proofing' ),
-				'priority'   => 3,
-			);
-		}
 
 		$this->menu_links = apply_filters( 'modula_admin_page_link', $links );
 

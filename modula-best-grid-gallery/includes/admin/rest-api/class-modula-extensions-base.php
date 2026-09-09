@@ -133,9 +133,9 @@ class Modula_Extensions_Base {
 			'modula-defaults'            => array(
 				'available'   => false,
 				'enabled'     => false,
-				'name'        => __( 'Defaults', 'modula-best-grid-gallery' ),
+				'name'        => __( 'Presets', 'modula-best-grid-gallery' ),
 				'slug'        => 'modula-defaults',
-				'description' => __( 'Set default settings for all your galleries to save time and maintain consistency.', 'modula-best-grid-gallery' ),
+				'description' => __( 'Set preset settings for all your galleries to save time and maintain consistency.', 'modula-best-grid-gallery' ),
 			),
 			'modula-comments'            => array(
 				'available'   => false,
@@ -668,7 +668,7 @@ class Modula_Extensions_Base {
 			$current_plan = 'free';
 		}
 
-		if ( ! defined( 'MODULA_PRO_VERSION' ) ) {
+		if ( ! modula_is_compatible_pro() ) {
 			return true;
 		}
 

@@ -168,7 +168,7 @@ class Modula_Uninstall {
 		// Delete options
 		if ( '1' == $uninstall_option['delete_options'] ) {
 			// filter for options to be added by Modula's add-ons
-			$options_array = apply_filters( 'modula_uninstall_db_options', array( 'modula_troubleshooting_option', 'modula-checks', 'modula_version', 'widget_modula_gallery_widget', 'modula-rate-time' ) );
+			$options_array = apply_filters( 'modula_uninstall_db_options', array( 'modula_troubleshooting_option', 'modula-checks', 'modula_version', 'widget_modula_gallery_widget', 'modula-rate-time', 'modula_modern_beta', 'modula_beta_gallery_migrated' ) );
 
 			foreach ( $options_array as $db_option ) {
 				delete_option( $db_option );

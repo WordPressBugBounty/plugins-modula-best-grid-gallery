@@ -1,16 +1,25 @@
 import ModulaGalleryImageInner from './ModulaGalleryImageInner';
+import { buildModulaItemHoverClassNames } from '../utils/buildModulaItemHoverClassNames';
 
 const ModulaGalleryImage = (props) => {
 	const { settings, effectCheck } = props.attributes;
 	const { img, index } = props;
-	
-	let itemClassNames = `modula-item effect-${settings.effect}`;
+
+	const hoverClasses = buildModulaItemHoverClassNames(settings);
+	let itemClassNames = hoverClasses;
 	if (settings.type === 'slider') {
-		itemClassNames = 'modula-item f-carousel__slide';
+		const extra = hoverClasses.replace(/^modula-item\s+/, '').trim();
+		itemClassNames = `modula-item f-carousel__slide${extra ? ` ${extra}` : ''}`;
 	}
+	const hasHoverBuilder =
+		settings.hover_builder && typeof settings.hover_builder === 'object';
 
 	const renderMedia = () => {
-		if (!img.video_template || img.video_template !== '1' || !img.video_type) {
+		if (
+			!img.video_template ||
+			img.video_template !== '1' ||
+			!img.video_type
+		) {
 			// Return image element if video_template is not defined or is not '1'
 			return (
 				<img
@@ -25,7 +34,11 @@ const ModulaGalleryImage = (props) => {
 					src={img.src}
 				/>
 			);
-		} else if (img.video_template == '1' && 'undefined' != typeof img.video_thumbnail && '' != img.video_thumbnail ) {
+		} else if (
+			img.video_template == '1' &&
+			'undefined' != typeof img.video_thumbnail &&
+			'' != img.video_thumbnail
+		) {
 			// Return image thumbnail of video
 			return (
 				<img
@@ -79,13 +92,19 @@ const ModulaGalleryImage = (props) => {
 						index={index}
 						key={index}
 						hideTitle={
-							effectCheck && effectCheck.title ? false : true
+							hasHoverBuilder
+								? false
+								: !(effectCheck && effectCheck.title)
 						}
 						hideDescription={
-							effectCheck && effectCheck.description ? false : true
+							hasHoverBuilder
+								? false
+								: !(effectCheck && effectCheck.description)
 						}
 						hideSocial={
-							effectCheck && effectCheck.social ? false : true
+							hasHoverBuilder
+								? false
+								: !(effectCheck && effectCheck.social)
 						}
 						effectCheck={effectCheck}
 					/>
@@ -94,7 +113,6 @@ const ModulaGalleryImage = (props) => {
 		</div>
 	);
 };
-
 
 export default wp.components.withFilters('modula.ModulaGalleryImage')(
 	ModulaGalleryImage

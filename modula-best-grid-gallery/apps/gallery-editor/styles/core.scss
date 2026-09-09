@@ -1,0 +1,15 @@
+// Shared settings-editor styles (metabox + takeover).
+@use 'shared/appearance-vars';
+@use 'shared/app-accent-vars';
+@use 'shared/mod-ui-bridge';
+@use 'shared/appearance-menu';
+@use '../../shared-ui/styles';
+@use 'hub-list-icons';
+@use 'command-palette';
+@use 'metabox/error-boundary';
+@use 'metabox/field-rows';
+@use 'metabox/field-controls';
+@use 'metabox/composite-fields';
+@use 'metabox/sections';
+@use 'metabox/upsell';
+@use 'metabox/appearance-dark';

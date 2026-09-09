@@ -1,0 +1,36 @@
+// Bridge settings-editor tokens → shared-ui primitives (`--mod-ui-*`).
+// Host apps that are not settings-editor must set `--mod-ui-*` themselves.
+.modula-settings-editor__app {
+	--mod-ui-stage: var(--mod-se-stage);
+	--mod-ui-chrome: var(--mod-se-chrome);
+	--mod-ui-chrome-2: var(--mod-se-chrome-2);
+	--mod-ui-surface: var(--mod-se-surface);
+	--mod-ui-line: var(--mod-se-line);
+	--mod-ui-line-soft: var(--mod-se-line-soft);
+	--mod-ui-ink: var(--mod-se-ink);
+	--mod-ui-ink-2: var(--mod-se-ink-2);
+	--mod-ui-ink-3: var(--mod-se-ink-3);
+	--mod-ui-off: var(--mod-se-off);
+	--mod-ui-accent: var(--mod-se-accent);
+	--mod-ui-accent-ink: var(--mod-se-accent-ink);
+	--mod-ui-accent-soft: var(--mod-se-accent-soft);
+	--mod-ui-note: var(--mod-se-note);
+	--mod-ui-note-soft: var(--mod-se-note-soft);
+	--mod-ui-danger: var(--mod-se-danger);
+	--mod-ui-good: var(--mod-se-good);
+	--mod-ui-shadow-sm: var(--mod-se-shadow-sm);
+	--mod-ui-shadow-md: var(--mod-se-shadow-md);
+	--mod-ui-menu-bg: var(--mod-se-preview-flyout-bg);
+	--mod-ui-menu-border: var(--mod-se-preview-flyout-border);
+	--mod-ui-menu-shadow: var(--mod-se-preview-flyout-shadow);
+	--mod-ui-menu-row-hover: var(--mod-se-preview-flyout-row-hover);
+	--mod-ui-menu-ink: var(--mod-se-preview-flyout-ink);
+	--mod-ui-menu-ink-disabled: var(--mod-se-preview-flyout-ink-disabled);
+	--mod-ui-font-ui: var(--mod-se-font-ui);
+	--mod-ui-font-mono: var(--mod-se-font-mono);
+	--mod-ui-ease-space: var(--mod-se-ease-space);
+	--mod-ui-duration-row: var(--mod-se-duration-row);
+	--mod-ui-duration-fast: var(--mod-se-duration-fast);
+	--mod-ui-duration-switch: var(--mod-se-duration-switch);
+	--mod-ui-duration-pane: var(--mod-se-duration-pane);
+}

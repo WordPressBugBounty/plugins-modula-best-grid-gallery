@@ -1,0 +1,47 @@
+.modula-ui-textarea {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	width: 100%;
+}
+
+.modula-ui-textarea__field {
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 88px;
+	margin: 0;
+	padding: 8px 12px;
+	/* !important: WP admin forces white inputs; honor host --mod-ui-* (light/dark). */
+	border: 1px solid var(--mod-ui-line) !important;
+	border-radius: 0;
+	background: var(--mod-ui-surface) !important;
+	color: var(--mod-ui-ink) !important;
+	font-family: var(--mod-ui-font-ui, inherit);
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.45;
+	resize: vertical;
+	box-shadow: none !important;
+
+	&::placeholder {
+		color: var(--mod-ui-ink-3);
+	}
+
+	&:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
+	&:focus {
+		outline: none;
+		border-color: var(--mod-ui-accent) !important;
+		box-shadow: 0 0 0 3px var(--mod-ui-accent-soft, transparent) !important;
+	}
+}
+
+.modula-ui-textarea__help {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--mod-ui-ink-3);
+}

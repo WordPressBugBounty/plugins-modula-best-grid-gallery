@@ -1,6 +1,18 @@
 wp.Modula = 'undefined' === typeof wp.Modula ? {} : wp.Modula;
 
 (function ($, modula) {
+	/**
+	 * Legacy metabox radios / v2-synced inputs for where new images go.
+	 *
+	 * @return {string} start|end
+	 */
+	function modulaGetLegacyUploadPosition() {
+		var v = $('[name="modula-settings[upload_position]"]:checked').val();
+		if (v === 'start' || v === '1') {
+			return 'start';
+		}
+		return 'end';
+	}
 	var ModulaToolbar = wp.media.view.Toolbar.Select.extend({
 		clickSelect: function () {
 			var controller = this.controller,
@@ -369,9 +381,7 @@ wp.Modula = 'undefined' === typeof wp.Modula ? {} : wp.Modula;
 					sorting;
 				// Get the upload position this way, as the user may have changed it
 				// and we need to respect the position without saving the settings
-				const uploadPosition = $(
-					'[name="modula-settings[upload_position]"]:checked'
-				).val();
+				const uploadPosition = modulaGetLegacyUploadPosition();
 
 				if ('start' === uploadPosition) {
 					if (oldItemsCollection.length) {
@@ -407,8 +417,10 @@ wp.Modula = 'undefined' === typeof wp.Modula ? {} : wp.Modula;
 							);
 						if ('start' === uploadPosition) {
 							modula.Items.add(newModel, { at: 0 });
-							modula.Items.trigger('newItemAdded', newModel);
+						} else {
+							modula.Items.add(newModel);
 						}
+						modula.Items.trigger('newItemAdded', newModel);
 					}
 				}, this);
 
@@ -480,22 +492,31 @@ wp.Modula = 'undefined' === typeof wp.Modula ? {} : wp.Modula;
 		// File Uploaded - add images to the screen
 		fileupload: function (up, file, info) {
 			var modulaGalleryObject = this,
+				response;
+
+			try {
 				response = JSON.parse(info.response);
+			} catch (e) {
+				return;
+			}
+
+			if (!response || !response.data) {
+				return;
+			}
+
+			var uploadPosition = modulaGetLegacyUploadPosition();
 
 			var newModel = modulaGalleryObject.generateSingleImage(
-				response['data']
+				response.data
 			);
-			// Get the upload position this way, as the user may have changed it
-			// and we need to respect the position without saving the settings
-			const uploadPosition = $(
-				'[name="modula-settings[upload_position]"]:checked'
-			).val();
 
 			if ('start' === uploadPosition) {
 				modula.Items.add(newModel, { at: 0 });
-				modula.Items.trigger('newItemAdded', newModel);
-				modula.GalleryView.render();
+			} else {
+				modula.Items.add(newModel);
 			}
+			modula.Items.trigger('newItemAdded', newModel);
+			modula.GalleryView.render();
 		},
 
 		// Files Uploaded - hide progress bar

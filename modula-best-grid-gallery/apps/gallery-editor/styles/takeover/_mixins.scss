@@ -1,0 +1,261 @@
+@use '../variables' as *;
+
+// Toggle track + thumb — style kit: 40×20, knob 16, travel 20, accent when on.
+@mixin modula-takeover-toggle-appearance {
+	.components-form-toggle {
+		flex-shrink: 0;
+		margin-right: 0;
+		height: $mod-space-20;
+	}
+
+	.components-form-toggle__input {
+		width: $mod-space-40;
+		height: $mod-space-20;
+	}
+
+	.components-form-toggle__track {
+		width: $mod-space-40;
+		height: $mod-space-20;
+		border: none;
+		border-radius: $mod-radius-pill;
+		background: var(--mod-se-off, #c8c8cd);
+		box-shadow: none;
+		transition: background var(--mod-se-duration-switch, 0.16s) var(--mod-se-ease-space, #{$mod-se-ease-space});
+	}
+
+	.components-form-toggle.is-checked .components-form-toggle__track {
+		background: var(--mod-se-accent, var(--modula-takeover-accent, #{$modula-takeover-accent}));
+		border-color: transparent;
+		box-shadow: none;
+	}
+
+	.components-form-toggle__thumb {
+		top: 2px;
+		left: 2px;
+		width: $mod-space-16;
+		height: $mod-space-16;
+		border: none;
+		border-radius: 50%;
+		background: var(--mod-se-surface, #fff);
+		box-shadow: var(--mod-se-shadow-sm, 0 1px 2px rgb(0 0 0 / 8%));
+		transition: transform var(--mod-se-duration-switch, 0.16s) var(--mod-se-ease-space, #{$mod-se-ease-space});
+	}
+
+	.components-form-toggle.is-checked .components-form-toggle__thumb {
+		background: var(--mod-se-surface, #fff);
+		transform: translateX($mod-space-20);
+	}
+}
+
+// RangeControl: rail is the first span after `.components-range-control__slider` (WP 6.x+).
+@mixin modula-takeover-range-control-appearance {
+
+	// Rail
+	.components-range-control__wrapper>.components-range-control__slider+span {
+		background-color: rgba(0, 0, 0, 0.45) !important;
+		box-shadow:
+			inset 0 0 0 1px rgba(255, 255, 255, 0.38),
+			inset 0 1px 2px rgba(0, 0, 0, 0.45);
+	}
+
+	.components-range-control__wrapper>.components-range-control__slider:disabled+span {
+		background-color: rgba(0, 0, 0, 0.28) !important;
+		box-shadow:
+			inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+			inset 0 1px 2px rgba(0, 0, 0, 0.35);
+		opacity: 0.85;
+	}
+
+	// Filled segment — same accent as checked toggle track (user admin color scheme).
+	.components-range-control__track {
+		background-color: var(--modula-takeover-accent, #2271b1) !important;
+		box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+	}
+
+	.components-range-control__wrapper>.components-range-control__slider:disabled~.components-range-control__track {
+		background-color: #646970 !important;
+		box-shadow: none;
+	}
+
+	// Thumb knob — match toggle thumb
+	.components-range-control__thumb-wrapper>span {
+		background-color: #f0f0f1 !important;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+	}
+
+	.components-range-control__wrapper>.components-range-control__slider:disabled~.components-range-control__thumb-wrapper>span {
+		background-color: #8c8f94 !important;
+		box-shadow: none;
+	}
+}
+
+// RangeControl — style kit: 4px rail (--off), 20px accent bead with surface ring.
+@mixin modula-gutenberg-core-range-control-appearance {
+	$mod-se-range-accent: var(--mod-se-accent, var(--mod-se-range-track-bg, #{$modula-takeover-accent}));
+	$mod-se-range-rail: var(--mod-se-off, var(--mod-se-range-rail-bg, #c8c8cd));
+	$mod-se-range-thumb: var(--mod-se-range-thumb-bg, $mod-se-range-accent);
+	$mod-se-range-surface: var(--mod-se-surface, #fff);
+
+	.components-range-control__wrapper {
+		min-height: $mod-space-24;
+		// Do not add horizontal padding — misaligns track fill vs thumb (WP uses -6px input margin instead).
+		padding-inline: 0 !important;
+	}
+
+	// Unfilled rail.
+	.components-range-control__wrapper>.components-range-control__slider+span {
+		background-color: $mod-se-range-rail !important;
+		box-shadow: none !important;
+		border-radius: $mod-radius-pill;
+		height: $mod-space-4 !important;
+	}
+
+	.components-range-control__wrapper>.components-range-control__slider:disabled+span {
+		background-color: color-mix(in srgb, $mod-se-range-rail 72%, transparent) !important;
+		box-shadow: none !important;
+		opacity: 1;
+	}
+
+	// Filled segment.
+	.components-range-control__track {
+		background-color: $mod-se-range-accent !important;
+		box-shadow: none !important;
+		border-radius: $mod-radius-pill;
+		height: $mod-space-4 !important;
+	}
+
+	.components-range-control__wrapper>.components-range-control__slider:disabled~.components-range-control__track {
+		background-color: var(--mod-se-ink-3, #8b8b93) !important;
+		box-shadow: none;
+	}
+
+	// Style-kit bead: 20px, accent fill, 2px surface ring.
+	.components-range-control__thumb-wrapper>span {
+		background-color: $mod-se-range-thumb !important;
+		border: 2px solid $mod-se-range-surface !important;
+		box-shadow: none !important;
+		width: $mod-space-20 !important;
+		height: $mod-space-20 !important;
+		border-radius: 50% !important;
+	}
+
+	.components-range-control__wrapper>.components-range-control__slider:disabled~.components-range-control__thumb-wrapper>span {
+		background-color: var(--mod-se-ink-3, #8b8b93) !important;
+		box-shadow: none !important;
+	}
+
+	// Compact number field beside the track.
+	.components-range-control__number {
+
+		.components-input-control__backdrop {
+			border-radius: 0 !important;
+		}
+
+		input,
+		.components-input-control__input {
+			min-height: $mod-space-40 !important;
+			font-size: 13px;
+			font-weight: 500;
+			font-variant-numeric: tabular-nums;
+			line-height: 1.2;
+		}
+	}
+}
+
+// Flat WP-like form fields in sidebar V2 (nested panels, hub featured controls, filters).
+@mixin modula-sidebar-v2-flat-form-controls {
+	$mod-se-control-focus: var(--mod-se-accent, #{$modula-takeover-accent});
+	$mod-se-control-focus-ring: var(--mod-se-accent-soft, #{$modula-takeover-accent-soft});
+
+	.components-input-control__container {
+		box-shadow: none !important;
+		// InputBase sets an opaque light background via Emotion; backdrop draws the field chrome.
+		background: transparent !important;
+		border-radius: 0;
+		overflow: hidden;
+	}
+
+	// InputControl / SelectControl / NumberControl (range suffix) — border on backdrop.
+	.components-input-control__backdrop {
+		z-index: 0;
+		border: 1px solid var(--mod-se-control-border, var(--mod-se-chrome-border)) !important;
+		border-radius: 0 !important;
+		box-shadow: none !important;
+		background: var(--mod-se-control-bg, var(--mod-se-sidebar-settings-bg, #fff)) !important;
+	}
+
+	.components-input-control__container:focus-within .components-input-control__backdrop {
+		border-color: $mod-se-control-focus !important;
+		box-shadow: 0 0 0 3px $mod-se-control-focus-ring !important;
+	}
+
+	// TextControl / TextareaControl — no backdrop; border on the input itself.
+	// Shared-ui TextInput / Slider number keep their own compact height (do not force 40px).
+	.components-text-control__input,
+	.components-textarea-control__input,
+	input[type='text']:not(.modula-ui-text-input__field):not(.modula-ui-slider__number):not(.components-form-token-field__input),
+	input[type='search']:not(.modula-ui-text-input__field):not(.components-form-token-field__input),
+	textarea {
+		box-shadow: none !important;
+		color: var(--mod-se-sidebar-settings-ink, #1e1e1e) !important;
+		background: var(--mod-se-control-bg, var(--mod-se-sidebar-settings-bg, #fff)) !important;
+		border: 1px solid var(--mod-se-control-border, var(--mod-se-chrome-border)) !important;
+		border-radius: 0;
+		min-height: $mod-space-40;
+	}
+
+	// Filter name rows ship their own outer chrome — keep inner inputs borderless.
+	.modula-settings-editor__filter-name-list-row {
+
+		.components-text-control__input,
+		input[type='text'] {
+			background: transparent !important;
+			border: none !important;
+			border-radius: 0;
+			min-height: $mod-space-32;
+		}
+	}
+
+	// InputControl / SelectControl inputs sit above the backdrop.
+	.components-input-control__input,
+	.components-select-control__input,
+	select.components-select-control__input,
+	input.components-input-control__input {
+		position: relative;
+		z-index: 1;
+		box-shadow: none !important;
+		color: var(--mod-se-sidebar-settings-ink, #1e1e1e) !important;
+		background: transparent !important;
+		border: none !important;
+		border-radius: 0;
+		min-height: $mod-space-40;
+	}
+
+	.components-text-control__input:focus,
+	.components-textarea-control__input:focus,
+	.components-select-control__input:focus,
+	.components-input-control__input:focus,
+	input:focus,
+	select:focus,
+	textarea:focus {
+		box-shadow: none !important;
+		outline: none;
+	}
+
+	.components-text-control__input:focus,
+	.components-textarea-control__input:focus,
+	input[type='text']:not(.components-form-token-field__input):focus,
+	input[type='search']:not(.components-form-token-field__input):focus,
+	textarea:focus {
+		border-color: $mod-se-control-focus !important;
+		box-shadow: 0 0 0 1px $mod-se-control-focus !important;
+	}
+
+	.components-select-control .components-input-control__suffix {
+		position: relative;
+		z-index: 2;
+		box-shadow: none;
+		color: var(--mod-se-sidebar-settings-ink-muted, #646970) !important;
+		pointer-events: none;
+	}
+}

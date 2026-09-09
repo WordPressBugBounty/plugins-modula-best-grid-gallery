@@ -14,7 +14,11 @@ export const ModulaGallery = (props) => {
 			galleryRef.current = true;
 			return;
 		}
-		if (settings !== undefined) {
+		if (
+			settings !== undefined &&
+			(!settings.hover_builder ||
+				typeof settings.hover_builder !== 'object')
+		) {
 			checkHoverEffect(settings.effect);
 		}
 		if ('slider' !== settings.type) {
@@ -28,6 +32,8 @@ export const ModulaGallery = (props) => {
 	let itemsClassNames = 'modula-items';
 	if (settings.type == 'creative-gallery') {
 		galleryClassNames += 'modula-creative-gallery';
+	} else if (settings.type == 'polaroid') {
+		galleryClassNames += 'modula-polaroid-gallery';
 	} else if (settings.type == 'custom-grid') {
 		galleryClassNames += 'modula-custom-grid';
 	} else if (settings.type == 'slider') {
@@ -46,7 +52,7 @@ export const ModulaGallery = (props) => {
 		<Fragment>
 			<ModulaStyle id={id} settings={settings} />
 			<div
-				id={`jtg-${id}`}
+				id={`modula-${id}`}
 				ref={galleryElRef}
 				className={`${galleryClassNames} ${
 					props.attributes.modulaDivClassName != undefined

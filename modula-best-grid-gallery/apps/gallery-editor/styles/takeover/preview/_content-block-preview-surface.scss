@@ -1,0 +1,27 @@
+/**
+ * Settings-editor dark chrome: light “paper” under transparent content blocks
+ * so intentional dark ink stays readable without changing saved colors.
+ * Also lifts template overflow notice contrast on the dark stage.
+ */
+.modula-settings-editor__app[data-appearance='dark'] {
+	.modula-item.modula-item--embedded-content-block[data-preview-surface='paper'] {
+		isolation: isolate;
+
+		&::before {
+			content: '';
+			position: absolute;
+			inset: 0;
+			z-index: 0;
+			border-radius: inherit;
+			pointer-events: none;
+			/* Soft page surface — mimics a light front-end canvas under the tile. */
+			background: #f6f7f7;
+			box-shadow: inset 0 0 0 1px rgb(0 0 0 / 6%);
+		}
+	}
+
+	.modula-template__overflow-notice {
+		background: rgb(255 255 255 / 8%);
+		color: var(--mod-se-preview-ink-muted, rgb(255 255 255 / 72%));
+	}
+}

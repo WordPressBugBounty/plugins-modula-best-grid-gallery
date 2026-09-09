@@ -1,0 +1,43 @@
+@use '../../shared-styles/spacing' as *;
+@use '../../shared-styles/radii' as *;
+
+.modulaImageRadioGroup {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: $mod-space-20;
+    padding: $mod-space-10 0;
+
+    .modulaImageRadioGroupOption {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        .modulaImageRadioGroupInput {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .modulaImageRadioGroupLabel {
+            padding: $mod-space-30 $mod-space-25;
+            background-color: #F0F0F1;
+            border-radius: $mod-radius-4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            box-sizing: border-box;
+            cursor: pointer;
+            justify-content: center;
+            text-align: center;
+            border: 1px solid #f0f0f1;
+        }
+
+        .modulaImageRadioGroupLabelChecked {
+            border: 1px solid var(--wp-admin-theme-color);
+            box-shadow: 0 0 5px var(--wp-admin-theme-color);
+            background-color: #f0f0f1;
+        }
+    }
+}

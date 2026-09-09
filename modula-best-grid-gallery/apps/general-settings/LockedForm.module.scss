@@ -1,0 +1,22 @@
+@use '../shared-styles/spacing' as *;
+
+.lockedForm {
+    position: absolute;
+    // background: rgba(255, 255, 255, 0.75);
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    z-index: 10;
+    top: (-$mod-space-5);
+    bottom: (-$mod-space-5);
+    right: (-$mod-space-5);
+    left: (-$mod-space-5);
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(3px);
+
+    p {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--theme-text-color);
+    }
+}

@@ -1,0 +1,42 @@
+.modula-ui-icon-button {
+	box-sizing: border-box;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0;
+	padding: 0;
+	width: 32px;
+	min-width: 32px;
+	height: 32px;
+	border: 1px solid transparent;
+	border-radius: 0;
+	background: transparent;
+	color: var(--mod-ui-ink-2);
+	cursor: pointer;
+	transition:
+		background var(--mod-ui-duration-fast, 0.12s) ease,
+		color var(--mod-ui-duration-fast, 0.12s) ease;
+
+	svg {
+		display: block;
+		fill: currentColor;
+	}
+
+	&:hover:not(:disabled) {
+		color: var(--mod-ui-ink);
+		background: var(--mod-ui-chrome-2);
+	}
+
+	&:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: 0 0 0 3px var(--mod-ui-accent-soft, transparent);
+	}
+}

@@ -1,0 +1,50 @@
+@use '../variables' as *;
+
+.modula-settings-editor__placeholder {
+	margin: 0;
+	padding: $mod-space-10 $mod-space-12;
+	font-size: 12px;
+	color: #787c82;
+	line-height: 1.45;
+	background: #f6f7f7;
+	border: 1px dashed #c3c4c7;
+	border-radius: $mod-space-2;
+}
+
+.modula-settings-editor__footer-hint {
+	margin: $mod-space-8 0 0;
+	padding-top: $mod-space-10;
+	border-top: 1px solid #f0f0f1;
+	font-size: 12px;
+	color: #787c82;
+	line-height: 1.45;
+}
+
+.modula-settings-editor__raw {
+	margin-top: $mod-space-12;
+	padding-top: $mod-space-10;
+	border-top: 1px solid #dcdcde;
+
+	summary {
+		cursor: pointer;
+		font-size: 12px;
+		color: var(--modula-takeover-accent, #2271b1);
+		user-select: none;
+	}
+
+	summary:hover {
+		color: var(--modula-takeover-accent-strong, #135e96);
+	}
+}
+
+.modula-settings-editor__raw-pre {
+	margin: $mod-space-8 0 0;
+	padding: $mod-space-12;
+	overflow: auto;
+	max-height: 240px;
+	background: #f6f7f7;
+	border: 1px solid #c3c4c7;
+	border-radius: $mod-space-2;
+	font-size: 11px;
+	line-height: 1.45;
+}

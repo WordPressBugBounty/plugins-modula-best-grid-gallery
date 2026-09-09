@@ -1,0 +1,49 @@
+.codeEditor {
+	width: 100%;
+}
+
+.header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 8px;
+}
+
+.modeToggle {
+	max-width: 220px;
+	margin-left: auto;
+}
+
+.textarea {
+	width: 100%;
+	min-height: 280px;
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+}
+
+.codeEditor :global(.CodeMirror) {
+	border: 1px solid #8c8f94;
+	border-radius: 2px;
+	min-height: 280px;
+	font-size: 13px;
+}
+
+.codeEditor :global(.CodeMirror-scroll) {
+	min-height: 280px;
+}
+
+.codeEditor :global(.wp-editor-wrap),
+.codeEditor :global(.mce-tinymce) {
+	width: 100%;
+}
+
+.codeEditor :global(.wp-editor-container) {
+	border: 1px solid #8c8f94;
+	border-radius: 2px;
+}
+
+.codeEditor :global(.wp-media-buttons) {
+	margin-bottom: 8px;
+}

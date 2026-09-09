@@ -1,0 +1,19 @@
+@use 'spacing' as *;
+@forward 'spacing';
+@use 'radii' as *;
+@forward 'radii';
+@use 'takeover-theme' as *;
+@forward 'takeover-theme';
+
+// Shared “chip” height so Exit (link) and Save (WP Button) share one baseline and center line.
+$modula-topbar-action-h: $mod-space-32;
+$modula-topbar-action-pad-x: $mod-space-12;
+
+// Fixed style-kit accent (not WP admin theme colour). See docs/contributors/23-style-guide.md.
+$modula-takeover-accent: #2e4fe8 !default;
+$modula-takeover-accent-strong: #2e4fe8 !default;
+$modula-takeover-accent-hover: #4563f0 !default;
+$modula-takeover-accent-soft: #edf0fe !default;
+$modula-takeover-accent-dark: #6b85ff !default;
+$modula-takeover-accent-ink-dark: #93a6ff !default;
+$modula-takeover-accent-soft-dark: #21243a !default;

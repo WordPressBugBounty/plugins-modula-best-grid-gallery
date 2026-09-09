@@ -384,10 +384,10 @@ class Modula_Rest_Api {
 			);
 		}
 
-		// Defaults (for galleries) - requires defaults extension
+		// Presets (for galleries) - requires defaults extension
 		if ( $defaults_active ) {
 			$menu_items[] = array(
-				'title' => 'Defaults',
+				'title' => 'Presets',
 				'url'   => admin_url( 'edit.php?post_type=modula-defaults' ),
 				'class' => '',
 			);
@@ -401,10 +401,10 @@ class Modula_Rest_Api {
 				'class' => '',
 			);
 
-			// Defaults (for albums) - requires albums AND defaults extensions
+			// Presets (for albums) - requires albums AND defaults extensions
 			if ( $defaults_active ) {
 				$menu_items[] = array(
-					'title' => 'Defaults',
+					'title' => 'Presets',
 					'url'   => admin_url( 'edit.php?post_type=defaults-albums' ),
 					'class' => '',
 				);

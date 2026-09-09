@@ -49,6 +49,7 @@ class Gallery_Listing_Output {
 	public function add_columns( $columns ) {
 		$date = $columns['date'];
 		unset( $columns['date'] );
+		$columns['modula_beta']         = __( 'Beta', 'modula-best-grid-gallery' );
 		$columns['modula_ai_optimizer'] = __( 'Modula AI', 'modula-best-grid-gallery' );
 
 		$columns['date'] = $date;
@@ -62,12 +63,38 @@ class Gallery_Listing_Output {
 	 * @return void
 	 */
 	public function output( $column, $post_id ) {
+		if ( 'modula_beta' === $column ) {
+			$this->output_beta_column( $post_id );
+			return;
+		}
+
 		if ( 'modula_ai_optimizer' !== $column ) {
 			return;
 		}
 
 		$this->js_data( $post_id );
 		echo '<div class="mai-gallery-output" data-post-id="' . absint( $post_id ) . '"></div>';
+	}
+
+	/**
+	 * Beta column: Convert to beta button or Beta badge.
+	 *
+	 * @param int $post_id Gallery post ID.
+	 * @return void
+	 */
+	private function output_beta_column( $post_id ) {
+		$post_id = absint( $post_id );
+		if ( \Modula\V2\Beta_Settings::is_beta_gallery( $post_id ) ) {
+			echo '<span class="modula-beta-badge">' . esc_html__( 'Beta', 'modula-best-grid-gallery' ) . '</span>';
+			return;
+		}
+
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
+
+		$url = \Modula\V2\Admin\Beta_Gallery_Admin::convert_to_beta_url( $post_id );
+		echo '<a class="button button-primary button-small" href="' . esc_url( $url ) . '" data-modula-convert-beta>' . esc_html__( 'Convert to beta', 'modula-best-grid-gallery' ) . '</a>';
 	}
 
 	/**

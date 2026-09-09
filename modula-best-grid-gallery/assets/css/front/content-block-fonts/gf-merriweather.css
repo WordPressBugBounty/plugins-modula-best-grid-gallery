@@ -1,0 +1,25 @@
+/* Self-hosted Merriweather for Modula content blocks (gf-merriweather). */
+
+@font-face {
+  font-family: 'Merriweather';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../../../fonts/content-blocks/gf-merriweather/merriweather-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Merriweather';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url('../../../fonts/content-blocks/gf-merriweather/merriweather-latin-700-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Merriweather';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 900;
+  src: url('../../../fonts/content-blocks/gf-merriweather/merriweather-latin-900-normal.woff2') format('woff2');
+}

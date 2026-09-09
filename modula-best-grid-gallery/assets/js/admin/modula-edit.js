@@ -11,12 +11,19 @@
 			evt.preventDefault();
 
 			var notice = $(this).parent();
+			var data = {
+				action: 'modula-edit-notice',
+			};
+			if (
+				typeof modulaHelper !== 'undefined' &&
+				modulaHelper._wpnonce
+			) {
+				data.nonce = modulaHelper._wpnonce;
+			}
 			$.ajax({
 				method: 'POST',
 				url: ajaxurl,
-				data: {
-					action: 'modula-edit-notice',
-				},
+				data: data,
 			}).done(function (msg) {
 				notice.remove();
 			});

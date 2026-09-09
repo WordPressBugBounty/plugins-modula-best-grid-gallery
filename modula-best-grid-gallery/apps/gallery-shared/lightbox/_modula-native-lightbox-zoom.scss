@@ -1,0 +1,80 @@
+/**
+ * Native Modula lightbox zoom overlays (Fancybox v6).
+ */
+
+.modula-fancybox-container {
+	/*
+	 * Do not set `position` here: Fancybox v6 already applies
+	 * `.fancybox__container { position: absolute; inset: 0 }`, which both fills
+	 * the modal dialog and acts as the positioning context for the absolute
+	 * zoom overlays below. Overriding it (e.g. `position: relative`) has equal
+	 * specificity but loads later, collapsing the container to content height
+	 * and breaking the lightbox layout on the front end.
+	 */
+
+	.modula-native-zoom-lens,
+	.modula-native-zoom-window,
+	.modula-native-zoom-inner {
+		position: absolute;
+		z-index: 20;
+		pointer-events: none;
+		background-repeat: no-repeat;
+		background-color: #fff;
+		box-shadow: 0 4px 24px rgb(0 0 0 / 28%);
+		border: 1px solid rgb(255 255 255 / 65%);
+		display: none;
+	}
+
+	.modula-native-zoom-inner {
+		overflow: hidden;
+		border: 0;
+		box-shadow: none;
+		background-color: transparent;
+	}
+
+	.modula-native-zoom-lens--round {
+		border-radius: 50%;
+	}
+
+	.modula-native-zoom-lens--square {
+		border-radius: 2px;
+	}
+
+	.modula-native-zoom-window--upper-left {
+		top: 16px;
+		left: 16px;
+	}
+
+	.modula-native-zoom-window--upper-right {
+		top: 16px;
+		right: 16px;
+	}
+
+	.modula-native-zoom-window--lower-left {
+		bottom: 16px;
+		left: 16px;
+	}
+
+	.modula-native-zoom-window--lower-right {
+		bottom: 16px;
+		right: 16px;
+	}
+
+	.modula-native-zoom-tint {
+		position: absolute;
+		inset: 0;
+		z-index: 15;
+		pointer-events: none;
+		display: none;
+	}
+
+	.modula-native-zoom-image {
+		cursor: crosshair;
+	}
+
+	.modula-fancybox-elevatezoom-button.is-active {
+		opacity: 1;
+		color: var(--f-button-color, #fff);
+		background: rgb(255 255 255 / 18%);
+	}
+}

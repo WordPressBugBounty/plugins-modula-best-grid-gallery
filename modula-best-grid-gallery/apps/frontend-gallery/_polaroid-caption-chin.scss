@@ -1,0 +1,68 @@
+/* Polaroid + captions.contentPlacement = below-image: fixed chin, no image shrink. */
+
+.modula .modula-items.modula-polaroid-gallery.modula-polaroid-gallery--caption-in-chin {
+	.modula-polaroid-frame__media .modula-item.modula-caption-below-image {
+		display: grid !important;
+		grid-template-rows: minmax(0, 1fr) var(--modula-polaroid-chin-height, 44px);
+		height: 100%;
+		min-height: 0;
+	}
+
+	.modula-polaroid-frame__media .modula-item.modula-caption-below-image .modula-item-image-area {
+		grid-row: 1;
+		flex: none;
+		min-height: 0;
+		overflow: hidden;
+	}
+
+	.modula-polaroid-frame__media .modula-item.modula-caption-below-image .modula-item-below-caption--polaroid-chin {
+		grid-row: 2;
+		flex: none;
+		align-self: stretch;
+		height: var(--modula-polaroid-chin-height, 44px);
+		max-height: var(--modula-polaroid-chin-height, 44px);
+		margin-top: 0;
+		padding:
+			4px var(--modula-polaroid-chin-inset, 8px) var(--modula-polaroid-chin-inset, 8px);
+		box-sizing: border-box;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+		gap: 1px;
+		min-height: 0;
+		line-height: 1.25;
+		font-size: 12px;
+	}
+
+	.modula-polaroid-frame__media .modula-item.modula-caption-below-image .modula-item-below-caption--polaroid-chin .modula-title,
+	.modula-polaroid-frame__media .modula-item.modula-caption-below-image .modula-item-below-caption--polaroid-chin .jtg-description {
+		flex: 0 0 auto;
+		margin: 0;
+		padding: 0;
+		overflow: hidden;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 1;
+		line-clamp: 1;
+		position: static;
+		transform: none;
+		opacity: 1;
+		max-width: none;
+		width: 100%;
+		font-size: inherit;
+		line-height: inherit;
+	}
+
+	.modula-polaroid-frame__media .modula-item.modula-caption-below-image .modula-item-below-caption--polaroid-chin .jtg-description p {
+		display: inline;
+		margin: 0;
+		padding: 0;
+	}
+
+	.modula-polaroid-frame__media .modula-item.modula-caption-below-image .modula-item-below-caption--polaroid-chin:not(:has(.modula-title)) .jtg-description,
+	.modula-polaroid-frame__media .modula-item.modula-caption-below-image .modula-item-below-caption--polaroid-chin:not(:has(.jtg-description)) .modula-title {
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+	}
+}

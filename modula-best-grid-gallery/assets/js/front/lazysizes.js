@@ -31,6 +31,11 @@
 
 	var requestIdleCallback = window.requestIdleCallback;
 
+	// iOS WebKit (incl. Chrome; iPadOS may report as MacIntel + touch): idle callbacks in debounce can stall until interaction.
+	var isIOS =
+		/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+		(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
 	var regPicture = /^picture$/i;
 
 	var loadEvents = ['load', 'error', 'lazyincluded', '_lazyloaded'];
@@ -245,7 +250,11 @@
 			if (last < wait) {
 				setTimeout(later, wait - last);
 			} else {
-				(requestIdleCallback || run)(run);
+				if (isIOS) {
+					setTimeout(run, 0);
+				} else {
+					(requestIdleCallback || run)(run);
+				}
 			}
 		};
 

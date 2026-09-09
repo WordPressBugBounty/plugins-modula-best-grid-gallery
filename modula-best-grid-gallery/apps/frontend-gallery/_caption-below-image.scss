@@ -1,0 +1,239 @@
+/* Title & caption below the image tile (captions.contentPlacement = below-image). */
+
+.modula .modula-items .modula-item.modula-caption-below-image {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	/* Global `.modula-item { overflow: hidden }` would clip title/caption below the photo. */
+	overflow: visible;
+}
+
+/*
+ * Overlay tiles pin `.modula-item-hover-media` as a direct child of `.modula-item`.
+ * Below-image wraps that shell in `.modula-item-image-area`. Without these rules the
+ * fill-parent picture stack is absolutely positioned in a 0-height in-flow shell
+ * and the gallery paints empty white cells.
+ */
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-image-area > .modula-item-hover-media {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	transform-origin: center center;
+	z-index: 0;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-image-area > .modula-item-hover-media:has(.modula-item-picture-stack--fill-parent) {
+	position: absolute;
+	inset: 0;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-image-area {
+	position: relative;
+	width: 100%;
+	flex: 0 0 auto;
+	overflow: hidden;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image.modula-caption-below-image--fixed-tile {
+	height: 100%;
+	min-height: 0;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image.modula-caption-below-image--fixed-tile .modula-item-image-area:not(.modula-uniform-grid__media) {
+	flex: 1 1 0;
+	min-height: 0;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-image-area>a.tile-inner,
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-image-area>a.modula-item-link {
+	position: absolute;
+	inset: 0;
+	z-index: 5;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-image-area .modula-item-overlay {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-image-area .modula-item-content {
+	position: absolute;
+	inset: 0;
+	height: auto;
+	opacity: 1;
+	pointer-events: none;
+	z-index: 2;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-image-area .modula-item-picture:not(.modula-item-picture--focal-crop) {
+	position: relative;
+	inset: auto;
+	width: 100%;
+	height: auto;
+	overflow: visible;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-image-area .modula-item-picture:not(.modula-item-picture--focal-crop) img,
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-image-area .modula-item-picture:not(.modula-item-picture--focal-crop) img.pic {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-width: 100%;
+	position: relative;
+	object-fit: initial;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image.modula-caption-below-image--fixed-tile .modula-item-image-area .modula-item-picture {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image.modula-caption-below-image--fixed-tile .modula-item-image-area .modula-item-picture:not(.modula-item-picture--focal-crop) img,
+.modula .modula-items .modula-item.modula-caption-below-image.modula-caption-below-image--fixed-tile .modula-item-image-area .modula-item-picture:not(.modula-item-picture--focal-crop) img.pic {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+}
+
+/* Justified / slotted: image area height is set inline to the layout slot; caption sits below. */
+.modula .modula-items .modula-item.modula-caption-below-image.modula-caption-below-image--slot-image .modula-item-image-area .modula-item-picture {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image.modula-caption-below-image--slot-image .modula-item-image-area .modula-item-picture:not(.modula-item-picture--focal-crop) img,
+.modula .modula-items .modula-item.modula-caption-below-image.modula-caption-below-image--slot-image .modula-item-image-area .modula-item-picture:not(.modula-item-picture--focal-crop) img.pic {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+}
+
+.modula .modula-fit-grid .modula-item.modula-caption-below-image.modula-caption-below-image--fixed-tile .modula-item-image-area .modula-item-picture:not(.modula-item-picture--focal-crop) img,
+.modula .modula-fit-grid .modula-item.modula-caption-below-image.modula-caption-below-image--fixed-tile .modula-item-image-area .modula-item-picture:not(.modula-item-picture--focal-crop) img.pic {
+	object-fit: contain;
+	object-position: var(--modula-uniform-image-position, center center);
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-below-caption {
+	flex: 0 0 auto;
+	width: 100%;
+	padding: 0;
+	color: #1e1e1e;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-below-caption .jtg-description {
+	color: #50575e;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-below-caption--align-left {
+	text-align: left;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-below-caption--align-center {
+	text-align: center;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-below-caption--align-right {
+	text-align: right;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-below-caption .modula-title,
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-below-caption .jtg-description {
+	position: static;
+	transform: none;
+	opacity: 1;
+	max-width: none;
+	width: 100%;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-below-caption .modula-title::before {
+	display: none;
+}
+
+/* PHP SSR: figc stays in flow below the image inside modula-item-content. */
+.modula .modula-items .modula-item.modula-caption-below-image:not(.modula-hover-v2)>.modula-item-content,
+.modula .modula-items .modula-item.modula-caption-below-image.modula-hover-v2>.modula-item-content {
+	position: relative;
+	inset: auto;
+	display: flex;
+	flex-direction: column;
+	height: auto;
+	opacity: 1;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-content>img,
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-content>picture,
+.modula .modula-items .modula-item.modula-caption-below-image>.modula-item-picture {
+	order: 1;
+	position: relative;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-content>.figc {
+	order: 2;
+	position: relative;
+	inset: auto;
+	height: auto !important;
+	padding: 0;
+	opacity: 1;
+	transform: none;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-content .figc .modula-title,
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-content .figc .jtg-description,
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-content .figc p.description {
+	position: static;
+	transform: none;
+	opacity: 1;
+}
+
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-content .figc .modula-title::before {
+	display: none;
+}
+
+/* Masonry columns: match in-flow img rules when picture sits in image-area. */
+.modula-masonry-react .modula-caption-below-image .modula-item-image-area .modula-item-picture img.pic {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-width: 100%;
+	position: relative;
+}
+
+/* Uniform grid: item stays auto-height; aspect ratio lives on the media wrapper. */
+.modula .modula-uniform-grid .modula-uniform-grid__cell>.modula-item.modula-caption-below-image,
+.modula .modula-fit-grid .modula-uniform-grid__cell>.modula-item.modula-caption-below-image {
+	height: auto !important;
+	flex: 0 0 auto;
+}
+
+.modula .modula-uniform-grid .modula-item.modula-caption-below-image.modula-caption-below-image--fixed-tile,
+.modula .modula-fit-grid .modula-item.modula-caption-below-image.modula-caption-below-image--fixed-tile {
+	height: auto !important;
+}
+
+.modula .modula-uniform-grid .modula-item.modula-caption-below-image .modula-item-image-area.modula-uniform-grid__media,
+.modula .modula-fit-grid .modula-item.modula-caption-below-image .modula-item-image-area.modula-uniform-grid__media {
+	aspect-ratio: var(--modula-uniform-aspect, 1 / 1);
+	flex: 0 0 auto;
+	width: 100%;
+	min-height: 0;
+}
+
+.modula .modula-uniform-grid.modula-uniform-grid--caption-below .modula-uniform-grid__cell>.modula-item.modula-item--embedded,
+.modula .modula-fit-grid.modula-fit-grid--caption-below .modula-uniform-grid__cell>.modula-item.modula-item--embedded {
+	height: auto !important;
+	aspect-ratio: var(--modula-uniform-aspect, 1 / 1);
+	min-height: clamp(5.5rem, 16vw, 11rem);
+}

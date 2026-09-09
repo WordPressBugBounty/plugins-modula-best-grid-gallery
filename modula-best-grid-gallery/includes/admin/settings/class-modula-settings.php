@@ -302,6 +302,7 @@ class Modula_Settings {
 		);
 	}
 
+
 	/**
 	 * Build a textarea field
 	 *
@@ -980,7 +981,7 @@ class Modula_Settings {
 	private function build_watermark_combo_fields( $watermark, $watermark_positions ) {
 		$position_default = isset( $watermark['watermark_position'] ) ? $watermark['watermark_position'] : self::DEFAULT_WATERMARK_POSITION;
 		$margin_default   = isset( $watermark['watermark_margin'] ) ? $watermark['watermark_margin'] : self::DEFAULT_WATERMARK_MARGIN;
-		$width_default    = isset( $watermark['watermark_image_dimension_width'] ) ? $watermark['watermark_image_dimension_width'] : 0;
+		$width_default    = isset( $watermark['watermark_image_dimension_width'] ) ? $watermark['watermark_image_dimension_width'] : 100;
 		$height_default   = isset( $watermark['watermark_image_dimension_height'] ) ? $watermark['watermark_image_dimension_height'] : 0;
 
 		return $this->build_combo_field(

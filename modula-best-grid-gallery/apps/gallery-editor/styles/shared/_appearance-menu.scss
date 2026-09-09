@@ -1,0 +1,96 @@
+@use "../variables" as *;
+
+/* stylelint-disable selector-class-pattern --
+   BEM matches settings-editor chrome. */
+
+.modula-settings-editor__appearance-toggle-wrap {
+	position: relative;
+	flex-shrink: 0;
+}
+
+.modula-settings-editor__appearance-menu {
+	position: absolute;
+	right: 0;
+	top: calc(100% + #{$mod-space-6});
+	z-index: 100003;
+	min-width: 168px;
+	margin: 0;
+	padding: $mod-space-6 0;
+	list-style: none;
+	box-sizing: border-box;
+	background: var(--mod-se-flyout-bg, #2c3338);
+	border: 1px solid var(--mod-se-flyout-border, #3c434a);
+	border-radius: $mod-radius-4;
+	box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+}
+
+.modula-settings-editor__app[data-appearance="dark"] .modula-settings-editor__appearance-menu {
+	color-scheme: dark;
+}
+
+.modula-settings-editor__app[data-appearance="light"] .modula-settings-editor__appearance-menu {
+	color-scheme: light;
+}
+
+.modula-settings-editor__appearance-menu--sidebar-footer {
+	right: auto;
+	left: 0;
+	top: auto;
+	bottom: calc(100% + #{$mod-space-6});
+	z-index: 100004;
+}
+
+.modula-settings-editor__appearance-menu-item {
+	display: flex;
+	align-items: center;
+	gap: $mod-space-10;
+	width: 100%;
+	margin: 0;
+	padding: $mod-space-9 $mod-space-14;
+	box-sizing: border-box;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.3;
+	text-align: left;
+	cursor: pointer;
+	border: none;
+	border-radius: 0;
+	background: transparent;
+	color: var(--mod-se-flyout-ink, rgb(255 255 255 / 92%));
+
+	&:hover {
+		background: var(--mod-se-flyout-row-hover, rgb(255 255 255 / 8%));
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: inset 0 0 0 2px rgba(158, 194, 230, 0.55);
+	}
+
+	&[aria-checked="true"] {
+		font-weight: 600;
+	}
+}
+
+.modula-settings-editor__appearance-menu-label {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.modula-settings-editor__appearance-menu-check {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	color: var(--modula-takeover-accent, #{$modula-takeover-accent});
+
+	svg {
+		display: block;
+		fill: currentcolor;
+	}
+}

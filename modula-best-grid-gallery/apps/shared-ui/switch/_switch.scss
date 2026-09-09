@@ -1,0 +1,97 @@
+.modula-ui-switch {
+	display: inline-flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 4px;
+}
+
+.modula-ui-switch__label {
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.5;
+	color: var(--mod-ui-ink);
+}
+
+.modula-ui-switch__control-wrap {
+	display: inline-flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+}
+
+.modula-ui-switch__status {
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.2;
+	color: var(--mod-ui-ink-2);
+	font-variant-numeric: tabular-nums;
+	user-select: none;
+}
+
+.modula-ui-switch__control {
+	display: inline-flex;
+	margin: 0;
+	padding: 0;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+
+	&:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible .modula-ui-switch__track {
+		box-shadow: 0 0 0 3px var(--mod-ui-accent-soft, transparent);
+	}
+}
+
+.modula-ui-switch__track {
+	position: relative;
+	display: block;
+	width: 40px;
+	height: 20px;
+	border-radius: 999px;
+	background: var(--mod-ui-off);
+	transition: background var(--mod-ui-duration-switch, 0.16s) var(--mod-ui-ease-space, cubic-bezier(0.32, 0.72, 0, 1));
+}
+
+.modula-ui-switch__knob {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	/* Knob stays light in both appearances (mockup). */
+	background: #fff;
+	box-shadow: var(--mod-ui-shadow-sm, 0 1px 2px rgb(0 0 0 / 8%));
+	transition: transform var(--mod-ui-duration-switch, 0.16s) var(--mod-ui-ease-space, cubic-bezier(0.32, 0.72, 0, 1));
+}
+
+.modula-ui-switch__control.is-checked .modula-ui-switch__track {
+	background: var(--mod-ui-accent);
+}
+
+.modula-ui-switch__control.is-checked .modula-ui-switch__knob {
+	transform: translateX(20px);
+}
+
+.modula-ui-switch__help {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--mod-ui-ink-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.modula-ui-switch__track,
+	.modula-ui-switch__knob {
+		transition: none;
+	}
+}

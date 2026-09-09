@@ -42,7 +42,10 @@ class Modula_Settings_Sanitizer {
 	}
 
 	public function number_array( $value ) {
-		return array_map( 'absint', $value );
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+		return array_values( array_filter( array_map( 'absint', $value ) ) );
 	}
 
 	public function bool_array( $value ) {

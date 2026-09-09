@@ -1,0 +1,397 @@
+@use "../../variables" as *;
+
+.modula-gallery-takeover__preview-wrap {
+	flex: 1;
+	min-height: 0;
+	/* Flush with sidebar + top of workspace (aligned with sidebar chrome row) */
+	padding: 0;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+}
+
+/* Desktop artboard max-width (style kit). Tablet/mobile modifiers override below. */
+.modula-gallery-takeover__preview-wrap:not(.modula-gallery-takeover__preview-wrap--tablet):not(.modula-gallery-takeover__preview-wrap--mobile) {
+	.modula-gallery-takeover__live-preview-body {
+		max-width: 960px;
+		width: 100%;
+		margin-left: auto;
+		margin-right: auto;
+		box-sizing: border-box;
+	}
+}
+
+/* Tablet/mobile: only the rendered gallery column shrinks — not app topbar or preview chrome */
+.modula-gallery-takeover__preview-wrap--tablet {
+	align-items: stretch;
+
+	.modula-gallery-takeover__live-preview-body {
+		max-width: 768px;
+		width: 100%;
+		margin-left: auto;
+		margin-right: auto;
+		box-sizing: border-box;
+	}
+
+	.modula-gallery-takeover__preview-loading,
+	.modula-gallery-takeover__preview-placeholder {
+		max-width: 768px;
+		width: 100%;
+		margin-left: auto;
+		margin-right: auto;
+		box-sizing: border-box;
+	}
+
+	.modula-gallery-takeover__preview-error {
+		max-width: 768px;
+		width: 100%;
+		margin-left: auto;
+		margin-right: auto;
+	}
+}
+
+.modula-gallery-takeover__preview-wrap--mobile {
+	align-items: stretch;
+
+	.modula-gallery-takeover__live-preview-body {
+		max-width: 390px;
+		width: 100%;
+		margin-left: auto;
+		margin-right: auto;
+		box-sizing: border-box;
+	}
+
+	.modula-gallery-takeover__preview-loading,
+	.modula-gallery-takeover__preview-placeholder {
+		max-width: 390px;
+		width: 100%;
+		margin-left: auto;
+		margin-right: auto;
+		box-sizing: border-box;
+	}
+
+	.modula-gallery-takeover__preview-error {
+		max-width: 390px;
+		width: 100%;
+		margin-left: auto;
+		margin-right: auto;
+	}
+}
+
+.modula-gallery-takeover__preview-loading {
+	flex: 1;
+	min-height: 160px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: $mod-space-10;
+	padding: $mod-space-24 $mod-space-16;
+	background: var(--mod-se-preview-bg, #{$mod-takeover-surface-raised});
+	border: none;
+	border-bottom: 1px dashed var(--mod-se-preview-border-dashed, #{$mod-takeover-border-dashed});
+	border-radius: 0;
+	font-size: 13px;
+	color: var(--mod-se-preview-ink-muted, #{$mod-takeover-text-muted});
+	box-sizing: border-box;
+}
+
+.modula-gallery-takeover__preview-error {
+	flex: 1;
+	min-height: 120px;
+	align-self: stretch;
+}
+
+.modula-gallery-takeover__live-preview {
+	flex: 1;
+	min-height: 200px;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+	overflow: hidden;
+	background: var(--mod-se-preview-bg, #{$mod-takeover-surface-raised});
+	/* Docked panel: no floating card */
+	border: none;
+	border-radius: 0;
+	box-sizing: border-box;
+
+	&.modula-gallery {
+		opacity: 1;
+		visibility: visible;
+	}
+
+	/* Theme block-button CSS is missing in admin — mirror front TT-style pill. */
+	.modula-download-all-button.wp-block-button {
+		margin-top: 10px;
+		margin-bottom: 10px;
+	}
+
+	.modula-download-all-button .modula-download-all {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4em;
+		box-sizing: border-box;
+		padding: 0.65em 1.35em;
+		border: none;
+		border-radius: 9999px;
+		background-color: var(--wp--preset--color--contrast, #111);
+		color: var(--wp--preset--color--base, #fff);
+		font: inherit;
+		font-weight: 500;
+		line-height: 1.25;
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	.modula-download-all-button .modula-download-all:hover,
+	.modula-download-all-button .modula-download-all:focus,
+	.modula-download-all-button .modula-download-all:focus-visible {
+		color: var(--wp--preset--color--base, #fff);
+		text-decoration: none;
+		outline: none;
+	}
+
+	.modula-download-all-button .modula-download-all svg {
+		display: block;
+		width: 1.2em;
+		height: 1.2em;
+		flex: 0 0 auto;
+		max-width: 1.5rem;
+		max-height: 1.5rem;
+		fill: currentColor;
+	}
+}
+
+.modula-gallery-takeover__live-preview-body {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	gap: $mod-space-10;
+	padding: $mod-space-10 $mod-space-16;
+	box-sizing: border-box;
+	z-index: 1;
+
+	&--width-overflow {
+		/* Keep vertical clip; horizontal scroll lives on the gallery scroll region. */
+		overflow-x: hidden;
+		overflow-y: hidden;
+	}
+}
+
+.modula-gallery-takeover__live-preview-width-overflow-notice {
+	flex-shrink: 0;
+	margin: 0;
+}
+
+.modula-gallery-takeover__live-preview-body--hover-builder {
+	align-items: center;
+	justify-content: center;
+}
+
+.modula-gallery-takeover__live-preview-dropzone-notice {
+	flex-shrink: 0;
+	margin: 0;
+}
+
+.modula-gallery-takeover__live-preview-empty-state {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: $mod-space-6 0;
+	box-sizing: border-box;
+}
+
+.modula-gallery-takeover__live-preview-empty-state--video {
+	flex-direction: column;
+	gap: $mod-space-4;
+	text-align: center;
+	max-width: 28rem;
+	margin-inline: auto;
+	padding-inline: $mod-space-6;
+}
+
+.modula-gallery-takeover__live-preview-empty-state__message {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 500;
+	color: var(--mod-se-preview-ink, #{$mod-takeover-text-strong});
+}
+
+.modula-gallery-takeover__live-preview-empty-state__hint {
+	margin: 0;
+	font-size: 0.875rem;
+	opacity: 0.75;
+	color: var(--mod-se-preview-ink-muted, #{$mod-takeover-text-muted});
+}
+
+/*
+ * Video layout empty shell has no `.modula-item` tiles; keep the takeover preview
+ * visible so the empty message is not hidden by gallery-shell FOUC rules.
+ */
+.modula-gallery-takeover__live-preview.modula-gallery-initialized:has(.modula-video--empty) {
+	opacity: 1;
+	visibility: visible;
+}
+
+/* Middle column: only this region scrolls; start/end drop zones stay pinned */
+.modula-gallery-takeover__live-preview-gallery-scroll {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+	box-sizing: border-box;
+
+	&--width-overflow {
+		overflow-x: auto;
+		overflow-y: auto;
+		overscroll-behavior-x: contain;
+
+		.modula-gallery-takeover__live-preview-gallery-shell {
+			max-width: none;
+			margin-inline: 0;
+		}
+	}
+}
+
+/* Story editor strip: tile box-shadows extend below the row — extra scroll foot room */
+.modula-gallery-takeover__live-preview-gallery-scroll:has(.modula-story--editor-preview) {
+	padding-bottom: $mod-space-32;
+}
+
+/*
+ * Custom grid: room below the last row so resize/drag handles are not flush against the scroll edge
+ * (reduces accidental page scroll + OS scroll chaining while resizing downward).
+ */
+.modula-gallery-takeover__live-preview-gallery-scroll:has(.modula-custom-grid--editor-pages) {
+	padding-bottom: min(42vh, 320px);
+	overscroll-behavior-y: contain;
+}
+
+.modula-gallery-takeover__preview-upload-dropzone {
+	flex-shrink: 0;
+	box-sizing: border-box;
+	border-radius: $mod-radius-6;
+	/* Same box model in every state — avoids layout jump idle ↔ loading (dashed vs solid). */
+	border-width: 1px;
+	border-style: solid;
+	border-color: var(--mod-se-preview-border-dashed, #{$mod-takeover-border-dashed});
+	background: color-mix(in srgb,
+		var(--modula-takeover-accent, #{$modula-takeover-accent}) 8%,
+		var(--mod-se-preview-bg, #{$mod-takeover-surface-raised}));
+	transition:
+		border-color 0.15s ease,
+		background 0.15s ease;
+
+	&:not(.modula-gallery-takeover__preview-upload-dropzone--status-loading):not(.modula-gallery-takeover__preview-upload-dropzone--status-complete) {
+		border-style: dashed;
+	}
+
+	&--status-loading {
+		border-style: solid;
+		border-color: color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 42%,
+			var(--mod-se-preview-border-dashed, #{$mod-takeover-border-dashed}));
+		background: color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 14%,
+			var(--mod-se-preview-bg, #{$mod-takeover-surface-raised}));
+	}
+
+	/* WP-adjacent success green on light preview surface */
+	&--status-complete {
+		border-style: solid;
+		border-color: color-mix(in srgb,
+			#008a20 55%,
+			var(--mod-se-preview-border, #{$mod-takeover-border-light}));
+		background: color-mix(in srgb,
+			#008a20 12%,
+			var(--mod-se-preview-bg, #{$mod-takeover-surface-raised}));
+	}
+
+	&--drag-active.modula-gallery-takeover__preview-upload-dropzone--status-idle {
+		border-color: color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 55%,
+			var(--mod-se-preview-border-dashed, #{$mod-takeover-border-dashed}));
+		background: color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 18%,
+			var(--mod-se-preview-bg, #{$mod-takeover-surface-raised}));
+		box-shadow: 0 0 0 1px color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 35%,
+			transparent);
+	}
+
+	&--empty {
+		width: min(720px, 100%);
+		max-width: 100%;
+		min-height: min(56vh, 420px);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: $mod-space-16;
+	}
+}
+
+/*
+ * Fixed min-height so idle / loading (with optional progress line) / complete share one band height.
+ */
+.modula-gallery-takeover__preview-upload-dropzone__inner {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	min-height: 52px;
+	box-sizing: border-box;
+	gap: $mod-space-4;
+}
+
+.modula-gallery-takeover__preview-upload-dropzone__row {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: $mod-space-10;
+	flex-shrink: 0;
+
+	.components-spinner {
+		margin: 0;
+		width: 18px;
+		height: 18px;
+		flex-shrink: 0;
+	}
+}
+
+.modula-gallery-takeover__preview-upload-dropzone__row--complete {
+	gap: $mod-space-8;
+}
+
+.modula-gallery-takeover__preview-upload-dropzone__icon-check {
+	display: inline-flex;
+	color: #008a20;
+	flex-shrink: 0;
+
+	svg {
+		display: block;
+		fill: currentColor;
+	}
+}
+
+.modula-gallery-takeover__preview-upload-dropzone__text {
+	margin: 0;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--mod-se-preview-ink-muted, #{$mod-takeover-text-muted});
+	text-align: center;
+
+	&--strong {
+		color: var(--mod-se-preview-ink, #{$mod-takeover-text-strong});
+	}
+
+	&--complete {
+		color: color-mix(in srgb, #006008 78%, var(--mod-se-preview-ink, #{$mod-takeover-text-strong}));
+		text-align: left;
+	}
+}

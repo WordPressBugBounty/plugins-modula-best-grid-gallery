@@ -1,0 +1,233 @@
+/**
+ * Modula gallery edit — full-screen takeover (hides WP admin chrome).
+ * Loaded only when modula_gallery_takeover_ui is enabled.
+ *
+ * Pre-React boot shell + appearance: `data-modula-se-appearance` on <html>
+ * is set from localStorage in admin_head (see Gallery_Takeover_Admin).
+ */
+
+body.modula-gallery-takeover {
+	overflow: hidden !important;
+	height: auto !important;
+}
+
+body.modula-gallery-takeover #wpadminbar,
+body.modula-gallery-takeover #adminmenumain,
+body.modula-gallery-takeover #adminmenuback,
+body.modula-gallery-takeover #adminmenuwrap {
+	display: none !important;
+}
+
+body.modula-gallery-takeover #wpcontent {
+	margin-left: 0 !important;
+	padding-left: 0 !important;
+}
+
+body.modula-gallery-takeover #wpbody {
+	padding-top: 0 !important;
+}
+
+body.modula-gallery-takeover #wpbody-content {
+	padding-bottom: 0 !important;
+	margin-bottom: 0 !important;
+	float: none !important;
+}
+
+body.modula-gallery-takeover .wrap {
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+body.modula-gallery-takeover #screen-meta,
+body.modula-gallery-takeover #screen-meta-links,
+body.modula-gallery-takeover #contextual-help-link-wrap {
+	display: none !important;
+}
+
+body.modula-gallery-takeover #wpfooter {
+	display: none !important;
+}
+
+/* Fixed layer: only our app is visible and interactive. */
+body.modula-gallery-takeover
+	#modula-gallery-takeover-root.modula-gallery-takeover__mount {
+	--modula-se-boot-bg: #e9e9e5;
+	--modula-se-boot-ink: #8b8b93;
+	--modula-se-boot-ink-strong: #16161a;
+	--modula-se-boot-ink-body: #56565e;
+	--modula-se-boot-accent: #2e4fe8;
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	display: flex;
+	flex-direction: column;
+	background: var(--modula-se-boot-bg);
+	color: var(--modula-se-boot-ink);
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+html[data-modula-se-appearance="dark"]
+	body.modula-gallery-takeover
+	#modula-gallery-takeover-root.modula-gallery-takeover__mount,
+body.modula-gallery-takeover
+	#modula-gallery-takeover-root.modula-gallery-takeover__mount[data-appearance="dark"] {
+	--modula-se-boot-bg: #101114;
+	--modula-se-boot-ink: #74747e;
+	--modula-se-boot-ink-strong: #ececef;
+	--modula-se-boot-ink-body: #a2a2ac;
+	--modula-se-boot-accent: #6b85ff;
+	color-scheme: dark;
+}
+
+/* HTML/CSS boot — visible until React createRoot replaces mount children. */
+.modula-settings-editor__boot {
+	display: flex;
+	flex: 1;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	margin: 0;
+	padding: 24px;
+	min-height: 0;
+	font-family:
+		-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans,
+		Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	font-size: 14px;
+	line-height: 1.4;
+	color: var(--modula-se-boot-ink, #8b8b93);
+	box-sizing: border-box;
+}
+
+.modula-settings-editor__boot-spinner {
+	box-sizing: border-box;
+	width: 18px;
+	height: 18px;
+	flex: 0 0 auto;
+	border: 2px solid var(--modula-se-boot-ink, #8b8b93);
+	border-top-color: var(--modula-se-boot-accent, #2e4fe8);
+	border-radius: 50%;
+	animation: modula-se-boot-spin 0.7s linear infinite;
+}
+
+.modula-settings-editor__boot-label {
+	min-width: 0;
+}
+
+@keyframes modula-se-boot-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/*
+ * Desktop-only gate: phones and tablets (max-width 1024px).
+ * Hidden on desktop until React replaces the mount. Keep in sync with
+ * apps/gallery-editor/constants/desktopEditorViewport.js.
+ */
+.modula-gallery-takeover__desktop-only {
+	display: none;
+	flex: 1;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 0;
+	padding: 32px 20px;
+	box-sizing: border-box;
+	text-align: center;
+	font-family:
+		-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans,
+		Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	color: var(--modula-se-boot-ink-body, #56565e);
+}
+
+.modula-gallery-takeover__desktop-only-inner {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	max-width: 320px;
+}
+
+.modula-gallery-takeover__desktop-only-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	margin: 0 0 16px;
+	color: var(--modula-se-boot-ink, #8b8b93);
+}
+
+.modula-gallery-takeover__desktop-only-icon svg {
+	display: block;
+	width: 48px;
+	height: 48px;
+}
+
+body.modula-gallery-takeover .modula-gallery-takeover__desktop-only-title {
+	margin: 0 0 8px;
+	padding: 0;
+	font-family: inherit;
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.3;
+	letter-spacing: -0.01em;
+	color: var(--modula-se-boot-ink-strong, #16161a);
+}
+
+.modula-gallery-takeover__desktop-only-body {
+	margin: 0 0 24px;
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 1.4;
+	color: var(--modula-se-boot-ink-body, #56565e);
+}
+
+a.modula-gallery-takeover__desktop-only-back {
+	box-sizing: border-box;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 32px;
+	height: 32px;
+	padding: 0 12px;
+	border: 1px solid var(--modula-se-boot-accent, #2e4fe8);
+	border-radius: 0;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1;
+	color: #fff;
+	background: var(--modula-se-boot-accent, #2e4fe8);
+	text-decoration: none;
+	cursor: pointer;
+}
+
+a.modula-gallery-takeover__desktop-only-back:hover,
+a.modula-gallery-takeover__desktop-only-back:focus {
+	color: #fff;
+	filter: brightness(1.05);
+}
+
+a.modula-gallery-takeover__desktop-only-back:focus {
+	outline: none;
+}
+
+a.modula-gallery-takeover__desktop-only-back:focus-visible {
+	box-shadow: 0 0 0 3px rgba(46, 79, 232, 0.2);
+}
+
+@media (max-width: 1024px) {
+	.modula-settings-editor__boot {
+		display: none !important;
+	}
+
+	.modula-gallery-takeover__desktop-only {
+		display: flex;
+	}
+}
+
+/* Tooltips from @wordpress/components must render above this fixed layer (see WP .components-tooltip z-index). */
+body.modula-gallery-takeover .components-tooltip {
+	z-index: 1000102 !important;
+}

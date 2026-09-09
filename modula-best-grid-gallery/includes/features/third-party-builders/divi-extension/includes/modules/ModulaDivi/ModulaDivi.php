@@ -137,7 +137,7 @@ class Modula_Divi_Module extends ET_Builder_Module {
 		wp_enqueue_script( 'modula-lazysizes' );
 		wp_enqueue_script( 'modula' );
 		wp_enqueue_script( 'modulaFancybox' );
-		wp_add_inline_script( 'modulaFancybox', "const ModulaShareButtons = '" . addslashes( json_encode( Modula_Helper::render_lightbox_share_template() ) ) . "';" , 'before' );
+		Modula_Helper::add_lightbox_share_buttons_inline_script( 'modulaFancybox' );
 
 		do_action( 'modula_divi_builder_sripts_after_modula' );
 

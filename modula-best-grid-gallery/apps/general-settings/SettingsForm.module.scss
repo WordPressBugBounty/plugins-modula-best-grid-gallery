@@ -1,0 +1,24 @@
+.fieldWrapper {
+    position: relative;
+    margin-bottom: var(--theme-content-spacing);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--theme-content-spacing);
+}
+
+.disabledClass {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.comboFieldWrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--theme-content-spacing);
+    align-items: center;
+    width: 100%;
+}

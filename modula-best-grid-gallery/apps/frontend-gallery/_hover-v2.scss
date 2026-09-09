@@ -1,0 +1,762 @@
+/* Composable hover (v2): classes from PHP Modula_Item_Data_Processor::process_hover_effects */
+
+.modula .modula-items .modula-item.modula-hover-v2 .figc-inner {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35em;
+	align-items: stretch;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2 .modula-title {
+	order: var(--modula-hover-ord-title, 0);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2 .jtg-description {
+	order: var(--modula-hover-ord-caption, 1);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2 .modula-social {
+	order: var(--modula-hover-ord-social, 2);
+}
+
+/*
+ * Card treatments (image area).
+ * React tiles scale `.modula-item-hover-media` / `.modula-showcase__hover-media`
+ * so dim overlay + figc stay aligned with the photo. Legacy PHP markup still
+ * zooms the img when no media shell is present.
+ */
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--zoom .modula-item-hover-media,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--zoom .modula-showcase__hover-media,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--zoom:not(:has(.modula-item-hover-media)):not(:has(.modula-showcase__hover-media)) .modula-item-content img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--zoom:not(:has(.modula-item-hover-media)):not(:has(.modula-showcase__hover-media)) .modula-item-picture img {
+	transition: transform var(--modula-hover-card-enter-duration, 350ms) ease;
+	transition-delay: 0ms;
+	transform: scale(1);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--zoom:hover .modula-item-hover-media,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--zoom:hover .modula-showcase__hover-media,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--zoom:focus-within:has(:focus-visible) .modula-item-hover-media,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--zoom:focus-within:has(:focus-visible) .modula-showcase__hover-media,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--zoom:hover:not(:has(.modula-item-hover-media)):not(:has(.modula-showcase__hover-media)) .modula-item-content img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--zoom:hover:not(:has(.modula-item-hover-media)):not(:has(.modula-showcase__hover-media)) .modula-item-picture img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--zoom:focus-within:has(:focus-visible):not(:has(.modula-item-hover-media)):not(:has(.modula-showcase__hover-media)) .modula-item-content img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--zoom:focus-within:has(:focus-visible):not(:has(.modula-item-hover-media)):not(:has(.modula-showcase__hover-media)) .modula-item-picture img {
+	transition-delay: var(--modula-hover-card-enter-delay, 0ms);
+	transform: scale(1.06);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--grayscale .modula-item-content img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--grayscale .modula-item-picture img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--grayscale .modula-showcase__img {
+	transition: filter var(--modula-hover-card-enter-duration, 350ms) ease;
+	transition-delay: 0ms;
+	filter: grayscale(0);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--grayscale:hover .modula-item-content img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--grayscale:hover .modula-item-picture img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--grayscale:focus-within:has(:focus-visible) .modula-item-content img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--grayscale:focus-within:has(:focus-visible) .modula-item-picture img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--grayscale:hover .modula-showcase__img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--grayscale:focus-within:has(:focus-visible) .modula-showcase__img {
+	transition-delay: var(--modula-hover-card-enter-delay, 0ms);
+	filter: grayscale(1);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--lift {
+	transition:
+		transform var(--modula-hover-card-enter-duration, 250ms) ease,
+		box-shadow var(--modula-hover-card-enter-duration, 250ms) ease;
+	transition-delay: 0ms;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--lift:hover,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--lift:focus-within:has(:focus-visible) {
+	transition-delay: var(--modula-hover-card-enter-delay, 0ms);
+	transform: translateY(-4px);
+	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+}
+
+/*
+ * Dim overlay add-on: stacks with other card treatments. Same rules as legacy --dim class.
+ * Tint / strength: --modula-hover-overlay-tint / --modula-hover-dim-active-opacity on #modula-{id} or the item.
+ */
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--dim .modula-item-overlay,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--dim-addon .modula-item-overlay {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	pointer-events: none;
+	background-color: var(--modula-hover-overlay-tint, rgba(0, 0, 0, 0.55));
+	transition: opacity var(--modula-hover-card-enter-duration, 300ms) ease;
+	transition-delay: 0ms;
+	opacity: 0;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--dim:hover .modula-item-overlay,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--dim:focus-within:has(:focus-visible) .modula-item-overlay,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--dim-addon:hover .modula-item-overlay,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--dim-addon:focus-within:has(:focus-visible) .modula-item-overlay {
+	transition-delay: var(--modula-hover-card-enter-delay, 0ms);
+	opacity: var(--modula-hover-dim-active-opacity, 0.55);
+}
+
+/* Slot entrance: subtle motion until hover */
+.modula .modula-items .modula-item.modula-hover-v2 .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2 .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2 .figc .modula-social {
+	transition:
+		opacity var(--modula-hover-enter-duration, 280ms) ease,
+		transform var(--modula-hover-enter-duration, 280ms) ease,
+		filter var(--modula-hover-enter-duration, 280ms) ease;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2 .figc .modula-title {
+	--modula-hover-enter-duration: var(--modula-hover-enter-duration-title, 280ms);
+	transition-delay: var(--modula-hover-enter-delay-title, 0ms);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2 .figc .jtg-description {
+	--modula-hover-enter-duration: var(--modula-hover-enter-duration-caption, 280ms);
+	transition-delay: var(--modula-hover-enter-delay-caption, 0ms);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2 .figc .modula-social {
+	--modula-hover-enter-duration: var(--modula-hover-enter-duration-social, 280ms);
+	transition-delay: var(--modula-hover-enter-delay-social, 0ms);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--fade .figc .modula-title {
+	opacity: 0;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--fade:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--fade:focus-within:has(:focus-visible) .figc .modula-title {
+	opacity: 1;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--fade .figc .jtg-description {
+	opacity: 0;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--fade:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--fade:focus-within:has(:focus-visible) .figc .jtg-description {
+	opacity: 1;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--fade .figc .modula-social {
+	opacity: 0;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--fade:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--fade:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 1;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--slide-up .figc .modula-title {
+	opacity: 0;
+	transform: translateY(12px);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--slide-up:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--slide-up:focus-within:has(:focus-visible) .figc .modula-title {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--slide-up .figc .jtg-description {
+	opacity: 0;
+	transform: translateY(12px);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--slide-up:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--slide-up:focus-within:has(:focus-visible) .figc .jtg-description {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--slide-up .figc .modula-social {
+	opacity: 0;
+	transform: translateY(12px);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--slide-up:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--slide-up:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--slide-down .figc .modula-title {
+	opacity: 0;
+	transform: translateY(-12px);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--slide-down:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--slide-down:focus-within:has(:focus-visible) .figc .modula-title {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--slide-down .figc .jtg-description {
+	opacity: 0;
+	transform: translateY(-12px);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--slide-down:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--slide-down:focus-within:has(:focus-visible) .figc .jtg-description {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--slide-down .figc .modula-social {
+	opacity: 0;
+	transform: translateY(-12px);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--slide-down:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--slide-down:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--slide-left .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--slide-left .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--slide-left .figc .modula-social {
+	opacity: 0;
+	transform: translateX(16px);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--slide-left:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--slide-left:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--slide-left:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--slide-left:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--slide-left:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--slide-left:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 1;
+	transform: translateX(0);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--slide-right .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--slide-right .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--slide-right .figc .modula-social {
+	opacity: 0;
+	transform: translateX(-16px);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--slide-right:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--slide-right:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--slide-right:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--slide-right:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--slide-right:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--slide-right:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 1;
+	transform: translateX(0);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--blur-in .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--blur-in .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--blur-in .figc .modula-social {
+	opacity: 0;
+	filter: blur(5px);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--blur-in:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--blur-in:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--blur-in:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--blur-in:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--blur-in:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--blur-in:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 1;
+	filter: blur(0);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--scale .figc .modula-title {
+	opacity: 0;
+	transform: scale(0.94);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--scale:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--title--scale:focus-within:has(:focus-visible) .figc .modula-title {
+	opacity: 1;
+	transform: scale(1);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--scale .figc .jtg-description {
+	opacity: 0;
+	transform: scale(0.94);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--scale:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--caption--scale:focus-within:has(:focus-visible) .figc .jtg-description {
+	opacity: 1;
+	transform: scale(1);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--scale .figc .modula-social {
+	opacity: 0;
+	transform: scale(0.94);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--scale:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-enter--social--scale:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 1;
+	transform: scale(1);
+}
+
+/* Free-position slots (percent anchors on the tile). */
+.modula .modula-items .modula-item.modula-hover-v2--free-slots .modula-item-content {
+	position: relative;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc {
+	position: absolute;
+	inset: 0;
+	padding: 0;
+	margin: 0;
+	z-index: 2;
+	pointer-events: none;
+	overflow: hidden;
+	/* Diamond graphic: square sized from min(tile width, tile height). */
+	container-type: size;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc-inner {
+	position: relative;
+	display: block;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--frame .figc::before,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--diamond .figc::before {
+	content: '';
+	position: absolute;
+	border: 2px solid rgba(255, 255, 255, 0.92);
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 220ms ease, transform 220ms ease;
+	z-index: 3;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--frame .figc::before {
+	inset: 10%;
+}
+
+/* Square in tile space, then rotate — avoids stretched rhombus on wide custom-grid tiles. */
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--diamond .figc::before {
+	inset: auto;
+	left: 50%;
+	top: 50%;
+	width: min(64cqw, 64cqh);
+	height: min(64cqw, 64cqh);
+	transform: translate(-50%, -50%) rotate(45deg) scale(0.92);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--frame:hover .figc::before,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--frame:focus-within:has(:focus-visible) .figc::before {
+	opacity: 1;
+	transform: scale(1);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--diamond:hover .figc::before,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--diamond:focus-within:has(:focus-visible) .figc::before {
+	opacity: 1;
+	transform: translate(-50%, -50%) rotate(45deg) scale(1);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic-visibility--always.modula-hover-graphic--frame .figc::before,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic-visibility--always.modula-hover-graphic--diamond .figc::before {
+	opacity: 1;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic-visibility--always.modula-hover-graphic--frame .figc::before {
+	transform: scale(1);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic-visibility--always.modula-hover-graphic--diamond .figc::before {
+	transform: translate(-50%, -50%) rotate(45deg) scale(1);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .modula-social {
+	position: absolute;
+	pointer-events: auto;
+	box-sizing: border-box;
+	min-width: 0;
+	width: max-content;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+	order: unset;
+	z-index: 3;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .jtg-description p {
+	margin: 0;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .modula-title {
+	left: var(--modula-hover-slot-title-x, 50%);
+	top: var(--modula-hover-slot-title-y, 18%);
+	--modula-hover-slot-anchor: var(--modula-hover-slot-anchor-title, 0%);
+	max-width: min(var(--modula-hover-slot-max-width-title, 50%),
+			calc(100% - 0.75rem));
+	text-align: var(--modula-hover-slot-text-align-title, left);
+	transform: translate(var(--modula-hover-slot-anchor-title, 0%), -50%);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .jtg-description {
+	left: var(--modula-hover-slot-caption-x, 50%);
+	top: var(--modula-hover-slot-caption-y, 50%);
+	--modula-hover-slot-anchor: var(--modula-hover-slot-anchor-caption, 0%);
+	max-width: min(var(--modula-hover-slot-max-width-caption, 50%),
+			calc(100% - 0.75rem));
+	text-align: var(--modula-hover-slot-text-align-caption, left);
+	transform: translate(var(--modula-hover-slot-anchor-caption, 0%), -50%);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .modula-social {
+	left: var(--modula-hover-slot-social-x, 50%);
+	top: var(--modula-hover-slot-social-y, 82%);
+	--modula-hover-slot-anchor: var(--modula-hover-slot-anchor-social, 0%);
+	max-width: min(var(--modula-hover-slot-max-width-social, 50%),
+			calc(100% - 0.75rem));
+	text-align: var(--modula-hover-slot-text-align-social, left);
+	transform: translate(var(--modula-hover-slot-anchor-social, 0%), -50%);
+}
+
+/* Show on hover: keep layers hidden until the tile is hovered or keyboard-focused. */
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--title--on-hover:not(:hover):not(:focus-within:has(:focus-visible)) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--caption--on-hover:not(:hover):not(:focus-within:has(:focus-visible)) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--social--on-hover:not(:hover):not(:focus-within:has(:focus-visible)) .figc .modula-social {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--title--on-hover:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--title--on-hover:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--caption--on-hover:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--caption--on-hover:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--social--on-hover:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--social--on-hover:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--title--always .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--caption--always .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--social--always .figc .modula-social {
+	opacity: 1;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--title--hidden .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--caption--hidden .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--social--hidden .figc .modula-social {
+	opacity: 0;
+	pointer-events: none;
+	visibility: hidden;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--title--hide-on-hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--caption--hide-on-hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--social--hide-on-hover .figc .modula-social {
+	opacity: 1;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--title--hide-on-hover:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--title--hide-on-hover:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--caption--hide-on-hover:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--caption--hide-on-hover:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--social--hide-on-hover:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--social--hide-on-hover:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 0;
+}
+
+/* Hide-on-hover: use chosen motion as an exit transition. */
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--title--fade:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--title--fade:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--caption--fade:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--caption--fade:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--fade:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--fade:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 0;
+	transition-delay: 0ms;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--title--slide-up:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--title--slide-up:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--caption--slide-up:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--caption--slide-up:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-up:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-up:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 0;
+	transform: translate(var(--modula-hover-slot-anchor, 0%), calc(-50% - 12px));
+	transition-delay: 0ms;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--title--slide-down:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--title--slide-down:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--caption--slide-down:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--caption--slide-down:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-down:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-down:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 0;
+	transform: translate(var(--modula-hover-slot-anchor, 0%), calc(-50% + 12px));
+	transition-delay: 0ms;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--title--slide-left:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--title--slide-left:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--caption--slide-left:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--caption--slide-left:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-left:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-left:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 0;
+	transform: translate(calc(var(--modula-hover-slot-anchor, 0%) - 16px), -50%);
+	transition-delay: 0ms;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--title--slide-right:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--title--slide-right:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--caption--slide-right:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--caption--slide-right:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-right:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-right:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 0;
+	transform: translate(calc(var(--modula-hover-slot-anchor, 0%) + 16px), -50%);
+	transition-delay: 0ms;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--title--blur-in:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--title--blur-in:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--caption--blur-in:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--caption--blur-in:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--blur-in:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--blur-in:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 0;
+	filter: blur(5px);
+	transition-delay: 0ms;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--title--scale:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--title--scale:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--caption--scale:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--caption--scale:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--scale:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--scale:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 0;
+	transform: translate(var(--modula-hover-slot-anchor, 0%), -50%) scale(0.94);
+	transition-delay: 0ms;
+}
+
+/* Entrance + anchor: combine centering with motion (higher specificity than rules above). */
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--fade .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--fade .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--fade .figc .modula-social {
+	opacity: 0;
+	transform: translate(var(--modula-hover-slot-anchor, 0%), -50%);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--fade:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--fade:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--fade:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--fade:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--fade:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--fade:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 1;
+	transform: translate(var(--modula-hover-slot-anchor, 0%), -50%);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-up .figc .modula-title {
+	opacity: 0;
+	transform: translate(var(--modula-hover-slot-anchor-title, 0%),
+			calc(-50% + 12px));
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-up:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-up:focus-within:has(:focus-visible) .figc .modula-title {
+	opacity: 1;
+	transform: translate(var(--modula-hover-slot-anchor-title, 0%), -50%);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-up .figc .jtg-description {
+	opacity: 0;
+	transform: translate(var(--modula-hover-slot-anchor-caption, 0%),
+			calc(-50% + 12px));
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-up:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-up:focus-within:has(:focus-visible) .figc .jtg-description {
+	opacity: 1;
+	transform: translate(var(--modula-hover-slot-anchor-caption, 0%), -50%);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-up .figc .modula-social {
+	opacity: 0;
+	transform: translate(var(--modula-hover-slot-anchor-social, 0%),
+			calc(-50% + 12px));
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-up:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-up:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 1;
+	transform: translate(var(--modula-hover-slot-anchor-social, 0%), -50%);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-down .figc .modula-title {
+	opacity: 0;
+	transform: translate(var(--modula-hover-slot-anchor-title, 0%),
+			calc(-50% - 12px));
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-down:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-down:focus-within:has(:focus-visible) .figc .modula-title {
+	opacity: 1;
+	transform: translate(var(--modula-hover-slot-anchor-title, 0%), -50%);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-down .figc .jtg-description {
+	opacity: 0;
+	transform: translate(var(--modula-hover-slot-anchor-caption, 0%),
+			calc(-50% - 12px));
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-down:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-down:focus-within:has(:focus-visible) .figc .jtg-description {
+	opacity: 1;
+	transform: translate(var(--modula-hover-slot-anchor-caption, 0%), -50%);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-down .figc .modula-social {
+	opacity: 0;
+	transform: translate(var(--modula-hover-slot-anchor-social, 0%),
+			calc(-50% - 12px));
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-down:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-down:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 1;
+	transform: translate(var(--modula-hover-slot-anchor-social, 0%), -50%);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-left .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-left .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-left .figc .modula-social {
+	opacity: 0;
+	transform: translate(calc(var(--modula-hover-slot-anchor, 0%) + 16px),
+			-50%);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-left:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-left:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-left:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-left:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-left:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-left:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 1;
+	transform: translate(var(--modula-hover-slot-anchor, 0%), -50%);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-right .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-right .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-right .figc .modula-social {
+	opacity: 0;
+	transform: translate(calc(var(--modula-hover-slot-anchor, 0%) - 16px),
+			-50%);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-right:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-right:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-right:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-right:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-right:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-right:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 1;
+	transform: translate(var(--modula-hover-slot-anchor, 0%), -50%);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--blur-in .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--blur-in .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--blur-in .figc .modula-social {
+	opacity: 0;
+	transform: translate(var(--modula-hover-slot-anchor, 0%), -50%);
+	filter: blur(5px);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--blur-in:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--blur-in:focus-within:has(:focus-visible) .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--blur-in:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--blur-in:focus-within:has(:focus-visible) .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--blur-in:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--blur-in:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 1;
+	transform: translate(var(--modula-hover-slot-anchor, 0%), -50%);
+	filter: blur(0);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--scale .figc .modula-title {
+	opacity: 0;
+	transform: translate(var(--modula-hover-slot-anchor-title, 0%), -50%) scale(0.94);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--scale:hover .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--scale:focus-within:has(:focus-visible) .figc .modula-title {
+	opacity: 1;
+	transform: translate(var(--modula-hover-slot-anchor-title, 0%), -50%) scale(1);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--scale .figc .jtg-description {
+	opacity: 0;
+	transform: translate(var(--modula-hover-slot-anchor-caption, 0%), -50%) scale(0.94);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--scale:hover .figc .jtg-description,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--scale:focus-within:has(:focus-visible) .figc .jtg-description {
+	opacity: 1;
+	transform: translate(var(--modula-hover-slot-anchor-caption, 0%), -50%) scale(1);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--scale .figc .modula-social {
+	opacity: 0;
+	transform: translate(var(--modula-hover-slot-anchor-social, 0%), -50%) scale(0.94);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--scale:hover .figc .modula-social,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--scale:focus-within:has(:focus-visible) .figc .modula-social {
+	opacity: 1;
+	transform: translate(var(--modula-hover-slot-anchor-social, 0%), -50%) scale(1);
+}
+
+/*
+ * Interaction → “No animation for people who ask for less” (visitor frontend only).
+ * Root gets `.modula-respect-reduced-motion` when the setting is On (not in editor preview).
+ * When the OS also asks for less motion, drop all gallery animations/transitions.
+ */
+.modula.modula-gallery.modula-respect-reduced-motion {
+	@media (prefers-reduced-motion: reduce) {
+
+		*,
+		*::before,
+		*::after {
+			animation: none !important;
+			animation-duration: 0.01ms !important;
+			animation-iteration-count: 1 !important;
+			transition: none !important;
+			transition-duration: 0.01ms !important;
+			scroll-behavior: auto !important;
+		}
+
+		.modula-items .modula-item.modula-hover-v2,
+		.modula-items .modula-item.modula-hover-v2 .modula-item-content img,
+		.modula-items .modula-item.modula-hover-v2 .modula-item-picture img,
+		.modula-items .modula-item.modula-hover-v2 .modula-item-overlay,
+		.modula-items .modula-item.modula-hover-v2 .figc .modula-title,
+		.modula-items .modula-item.modula-hover-v2 .figc .jtg-description,
+		.modula-items .modula-item.modula-hover-v2 .figc .modula-social {
+			transition: none !important;
+			animation: none !important;
+		}
+	}
+}

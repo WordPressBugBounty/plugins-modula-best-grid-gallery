@@ -25,10 +25,13 @@
 			}
 
 			// Check per gallery & per image if we should show title.
-			$should_hide_title = ( boolval( $data->settings['hide_title'] ) || ( isset( $image['hide_title'] ) && boolval( $image['hide_title'] ) ) );
+			$should_hide_title = ( Modula_Helper::is_truthy_flag( $data->settings['hide_title'] ) || ( isset( $image['hide_title'] ) && Modula_Helper::is_truthy_flag( $image['hide_title'] ) ) );
 			$is_slider         = isset( $data->settings['slider_image_crop'] );
 			$custom_size       = $is_slider ? 'custom' === $data->settings['slider_image_size'] : 'custom' === $data->settings['grid_image_size'];
 			$crop              = $is_slider ? boolval( $data->settings['slider_image_crop'] ) : boolval( $data->settings['grid_image_crop'] );
+
+			$enable_social              = Modula_Helper::is_truthy_flag( $data->settings['enableSocial'] );
+			$social_desktop_collapsed   = Modula_Helper::is_truthy_flag( $data->settings['socialDesktopCollapsed'] );
 
 			// Create array with data in order to send it to image template
 			$item_data = array(
@@ -39,15 +42,16 @@
 
 				/* What to show from elements */
 				'hide_title'             => $should_hide_title,
-				'hide_description'       => boolval( $data->settings['hide_description'] ) ? true : false,
-				'hide_socials'           => ! boolval( $data->settings['enableSocial'] ) || boolval( $data->settings['socialDesktopCollapsed'] ),
-				'enableTwitter'          => boolval( $data->settings['enableTwitter'] ),
-				'enableWhatsapp'         => boolval( $data->settings['enableWhatsapp'] ),
-				'enableFacebook'         => boolval( $data->settings['enableFacebook'] ),
-				'enablePinterest'        => boolval( $data->settings['enablePinterest'] ),
-				'enableLinkedin'         => boolval( $data->settings['enableLinkedin'] ),
-				'enableEmail'            => boolval( $data->settings['enableEmail'] ),
-				'socialDesktopCollapsed' => boolval( $data->settings['socialDesktopCollapsed'] ),
+				'hide_description'       => Modula_Helper::is_truthy_flag( $data->settings['hide_description'] ),
+				'enableSocial'           => $enable_social,
+				'hide_socials'           => ! $enable_social || $social_desktop_collapsed,
+				'enableTwitter'          => Modula_Helper::is_truthy_flag( $data->settings['enableTwitter'] ),
+				'enableWhatsapp'         => Modula_Helper::is_truthy_flag( $data->settings['enableWhatsapp'] ),
+				'enableFacebook'         => Modula_Helper::is_truthy_flag( $data->settings['enableFacebook'] ),
+				'enablePinterest'        => Modula_Helper::is_truthy_flag( $data->settings['enablePinterest'] ),
+				'enableLinkedin'         => Modula_Helper::is_truthy_flag( $data->settings['enableLinkedin'] ),
+				'enableEmail'            => Modula_Helper::is_truthy_flag( $data->settings['enableEmail'] ),
+				'socialDesktopCollapsed' => $social_desktop_collapsed,
 				'lazyLoad'               => modula_run_lazy_load( $data->settings ),
 				'gallery_type'           => $data->settings['type'],
 				// Video defaults (some extensions expect these properties to exist).
@@ -97,7 +101,7 @@
 			// Let's set the data used for the srcset and sizes behaviour.
 			// If the image size is custom and cropped, the srcset and sizes should not be set to avoid the browser
 			// to load the wrong image. This is particular problematic when using the SpeedUp extension.
-			if ( in_array( $data->settings['type'], array( 'creative-gallery', 'grid', 'custom-grid' ) ) ) {
+			if ( in_array( $data->settings['type'], array( 'creative-gallery', 'grid', 'custom-grid', 'polaroid' ), true ) ) {
 				// Specify if the image size is custom.
 				if ( 'custom' === $data->settings['grid_image_size'] ) {
 					$item_data['custom_grid'] = true;
@@ -131,7 +135,8 @@
 			do_action( 'modula_shortcode_before_item', $data->settings, $item_data );
 			$data->loader->set_template_data( $item_data );
 			$slug = apply_filters( 'modula_item_template_slug', 'items/item', $data->settings, $image );
-			$name = apply_filters( 'modula_item_template_name', $data->settings['effect'], $data->settings, $image );
+			$default_item_tpl = Modula_Helper::classic_item_template_name( $data->settings );
+			$name = apply_filters( 'modula_item_template_name', $default_item_tpl, $data->settings, $image );
 			$data->loader->get_template_part( $slug, $name );
 			do_action( 'modula_shortcode_after_item', $data->settings, $item_data );
 		}

@@ -1,0 +1,459 @@
+@use 'mixins' as *;
+@use '../variables' as *;
+
+// Takeover settings panel layout (appearance-agnostic). Colors live in dark/light partials.
+.modula-gallery-takeover__sidebar-settings-inner {
+	flex: 1;
+	min-height: 0;
+	overflow-x: hidden;
+	overflow-y: auto;
+	padding: $mod-space-10 $mod-takeover-sidebar-settings-inner-pad-x $mod-space-16;
+	scrollbar-width: thin;
+	scrollbar-color: var(--mod-se-scrollbar-thumb) var(--mod-se-scrollbar-track);
+	background: var(--mod-se-sidebar-settings-bg);
+	color: var(--mod-se-sidebar-settings-ink);
+
+	&::-webkit-scrollbar {
+		width: $mod-space-10;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background-color: var(--mod-se-scrollbar-thumb);
+		border-radius: $mod-radius-8;
+		border: $mod-space-focus-ring solid var(--mod-se-scrollbar-track);
+	}
+
+	&::-webkit-scrollbar-track {
+		background: var(--mod-se-scrollbar-track);
+	}
+
+	// Hub field shown as a normal form control (not a list row): no row hover, no fixed list height.
+	.modula-settings-editor__category--hub .modula-settings-editor__section--hub-field-embedded {
+		@media (hover: hover) {
+			&:hover {
+				background: transparent;
+			}
+		}
+
+		&:focus-within {
+			background: transparent;
+		}
+
+		.modula-settings-editor__field-row {
+			min-height: 0;
+			padding: 0;
+			align-items: stretch;
+		}
+
+		.modula-settings-editor__field-row--toggle,
+		.modula-settings-editor__field-row--toggle-nested {
+			grid-template-rows: auto auto;
+
+			&:has(.modula-settings-editor__field-toggle-foot) {
+				grid-template-rows: auto auto;
+			}
+		}
+	}
+
+	.modula-settings-editor__category-hub-submenu-inner
+		> .modula-settings-editor__section--hub-field-embedded {
+		margin-bottom: $mod-space-12;
+		padding-bottom: $mod-space-12;
+		border-bottom: 1px solid var(--mod-se-chrome-border);
+		box-sizing: border-box;
+	}
+
+	.modula-settings-editor__category--hub .modula-settings-editor__section--hub-field {
+		// List-row toggles (e.g. Pagination): match drill labels, not form field labels (600).
+		.modula-settings-editor__field-label {
+			font-size: 13px;
+			font-weight: 400;
+			line-height: 1.35;
+		}
+
+		.modula-settings-editor__field-toggle-nested-chevron svg {
+			fill: var(--mod-se-sidebar-ink-muted);
+		}
+	}
+
+	.modula-settings-editor__section {
+		background: transparent;
+		border: none;
+		border-radius: 0;
+		padding: 0;
+		margin: $mod-space-16 0 0;
+
+		&:first-child {
+			margin-top: 0;
+		}
+	}
+
+	.modula-settings-editor__section-head {
+		margin: 0 0 $mod-space-8;
+		padding: 0;
+	}
+
+	.modula-settings-editor__section-body {
+		max-width: none;
+	}
+
+	.modula-settings-editor__fields {
+		gap: 0;
+	}
+
+	.modula-settings-editor__category--hub .modula-settings-editor__section--hub-field,
+	.modula-settings-editor__category--nested-stack .modula-settings-editor__section--nested-panel {
+		margin-top: 0;
+		margin-bottom: 0;
+		padding: 0;
+	}
+
+	// List-row hub fields only (Pagination, Toolbar toggle). Embedded controls are normal form fields.
+	.modula-settings-editor__category--hub
+		.modula-settings-editor__section--hub-field:not(
+			.modula-settings-editor__section--hub-field-embedded
+		) {
+		border-bottom: none;
+
+		@media (hover: hover) {
+			&:hover {
+				background: var(--mod-se-hover-overlay);
+			}
+		}
+
+		&:focus-within {
+			background: var(--mod-se-hover-overlay);
+		}
+
+		.modula-settings-editor__field-row {
+			padding: 0;
+			min-height: $mod-takeover-sidebar-list-row-min-height;
+			box-sizing: border-box;
+			align-items: center;
+			border-bottom: none;
+		}
+
+		.modula-settings-editor__field-row--toggle {
+			grid-template-rows: minmax($mod-takeover-sidebar-list-row-min-height, auto);
+			row-gap: 0;
+
+			&:has(.modula-settings-editor__field-toggle-foot) {
+				grid-template-rows:
+					minmax($mod-takeover-sidebar-list-row-min-height, auto) auto;
+				row-gap: $mod-space-10;
+			}
+		}
+
+		.modula-settings-editor__field-row--toggle-nested {
+			grid-template-columns: minmax(0, 1fr) auto auto;
+			grid-template-rows: minmax($mod-takeover-sidebar-list-row-min-height, auto);
+			column-gap: $mod-space-12;
+			row-gap: 0;
+			align-items: center;
+
+			&:has(.modula-settings-editor__field-toggle-foot) {
+				grid-template-rows:
+					minmax($mod-takeover-sidebar-list-row-min-height, auto) auto;
+				row-gap: $mod-space-10;
+			}
+		}
+
+		.components-toggle-control,
+		.components-toggle-control .components-base-control__field {
+			margin-bottom: 0 !important;
+		}
+	}
+
+	.modula-settings-editor__field-row {
+		box-sizing: border-box;
+		grid-template-columns: 1fr;
+		gap: $mod-space-6 0;
+		align-items: stretch;
+		border-bottom-color: var(--mod-se-chrome-border);
+	}
+
+	.modula-settings-editor__field-row--toggle {
+		grid-template-columns: minmax(200px, 1fr) auto;
+		grid-template-rows: auto auto;
+		column-gap: $mod-space-12;
+		row-gap: $mod-space-10;
+		align-items: center;
+	}
+
+	.modula-settings-editor__field-toggle-grid-bridge {
+		display: contents;
+	}
+
+	.modula-settings-editor__field-row--toggle > .modula-settings-editor__field-label-col {
+		grid-column: 1;
+		grid-row: 1;
+		align-self: center;
+		min-width: 0;
+	}
+
+	.modula-settings-editor__field-row--toggle .modula-settings-editor__field-control-col--toggle-inline {
+		grid-column: 2;
+		grid-row: 1;
+		align-self: center;
+		min-width: 0;
+	}
+
+	.modula-settings-editor__field-row--toggle .modula-settings-editor__field-toggle-foot {
+		grid-column: 1 / -1;
+		grid-row: 2;
+		min-width: 0;
+		width: 100%;
+	}
+
+	.modula-settings-editor__category--hub .modula-settings-editor__section--hub-field .modula-settings-editor__field-row--toggle {
+		grid-template-rows: minmax($mod-takeover-sidebar-list-row-min-height, auto);
+		row-gap: 0;
+
+		&:has(.modula-settings-editor__field-toggle-foot) {
+			grid-template-rows:
+				minmax($mod-takeover-sidebar-list-row-min-height, auto) auto;
+			row-gap: $mod-space-10;
+		}
+	}
+
+	.modula-settings-editor__category--hub .modula-settings-editor__section--hub-field .modula-settings-editor__field-row--toggle-nested {
+		grid-template-rows: minmax($mod-takeover-sidebar-list-row-min-height, auto);
+		row-gap: 0;
+
+		&:has(.modula-settings-editor__field-toggle-foot) {
+			grid-template-rows:
+				minmax($mod-takeover-sidebar-list-row-min-height, auto) auto;
+			row-gap: $mod-space-10;
+		}
+	}
+
+	.modula-settings-editor__field-row--toggle-nested {
+		position: relative;
+		grid-template-columns: minmax(200px, 1fr) auto auto;
+		grid-template-rows: minmax($mod-takeover-sidebar-list-row-min-height, auto);
+		row-gap: 0;
+
+		&:has(.modula-settings-editor__field-toggle-foot) {
+			grid-template-rows:
+				minmax($mod-takeover-sidebar-list-row-min-height, auto) auto;
+			row-gap: $mod-space-10;
+		}
+	}
+
+	.modula-settings-editor__field-toggle-nested-hit-layer {
+		grid-column: 1 / -1;
+		grid-row: 1;
+		z-index: 1;
+		align-self: stretch;
+		justify-self: stretch;
+		width: 100%;
+		min-height: 100%;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		cursor: pointer;
+
+		&:disabled {
+			cursor: default;
+			opacity: 0.45;
+		}
+	}
+
+	.modula-settings-editor__field-label-line--toggle-nested-pass-through {
+		pointer-events: none;
+
+		.modula-settings-editor__field-path-tip,
+		.modula-ui-reset-to-default {
+			pointer-events: auto;
+		}
+	}
+
+	.modula-settings-editor__field-toggle-grid-bridge--with-drill {
+		display: contents;
+	}
+
+	.modula-settings-editor__field-toggle-drill-row {
+		display: contents;
+	}
+
+	.modula-settings-editor__field-row--toggle-nested .modula-settings-editor__field-label-col--toggle-nested-z {
+		position: relative;
+		z-index: 2;
+		grid-column: 1;
+		grid-row: 1;
+		align-self: center;
+		min-width: 0;
+		pointer-events: none;
+
+		.modula-settings-editor__field-path-tip,
+		.modula-ui-reset-to-default {
+			pointer-events: auto;
+		}
+	}
+
+	.modula-settings-editor__field-row--toggle-nested .modula-settings-editor__field-control-col--toggle-nested-z {
+		position: relative;
+		z-index: 3;
+	}
+
+	.modula-settings-editor__field-row--toggle-nested .modula-settings-editor__field-control-col--toggle-inline {
+		grid-column: 2;
+		grid-row: 1;
+		align-self: center;
+		min-width: 0;
+	}
+
+	.modula-settings-editor__field-row--toggle-nested .modula-settings-editor__field-toggle-nested-chevron {
+		grid-column: 3;
+		grid-row: 1;
+		z-index: 2;
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		min-width: 36px;
+		pointer-events: none;
+		align-self: center;
+	}
+
+	.modula-settings-editor__field-row--toggle-nested .modula-settings-editor__field-toggle-foot {
+		grid-column: 1 / -1;
+		grid-row: 2;
+		min-width: 0;
+		width: 100%;
+	}
+
+	.modula-settings-editor__category--hub .modula-settings-editor__category-hub-submenu {
+		margin-top: $mod-space-6;
+	}
+
+	.modula-settings-editor__category-hub-submenu-inner {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+		border: none;
+		border-radius: 0;
+		overflow: visible;
+		background: transparent;
+	}
+
+	.modula-settings-editor__category-hub-submenu-inner > .modula-settings-editor__category-hub-drill-row,
+	.modula-settings-editor__category-hub-submenu-inner
+		> .modula-settings-editor__section--hub-field:not(
+			.modula-settings-editor__section--hub-field-embedded
+		) {
+		margin-left: -$mod-takeover-sidebar-settings-inner-pad-x;
+		margin-right: -$mod-takeover-sidebar-settings-inner-pad-x;
+		padding-left: $mod-takeover-sidebar-settings-inner-pad-x;
+		padding-right: $mod-takeover-sidebar-settings-inner-pad-x;
+		box-sizing: border-box;
+	}
+
+	.modula-settings-editor__category-hub-drill-row {
+		border-bottom: none;
+
+		@media (hover: hover) {
+			&:hover {
+				background: var(--mod-se-hover-overlay);
+			}
+		}
+
+		&:focus-within {
+			background: var(--mod-se-hover-overlay);
+		}
+	}
+
+	.modula-settings-editor__category-hub-drill-btn.components-button {
+		display: flex;
+		width: 100%;
+		justify-content: space-between;
+		align-items: center;
+		gap: $mod-space-8;
+		box-sizing: border-box;
+		min-height: $mod-takeover-sidebar-list-row-min-height;
+		padding: $mod-takeover-sidebar-list-row-pad-y 0;
+		border: none;
+		border-radius: 0;
+		box-shadow: none !important;
+		color: var(--mod-se-sidebar-settings-ink);
+		text-align: left;
+
+		&:hover:not(:disabled),
+		&:focus:not(:disabled) {
+			background: transparent !important;
+			box-shadow: none !important;
+			color: var(--mod-se-chrome-ink);
+		}
+
+		&:disabled {
+			opacity: 0.45;
+			cursor: not-allowed;
+		}
+	}
+
+	.modula-settings-editor__category-hub-drill-label {
+		flex: 1;
+		min-width: 0;
+		font-size: 13px;
+		font-weight: 400;
+		line-height: 1.35;
+		text-align: left;
+	}
+
+	.modula-settings-editor__category-hub-drill-chevron {
+		flex-shrink: 0;
+		color: var(--mod-se-sidebar-ink-muted);
+	}
+
+	.modula-settings-editor__field-row--composite,
+	.modula-settings-editor__field-row--full-width,
+	.modula-settings-editor__field-row--help-only {
+		grid-template-columns: 1fr;
+	}
+
+	.modula-settings-editor__field-row--toggle .modula-settings-editor__field-label-line {
+		width: 100%;
+		min-width: 0;
+	}
+
+	.modula-settings-editor__field-row--toggle .modula-settings-editor__field-label-with-tip {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	.modula-settings-editor__field-row--toggle .modula-settings-editor__field-label {
+		white-space: normal;
+	}
+
+	.modula-settings-editor__field-control-col {
+		min-width: 0;
+	}
+
+	.modula-settings-editor__field-row--toggle .modula-settings-editor__field-control-col--toggle-inline {
+		width: auto;
+	}
+
+	.modula-settings-editor__field-row:not(.modula-settings-editor__field-row--toggle)
+		.modula-settings-editor__field-control-col {
+		width: 100%;
+	}
+
+	.modula-settings-editor__composite-grid--cells-3 {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: $mod-space-8;
+	}
+
+	.modula-settings-editor__composite-grid--cells-2-equal {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: $mod-space-10;
+	}
+
+	.modula-settings-editor__inline-field {
+		gap: $mod-space-4;
+	}
+
+	.modula-settings-editor__tuple3-flex {
+		width: 100%;
+		min-width: 0;
+	}
+}

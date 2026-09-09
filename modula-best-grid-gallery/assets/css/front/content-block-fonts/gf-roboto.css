@@ -1,0 +1,33 @@
+/* Self-hosted Roboto for Modula content blocks (gf-roboto). */
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../../../fonts/content-blocks/gf-roboto/roboto-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('../../../fonts/content-blocks/gf-roboto/roboto-latin-500-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url('../../../fonts/content-blocks/gf-roboto/roboto-latin-700-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 900;
+  src: url('../../../fonts/content-blocks/gf-roboto/roboto-latin-900-normal.woff2') format('woff2');
+}

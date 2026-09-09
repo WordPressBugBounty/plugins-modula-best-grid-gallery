@@ -295,12 +295,12 @@ class Modula_Insights_Base {
 
 			return array(
 				'primary'   => array(
-					'label' => __( 'Gallery defaults', 'modula-best-grid-gallery' ),
+					'label' => __( 'Gallery presets', 'modula-best-grid-gallery' ),
 					'value' => $gallery_defaults_count,
 				),
 				'secondary' => array(
 					array(
-						'label' => __( 'Album defaults', 'modula-best-grid-gallery' ),
+						'label' => __( 'Album presets', 'modula-best-grid-gallery' ),
 						'value' => $album_defaults_count,
 					),
 					array(
@@ -315,7 +315,7 @@ class Modula_Insights_Base {
 
 			return array(
 				'primary'   => array(
-					'label' => __( 'Galleries that could use defaults', 'modula-best-grid-gallery' ),
+					'label' => __( 'Galleries that could use presets', 'modula-best-grid-gallery' ),
 					'value' => $total_galleries,
 				),
 				'secondary' => array(

@@ -1,0 +1,49 @@
+@use "../../variables" as *;
+
+/* Content block editor — headline-first + optional collapsed extras */
+.modula-content-block-edit-modal .modula-content-block-edit,
+.modula-content-block-edit__inner {
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-12;
+	min-width: min(100%, 32rem);
+}
+
+.modula-content-block-edit-modal .modula-content-block-edit {
+	padding: $mod-space-16 $mod-space-20;
+}
+
+.modula-content-block-edit__intro {
+	margin: 0 0 $mod-space-4;
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--mod-se-ink-3, #646970);
+}
+
+.modula-content-block-edit__body-control {
+	margin-bottom: 0;
+}
+
+.modula-content-block-edit__bg-image-card {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 0;
+	width: 100%;
+}
+
+.modula-settings-editor__media-attachment--summary {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: $mod-space-12;
+	width: 100%;
+}
+
+@media (max-width: 782px) {
+
+	.modula-content-block-edit__layout-grid,
+	.modula-content-block-edit__colors-grid {
+		grid-template-columns: 1fr;
+	}
+}

@@ -98,18 +98,89 @@ class ModulaGalleryUpload {
 			});
 		}
 		const uploadErrorNotice = document.querySelector(
-			'div[notice-target="modula_uploaded_files"]'
+			'div[notice-target="modula_uploaded_error_files"]'
 		);
 		if (uploadErrorNotice) {
-			uploadErrorNotice.addEventListener('click', function (e) {
-				const data = {
-					action: 'modula_dismiss_upload_error_notice',
-					post_ID: instance.postID,
-					security: modulaGalleryUpload.security,
-				};
-				instance.ajaxCall(data);
+			uploadErrorNotice.addEventListener('click', function () {
+				instance
+					.restGalleryPost('dismiss-errors', {})
+					.catch(function () {});
 			});
 		}
+	}
+	/**
+	 * POST JSON to Modula gallery upload REST API.
+	 *
+	 * @param {string} suffix Route after …/upload/
+	 * @param {Object} body JSON body
+	 * @returns {Promise<Object>}
+	 */
+	async restGalleryPost(suffix, body) {
+		const id =
+			this.postID ||
+			(document.getElementById('post_ID')
+				? document.getElementById('post_ID').value
+				: 0);
+		const url =
+			modulaGalleryUpload.restUrl +
+			'gallery/' +
+			encodeURIComponent(id) +
+			'/upload/' +
+			suffix;
+		const res = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': modulaGalleryUpload.restNonce,
+			},
+			credentials: 'same-origin',
+			body: JSON.stringify(body),
+		});
+		const json = await res.json().catch(function () {
+			return {};
+		});
+		if (!res.ok) {
+			const msg =
+				json && json.message ? json.message : res.statusText || 'Error';
+			throw new Error(msg);
+		}
+		return json;
+	}
+	/**
+	 * @param {*} str
+	 * @returns {string}
+	 */
+	escapeHtml(str) {
+		const div = document.createElement('div');
+		div.textContent = str == null ? '' : String(str);
+		return div.innerHTML;
+	}
+	/**
+	 * Parse attachment id from wp.Uploader / async-upload response.
+	 *
+	 * @param {*} raw
+	 * @returns {number}
+	 */
+	parseAttachmentIdFromUploadResponse(raw) {
+		if (raw == null || raw === '') {
+			return 0;
+		}
+		const s = String(raw).trim();
+		if (/^\d+$/.test(s)) {
+			return parseInt(s, 10);
+		}
+		try {
+			const o = JSON.parse(s);
+			if (o && o.data && o.data.id) {
+				return parseInt(o.data.id, 10);
+			}
+			if (o && o.id) {
+				return parseInt(o.id, 10);
+			}
+		} catch (e) {
+			/* ignore */
+		}
+		return 0;
 	}
 	/**
 	 * File browser
@@ -148,26 +219,42 @@ class ModulaGalleryUpload {
 			$parent.removeClass('folder_open');
 		} else {
 			$link.after('<ul class="load_tree loading"></ul>');
-			var data = {
-				action: 'modula_list_folders',
-				path: $link.attr('data-path'),
-				postID: instance.postID,
-				security: modulaGalleryUpload.security,
-				'input-checked': $inputChecked,
-			};
-
-			jQuery.post(modulaGalleryUpload.ajaxUrl, data, function (response) {
-				$parent.addClass('folder_open');
-
-				if (response) {
-					$parent.find('.load_tree').html(response);
-				} else {
-					$parent
-						.find('.load_tree')
-						.html(modulaGalleryUpload.noSubFolders);
-				}
-				$parent.find('.load_tree').removeClass('load_tree loading');
-			});
+			instance
+				.restGalleryPost('list-folders', {
+					path: $link.attr('data-path'),
+					input_checked: $inputChecked,
+				})
+				.then(function (data) {
+					$parent.addClass('folder_open');
+					const items = data.items || [];
+					let html = '';
+					if (items.length) {
+						html = items
+							.map(function (item) {
+								return (
+									'<li><input type="checkbox" value="' +
+									instance.escapeHtml(item.value) +
+									'" ' +
+									(item.checked ? 'checked' : '') +
+									'><a href="#" class="folder" data-path="' +
+									instance.escapeHtml(item.data_path) +
+									'">' +
+									instance.escapeHtml(item.basename) +
+									'</a></li>'
+								);
+							})
+							.join('');
+					} else {
+						html = modulaGalleryUpload.noSubfolders;
+					}
+					$parent.find('.load_tree').html(html);
+					$parent.find('.load_tree').removeClass('load_tree loading');
+				})
+				.catch(function () {
+					$parent.addClass('folder_open');
+					$parent.find('.load_tree').html(modulaGalleryUpload.noSubfolders);
+					$parent.find('.load_tree').removeClass('load_tree loading');
+				});
 		}
 		return false;
 	}
@@ -243,26 +330,32 @@ class ModulaGalleryUpload {
 	 * @since 2.11.0
 	 */
 	async checkPaths(paths) {
-		if (paths.length === 0) {
+		let pathArr = paths;
+		if (typeof paths === 'string') {
+			try {
+				pathArr = JSON.parse(paths);
+			} catch (e) {
+				pathArr = [];
+			}
+		}
+		if (!Array.isArray(pathArr) || pathArr.length === 0) {
 			return {
 				success: false,
 				data: modulaGalleryUpload.noFoldersSelected,
 			};
 		}
-
 		const instance = this;
 		if (!instance.postID) {
 			instance.postID = document.getElementById('post_ID').value;
 		}
-		const $params = {
-			action: 'modula_check_paths',
-			paths: paths,
-			security: modulaGalleryUpload.security,
-			post_ID: instance.postID,
-		};
-		const ajaxResponse = await instance.ajaxCall($params),
-			response = await JSON.parse(ajaxResponse);
-		return response;
+		try {
+			const data = await instance.restGalleryPost('check-paths', {
+				paths: pathArr,
+			});
+			return { success: true, data: data.folders };
+		} catch (e) {
+			return { success: false, data: e.message };
+		}
 	}
 	/**
 	 * Files validation
@@ -272,71 +365,23 @@ class ModulaGalleryUpload {
 	 * @since 2.11.0
 	 */
 	async filesValidation(paths) {
-		const $params = {
-				action: 'modula_check_files',
-				paths: paths,
-				security: modulaGalleryUpload.security,
-			},
-			instance = this;
-
-		const ajaxResponse = await instance.ajaxCall($params),
-			response = await JSON.parse(ajaxResponse);
-
-		return response;
-	}
-	/**
-	 * AJAX request
-	 * @param {*} $params
-	 * @param {*} $callback
-	 * @returns
-	 *
-	 * @since 2.11.0
-	 */
-	async ajaxCall($params) {
-		return new Promise((resolve, reject) => {
-			// Create a new XMLHttpRequest object.
-			var xhr = new XMLHttpRequest();
-			var params = new URLSearchParams();
-			// Set the request parameters.
-			if ($params) {
-				// Loop through the parameters and append them to the URLSearchParams object.
-				for (let key in $params) {
-					if (!$params.hasOwnProperty(key)) {
-						continue;
-					}
-					params.append(key, $params[key]);
-				}
+		const instance = this;
+		let pathArr = paths;
+		if (typeof paths === 'string') {
+			try {
+				pathArr = JSON.parse(paths);
+			} catch (e) {
+				pathArr = [];
 			}
-			// Set request to admin-ajax.php.
-			xhr.open('POST', modulaGalleryUpload.ajaxUrl, true);
-			// Set the content type for a POST request.
-			xhr.setRequestHeader(
-				'Content-Type',
-				'application/x-www-form-urlencoded'
-			);
-			// Detect when the request is complete
-			xhr.onreadystatechange = function () {
-				if (xhr.readyState === 4) {
-					// 4 means request is done
-					if (xhr.status === 200) {
-						// 200 is a successful status
-						resolve(xhr.response);
-					} else {
-						// Handle error if necessary
-						reject(xhr.response);
-					}
-				}
-			};
-
-			// Define what happens in case of an error.
-			xhr.onerror = function () {
-				console.error('Request failed');
-				// Send error message
-			};
-
-			// Send the request with parameters.
-			xhr.send(params.toString());
-		});
+		}
+		try {
+			const data = await instance.restGalleryPost('check-files', {
+				paths: pathArr,
+			});
+			return { success: true, data: data.files };
+		} catch (e) {
+			return { success: false, data: e.message };
+		}
 	}
 	/**
 	 * Import files
@@ -372,25 +417,18 @@ class ModulaGalleryUpload {
 				instance.progressMode.noModalProgress(i + 1);
 			}
 			const file = files[i];
-			const $params = {
-				action: 'modula_import_file',
-				file: file,
-				post_ID: instance.postID,
-				security: modulaGalleryUpload.security,
-				delete_files: instance.deleteFiles,
-			};
-			const ajaxResponse = await instance.ajaxCall($params),
-				response = await JSON.parse(ajaxResponse);
-			if (response.success) {
+			try {
+				const data = await instance.restGalleryPost('import-file', {
+					file: file,
+					delete_files: instance.deleteFiles,
+				});
 				if (modal) {
 					instance.progressMode.update(i + 1, files.length);
 				}
-
-				filesIDs.push(response.data);
-			} else {
+				filesIDs.push(data.attachment_id);
+			} catch (e) {
 				if (!modal) {
-					// Send error message
-					instance.progressMode.changeText(response.data);
+					instance.progressMode.changeText(e.message);
 				}
 			}
 		}
@@ -435,32 +473,26 @@ class ModulaGalleryUpload {
 	async updateGallery($ids, modal = true) {
 		const instance = this;
 		instance.postID = document.getElementById('post_ID').value;
-
-		const $params = {
-			action: 'modula_add_images_ids',
-			ids: $ids,
-			galleryID: instance.postID,
-			security: modulaGalleryUpload.security,
-		};
-
-		const ajaxResponse = await instance.ajaxCall($params),
-			response = await JSON.parse(ajaxResponse);
-		if (response.success) {
+		try {
+			const data = await instance.restGalleryPost('add-images', {
+				ids: $ids,
+			});
 			if (modal) {
-				// Update the gallery
 				instance.progressMode.changeText(
 					modulaGalleryUpload.galleryUpdated
 				);
 			}
-			// Set data to send to the parent.
 			const parentData = {
 				action: 'modula_gallery_updated',
 				postID: instance.postID,
-				images: response.data,
+				images: data.images,
 				security: modulaGalleryUpload.security,
 			};
-			// Send data to the parent
 			instance.sendDataToParent(parentData);
+		} catch (e) {
+			if (modal) {
+				instance.progressMode.changeText(e.message);
+			}
 		}
 	}
 	/**
@@ -510,18 +542,23 @@ class ModulaGalleryUpload {
 	 */
 	addFilesToGallery(images) {
 		const instance = this;
-		// Get the images
 		const imagesArray = Object.values(images);
+		const positionInput = document.querySelector(
+			'input[name="modula-settings[upload_position]"]:checked'
+		);
+		const uploadPosition =
+			positionInput && positionInput.value ? positionInput.value : 'end';
+		const atStart =
+			uploadPosition === 'start' || uploadPosition === '1';
+
 		for (let i = 0; i < imagesArray.length; i++) {
 			const newModel = instance.generateSingleImage(imagesArray[i]);
-			// Get checked input modula-settings[upload_position] value
-			const uploadPosition = document.querySelector(
-				'input[name="modula-settings[upload_position]"]:checked'
-			).value;
-			if ('start' === uploadPosition) {
+			if (atStart) {
 				wp.Modula.Items.add(newModel, { at: 0 });
-				wp.Modula.Items.trigger('newItemAdded', newModel);
+			} else {
+				wp.Modula.Items.add(newModel);
 			}
+			wp.Modula.Items.trigger('newItemAdded', newModel);
 			wp.Modula.GalleryView.render();
 		}
 	}
@@ -642,11 +679,16 @@ class ModulaGalleryUpload {
 				// File Upload Error - show errors
 				uploader.uploader.bind('Error', function (up, err) {
 					let errorResponse = err.message;
-					if ('undefined' !== typeof err.response) {
-						const errorResponseObj = JSON.parse(err.response);
-						errorResponse = errorResponseObj.message;
+					if ('undefined' !== typeof err.response && err.response) {
+						try {
+							const errorResponseObj = JSON.parse(err.response);
+							if (errorResponseObj && errorResponseObj.message) {
+								errorResponse = errorResponseObj.message;
+							}
+						} catch (e) {
+							/* keep err.message */
+						}
 					}
-					// Show message
 					modulaGalleryObject.errorContainer.html(
 						'<div class="error fade"><p>' +
 							err.file.name +
@@ -667,9 +709,10 @@ class ModulaGalleryUpload {
 
 			// File Uploaded - add images to the screen
 			fileupload: async function (up, file, info) {
-				// Get id of the file
-				const $fileID = info.response;
-				if (!$fileID) {
+				const fileId = instance.parseAttachmentIdFromUploadResponse(
+					info.response
+				);
+				if (!fileId) {
 					instance.progressMode.changeText(
 						__(
 							'Error uploading file. Please try again.',
@@ -678,9 +721,12 @@ class ModulaGalleryUpload {
 					);
 					modulaGalleryObject.errorContainer.html(
 						'<div class="error fade"><p>' +
-							err.file.name +
+							file.name +
 							': ' +
-							errorResponse +
+							__(
+								'Invalid upload response.',
+								'modula-best-grid-gallery'
+							) +
 							'</p></div>'
 					);
 					up.refresh();
@@ -694,65 +740,55 @@ class ModulaGalleryUpload {
 					)
 				);
 
-				// File has been uploaded, now we need to unzip it
-				// Create the data object
-				var data = {
-					action: 'modula_unzip_file',
-					fileID: $fileID,
-					security: modulaGalleryUpload.security,
-				};
+				let unzipData;
+				try {
+					unzipData = await instance.restGalleryPost('unzip', {
+						file_id: fileId,
+					});
+				} catch (e) {
+					instance.progressMode.changeText(e.message);
+					return;
+				}
 
-				const ajaxResponse = await instance.ajaxCall(data),
-					response = await JSON.parse(ajaxResponse);
-				// Check if the response is successful
-				if (response.success) {
-					instance.progressMode.changeText(
+				instance.progressMode.changeText(
+					__(
+						'.zip extracted, checking files...',
+						'modula-best-grid-gallery'
+					)
+				);
+				const responsePaths = await instance.checkPaths(
+					JSON.stringify(unzipData.folders || [])
+				);
+				if (!responsePaths.success) {
+					instance.progressMode.changeText(responsePaths.data);
+					return;
+				}
+				instance.progressMode.changeText(
+					__('Found ', 'modula-best-grid-gallery') +
+						responsePaths.data.length +
 						__(
-							'.zip extracted, checking files...',
+							' folders. Starting files validation...',
 							'modula-best-grid-gallery'
 						)
-					);
-					// Send the folder path to the folder uploader
-					const responsePaths = await instance.checkPaths(
-						JSON.stringify(response.data)
-					);
-					// Check if the response is successful
-					if (!responsePaths.success) {
-						// Send error message
-						instance.progressMode.changeText(responsePaths.data);
-						return;
-					}
-					instance.progressMode.changeText(
-						__('Found ', 'modula-best-grid-gallery') +
-							responsePaths.data.length +
-							__(
-								' folders. Starting files validation...',
-								'modula-best-grid-gallery'
-							)
-					);
-					const responseFiles = await instance.filesValidation(
-						JSON.stringify(responsePaths.data)
-					);
+				);
+				const responseFiles = await instance.filesValidation(
+					JSON.stringify(responsePaths.data)
+				);
 
-					if (!responseFiles.success) {
-						// Send error message
-						instance.progressMode.changeText(responseFiles.data);
-						return;
-					}
-					instance.progressMode.changeText(
-						__('Found ', 'modula-best-grid-gallery') +
-							responseFiles.data.length +
-							__(
-								' valid files. Starting importing the files...',
-								'modula-best-grid-gallery'
-							)
-					);
-
-					// Import the files in the Media Library
-					instance.importFiles(responseFiles.data, false);
-				} else {
-					// Send error message
+				if (!responseFiles.success) {
+					instance.progressMode.changeText(responseFiles.data);
+					return;
 				}
+				instance.progressMode.changeText(
+					__('Found ', 'modula-best-grid-gallery') +
+						responseFiles.data.length +
+						__(
+							' valid files. Starting importing the files...',
+							'modula-best-grid-gallery'
+						)
+				);
+
+				instance.importFiles(responseFiles.data, false);
 			},
 			// Files Uploaded - hide progress bar
 			filesuploaded: function () {},

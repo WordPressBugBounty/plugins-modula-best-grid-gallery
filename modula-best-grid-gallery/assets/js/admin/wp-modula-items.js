@@ -38,8 +38,12 @@ wp.Modula = 'undefined' === typeof (wp.Modula) ? {} : wp.Modula;
         },
 
         onNewItemAdded: function (newModel) {
-            this.remove(newModel, { silent: true });
-            this.add(newModel, { at: 0, silent: true });
+            var uploadPosition = $('[name="modula-settings[upload_position]"]:checked').val();
+            var atStart = 'start' === uploadPosition || '1' === uploadPosition;
+            if (atStart) {
+                this.remove(newModel, { silent: true });
+                this.add(newModel, { at: 0, silent: true });
+            }
             this.trigger('collectionUpdated');
         },
     });

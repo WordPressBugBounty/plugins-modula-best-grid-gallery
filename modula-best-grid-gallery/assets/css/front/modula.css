@@ -4,6 +4,22 @@ html body .modula .modula-items .modula-item {
 	overflow: hidden;
 }
 
+/*
+ * Classic hover tint sits behind the image. On hover the image opacity drops
+ * (see shortcode hoverOpacity CSS) so this color shows through. Restored for
+ * Lite-only front: columns overlay was commented out in 2020 (Pro #280) and
+ * later removed from this sheet while admin effects.css kept it.
+ */
+html body .modula .modula-items .modula-item .modula-item-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: -1;
+	pointer-events: none;
+}
+
 html body .modula .modula-items .modula-item .modula-item-content {
 	transition:
 		transform 0.3s ease-out,
@@ -38,6 +54,12 @@ html
 	.modula-item-content,
 html
 	body
+	.modula
+	.modula-items.modula-polaroid-gallery
+	.modula-item
+	.modula-item-content,
+html
+	body
 	.modula.modula-custom-grid
 	.modula-items
 	.modula-item
@@ -45,7 +67,7 @@ html
 	height: 100%;
 }
 
-html body .modula .modula-items .modula-item .jtg-social {
+html body .modula .modula-items .modula-item .modula-social {
 	z-index: 10;
 	font-size: 0;
 }
@@ -54,13 +76,13 @@ html
 	body
 	.modula:not(.modula-loaded-scale).modula-gallery-initialized
 	.modula-items
-	.modula-item.tg-loaded
+	.modula-item.tg-loaded:not(.modula-item--embedded)
 	.modula-item-content,
 html
 	body
 	.modula:not(.modula-loaded-scale).modula-gallery-initialized
 	.modula-items.justified-gallery
-	.modula-item
+	.modula-item:not(.modula-item--embedded)
 	.modula-item-content,
 html
 	body
@@ -68,7 +90,7 @@ html
 		.modula-is-lazy
 	).modula-gallery-initialized
 	.modula-items
-	.modula-item
+	.modula-item:not(.modula-item--embedded)
 	.modula-item-content,
 html
 	body
@@ -76,10 +98,11 @@ html
 		.modula-is-lazy
 	).modula-gallery-initialized
 	.modula-items
-	.modula-item
-	.modula-item-content {
-	transform: scale(1) translate(0, 0) rotate(0deg) !important;
-	opacity: 1;
+	.modula-item:not(.modula-item--embedded)
+	.modula-item-content,
+html body .modula .modula-items .modula-item--embedded .modula-item-content {
+	transform: none !important;
+	opacity: 1 !important;
 }
 
 html body .modula .modula-items .modula-item picture.pic,
@@ -107,6 +130,13 @@ html
 	.modula-items
 	.modula-item
 	picture.pic
+	img,
+html
+	body
+	.modula
+	.modula-items.modula-polaroid-gallery
+	.modula-item
+	picture.pic
 	img {
 	width: 100%;
 }
@@ -114,8 +144,11 @@ html
 html body .modula.modula-columns .modula-items .modula-item picture.pic,
 html body .modula.modula-columns .modula-items .modula-item img.pic {
 	position: relative;
+	display: block;
+	width: 100%;
 	max-width: 100%;
-	margin: 0 auto;
+	height: auto;
+	margin: 0;
 }
 
 html body .modula .modula-items .modula-item.tg-loaded picture.pic,
@@ -181,13 +214,17 @@ html body .modula .modula-items .caption span.title {
 	font-weight: bold;
 }
 
-html body .modula .jtg-social a {
+html body .modula .modula-social a {
 	box-shadow: none;
 }
 
-html body .modula .jtg-social svg {
+html body .modula .modula-social svg {
 	width: 20px;
 	height: 16px;
+}
+
+html body .modula .modula-items .modula-item .modula-title {
+	margin: 0;
 }
 
 html body .modula .modula-items .modula-item p {
@@ -204,7 +241,7 @@ html body .modula .figc {
 	padding: 2em;
 }
 
-html body .modula .modula-item .jtg-social a {
+html body .modula .modula-item .modula-social a {
 	text-decoration: none;
 	color: #fff;
 	display: inline-block;
@@ -215,14 +252,14 @@ html body .modula .modula-item .jtg-social a {
 	transition: opacity 0.3s;
 }
 
-html body .modula .modula-item:hover .jtg-social a {
+html body .modula .modula-item:hover .modula-social a {
 	opacity: 1;
 }
 
 /*---------------*/
 /***** pufrobo *****/
 /*---------------*/
-html body .modula .modula-items .jtg-social {
+html body .modula .modula-items .modula-social {
 	opacity: 0;
 	right: 30px;
 	position: absolute;
@@ -231,31 +268,37 @@ html body .modula .modula-items .jtg-social {
 	transition: all 0.3s;
 }
 
-html body .et_pb_module_inner .modula .modula-items .jtg-social {
+html body .et_pb_module_inner .modula .modula-items .modula-social {
 	transition: all 0.3s !important;
 }
 
-html body .modula .modula-items .modula-item.effect-pufrobo .jtg-social a {
+html body .modula .modula-items .modula-item.effect-pufrobo .modula-social a {
 	margin-right: 10px;
 }
 
 @media all and (max-width: 480px) {
-	html body .modula .modula-items .modula-item.effect-pufrobo .jtg-social {
+	html body .modula .modula-items .modula-item.effect-pufrobo .modula-social {
 		right: 0;
 		width: 100%;
 		text-align: center;
 	}
 
-	html body .modula .modula-items .modula-item.effect-pufrobo .jtg-social a {
+	html
+		body
+		.modula
+		.modula-items
+		.modula-item.effect-pufrobo
+		.modula-social
+		a {
 		padding: 5px;
 	}
 }
 
-html body .modula .modula-items .jtg-social {
+html body .modula .modula-items .modula-social {
 	opacity: 1;
 }
 
-html body .modula .modula-items .jtg-social a:last-of-type {
+html body .modula .modula-items .modula-social a:last-of-type {
 	margin-right: 0;
 }
 
@@ -279,7 +322,7 @@ html body .modula .modula-item.effect-pufrobo .figc {
 	text-align: right;
 }
 
-html body .modula .modula-item.effect-pufrobo .jtg-title,
+html body .modula .modula-item.effect-pufrobo .modula-title,
 html body .modula .modula-item.effect-pufrobo p,
 html body .modula .modula-item.effect-pufrobo .jtg-description {
 	position: absolute;
@@ -315,7 +358,7 @@ html body .modula .modula-item.effect-pufrobo .jtg-description {
 	letter-spacing: 1px;
 }
 
-html body .modula .modula-items .modula-item.effect-pufrobo .jtg-title {
+html body .modula .modula-items .modula-item.effect-pufrobo .modula-title {
 	/*top: 30px;*/
 	top: 10%;
 	-webkit-transition: -webkit-transform 0.35s;
@@ -330,17 +373,17 @@ html
 	.modula
 	.modula-items
 	.modula-item.effect-pufrobo
-	.jtg-title {
+	.modula-title {
 	-webkit-transition: -webkit-transform 0.35s !important;
 	transition: transform 0.35s !important;
 }
 
-html body .modula .modula-item.effect-pufrobo:hover .jtg-title {
+html body .modula .modula-item.effect-pufrobo:hover .modula-title {
 	-webkit-transform: translate3d(0, 0, 0);
 	transform: translate3d(0, 0, 0);
 }
 
-html body .modula .modula-item.effect-pufrobo .jtg-title::after {
+html body .modula .modula-item.effect-pufrobo .modula-title::after {
 	position: absolute;
 	top: 80%;
 	left: 0;
@@ -352,7 +395,7 @@ html body .modula .modula-item.effect-pufrobo .jtg-title::after {
 	transform: translate3d(0, 40px, 0);
 }
 
-html body .modula .modula-item.effect-pufrobo .jtg-title::after,
+html body .modula .modula-item.effect-pufrobo .modula-title::after,
 html body .modula .modula-item.effect-pufrobo p,
 html body .modula .modula-item.effect-pufrobo .jtg-description {
 	opacity: 0;
@@ -364,7 +407,7 @@ html body .modula .modula-item.effect-pufrobo .jtg-description {
 		transform 0.35s;
 }
 
-html body .modula .modula-item.effect-pufrobo:hover .jtg-title::after,
+html body .modula .modula-item.effect-pufrobo:hover .modula-title::after,
 html body .modula .modula-item.effect-pufrobo:hover p,
 html body .modula .modula-item.effect-pufrobo:hover .jtg-description {
 	margin-top: 10px;
@@ -380,7 +423,7 @@ html
 	.modula-items
 	.modula-item.effect-pufrobo
 	.figc.no-title.no-description
-	.jtg-title:after {
+	.modula-title:after {
 	display: none;
 }
 
@@ -391,77 +434,77 @@ html
 	.modula-items
 	.modula-item.effect-fluid-up
 	.figc
-	.jtg-title:before,
+	.modula-title:before,
 html
 	body
 	.modula
 	.modula-items
 	.modula-item.effect-hide
 	.figc
-	.jtg-title:before,
+	.modula-title:before,
 html
 	body
 	.modula
 	.modula-items
 	.modula-item.effect-quiet
 	.figc
-	.jtg-title:before,
+	.modula-title:before,
 html
 	body
 	.modula
 	.modula-items
 	.modula-item.effect-reflex
 	.figc
-	.jtg-title:before,
+	.modula-title:before,
 html
 	body
 	.modula
 	.modula-items
 	.modula-item.effect-curtain
 	.figc
-	.jtg-title:before,
+	.modula-title:before,
 html
 	body
 	.modula
 	.modula-items
 	.modula-item.effect-lens
 	.figc
-	.jtg-title:before,
+	.modula-title:before,
 html
 	body
 	.modula
 	.modula-items
 	.modula-item.effect-appear
 	.figc
-	.jtg-title:before,
+	.modula-title:before,
 html
 	body
 	.modula
 	.modula-items
 	.modula-item.effect-crafty
 	.figc
-	.jtg-title:before,
+	.modula-title:before,
 html
 	body
 	.modula
 	.modula-items
 	.modula-item.effect-seemo
 	.figc
-	.jtg-title:before,
+	.modula-title:before,
 html
 	body
 	.modula
 	.modula-items
 	.modula-item.effect-comodo
 	.figc
-	.jtg-title:before,
+	.modula-title:before,
 html
 	body
 	.modula
 	.modula-items
 	.modula-item.effect-pufrobo
 	.figc
-	.jtg-title:before {
+	.modula-title:before {
 	display: none;
 }
 
@@ -496,6 +539,7 @@ html body .modula.modula-columns .modula-item {
 
 html body .modula.modula-columns .modula-item .modula-item-content {
 	position: relative;
+	width: 100%;
 }
 
 html
@@ -775,13 +819,21 @@ html body div.modula-powered svg.modula-logo {
 	visibility: visible;
 }
 
+.modula-creative-commons-wrap {
+	margin-top: 16px;
+}
+
 .modula-creative-commons-wrap p {
 	margin: 0;
 }
 
+/* Keep CC badge aspect ratio if a theme/plugin sets img { width: 100% }. */
 .modula-creative-commons-wrap img {
+	width: auto;
+	max-width: 100%;
 	height: 20px;
 	margin-right: 10px;
+	object-fit: contain;
 }
 
 .modula-fancybox-container button.f-button.is-close-btn {
@@ -793,7 +845,7 @@ html body div.modula-powered svg.modula-logo {
 	background-color: var(--f-button-hover-bg);
 }
 
-html body .modula-items .modula-item .jtg-social-expandable {
+html body .modula-items .modula-item .modula-social-expandable {
 	display: none;
 }
 
@@ -801,11 +853,15 @@ html
 	body
 	.modula-items
 	.modula-item
-	.jtg-social-expandable-icons:not(.modula-show-socials) {
+	.modula-social-expandable-icons:not(.modula-show-socials) {
 	display: none;
 }
 
-html body .modula-items .modula-item .jtg-social-expandable-icons {
+html
+	body
+	.modula-items
+	.modula-item
+	.modula-social-expandable-icons.modula-show-socials {
 	padding: 10px 15px;
 	background-color: #000;
 	border-radius: 20px;
@@ -826,12 +882,12 @@ html
 	.modula-items
 	.modula-item
 	.modula-socials-right
-	.jtg-social-expandable-icons {
+	.modula-social-expandable-icons {
 	left: 0;
 	right: unset;
 }
 
-html body .modula-items .modula-item .jtg-social-expandable-icons::before {
+html body .modula-items .modula-item .modula-social-expandable-icons::before {
 	content: "";
 	position: absolute;
 	width: 0;
@@ -848,7 +904,7 @@ html
 	.modula-items
 	.modula-item
 	.modula-socials-right
-	.jtg-social-expandable-icons::before {
+	.modula-social-expandable-icons::before {
 	right: unset;
 	left: 10px;
 }
@@ -857,7 +913,7 @@ html
 	body
 	.modula-items
 	.modula-item
-	.jtg-social-desktop-collapsed.jtg-social-expandable {
+	.modula-social-desktop-collapsed.modula-social-expandable {
 	padding: 10px;
 	background-color: #000;
 	border-radius: 50%;
@@ -873,7 +929,7 @@ html
 	body
 	.modula
 	.modula-items
-	.jtg-social-desktop-collapsed.jtg-social-expandable
+	.modula-social-desktop-collapsed.modula-social-expandable
 	a.modula-icon-share {
 	pointer-events: none;
 	display: flex;
@@ -886,7 +942,7 @@ html
 html
 	body
 	.modula-item
-	.jtg-social-desktop-collapsed.jtg-social-expandable-icons
+	.modula-social-desktop-collapsed.modula-social-expandable-icons
 	a {
 	justify-content: center;
 	align-items: center;
@@ -898,14 +954,18 @@ html
 	body
 	.modula-items
 	.modula-item
-	.jtg-social-desktop-collapsed.jtg-social-expandable-icons:not(
+	.modula-social-desktop-collapsed.modula-social-expandable-icons:not(
 		.modula-show-socials
 	) {
 	display: none;
 }
 
 @media (max-width: 992px) {
-	html body .modula-items .modula-item .jtg-social-expandable-icons {
+	html
+		body
+		.modula-items
+		.modula-item
+		.modula-social-expandable-icons.modula-show-socials {
 		padding: 10px 15px;
 		background-color: #000;
 		border-radius: 20px;
@@ -926,12 +986,16 @@ html
 		.modula-items
 		.modula-item
 		.modula-socials-right
-		.jtg-social-expandable-icons {
+		.modula-social-expandable-icons {
 		left: 0;
 		right: unset;
 	}
 
-	html body .modula-items .modula-item .jtg-social-expandable-icons::before {
+	html
+		body
+		.modula-items
+		.modula-item
+		.modula-social-expandable-icons::before {
 		content: "";
 		position: absolute;
 		width: 0;
@@ -948,12 +1012,12 @@ html
 		.modula-items
 		.modula-item
 		.modula-socials-right
-		.jtg-social-expandable-icons::before {
+		.modula-social-expandable-icons::before {
 		right: unset;
 		left: 10px;
 	}
 
-	html body .modula-items .modula-item .jtg-social-expandable {
+	html body .modula-items .modula-item .modula-social-expandable {
 		padding: 10px;
 		background-color: #000;
 		border-radius: 50%;
@@ -965,7 +1029,12 @@ html
 		display: block;
 	}
 
-	html body .modula .modula-items .jtg-social-expandable a.modula-icon-share {
+	html
+		body
+		.modula
+		.modula-items
+		.modula-social-expandable
+		a.modula-icon-share {
 		pointer-events: none;
 		display: flex;
 		justify-content: center;
@@ -974,7 +1043,7 @@ html
 		text-decoration: none;
 	}
 
-	html body .modula-item .jtg-social-expandable-icons a {
+	html body .modula-item .modula-social-expandable-icons a {
 		justify-content: center;
 		align-items: center;
 		display: flex;
@@ -984,11 +1053,11 @@ html
 		body
 		.modula-items
 		.modula-item
-		.jtg-social-expandable-icons:not(.modula-show-socials) {
+		.modula-social-expandable-icons:not(.modula-show-socials) {
 		display: none;
 	}
 
-	html body .modula-items .modula-item .jtg-social {
+	html body .modula-items .modula-item .modula-social {
 		display: none;
 	}
 }

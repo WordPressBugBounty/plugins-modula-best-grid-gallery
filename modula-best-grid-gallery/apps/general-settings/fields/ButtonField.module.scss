@@ -1,0 +1,64 @@
+.wrapper {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+	position: relative;
+	width: 100%;
+}
+
+.button {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.spinner {
+	margin: 0;
+	width: 16px;
+	height: 16px;
+}
+
+.notice {
+	padding: 8px 14px;
+	border-radius: 6px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	font-size: 13px;
+	line-height: 1.4;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.success {
+	background-color: #46b450;
+	color: #fff;
+}
+
+.error {
+	background-color: #d63638;
+	color: #fff;
+}
+
+.slideIn {
+	opacity: 1;
+	animation: fadeInNotice 0.25s ease-out, fadeOutNotice 0.3s ease-in 3.6s forwards;
+}
+
+@keyframes fadeInNotice {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes fadeOutNotice {
+	to {
+		opacity: 0;
+		transform: translateY(-4px);
+	}
+}

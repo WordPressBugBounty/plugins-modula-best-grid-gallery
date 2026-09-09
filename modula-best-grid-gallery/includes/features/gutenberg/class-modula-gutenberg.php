@@ -15,7 +15,7 @@ class Modula_Gutenberg {
 	/**
 	 * Main construct function
 	 */
-	function __construct() {
+	public function __construct() {
 
 		// Return early if this function does not exist.
 		if ( ! function_exists( 'register_block_type' ) ) {
@@ -173,7 +173,7 @@ class Modula_Gutenberg {
 		}
 
 		$in_view          = false;
-		$inview_permitted = apply_filters( 'modula_loading_inview_grids', array( 'custom-grid', 'creative-gallery', 'grid' ), $settings );
+		$inview_permitted = apply_filters( 'modula_loading_inview_grids', array( 'custom-grid', 'creative-gallery', 'grid', 'polaroid' ), $settings );
 		if ( isset( $settings['inView'] ) && '1' == $settings['inView'] && in_array( $type, $inview_permitted, true ) ) {
 			$in_view = true;
 		}
@@ -202,6 +202,19 @@ class Modula_Gutenberg {
 
 		if ( isset( $_POST['effect'] ) ) {
 			$effect = $_POST['effect']; //phpcs:ignore
+		}
+
+		// Legacy preset slugs are gone; composable hover uses v2 `hover_builder`. Respond with all slots enabled for the block UI.
+		if ( ! is_string( $effect ) || '' === $effect ) {
+			wp_send_json(
+				array(
+					'title'       => true,
+					'description' => true,
+					'social'      => true,
+					'scripts'     => false,
+				)
+			);
+			die();
 		}
 
 		$effect_check = Modula_Helper::hover_effects_elements( $effect );
@@ -251,7 +264,13 @@ class Modula_Gutenberg {
 	 * @since 2.11.3
 	*/
 	public function rest_api_filter_data( $response, $post, $request ) {
-		$data   = $response->get_data();
+		$data = $response->get_data();
+
+		// Partial REST responses (e.g. `_fields`) may omit gallery meta.
+		if ( empty( $data['modulaImages'] ) || ! is_array( $data['modulaImages'] ) ) {
+			return $response;
+		}
+
 		$images = $data['modulaImages'];
 
 		foreach ( $images as $key => $image ) {

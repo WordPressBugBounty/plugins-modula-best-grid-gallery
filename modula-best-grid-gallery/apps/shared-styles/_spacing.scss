@@ -1,0 +1,39 @@
+// Shared spacing scale for Modula apps (settings editor, admin apps, frontend gallery).
+// Naming: `$mod-space-{N}` = N pixels — margin, padding, gap, inset, offsets.
+// Border widths (1px) and font sizes may stay literals unless they match a token.
+
+$mod-space-0: 0 !default;
+$mod-space-px: 1px !default;
+$mod-space-2: 2px !default;
+$mod-space-3: 3px !default;
+$mod-space-4: 4px !default;
+$mod-space-5: 5px !default;
+$mod-space-6: 6px !default;
+$mod-space-7: 7px !default;
+$mod-space-8: 8px !default;
+$mod-space-9: 9px !default;
+$mod-space-10: 10px !default;
+$mod-space-11: 11px !default;
+$mod-space-12: 12px !default;
+$mod-space-14: 14px !default;
+$mod-space-15: 15px !default;
+$mod-space-16: 16px !default;
+$mod-space-18: 18px !default;
+$mod-space-20: 20px !default;
+$mod-space-22: 22px !default;
+$mod-space-24: 24px !default;
+$mod-space-25: 25px !default;
+$mod-space-28: 28px !default;
+$mod-space-30: 30px !default;
+$mod-space-32: 32px !default;
+$mod-space-34: 34px !default;
+$mod-space-36: 36px !default;
+$mod-space-40: 40px !default;
+$mod-space-44: 44px !default;
+$mod-space-48: 48px !default;
+$mod-space-52: 52px !default;
+$mod-space-56: 56px !default;
+$mod-space-72: 72px !default;
+
+$mod-space-focus-ring: 2px !default;
+$mod-space-modal-body-padding-top: $mod-space-72 !default;

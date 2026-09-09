@@ -1,20 +1,12 @@
+<?php
+$settings = array(
+	'classes'     => '',
+	'dismissible' => true,
+	'id'          => 'modula-modal-bulk-editor-upgrade-' . get_the_ID(),
+);
+?>
 <div class='modula-modal__overlay bulk-editor'>
-	<div class="modula-modal__frame <?php
-	$settings = array(
-		'classes'     => '',
-		'dismissible' => true,
-		'id'          => 'modula-modal-bulk-editor-upgrade-' . get_the_ID(),
-	);
-	echo esc_attr( $settings['classes'] ); ?>" 
-	<?php
-	echo esc_attr( $settings['classes'] );
-	?>
-	" 
-	<?php
-	if ( $settings['dismissible'] ) :
-		?>
-	data-modula-modal-dismissible data-modula-modal-id="<?php echo esc_attr( $settings['id'] ); ?>"<?php endif; ?>>
-	>
+	<div class="modula-modal__frame <?php echo esc_attr( $settings['classes'] ); ?>" <?php if ( $settings['dismissible'] ) : ?>data-modula-modal-dismissible data-modula-modal-id="<?php echo esc_attr( $settings['id'] ); ?>"<?php endif; ?>>
 		<div class="modula-modal__header">
 			<button class="modula-modal__dismiss">
 				<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false">

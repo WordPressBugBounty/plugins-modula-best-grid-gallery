@@ -1,0 +1,53 @@
+@use '../../variables' as *;
+
+// Shared takeover extension import dialog inner layout.
+// Modal shell chrome lives in _gallery-modal.scss.
+
+.modula-import-dialog__inner {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	padding: $mod-space-16 $mod-space-20 $mod-space-20;
+	box-sizing: border-box;
+}
+
+.modula-import-dialog__intro {
+	margin: 0 0 $mod-space-14;
+	font-size: 13px;
+	line-height: 1.55;
+	color: #50575e;
+}
+
+.modula-import-dialog__spinner-wrap {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: $mod-space-10;
+	min-height: 120px;
+	font-size: 13px;
+	color: #50575e;
+}
+
+.modula-import-dialog__lazy-fallback {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	background: rgba(255, 255, 255, 0.72);
+}
+
+.modula-import-dialog__footer-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: $mod-space-8;
+}
+
+$mod-import-dialog-inset: $mod-space-24;
+
+.modula-import-dialog--fullscreen {
+	.modula-import-dialog__inner {
+		min-height: 0;
+		height: 100%;
+		padding: $mod-import-dialog-inset;
+	}
+}

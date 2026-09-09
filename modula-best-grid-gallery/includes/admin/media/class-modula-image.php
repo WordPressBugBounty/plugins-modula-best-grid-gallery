@@ -1,6 +1,7 @@
 <?php
 
 class Modula_Image {
+
 	public function __construct() {}
 
 	/**
@@ -24,14 +25,17 @@ class Modula_Image {
 				'url' => $image_full[0],
 			);
 
-			$gallery_types = array( 'creative-gallery', 'custom-grid', 'grid' );
+			$gallery_types = array( 'creative-gallery', 'custom-grid', 'grid', 'justified-grid', 'parallax-masonry', 'uniform-grid', 'fit-grid', 'polaroid' );
 
 			if ( in_array( $type, $gallery_types, true ) ) {
 				if ( is_array( $sizes ) && ! empty( $sizes ) ) {
+					$size_width  = isset( $sizes['width'] ) ? $sizes['width'] : 0;
+					$size_height = isset( $sizes['height'] ) ? $sizes['height'] : 0;
+
 					if ( ! $crop ) {
 						$ratio  = (float) ( (int) $image_full[1] / (int) $image_full[2] );
-						$width  = absint( $sizes['width'] );
-						$height = absint( $sizes['height'] );
+						$width  = absint( $size_width );
+						$height = absint( $size_height );
 
 						if ( 0 === $width || 0 === $height ) {
 							if ( 0 === $width ) {
@@ -39,11 +43,11 @@ class Modula_Image {
 							} else {
 								$height = $width / $ratio;
 							}
-						} elseif ( $sizes['width'] / $sizes['height'] !== $image_full[1] / $image_full[2] ) {
-							if ( $sizes['width'] <= $sizes['height'] ) {
-								$height = $sizes['width'] / $ratio;
+						} elseif ( $size_width / $size_height !== $image_full[1] / $image_full[2] ) {
+							if ( $size_width <= $size_height ) {
+								$height = $size_width / $ratio;
 							} else {
-								$width = $sizes['height'] * $ratio;
+								$width = $size_height * $ratio;
 							}
 						}
 
@@ -54,12 +58,12 @@ class Modula_Image {
 							$return['width']  = (int) $width;
 							$return['height'] = (int) $height;
 						}
-					} elseif ( $sizes['width'] > $image_full[1] || $sizes['height'] > $image_full[2] ) {
-							$return['width']  = $image_full[1];
-							$return['height'] = $image_full[2];
+					} elseif ( $size_width > $image_full[1] || $size_height > $image_full[2] ) {
+						$return['width']  = $image_full[1];
+						$return['height'] = $image_full[2];
 					} else {
-						$return['width']  = $sizes['width'];
-						$return['height'] = $sizes['height'];
+						$return['width']  = $size_width;
+						$return['height'] = $size_height;
 					}
 				} else {
 					$image_sizes = wp_get_attachment_image_src( $id, $sizes );
@@ -72,6 +76,17 @@ class Modula_Image {
 				}
 			} else {
 				$return = apply_filters( "modula_resize_image_{$type}", $return, $id, $sizes, $crop );
+			}
+
+			if ( ! is_array( $return ) ) {
+				$return = array(
+					'url' => $image_full[0],
+				);
+			}
+
+			if ( ! isset( $return['width'], $return['height'] ) ) {
+				$return['width']  = (int) $image_full[1];
+				$return['height'] = (int) $image_full[2];
 			}
 
 			return $return;
@@ -91,7 +106,7 @@ class Modula_Image {
 	public function get_image_info( $args ) {
 
 		// Unpack arguments.
-		list( $url, $width, $height, $crop, $align, $quality, $retina, $data ) = $args;
+		list($url, $width, $height, $crop, $align, $quality, $retina, $data) = $args;
 
 		// Return an error if no URL is present.
 		if ( empty( $url ) ) {
@@ -132,7 +147,7 @@ class Modula_Image {
 		}
 
 		// Set original width and height.
-		list( $orig_width, $orig_height, $orig_type ) = $size;
+		list($orig_width, $orig_height, $orig_type) = $size;
 
 		// Generate width or height if not provided.
 		if ( $width && ! $height ) {

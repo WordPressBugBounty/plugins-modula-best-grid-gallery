@@ -1,0 +1,14 @@
+// Live preview: always-visible chrome (toolbar, dropzones, hidden file input, aux panel shell).
+@use 'preview/shell';
+@use 'preview/reorder-panel';
+@use 'preview/reorder-setup';
+@use 'preview/live-preview-region';
+@use 'preview/preview-chrome';
+@use 'preview/canvas-toolbar';
+@use 'preview/selection-bar';
+@use 'preview/status-bar';
+@use 'preview/live-preview-pagebreak-admin';
+@use 'preview/upload-surface';
+@use 'preview/filters-preview';
+@use 'preview/content-block-preview-surface';
+@use '../../../frontend-gallery/polaroid-caption-chin';

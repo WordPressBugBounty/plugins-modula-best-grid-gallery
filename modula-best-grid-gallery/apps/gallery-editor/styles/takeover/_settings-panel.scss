@@ -1,0 +1,1219 @@
+@use '../variables' as *;
+
+// Redesign settings panel column (404) — section headings + drill / exit rows.
+.modula-settings-panel {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	height: 100%;
+	/* Panel chrome-2: header + inter-section gaps read as grey, not empty white rows. */
+	background: var(--mod-se-chrome-2);
+	color: var(--mod-se-ink);
+}
+
+.modula-settings-panel__header {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	/* Eyebrow→title uses margin on eyebrow; title→desc stays tighter via desc margin. */
+	gap: 0;
+	flex: 0 0 auto;
+	box-sizing: border-box;
+	padding: $mod-space-20 $mod-space-20 $mod-space-20;
+	border-bottom: 1px solid var(--mod-se-line);
+	background: transparent;
+}
+
+.modula-settings-panel__header--nested {
+	/* Mock pane-head: 16 / 20 / 14 — compact back row above left-aligned title. */
+	padding: $mod-space-16 $mod-space-20 $mod-space-14;
+	gap: $mod-space-4;
+}
+
+.modula-settings-panel__back {
+	display: inline-flex;
+	flex-direction: row;
+	align-items: center;
+	gap: $mod-space-2;
+	flex: 0 0 auto;
+	align-self: flex-start;
+	width: auto;
+	max-width: 100%;
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: 0;
+	background: transparent;
+	color: var(--mod-se-ink-3);
+	cursor: pointer;
+	font: inherit;
+	text-align: left;
+
+	&:hover {
+		color: var(--mod-se-ink-2);
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: inset 0 0 0 2px var(--mod-se-accent);
+	}
+}
+
+.modula-settings-panel__back-icon {
+	display: block;
+	flex: 0 0 auto;
+	fill: currentColor;
+}
+
+.modula-settings-panel__back-label {
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	line-height: 1.3;
+	text-transform: uppercase;
+	color: inherit;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.modula-settings-panel__eyebrow {
+	margin: 0 0 $mod-space-4;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	line-height: 1.3;
+	text-transform: uppercase;
+	color: var(--mod-se-ink-3);
+}
+
+.modula-settings-panel__title {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	line-height: 1.2;
+	color: var(--mod-se-ink);
+	text-align: left;
+}
+
+.modula-settings-panel__header--nested .modula-settings-panel__title {
+	/* Nested title sits under the back row, full width left-aligned. */
+	width: 100%;
+}
+
+.modula-settings-panel__desc {
+	/* Tight to title — design keeps ~2px optical gap, not a second rhythm step. */
+	margin: $mod-space-2 0 0;
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 1.35;
+	color: var(--mod-se-ink-2);
+}
+
+.modula-settings-panel__scroll {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	padding-bottom: $mod-space-28;
+}
+
+.modula-settings-editor__composite-stack-heading-row {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: $mod-space-4;
+	min-width: 0;
+}
+
+.modula-settings-panel__body {
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+}
+
+.modula-settings-panel__body--nested {
+	padding: 0;
+	/*
+	 * Same chrome-2 stage as the hub panel: gaps above section strips read as
+	 * grey, not white “dungi” between white rows and chrome headings.
+	 */
+	background: var(--mod-se-chrome-2);
+}
+
+.modula-settings-panel__nested {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	padding: 0;
+
+	.modula-settings-panel__section-body {
+		.modula-settings-editor__proofing-lock-placeholder {
+			box-sizing: border-box;
+			margin: 0;
+			padding: $mod-space-16 $mod-space-20 $mod-space-20;
+		}
+	}
+
+	.modula-settings-editor__proofing-lock-placeholder-btn {
+		width: 100%;
+		justify-content: center;
+	}
+
+	.modula-settings-editor__proofing-lock-hint {
+		margin: $mod-space-8 0 0;
+		font-size: 12px;
+		line-height: 1.45;
+		color: var(--mod-se-ink-3, var(--mod-se-sidebar-settings-ink-muted, #{$mod-takeover-text-muted}));
+	}
+}
+
+.modula-settings-panel__nested-upsell {
+	box-sizing: border-box;
+	padding: $mod-space-16 $mod-space-20;
+	border-bottom: 1px solid var(--mod-se-line-soft);
+	background: var(--mod-se-surface);
+}
+
+.modula-settings-panel__nested-fields {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	/*
+	 * No top/side padding on the stage — section strips are full-bleed chrome.
+	 * Field rows paint their own surface + horizontal gut (like hub section-body).
+	 */
+	padding: 0 0 $mod-space-28;
+	background: transparent;
+
+	/* Nested panels that start with a field (not a section strip) need top air. */
+	>.modula-settings-editor__field-row:first-child:not(.modula-settings-editor__field-row--section-heading) {
+		margin-top: $mod-space-12;
+	}
+
+	/*
+	 * Content rows = white section-body. Headings stay chrome-2 on the stage so
+	 * inter-section margin is grey (hub rhythm), never a white stripe.
+	 */
+	>.modula-settings-editor__field-row:not(.modula-settings-editor__field-row--section-heading) {
+		background: var(--mod-se-surface);
+	}
+
+	.modula-settings-editor__field-row--disabled-when {
+		opacity: 0.45;
+		pointer-events: none;
+	}
+
+	/* Mockup section strips (What shows / Placement / …) — full-bleed chrome. */
+	.modula-settings-editor__field-row--section-heading {
+		box-sizing: border-box;
+		grid-template-columns: 1fr;
+		align-items: center;
+		margin-left: 0;
+		margin-right: 0;
+		/* Hub `.modula-settings-panel__section + &` gap — grey on chrome-2 stage. */
+		margin-top: $mod-space-28;
+		padding: $mod-space-8 $mod-space-20;
+		border-bottom: none;
+		background: var(--mod-se-chrome-2);
+
+		/*
+		 * Same 28px “above strip” as hub `.modula-settings-panel__section:first-child`
+		 * — grey on the chrome-2 nested stage (not a white dungă).
+		 */
+		&:first-child {
+			margin-top: $mod-space-28;
+		}
+
+		.modula-settings-editor__section-heading-label {
+			font-size: 11px;
+			font-weight: 600;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+			color: var(--mod-se-ink-3);
+		}
+	}
+
+	/* Soft divider on the row above a strip doubles as a white hairline — drop it. */
+	.modula-settings-editor__field-row:has(+ .modula-settings-editor__field-row--section-heading) {
+		border-bottom: none;
+	}
+
+	/* Stacked label → control → help (override metabox 2-col grid). */
+	.modula-settings-editor__field-row--stacked:not(.modula-settings-editor__field-row--toggle):not(.modula-settings-editor__field-row--toggle-nested):not(.modula-settings-editor__field-row--section-heading) {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto;
+		gap: $mod-space-8;
+		align-items: stretch;
+		/* Match hub row rhythm — was 20/16 and read as “labartat”. */
+		padding: $mod-space-12 $mod-space-20;
+		border-bottom: 1px solid var(--mod-se-line-soft);
+
+		&:first-child {
+			padding-top: $mod-space-12;
+		}
+
+		&:last-child {
+			border-bottom: none;
+		}
+
+		.modula-settings-editor__field-label-col {
+			width: 100%;
+			min-width: 0;
+		}
+
+		.modula-settings-editor__field-control-col {
+			width: 100%;
+			min-width: 0;
+			/* Let Select/TextInput/Slider + help size naturally (do not clip help). */
+			height: auto;
+			min-height: 0;
+			overflow: visible;
+		}
+
+		.modula-settings-editor__field-label {
+			font-size: 14px;
+			font-weight: 500;
+			line-height: 1.5;
+			color: var(--mod-se-ink);
+		}
+	}
+
+	/*
+	 * Toggle: label left, switch right — same display:contents bridge pattern as
+	 * sidebar-settings-layout (redesign panel is not under that scope).
+	 */
+	.modula-settings-editor__field-toggle-grid-bridge {
+		display: contents;
+	}
+
+	.modula-settings-editor__field-row--stacked.modula-settings-editor__field-row--toggle:not(.modula-settings-editor__field-row--toggle-nested) {
+		grid-template-columns: minmax(0, 1fr) auto;
+		/* Single row by default — a spare `auto` track + row-gap leaves 8px dead air under the switch. */
+		grid-template-rows: auto;
+		column-gap: $mod-space-16;
+		row-gap: 0;
+		align-items: center;
+		/* Match hub `.modula-ui-settings-row` — 52px / 12×20, not the airy 20/16 stack. */
+		box-sizing: border-box;
+		min-height: 52px;
+		padding: $mod-space-12 $mod-space-20;
+		border-bottom: 1px solid var(--mod-se-line-soft);
+
+		&:has(.modula-ui-switch__help),
+		&:has(.modula-settings-editor__field-toggle-foot) {
+			grid-template-rows: auto auto;
+			row-gap: $mod-space-8;
+		}
+
+		&:last-child {
+			border-bottom: none;
+		}
+
+		>.modula-settings-editor__field-label-col {
+			grid-column: 1;
+			grid-row: 1;
+			align-self: center;
+			min-width: 0;
+			width: auto;
+			max-width: none;
+		}
+
+		/*
+		 * Flatten wrappers so the switch sits in column 2 and help spans the
+		 * full row underneath (otherwise long help greedily shrinks the label to 0).
+		 */
+		.modula-settings-editor__field-control-col--toggle-inline,
+		.modula-settings-editor__field-control-col--toggle-inline>[id^='modula-field-'],
+		.modula-settings-editor__toggle-end,
+		.modula-ui-switch {
+			display: contents;
+		}
+
+		.modula-ui-switch__control-wrap {
+			grid-column: 2;
+			grid-row: 1;
+			justify-self: end;
+			align-self: center;
+		}
+
+		.modula-ui-switch__help {
+			grid-column: 1 / -1;
+			grid-row: 2;
+			margin: 0;
+			min-width: 0;
+			width: auto;
+		}
+
+		.modula-settings-editor__field-toggle-foot {
+			grid-column: 1 / -1;
+			grid-row: 2;
+			min-width: 0;
+			width: 100%;
+		}
+
+		.modula-settings-editor__field-label {
+			font-size: 14px;
+			font-weight: 500;
+			line-height: 1.5;
+			color: var(--mod-se-ink);
+		}
+	}
+
+	.modula-settings-editor__field-row--composite,
+	.modula-settings-editor__field-row--device-tabs {
+		padding: $mod-space-12 $mod-space-20;
+		border-bottom: 1px solid var(--mod-se-line-soft);
+
+		&:last-child {
+			border-bottom: none;
+		}
+	}
+
+	/*
+	 * Metabox compact-stack / composite divider-before use hard-coded light
+	 * borders — neutralize inside nested so dark mode does not flash white.
+	 */
+	.modula-settings-editor__field-row--compact-stack {
+		padding-left: $mod-space-20;
+		padding-right: $mod-space-20;
+	}
+
+	.modula-settings-editor__field-row--compact-stack+.modula-settings-editor__field-row:not(.modula-settings-editor__field-row--compact-stack):not(.modula-settings-editor__field-row--section-heading) {
+		border-top: none;
+		margin-top: 0;
+	}
+
+	.modula-settings-editor__field-row--composite-divider-before {
+		border-top-color: var(--mod-se-line-soft);
+	}
+
+	/* Color swatches: label | chip — same 52px row as hub toggles. */
+	.modula-settings-editor__field-row--stacked:has(.modula-settings-editor__color-picker--swatch):not(.modula-settings-editor__field-row--toggle):not(.modula-settings-editor__field-row--toggle-nested) {
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		column-gap: $mod-space-16;
+		row-gap: 0;
+		box-sizing: border-box;
+		min-height: 52px;
+		padding: $mod-space-12 $mod-space-20;
+
+		.modula-settings-editor__field-label-col {
+			grid-column: 1;
+			grid-row: 1;
+			width: auto;
+			max-width: none;
+			min-width: 0;
+		}
+
+		.modula-settings-editor__field-control-col {
+			grid-column: 2;
+			grid-row: 1;
+			width: auto;
+			justify-self: end;
+			min-width: 0;
+		}
+
+		/* Help under the chip must not collapse the label column. */
+		.modula-settings-editor__color-picker--swatch {
+			display: flex;
+			flex-direction: column;
+			align-items: flex-end;
+			gap: 0;
+		}
+
+		.modula-settings-editor__color-picker-help {
+			display: none;
+		}
+	}
+
+	/* Position grid: label left | 3×3 matrix right (watermark Placement). */
+	.modula-settings-editor__field-row--stacked:has(.modula-settings-editor__position-grid):not(.modula-settings-editor__field-row--toggle):not(.modula-settings-editor__field-row--toggle-nested) {
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		column-gap: $mod-space-16;
+		row-gap: 0;
+		box-sizing: border-box;
+		min-height: 52px;
+		padding: $mod-space-12 $mod-space-20;
+
+		.modula-settings-editor__field-label-col {
+			grid-column: 1;
+			grid-row: 1;
+			width: auto;
+			max-width: none;
+			min-width: 0;
+		}
+
+		.modula-settings-editor__field-control-col {
+			grid-column: 2;
+			grid-row: 1;
+			width: auto;
+			justify-self: end;
+			min-width: 0;
+		}
+
+		.modula-settings-editor__position-grid {
+			align-items: flex-end;
+		}
+
+		.modula-settings-editor__field-help {
+			display: none;
+		}
+	}
+
+	/* Color pair under a composite heading (Page button colors). */
+	.modula-settings-editor__composite-grid--cells-stacked>.modula-settings-editor__inline-field:has(.modula-settings-editor__color-picker--swatch) {
+		flex-direction: row;
+		flex-wrap: nowrap;
+		align-items: flex-start;
+		justify-content: space-between;
+		column-gap: $mod-space-12;
+		padding: $mod-space-6 0;
+		/* Keep each color row in its own stacking context so help cannot paint over the next label. */
+		isolation: isolate;
+		overflow: visible;
+
+		.modula-settings-editor__inline-field-label-line {
+			flex: 1 1 auto;
+			min-width: 0;
+			min-height: 28px;
+			display: flex;
+			align-items: center;
+		}
+
+		.modula-settings-editor__inline-field-control {
+			flex: 0 1 auto;
+			width: auto;
+			max-width: min(100%, 240px);
+			min-width: 0;
+		}
+
+		.modula-settings-editor__color-picker--swatch {
+			display: flex;
+			flex-direction: column;
+			align-items: flex-end;
+			gap: $mod-space-4;
+			width: 100%;
+			max-width: 240px;
+		}
+
+		.modula-settings-editor__color-picker-help {
+			display: block;
+			margin: 0;
+			width: 100%;
+			max-width: 240px;
+			text-align: right;
+			line-height: 1.35;
+			overflow-wrap: anywhere;
+		}
+	}
+
+	.modula-settings-editor__field-row--control-only {
+		grid-template-columns: 1fr;
+		padding: 0;
+		border-bottom: none;
+	}
+
+	.modula-settings-editor__field-row--stacked.modula-settings-editor__field-row--control-only {
+		padding: $mod-space-12 $mod-space-20 $mod-space-16;
+	}
+
+	.modula-settings-editor__composite-stack-heading {
+		color: var(--mod-se-ink);
+	}
+
+	.modula-ui-tabs {
+		margin-bottom: $mod-space-4;
+	}
+
+	/*
+	 * Nested field chrome: height only on the control element — never on wrappers
+	 * that also hold help text (clips help onto the next row label).
+	 */
+	.modula-ui-text-input,
+	.modula-ui-select,
+	.modula-ui-slider,
+	.modula-settings-editor__tuple3-device-tabs {
+		height: auto;
+		min-height: 0;
+		max-height: none;
+		overflow: visible;
+	}
+
+	.modula-ui-slider__number,
+	.modula-ui-text-input__field,
+	.modula-ui-select__field {
+		min-height: 28px;
+		height: 28px;
+		border-color: var(--mod-se-line) !important;
+		background: var(--mod-se-surface) !important;
+		color: var(--mod-se-ink) !important;
+	}
+
+	.modula-settings-editor__tuple3-device-tabs {
+		.modula-ui-tabs {
+			margin-bottom: 0;
+		}
+	}
+
+	.modula-settings-editor__inline-field-label {
+		color: var(--mod-se-ink);
+	}
+}
+
+.modula-settings-panel__nested-empty {
+	margin: 0;
+	padding: $mod-space-20;
+	font-size: 13px;
+	line-height: 1.45;
+	color: var(--mod-se-ink-3);
+}
+
+.modula-settings-panel__section {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	padding: 0;
+
+	/* Same 28px “above section heading” rhythm for Structure after the panel header. */
+	&:first-child {
+		margin-top: $mod-space-28;
+	}
+
+	&+& {
+		margin-top: $mod-space-28;
+	}
+}
+
+.modula-settings-panel__section-heading {
+	box-sizing: border-box;
+	width: 100%;
+	margin: 0;
+	padding: $mod-space-8 $mod-space-20;
+	background: var(--mod-se-chrome-2);
+	color: var(--mod-se-ink-3);
+}
+
+.modula-settings-panel__section-body {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	padding: 0;
+	/* White (light) / raised surface (dark) for rows — contrasts with chrome-2 panel gaps. */
+	background: var(--mod-se-surface);
+
+	/* Last row must not keep a divider — that reads as an empty row before the next section. */
+	> :last-child {
+		border-bottom: none;
+
+		.modula-ui-settings-row,
+		.modula-settings-panel__exit-row {
+			border-bottom: none;
+		}
+	}
+}
+
+.modula-settings-panel__note-text {
+	margin: 0;
+	padding: $mod-space-12 $mod-space-20 $mod-space-16;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--mod-se-ink-3);
+}
+
+.modula-settings-panel__drill-row {
+	/* shared-ui SettingsRow; panel just scopes if needed */
+	padding-left: $mod-space-20;
+	padding-right: $mod-space-20;
+
+	/*
+	 * SettingsRow copy defaults to baseline — fine for text-only values, but a
+	 * color swatch in the Style summary sits above the label midline.
+	 */
+	.modula-ui-settings-row__copy {
+		align-items: center;
+	}
+
+	.modula-ui-settings-row__value {
+		display: inline-flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 0;
+		min-width: 0;
+	}
+}
+
+.modula-settings-panel__drill-summary {
+	display: inline-flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: nowrap;
+	gap: 0;
+	min-width: 0;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.modula-settings-panel__drill-summary-swatch {
+	display: inline-block;
+	flex: 0 0 auto;
+	box-sizing: border-box;
+	width: $mod-space-20;
+	height: $mod-space-20;
+	margin-right: $mod-space-4;
+	border: 1px solid var(--mod-se-line);
+	border-radius: 0;
+	vertical-align: middle;
+}
+
+.modula-settings-panel__drill-summary-sep,
+.modula-settings-panel__drill-summary-text {
+	flex: 0 1 auto;
+	min-width: 0;
+	margin-left: $mod-space-2;
+}
+
+.modula-settings-panel__embedded {
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-8;
+	margin: 0;
+	padding: $mod-space-16 $mod-space-20 $mod-space-12;
+	border: none;
+	border-radius: 0;
+	background: transparent;
+}
+
+.modula-settings-panel__embedded-label {
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.5;
+	color: var(--mod-se-ink);
+}
+
+.modula-settings-panel__embedded-help {
+	margin: 0;
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.5;
+	color: var(--mod-se-ink-3);
+	max-width: 64ch;
+}
+
+.modula-settings-panel__embedded-control {
+	width: 100%;
+	min-width: 0;
+
+	.components-base-control,
+	.components-base-control__field {
+		margin-bottom: 0;
+	}
+
+	.modula-ui-select {
+		width: 100%;
+	}
+
+	.modula-ui-menu-select {
+		width: 100%;
+	}
+
+	.modula-ui-select__field {
+		width: 100%;
+		max-width: 100%;
+		height: $mod-space-34 !important;
+		min-height: $mod-space-34 !important;
+		line-height: #{$mod-space-34 - $mod-space-2} !important;
+		padding: 0 36px 0 12px !important;
+		font-size: 13px !important;
+		border-color: var(--mod-se-line) !important;
+		background: var(--mod-se-surface) !important;
+		color: var(--mod-se-ink) !important;
+	}
+
+	.modula-ui-select__caret {
+		border-color: var(--mod-se-ink-3);
+	}
+}
+
+.modula-settings-panel__toggle-row {
+	padding-left: $mod-space-20;
+	padding-right: $mod-space-20;
+
+	/* Beat `__app[data-appearance=dark] .field-label` (metabox secondary ink). */
+	.modula-settings-editor__app[data-appearance] & .modula-settings-editor__field-label {
+		color: inherit;
+		font-size: inherit;
+		font-weight: inherit;
+		line-height: inherit;
+	}
+
+	.modula-ui-settings-row__end {
+		width: auto;
+		min-width: 40px;
+		height: auto;
+		justify-content: flex-end;
+		gap: 0;
+	}
+
+	.modula-settings-panel__switch {
+		display: inline-flex;
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.modula-ui-switch.has-status .modula-ui-switch__control-wrap {
+		gap: $mod-space-8;
+	}
+
+	.modula-ui-switch__help {
+		display: none;
+	}
+
+	&.modula-settings-panel__toggle-row--has-help {
+		align-items: start;
+
+		.modula-ui-settings-row__end {
+			/* Keep On/Off + switch on the label row, not centered against help. */
+			margin-top: 2px;
+		}
+
+		.modula-ui-settings-row__help {
+			display: flex;
+			align-items: flex-start;
+			gap: $mod-space-8;
+			margin-top: $mod-space-2;
+			color: var(--mod-se-ink-3);
+
+			&::before {
+				content: 'i';
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				flex-shrink: 0;
+				box-sizing: border-box;
+				width: 14px;
+				height: 14px;
+				margin-top: 2px;
+				border: 1px solid currentColor;
+				border-radius: 50%;
+				font-size: 10px;
+				font-weight: 600;
+				font-style: italic;
+				line-height: 1;
+			}
+		}
+	}
+}
+
+.modula-settings-panel__color-row {
+	padding-left: $mod-space-20;
+	padding-right: $mod-space-20;
+
+	.modula-ui-settings-row__end {
+		width: auto;
+		min-width: 0;
+		height: auto;
+		justify-content: flex-end;
+	}
+
+	.modula-settings-editor__color-swatch-btn--chip {
+		max-width: 100%;
+	}
+}
+
+.modula-settings-panel__segmented-row {
+	padding-left: $mod-space-20;
+	padding-right: $mod-space-20;
+
+	.modula-ui-settings-row__end {
+		width: auto;
+		min-width: 0;
+		height: auto;
+		justify-content: flex-end;
+		flex: 1 1 auto;
+	}
+
+	.modula-ui-segmented {
+		max-width: 100%;
+	}
+}
+
+.modula-settings-panel__segmented-row--stacked {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: $mod-space-8;
+	padding: $mod-space-12 $mod-space-20;
+	border-bottom: 1px solid var(--mod-se-line);
+
+	.modula-ui-segmented {
+		width: 100%;
+	}
+}
+
+.modula-settings-panel__position-grid-row {
+	padding: $mod-space-12 $mod-space-20;
+	border-bottom: 1px solid var(--mod-se-line);
+
+	.modula-settings-editor__position-grid {
+		width: 100%;
+		align-items: flex-start;
+	}
+
+	.modula-settings-editor__field-help {
+		display: none;
+	}
+}
+
+.modula-settings-panel__segmented-row-label {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.35;
+	color: var(--mod-se-ink);
+}
+
+.modula-settings-panel__select-row {
+	padding-left: $mod-space-20;
+	padding-right: $mod-space-20;
+
+	.modula-ui-settings-row__end {
+		width: auto;
+		min-width: 0;
+		max-width: 60%;
+		height: auto;
+		justify-content: flex-end;
+	}
+
+	.modula-ui-select {
+		width: 100%;
+		min-width: 140px;
+	}
+}
+
+.modula-settings-panel__select-row--stacked {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: $mod-space-8;
+	padding: $mod-space-12 $mod-space-20;
+	border-bottom: 1px solid var(--mod-se-line);
+
+	.modula-ui-menu-select {
+		width: 100%;
+	}
+}
+
+.modula-settings-panel__hover-preset-block {
+
+	/* Prefer stacked field-row chrome (surface on chrome-2 stage); keep Customize under the Select. */
+	&.modula-settings-editor__field-row--stacked {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: $mod-space-8;
+	}
+
+	.modula-settings-panel__hover-preset-actions {
+		display: flex;
+		justify-content: flex-end;
+		margin: 0;
+		padding: 0;
+		border: none;
+	}
+}
+
+.modula-settings-panel__select-row-label {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.35;
+	color: var(--mod-se-ink);
+}
+
+.modula-settings-editor__info-callout {
+	display: flex;
+	align-items: flex-start;
+	gap: $mod-space-8;
+	box-sizing: border-box;
+	width: 100%;
+	margin: 0;
+	padding: $mod-space-12 $mod-space-20 $mod-space-16;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--mod-se-ink-2);
+}
+
+.modula-settings-editor__info-callout-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 16px;
+	height: 16px;
+	margin-top: 1px;
+	border: 1px solid var(--mod-se-ink-3);
+	border-radius: 50%;
+	font-size: 11px;
+	font-weight: 600;
+	font-style: italic;
+	line-height: 1;
+	color: var(--mod-se-ink-3);
+}
+
+.modula-settings-editor__info-callout-text {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.modula-settings-editor__placeholder-pattern {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: $mod-space-8;
+	width: 100%;
+	min-width: 0;
+}
+
+.modula-settings-editor__placeholder-pattern-tokens {
+	display: flex;
+	flex-wrap: wrap;
+	gap: $mod-space-8;
+}
+
+.modula-settings-editor__placeholder-pattern-token {
+	display: inline-flex;
+	align-items: center;
+	box-sizing: border-box;
+	margin: 0;
+	padding: $mod-space-4 $mod-space-8;
+	border: 1px solid var(--mod-se-line);
+	border-radius: 0;
+	background: var(--mod-se-chrome-2);
+	color: var(--mod-se-ink-2);
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 12px;
+	line-height: 1.35;
+	cursor: pointer;
+
+	&:hover:not(:disabled) {
+		background: var(--mod-se-surface);
+		color: var(--mod-se-ink);
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+}
+
+.modula-settings-editor__placeholder-pattern-preview {
+	box-sizing: border-box;
+	padding: $mod-space-8 $mod-space-12;
+	border: 1px solid var(--mod-se-line-soft);
+	background: var(--mod-se-chrome-2);
+}
+
+.modula-settings-editor__placeholder-pattern-preview-name {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 12px;
+	line-height: 1.4;
+	color: var(--mod-se-accent-ink, var(--mod-se-ink-2));
+	word-break: break-all;
+}
+
+.modula-settings-editor__placeholder-pattern-help {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--mod-se-ink-3);
+}
+
+.modula-settings-editor__field-row--info-callout {
+	grid-template-columns: 1fr;
+	padding: 0;
+	border-bottom: 0;
+}
+
+.modula-settings-editor__field-row--help-only {
+	grid-template-columns: 1fr;
+	padding: $mod-space-12 $mod-space-20 $mod-space-16;
+	border-bottom: 1px solid var(--mod-se-line-soft);
+}
+
+.modula-settings-editor__field-row--exif-result,
+.modula-settings-editor__field-row--deeplink-url,
+.modula-settings-editor__field-row--gallery-defaults-shell,
+.modula-settings-editor__field-row--instagram-account {
+	grid-template-columns: 1fr;
+	border-bottom: 0;
+}
+
+.modula-settings-panel__section-body,
+.modula-settings-panel__nested-fields {
+	.modula-settings-editor__gallery-defaults-shell {
+		box-sizing: border-box;
+		margin: 0;
+		padding: $mod-space-16 $mod-space-20;
+	}
+}
+
+.modula-settings-editor__field-row--exif-result,
+.modula-settings-editor__field-row--deeplink-url,
+.modula-settings-editor__field-row--instagram-account {
+	padding: $mod-space-12 $mod-space-20 $mod-space-16;
+}
+
+.modula-settings-editor__settings-preview {
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-8;
+}
+
+.modula-settings-editor__settings-preview-label {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.4;
+	color: var(--mod-se-ink);
+}
+
+.modula-settings-editor__settings-preview-box {
+	box-sizing: border-box;
+	padding: $mod-space-12 $mod-space-14;
+	border: 1px solid var(--mod-se-line, rgba(148, 163, 184, 0.28));
+	border-radius: 6px;
+	background: transparent;
+}
+
+.modula-settings-editor__settings-preview-sample {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.55;
+	color: var(--mod-se-ink-2);
+	word-break: break-word;
+}
+
+.modula-settings-editor__settings-preview-footer {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--mod-se-ink-3);
+}
+
+.modula-settings-editor__deeplink-url-preview-url {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 12px;
+	line-height: 1.45;
+	word-break: break-all;
+}
+
+.modula-settings-editor__deeplink-url-preview-base {
+	color: var(--mod-se-ink-3);
+}
+
+.modula-settings-editor__deeplink-url-preview-hash {
+	color: var(--mod-se-accent-ink, var(--mod-se-accent, #2271b1));
+	font-weight: 600;
+}
+
+.modula-settings-editor__instagram-account-status {
+	margin: 0 0 $mod-space-6;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.4;
+	color: var(--mod-se-ink);
+}
+
+.modula-settings-editor__instagram-account-hint {
+	margin: 0 0 $mod-space-10;
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--mod-se-ink-3);
+}
+
+.modula-settings-panel__toggle-upsell {
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-8;
+	box-sizing: border-box;
+	padding: $mod-space-12 $mod-space-20;
+	border-bottom: 1px solid var(--mod-se-line-soft);
+}
+
+.modula-settings-panel__toggle-upsell-label {
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.5;
+	color: var(--mod-se-ink);
+}
+
+.modula-settings-panel__exit-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: $mod-space-12;
+	box-sizing: border-box;
+	width: 100%;
+	min-height: $mod-space-52;
+	margin: 0;
+	padding: $mod-space-12 $mod-space-20;
+	border: none;
+	border-bottom: 1px solid var(--mod-se-line-soft);
+	border-radius: 0;
+	background: transparent;
+	color: inherit;
+	text-align: left;
+	font: inherit;
+	cursor: pointer;
+	transition: background var(--mod-se-duration-fast, 0.1s) ease;
+
+	&:hover {
+		background: var(--mod-se-chrome-2);
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: inset 0 0 0 2px var(--mod-se-accent);
+	}
+}
+
+.modula-settings-panel__exit-row-label {
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.5;
+	color: var(--mod-se-ink);
+	min-width: 0;
+}
+
+.modula-settings-panel__exit-row-target {
+	display: inline-flex;
+	align-items: center;
+	gap: $mod-space-4;
+	flex: 0 0 auto;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.45;
+	color: var(--mod-se-accent);
+
+	svg {
+		fill: currentColor;
+	}
+}

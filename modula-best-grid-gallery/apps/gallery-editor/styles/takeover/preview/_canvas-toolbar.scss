@@ -1,0 +1,147 @@
+@use "../../variables" as *;
+
+/* Design: canvas chrome bar is 46px tall. */
+$mod-canvas-toolbar-h: 46px;
+
+.modula-gallery-takeover__canvas-toolbar {
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-8;
+	min-height: $mod-canvas-toolbar-h;
+	height: $mod-canvas-toolbar-h;
+	padding: 0 $mod-space-18;
+	box-sizing: border-box;
+	/* Secondary chrome under the app topbar — not inside the artboard card. */
+	border-bottom: 1px solid var(--mod-se-line, var(--mod-se-preview-toolbar-border, #{$mod-takeover-preview-toolbar-border}));
+	background: var(--mod-se-chrome, var(--mod-se-preview-toolbar-bg, #{$mod-takeover-preview-toolbar-bg}));
+	color: var(--mod-se-ink-2, var(--mod-se-preview-ink-secondary, #{$mod-takeover-text-base}));
+}
+
+.modula-gallery-takeover__canvas-toolbar-notice {
+	margin: $mod-space-8 0 0;
+}
+
+.modula-gallery-takeover__canvas-toolbar-row {
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: $mod-space-12 $mod-space-16;
+	min-height: $mod-canvas-toolbar-h;
+	height: 100%;
+	box-sizing: border-box;
+}
+
+.modula-gallery-takeover__canvas-toolbar-left,
+.modula-gallery-takeover__canvas-toolbar-right {
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: center;
+	gap: $mod-space-16;
+	min-width: 0;
+}
+
+.modula-gallery-takeover__canvas-toolbar-right {
+	margin-inline-start: auto;
+	gap: $mod-space-12;
+}
+
+/* Quiet icon+label actions — Select all / Bulk edit / Sort (CanvasToolbarActionButton). */
+.modula-gallery-takeover__canvas-toolbar-action.modula-ui-button {
+	gap: $mod-space-8;
+	min-height: auto;
+	height: auto;
+	padding: $mod-space-6 $mod-space-8;
+	border: 1px solid transparent;
+	border-radius: 0;
+	background: transparent;
+	box-shadow: none;
+	outline: none;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--mod-se-ink-2, var(--mod-se-preview-ink-secondary, #{$mod-takeover-text-base}));
+
+	.modula-gallery-takeover__canvas-toolbar-action-icon {
+		display: inline-flex;
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		line-height: 0;
+		color: inherit;
+
+		svg {
+			display: block;
+			color: inherit;
+		}
+	}
+
+	.modula-gallery-takeover__canvas-toolbar-action-label {
+		line-height: 1;
+		color: inherit;
+	}
+
+	&:hover:not(:disabled):not(.is-disabled),
+	&:focus-visible,
+	&:active:not(:disabled):not(.is-disabled) {
+		background: var(--mod-se-chrome-2, var(--mod-se-hover-overlay, transparent));
+		border-color: var(--mod-se-line, var(--mod-se-preview-toolbar-border, #{$mod-takeover-preview-toolbar-border}));
+		color: var(--mod-se-ink, var(--mod-se-preview-ink, #{$mod-takeover-text-strong}));
+		box-shadow: none;
+		outline: none;
+	}
+
+	&:focus {
+		outline: none;
+		box-shadow: none;
+	}
+}
+
+.modula-gallery-takeover__canvas-toolbar-uploading {
+	display: inline-flex;
+	align-items: center;
+	gap: $mod-space-8;
+	font-size: 12px;
+	color: var(--mod-se-ink-3, var(--mod-se-preview-ink-muted, #{$mod-takeover-text-muted}));
+}
+
+.modula-gallery-takeover__canvas-toolbar-viewport {
+	display: inline-flex;
+	align-items: stretch;
+	border: 1px solid var(--mod-se-line, var(--mod-se-preview-toolbar-border, #{$mod-takeover-preview-toolbar-border}));
+	border-radius: 0;
+	overflow: hidden;
+	background: var(--mod-se-surface, var(--mod-se-preview-bg, #{$mod-takeover-surface-raised}));
+}
+
+.modula-gallery-takeover__canvas-toolbar-viewport-btn.modula-ui-icon-button {
+	width: $mod-space-32;
+	min-width: $mod-space-32;
+	height: $mod-space-32;
+	border-radius: 0 !important;
+	border: none;
+	border-inline-end: 1px solid var(--mod-se-line, var(--mod-se-preview-toolbar-border, #{$mod-takeover-preview-toolbar-border}));
+	color: var(--mod-se-ink-2, var(--mod-se-preview-ink-secondary, #{$mod-takeover-text-base}));
+
+	&:last-child {
+		border-inline-end: none;
+	}
+
+	&:hover:not(:disabled) {
+		background: var(--mod-se-chrome-2, var(--mod-se-preview-segment-hover-bg, transparent));
+		color: var(--mod-se-ink, var(--mod-se-preview-ink, #{$mod-takeover-text-strong}));
+	}
+
+	&.is-active {
+		background: var(--mod-se-chrome-2, var(--mod-se-preview-segment-active-bg, #{$mod-takeover-preview-segment-active-bg}));
+		color: var(--mod-se-ink, var(--mod-se-preview-segment-btn-ink-active, #{$mod-takeover-preview-segment-btn-ink-active}));
+	}
+}
+
+.modula-gallery-takeover__canvas-toolbar-divider {
+	display: inline-block;
+	width: 1px;
+	height: $mod-space-24;
+	flex-shrink: 0;
+	background: var(--mod-se-line, var(--mod-se-preview-toolbar-border, #{$mod-takeover-preview-toolbar-border}));
+}

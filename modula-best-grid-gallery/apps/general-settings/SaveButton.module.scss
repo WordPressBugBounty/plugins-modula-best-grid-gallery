@@ -1,0 +1,61 @@
+@use '../shared-styles/spacing' as *;
+@use '../shared-styles/radii' as *;
+
+.saveSettingsWrap {
+    box-shadow: none;
+    color: var(--theme-text-color);
+    font-weight: 500;
+    height: auto;
+    outline: none;
+    padding: 0;
+    margin-top: var(--theme-content-spacing);
+    padding-top: var(--theme-content-spacing);
+    border-top: 1px solid var(--theme-border-color);
+    position: relative;
+    text-align: left;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    justify-content: flex-end;
+    display: flex;
+}
+
+.saveNotice {
+    position: absolute;
+    right: $mod-space-25;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #46b450;
+    color: white;
+    padding: $mod-space-8 $mod-space-16;
+    border-radius: $mod-radius-6;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.slideIn {
+    opacity: 1;
+    right: $mod-space-25;
+    animation: slideInRight 0.3s ease-out, slideOutLeft 0.3s ease-in 2.7s forwards;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translate(100%, -50%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(0, -50%);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutLeft {
+    to {
+        transform: translate(100%, -50%);
+        opacity: 0;
+    }
+}

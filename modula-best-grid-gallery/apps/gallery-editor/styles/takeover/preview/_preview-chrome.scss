@@ -1,0 +1,709 @@
+@use "../../variables" as *;
+
+/* Width from settings applies here only — toolbar stays full width; shell is centered in the preview column */
+.modula-gallery-takeover__live-preview-gallery-shell {
+	margin-inline: auto;
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+	/*
+	 * Inset tiles inside the scroll content box so multi-select
+	 * outline (2px) + offset (2px) is not clipped by overflow:auto
+	 * (scrollports clip at the content edge; padding on the scroll
+	 * itself does not reserve paint room for outlines).
+	 */
+	padding: $mod-space-8;
+}
+
+/* Preview toolbar — same band as `.reorder-head` and legacy `.modula-upload-actions` */
+.modula-gallery-takeover__preview-chrome {
+	flex-shrink: 0;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-start;
+	gap: $mod-space-8 $mod-space-12;
+	min-height: $mod-takeover-workspace-panel-head-min-height;
+	padding: 0 $mod-takeover-workspace-panel-head-padding-x;
+	box-sizing: border-box;
+	background: var(--mod-se-preview-toolbar-bg, #{$mod-takeover-preview-toolbar-bg});
+	border-bottom: 1px solid var(--mod-se-preview-toolbar-border, #{$mod-takeover-preview-toolbar-border});
+}
+
+.modula-gallery-takeover__preview-chrome-main {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: $mod-space-12 $mod-space-20;
+	min-width: 0;
+	flex: 0 0 auto;
+}
+
+.modula-gallery-takeover__preview-chrome-left {
+	display: flex;
+	align-items: center;
+	gap: $mod-space-10;
+	min-width: 0;
+}
+
+/* Custom grid only: shrink preview width (smaller cells) for tall layouts */
+.modula-gallery-takeover__preview-custom-grid-zoom {
+	display: inline-flex;
+	align-items: center;
+	gap: $mod-space-4;
+	padding: $mod-space-2 $mod-space-8;
+	border-radius: 0;
+	background: var(--mod-se-preview-segment-bg, #{$mod-takeover-preview-segment-bg});
+	border: 1px solid var(--mod-se-preview-segment-border, #{$mod-takeover-preview-segment-border});
+	box-sizing: border-box;
+}
+
+.modula-gallery-takeover__preview-custom-grid-zoom__label {
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--mod-se-preview-ink-subtle, #{$mod-takeover-preview-toolbar-label-ink});
+	white-space: nowrap;
+}
+
+.modula-gallery-takeover__preview-custom-grid-zoom__value {
+	min-width: 2.5rem;
+	text-align: center;
+	font-size: 12px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	color: var(--mod-se-preview-ink, #{$mod-takeover-text-strong});
+}
+
+.modula-gallery-takeover__preview-custom-grid-zoom__btn {
+	margin: 0;
+	padding: 0 $mod-space-8;
+	min-width: $mod-space-28;
+	height: $mod-space-28;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1;
+	color: var(--mod-se-preview-segment-btn-ink, #{$mod-takeover-preview-segment-btn-ink});
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	cursor: pointer;
+	box-shadow: none;
+
+	&:hover:not(:disabled) {
+		color: var(--mod-se-preview-segment-btn-ink-active, #{$mod-takeover-preview-segment-btn-ink-active});
+		background: var(--mod-se-preview-segment-hover-bg, #{$mod-takeover-preview-segment-hover-bg});
+	}
+
+	&:disabled {
+		opacity: 0.35;
+		cursor: not-allowed;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: 0 0 0 2px $mod-takeover-focus-ring-neutral;
+	}
+}
+
+/* Flexible slot so upload status stays centered in the preview toolbar */
+.modula-gallery-takeover__preview-chrome-center {
+	flex: 1 1 auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 0;
+	padding-inline: $mod-space-8;
+}
+
+.modula-gallery-takeover__preview-chrome-uploading {
+	display: inline-flex;
+	align-items: center;
+	gap: $mod-space-8;
+	max-width: 100%;
+	padding: $mod-space-6 $mod-space-14;
+	border-radius: 999px;
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1.25;
+	color: var(--mod-se-preview-ink, #{$mod-takeover-text-strong});
+	background: color-mix(in srgb,
+		var(--modula-takeover-accent, #{$modula-takeover-accent}) 16%,
+		var(--mod-se-preview-bg, #{$mod-takeover-surface-raised}));
+	border: 1px solid color-mix(in srgb,
+		var(--modula-takeover-accent, #{$modula-takeover-accent}) 42%,
+		var(--mod-se-preview-toolbar-border, #{$mod-takeover-preview-toolbar-border}));
+	box-shadow: 0 1px 0 color-mix(in srgb, var(--mod-se-preview-ink, #{$mod-takeover-text-strong}) 6%, transparent),
+	0 8px 24px color-mix(in srgb, var(--mod-se-preview-ink, #{$mod-takeover-text-strong}) 8%, transparent);
+
+	.components-spinner {
+		margin: 0;
+		width: 18px;
+		height: 18px;
+	}
+}
+
+/* Preview width: one icon + flyout (takeover toolbar) */
+.modula-gallery-takeover__preview-viewport-dropdown {
+	position: relative;
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	align-self: center;
+}
+
+.modula-gallery-takeover__preview-viewport-trigger {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: $mod-space-32;
+	min-width: $mod-space-32;
+	height: $mod-space-32;
+	min-height: $mod-space-32;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	background: transparent !important;
+	border: 1px solid var(--mod-se-preview-border, #{$mod-takeover-border-light}) !important;
+	border-radius: 0;
+	box-shadow: none !important;
+	cursor: pointer;
+	color: var(--mod-se-preview-ink-secondary, #{$mod-takeover-text-base});
+	transition:
+		background var(--mod-se-duration-fast, 0.12s) ease,
+		color var(--mod-se-duration-fast, 0.12s) ease,
+		border-color var(--mod-se-duration-fast, 0.12s) ease;
+
+	svg {
+		display: block;
+		fill: currentColor;
+	}
+
+	&:hover:not(:disabled) {
+		background: var(--mod-se-preview-segment-hover-bg, #{$mod-takeover-light-hover-overlay}) !important;
+		color: var(--mod-se-preview-ink, #{$mod-takeover-text-strong}) !important;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: 0 0 0 2px $mod-takeover-focus-ring-neutral !important;
+	}
+}
+
+.modula-gallery-takeover__preview-viewport-menu {
+	position: absolute;
+	left: 0;
+	top: calc(100% + #{$mod-space-4});
+	z-index: 50;
+	min-width: 200px;
+	margin: 0;
+	padding: $mod-space-6 0;
+	list-style: none;
+	background: var(--mod-se-preview-flyout-bg, #{$mod-takeover-preview-flyout-bg});
+	border: 1px solid var(--mod-se-preview-flyout-border, #{$mod-takeover-preview-flyout-border});
+	border-radius: 0;
+	box-shadow: var(--mod-se-preview-flyout-shadow, var(--mod-se-shadow-md, #{$mod-takeover-preview-flyout-shadow}));
+}
+
+.modula-gallery-takeover__preview-viewport-menu-item {
+	display: flex;
+	align-items: center;
+	gap: $mod-space-12;
+	width: 100%;
+	margin: 0;
+	padding: $mod-space-8 $mod-space-16;
+	box-sizing: border-box;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.3;
+	text-align: left;
+	cursor: pointer;
+	border: none;
+	border-radius: 0;
+	background: transparent;
+	color: var(--mod-se-preview-flyout-ink, #{$mod-takeover-preview-flyout-ink});
+
+	&:hover {
+		background: var(--mod-se-preview-flyout-row-hover, #{$mod-takeover-preview-flyout-row-hover});
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: inset 0 0 0 2px $mod-takeover-focus-ring-neutral;
+	}
+}
+
+.modula-gallery-takeover__preview-viewport-menu-icon {
+	display: inline-flex;
+	flex-shrink: 0;
+	color: var(--mod-se-preview-ink-muted, #{$mod-takeover-text-muted});
+
+	svg {
+		display: block;
+		fill: currentColor;
+	}
+}
+
+.modula-gallery-takeover__preview-viewport-menu-label {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.modula-gallery-takeover__preview-viewport-menu-check {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	color: var(--modula-takeover-accent, #{$modula-takeover-accent});
+
+	svg {
+		display: block;
+		fill: currentColor;
+	}
+}
+
+.modula-gallery-takeover__preview-insert {
+	display: flex;
+	align-items: center;
+	gap: $mod-space-10;
+	min-width: 0;
+}
+
+.modula-gallery-takeover__preview-insert-label {
+	font-size: 12px;
+	color: var(--mod-se-preview-ink-muted, #{$mod-takeover-preview-toolbar-insert-ink});
+	white-space: nowrap;
+}
+
+.modula-gallery-takeover__preview-segment {
+	display: inline-flex;
+	border-radius: $mod-radius-6;
+	padding: $mod-space-2;
+	background: var(--mod-se-preview-segment-bg, #{$mod-takeover-preview-segment-bg});
+	border: 1px solid var(--mod-se-preview-segment-border, #{$mod-takeover-preview-segment-border});
+}
+
+.modula-gallery-takeover__preview-segment-btn {
+	margin: 0;
+	padding: $mod-space-5 $mod-space-12;
+	border: none;
+	border-radius: $mod-radius-4;
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+	background: transparent;
+	color: var(--mod-se-preview-segment-btn-ink, #{$mod-takeover-preview-segment-btn-ink});
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
+
+	&:hover {
+		color: var(--mod-se-preview-segment-btn-ink-active, #{$mod-takeover-preview-segment-btn-ink-active});
+		background: var(--mod-se-preview-segment-hover-bg, #{$mod-takeover-preview-segment-hover-bg});
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: 0 0 0 2px $mod-takeover-focus-ring-neutral;
+	}
+
+	&.is-active {
+		background: var(--mod-se-preview-segment-active-bg, #{$mod-takeover-preview-segment-active-bg});
+		color: var(--mod-se-preview-segment-btn-ink-active, #{$mod-takeover-preview-segment-btn-ink-active});
+		box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--modula-takeover-accent, #{$modula-takeover-accent}) 45%, transparent);
+	}
+}
+
+.modula-gallery-takeover__preview-chrome-actions {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: $mod-space-8;
+	margin-inline-start: auto;
+
+	/* Last control (Add New) — tiny inset from viewport edge */
+	.modula-gallery-takeover__preview-add-split:last-child {
+		margin-inline-end: $mod-space-2;
+	}
+}
+
+.modula-gallery-takeover__preview-action.components-button {
+	min-height: $mod-space-32;
+	height: $mod-space-32;
+	padding-top: 0;
+	padding-bottom: 0;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.4;
+	border-radius: 0 !important;
+}
+
+.modula-gallery-takeover__preview-action--primary.components-button.is-primary {
+	background: var(--mod-se-accent, var(--modula-takeover-accent)) !important;
+	border-color: var(--mod-se-accent, var(--modula-takeover-accent-strong)) !important;
+	color: #fff !important;
+	font-weight: 600;
+	box-shadow: var(--mod-se-shadow-sm) !important;
+
+	&:hover:not(:disabled) {
+		background: var(--modula-takeover-accent-hover) !important;
+		border-color: var(--mod-se-accent, var(--modula-takeover-accent)) !important;
+	}
+}
+
+.modula-gallery-takeover__preview-action--ghost.components-button.is-secondary {
+	background: transparent !important;
+	border-color: var(--mod-se-preview-border, #{$mod-takeover-border-light}) !important;
+	color: var(--mod-se-preview-ink-secondary, #{$mod-takeover-text-base}) !important;
+	font-weight: 500;
+	box-shadow: none !important;
+	border-radius: 0 !important;
+
+	&:hover:not(:disabled) {
+		background: var(--mod-se-preview-segment-hover-bg, #{$mod-takeover-light-hover-overlay}) !important;
+		color: var(--mod-se-preview-ink, #{$mod-takeover-text-strong}) !important;
+	}
+}
+
+.modula-gallery-takeover__preview-layout-dirty-indicator {
+	display: inline-flex;
+	align-items: center;
+	height: $mod-space-28;
+	padding: 0 $mod-space-8;
+	border-radius: 0;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1;
+	color: var(--mod-se-accent-ink, var(--mod-se-preview-ink, #{$mod-takeover-text-strong}));
+	background: var(--mod-se-accent-soft, color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 16%,
+			var(--mod-se-preview-bg, #{$mod-takeover-surface-raised})));
+	border: 1px solid var(--mod-se-line, color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 42%,
+			var(--mod-se-preview-toolbar-border, #{$mod-takeover-preview-toolbar-border})));
+}
+
+/* Split “Add New” (legacy `#modula_gallery_add_action` bridge) */
+.modula-gallery-takeover__preview-add-split {
+	position: relative;
+	flex-shrink: 0;
+	align-self: center;
+}
+
+/*
+ * One outer border on the wrapper only — two bordered siblings + overflow:hidden
+ * caused beveled/aliased corners in WebKit.
+ */
+.modula-gallery-takeover__preview-add-split-inner {
+	display: inline-flex;
+	align-items: stretch;
+	height: $mod-space-32;
+	box-sizing: border-box;
+	border-radius: 0;
+	overflow: hidden;
+	border: 1px solid var(--mod-se-accent, var(--modula-takeover-accent-strong));
+	background: var(--mod-se-accent, var(--modula-takeover-accent));
+	box-shadow: var(--mod-se-shadow-sm, #{$mod-takeover-split-inner-shadow});
+}
+
+.modula-gallery-takeover__preview-add-split-main,
+.modula-gallery-takeover__preview-add-split-caret {
+	margin: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: $mod-space-4;
+	box-sizing: border-box;
+	min-height: 0;
+	height: 100%;
+	padding: 0 $mod-space-10;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.2;
+	cursor: pointer;
+	border: none;
+	border-radius: 0;
+	background: transparent;
+	color: $mod-takeover-ink-on-dark;
+	-webkit-font-smoothing: antialiased;
+	transition: background 0.15s ease;
+
+	svg {
+		flex-shrink: 0;
+		fill: currentColor;
+		color: inherit;
+	}
+
+	&:hover {
+		background: $mod-takeover-accent-split-hover;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: inset 0 0 0 2px $mod-takeover-dark-focus-inset;
+	}
+}
+
+.modula-gallery-takeover__preview-add-split-caret {
+	min-width: 26px;
+	padding-left: $mod-space-4;
+	padding-right: $mod-space-4;
+	box-shadow: inset 1px 0 0 $mod-takeover-dark-divider-strong;
+}
+
+/* Styleguide `.menu` / `.grp2` / `button` — Add images caret flyout. */
+.modula-gallery-takeover__preview-add-menu {
+	position: absolute;
+	right: 0;
+	top: calc(100% + #{$mod-space-4});
+	z-index: 50;
+	width: 254px;
+	max-width: min(254px, calc(100vw - #{$mod-space-24}));
+	margin: 0;
+	padding: 7px;
+	list-style: none;
+	box-sizing: border-box;
+	background: var(--mod-se-preview-flyout-bg, var(--mod-se-surface, #{$mod-takeover-preview-flyout-bg}));
+	border: 1px solid var(--mod-se-preview-flyout-border, var(--mod-se-line, #{$mod-takeover-preview-flyout-border}));
+	border-radius: 0;
+	box-shadow:
+		0 1px 2px rgb(0 0 0 / 40%),
+		0 10px 30px -10px rgb(0 0 0 / 60%);
+}
+
+.modula-gallery-takeover__preview-add-menu-group {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.modula-gallery-takeover__preview-add-menu-group-label {
+	font-size: 10px;
+	font-weight: 650;
+	letter-spacing: 0.11em;
+	line-height: 1.3;
+	text-transform: uppercase;
+	color: var(--mod-se-ink-3, var(--mod-se-preview-ink-muted, #{$mod-takeover-text-muted}));
+	margin: 9px -7px 0;
+	padding: 13px 17px 7px;
+	border-top: 1px solid var(--mod-se-line-soft, #{$mod-takeover-border-light-muted});
+	box-sizing: border-box;
+}
+
+.modula-gallery-takeover__preview-add-menu-group:first-child .modula-gallery-takeover__preview-add-menu-group-label {
+	margin-top: 0;
+	padding-top: 7px;
+	border-top: 0;
+}
+
+.modula-gallery-takeover__preview-add-menu-group-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.modula-gallery-takeover__preview-add-menu-item {
+	margin: 0;
+	padding: 0;
+}
+
+.modula-gallery-takeover__preview-add-menu-btn {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	width: 100%;
+	margin: 0;
+	padding: 8px 10px;
+	box-sizing: border-box;
+	text-align: left;
+	font: inherit;
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 1.3;
+	cursor: pointer;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	color: var(--mod-se-preview-flyout-ink, var(--mod-se-ink, #{$mod-takeover-preview-flyout-ink}));
+
+	&:hover:not(:disabled) {
+		background: var(--mod-se-preview-flyout-row-hover, #{$mod-takeover-preview-flyout-row-hover});
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--modula-takeover-accent, #{$modula-takeover-accent}) 75%, transparent);
+	}
+
+	&.is-disabled {
+		cursor: not-allowed;
+		color: var(--mod-se-preview-flyout-ink-disabled, #{$mod-takeover-preview-flyout-ink-disabled});
+
+		.modula-gallery-takeover__preview-add-menu-icon {
+			opacity: 0.55;
+		}
+	}
+
+	svg {
+		display: block;
+		flex: none;
+		fill: none;
+		stroke: currentColor;
+	}
+}
+
+.modula-gallery-takeover__preview-add-menu-icon {
+	flex: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 15px;
+	height: 15px;
+	color: var(--mod-se-ink-3, var(--mod-se-preview-ink-muted, #{$mod-takeover-text-muted}));
+}
+
+/* Label + badge sit inline; badge is no longer pushed to the far edge. */
+.modula-gallery-takeover__preview-add-menu-label-wrap {
+	flex: 1;
+	min-width: 0;
+	display: inline-flex;
+	align-items: center;
+	flex-wrap: wrap;
+	column-gap: $mod-space-8;
+	row-gap: $mod-space-4;
+	max-width: 100%;
+}
+
+.modula-gallery-takeover__preview-add-menu-label {
+	font-weight: 400;
+	min-width: 0;
+	text-align: left;
+}
+
+.modula-gallery-takeover__preview-add-menu-badge {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: $mod-space-3 $mod-space-9;
+	font-size: 10px;
+	font-weight: 600;
+	line-height: 1.25;
+	letter-spacing: 0.02em;
+	text-transform: none;
+	white-space: nowrap;
+	color: var(--mod-se-preview-flyout-ink, #{$mod-takeover-preview-flyout-ink});
+	border-radius: $mod-radius-pill;
+	border: 1px solid transparent;
+	box-shadow: $mod-takeover-preview-flyout-badge-shadow;
+
+	&.is-extension {
+		background: color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 22%,
+			var(--mod-se-preview-flyout-badge-muted-bg, #{$mod-takeover-preview-flyout-badge-muted-bg}));
+		border-color: color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 45%,
+			var(--mod-se-preview-flyout-border, #{$mod-takeover-preview-flyout-border}));
+		color: color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 55%,
+			var(--mod-se-preview-ink, #{$mod-takeover-text-strong}));
+	}
+
+	/* Pro-only items (e.g. From Folder / From ZIP on Lite). */
+	&.is-pro {
+		background: color-mix(in srgb,
+			$mod-takeover-pro-badge-bg-mix 22%,
+			var(--mod-se-preview-flyout-badge-muted-bg, #{$mod-takeover-preview-flyout-badge-muted-bg}));
+		border-color: color-mix(in srgb,
+			$mod-takeover-pro-badge-border-mix 40%,
+			var(--mod-se-preview-flyout-border, #{$mod-takeover-preview-flyout-border}));
+		color: color-mix(in srgb, $mod-takeover-pro-badge-bg-mix 75%, var(--mod-se-preview-ink, #{$mod-takeover-text-strong}));
+	}
+
+	/* Subscription / plan does not include the extension. */
+	&.is-plan {
+		background: color-mix(in srgb,
+			$mod-takeover-plan-badge-violet 18%,
+			var(--mod-se-preview-flyout-badge-muted-bg, #{$mod-takeover-preview-flyout-badge-muted-bg}));
+		border-color: color-mix(in srgb,
+			$mod-takeover-plan-badge-lilac 35%,
+			var(--mod-se-preview-flyout-border, #{$mod-takeover-preview-flyout-border}));
+		color: color-mix(in srgb, $mod-takeover-plan-badge-violet 72%, var(--mod-se-preview-ink, #{$mod-takeover-text-strong}));
+	}
+
+	&.is-muted {
+		background: var(--mod-se-preview-flyout-badge-muted-bg, #{$mod-takeover-preview-flyout-badge-muted-bg});
+		border-color: var(--mod-se-preview-flyout-badge-muted-border, #{$mod-takeover-preview-flyout-badge-muted-border});
+		color: var(--mod-se-preview-flyout-badge-muted-ink, #{$mod-takeover-preview-flyout-badge-muted-ink});
+		font-weight: 500;
+	}
+}
+
+.modula-gallery-takeover__preview-placeholder {
+	flex: 1;
+	min-height: 160px;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: $mod-space-20 $mod-space-16;
+	background: var(--mod-se-preview-bg, #{$mod-takeover-surface-raised});
+	border: none;
+	border-bottom: 1px dashed var(--mod-se-preview-border-dashed, #{$mod-takeover-border-dashed});
+	border-radius: 0;
+	box-sizing: border-box;
+}
+
+.modula-gallery-takeover__preview-placeholder-title {
+	margin: 0 0 $mod-space-8;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--mod-se-preview-ink, #{$mod-takeover-text-strong});
+}
+
+.modula-gallery-takeover__preview-placeholder-hint {
+	margin: 0;
+	max-width: 36em;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--mod-se-preview-ink-muted, #{$mod-takeover-text-muted});
+}
+
+.modula-settings-editor__app[data-appearance='dark'] {
+	.modula-gallery-takeover__preview-chrome-notice.components-notice.is-error {
+		background: color-mix(in srgb, #d63638 18%, var(--mod-se-preview-bg, #{$mod-takeover-sidebar-bg}));
+		border-color: color-mix(in srgb, #d63638 45%, var(--mod-se-preview-border, #{$mod-takeover-chrome-border}));
+		color: var(--mod-se-preview-ink, #{$mod-takeover-ink-on-dark-strong});
+
+		.components-notice__content {
+			color: inherit;
+		}
+	}
+}

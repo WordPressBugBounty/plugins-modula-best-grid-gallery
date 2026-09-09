@@ -1,0 +1,287 @@
+{
+    "exported_at": "2026-04-07T11:30:11+00:00",
+    "source_input": "/Users/cosmin/repositories/personal/wpchill/modula-lite/modula-last-save-payload.json",
+    "gallery_id": 1560,
+    "source_saved_at": "2026-04-03T06:38:12+00:00",
+    "modula_settings_v2": {
+        "general": {
+            "type": "creative-gallery",
+            "width": "Auto",
+            "height": [
+                800,
+                900,
+                800
+            ],
+            "randomFactor": 50,
+            "shuffle": false,
+            "uploadPosition": "start"
+        },
+        "layout": {
+            "gridType": 3,
+            "gridRowHeight": 130,
+            "gridJustifyLastRow": "nojustify",
+            "gridImageSize": "1536x1536",
+            "gridImageDimensions": {
+                "width": 300,
+                "height": 230
+            },
+            "imgSize": 200,
+            "imgCrop": true,
+            "gridImageCrop": false,
+            "gutter": 5,
+            "tabletGutter": 5,
+            "mobileGutter": 5
+        },
+        "pagination": {
+            "maxImagesCount": 2,
+            "maxImagesCountMobile": false,
+            "enablePagination": false,
+            "enableInfiniteScroll": false,
+            "enableLoadMore": false,
+            "paginationNumber": 10,
+            "paginationColor": "",
+            "activePaginationColor": "",
+            "paginationPosition": "left"
+        },
+        "slider": {
+            "imageSize": "large",
+            "imageDimensions": {
+                "width": 250,
+                "height": 250
+            },
+            "imageCrop": true,
+            "adaptiveHeight": true,
+            "syncing": true,
+            "syncingNavSize": "medium",
+            "syncingNavImageDimensions": {
+                "width": 0,
+                "height": 0
+            },
+            "syncingNavImageCrop": false,
+            "syncingNavThumbnailsNumber": false,
+            "syncingNavThumbnailsGutter": 10,
+            "syncingNavThumbnailsBorderColor": "#000000",
+            "autoplay": false,
+            "autoplaySpeed": 3000,
+            "pauseOnHover": false,
+            "arrows": true,
+            "arrowsInside": true,
+            "dots": true,
+            "draggable": true,
+            "centerMode": true,
+            "centerPadding": "30px",
+            "fade": false,
+            "infinite": true,
+            "slidesToShow": 3,
+            "slidesToScroll": true,
+            "speed": 300,
+            "rtl": false,
+            "initialSlide": false,
+            "imageInfo": false,
+            "imageInfoPosition": "bot_outside",
+            "lightbox": "no-link",
+            "tabletSlides": true,
+            "tabletScrolls": true,
+            "mobileSlides": true,
+            "mobileScrolls": true
+        },
+        "lightbox": {
+            "lightbox": "fancybox",
+            "showNavigation": true,
+            "touch": true,
+            "openOn": "both",
+            "doubleClick": false,
+            "loop": false,
+            "showTitle": false,
+            "showCaption": false,
+            "captionPosition": "left",
+            "keyboard": false,
+            "wheel": false,
+            "toolbar": false,
+            "close": true,
+            "thumbs": false,
+            "download": false,
+            "zoom": false,
+            "clickSlide": false,
+            "infobar": false,
+            "animationEffect": "false",
+            "transitionEffect": "fade",
+            "showAll": false,
+            "showThumbnails": false,
+            "backgroundColor": "rgba(30,30,30,.9)",
+            "thumbsPosition": "bottom",
+            "downloadAllButton": true,
+            "enableFullscreen": false,
+            "openFullscreen": false
+        },
+        "captions": {
+            "mobileCaptionCopy": true,
+            "hideTitle": true,
+            "titleColor": "#ffffff",
+            "titleFontSize": 16,
+            "mobileTitleFontSize": 12,
+            "hideDescription": false,
+            "captionColor": "#ffffff",
+            "captionFontSize": 14,
+            "mobileCaptionFontSize": 10,
+            "hideGalleryTitle": true,
+            "galleryTitleType": "p",
+            "titleFontWeight": 400,
+            "captionFontWeight": "normal"
+        },
+        "social": {
+            "enableSocial": false,
+            "enableTwitter": false,
+            "enableFacebook": false,
+            "enableWhatsapp": false,
+            "enableLinkedin": false,
+            "enablePinterest": false,
+            "enableEmail": false,
+            "emailSubject": "Check out this awesome image !!",
+            "emailMessage": "Here is the link to the image : %%image_link%% and this is the link to the gallery : %%gallery_link%%",
+            "socialIconColor": "#ffffff",
+            "socialIconSize": 16,
+            "socialIconPadding": 10,
+            "socialDesktopCollapsed": true
+        },
+        "download": {
+            "downloadGalleryButton": true,
+            "enableDownload": false,
+            "downloadImageSizes": "thumbnail",
+            "downloadAllGalleryButton": true,
+            "downloadAllColor": "",
+            "downloadAllBackgroundColor": "",
+            "downloadAllGalleryButtonIcon": true,
+            "downloadAllGalleryIconColor": "",
+            "downloadAllHposition": "center",
+            "downloadAllPosition": "below_gallery",
+            "downloadAllLabel": "Download All Images",
+            "customZipName": "%%gallery_title%%"
+        },
+        "loadingEffects": {
+            "loadedScale": 100,
+            "inView": false,
+            "loadedRotate": false,
+            "loadedHSlide": false,
+            "loadedVSlide": false
+        },
+        "hover": {
+            "effect": "chico",
+            "cursor": "zoom-in",
+            "uploadCursor": false,
+            "hoverColor": "rgba(0,0,0,.5)",
+            "hoverOpacity": 50
+        },
+        "style": {
+            "borderSize": false,
+            "borderRadius": false,
+            "borderColor": "#ffffff",
+            "shadowSize": false,
+            "shadowColor": "#ffffff",
+            "customCss": ""
+        },
+        "performance": {
+            "enableOptimization": "",
+            "thumbnailOptimization": "",
+            "lightboxOptimization": "",
+            "modulaSpeedHelp": "",
+            "lazyLoad": true
+        },
+        "responsive": {
+            "enableResponsive": false,
+            "tabletColumns": 2,
+            "mobileColumns": true
+        },
+        "filters": {
+            "filters": [
+                "caini",
+                "pisici"
+            ],
+            "dropdownFilters": false,
+            "filterClick": false,
+            "hideAllFilter": false,
+            "allFilterLabel": "All",
+            "filterLinkColor": "",
+            "filterLinkHoverColor": "",
+            "defaultActiveFilter": "All",
+            "filterPositioning": "top",
+            "filterTextAlignment": "none",
+            "enableCollapsibleFilters": false,
+            "collapsibleActionText": "Filter by",
+            "enableMobileDropdownFilters": false
+        },
+        "deeplink": {
+            "modulaDeeplink": false,
+            "customLinkName": "modulagallery"
+        },
+        "instagram": {
+            "syncWithInstagram": false
+        },
+        "passwordProtect": {
+            "enablePassword": false,
+            "password": "%k2B4sQwyjvpp&4iou",
+            "passwordProtectUsername": "",
+            "passwordProtectText": ""
+        },
+        "slideshow": {
+            "enableSlideshow": false,
+            "enableAutoplay": false,
+            "pauseOnHover": false,
+            "slideshowSpeed": 5000
+        },
+        "zoom": {
+            "enableZoom": false,
+            "zoomOnHover": true,
+            "zoomType": "window",
+            "zoomEffect": "fade_in",
+            "zoomWindowPosition": "upper_left",
+            "zoomWindowSize": "medium",
+            "zoomLensSize": "medium",
+            "zoomLensShape": "round",
+            "zoomTintColor": "",
+            "zoomTintOpacity": false
+        },
+        "watermark": {
+            "enableWatermark": true,
+            "customSettingsWatermark": false,
+            "watermarkImage": false,
+            "watermarkPosition": "bottom_left",
+            "watermarkMargin": 10,
+            "watermarkImageDimensionWidth": false,
+            "watermarkImageDimensionHeight": false,
+            "watermarkEnableBackup": true,
+            "watermarkApplyToExistingImages": "",
+            "watermarkRemoveWatermark": ""
+        },
+        "exif": {
+            "enableExif": false,
+            "exifCamera": true,
+            "exifLens": true,
+            "exifShutterSpeed": true,
+            "exifAperture": true,
+            "exifFocalLength": true,
+            "exifIso": true,
+            "exifDate": true
+        },
+        "licensing": {
+            "imageLicensing": "none",
+            "displayWithDescription": false,
+            "showOnLightbox": false
+        },
+        "comments": {
+            "commentStatus": true,
+            "toggleComments": true,
+            "startCollapsed": false
+        },
+        "proofing": {
+            "imageProofing": false,
+            "minSelection": false,
+            "maxSelection": false,
+            "loginRejectionNotice": "",
+            "showLoginLink": true,
+            "expireRejectionNotice": "",
+            "expireLinkToPage": false,
+            "expireLinkToPageUrl": ""
+        }
+    }
+}

@@ -1,0 +1,73 @@
+@use "../../variables" as *;
+
+.modula-gallery-takeover__main {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	background: transparent;
+	overflow: hidden;
+	outline: none;
+
+	&:focus-visible {
+		box-shadow: inset 0 0 0 2px var(--modula-takeover-accent, #{$modula-takeover-accent});
+	}
+}
+
+/* Live preview panel — artboard surface (radius 0) */
+.modula-gallery-takeover__preview-card {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	background: var(--mod-se-surface, var(--mod-se-preview-bg, #{$mod-takeover-surface-raised}));
+	background-clip: padding-box;
+	border-radius: 0;
+	border: 1px solid var(--mod-se-line, var(--mod-se-preview-card-border, #{$mod-takeover-preview-card-border}));
+	box-shadow: var(--mod-se-shadow-md, none);
+	filter: var(--mod-se-preview-card-filter, none);
+	overflow: hidden;
+	box-sizing: border-box;
+	margin-left: 0;
+	width: 100%;
+	transition:
+		max-width $mod-takeover-transition-panel,
+		margin-left $mod-takeover-transition-panel,
+		transform $mod-takeover-transition-panel,
+		filter $mod-takeover-transition-panel;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.modula-gallery-takeover__preview-card {
+		transition: none;
+	}
+}
+
+.modula-gallery-takeover__preview-actions {
+	flex-shrink: 0;
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: $mod-space-12;
+	min-height: $mod-space-40;
+	padding: 0 $mod-space-16;
+	background: var(--mod-se-chrome, var(--mod-se-preview-toolbar-bg, #{$mod-takeover-preview-toolbar-bg}));
+	border-top: 1px solid var(--mod-se-line, var(--mod-se-preview-toolbar-border, #{$mod-takeover-preview-toolbar-border}));
+	color: var(--mod-se-ink-2, var(--mod-se-preview-ink-secondary, #{$mod-takeover-text-base}));
+	font-size: 12px;
+
+	.modula-settings-editor__save-bar {
+		flex-direction: row;
+		align-items: center;
+		gap: $mod-space-10;
+		padding: 0;
+		margin: 0;
+		border: none;
+		color: inherit;
+
+		p,
+		.components-notice__content {
+			color: var(--mod-se-preview-ink-muted, #{$mod-takeover-text-muted});
+		}
+	}
+}

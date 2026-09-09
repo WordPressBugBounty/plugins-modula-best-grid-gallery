@@ -1,0 +1,27 @@
+@use '../variables' as *;
+
+// Fixed style-kit accent (not WP admin theme colour). See 23-style-guide.md.
+// Legacy --modula-takeover-accent* aliases keep existing consumers working.
+.modula-settings-editor__app {
+	--mod-se-accent: #{$modula-takeover-accent};
+	--mod-se-accent-ink: #{$modula-takeover-accent};
+	--mod-se-accent-soft: #{$modula-takeover-accent-soft};
+
+	--modula-takeover-accent: var(--mod-se-accent);
+	--modula-takeover-accent-strong: var(--mod-se-accent);
+	--modula-takeover-accent-hover: #{$modula-takeover-accent-hover};
+}
+
+.modula-settings-editor__app[data-appearance='light'] {
+	--mod-se-accent: #{$modula-takeover-accent};
+	--mod-se-accent-ink: #{$modula-takeover-accent};
+	--mod-se-accent-soft: #{$modula-takeover-accent-soft};
+	--modula-takeover-accent-hover: #{$modula-takeover-accent-hover};
+}
+
+.modula-settings-editor__app[data-appearance='dark'] {
+	--mod-se-accent: #{$modula-takeover-accent-dark};
+	--mod-se-accent-ink: #{$modula-takeover-accent-ink-dark};
+	--mod-se-accent-soft: #{$modula-takeover-accent-soft-dark};
+	--modula-takeover-accent-hover: #{$modula-takeover-accent-ink-dark};
+}

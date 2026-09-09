@@ -1,0 +1,277 @@
+@use '../takeover-theme' as theme;
+
+// Semantic appearance tokens — set on `.modula-settings-editor__app[data-appearance]`.
+// Canonical roles: docs/contributors/23-style-guide.md (style kit → --mod-se-*).
+
+.modula-settings-editor__app {
+	--mod-se-font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, 'Helvetica Neue',
+		Arial, sans-serif;
+	--mod-se-font-mono: ui-monospace, 'SF Mono', SFMono-Regular, 'JetBrains Mono', Menlo, Consolas,
+		monospace;
+	--mod-se-gut: #{theme.$mod-se-gut};
+	--mod-se-rail-w: #{theme.$mod-se-rail-w};
+	--mod-se-panel-w: #{theme.$mod-se-panel-w};
+	--mod-se-ease-space: #{theme.$mod-se-ease-space};
+	--mod-se-duration-row: 0.1s;
+	--mod-se-duration-fast: 0.12s;
+	--mod-se-duration-switch: 0.16s;
+	--mod-se-duration-pane: 0.22s;
+}
+
+.modula-settings-editor__app[data-appearance='light'] {
+	color-scheme: light;
+
+	// --- Style kit surfaces ---
+	--mod-se-stage: #e9e9e5;
+	--mod-se-chrome: #f6f6f4;
+	--mod-se-chrome-2: #f0f0ed;
+	--mod-se-surface: #fff;
+	--mod-se-line: #e3e3de;
+	--mod-se-line-soft: #edede8;
+
+	// --- Style kit ink ---
+	--mod-se-ink: #16161a;
+	--mod-se-ink-2: #56565e;
+	--mod-se-ink-3: #8b8b93;
+	--mod-se-off: #c8c8cd;
+
+	// --- Style kit accent (fixed) ---
+	--mod-se-accent: #2e4fe8;
+	--mod-se-accent-ink: #2e4fe8;
+	--mod-se-accent-soft: #edf0fe;
+
+	// --- Style kit meaning ---
+	--mod-se-note: #b4530a;
+	--mod-se-note-soft: #fdf2e6;
+	--mod-se-danger: #b4362b;
+	--mod-se-good: #1e9e62;
+
+	// --- Elevation ---
+	--mod-se-shadow-sm: 0 1px 2px rgb(0 0 0 / 8%);
+	--mod-se-shadow-md: 0 4px 22px rgb(0 0 0 / 12%), 0 0 0 1px rgb(0 0 0 / 4%);
+
+	// --- Legacy shell aliases (wired to style kit) ---
+	--mod-se-canvas-bg: var(--mod-se-stage);
+	--mod-se-sidebar-bg: var(--mod-se-chrome);
+	--mod-se-sidebar-ink: var(--mod-se-ink);
+	--mod-se-sidebar-ink-muted: var(--mod-se-ink-2);
+	--mod-se-chrome-bg: var(--mod-se-chrome);
+	--mod-se-chrome-border: var(--mod-se-line);
+	--mod-se-chrome-ink: var(--mod-se-ink);
+	--mod-se-chrome-ink-secondary: var(--mod-se-ink-2);
+	--mod-se-chrome-ink-muted: var(--mod-se-ink-3);
+	--mod-se-sidebar-settings-bg: var(--mod-se-chrome-2);
+	--mod-se-sidebar-settings-ink: var(--mod-se-ink);
+	--mod-se-sidebar-settings-ink-muted: var(--mod-se-ink-2);
+	--mod-se-sidebar-nav-bg: var(--mod-se-chrome);
+	--mod-se-sidebar-v2-featured-bg: var(--mod-se-chrome-2);
+	--mod-se-sidebar-v2-featured-border: var(--mod-se-line);
+	--mod-se-sidebar-v2-nav-hover-bg: var(--mod-se-chrome-2);
+	--mod-se-sidebar-v2-row-hover-bg: rgb(0 0 0 / 3.5%);
+	--mod-se-control-border: var(--mod-se-line);
+	--mod-se-control-bg: var(--mod-se-surface);
+	--mod-se-range-rail-bg: var(--mod-se-off);
+	--mod-se-range-track-bg: var(--mod-se-accent);
+	--mod-se-range-thumb-bg: var(--mod-se-accent);
+	--mod-se-hover-overlay: rgb(0 0 0 / 6%);
+	--mod-se-sidebar-context-bg: var(--mod-se-chrome-2);
+	--mod-se-press-overlay: rgb(0 0 0 / 10%);
+	--mod-se-menu-surface-bg: var(--mod-se-chrome-2);
+	--mod-se-flyout-bg: var(--mod-se-surface);
+	--mod-se-flyout-ink: var(--mod-se-ink);
+	--mod-se-flyout-ink-muted: var(--mod-se-ink-2);
+	--mod-se-flyout-border: var(--mod-se-line);
+	--mod-se-flyout-row-hover: var(--mod-se-chrome-2);
+	--mod-se-topbar-input-bg: var(--mod-se-chrome-2);
+	--mod-se-topbar-input-border: var(--mod-se-line);
+	--mod-se-topbar-title-pill-bg: transparent;
+	--mod-se-topbar-title-pill-border: transparent;
+	--mod-se-topbar-title-pill-bg-focus: var(--mod-se-surface);
+	--mod-se-topbar-title-pill-border-focus: var(--mod-se-line);
+	--mod-se-shell-ink: var(--mod-se-ink);
+	--mod-se-status-muted: var(--mod-se-ink-3);
+	--mod-se-skip-bg: var(--mod-se-ink);
+	--mod-se-skip-ink: var(--mod-se-surface);
+	--mod-se-scrollbar-thumb: var(--mod-se-off);
+	--mod-se-scrollbar-track: var(--mod-se-stage);
+	--mod-se-metabox-bg: transparent;
+	--mod-se-metabox-ink: var(--mod-se-ink);
+	--mod-se-metabox-border: var(--mod-se-stage);
+	--mod-se-metabox-tab-border: var(--mod-se-line);
+	--mod-se-palette-backdrop: rgb(0 0 0 / 45%);
+	--mod-se-palette-panel-bg: var(--mod-se-surface);
+	--mod-se-palette-ink: var(--mod-se-ink);
+	--mod-se-palette-ink-muted: var(--mod-se-ink-2);
+	--mod-se-palette-ink-faint: var(--mod-se-ink-3);
+	--mod-se-palette-border: var(--mod-se-line);
+	--mod-se-palette-input-bg: var(--mod-se-chrome-2);
+	--mod-se-palette-input-border: var(--mod-se-line);
+	--mod-se-palette-item-hover: var(--mod-se-hover-overlay);
+	--mod-se-palette-item-active-bg: var(--mod-se-accent-soft);
+	--mod-se-palette-item-active-border: var(--mod-se-accent);
+	--mod-se-palette-shadow: var(--mod-se-shadow-md);
+	--mod-se-preview-card-filter: none;
+	--mod-se-preview-bg: var(--mod-se-surface);
+	--mod-se-preview-toolbar-bg: var(--mod-se-chrome);
+	--mod-se-preview-toolbar-border: var(--mod-se-line);
+	--mod-se-preview-border: var(--mod-se-line);
+	--mod-se-preview-border-dashed: var(--mod-se-off);
+	--mod-se-preview-ink: var(--mod-se-ink);
+	--mod-se-preview-ink-muted: var(--mod-se-ink-2);
+	--mod-se-preview-ink-secondary: var(--mod-se-ink-2);
+	--mod-se-preview-ink-subtle: var(--mod-se-ink-3);
+	--mod-se-preview-segment-bg: var(--mod-se-chrome-2);
+	--mod-se-preview-segment-border: var(--mod-se-line);
+	--mod-se-preview-segment-hover-bg: var(--mod-se-hover-overlay);
+	--mod-se-preview-segment-active-bg: var(--mod-se-surface);
+	--mod-se-preview-segment-btn-ink: var(--mod-se-ink-2);
+	--mod-se-preview-segment-btn-ink-active: var(--mod-se-ink);
+	--mod-se-preview-flyout-bg: var(--mod-se-surface);
+	--mod-se-preview-flyout-border: var(--mod-se-line);
+	--mod-se-preview-flyout-shadow: var(--mod-se-shadow-md);
+	--mod-se-preview-flyout-row-hover: var(--mod-se-chrome-2);
+	--mod-se-preview-flyout-ink: var(--mod-se-ink);
+	--mod-se-preview-flyout-ink-disabled: var(--mod-se-ink-3);
+	--mod-se-preview-flyout-badge-muted-bg: var(--mod-se-chrome-2);
+	--mod-se-preview-flyout-badge-muted-border: var(--mod-se-line);
+	--mod-se-preview-flyout-badge-muted-ink: var(--mod-se-ink-2);
+	--mod-se-preview-card-border: var(--mod-se-line);
+	--mod-se-aux-bg: var(--mod-se-surface);
+	--mod-se-aux-border: var(--mod-se-line);
+	--mod-se-aux-surface: var(--mod-se-chrome-2);
+	--mod-se-aux-surface-raised: var(--mod-se-surface);
+	--mod-se-aux-ink: var(--mod-se-ink);
+	--mod-se-aux-ink-muted: var(--mod-se-ink-2);
+	--mod-se-aux-border-muted: var(--mod-se-line-soft);
+	--mod-se-aux-border-strong: var(--mod-se-line);
+	--mod-se-aux-hover-overlay: var(--mod-se-hover-overlay);
+}
+
+.modula-settings-editor__app[data-appearance='dark'] {
+	color-scheme: dark;
+
+	// --- Style kit surfaces ---
+	--mod-se-stage: #101114;
+	--mod-se-chrome: #17181b;
+	--mod-se-chrome-2: #1d1e22;
+	--mod-se-surface: #202126;
+	--mod-se-line: #2c2e34;
+	--mod-se-line-soft: #26282d;
+
+	// --- Style kit ink ---
+	--mod-se-ink: #ececef;
+	--mod-se-ink-2: #a2a2ac;
+	--mod-se-ink-3: #74747e;
+	--mod-se-off: #45464e;
+
+	// --- Style kit accent (fixed) ---
+	--mod-se-accent: #6b85ff;
+	--mod-se-accent-ink: #93a6ff;
+	--mod-se-accent-soft: #21243a;
+
+	// --- Style kit meaning ---
+	--mod-se-note: #e9a25c;
+	--mod-se-note-soft: #2e2418;
+	--mod-se-danger: #f08a7e;
+	--mod-se-good: #43c489;
+
+	// --- Elevation ---
+	--mod-se-shadow-sm: 0 1px 2px rgb(0 0 0 / 35%);
+	--mod-se-shadow-md: 0 4px 22px rgb(0 0 0 / 45%), 0 0 0 1px rgb(255 255 255 / 4%);
+
+	// --- Legacy shell aliases ---
+	--mod-se-canvas-bg: var(--mod-se-stage);
+	--mod-se-sidebar-bg: var(--mod-se-chrome);
+	--mod-se-sidebar-ink: var(--mod-se-ink);
+	--mod-se-sidebar-ink-muted: var(--mod-se-ink-2);
+	--mod-se-chrome-bg: var(--mod-se-chrome);
+	--mod-se-chrome-border: var(--mod-se-line);
+	--mod-se-chrome-ink: var(--mod-se-ink);
+	--mod-se-chrome-ink-secondary: var(--mod-se-ink-2);
+	--mod-se-chrome-ink-muted: var(--mod-se-ink-3);
+	--mod-se-sidebar-settings-bg: var(--mod-se-chrome-2);
+	--mod-se-sidebar-settings-ink: var(--mod-se-ink);
+	--mod-se-sidebar-settings-ink-muted: var(--mod-se-ink-2);
+	--mod-se-sidebar-nav-bg: var(--mod-se-chrome);
+	--mod-se-sidebar-v2-featured-bg: var(--mod-se-chrome-2);
+	--mod-se-sidebar-v2-featured-border: var(--mod-se-line);
+	--mod-se-sidebar-v2-nav-hover-bg: var(--mod-se-hover-overlay);
+	--mod-se-sidebar-v2-row-hover-bg: rgb(255 255 255 / 6%);
+	--mod-se-control-border: var(--mod-se-line);
+	--mod-se-control-bg: var(--mod-se-surface);
+	--mod-se-range-rail-bg: var(--mod-se-off);
+	--mod-se-range-track-bg: var(--mod-se-accent);
+	--mod-se-range-thumb-bg: var(--mod-se-accent);
+	--mod-se-hover-overlay: rgb(255 255 255 / 8%);
+	--mod-se-sidebar-context-bg: rgb(255 255 255 / 4%);
+	--mod-se-press-overlay: rgb(255 255 255 / 12%);
+	--mod-se-menu-surface-bg: var(--mod-se-chrome-2);
+	--mod-se-flyout-bg: var(--mod-se-surface);
+	--mod-se-flyout-ink: var(--mod-se-ink);
+	--mod-se-flyout-ink-muted: var(--mod-se-ink-2);
+	--mod-se-flyout-border: var(--mod-se-line);
+	--mod-se-flyout-row-hover: var(--mod-se-hover-overlay);
+	--mod-se-topbar-input-bg: var(--mod-se-chrome-2);
+	--mod-se-topbar-input-border: var(--mod-se-line);
+	--mod-se-topbar-title-pill-bg: transparent;
+	--mod-se-topbar-title-pill-border: transparent;
+	--mod-se-topbar-title-pill-bg-focus: var(--mod-se-surface);
+	--mod-se-topbar-title-pill-border-focus: var(--mod-se-line);
+	--mod-se-shell-ink: var(--mod-se-ink);
+	--mod-se-status-muted: var(--mod-se-ink-3);
+	--mod-se-skip-bg: var(--mod-se-ink);
+	--mod-se-skip-ink: var(--mod-se-stage);
+	--mod-se-scrollbar-thumb: var(--mod-se-off);
+	--mod-se-scrollbar-track: var(--mod-se-chrome);
+	--mod-se-metabox-bg: var(--mod-se-chrome);
+	--mod-se-metabox-ink: var(--mod-se-ink);
+	--mod-se-metabox-border: var(--mod-se-line);
+	--mod-se-metabox-tab-border: var(--mod-se-line);
+	--mod-se-palette-backdrop: rgb(0 0 0 / 52%);
+	--mod-se-palette-panel-bg: var(--mod-se-surface);
+	--mod-se-palette-ink: var(--mod-se-ink);
+	--mod-se-palette-ink-muted: var(--mod-se-ink-2);
+	--mod-se-palette-ink-faint: var(--mod-se-ink-3);
+	--mod-se-palette-border: var(--mod-se-line);
+	--mod-se-palette-input-bg: var(--mod-se-chrome-2);
+	--mod-se-palette-input-border: var(--mod-se-line);
+	--mod-se-palette-item-hover: var(--mod-se-hover-overlay);
+	--mod-se-palette-item-active-bg: var(--mod-se-accent-soft);
+	--mod-se-palette-item-active-border: var(--mod-se-accent);
+	--mod-se-palette-shadow: var(--mod-se-shadow-md);
+	--mod-se-preview-card-filter: none;
+	--mod-se-preview-bg: var(--mod-se-surface);
+	--mod-se-preview-toolbar-bg: var(--mod-se-chrome);
+	--mod-se-preview-toolbar-border: var(--mod-se-line);
+	--mod-se-preview-border: var(--mod-se-line);
+	--mod-se-preview-border-dashed: var(--mod-se-off);
+	--mod-se-preview-ink: var(--mod-se-ink);
+	--mod-se-preview-ink-muted: var(--mod-se-ink-2);
+	--mod-se-preview-ink-secondary: var(--mod-se-ink-2);
+	--mod-se-preview-ink-subtle: var(--mod-se-ink-3);
+	--mod-se-preview-segment-bg: var(--mod-se-chrome-2);
+	--mod-se-preview-segment-border: var(--mod-se-line);
+	--mod-se-preview-segment-hover-bg: var(--mod-se-hover-overlay);
+	--mod-se-preview-segment-active-bg: var(--mod-se-surface);
+	--mod-se-preview-segment-btn-ink: var(--mod-se-ink-2);
+	--mod-se-preview-segment-btn-ink-active: var(--mod-se-ink);
+	--mod-se-preview-flyout-bg: var(--mod-se-surface);
+	--mod-se-preview-flyout-border: var(--mod-se-line);
+	--mod-se-preview-flyout-shadow: var(--mod-se-shadow-md);
+	--mod-se-preview-flyout-row-hover: var(--mod-se-hover-overlay);
+	--mod-se-preview-flyout-ink: var(--mod-se-ink);
+	--mod-se-preview-flyout-ink-disabled: var(--mod-se-ink-3);
+	--mod-se-preview-flyout-badge-muted-bg: var(--mod-se-chrome-2);
+	--mod-se-preview-flyout-badge-muted-border: var(--mod-se-line);
+	--mod-se-preview-flyout-badge-muted-ink: var(--mod-se-ink-2);
+	--mod-se-preview-card-border: var(--mod-se-line);
+	--mod-se-aux-bg: var(--mod-se-surface);
+	--mod-se-aux-border: var(--mod-se-line);
+	--mod-se-aux-surface: var(--mod-se-chrome-2);
+	--mod-se-aux-surface-raised: var(--mod-se-surface);
+	--mod-se-aux-ink: var(--mod-se-ink);
+	--mod-se-aux-ink-muted: var(--mod-se-ink-2);
+	--mod-se-aux-border-muted: var(--mod-se-line-soft);
+	--mod-se-aux-border-strong: var(--mod-se-line);
+	--mod-se-aux-hover-overlay: var(--mod-se-hover-overlay);
+}

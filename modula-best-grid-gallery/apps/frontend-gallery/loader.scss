@@ -1,0 +1,11 @@
+/**
+ * Critical styles for the thin loader entry (pending shell before React bootstrap).
+ *
+ * @package
+ */
+@use 'gallery-shell';
+@use 'gallery-chrome';
+
+.modula.modula-gallery {
+	transition: opacity 0.3s, visibility 0.3s;
+}

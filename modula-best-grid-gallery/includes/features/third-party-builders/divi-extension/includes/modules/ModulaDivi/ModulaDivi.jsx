@@ -21,10 +21,10 @@ class ModulaDivi extends Component {
 	}
 
 	componentDidUpdate(prevProps) {
-		let id = '#jtg-' + this.props.gallery_select;
+		const id = '#modula-' + this.props.gallery_select;
 
 		if ($(id).length > 0) {
-			let modulaSettings = $(id).data('config'),
+			const modulaSettings = $(id).data('config'),
 				modulaInstance = $(id).data('plugin_modulaGallery');
 
 			if (!modulaInstance) {

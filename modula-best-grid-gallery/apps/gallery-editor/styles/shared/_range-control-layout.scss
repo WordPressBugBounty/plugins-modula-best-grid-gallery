@@ -1,0 +1,70 @@
+@use '../variables' as *;
+
+// RangeControl: slider track + compact number on one row (grid beats flex + WP width:100% overrides).
+@mixin modula-settings-range-control-inline-layout($wrapper-padding-inline: $mod-space-8) {
+
+	.modula-settings-editor__inline-field-control,
+	.modula-settings-editor__field-control-col {
+		.components-range-control {
+			width: 100%;
+			max-width: 100%;
+		}
+
+		.components-range-control .components-base-control__field {
+			width: 100%;
+			max-width: 100%;
+		}
+
+		.components-range-control__root {
+			display: grid !important;
+			grid-template-columns: minmax(0, 1fr) 3.25rem;
+			align-items: center;
+			width: 100%;
+			max-width: 100%;
+			min-width: 0;
+			gap: $mod-space-8;
+		}
+
+		.components-range-control__wrapper {
+			grid-column: 1;
+			min-width: 0;
+			width: 100% !important;
+			max-width: 100%;
+			// Thumb + invisible range input extend past the rail; do not clip (overflow:hidden cut the knob).
+			overflow: visible;
+			box-sizing: border-box;
+			padding-inline: $wrapper-padding-inline;
+		}
+
+		.components-range-control__number {
+			grid-column: 2;
+			width: 3.25rem !important;
+			max-width: 3.25rem !important;
+			min-width: 3.25rem !important;
+			margin-inline-start: 0 !important;
+			justify-self: end;
+
+			&.components-number-control,
+			.components-input-control,
+			.components-input-control__container {
+				width: 100% !important;
+				max-width: 3.25rem !important;
+				min-width: 0 !important;
+			}
+
+			input,
+			.components-input-control__input {
+				width: 100% !important;
+				max-width: 3.25rem !important;
+				min-width: 0 !important;
+				padding-inline: $mod-space-6;
+				text-align: center;
+			}
+		}
+	}
+}
+
+// Sidebar V2 — no wrapper padding; WP RangeControl already extends the native input by thumb radius.
+@mixin modula-sidebar-v2-range-control-inline-layout {
+	@include modula-settings-range-control-inline-layout(0);
+}

@@ -16,6 +16,9 @@ class Modula_Helper {
 	*/
 	public static function generate_attributes( $attributes ) {
 		$return = '';
+		if ( null === $attributes || ! is_array( $attributes ) ) {
+			return $return;
+		}
 		foreach ( $attributes as $name => $value ) {
 			if ( is_array( $value ) && 'class' == $name ) {
 				$value = implode( ' ', $value );
@@ -33,6 +36,122 @@ class Modula_Helper {
 		}
 
 		return $return;
+	}
+
+	/**
+	 * WordPress / REST flags are 1 or '1'. Do not use boolval() — boolval( '0' ) is true.
+	 *
+	 * @param mixed $value Setting or item flag.
+	 * @return bool
+	 */
+	public static function is_truthy_flag( $value ) {
+		return true === $value || 1 === $value || '1' === $value;
+	}
+
+	/**
+	 * CSS id for a classic visitor gallery (no leading #).
+	 *
+	 * The shortcode stores `gallery_id` as `modula-{postId}`. Selectors must not
+	 * prefix `modula-` again.
+	 *
+	 * @param string $gallery_id Shortcode gallery_id or numeric post id.
+	 * @return string
+	 */
+	public static function classic_gallery_css_root_id( $gallery_id ) {
+		$gallery_id = (string) $gallery_id;
+		if ( 0 === strpos( $gallery_id, 'modula-' ) || 0 === strpos( $gallery_id, 'jtg-' ) ) {
+			return $gallery_id;
+		}
+		return 'modula-' . $gallery_id;
+	}
+
+	/**
+	 * CSS width value for the classic visitor gallery container.
+	 *
+	 * Gallery Width is a free-text field (`100%`, `800px`, `50`, `Auto`).
+	 *
+	 * @param mixed $width Saved width.
+	 * @return string
+	 */
+	public static function classic_gallery_css_width_value( $width ) {
+		$width = trim( (string) $width );
+		if ( '' === $width || 0 === strcasecmp( $width, 'auto' ) ) {
+			return '100%';
+		}
+		if ( preg_match( '/^-?\d+(\.\d+)?$/', $width ) ) {
+			return $width . 'px';
+		}
+		return $width;
+	}
+
+	/**
+	 * Classic Load-in-view reveal selector for image tile content.
+	 *
+	 * Must not nest the gallery root id twice. The root already carries
+	 * `.modula-loaded-scale` when the gallery is in the viewport.
+	 *
+	 * @param mixed $gallery_id Gallery id or existing root id.
+	 * @return string
+	 */
+	public static function classic_inview_reveal_selector( $gallery_id ) {
+		$css_id = self::classic_gallery_css_root_id( $gallery_id );
+		return "#{$css_id}.modula-loaded-scale .modula-item:not(.modula-item--embedded) .modula-item-content";
+	}
+
+	/**
+	 * Classic visitor CSS for hover overlay tint + image dim strength.
+	 *
+	 * Lite shortcode must emit this itself: Pro injects the same via
+	 * `modula_shortcode_css`, and admin preview uses effects.css + Gutenberg styles.
+	 *
+	 * @param mixed $gallery_id Gallery id or existing root id.
+	 * @param array $settings   Flat gallery settings.
+	 * @return string CSS rules (may be empty when effect is `none`).
+	 */
+	public static function classic_hover_overlay_css( $gallery_id, $settings ) {
+		if ( ! is_array( $settings ) ) {
+			return '';
+		}
+		if ( 'none' === self::classic_item_template_name( $settings ) ) {
+			return '';
+		}
+
+		$css_id = self::classic_gallery_css_root_id( $gallery_id );
+		$color  = '';
+		if ( isset( $settings['hoverColor'] ) && is_string( $settings['hoverColor'] ) ) {
+			$color = self::sanitize_rgba_colour( $settings['hoverColor'] );
+		}
+		if ( '' === $color ) {
+			$color = '#000000';
+		}
+
+		$css     = "#{$css_id} .modula-item .modula-item-overlay{background-color:{$color};}";
+		$opacity = isset( $settings['hoverOpacity'] ) ? absint( $settings['hoverOpacity'] ) : 50;
+		if ( $opacity <= 100 ) {
+			$css .= "#{$css_id} .modula-item:hover img{opacity:" . ( 1 - ( $opacity / 100 ) ) . ';}';
+		}
+
+		return $css;
+	}
+
+	/**
+	 * Classic item template name (`none` vs an effect slug).
+	 *
+	 * Hover builder is the Beta overlay. Classic still uses legacy `effect`
+	 * plus `items/item.php` (titles/captions). `items/item-none.php` has no overlay.
+	 *
+	 * @param array $settings Flat gallery settings.
+	 * @return string
+	 */
+	public static function classic_item_template_name( $settings ) {
+		if ( ! is_array( $settings ) ) {
+			return 'pufrobo';
+		}
+		$effect = isset( $settings['effect'] ) ? (string) $settings['effect'] : 'pufrobo';
+		if ( '' === $effect ) {
+			$effect = 'pufrobo';
+		}
+		return ( 'none' === $effect ) ? 'none' : $effect;
 	}
 
 	public static function get_icon( $icon ) {
@@ -134,6 +253,110 @@ class Modula_Helper {
 	}
 
 	/**
+	 * Default Lite hover labels (filter: modula_available_hover_effects).
+	 * Keep in sync with CPT hover-effect field defaults.
+	 *
+	 * @return array<string, string>
+	 */
+	public static function get_lite_hover_effects_defaults() {
+		return array(
+			'none'    => esc_html__( 'None', 'modula-best-grid-gallery' ),
+			'pufrobo' => esc_html__( 'Pufrobo', 'modula-best-grid-gallery' ),
+		);
+	}
+
+	/**
+	 * Default Pro hover labels (filter: modula_pro_hover_effects).
+	 * Keep in sync with CPT hover-effect field defaults.
+	 *
+	 * @return array<string, string>
+	 */
+	public static function get_pro_hover_effects_defaults() {
+		// phpcs:disable WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound, WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+		return array(
+			'fluid-up'        => esc_html__( 'Fluid Up', 'modula-best-grid-gallery' ),
+			'greyscale'       => esc_html__( 'Greyscale', 'modula-best-grid-gallery' ),
+			'under'           => esc_html__( 'Under Image', 'modula-best-grid-gallery' ),
+			'hide'            => esc_html__( 'Hide', 'modula-best-grid-gallery' ),
+			'quiet'           => esc_html__( 'Quiet', 'modula-best-grid-gallery' ),
+			'catinelle'       => esc_html__( 'Catinelle', 'modula-best-grid-gallery' ),
+			'reflex'          => esc_html__( 'Reflex', 'modula-best-grid-gallery' ),
+			'curtain'         => esc_html__( 'Curtain', 'modula-best-grid-gallery' ),
+			'lens'            => esc_html__( 'Lens', 'modula-best-grid-gallery' ),
+			'appear'          => esc_html__( 'Appear', 'modula-best-grid-gallery' ),
+			'crafty'          => esc_html__( 'Crafty', 'modula-best-grid-gallery' ),
+			'seemo'           => esc_html__( 'Seemo', 'modula-best-grid-gallery' ),
+			'comodo'          => esc_html__( 'Comodo', 'modula-best-grid-gallery' ),
+			'lily'            => esc_html__( 'Lily', 'modula-best-grid-gallery' ),
+			'sadie'           => esc_html__( 'Sadie', 'modula-best-grid-gallery' ),
+			'honey'           => esc_html__( 'Honey', 'modula-best-grid-gallery' ),
+			'layla'           => esc_html__( 'Layla', 'modula-best-grid-gallery' ),
+			'zoe'             => esc_html__( 'Zoe', 'modula-best-grid-gallery' ),
+			'oscar'           => esc_html__( 'Oscar', 'modula-best-grid-gallery' ),
+			'marley'          => esc_html__( 'Marley', 'modula-best-grid-gallery' ),
+			'ruby'            => esc_html__( 'Ruby', 'modula-best-grid-gallery' ),
+			'roxy'            => esc_html__( 'Roxy', 'modula-best-grid-gallery' ),
+			'bubba'           => esc_html__( 'Bubba', 'modula-best-grid-gallery' ),
+			'dexter'          => esc_html__( 'Dexter', 'modula-best-grid-gallery' ),
+			'sarah'           => esc_html__( 'Sarah', 'modula-best-grid-gallery' ),
+			'chico'           => esc_html__( 'Chico', 'modula-best-grid-gallery' ),
+			'milo'            => esc_html__( 'Milo', 'modula-best-grid-gallery' ),
+			'julia'           => esc_html__( 'Julia', 'modula-best-grid-gallery' ),
+			'hera'            => esc_html__( 'Hera', 'modula-best-grid-gallery' ),
+			'winston'         => esc_html__( 'Winston', 'modula-best-grid-gallery' ),
+			'selena'          => esc_html__( 'Selena', 'modula-best-grid-gallery' ),
+			'terry'           => esc_html__( 'Terry', 'modula-best-grid-gallery' ),
+			'phoebe'          => esc_html__( 'Phoebe', 'modula-best-grid-gallery' ),
+			'apollo'          => esc_html__( 'Apollo', 'modula-best-grid-gallery' ),
+			'steve'           => esc_html__( 'Steve', 'modula-best-grid-gallery' ),
+			'jazz'            => esc_html__( 'Jazz', 'modula-best-grid-gallery' ),
+			'ming'            => esc_html__( 'Ming', 'modula-best-grid-gallery' ),
+			'lexi'            => esc_html__( 'Lexi', 'modula-best-grid-gallery' ),
+			'duke'            => esc_html__( 'Duke', 'modula-best-grid-gallery' ),
+			'tilt_1'          => esc_html__( 'Tilt Effect 1', 'modula-best-grid-gallery' ),
+			'tilt_3'          => esc_html__( 'Tilt Effect 2', 'modula-best-grid-gallery' ),
+			'tilt_7'          => esc_html__( 'Tilt Effect 3', 'modula-best-grid-gallery' ),
+			'centered-bottom' => esc_html__( 'Center Bottom', 'modula-best-grid-gallery' ),
+		);
+		// phpcs:enable WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound, WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+	}
+
+	/**
+	 * Merged slug => label for all hover effects (same logic as CPT hover-effect field).
+	 *
+	 * @return array<string, string>
+	 */
+	public static function get_hover_effects_merged_labels() {
+		$lite = apply_filters( 'modula_available_hover_effects', self::get_lite_hover_effects_defaults() );
+		$pro  = apply_filters( 'modula_pro_hover_effects', self::get_pro_hover_effects_defaults() );
+		if ( $pro ) {
+			return array_merge( $lite, $pro );
+		}
+		return $lite;
+	}
+
+	/**
+	 * Legacy preset catalog (labels + title/caption/social flags). Unused by the v2 settings editor
+	 * composable hover builder; kept for classic admin / extensions that still read hover slugs.
+	 *
+	 * @return array<string, array{label: string, supportsTitle: bool, supportsCaption: bool, supportsSocial: bool, extraScript: bool}>
+	 */
+	public static function get_hover_effects_catalog_for_editor() {
+		$catalog = array();
+		foreach ( self::get_hover_effects_merged_labels() as $slug => $label ) {
+			$el               = self::hover_effects_elements( $slug );
+			$catalog[ $slug ] = array(
+				'label'           => $label,
+				'supportsTitle'   => ! empty( $el['title'] ),
+				'supportsCaption' => ! empty( $el['description'] ),
+				'supportsSocial'  => ! empty( $el['social'] ),
+				'extraScript'     => ! empty( $el['scripts'] ),
+			);
+		}
+		return $catalog;
+	}
+
+	/**
 	 * Callback to sort tabs/fields on priority.
 	 *
 	 * @since 2.0.0
@@ -207,9 +430,15 @@ class Modula_Helper {
 		return $gallery_array;
 	}
 
+	/**
+	 * Sanitize a CSS color for Modula settings (hex, rgb, rgba, or empty/transparent).
+	 *
+	 * @param mixed $color Raw color from request / settings.
+	 * @return string Sanitized `#rrggbb`, `rgb(...)`, `rgba(...)`, or '' for transparent/invalid.
+	 */
 	public static function sanitize_rgba_colour( $color ) {
 
-		if ( empty( $color ) ) {
+		if ( null === $color || false === $color || '' === $color ) {
 			return '';
 		}
 
@@ -217,18 +446,34 @@ class Modula_Helper {
 			return 'rgba(0,0,0,0)';
 		}
 
-		if ( false === strpos( $color, 'rgba' ) ) {
-			return sanitize_hex_color( $color );
+		$color = trim( (string) $color );
+		if ( '' === $color || 0 === strcasecmp( $color, 'transparent' ) ) {
+			return '';
 		}
 
-		$color = str_replace( ' ', '', $color );
-		sscanf( $color, 'rgba(%d,%d,%d,%f)', $red, $green, $blue, $alpha );
+		$compact = str_replace( ' ', '', $color );
 
-		return 'rgba(' . absint( $red ) . ',' . absint( $green ) . ',' . absint( $blue ) . ',' . floatval( $alpha ) . ')';
+		if ( 0 === stripos( $compact, 'rgba(' ) ) {
+			if ( ! preg_match( '/^rgba\((\d{1,3}),(\d{1,3}),(\d{1,3}),([0-9]*\.?[0-9]+)\)$/i', $compact, $m ) ) {
+				return '';
+			}
+			$alpha = max( 0, min( 1, (float) $m[4] ) );
+			return 'rgba(' . absint( $m[1] ) . ',' . absint( $m[2] ) . ',' . absint( $m[3] ) . ',' . $alpha . ')';
+		}
+
+		if ( 0 === stripos( $compact, 'rgb(' ) ) {
+			if ( ! preg_match( '/^rgb\((\d{1,3}),(\d{1,3}),(\d{1,3})\)$/i', $compact, $m ) ) {
+				return '';
+			}
+			return 'rgb(' . absint( $m[1] ) . ',' . absint( $m[2] ) . ',' . absint( $m[3] ) . ')';
+		}
+
+		$hex = sanitize_hex_color( $color );
+		return $hex ? $hex : '';
 	}
 
 	public static function lightbox_default_options() {
-		$lightbox_touch      = apply_filters( 'modula_lightbox_touch', true );
+		$lightbox_touch       = apply_filters( 'modula_lightbox_touch', true );
 		$lightbox_click_slide = apply_filters( 'modula_lightbox_click_slide', true );
 
 		$fancybox_options = array(
@@ -536,7 +781,7 @@ class Modula_Helper {
 			'twitter'   =>
 				'<a class="modula-fancybox-share__button modula-fancybox-share__button--tw" href="https://twitter.com/intent/tweet?url={modulaShareUrl}&text={descr}">
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512px" height="512px" clip-rule="evenodd" baseProfile="basic"><polygon fill="#fff" points="437.333,64 105.245,448 66.867,448 393.955,64"/><polygon fill="#1da1f2" fill-rule="evenodd" points="332.571,448 83.804,74.667 178.804,74.667 427.571,448" clip-rule="evenodd"/><path fill="#fff" d="M168.104,96l219.628,320h-43.733L121.371,96H168.104 M184.723,64H61.538l263.542,384h121.185L184.723,64L184.723,64z"/></svg>
-				<span>Twitter</span></a>',
+				<span>X</span></a>',
 
 			'pinterest' =>
 				'<a class="modula-fancybox-share__button modula-fancybox-share__button--pt" href="https://www.pinterest.com/pin/create/button/?url={modulaShareUrl}&description={descr}&media={media}">
@@ -560,6 +805,31 @@ class Modula_Helper {
 		);
 
 		return apply_filters( 'modula_share_buttons_template', $share_buttons );
+	}
+
+	/**
+	 * Inline share-button templates for legacy modula-fancybox.js (idempotent per script handle).
+	 *
+	 * v2 React galleries should read `shareButtons` from the bootstrap JSON instead.
+	 *
+	 * @param string $script_handle Registered/enqueued script handle (e.g. modulaFancybox, modula-gallery).
+	 */
+	public static function add_lightbox_share_buttons_inline_script( $script_handle ) {
+		$script_handle = (string) $script_handle;
+		if ( '' === $script_handle ) {
+			return;
+		}
+
+		static $done = array();
+		if ( ! empty( $done[ $script_handle ] ) ) {
+			return;
+		}
+
+		$json   = wp_json_encode( self::render_lightbox_share_template() );
+		$inline = "window.ModulaShareButtons=window.ModulaShareButtons||'" . addslashes( (string) $json ) . "';";
+
+		wp_add_inline_script( $script_handle, $inline, 'before' );
+		$done[ $script_handle ] = true;
 	}
 
 	public static function snake_to_camel( $key ) {

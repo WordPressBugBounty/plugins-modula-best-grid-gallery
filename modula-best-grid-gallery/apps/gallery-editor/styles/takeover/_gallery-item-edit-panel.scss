@@ -1,0 +1,263 @@
+@use '../variables' as *;
+
+.modula-gallery-item-edit-panel {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	height: 100%;
+	background: var(--mod-se-chrome-2);
+	color: var(--mod-se-ink);
+}
+
+.modula-gallery-item-edit-panel__scroll {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: auto;
+	padding: 0 0 $mod-space-20;
+}
+
+/* Attachment card: same full-bleed surface as TEXT / LINK section bodies. */
+.modula-gallery-item-edit-panel .modula-settings-panel__section:first-child {
+	margin-top: 0;
+}
+
+.modula-gallery-item-edit-panel .modula-settings-panel__section-body {
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-14;
+	padding: $mod-space-12 $mod-space-20 $mod-space-16;
+}
+
+/* SettingsRow ships with 20px gut for hub lists; section-body already pads —
+   zero horizontal so toggle labels line up with FieldStack (Address, etc.). */
+.modula-gallery-item-edit-panel .modula-ui-settings-row {
+	padding-left: 0;
+	padding-right: 0;
+	border-bottom: none;
+
+	&.is-dirty {
+		padding-left: 0;
+	}
+}
+
+.modula-gallery-item-edit-panel .modula-ui-settings-row__dirty {
+	left: -13px;
+}
+
+.modula-gallery-item-edit-panel__filters {
+	width: 100%;
+}
+
+.modula-gallery-item-edit-panel__file-cta {
+	width: 100%;
+}
+
+.modula-gallery-item-edit-panel__lock-block {
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-10;
+}
+
+.modula-gallery-item-edit-panel__lock-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: $mod-space-12;
+}
+
+.modula-gallery-item-edit-panel__lock-label {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--mod-se-ink);
+}
+
+.modula-gallery-item-edit-panel__wm-block {
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-10;
+}
+
+.modula-gallery-item-edit-panel__wm-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: $mod-space-12;
+}
+
+.modula-gallery-item-edit-panel__wm-label {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--mod-se-ink);
+}
+
+.modula-gallery-item-edit-panel__wm-actions {
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-8;
+	width: 100%;
+
+	.modula-settings-editor__watermark-action {
+		width: 100%;
+	}
+}
+
+.modula-gallery-item-edit-panel__danger {
+	color: var(--mod-se-danger, #d63638) !important;
+}
+
+.modula-gallery-item-edit-panel__file-help {
+	margin: $mod-space-8 0 0;
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.4;
+	color: var(--mod-se-ink-3);
+}
+
+/* Segmented + follow-up control (e.g. Text color Auto/Custom + swatch). */
+.modula-gallery-item-edit-panel__control-stack {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: $mod-space-12;
+	width: 100%;
+	box-sizing: border-box;
+
+	.modula-gallery-item-edit-panel__file-help {
+		margin: 0;
+	}
+}
+
+.modula-gallery-item-edit-panel__ai-toolbar {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: $mod-space-10;
+}
+
+.modula-gallery-item-edit-panel__ai-hint {
+	margin: 0;
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.4;
+	color: var(--mod-se-ink-3);
+}
+
+.modula-gallery-item-edit-panel__ai-btn--inline {
+	width: auto;
+	flex: 0 0 auto;
+}
+
+.modula-gallery-item-edit-panel__ai-btn-icon {
+	display: inline-flex;
+	flex-shrink: 0;
+	line-height: 0;
+
+	svg {
+		display: block;
+		fill: currentColor;
+	}
+}
+
+.modula-gallery-item-edit-panel__ai-label-end {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
+.modula-gallery-item-edit-panel__ai-badge {
+	display: inline-flex;
+	align-items: center;
+	height: 20px;
+	padding: 0 8px;
+	border: 1px solid transparent;
+	background: var(--mod-se-accent-soft);
+	color: var(--mod-se-accent-ink);
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1;
+	white-space: nowrap;
+}
+
+.modula-gallery-item-edit-panel__ai-notice {
+	margin: 0;
+	padding: $mod-space-10 $mod-space-12;
+	font-size: 12px;
+	line-height: 1.4;
+	border: 1px solid var(--mod-se-line);
+
+	&--success {
+		color: var(--mod-se-good, #1e4620);
+		background: color-mix(in srgb, var(--mod-se-good, #00a32a) 12%, transparent);
+		border-color: color-mix(in srgb, var(--mod-se-good, #00a32a) 35%, transparent);
+	}
+
+	&--error {
+		color: var(--mod-se-danger, #d63638);
+		background: color-mix(in srgb, var(--mod-se-danger, #d63638) 10%, transparent);
+		border-color: color-mix(in srgb, var(--mod-se-danger, #d63638) 35%, transparent);
+	}
+}
+
+/* Image focus nested view in settings column */
+.modula-gallery-item-focus-panel {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	height: 100%;
+}
+
+.modula-gallery-item-focus-panel__scroll {
+	flex: 1;
+	min-height: 0;
+}
+
+.modula-gallery-item-focus-panel .modula-focus-point-modal__crop-wrap {
+	height: min(36vh, 260px);
+}
+
+.modula-gallery-item-focus-panel__footer {
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: $mod-space-8;
+	padding: $mod-space-10 $mod-space-12;
+	border-top: 1px solid var(--mod-se-line);
+	flex-shrink: 0;
+	box-sizing: border-box;
+	width: 100%;
+	min-width: 0;
+
+	>.modula-ui-button {
+		flex: 0 0 auto;
+	}
+}
+
+.modula-gallery-item-focus-panel__footer-end {
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: $mod-space-6;
+	margin-left: auto;
+	min-width: 0;
+
+	>.modula-ui-button {
+		flex: 0 0 auto;
+		width: auto;
+	}
+}
+
+.modula-gallery-item-focus-panel__empty {
+	margin: $mod-space-16;
+	font-size: 13px;
+	color: var(--mod-se-ink-3);
+}

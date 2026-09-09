@@ -147,7 +147,26 @@ var modulaGalleryConditions = Backbone.Model.extend({
 			rows.filter(
 				'[data-container="shadowSize"],[data-container="shadowColor"]'
 			).show();
-		} else if ('grid' == value) {
+		} else if ('polaroid' == value) {
+			tabs.filter('[data-tab="modula-responsive"]').hide();
+
+			rows.filter(
+				'[data-container="width"], [data-container="height"], [data-container="shuffle"]'
+			).show();
+			rows.filter('[data-container="randomFactor"]').hide();
+
+			rows.filter(
+				'[data-container="height"],  [data-container="gutter"], [data-container="shuffle"], [data-container="showAllOnLightbox"],[data-container="maxImagesCount"]'
+			).setting_state(this, 'on');
+
+			rows.filter(
+				'[data-container="grid_type"], [data-container="grid_row_height"], [data-container="grid_max_row_height"], [data-container="grid_row_height"], [data-container="grid_justify_last_row"]'
+			).hide();
+
+			rows.filter(
+				'[data-container="shadowSize"],[data-container="shadowColor"]'
+			).show();
+		} else if ('grid' == value || 'parallax-masonry' == value) {
 			rows.filter(
 				'[data-container="grid_type"], [data-container="width"],[data-container="grid_row_height"], [data-container="grid_max_row_height"], [data-container="grid_row_height"], [data-container="grid_justify_last_row"], [data-container="gutter"],[data-container="maxImagesCount"],[data-container="shuffle"]'
 			).show();
@@ -380,7 +399,8 @@ var modulaGalleryConditions = Backbone.Model.extend({
 		var rows = this.get('rows'),
 			tabs = this.get('tabs');
 
-		if ('grid' != wp.Modula.Settings.get('type')) {
+		var t = wp.Modula.Settings.get('type');
+		if ('grid' != t && 'parallax-masonry' != t) {
 			return;
 		}
 

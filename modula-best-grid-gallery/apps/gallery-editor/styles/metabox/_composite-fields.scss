@@ -1,0 +1,111 @@
+@use '../variables' as *;
+
+.modula-settings-editor__advanced-toggle {
+	padding: $mod-space-4 0 $mod-space-8;
+	border-bottom: 1px solid #f0f0f1;
+	margin-bottom: $mod-space-4;
+
+	&--global {
+		max-width: 720px;
+	}
+}
+
+.modula-settings-editor__composite-grid {
+	display: grid;
+	gap: $mod-space-16;
+	width: 100%;
+	align-items: start;
+}
+
+.modula-settings-editor__composite-grid--cells-2 {
+	grid-template-columns: minmax(120px, 1fr) minmax(200px, 2fr);
+}
+
+.modula-settings-editor__composite-grid--cells-2-equal {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.modula-settings-editor__composite-grid--cells-3 {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.modula-settings-editor__composite-grid--cells-auto {
+	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+// Range + color pairs (Border, Shadow): stack fields to avoid hit-area overlap in narrow sidebar.
+.modula-settings-editor__composite-grid--cells-stacked {
+	grid-template-columns: 1fr;
+	gap: $mod-space-10;
+}
+
+.modula-settings-editor__composite-grid>.modula-settings-editor__inline-field {
+	position: relative;
+	isolation: isolate;
+	min-width: 0;
+}
+
+.modula-settings-editor__composite-grid>.modula-settings-editor__inline-field:has(.modula-settings-editor__color-picker) {
+	z-index: 1;
+}
+
+.modula-settings-editor__composite-with-heading-inner {
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-8;
+	width: 100%;
+	min-width: 0;
+}
+
+.modula-settings-editor__composite-stack-heading {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--mod-se-ink, #1d2327);
+}
+
+.modula-settings-editor__composite-stack-heading-row {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: $mod-space-4;
+	min-width: 0;
+}
+
+.modula-settings-editor__field-row--device-tabs {
+	.modula-settings-editor__composite-with-heading-inner {
+		gap: $mod-space-10;
+	}
+
+	.modula-settings-editor__field-row--control-only {
+		padding: 0;
+		border-bottom: none;
+	}
+}
+
+.modula-settings-editor__field-row--composite-divider-before {
+	padding-top: $mod-space-16;
+	margin-top: $mod-space-8;
+	border-top: 1px solid #f0f0f1;
+}
+
+.modula-settings-editor__dimensions-flex {
+	flex-wrap: nowrap !important;
+	align-items: flex-end;
+	width: 100%;
+	min-width: 0;
+
+	>.components-flex-item {
+		flex: 1 1 0;
+		min-width: 0;
+	}
+}
+
+@media (max-width: 600px) {
+
+	.modula-settings-editor__composite-grid--cells-2,
+	.modula-settings-editor__composite-grid--cells-3 {
+		grid-template-columns: 1fr;
+	}
+}

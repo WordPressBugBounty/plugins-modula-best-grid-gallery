@@ -290,7 +290,13 @@ function ModulaOpenShare() {
 		"<div class='modula-fancybox-share'><h1>" +
 		instance.options.l10n.SHARE +
 		'</h1><p>';
-	var shareBtnTpl = JSON.parse(ModulaShareButtons);
+	var shareButtonsJson =
+		typeof window !== 'undefined' && window.ModulaShareButtons
+			? window.ModulaShareButtons
+			: typeof ModulaShareButtons !== 'undefined'
+				? ModulaShareButtons
+				: '';
+	var shareBtnTpl = shareButtonsJson ? JSON.parse(shareButtonsJson) : {};
 
 	instance.options.modulaShare.forEach(function (value, index) {
 		var rawEmailMessage = instance.options.lightboxEmailMessage.length

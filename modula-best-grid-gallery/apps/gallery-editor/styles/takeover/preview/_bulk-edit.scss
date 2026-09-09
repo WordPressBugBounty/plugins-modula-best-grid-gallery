@@ -1,0 +1,596 @@
+@use "../../variables" as *;
+
+$bulk-edit-row-height: 60px;
+$bulk-edit-thumb-size: 48px;
+$bulk-edit-input-height: $mod-space-36;
+$bulk-edit-wysiwyg-height: 120px;
+$bulk-edit-field-action-width: 32px;
+
+// Shared light-surface field chrome (matches takeover proofing / filter-name focus pattern).
+@mixin bulk-edit-field-surface {
+	box-sizing: border-box;
+	width: 100%;
+	height: $bulk-edit-input-height;
+	min-height: $bulk-edit-input-height;
+	padding: 0 $mod-space-8;
+	font-size: 13px;
+	line-height: 1.35;
+	color: $mod-takeover-text-strong;
+	background: $mod-takeover-surface-raised !important;
+	border: 1px solid $mod-takeover-border-light !important;
+	border-radius: $mod-radius-4;
+	box-shadow: none !important;
+	transition:
+		border-color 0.12s ease,
+		box-shadow 0.12s ease,
+		background-color 0.12s ease;
+
+	&::placeholder {
+		color: $mod-takeover-text-subtle;
+		opacity: 1;
+	}
+}
+
+@mixin bulk-edit-field-surface-hover {
+	border-color: color-mix(in srgb, $mod-takeover-text-base 22%, $mod-takeover-border-light) !important;
+}
+
+@mixin bulk-edit-field-surface-focus {
+	outline: none !important;
+	border-color: var(--modula-takeover-accent, #{$modula-takeover-accent}) !important;
+	box-shadow: 0 0 0 1px color-mix(in srgb,
+		var(--modula-takeover-accent, #{$modula-takeover-accent}) 28%,
+		transparent) !important;
+	background: color-mix(in srgb,
+		var(--modula-takeover-accent, #{$modula-takeover-accent}) 5%,
+		$mod-takeover-surface-raised) !important;
+}
+
+// Column template: check | image | title | alt | description | [filters] | actions
+$bulk-edit-cols: 40px 72px minmax(180px, 1fr) minmax(180px, 1fr) minmax(240px, 1.2fr) 48px;
+$bulk-edit-cols-filters: 40px 72px minmax(180px, 1fr) minmax(180px, 1fr) minmax(240px, 1.2fr) minmax(220px, 1fr) 48px;
+
+.modula-bulk-edit-modal__panel {
+	background: $mod-takeover-surface-subtle;
+}
+
+.modula-bulk-edit-modal__body {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	background: $mod-takeover-surface-subtle;
+}
+
+.modula-bulk-edit-modal__body>.modula-bulk-edit {
+	flex: 1 1 auto;
+	min-height: 0;
+	height: 100%;
+	overflow: hidden;
+}
+
+.modula-bulk-edit-modal__notices {
+	flex-shrink: 0;
+	margin: $mod-space-12 $mod-space-24 0;
+
+	.components-notice {
+		margin-bottom: $mod-space-8;
+	}
+}
+
+// Bulk edit layout: subheader + scrollable sheet + pinned footer.
+.modula-bulk-edit {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	min-height: 0;
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+	--modula-bulk-edit-cols: #{$bulk-edit-cols};
+	--modula-bulk-edit-input-height: #{$bulk-edit-input-height};
+	--modula-bulk-edit-wysiwyg-height: #{$bulk-edit-wysiwyg-height};
+
+	&.modula-bulk-edit--has-filters {
+		--modula-bulk-edit-cols: #{$bulk-edit-cols-filters};
+	}
+}
+
+.modula-bulk-edit__subheader {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: $mod-space-8 $mod-space-16;
+	flex-shrink: 0;
+	padding: $mod-space-10 $mod-space-24;
+	border-bottom: 1px solid $mod-takeover-border-light;
+	background: $mod-takeover-surface-raised;
+
+	.components-checkbox-control {
+		margin-bottom: 0;
+	}
+}
+
+.modula-bulk-edit__subheader-meta {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.4;
+	color: $mod-takeover-text-muted;
+}
+
+.modula-bulk-edit__sheet-host {
+	position: relative;
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	min-height: 0;
+	margin: $mod-space-12 $mod-space-24;
+	overflow: hidden;
+}
+
+.modula-bulk-edit__sheet {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	min-height: 0;
+	overflow: hidden;
+	border: 1px solid $mod-takeover-border-light;
+	border-radius: $mod-radius-8;
+	background: $mod-takeover-surface-raised;
+}
+
+.modula-bulk-edit__sheet-scroll {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-x: auto;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+.modula-bulk-edit__sheet-head,
+.modula-bulk-edit__row {
+	display: grid;
+	grid-template-columns: var(--modula-bulk-edit-cols);
+	gap: $mod-space-6 $mod-space-8;
+	align-items: center;
+	min-width: min(100%, 1000px);
+	padding-left: $mod-space-12;
+	padding-right: $mod-space-12;
+	box-sizing: border-box;
+}
+
+.modula-bulk-edit--has-filters .modula-bulk-edit__sheet-head,
+.modula-bulk-edit--has-filters .modula-bulk-edit__row {
+	min-width: min(100%, 1120px);
+}
+
+.modula-bulk-edit__sheet-head {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	min-height: 32px;
+	padding-top: $mod-space-8;
+	padding-bottom: $mod-space-8;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: $mod-takeover-text-muted;
+	background: $mod-takeover-surface-muted;
+	border-bottom: 1px solid $mod-takeover-border-light;
+
+	.modula-bulk-edit__col {
+		min-width: 0;
+		overflow: visible;
+		white-space: nowrap;
+	}
+}
+
+.modula-bulk-edit__sheet-body {
+	min-height: min-content;
+}
+
+.modula-bulk-edit__entry {
+	border-bottom: 1px solid $mod-takeover-border-light;
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	.modula-bulk-edit__row {
+		background: $mod-takeover-surface-raised;
+		transition: background-color 0.12s ease;
+	}
+
+	&:hover .modula-bulk-edit__row {
+		background: color-mix(in srgb, $mod-takeover-text-base 3%, $mod-takeover-surface-raised);
+	}
+
+	&.is-selected .modula-bulk-edit__row {
+		background: color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 6%,
+			$mod-takeover-surface-raised);
+	}
+
+	&.is-modified .modula-bulk-edit__row {
+		box-shadow: inset 3px 0 0 var(--modula-takeover-accent, #{$modula-takeover-accent});
+	}
+
+	&.is-description-expanded .modula-bulk-edit__row {
+		min-height: auto;
+		align-items: flex-start;
+		padding-top: $mod-space-8;
+		padding-bottom: $mod-space-8;
+	}
+
+	&.is-description-expanded .modula-bulk-edit__col--check,
+	&.is-description-expanded .modula-bulk-edit__col--thumb,
+	&.is-description-expanded .modula-bulk-edit__col--actions {
+		align-items: flex-start;
+		padding-top: $mod-space-2;
+	}
+}
+
+.modula-bulk-edit__row {
+	min-height: $bulk-edit-row-height;
+	padding-top: $mod-space-6;
+	padding-bottom: $mod-space-6;
+}
+
+.modula-bulk-edit__col {
+	min-width: 0;
+
+	.components-base-control {
+		margin-bottom: 0;
+	}
+
+	.components-base-control__field {
+		margin-bottom: 0;
+	}
+}
+
+.modula-bulk-edit__col--check {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.modula-bulk-edit__col--thumb {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.modula-bulk-edit__media {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: $mod-space-4;
+	width: 100%;
+	min-width: 0;
+}
+
+.modula-bulk-edit__thumb {
+	flex-shrink: 0;
+	width: $bulk-edit-thumb-size;
+	height: $bulk-edit-thumb-size;
+	border-radius: $mod-radius-4;
+	background-size: cover;
+	background-position: center;
+	background-color: $mod-takeover-surface-muted;
+	box-shadow: inset 0 0 0 1px rgb(0 0 0 / 8%);
+}
+
+.modula-bulk-edit__filename {
+	display: block;
+	max-width: 100%;
+	font-size: 10px;
+	line-height: 1.25;
+	color: $mod-takeover-text-subtle;
+	text-align: center;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.modula-bulk-edit__field-with-action {
+	position: relative;
+	width: 100%;
+	min-width: 0;
+
+	.components-base-control {
+		width: 100%;
+		margin-bottom: 0 !important;
+	}
+
+	.components-base-control__field {
+		margin-bottom: 0 !important;
+	}
+
+	.components-text-control__input,
+	input[type='text'] {
+		padding-right: calc(#{$bulk-edit-field-action-width} + #{$mod-space-4}) !important;
+		@include bulk-edit-field-surface;
+
+		&:hover:not(:disabled):not([aria-disabled='true']) {
+			@include bulk-edit-field-surface-hover;
+		}
+
+		&:focus {
+			@include bulk-edit-field-surface-focus;
+		}
+	}
+}
+
+.modula-bulk-edit__field-action {
+	position: absolute;
+	top: 50%;
+	right: 2px;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transform: translateY(-50%);
+	pointer-events: none;
+
+	.components-button {
+		pointer-events: auto;
+	}
+}
+
+.modula-bulk-edit__col--description,
+.modula-bulk-edit__col--filters {
+	display: flex;
+	align-items: center;
+	width: 100%;
+}
+
+.modula-bulk-edit__col--filters {
+	overflow: visible;
+	position: relative;
+	z-index: 0;
+}
+
+.modula-bulk-edit__entry:has(.modula-bulk-edit__col--filters:focus-within) {
+	position: relative;
+	z-index: 2;
+}
+
+.modula-bulk-edit__ai-btn.components-button {
+	flex-shrink: 0;
+	min-width: $bulk-edit-field-action-width;
+	width: $bulk-edit-field-action-width;
+	height: $bulk-edit-field-action-width;
+	padding: 0;
+	color: var(--modula-takeover-accent, #{$modula-takeover-accent}) !important;
+	background: transparent !important;
+	border: 1px solid transparent !important;
+	border-radius: $mod-radius-4;
+	box-shadow: none !important;
+
+	&:hover:not(:disabled) {
+		color: var(--modula-takeover-accent-strong, #{$modula-takeover-accent-strong}) !important;
+		background: color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 8%,
+			transparent) !important;
+		border-color: color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 18%,
+			transparent) !important;
+	}
+
+	svg {
+		width: 14px;
+		height: 14px;
+		fill: currentcolor;
+	}
+}
+
+.modula-bulk-edit__desc-cell {
+	display: flex;
+	align-items: center;
+	gap: $mod-space-8;
+	width: 100%;
+	min-width: 0;
+}
+
+.modula-bulk-edit__desc-trigger {
+	@include bulk-edit-field-surface;
+
+	flex: 1;
+	min-width: 0;
+	display: block;
+	margin: 0;
+	padding-right: $mod-space-8;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+	appearance: none;
+
+	&:hover {
+		@include bulk-edit-field-surface-hover;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		@include bulk-edit-field-surface-focus;
+	}
+}
+
+.modula-bulk-edit__desc-trigger-text {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: $mod-takeover-text-strong;
+
+	&.is-empty {
+		color: $mod-takeover-text-subtle;
+		font-style: normal;
+	}
+}
+
+.modula-bulk-edit__desc-edit-link.components-button {
+	flex-shrink: 0;
+	min-height: $bulk-edit-input-height;
+	height: $bulk-edit-input-height;
+	padding: 0 $mod-space-4;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--modula-takeover-accent, #{$modula-takeover-accent}) !important;
+	text-decoration: none;
+
+	&:hover:not(:disabled) {
+		color: var(--modula-takeover-accent-strong, #{$modula-takeover-accent-strong}) !important;
+	}
+}
+
+.modula-bulk-edit__col--description-expanded {
+	align-items: stretch;
+}
+
+.modula-bulk-edit__desc-inline {
+	width: 100%;
+	min-width: 0;
+
+	.wp-editor-wrap {
+		box-sizing: border-box;
+		min-height: var(--modula-bulk-edit-wysiwyg-height);
+		border: 1px solid $mod-takeover-border-light;
+		border-radius: $mod-radius-4;
+		overflow: hidden;
+		background: $mod-takeover-surface-raised;
+	}
+
+	.wp-editor-tabs,
+	.quicktags-toolbar {
+		display: none;
+	}
+
+	.mce-toolbar-grp {
+		border-bottom: 1px solid $mod-takeover-border-light !important;
+		background: $mod-takeover-surface-muted !important;
+	}
+
+	.mce-edit-area iframe {
+		min-height: 84px !important;
+	}
+
+	textarea.modula-bulk-edit__desc-inline-textarea {
+		min-height: 84px;
+		font-size: 13px;
+	}
+}
+
+.modula-bulk-edit__col--actions {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.modula-bulk-edit__delete-btn.components-button {
+	min-width: 32px;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	color: $mod-takeover-text-muted !important;
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+
+	&:hover:not(:disabled) {
+		color: #d63638 !important;
+		background: color-mix(in srgb, #d63638 8%, transparent) !important;
+	}
+}
+
+// Shared-ui FiltersTokenField in the bulk-edit grid (compact chips).
+.modula-bulk-edit__filters-input {
+	.modula-ui-filters-token-field__chips {
+		gap: $mod-space-4;
+	}
+
+	.modula-ui-chip {
+		min-height: 24px;
+		height: 24px;
+		padding: 0 $mod-space-8;
+		font-size: 12px;
+	}
+
+	.modula-ui-filters-token-field__add {
+		min-height: 24px;
+		height: 24px;
+	}
+
+	.modula-ui-filters-token-field__add-wrap {
+		min-width: 110px;
+		max-width: 180px;
+	}
+}
+
+// TinyMCE link/image dialogs append to body; keep above nested modals.
+body.modula-gallery-takeover {
+
+	.mce-window,
+	.mce-floatpanel,
+	.mce-menu {
+		z-index: 1000020 !important;
+	}
+}
+
+@media (max-width: 782px) {
+	.modula-bulk-edit__sheet-head {
+		display: none;
+	}
+
+	.modula-bulk-edit__row {
+		grid-template-columns: 40px #{$bulk-edit-thumb-size} 1fr 48px;
+		grid-template-areas:
+			"check thumb title actions"
+			"check thumb alt actions"
+			"check thumb desc actions"
+			"check thumb filters actions";
+		row-gap: $mod-space-8;
+	}
+
+	.modula-bulk-edit:not(.modula-bulk-edit--has-filters) .modula-bulk-edit__row {
+		grid-template-areas:
+			"check thumb title actions"
+			"check thumb alt actions"
+			"check thumb desc actions";
+	}
+
+	.modula-bulk-edit__col--check {
+		grid-area: check;
+	}
+
+	.modula-bulk-edit__col--thumb {
+		grid-area: thumb;
+	}
+
+	.modula-bulk-edit__col--title {
+		grid-area: title;
+	}
+
+	.modula-bulk-edit__col--alt {
+		grid-area: alt;
+	}
+
+	.modula-bulk-edit__col--description {
+		grid-area: desc;
+	}
+
+	.modula-bulk-edit__col--filters {
+		grid-area: filters;
+	}
+
+	.modula-bulk-edit__col--actions {
+		grid-area: actions;
+		align-self: start;
+		padding-top: $mod-space-4;
+	}
+
+}

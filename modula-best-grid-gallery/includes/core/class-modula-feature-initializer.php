@@ -26,6 +26,10 @@ class Modula_Feature_Initializer {
 	 * @return void
 	 */
 	public function check_compatibility(): void {
+		if ( is_admin() && function_exists( 'modula_incompatible_pro_admin_notice' ) ) {
+			add_action( 'admin_notices', 'modula_incompatible_pro_admin_notice' );
+		}
+
 		if ( ! is_admin() || ! class_exists( 'Modula\Ai_Compatibility' ) ) {
 			return;
 		}

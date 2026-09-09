@@ -1,0 +1,1947 @@
+@use '../shared-styles/spacing' as *;
+@use '../shared-styles/radii' as *;
+@use 'gallery-shell';
+@use 'hover-v2';
+@use 'social';
+@use 'caption-below-image';
+@use 'caption-compact-popover';
+@use 'polaroid-caption-chin';
+@use 'video-gallery';
+@use 'gallery-chrome';
+@use 'slider-slide-caption';
+@use 'showcase';
+@use 'template';
+
+.modula {
+	position: relative;
+
+	.modula-items .modula-item>.modula-item-link.tile-inner {
+		position: absolute;
+		inset: 0;
+		z-index: 5;
+	}
+
+	/*
+	 * React tiles: picture + dim overlay + figc share one shell so hover zoom
+	 * does not outgrow the tint layer.
+	 *
+	 * Natural-height layouts (masonry, parallax) size the tile from the image.
+	 * An absolute shell would collapse `.modula-item` to 0 height and
+	 * `overflow: hidden` would clip the photo. Fill-slot tiles already have a
+	 * definite box (uniform/fit/creative/custom); pin the shell to that box.
+	 * Flex column keeps `.modula-uniform-grid__media` (`flex: 1`) filling the tile.
+	 */
+	.modula-items .modula-item>.modula-item-hover-media {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		overflow: hidden;
+		transform-origin: center center;
+		z-index: 0;
+	}
+
+	.modula-items .modula-item>.modula-item-hover-media:has(.modula-item-picture-stack--fill-parent) {
+		position: absolute;
+		inset: 0;
+	}
+
+	/*
+	 * Overlay chrome above the full-bleed lightbox hit target. pointer-events:none so
+	 * empty areas still open the lightbox; social / text links re-enable hits.
+	 */
+	.modula-items .modula-item>.modula-item-content {
+		z-index: 6;
+		pointer-events: none;
+	}
+
+	.modula-items .modula-item>.modula-item-content .modula-social,
+	.modula-items .modula-item>.modula-item-content .modula-social a,
+	.modula-items .modula-item>.modula-item-content a[href] {
+		pointer-events: auto;
+	}
+
+	&.modula-gallery {
+		.modula-gallery-title {
+			margin: 0 0 $mod-space-16;
+			line-height: 1.3;
+		}
+	}
+
+	img {
+		width: 100%;
+		transition: width .3s, height .3s, transform .3s linear, opacity .2s linear;
+	}
+
+	/*
+	 * Focal point (object-position) or crop: no transitions — themes often use
+	 * `img { transition: all }` which interpolates object-position / transform.
+	 * !important + html body beats uniform-grid / legacy blocks; inline style also set in JS.
+	 */
+	img.modula-item-img--focal-point,
+	img.modula-item-img--focal-crop {
+		transition: none !important;
+		transition-property: none !important;
+	}
+
+	/*
+	 * Focal crop tiles: JS sets --modula-focal-* on the img. Themes and layout blocks may use
+	 * `img { width:100% !important; object-fit:cover !important }`; html body prefix beats
+	 * uniform-grid / legacy layout overrides so editor + front match the cropper.
+	 */
+	html body & .modula-items img.modula-item-img--focal-crop {
+		width: var(--modula-focal-w) !important;
+		height: var(--modula-focal-h) !important;
+		max-width: none !important;
+		object-fit: fill !important;
+		object-position: initial !important;
+		position: absolute !important;
+		left: var(--modula-focal-left) !important;
+		top: var(--modula-focal-top) !important;
+		transform: var(--modula-focal-transform, none) !important;
+	}
+
+	/* Custom grid letterbox: full photo inside tile (object-fit contain). */
+	html body & .modula-items.modula-custom-grid img.modula-item-img--letterbox-contain {
+		max-width: none !important;
+		width: 100% !important;
+		height: 100% !important;
+		object-fit: contain !important;
+		object-position: var(--modula-letterbox-position, center center);
+	}
+
+	.modula-custom-grid-visitor-page-gap {
+		height: 1.5rem;
+	}
+
+	.modula-item {
+		overflow: hidden;
+	}
+
+	/**
+	 * v2 content_block tiles — large readable headline (poster-style defaults).
+	 */
+	.modula-item.modula-item--embedded-content-block {
+		.modula-item-content--embedded {
+			display: flex;
+			align-items: stretch;
+			overflow-x: hidden;
+			overflow-y: auto;
+		}
+
+		.modula-embedded-block-inner {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-self: stretch;
+			min-height: 100%;
+			gap: 0.35em;
+		}
+
+		.modula-embedded-block__title {
+			font-size: clamp(1rem, 2.5vw + 0.55rem, 2.125rem);
+			font-weight: 800;
+			line-height: 1.06;
+			letter-spacing: 0.02em;
+			text-transform: uppercase;
+			margin: 0;
+			opacity: 1;
+			color: inherit;
+		}
+
+		.modula-embedded-block__description {
+			font-size: clamp(0.75rem, 1.1vw + 0.55rem, 0.9375rem);
+			font-weight: 600;
+			line-height: 1.3;
+			opacity: 1;
+			color: inherit;
+			margin: 0;
+		}
+
+		.modula-embedded-block__body {
+			font-size: clamp(0.8125rem, 0.9vw + 0.6rem, 1rem);
+			line-height: 1.45;
+			font-weight: 500;
+			margin: 0;
+			opacity: 1;
+			color: inherit;
+
+			a {
+				color: inherit;
+				text-decoration: underline;
+				text-underline-offset: 0.12em;
+			}
+
+			strong,
+			b {
+				font-weight: 700;
+			}
+
+			em,
+			i {
+				font-style: italic;
+			}
+
+			ul,
+			ol {
+				margin: 0 0 0.5em;
+				padding-left: 1.25em;
+			}
+
+			li {
+				margin: 0 0 0.25em;
+			}
+
+			blockquote {
+				margin: 0 0 0.5em;
+				padding-left: 0.75em;
+				border-left: 3px solid currentColor;
+				opacity: 0.92;
+			}
+
+			.alignleft {
+				text-align: left;
+			}
+
+			.aligncenter {
+				text-align: center;
+			}
+
+			.alignright {
+				text-align: right;
+			}
+		}
+
+		.modula-embedded-block__body p {
+			margin: 0 0 0.5em;
+		}
+
+		.modula-embedded-block__body p:last-child {
+			margin-bottom: 0;
+		}
+	}
+}
+
+/* Slider: Fancyapps Thumbs plugin bar under main carousel */
+.modula .modula-slider {
+
+	/*
+	 * FOUC guard: before Fancyapps adds `.f-carousel` (JS init runs after paint), the raw
+	 * slides render as a plain block and stack vertically — showing the whole column of
+	 * images. Lay them in a clipped horizontal row so only the first frame is visible
+	 * until the carousel wires up. The rule stops applying the moment `.f-carousel` lands.
+	 * Showcase owns its own strip flex — do not force 100% slide widths.
+	 */
+	.modula-items:not(.f-carousel):not(.modula-showcase) {
+		display: flex;
+		flex-wrap: nowrap;
+		overflow: hidden;
+
+		>.modula-item {
+			flex: 0 0 100%;
+			max-width: 100%;
+		}
+	}
+
+	/*
+	 * Arrows sit over the viewport edges; full-slide lightbox links (.modula-item-link)
+	 * must stay below hit targets so prev/next receive clicks (theme .modula-items uses z-index: 1).
+	 */
+	.modula-items.f-carousel {
+		isolation: isolate;
+		/* Allow absolutely positioned arrows (siblings of the viewport) to stay clickable */
+		overflow: visible;
+
+		/* Prev/next: white circular hit area (Fancyapps --f-arrow-* → .f-button.is-arrow) */
+		--f-arrow-bg: #fff;
+		--f-arrow-hover-bg: #f3f3f3;
+		--f-arrow-active-bg: #eaeaea;
+		--f-arrow-border-radius: 50%;
+		--f-arrow-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+		--f-arrow-color: #1a1a1a;
+		--f-arrow-hover-color: #000;
+		--f-arrow-width: #{$mod-space-44};
+		--f-arrow-height: #{$mod-space-44};
+		/* Default = outside (legacy Pro). Inside overrides via shell class / JS style. */
+		--f-arrow-pos: -22px;
+
+		.f-carousel__viewport {
+			position: relative;
+			z-index: 1;
+		}
+
+		.f-button.is-arrow.is-prev,
+		.f-button.is-arrow.is-next {
+			z-index: 100;
+			/* Keep absolute overlay — never flex-stack above/below the viewport. */
+			position: absolute !important;
+		}
+
+		/*
+		 * Dots: Fancy “dynamic” mode adds class `active` on the current dot. Themes often
+		 * style `button.active` (border, ::before “stem”, shadows) which clashes with the
+		 * library’s circular ::after-only bullets — reset to keep a clean pill look.
+		 */
+		.f-carousel__dots .f-carousel__dot {
+			appearance: none;
+			background-color: transparent;
+			border: 0;
+			box-shadow: none;
+
+			&::before {
+				display: none !important;
+				content: none !important;
+			}
+
+			&.active,
+			&.padd,
+			&.small,
+			&.micro {
+				border: 0;
+				box-shadow: none;
+				background-color: transparent;
+			}
+
+			&:focus {
+				outline: none;
+			}
+
+			&:focus-visible {
+				outline: $mod-space-focus-ring solid rgba(0, 0, 0, 0.35);
+				outline-offset: $mod-space-2;
+			}
+		}
+	}
+
+	&.modula-slider--arrows-inside .modula-items.f-carousel {
+		--f-arrow-pos: 12px;
+	}
+
+	&.modula-slider--arrows-outside .modula-items.f-carousel {
+		--f-arrow-pos: -22px;
+	}
+
+	/*
+	 * Slider card look: corner radius from Style (`--modula-slider-slide-radius`).
+	 * Outside captions use overflow:visible on the slide; media shell clips the image.
+	 */
+	&.modula-gallery .modula-items.f-carousel .f-carousel__slide,
+	.modula-items.f-carousel .f-carousel__slide {
+		border-radius: var(--modula-slider-slide-radius, 0px);
+		overflow: hidden;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+	}
+
+	/*
+	 * Outside captions sit below/above the image in document flow — do not clip them
+	 * with the rounded “card” overflow used for image-only slides.
+	 */
+	&.modula-gallery .modula-items.f-carousel .f-carousel__slide:has(.slider-image-info--top_outside),
+	&.modula-gallery .modula-items.f-carousel .f-carousel__slide:has(.slider-image-info--bot_outside),
+	.modula-items.f-carousel .f-carousel__slide:has(.slider-image-info--top_outside),
+	.modula-items.f-carousel .f-carousel__slide:has(.slider-image-info--bot_outside) {
+		overflow: visible;
+	}
+
+	/*
+	 * Fancy “is-centered” uses ::before/::after + margin:auto so the slide content stays
+	 * only as tall as the image — the rest of the tile shows empty background while
+	 * border-radius still wraps the full cell (truncated look at the bottom).
+	 * We want photos to fill the tile with cover; drop those spacers for our slider cards.
+	 */
+	.modula-items.f-carousel.is-centered .f-carousel__slide::before,
+	.modula-items.f-carousel.is-centered .f-carousel__slide::after {
+		display: none;
+	}
+
+	.modula-items.f-carousel.is-centered .f-carousel__slide {
+		align-items: stretch;
+	}
+
+	.modula-items.f-carousel .f-carousel__slide.modula-item {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		height: auto;
+	}
+
+	.modula-items.f-carousel .f-carousel__slide .modula-item-link.tile-inner {
+		position: absolute;
+		inset: 0;
+		z-index: 5;
+	}
+
+	.modula-items.f-carousel .f-carousel__slide .modula-slider-image-wrapper {
+		width: 100%;
+		position: relative;
+		z-index: 1;
+	}
+
+	/*
+	 * Slide title/caption render in `.slider-image-info` (SliderSlideCaption), not `.figc`.
+	 * Guard against duplicate/hidden overlay copy if markup or settings drift.
+	 */
+	.modula-items.f-carousel .f-carousel__slide:has(.slider-image-info) .modula-item-content .figc .modula-title,
+	.modula-items.f-carousel .f-carousel__slide:has(.slider-image-info) .modula-item-content .figc .jtg-description {
+		display: none !important;
+	}
+
+	/* Fixed-height slider: crop slides to configured aspect (see SliderLayout shell style). */
+	&.modula-slider--fixed-height .modula-items.f-carousel .f-carousel__slide .modula-slider-image-wrapper {
+		aspect-ratio: var(--modula-slider-slide-aspect, 16 / 9);
+		flex: 0 0 auto;
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+	}
+
+	&.modula-slider--fixed-height .modula-items.f-carousel .f-carousel__slide .modula-slider-image-wrapper>.modula-item-picture-stack {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		min-height: 0;
+		overflow: hidden;
+	}
+
+	/*
+	 * Outside captions: aspect lives on the media shell so figcaption stays in flow
+	 * under/above the image (overrides the absolute picture-stack fill above).
+	 */
+	&.modula-slider--fixed-height .modula-items.f-carousel .f-carousel__slide .modula-slider-image-wrapper--caption-top_outside,
+	&.modula-slider--fixed-height .modula-items.f-carousel .f-carousel__slide .modula-slider-image-wrapper--caption-bot_outside {
+		aspect-ratio: unset;
+	}
+
+	&.modula-slider--fixed-height .modula-items.f-carousel .f-carousel__slide .modula-slider-image-wrapper--caption-top_outside>.modula-slider-slide-media,
+	&.modula-slider--fixed-height .modula-items.f-carousel .f-carousel__slide .modula-slider-image-wrapper--caption-bot_outside>.modula-slider-slide-media {
+		position: relative;
+		inset: unset;
+		width: 100%;
+		flex: 0 0 auto;
+		aspect-ratio: var(--modula-slider-slide-aspect, 16 / 9);
+		overflow: hidden;
+		min-height: 0;
+	}
+
+	&.modula-slider--fixed-height .modula-items.f-carousel .f-carousel__slide .modula-slider-image-wrapper--caption-top_outside>.modula-slider-slide-media>.modula-item-picture-stack,
+	&.modula-slider--fixed-height .modula-items.f-carousel .f-carousel__slide .modula-slider-image-wrapper--caption-bot_outside>.modula-slider-slide-media>.modula-item-picture-stack {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		min-height: 0;
+		overflow: hidden;
+	}
+
+	&.modula-slider--fixed-height .modula-items.f-carousel .f-carousel__slide .modula-item-picture {
+		flex: 1 1 auto;
+		min-height: 0;
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	&.modula-slider--fixed-height .modula-items.f-carousel .f-carousel__slide .modula-item-picture:not(.modula-item-picture--focal-crop) img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: center;
+		display: block;
+	}
+
+	/* Adaptive height: slide height follows image; Fancyapps measures offsetHeight per page. */
+	&.modula-slider--adaptive-height .modula-items.f-carousel .f-carousel__track {
+		align-items: flex-start;
+	}
+
+	&.modula-slider--adaptive-height .modula-items.f-carousel .f-carousel__slide .modula-slider-image-wrapper {
+		flex: 0 0 auto;
+		display: block;
+	}
+
+	&.modula-slider--adaptive-height .modula-items.f-carousel .f-carousel__slide .modula-slider-image-wrapper--caption-top_outside,
+	&.modula-slider--adaptive-height .modula-items.f-carousel .f-carousel__slide .modula-slider-image-wrapper--caption-bot_outside {
+		display: flex;
+		flex-direction: column;
+	}
+
+	/*
+	 * Named / default image size: keep intrinsic width (never upscale a thumbnail
+	 * to gallery width). Custom + crop fills the track.
+	 */
+	&.modula-slider--adaptive-height.modula-slider--scale-down .modula-items.f-carousel .f-carousel__slide .modula-item-picture-stack {
+		display: flex;
+		justify-content: center;
+		width: 100%;
+	}
+
+	&.modula-slider--adaptive-height.modula-slider--scale-down .modula-items.f-carousel .f-carousel__slide .modula-item-picture:not(.modula-item-picture--focal-crop) img {
+		width: auto;
+		max-width: 100%;
+		height: auto;
+		display: block;
+		margin-inline: auto;
+	}
+
+	&.modula-slider--adaptive-height.modula-slider--fill-crop .modula-items.f-carousel .f-carousel__slide .modula-item-picture:not(.modula-item-picture--focal-crop) img {
+		width: 100%;
+		height: auto;
+		max-width: 100%;
+		display: block;
+	}
+
+	&.modula-slider--adaptive-height .modula-items.f-carousel .f-carousel__slide.modula-item {
+		height: auto !important;
+	}
+
+	/*
+	 * Content / shortcode slides: Fancyapps adaptiveHeight measures lastElementChild
+	 * (.modula-item-content--embedded). Without a floor, short copy collapses the viewport.
+	 */
+	&.modula-slider--adaptive-height .modula-items.f-carousel .f-carousel__slide.modula-item--embedded,
+	&.modula-slider--adaptive-height .modula-items.f-carousel .f-carousel__slide.modula-item--embedded .modula-item-content--embedded {
+		min-height: clamp(5.5rem, 16vw, 11rem);
+	}
+
+	/*
+	 * Fixed-height slider: embedded slides share the same aspect box as image slides
+	 * (.modula-slider-image-wrapper). Without it the track height collapses and peek /
+	 * visible-at-once / advance-by break for content blocks.
+	 */
+	.modula-items.f-carousel .f-carousel__slide.modula-item--embedded {
+		min-width: 0;
+		max-width: 100%;
+	}
+
+	&.modula-slider--fixed-height .modula-items.f-carousel .f-carousel__slide.modula-item--embedded {
+		aspect-ratio: var(--modula-slider-slide-aspect, 16 / 9);
+		flex: 0 0 auto;
+		height: auto;
+	}
+
+	&.modula-slider--fixed-height .modula-items.f-carousel .f-carousel__slide.modula-item--embedded .modula-item-content--embedded {
+		position: relative;
+		inset: unset;
+		flex: 1 1 auto;
+		min-height: 0;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+
+	&.modula-slider--adaptive-height .modula-items.f-carousel .f-carousel__slide .modula-item-picture-stack {
+		height: auto;
+		min-height: 0;
+	}
+
+	/* Editor preview chrome must not contribute to Fancyapps offsetHeight measurements. */
+	&.modula-slider--adaptive-height .modula-items.f-carousel .f-carousel__slide .modula-item-preview-admin-mount {
+		position: absolute;
+		inset: 0;
+		z-index: 120;
+		pointer-events: none;
+	}
+
+	.f-thumbs {
+		margin-top: var(--modula-slider-thumbs-margin-top, #{$mod-space-10});
+		max-width: var(--modula-slider-thumbs-max-width, none);
+		width: var(--modula-slider-thumbs-max-width, auto);
+		margin-left: auto;
+		margin-right: auto;
+
+		/* Named / custom Thumbnail image size: keep crops tidy in the strip. */
+		.f-thumbs__slide button img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+
+	/* Visible-thumbnails (auto): classic strip — match modern tile chrome. */
+	&.modula-slider--thumbs-equal-slots .f-thumbs.is-classic {
+		.f-thumbs__viewport {
+			overflow: hidden;
+		}
+
+		.f-thumbs__slide button {
+			width: 100%;
+			height: 100%;
+			border-radius: 4px;
+			overflow: hidden;
+		}
+
+		.f-thumbs__slide button:after {
+			border-radius: inherit;
+		}
+	}
+
+	/*
+	 * Visible thumbnails > 0: classic paged Sync strip (N thumbs per page).
+	 * Strip width comes from --modula-slider-thumbs-max-width and is centered.
+	 */
+	&.modula-slider--thumbs-paged .f-thumbs.is-classic {
+		.f-thumbs__viewport {
+			overflow: hidden;
+		}
+
+		.f-thumbs__slide {
+			flex: 0 0 auto;
+		}
+
+		.f-thumbs__slide button {
+			width: 100%;
+			height: 100%;
+			border-radius: 4px;
+			overflow: hidden;
+		}
+
+		.f-thumbs__slide button:after {
+			border-radius: inherit;
+		}
+	}
+}
+
+/*
+ * Story layout — MUST live under `.modula`, not `.modula-parallax-masonry`.
+ * (Story can render on any gallery page; parallax scope would drop all story CSS.)
+ */
+.modula .modula-story {
+	width: 100%;
+
+	/*
+	 * Frame: no flex here. StoryChrome is position:absolute; carousel is absolute inset.
+	 * Height comes from aspect-ratio + width only.
+	 * No fill background — slides are full-bleed; a dark fill (#0a0a0a) bleeds through
+	 * anti-aliased rounded corners when tile box-shadow/border is also applied.
+	 */
+	.modula-story__frame {
+		position: relative;
+		width: 100%;
+		max-width: 420px;
+		margin: 0 auto;
+		aspect-ratio: 9 / 16;
+		max-height: min(90vh, 900px);
+		border-radius: $mod-radius-14;
+		overflow: hidden;
+		background: transparent;
+		box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+	}
+
+	.modula-story__frame>.modula-items.f-carousel .f-carousel__viewport {
+		border-radius: inherit;
+		overflow: hidden;
+	}
+
+	.modula-story__frame>.modula-items {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 1;
+		min-height: 0;
+	}
+
+	.modula-items.f-carousel {
+		isolation: isolate;
+
+		.f-carousel__viewport {
+			position: relative;
+			z-index: 1;
+			height: 100%;
+		}
+
+		.f-carousel__track {
+			height: 100%;
+		}
+	}
+
+	.modula-items.f-carousel .f-carousel__slide.modula-item {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		height: 100%;
+		border-radius: 0;
+		box-shadow: none;
+	}
+
+	.modula-items.f-carousel .f-carousel__slide.modula-item--embedded {
+		overflow: hidden;
+	}
+
+	.modula-items.f-carousel .f-carousel__slide .modula-item-link.tile-inner {
+		position: absolute;
+		inset: 0;
+		z-index: 5;
+	}
+
+	.modula-story-chrome {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		z-index: 8;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.modula-story-progress {
+		display: flex;
+		gap: $mod-space-4;
+		padding: $mod-space-6 $mod-space-10 $mod-space-6;
+		/* Whole top band captures clicks so gaps do not fall through to the lightbox link. */
+		pointer-events: auto;
+		flex-shrink: 0;
+	}
+
+	$mod-story-progress-track-h: $mod-space-3;
+	$mod-story-progress-track-h-hover: $mod-space-5;
+	$mod-story-progress-track-scale-hover: calc(#{$mod-story-progress-track-h-hover} / #{$mod-story-progress-track-h});
+	$mod-story-progress-hit-pad-y: $mod-space-12;
+
+	button.modula-story-progress__seg.modula-story-progress__seg {
+		pointer-events: auto;
+		flex: 1 1 0;
+		position: relative;
+		display: flex;
+		align-items: center;
+		min-width: 0;
+		/* Invisible vertical hit target; bar thickens on hover via scale (no layout shift). */
+		padding: $mod-story-progress-hit-pad-y 0;
+		height: auto;
+		border-radius: 0;
+		background: transparent;
+		overflow: visible;
+		-webkit-appearance: none;
+		appearance: none;
+		border: 0;
+		margin: 0;
+		cursor: pointer;
+		color: transparent;
+		-webkit-tap-highlight-color: transparent;
+
+		&::before {
+			content: '';
+			display: block;
+			width: 100%;
+			height: $mod-story-progress-track-h;
+			border-radius: $mod-radius-2;
+			background: rgba(255, 255, 255, 0.35);
+			transform-origin: center center;
+			transition: transform 0.15s ease;
+		}
+
+		&:hover::before,
+		&:focus-visible::before {
+			transform: scaleY($mod-story-progress-track-scale-hover);
+		}
+	}
+
+	button.modula-story-progress__seg.modula-story-progress__seg::-moz-focus-inner {
+		border: 0;
+	}
+
+	button.modula-story-progress__seg.modula-story-progress__seg:focus,
+	button.modula-story-progress__seg.modula-story-progress__seg:focus-visible,
+	button.modula-story-progress__seg.modula-story-progress__seg:active {
+		outline: 0 !important;
+		outline-offset: 0 !important;
+		box-shadow: none !important;
+	}
+
+	.modula-story-progress__fill {
+		position: absolute;
+		left: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		display: block;
+		height: $mod-story-progress-track-h;
+		width: 0;
+		border-radius: $mod-radius-2;
+		background: #fff;
+		transform-origin: center center;
+		transition:
+			width 0.25s ease,
+			transform 0.15s ease;
+		pointer-events: none;
+		z-index: 1;
+	}
+
+	button.modula-story-progress__seg.modula-story-progress__seg:hover .modula-story-progress__fill,
+	button.modula-story-progress__seg.modula-story-progress__seg:focus-visible .modula-story-progress__fill {
+		transform: translateY(-50%) scaleY($mod-story-progress-track-scale-hover);
+	}
+
+	.modula-story-progress__fill.is-done {
+		width: 100%;
+	}
+
+	.modula-story-progress__fill.is-active {
+		width: 100%;
+	}
+
+	.modula-story-taps {
+		flex: 1 1 auto;
+		display: flex;
+		flex-direction: row;
+		min-height: 0;
+		pointer-events: none;
+	}
+
+	/*
+	 * Tap zones: themes/WP often style button:focus with outline/box-shadow — reset with
+	 * high specificity (.modula.modula-gallery …) so story chrome stays clean.
+	 */
+	button.modula-story-tap.modula-story-tap {
+		pointer-events: auto;
+		-webkit-appearance: none;
+		appearance: none;
+		border: 0;
+		padding: 0;
+		margin: 0;
+		background: transparent;
+		cursor: pointer;
+		color: transparent;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	button.modula-story-tap.modula-story-tap::-moz-focus-inner {
+		border: 0;
+	}
+
+	button.modula-story-tap.modula-story-tap:focus,
+	button.modula-story-tap.modula-story-tap:focus-visible,
+	button.modula-story-tap.modula-story-tap:focus-within,
+	button.modula-story-tap.modula-story-tap:active {
+		outline: 0 !important;
+		outline-offset: 0 !important;
+		box-shadow: none !important;
+	}
+
+	.modula.modula-gallery .modula-story button.modula-story-tap:focus,
+	.modula.modula-gallery .modula-story button.modula-story-tap:focus-visible,
+	.modula.modula-gallery .modula-story button.modula-story-tap:active {
+		outline: 0 !important;
+		outline-offset: 0 !important;
+		box-shadow: none !important;
+	}
+
+	.modula.modula-gallery .modula-story button.modula-story-progress__seg:focus,
+	.modula.modula-gallery .modula-story button.modula-story-progress__seg:focus-visible,
+	.modula.modula-gallery .modula-story button.modula-story-progress__seg:active {
+		outline: 0 !important;
+		outline-offset: 0 !important;
+		box-shadow: none !important;
+	}
+
+	.modula-story-tap--prev {
+		flex: 0 0 28%;
+	}
+
+	.modula-story-tap--pass {
+		flex: 1 1 auto;
+		pointer-events: none;
+	}
+
+	.modula-story-tap--next {
+		flex: 0 0 28%;
+	}
+
+	.modula-story-image-wrapper {
+		flex: 1 1 auto;
+		min-height: 0;
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		position: relative;
+		z-index: 1;
+	}
+
+	.modula-item-picture {
+		flex: 1 1 auto;
+		min-height: 0;
+	}
+
+	.modula-item-picture-stack {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		min-height: 0;
+		flex: 1 1 auto;
+		overflow: hidden;
+		background: #f2f2f2;
+	}
+
+	.modula-item-picture--placeholder {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: center;
+		z-index: 0;
+		filter: blur(10px);
+		transform: scale(1.06);
+		pointer-events: none;
+	}
+
+	.modula-item-picture--placeholder.modula-item-img--focal-crop,
+	.modula-item-picture--placeholder.modula-item-img--focal-point {
+		inset: auto;
+		object-fit: fill;
+		object-position: initial;
+		filter: blur(10px);
+		transform: var(--modula-focal-transform, none);
+	}
+
+	.modula-item-picture--placeholder.modula-item-img--focal-crop {
+		width: var(--modula-focal-w) !important;
+		height: var(--modula-focal-h) !important;
+		max-width: none !important;
+		left: var(--modula-focal-left) !important;
+		top: var(--modula-focal-top) !important;
+	}
+
+	.modula-item-picture-stack:has(.modula-item-picture__img--revealed) .modula-item-picture--placeholder {
+		opacity: 0;
+		transition: opacity 0.35s ease;
+	}
+
+	.modula-item-picture img.modula-item-picture__img--pending {
+		opacity: 0;
+	}
+
+	.modula-item-picture img.modula-item-picture__img--revealed {
+		opacity: 1;
+		transition: opacity 0.35s ease;
+	}
+
+	.modula-uniform-grid__media>.modula-item-picture-stack,
+	.modula-item-image-area>.modula-item-picture-stack {
+		position: absolute;
+		inset: 0;
+		min-height: 0;
+	}
+
+	.modula-item-picture-stack>.modula-item-picture {
+		position: relative;
+		z-index: 1;
+	}
+
+	.modula-item-picture:not(.modula-item-picture--focal-crop) img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: center;
+	}
+
+	.modula-story-video-wrapper {
+		flex: 1 1 auto;
+		min-height: 0;
+		width: 100%;
+		position: relative;
+		z-index: 1;
+		background: #000;
+	}
+
+	.modula-story-video-el,
+	.modula-story-video-iframe,
+	.modula-story-video-poster {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		border: 0;
+		object-fit: cover;
+		object-position: center;
+	}
+
+	.modula-story-video-el {
+		background: #000;
+	}
+
+	.modula-story-caption {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		padding: $mod-space-20 $mod-space-14 $mod-space-16;
+		background: linear-gradient(0deg,
+				rgba(0, 0, 0, 0.75) 0%,
+				rgba(0, 0, 0, 0.2) 55%,
+				transparent 100%);
+		color: #fff;
+		z-index: 2;
+		pointer-events: none;
+		max-height: 45%;
+		overflow: hidden;
+	}
+
+	.modula-story-caption__title {
+		font-weight: 600;
+		font-size: 0.95rem;
+		line-height: 1.3;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+	}
+
+	.modula-story-caption__desc {
+		margin-top: $mod-space-6;
+		font-size: 0.8rem;
+		line-height: 1.35;
+		opacity: 0.92;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 4;
+		overflow: hidden;
+		overflow-wrap: anywhere;
+
+		p {
+			margin: 0;
+
+			&:not(:last-child) {
+				margin-bottom: 0.35em;
+			}
+		}
+
+		a {
+			color: inherit;
+			text-decoration: underline;
+			pointer-events: auto;
+		}
+	}
+
+	/*
+	 * Story owns title/caption via `.modula-story-caption` (bottom gradient).
+	 * Hover effects are disabled for story; overlay figc text must not duplicate.
+	 */
+	.modula-item-content .modula-title,
+	.modula-item-content .jtg-description,
+	.modula-hover-builder-card__image-slot .modula-title,
+	.modula-hover-builder-card__image-slot .jtg-description {
+		display: none !important;
+	}
+
+	/*
+	 * Settings-editor live preview: wrapping row — several portrait tiles per line when width allows,
+	 * then next row (“una sub alta” per rând); no horizontal scroll on the strip. 9:16 + Focus modal.
+	 */
+	&.modula-story--editor-preview {
+		.modula-story__frame--editor-preview {
+			max-width: 100%;
+			aspect-ratio: auto;
+			max-height: none;
+			overflow: visible;
+			background: transparent;
+			box-shadow: none;
+			/* Room so card box-shadows are not clipped by the takeover preview chrome */
+			padding-bottom: $mod-space-12;
+		}
+
+		.modula-story-editor-stack {
+			position: relative;
+			inset: auto;
+			width: 100%;
+			height: auto;
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			/* Per line: leftover width splits evenly left/right (incl. last row after wrap). */
+			justify-content: center;
+			align-items: flex-start;
+			column-gap: var(--modula-uniform-gap, #{$mod-space-10});
+			row-gap: $mod-space-16;
+			overflow: visible;
+			padding-top: $mod-space-6;
+			padding-bottom: $mod-space-20;
+			z-index: 1;
+			min-height: 0;
+		}
+
+		.modula-story-editor-stack>.modula-item {
+			flex: 0 1 auto;
+			width: clamp(152px, 30vw, 238px);
+			max-width: 100%;
+			aspect-ratio: 9 / 16;
+			border-radius: $mod-radius-14;
+			overflow: hidden;
+			background: #0a0a0a;
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+			display: flex;
+			flex-direction: column;
+			min-height: 0;
+		}
+
+		.modula-story-editor-stack .modula-story-image-wrapper {
+			flex: 1 1 auto;
+			min-height: 0;
+		}
+
+		.modula-story-caption__desc {
+			-webkit-line-clamp: 2;
+		}
+	}
+}
+
+/* BnB layout: hero (left) + 2x2 featured (right), then uniform grid.
+ * Gap uses the CSS default only — do not bind layout.gutter (hidden for BnB;
+ * values from other gallery types must not stick). */
+.modula-bnb {
+	--modula-bnb-gutter: #{$mod-space-10};
+
+	.modula-bnb-featured {
+		display: grid;
+		grid-template-columns: 2fr 1fr 1fr;
+		grid-template-rows: 1fr 1fr;
+		gap: var(--modula-bnb-gutter);
+		min-height: min(45vw, 420px);
+		margin-bottom: var(--modula-bnb-gutter);
+	}
+
+	.modula-bnb-hero {
+		grid-column: 1;
+		grid-row: 1 / -1;
+		position: relative;
+		overflow: hidden;
+		min-height: 0;
+	}
+
+	.modula-bnb-featured-grid {
+		grid-column: 2 / -1;
+		grid-row: 1 / -1;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: 1fr 1fr;
+		gap: var(--modula-bnb-gutter);
+		min-height: 0;
+	}
+
+	.modula-bnb-featured-cell {
+		position: relative;
+		overflow: hidden;
+		min-height: 0;
+		container-type: inline-size;
+	}
+
+	/* Mobile / narrow: hero full-width, then 2×2 below (3 rows). */
+	&.modula-bnb--compact {
+		.modula-bnb-featured {
+			grid-template-columns: 1fr 1fr;
+			grid-template-rows: auto auto auto;
+			min-height: 0;
+		}
+
+		.modula-bnb-hero {
+			grid-column: 1 / -1;
+			grid-row: 1;
+			aspect-ratio: 4 / 3;
+			min-height: 160px;
+		}
+
+		.modula-bnb-featured-grid {
+			grid-column: 1 / -1;
+			grid-row: 2 / span 2;
+			grid-template-columns: 1fr 1fr;
+			grid-template-rows: 1fr 1fr;
+		}
+
+		.modula-bnb-featured-cell {
+			aspect-ratio: 1;
+		}
+	}
+
+	.modula-bnb-featured-cell--has-more::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: 4;
+		pointer-events: none;
+		background: rgba(0, 0, 0, 0.28);
+	}
+
+	.modula-bnb-show-all-photos {
+		position: absolute;
+		right: 10px;
+		bottom: 10px;
+		z-index: 6;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		max-width: calc(100% - 20px);
+		min-width: 0;
+		margin: 0;
+		padding: 8px 12px;
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		border-radius: 8px;
+		background: #fff;
+		color: #222;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+		font: inherit;
+		font-size: 13px;
+		font-weight: 600;
+		line-height: 1.2;
+		cursor: pointer;
+		text-align: left;
+		white-space: nowrap;
+		overflow: hidden;
+		transition:
+			background-color 0.15s ease,
+			box-shadow 0.15s ease,
+			transform 0.15s ease;
+
+		&:hover,
+		&:focus-visible {
+			background: #f7f7f7;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+			transform: translateY(-1px);
+		}
+
+		&:focus-visible {
+			outline: 2px solid #2271b1;
+			outline-offset: 2px;
+		}
+	}
+
+	.modula-bnb-show-all-photos__icon {
+		flex: 0 0 auto;
+	}
+
+	.modula-bnb-show-all-photos__label {
+		flex: 0 1 auto;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	/* Count is hidden by default; the tile is usually too narrow. */
+	.modula-bnb-show-all-photos__count {
+		flex: 0 0 auto;
+		display: none;
+		font-weight: 500;
+		color: #444;
+	}
+
+	/* Roomy tiles: restore the "(N more images)" count next to the label. */
+	@container (min-width: 300px) {
+		.modula-bnb-show-all-photos__count {
+			display: inline;
+		}
+	}
+
+	/* Public front: extras stay in DOM for lightbox only (matches PHP BnB). */
+	.modula-bnb-grid {
+		display: none;
+		gap: var(--modula-bnb-gutter);
+	}
+
+	/* Settings editor / takeover preview: show extras under the featured block + badge. */
+	&.modula-bnb--editor-preview-extras .modula-bnb-grid {
+		display: grid;
+		margin-top: 0;
+	}
+
+	.modula-bnb-grid-cell {
+		position: relative;
+		overflow: hidden;
+		aspect-ratio: 1;
+		min-height: 0;
+	}
+
+	.modula-bnb-lightbox-only-overlay {
+		pointer-events: none;
+		position: absolute;
+		inset: 0;
+		z-index: 5;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.35em;
+		padding: 0.5rem;
+		text-align: center;
+		background: rgba(0, 0, 0, 0.55);
+		box-sizing: border-box;
+	}
+
+	.modula-bnb-lightbox-only-overlay__label {
+		color: #fff;
+		font-size: clamp(13px, 2.2vw, 20px);
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		line-height: 1.2;
+		text-transform: uppercase;
+	}
+
+	.modula-bnb-lightbox-only-overlay__hint {
+		color: rgba(255, 255, 255, 0.92);
+		font-size: clamp(10px, 1.6vw, 13px);
+		font-weight: 500;
+		line-height: 1.25;
+		max-width: 12rem;
+	}
+
+	.modula-bnb .modula-item-content {
+		opacity: 1;
+	}
+}
+
+/*
+ * Legacy modula.css forces html body .modula .modula-items .modula-item { position: absolute }.
+ * React masonry columns need normal flow; without this, every tile stacks at (0,0).
+ *
+ * `react-responsive-masonry` wraps each child in an extra flex `div` (ref host) until it has
+ * run `distributeChildren()`; only then items sit directly under the column `div`. Target both
+ * depths so `.modula-item` is never left `position:absolute` inside a zero-height wrapper (that
+ * breaks height measurement and prevents packing — looks like a fixed “row” grid).
+ */
+html body .modula .modula-items.modula-masonry-react>div>.modula-item,
+html body .modula .modula-items.modula-masonry-react>div>div>.modula-item {
+	position: relative !important;
+	inset: auto !important;
+	top: auto !important;
+	left: auto !important;
+	right: auto !important;
+	bottom: auto !important;
+}
+
+/*
+ * Embedded (content block / shortcode): copy lives in `.modula-item-content`. Legacy `modula.css`
+ * sets `opacity: 0` on that node until `.tg-loaded` / `.modula-columns` — image tiles keep
+ * `<picture>` as a *sibling* of the empty shell, so photos still show; embedded does not.
+ * Scope: any `.modula-items` (masonry, justified, creative wrapper, etc.), not only masonry-react.
+ */
+html body .modula .modula-items .modula-item--embedded .modula-item-content {
+	opacity: 1 !important;
+	transform: none !important;
+	z-index: 2;
+}
+
+/*
+ * Loaded tiles: legacy modula.css hides `.modula-item-content` until `.tg-loaded` and exempts
+ * `.modula-loaded-scale` from the reset. Loading-effect keyframes used fill-mode `none`, so
+ * opacity snapped back to 0 after the animation — hover/caption layers died a second later.
+ */
+html body .modula.modula-gallery-initialized .modula-items .modula-item.tg-loaded:not(.modula-item--embedded) .modula-item-content {
+	opacity: 1 !important;
+}
+
+/*
+ * Loaded tiles: keep picture-stack visible after load when load-in FX are armed.
+ */
+html body .modula.modula-gallery-initialized.modula-loaded-scale .modula-items .modula-item.tg-loaded:not(.modula-item--embedded) .modula-item-picture-stack,
+html body .modula.modula-gallery-initialized.modula-loaded-effects .modula-items .modula-item.tg-loaded:not(.modula-item--embedded) .modula-item-picture-stack {
+	opacity: 1 !important;
+}
+
+/*
+ * Masonry columns: flex parents often lack a definite height; `height: 100%` on embedded tiles
+ * collapses — reserve a minimum so the block is visible and text has a box.
+ */
+html body .modula .modula-items.modula-masonry-react .modula-item--embedded {
+	min-height: clamp(5.5rem, 16vw, 11rem);
+	align-self: stretch;
+}
+
+.modula-masonry-react {
+
+	>div>.modula-item,
+	>div>div>.modula-item {
+		position: relative;
+		width: 100%;
+		min-width: 0;
+	}
+
+	.modula-item .modula-item-content img.pic {
+		display: block;
+		width: 100%;
+		height: auto;
+		position: relative;
+		max-width: 100%;
+	}
+}
+
+/*
+ * Legacy modula.css sets `.tg-loaded img.pic { opacity: 1 }` before the React reveal
+ * class is applied — keep the LQIP placeholder-only state until the full image is ready.
+ */
+html body .modula .modula-items .modula-item.tg-loaded .modula-item-picture-stack img.pic.modula-item-picture__img--pending {
+	opacity: 0 !important;
+}
+
+/*
+ * React picture-stack (all layouts): LQIP overlay + neutralize legacy modula.css
+ * `img.pic { position:absolute }` which collapses tile height and flashes thumb + full image.
+ */
+html body .modula .modula-items .modula-item .modula-item-picture-stack {
+	position: relative;
+	width: 100%;
+	overflow: hidden;
+
+	.modula-item-picture--placeholder {
+		pointer-events: none;
+		filter: blur(10px);
+	}
+
+	.modula-item-picture--placeholder--sizer {
+		position: relative;
+		display: block;
+		width: 100%;
+		height: auto;
+		max-width: 100%;
+		z-index: 0;
+		transform: scale(1.06);
+	}
+
+	.modula-item-picture--placeholder--overlay {
+		position: absolute !important;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: center;
+		z-index: 0;
+		transform: scale(1.06);
+	}
+
+	.modula-item-picture--placeholder.modula-item-img--focal-crop,
+	.modula-item-picture--placeholder.modula-item-img--focal-point {
+		inset: auto;
+		object-fit: fill;
+		object-position: initial;
+		filter: blur(10px);
+		transform: var(--modula-focal-transform, none);
+	}
+
+	.modula-item-picture--placeholder.modula-item-img--focal-crop {
+		width: var(--modula-focal-w) !important;
+		height: var(--modula-focal-h) !important;
+		max-width: none !important;
+		left: var(--modula-focal-left) !important;
+		top: var(--modula-focal-top) !important;
+	}
+
+	img.modula-item-picture__img--pending,
+	img.pic.modula-item-picture__img--pending {
+		opacity: 0 !important;
+	}
+
+	img.modula-item-picture__img--revealed,
+	img.pic.modula-item-picture__img--revealed {
+		opacity: 1 !important;
+	}
+
+	img.pic:not(.modula-item-picture--placeholder):not(.modula-item-img--focal-crop):not(.modula-item-img--focal-point) {
+		position: relative !important;
+		inset: auto !important;
+		left: auto !important;
+		top: auto !important;
+		max-width: 100% !important;
+		width: 100% !important;
+		height: auto !important;
+		display: block !important;
+	}
+
+	/* Tiled / fillSlot layouts: stack is absolute-filled; img must cover the tile (not natural height). */
+	&.modula-item-picture-stack--fill-parent {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		min-height: 0;
+
+		>.modula-item-picture {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+		}
+
+		>.modula-item-picture:not(.modula-item-picture--focal-crop) img.pic:not(.modula-item-picture--placeholder):not(.modula-item-img--focal-crop):not(.modula-item-img--focal-point) {
+			width: 100% !important;
+			height: 100% !important;
+			max-width: none !important;
+			display: block !important;
+		}
+	}
+
+	>.modula-item-picture {
+		position: relative;
+		z-index: 1;
+		display: block;
+		width: 100%;
+	}
+
+	>.modula-item-picture:not(.modula-item-picture--focal-crop) img {
+		display: block;
+		max-width: 100%;
+	}
+}
+
+/*
+ * Flow layouts (masonry, parallax masonry, slider): line-height baseline gap under photos.
+ */
+html body .modula .modula-masonry-react,
+html body .modula .modula-parallax-masonry,
+html body .modula .modula-slider {
+	.modula-item-picture-stack>.modula-item-picture {
+		position: relative;
+		z-index: 1;
+		display: block;
+		width: 100%;
+	}
+
+	.modula-item-picture-stack>.modula-item-picture:not(.modula-item-picture--focal-crop) img {
+		display: block;
+		max-width: 100%;
+	}
+}
+
+/*
+ * Adaptive height + named/default image size: do not upscale past the served
+ * file’s intrinsic width. Custom + crop fills width (below via fill-crop class
+ * on the shell — this block only targets scale-down).
+ */
+html body .modula .modula-slider.modula-slider--scale-down.modula-slider--adaptive-height {
+
+	.modula-items.f-carousel .f-carousel__slide .modula-item-picture:not(.modula-item-picture--focal-crop) img,
+	.modula-items.f-carousel .f-carousel__slide img.pic:not(.modula-item-img--focal-crop):not(.modula-item-img--focal-point) {
+		width: auto !important;
+		max-width: 100% !important;
+		height: auto !important;
+		object-fit: fill !important;
+		margin-inline: auto;
+	}
+}
+
+html body .modula .modula-slider.modula-slider--fill-crop.modula-slider--adaptive-height {
+
+	.modula-items.f-carousel .f-carousel__slide .modula-item-picture:not(.modula-item-picture--focal-crop) img,
+	.modula-items.f-carousel .f-carousel__slide img.pic:not(.modula-item-img--focal-crop):not(.modula-item-img--focal-point) {
+		width: 100% !important;
+		max-width: 100% !important;
+		height: auto !important;
+		object-fit: fill !important;
+		margin-inline: 0;
+	}
+}
+
+html body .modula .modula-slider.modula-slider--fixed-height {
+
+	.modula-items.f-carousel .f-carousel__slide .modula-item-picture:not(.modula-item-picture--focal-crop) img,
+	.modula-items.f-carousel .f-carousel__slide img.pic:not(.modula-item-img--focal-crop):not(.modula-item-img--focal-point) {
+		width: 100% !important;
+		height: 100% !important;
+		max-width: none !important;
+		object-fit: cover !important;
+		object-position: center;
+	}
+}
+
+/**
+ * Uniform grid — equal columns (CSS Grid), equal cell size per row.
+ * Default: square cells (aspect-ratio 1 / 1). Fixed height: add class
+ * modula-uniform-grid--fixed-height (?modula_uniform_mode=fixed); uses
+ * --modula-uniform-cell-h from gallery desktop height setting.
+ */
+.modula .modula-uniform-grid,
+.modula .modula-fit-grid {
+	--modula-uniform-cols: 4;
+	--modula-uniform-cols-tablet: 2;
+	--modula-uniform-cols-mobile: 1;
+	--modula-uniform-gap: #{$mod-space-10};
+	--modula-uniform-cell-h: 280px;
+	/* Tile shape: height tracks column width (e.g. 1/1 = square). Images use object-fit: cover inside. */
+	--modula-uniform-aspect: 1 / 1;
+
+	display: grid;
+	grid-template-columns: repeat(var(--modula-uniform-cols-mobile),
+			minmax(0, 1fr));
+	gap: var(--modula-uniform-gap);
+	width: 100%;
+	min-width: 0;
+	align-items: stretch;
+
+	@media (min-width: 768px) {
+		grid-template-columns: repeat(var(--modula-uniform-cols-tablet),
+				minmax(0, 1fr));
+	}
+
+	@media (min-width: 1024px) {
+		grid-template-columns: repeat(var(--modula-uniform-cols),
+				minmax(0, 1fr));
+	}
+
+	.modula-uniform-grid__cell {
+		min-width: 0;
+		/* Safari: min-height 0 + flex collapses aspect-ratio-sized grid cells. */
+		min-height: auto;
+		display: flex;
+		flex-direction: column;
+		/* Fallback when JS does not inline aspect-ratio (visitor legacy path). */
+		aspect-ratio: 1 / 1;
+		/* Safari: var(--modula-uniform-aspect) is not applied reliably — React sets inline aspectRatio. */
+		aspect-ratio: var(--modula-uniform-aspect);
+	}
+
+	/* Inline gridTemplateColumns / gridAutoRows from UniformGridLayout (Safari var() in repeat()). */
+	&.modula-uniform-grid--react-tracks .modula-uniform-grid__cell:not(.modula-uniform-grid__cell--page-break),
+	&.modula-fit-grid--react-tracks .modula-uniform-grid__cell:not(.modula-uniform-grid__cell--page-break) {
+		min-height: auto;
+	}
+
+	/* Editor-preview pagination marker: full-width row must not use 1/1 aspect (height = width). */
+	.modula-uniform-grid__cell.modula-uniform-grid__cell--page-break {
+		grid-column: 1 / -1;
+		aspect-ratio: unset;
+		height: auto;
+		min-height: 0;
+		max-height: none;
+		flex: 0 0 auto;
+		align-self: stretch;
+	}
+
+	/*
+	 * modula.css forces .modula-items .modula-item { position: absolute } for legacy
+	 * layouts. That removes items from grid cell flow → cells collapse to 0 height →
+	 * “empty” grid. Match masonry stack (.modula-masonry-react > div > div > .modula-item).
+	 */
+	html body &.modula-items>.modula-uniform-grid__cell>.modula-item {
+		position: relative !important;
+		inset: auto !important;
+		top: auto !important;
+		left: auto !important;
+		right: auto !important;
+		bottom: auto !important;
+		width: 100%;
+		min-width: 0;
+		min-height: 0;
+		height: 100%;
+		flex: 1 1 auto;
+		display: flex;
+		flex-direction: column;
+	}
+
+	html body &.modula-items>.modula-uniform-grid__cell>.modula-item.modula-caption-below-image {
+		height: auto !important;
+		flex: 0 0 auto;
+	}
+
+	.modula-uniform-grid__cell:has(> .modula-item.modula-caption-below-image) {
+		aspect-ratio: unset;
+		height: auto;
+		min-height: 0;
+	}
+
+	.modula-item.modula-caption-below-image .modula-item-image-area.modula-uniform-grid__media {
+		aspect-ratio: var(--modula-uniform-aspect, 1 / 1);
+		flex: 0 0 auto;
+		width: 100%;
+		min-height: 0;
+	}
+
+	&.modula-uniform-grid--react-tracks:has(.modula-caption-below-image),
+	&.modula-uniform-grid--caption-below,
+	&.modula-fit-grid--react-tracks:has(.modula-caption-below-image),
+	&.modula-fit-grid--caption-below {
+		align-items: start;
+		grid-auto-rows: auto;
+	}
+
+	&.modula-uniform-grid--caption-below .modula-uniform-grid__cell:not(.modula-uniform-grid__cell--page-break),
+	&.modula-fit-grid--caption-below .modula-uniform-grid__cell:not(.modula-uniform-grid__cell--page-break) {
+		aspect-ratio: unset !important;
+		height: auto !important;
+		min-height: 0;
+		overflow: visible;
+	}
+
+	&.modula-uniform-grid--caption-below .modula-uniform-grid__cell>.modula-item.modula-item--embedded,
+	&.modula-fit-grid--caption-below .modula-uniform-grid__cell>.modula-item.modula-item--embedded {
+		height: auto !important;
+		aspect-ratio: var(--modula-uniform-aspect, 1 / 1);
+		min-height: clamp(5.5rem, 16vw, 11rem);
+	}
+
+	.modula-uniform-grid__media {
+		flex: 1 1 auto;
+		min-height: 0;
+		width: 100%;
+		position: relative;
+		overflow: hidden;
+		z-index: 0;
+	}
+
+	&.modula-uniform-grid--fixed-height .modula-uniform-grid__cell,
+	&.modula-fit-grid--fixed-height .modula-uniform-grid__cell {
+		aspect-ratio: unset;
+		height: var(--modula-uniform-cell-h);
+	}
+
+	&.modula-uniform-grid--fixed-height .modula-uniform-grid__cell.modula-uniform-grid__cell--page-break,
+	&.modula-fit-grid--fixed-height .modula-uniform-grid__cell.modula-uniform-grid__cell--page-break {
+		height: auto;
+		aspect-ratio: unset;
+	}
+
+	/* React uses .modula-item-picture (not .pic on <picture>); keep media visible without .tg-loaded */
+	html body &.modula-items .modula-item .modula-item-picture,
+	html body &.modula-items .modula-item img.pic {
+		opacity: 1 !important;
+	}
+
+	html body &.modula-items .modula-uniform-grid__media img.modula-item-picture__img--pending,
+	html body &.modula-items .modula-uniform-grid__media img.pic.modula-item-picture__img--pending {
+		opacity: 0 !important;
+	}
+
+	html body &.modula-items .modula-uniform-grid__media img.modula-item-picture__img--revealed,
+	html body &.modula-items .modula-uniform-grid__media img.pic.modula-item-picture__img--revealed {
+		opacity: 1 !important;
+	}
+
+	/* Legacy modula.css uses huge max-width on .pic; uniform grid fills with cover. */
+	html body &.modula-items.modula-uniform-grid .modula-uniform-grid__media .modula-item-picture:not(.modula-item-picture--focal-crop) img,
+	html body &.modula-items.modula-uniform-grid .modula-uniform-grid__media img.pic:not(.modula-item-img--focal-crop):not(.modula-item-img--focal-point) {
+		max-width: none !important;
+		width: 100% !important;
+		height: 100% !important;
+		object-fit: cover !important;
+		object-position: center;
+	}
+
+	/* Fit grid: full photo inside each tile (letterbox when needed). */
+	html body &.modula-items.modula-fit-grid .modula-uniform-grid__media .modula-item-picture:not(.modula-item-picture--focal-crop) img,
+	html body &.modula-items.modula-fit-grid .modula-uniform-grid__media img.pic:not(.modula-item-img--focal-crop):not(.modula-item-img--focal-point) {
+		max-width: none !important;
+		width: 100% !important;
+		height: 100% !important;
+		object-fit: contain !important;
+		object-position: var(--modula-uniform-image-position, center center);
+	}
+
+	.modula-item .modula-item-overlay {
+		z-index: 1;
+	}
+
+	/*
+	 * Above .tile-inner (z-index 5). pointer-events:none keeps empty areas
+	 * clickable for lightbox; social / text links re-enable hits.
+	 */
+	.modula-item .modula-item-content {
+		opacity: 1;
+		z-index: 6;
+		pointer-events: none;
+	}
+
+	.modula-item .modula-item-content .modula-social,
+	.modula-item .modula-item-content .modula-social a,
+	.modula-item .modula-item-content a[href] {
+		pointer-events: auto;
+	}
+}
+
+/*
+ * Polaroid: `.modula-items.modula-polaroid-gallery` is a direct child of `.modula`, not inside
+ * `.modula-uniform-grid` — rules must not be nested under uniform-grid or the pin never gets
+ * positioning and `.modula-item { overflow: hidden }` clips it.
+ */
+.modula .modula-items.modula-polaroid-gallery {
+	.modula-polaroid-slot.modula-item {
+		overflow: visible;
+	}
+
+	.modula-polaroid-slot.modula-item:hover {
+		z-index: 6;
+	}
+
+	.modula-polaroid-frame--has-pin .modula-polaroid-pin {
+		position: absolute;
+		top: -5px;
+		left: 50%;
+		width: 14px;
+		height: 14px;
+		margin-left: -7px;
+		border-radius: 50%;
+		box-shadow:
+			0 1px 2px rgba(0, 0, 0, 0.25),
+			inset 0 1px 1px rgba(255, 255, 255, 0.45);
+		z-index: 2;
+		pointer-events: none;
+	}
+
+	.modula-polaroid-frame__media .modula-item-content,
+	.modula-polaroid-frame__media {
+		height: 100%;
+	}
+
+	.modula-polaroid-frame__media .modula-item-picture:not(.modula-item-picture--focal-crop) img,
+	.modula-polaroid-frame__media img.pic {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+}
+
+/* Parallax masonry: viewfinder — 4 columns, continuous drift, top/bottom mask */
+.modula-parallax-masonry {
+	--modula-parallax-gutter: #{$mod-space-10};
+	--modula-parallax-column-width: 200px;
+	--modula-parallax-fade-height: 140px;
+	--modula-parallax-fade-color: #000;
+	--modula-parallax-viewfinder-radius: #{$mod-radius-12};
+
+	position: relative;
+	height: 100vh;
+	min-height: 400px;
+	overflow: hidden;
+	border-radius: var(--modula-parallax-viewfinder-radius);
+	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+
+	/* Viewfinder mask: top — content fades as if it continues above */
+	.modula-parallax-masonry-fade {
+		position: absolute;
+		left: 0;
+		right: 0;
+		height: var(--modula-parallax-fade-height);
+		pointer-events: none;
+		z-index: 2;
+	}
+
+	.modula-parallax-masonry-fade--top {
+		top: 0;
+		background: linear-gradient(to bottom,
+				var(--modula-parallax-fade-color) 0%,
+				var(--modula-parallax-fade-color) 15%,
+				color-mix(in srgb, var(--modula-parallax-fade-color) 85%, transparent) 35%,
+				transparent 100%);
+	}
+
+	.modula-parallax-masonry-fade--bottom {
+		bottom: 0;
+		background: linear-gradient(to top,
+				var(--modula-parallax-fade-color) 0%,
+				var(--modula-parallax-fade-color) 15%,
+				color-mix(in srgb, var(--modula-parallax-fade-color) 85%, transparent) 35%,
+				transparent 100%);
+	}
+
+	/* Overlay: background from React (settings.parallaxMasonry.overlayGradient); fallback if unset */
+	.modula-parallax-masonry-overlay {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(180deg,
+				rgba(0, 0, 0, 0.88) 0%,
+				rgba(0, 0, 0, 0.5) 40%,
+				rgba(0, 0, 0, 0.15) 72%,
+				rgba(0, 0, 0, 0) 100%);
+		pointer-events: none;
+		z-index: 3;
+		border-radius: var(--modula-parallax-viewfinder-radius);
+	}
+
+	/* Title on top: justified center, vertical center, bold, white */
+	.modula-parallax-masonry-title {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+		font-weight: bold;
+		font-size: clamp(1.5rem, 4vw, 3rem);
+		letter-spacing: 0.05em;
+		pointer-events: none;
+		z-index: 4;
+	}
+
+	/* Columns extend into fade zone so drift never shows a hard edge */
+	.modula-parallax-masonry-columns {
+		display: flex;
+		gap: var(--modula-parallax-gutter);
+		justify-content: center;
+		align-items: flex-start;
+		position: absolute;
+		top: 50%;
+		left: 0;
+		right: 0;
+		/* Stay under viewfinder overlay/fades (z-index 2–4). pointer-events: none
+		 * on chrome still lets tile :hover fire for Hover Effect Builder. */
+		z-index: 1;
+		transform: translateY(-50%);
+		padding: var(--modula-parallax-fade-height) 0;
+		max-height: calc(100% + var(--modula-parallax-fade-height) * 2);
+		will-change: transform;
+	}
+
+	.modula-parallax-masonry-column {
+		flex: 0 0 var(--modula-parallax-column-width);
+		max-width: var(--modula-parallax-column-width);
+		display: flex;
+		flex-direction: column;
+		gap: var(--modula-parallax-gutter);
+		will-change: transform;
+	}
+
+	.modula-parallax-masonry-item {
+		position: relative;
+		width: 100%;
+		overflow: hidden;
+		border-radius: $mod-radius-8;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+		&:hover,
+		&:focus-within {
+			z-index: 1;
+			overflow: visible;
+		}
+
+		.modula-item {
+			position: relative;
+			width: 100%;
+		}
+
+		.modula-item-picture:not(.modula-item-picture--focal-crop),
+		.modula-item-picture:not(.modula-item-picture--focal-crop) img {
+			display: block;
+			width: 100%;
+			height: auto;
+			vertical-align: middle;
+		}
+
+		.modula-item-content {
+			opacity: 1;
+		}
+	}
+}
+
+.modula.modula-blur-protection.modula-tab-blurred .modula-items {
+	filter: blur(6px);
+	transition: filter 0.2s ease;
+}
+
+.modula.modula-image-guardian .modula-item img {
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+.modula-creative-commons-wrap {
+	margin-top: $mod-space-16;
+}
+
+.modula-creative-commons-wrap p {
+	margin: 0;
+}
+
+/*
+ * Legacy parity: license badges sit under `.modula` but are not gallery tiles.
+ * Override `.modula img { width: 100% }` so height:20px keeps natural aspect ratio.
+ */
+.modula-creative-commons-wrap img,
+a.modula-image-licensing-caption img {
+	width: auto;
+	max-width: 100%;
+	height: 20px;
+	max-height: 20px;
+	margin-right: 10px;
+	object-fit: contain;
+}

@@ -1,0 +1,61 @@
+@use '../variables' as *;
+
+/* Sort & order — settings-column takeover (mirrors gallery-item-edit-panel shell). */
+.modula-gallery-reorder-sidebar {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	height: 100%;
+	background: var(--mod-se-chrome-2);
+	color: var(--mod-se-ink);
+}
+
+.modula-gallery-reorder-sidebar__scroll {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: auto;
+	padding: 0 0 $mod-space-20;
+}
+
+.modula-gallery-reorder-sidebar__notice {
+	flex-shrink: 0;
+	margin: 0;
+	border-radius: 0;
+	border-left: none;
+	border-right: none;
+
+	.components-notice__content {
+		margin: 0 0 2px;
+	}
+}
+
+.modula-gallery-reorder-sidebar .modula-gallery-takeover__reorder-body {
+	flex: none;
+	overflow: visible;
+	min-height: 0;
+	padding: $mod-space-16 $mod-space-16 0;
+}
+
+.modula-gallery-reorder-sidebar .modula-gallery-takeover__reorder-body--setup {
+	padding-top: $mod-space-8;
+}
+
+.modula-gallery-reorder-sidebar__foot {
+	flex-shrink: 0;
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: $mod-space-12;
+	padding: $mod-space-12 $mod-space-20;
+	border-top: 1px solid var(--mod-se-line, #{$mod-takeover-border-light});
+	background: transparent;
+	box-sizing: border-box;
+
+	&--split {
+		justify-content: space-between;
+		width: 100%;
+	}
+}

@@ -2,9 +2,13 @@ import icons from '../utils/icons';
 const { Fragment } = wp.element;
 
 const ModulaGalleryImageInner = (props) => {
-	const { settings, img, hideTitle, hideDescription, hideSocial, index } = props;
+	const { settings, img, hideTitle, hideDescription, hideSocial, index } =
+		props;
 
-	let effectArray = ['tilt_1', 'tilt_3', 'tilt_7'],
+	const legacyHover =
+		!settings.hover_builder || typeof settings.hover_builder !== 'object';
+
+	const effectArray = ['tilt_1', 'tilt_3', 'tilt_7'],
 		overlayArray = ['tilt_3', 'tilt_7'],
 		svgArray = ['tilt_1', 'tilt_7'],
 		jtgBody = [
@@ -20,16 +24,16 @@ const ModulaGalleryImageInner = (props) => {
 
 	return [
 		<Fragment key={index}>
-			{effectArray.includes(settings.effect) && (
+			{legacyHover && effectArray.includes(settings.effect) && (
 				<div className="tilter__deco tilter__deco--shine">
 					<div />
 				</div>
 			)}
-			{overlayArray.includes(settings.effect) && (
+			{legacyHover && overlayArray.includes(settings.effect) && (
 				<div className="tilter__deco tilter__deco--overlay" />
 			)}
 
-			{svgArray.includes(settings.effect) && (
+			{legacyHover && svgArray.includes(settings.effect) && (
 				<div className="tilter__deco tilter__deco--lines" />
 			)}
 
@@ -37,11 +41,13 @@ const ModulaGalleryImageInner = (props) => {
 				<div className="figc-inner">
 					{/* checking for undefined because on the first run , imageId doesnt exist */}
 					{'0' == settings.hide_title && !hideTitle && (
-						<div className={'jtg-title'}> {img.title} </div>
+						<div className={'modula-title'}> {img.title} </div>
 					)}
 					<div
 						className={
-							jtgBody.includes(settings.effect) ? 'jtg-body' : ''
+							legacyHover && jtgBody.includes(settings.effect)
+								? 'modula-body'
+								: ''
 						}
 					>
 						{'0' == settings.hide_description &&
@@ -54,7 +60,7 @@ const ModulaGalleryImageInner = (props) => {
 							)}
 
 						{!hideSocial && '1' == settings.enableSocial && (
-							<div className="jtg-social">
+							<div className="modula-social">
 								{'1' == settings.enableTwitter && (
 									<a className="modula-icon-twitter" href="#">
 										{' '}

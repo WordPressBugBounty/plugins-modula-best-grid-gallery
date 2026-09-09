@@ -1,0 +1,133 @@
+.modula-ui-slider {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	width: 100%;
+}
+
+.modula-ui-slider__row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	width: 100%;
+}
+
+.modula-ui-slider__track-wrap {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	height: 24px;
+}
+
+.modula-ui-slider__input {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 100%;
+	height: 4px;
+	margin: 0;
+	border: none;
+	border-radius: 0;
+	/* Uniform rail — no accent “progress” fill. */
+	background: var(--mod-ui-off);
+	cursor: pointer;
+
+	&:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
+	&::-webkit-slider-runnable-track {
+		height: 4px;
+		border: none;
+		border-radius: 0;
+		background: var(--mod-ui-off);
+	}
+
+	&::-moz-range-track {
+		height: 4px;
+		border: none;
+		border-radius: 0;
+		background: var(--mod-ui-off);
+	}
+
+	&::-webkit-slider-thumb {
+		appearance: none;
+		-webkit-appearance: none;
+		box-sizing: border-box;
+		width: 20px;
+		height: 20px;
+		margin-top: -8px;
+		border: 3px solid var(--mod-ui-surface, #fff);
+		border-radius: 50%;
+		background: var(--mod-ui-accent);
+		box-shadow: var(--mod-ui-shadow-sm, 0 1px 2px rgb(0 0 0 / 12%));
+		cursor: pointer;
+	}
+
+	&::-moz-range-thumb {
+		box-sizing: border-box;
+		width: 20px;
+		height: 20px;
+		border: 3px solid var(--mod-ui-surface, #fff);
+		border-radius: 50%;
+		background: var(--mod-ui-accent);
+		box-shadow: var(--mod-ui-shadow-sm, 0 1px 2px rgb(0 0 0 / 12%));
+		cursor: pointer;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--mod-ui-accent);
+		outline-offset: 4px;
+	}
+}
+
+.modula-ui-slider__number {
+	box-sizing: border-box;
+	flex: 0 0 56px;
+	width: 56px;
+	height: 28px;
+	min-height: 28px;
+	margin: 0;
+	padding: 0 6px;
+	/* !important: defeat wp-admin light input chrome in dark appearance. */
+	border: 1px solid var(--mod-ui-line) !important;
+	border-radius: 0 !important;
+	background: var(--mod-ui-surface) !important;
+	color: var(--mod-ui-ink) !important;
+	font-family: var(--mod-ui-font-ui, inherit);
+	font-size: 13px;
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+	text-align: center;
+	box-shadow: none !important;
+	-moz-appearance: textfield;
+	appearance: textfield;
+
+	&::-webkit-outer-spin-button,
+	&::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	&:focus {
+		outline: none;
+		border-color: var(--mod-ui-accent) !important;
+		box-shadow: 0 0 0 3px var(--mod-ui-accent-soft, transparent) !important;
+	}
+
+	&:disabled {
+		opacity: 0.45;
+	}
+}
+
+.modula-ui-slider__help {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--mod-ui-ink-3);
+}

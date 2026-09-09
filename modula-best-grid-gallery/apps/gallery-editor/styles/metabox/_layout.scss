@@ -1,0 +1,88 @@
+// Settings v2 metabox — mount, shell, intro (WP admin typography).
+@use '../variables' as *;
+
+.modula-settings-editor-mount {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.5;
+	color: #1d2327;
+}
+
+.modula-settings-editor__app {
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.modula-settings-editor__status {
+	display: flex;
+	align-items: center;
+	gap: $mod-space-8;
+	margin: 0 0 $mod-space-12;
+}
+
+.modula-settings-editor__shell {
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-12;
+}
+
+.modula-settings-editor__save-bar {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: $mod-space-8;
+	padding-bottom: $mod-space-8;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.modula-settings-editor__save-bar-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: $mod-space-8;
+}
+
+.modula-settings-editor__undo-redo {
+	display: inline-flex;
+	align-items: center;
+	gap: $mod-space-4;
+}
+
+.modula-settings-editor__undo-redo--topbar {
+	gap: $mod-space-2;
+}
+
+.modula-settings-editor__intro {
+	margin: 0 0 $mod-space-4;
+	padding-bottom: $mod-space-10;
+	border-bottom: 1px solid #dcdcde;
+}
+
+.modula-settings-editor__lede {
+	margin: 0;
+	color: #646970;
+	font-size: 13px;
+	line-height: 1.45;
+	max-width: 42em;
+}
+
+.modula-settings-editor__id-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: $mod-space-4;
+	padding: $mod-space-2 $mod-space-10;
+	font-size: 12px;
+	font-weight: 500;
+	color: #50575e;
+	background: #f0f0f1;
+	border: 1px solid #dcdcde;
+	border-radius: 999px;
+	line-height: 1.4;
+	white-space: nowrap;
+
+	strong {
+		font-weight: 600;
+		color: #1d2327;
+	}
+}

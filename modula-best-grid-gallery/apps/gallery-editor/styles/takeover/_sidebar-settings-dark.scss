@@ -1,0 +1,846 @@
+@use 'mixins' as *;
+@use '../variables' as *;
+@use '../shared/range-control-layout' as range-layout;
+
+// Dark-only WP component overrides (light uses _sidebar-settings-light.scss).
+.modula-settings-editor__app[data-appearance='dark'] {
+	.modula-gallery-takeover__sidebar-settings-inner {
+		color-scheme: dark;
+
+		.modula-settings-editor__hub-list-icon-wrap {
+			color: rgba(255, 255, 255, 0.88);
+		}
+
+		.modula-settings-editor__category-desc {
+			font-size: 12px;
+			line-height: 1.45;
+			margin-bottom: $mod-space-10;
+			color: rgba(255, 255, 255, 0.62);
+		}
+
+		.modula-settings-editor__proofing-lock-placeholder {
+			margin-bottom: $mod-space-12;
+		}
+
+		.modula-settings-editor__proofing-lock-placeholder-btn {
+			width: 100%;
+			justify-content: center;
+		}
+
+		// FSE-like: groups sit on sidebar chrome — no inset gray/blue panels or extra padding.
+		.modula-settings-editor__section {
+			background: transparent;
+			border: none;
+			border-radius: 0;
+			padding: 0;
+			margin: $mod-space-16 0 0;
+
+			&:first-child {
+				margin-top: 0;
+			}
+		}
+
+		.modula-settings-editor__section-head {
+			margin: 0 0 $mod-space-8;
+			padding: 0;
+		}
+
+		.modula-settings-editor__section-body {
+			max-width: none;
+		}
+
+		.modula-settings-editor__fields {
+			gap: 0;
+		}
+
+		// Hub + nested drill: flush with drill rows (no extra block margin between list items).
+		.modula-settings-editor__category--hub .modula-settings-editor__section--hub-field,
+		.modula-settings-editor__category--nested-stack .modula-settings-editor__section--nested-panel {
+			margin-top: 0;
+			margin-bottom: 0;
+			padding: 0;
+		}
+
+		.modula-settings-editor__category--nested-stack .modula-settings-editor__section--nested-panel .modula-settings-editor__nested-panel-upsell {
+			margin-bottom: $mod-space-12;
+		}
+
+		.modula-settings-editor__category--hub .modula-settings-editor__section--hub-field:not(.modula-settings-editor__section--hub-field-embedded) {
+			border-bottom: none;
+
+			// Match drill rows: full-row hover/focus affordance (toggle-with-nested uses a transparent hit layer).
+			@media (hover: hover) {
+				&:hover {
+					background: rgba(255, 255, 255, 0.06);
+				}
+			}
+
+			&:focus-within {
+				background: rgba(255, 255, 255, 0.04);
+			}
+
+			// Hub toggle row: chevron is not inside tertiary Button like drill rows — force SVG fill for dark UI.
+			.modula-settings-editor__field-toggle-nested-chevron svg {
+				fill: rgba(255, 255, 255, 0.55);
+			}
+
+			.modula-settings-editor__field-row {
+				padding: 0;
+				min-height: $mod-takeover-sidebar-list-row-min-height;
+				box-sizing: border-box;
+				align-items: center;
+				border-bottom: none;
+			}
+
+			// Match hub drill row height: first grid track must stay ≥ list row min-height (toggle + chevron rows
+			// otherwise collapse to ~switch height while align-items:center is active on `.field-row--toggle`).
+			.modula-settings-editor__field-row--toggle {
+				grid-template-rows: minmax($mod-takeover-sidebar-list-row-min-height, auto);
+				row-gap: 0;
+
+				&:has(.modula-settings-editor__field-toggle-foot) {
+					grid-template-rows:
+						minmax($mod-takeover-sidebar-list-row-min-height, auto) auto;
+					row-gap: $mod-space-10;
+				}
+			}
+
+			// Toggle + drill chevron: needs 3 columns; generic `.field-row--toggle` above is only 2 — override here.
+			.modula-settings-editor__field-row--toggle-nested {
+				grid-template-columns: minmax(0, 1fr) auto auto;
+				grid-template-rows: minmax($mod-takeover-sidebar-list-row-min-height, auto);
+				column-gap: $mod-space-12;
+				row-gap: 0;
+				align-items: center;
+
+				&:has(.modula-settings-editor__field-toggle-foot) {
+					grid-template-rows:
+						minmax($mod-takeover-sidebar-list-row-min-height, auto) auto;
+					row-gap: $mod-space-10;
+				}
+			}
+
+			// @wordpress/components ToggleControl adds bottom margin — hub list rows must match drill height.
+			.components-toggle-control,
+			.components-toggle-control .components-base-control__field {
+				margin-bottom: 0 !important;
+			}
+		}
+
+		// Hub field shown as a normal form control (not a list row): no row hover, no fixed list height.
+		.modula-settings-editor__category--hub .modula-settings-editor__section--hub-field-embedded {
+			@media (hover: hover) {
+				&:hover {
+					background: transparent;
+				}
+			}
+
+			&:focus-within {
+				background: transparent;
+			}
+
+			.modula-settings-editor__field-row {
+				min-height: 0;
+				padding: 0;
+				align-items: stretch;
+			}
+
+			.modula-settings-editor__field-row--toggle,
+			.modula-settings-editor__field-row--toggle-nested {
+				grid-template-rows: auto auto;
+
+				&:has(.modula-settings-editor__field-toggle-foot) {
+					grid-template-rows: auto auto;
+				}
+			}
+		}
+
+		.modula-settings-editor__section-title {
+			color: rgba(255, 255, 255, 0.95);
+		}
+
+		// Sidebar: label above control (narrow rail). Toggles stay label left / control right.
+		.modula-settings-editor__field-row {
+			box-sizing: border-box;
+			grid-template-columns: 1fr;
+			gap: $mod-space-6 0;
+			align-items: stretch;
+			border-bottom-color: rgba(255, 255, 255, 0.08);
+		}
+
+		// Toggle: row 1 = label + switch (pairwise centered); row 2 = full-width foot (upsell/errors).
+		// Populated by `SchemaFieldRow` as three grid items (label col + toggle inline + toggle foot).
+		.modula-settings-editor__field-row--toggle {
+			grid-template-columns: minmax(200px, 1fr) auto;
+			grid-template-rows: auto auto;
+			column-gap: $mod-space-12;
+			row-gap: $mod-space-10;
+			align-items: center;
+		}
+
+		// TanStack `Field` wraps the render in a fragment; `contents` exposes the two cells to this grid.
+		.modula-settings-editor__field-toggle-grid-bridge {
+			display: contents;
+		}
+
+		.modula-settings-editor__field-row--toggle>.modula-settings-editor__field-label-col {
+			grid-column: 1;
+			grid-row: 1;
+			align-self: center;
+			min-width: 0;
+		}
+
+		.modula-settings-editor__field-row--toggle .modula-settings-editor__field-control-col--toggle-inline {
+			grid-column: 2;
+			grid-row: 1;
+			align-self: center;
+			min-width: 0;
+		}
+
+		.modula-settings-editor__field-row--toggle .modula-settings-editor__field-toggle-foot {
+			grid-column: 1 / -1;
+			grid-row: 2;
+			min-width: 0;
+			width: 100%;
+		}
+
+		// Keep hub rows at list height (48px) unless a real foot row exists.
+		.modula-settings-editor__category--hub .modula-settings-editor__section--hub-field .modula-settings-editor__field-row--toggle {
+			grid-template-rows: minmax($mod-takeover-sidebar-list-row-min-height, auto);
+			row-gap: 0;
+
+			&:has(.modula-settings-editor__field-toggle-foot) {
+				grid-template-rows:
+					minmax($mod-takeover-sidebar-list-row-min-height, auto) auto;
+				row-gap: $mod-space-10;
+			}
+		}
+
+		.modula-settings-editor__category--hub .modula-settings-editor__section--hub-field .modula-settings-editor__field-row--toggle-nested {
+			grid-template-rows: minmax($mod-takeover-sidebar-list-row-min-height, auto);
+			row-gap: 0;
+
+			&:has(.modula-settings-editor__field-toggle-foot) {
+				grid-template-rows:
+					minmax($mod-takeover-sidebar-list-row-min-height, auto) auto;
+				row-gap: $mod-space-10;
+			}
+		}
+
+		// Toggle + drill-in chevron (nested sidebar stack).
+		.modula-settings-editor__field-row--toggle-nested {
+			position: relative;
+			grid-template-columns: minmax(200px, 1fr) auto auto;
+			grid-template-rows: minmax($mod-takeover-sidebar-list-row-min-height, auto);
+			row-gap: 0;
+
+			&:has(.modula-settings-editor__field-toggle-foot) {
+				grid-template-rows:
+					minmax($mod-takeover-sidebar-list-row-min-height, auto) auto;
+				row-gap: $mod-space-10;
+			}
+		}
+
+		.modula-settings-editor__field-toggle-nested-hit-layer {
+			grid-column: 1 / -1;
+			grid-row: 1;
+			z-index: 1;
+			align-self: stretch;
+			justify-self: stretch;
+			width: 100%;
+			min-height: 100%;
+			margin: 0;
+			padding: 0;
+			border: 0;
+			background: transparent;
+			cursor: pointer;
+
+			&:disabled {
+				cursor: default;
+				opacity: 0.45;
+			}
+		}
+
+		.modula-settings-editor__field-label-line--toggle-nested-pass-through {
+			pointer-events: none;
+
+			.modula-settings-editor__field-path-tip,
+			.modula-ui-reset-to-default {
+				pointer-events: auto;
+			}
+		}
+
+		.modula-settings-editor__field-toggle-grid-bridge--with-drill {
+			display: contents;
+		}
+
+		.modula-settings-editor__field-toggle-drill-row {
+			display: contents;
+		}
+
+		.modula-settings-editor__field-row--toggle-nested .modula-settings-editor__field-label-col--toggle-nested-z {
+			position: relative;
+			z-index: 2;
+			grid-column: 1;
+			grid-row: 1;
+			align-self: center;
+			min-width: 0;
+			// Let the transparent hit-layer button receive hover + clicks (label sits above it in z-order).
+			pointer-events: none;
+
+			.modula-settings-editor__field-path-tip,
+			.modula-ui-reset-to-default {
+				pointer-events: auto;
+			}
+		}
+
+		.modula-settings-editor__field-row--toggle-nested .modula-settings-editor__field-control-col--toggle-nested-z {
+			position: relative;
+			z-index: 3;
+		}
+
+		.modula-settings-editor__field-row--toggle-nested .modula-settings-editor__field-control-col--toggle-inline {
+			grid-column: 2;
+			grid-row: 1;
+			align-self: center;
+			min-width: 0;
+		}
+
+		.modula-settings-editor__field-row--toggle-nested .modula-settings-editor__field-toggle-nested-chevron {
+			grid-column: 3;
+			grid-row: 1;
+			z-index: 2;
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			min-width: 36px;
+			pointer-events: none;
+			align-self: center;
+		}
+
+		.modula-settings-editor__field-row--toggle-nested .modula-settings-editor__field-toggle-foot {
+			grid-column: 1 / -1;
+			grid-row: 2;
+			min-width: 0;
+			width: 100%;
+		}
+
+		.modula-settings-editor__nested-sidebar-head {
+			margin-bottom: $mod-space-10;
+		}
+
+		.modula-settings-editor__nested-sidebar-back.components-button {
+			color: rgba(255, 255, 255, 0.88);
+			padding-left: 0;
+
+			&:hover {
+				color: #fff;
+			}
+		}
+
+		.modula-settings-editor__nested-sidebar-title {
+			font-size: 14px;
+			font-weight: 600;
+			margin: $mod-space-8 0 0;
+			color: rgba(255, 255, 255, 0.95);
+		}
+
+		.modula-settings-editor__field-row--toggle-nested .modula-settings-editor__category-hub-drill-chevron {
+			color: rgba(255, 255, 255, 0.75);
+
+			svg {
+				fill: currentColor;
+			}
+		}
+
+		.modula-settings-editor__field-row--section-heading {
+			padding-bottom: $mod-space-8;
+			border-bottom: none;
+		}
+
+		.modula-settings-editor__field-row--compact-heading {
+			padding: 0 0 $mod-space-6;
+		}
+
+		.modula-settings-editor__section-heading-label {
+			color: var(--mod-se-ink-3, rgba(255, 255, 255, 0.55));
+			font-size: 11px;
+			font-weight: 600;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+		}
+
+		.modula-settings-editor__field-row--compact-stack {
+			padding: $mod-space-4 0;
+			border-bottom: none;
+		}
+
+		.modula-settings-editor__field-row--compact-stack+.modula-settings-editor__field-row:not(.modula-settings-editor__field-row--compact-stack) {
+			border-top: 1px solid rgba(255, 255, 255, 0.1);
+			margin-top: $mod-space-4;
+			padding-top: $mod-space-10;
+		}
+
+		// Category hub (`hubSections` in editorNavigation): drill rows + optional submenu wrapper.
+		.modula-settings-editor__category--hub .modula-settings-editor__category-hub-submenu {
+			margin-top: $mod-space-6;
+		}
+
+		.modula-settings-editor__category-hub-submenu-inner {
+			display: flex;
+			flex-direction: column;
+			gap: 0;
+			border: none;
+			border-radius: 0;
+			overflow: visible;
+			background: transparent;
+		}
+
+		.modula-settings-editor__category-hub-submenu-inner>.modula-settings-editor__category-hub-drill-row {
+			margin-left: -$mod-takeover-sidebar-settings-inner-pad-x;
+			margin-right: -$mod-takeover-sidebar-settings-inner-pad-x;
+			padding-left: $mod-takeover-sidebar-settings-inner-pad-x;
+			padding-right: $mod-takeover-sidebar-settings-inner-pad-x;
+			box-sizing: border-box;
+		}
+
+		.modula-settings-editor__category-hub-submenu-inner>.modula-settings-editor__section--hub-field:not(.modula-settings-editor__section--hub-field-embedded) {
+			margin-left: -$mod-takeover-sidebar-settings-inner-pad-x;
+			margin-right: -$mod-takeover-sidebar-settings-inner-pad-x;
+			padding-left: $mod-takeover-sidebar-settings-inner-pad-x;
+			padding-right: $mod-takeover-sidebar-settings-inner-pad-x;
+			box-sizing: border-box;
+		}
+
+		.modula-settings-editor__category-hub-submenu-inner>.modula-settings-editor__section--hub-field-embedded {
+			margin-bottom: $mod-space-12;
+			padding-bottom: $mod-space-12;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+			box-sizing: border-box;
+		}
+
+		.modula-settings-editor__category-hub-drill-row {
+			border-bottom: none;
+
+			@media (hover: hover) {
+				&:hover {
+					background: rgba(255, 255, 255, 0.06);
+				}
+			}
+
+			&:focus-within {
+				background: rgba(255, 255, 255, 0.04);
+			}
+		}
+
+		.modula-settings-editor__category-hub-drill-btn.components-button {
+			display: flex;
+			width: 100%;
+			justify-content: space-between;
+			align-items: center;
+			gap: $mod-space-8;
+			box-sizing: border-box;
+			min-height: $mod-takeover-sidebar-list-row-min-height;
+			padding: $mod-takeover-sidebar-list-row-pad-y 0;
+			border-radius: 0;
+			color: rgba(255, 255, 255, 0.92);
+			text-align: left;
+
+			&:hover:not(:disabled) {
+				background: transparent;
+				color: #fff;
+			}
+
+			&:disabled {
+				opacity: 0.45;
+				cursor: not-allowed;
+			}
+		}
+
+		.modula-settings-editor__category-hub-drill-label {
+			flex: 1;
+			min-width: 0;
+			font-size: 13px;
+			font-weight: 400;
+			line-height: 1.35;
+			text-align: left;
+		}
+
+		.modula-settings-editor__category-hub-drill-chevron {
+			flex-shrink: 0;
+			color: rgba(255, 255, 255, 0.55);
+		}
+
+		.modula-settings-editor__field-row--composite,
+		.modula-settings-editor__field-row--full-width,
+		.modula-settings-editor__field-row--help-only {
+			grid-template-columns: 1fr;
+		}
+
+		.modula-settings-editor__field-row--toggle .modula-settings-editor__field-label-line {
+			width: 100%;
+			min-width: 0;
+		}
+
+		.modula-settings-editor__field-row--toggle .modula-settings-editor__field-label-with-tip {
+			flex: 1 1 auto;
+			min-width: 0;
+		}
+
+		.modula-settings-editor__field-row--toggle .modula-settings-editor__field-label {
+			white-space: normal;
+		}
+
+		.modula-settings-editor__field-control-col {
+			min-width: 0;
+		}
+
+		.modula-settings-editor__field-row--toggle .modula-settings-editor__field-control-col--toggle-inline {
+			width: auto;
+		}
+
+		.modula-settings-editor__field-row:not(.modula-settings-editor__field-row--toggle) .modula-settings-editor__field-control-col {
+			width: 100%;
+		}
+
+		// Gutter: keep 3 columns in sidebar (avoid global 600px collapse to one column).
+		.modula-settings-editor__composite-grid--cells-3 {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: $mod-space-8;
+		}
+
+		.modula-settings-editor__composite-grid--cells-2-equal {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: $mod-space-10;
+		}
+
+		.modula-settings-editor__inline-field {
+			gap: $mod-space-4;
+		}
+
+		.modula-settings-editor__tuple3-flex {
+			width: 100%;
+			min-width: 0;
+		}
+
+		.modula-settings-editor__composite-stack-heading {
+			color: rgba(255, 255, 255, 0.92);
+		}
+
+		.modula-settings-editor__field-row--composite-divider-before {
+			border-top-color: rgba(255, 255, 255, 0.12);
+		}
+
+		// Schema upsells / speedup help — prefer --mod-se-* tokens on the base
+		// rules so settings-panel (v2) picks them up; keep legacy sidebar overrides.
+		.modula-settings-editor__speedup-help {
+			color: var(--mod-se-ink-2, rgba(255, 255, 255, 0.72));
+			background: var(--mod-se-chrome-2, rgba(0, 0, 0, 0.28));
+			border-color: var(--mod-se-line, rgba(255, 255, 255, 0.12));
+		}
+
+		.modula-settings-editor__speedup-help p {
+			color: inherit;
+		}
+
+		// Schema upsells — dark sidebar (same family as speedup help).
+		.modula-settings-editor__editor-upsell {
+			color: rgba(255, 255, 255, 0.78);
+			background: rgba(0, 0, 0, 0.28);
+			border: 1px solid rgba(255, 255, 255, 0.12);
+		}
+
+		.modula-settings-editor__editor-upsell-heading {
+			color: rgba(255, 255, 255, 0.95);
+		}
+
+		.modula-settings-editor__editor-upsell-text {
+			color: inherit;
+			white-space: pre-line;
+		}
+
+		.modula-settings-editor__editor-upsell-btn--secondary {
+			color: rgba(255, 255, 255, 0.92) !important;
+			box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35) !important;
+			background: transparent !important;
+
+			&:hover {
+				box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55) !important;
+				color: #fff !important;
+			}
+		}
+
+		.modula-settings-editor__editor-upsell-btn--primary {
+			background: #4f6b2f !important;
+			border-color: #4f6b2f !important;
+			color: #fff !important;
+
+			&:hover {
+				background: #3d5224 !important;
+				border-color: #3d5224 !important;
+			}
+		}
+
+		// Sortable filter names — compact horizontal rows (handle | input | count | delete).
+		.modula-settings-editor__filter-name-list-empty {
+			border-color: rgba(255, 255, 255, 0.14);
+			background: rgba(255, 255, 255, 0.04);
+		}
+
+		.modula-settings-editor__filter-name-list-empty-title {
+			color: rgba(255, 255, 255, 0.92);
+		}
+
+		.modula-settings-editor__filter-name-list-empty-desc {
+			color: rgba(255, 255, 255, 0.48);
+		}
+
+		.modula-settings-editor__filter-name-list-row {
+			border-color: rgba(255, 255, 255, 0.12);
+			background: rgba(255, 255, 255, 0.05);
+			box-shadow: none;
+
+			&:hover {
+				border-color: rgba(255, 255, 255, 0.18);
+				background: rgba(255, 255, 255, 0.07);
+			}
+
+			&:focus-within {
+				border-color: color-mix(in srgb,
+						var(--modula-takeover-accent, #2271b1) 55%,
+						transparent);
+				box-shadow: 0 0 0 1px color-mix(in srgb, var(--modula-takeover-accent, #2271b1) 28%, transparent);
+			}
+
+			&--dragging {
+				border-color: color-mix(in srgb,
+						var(--modula-takeover-accent, #2271b1) 65%,
+						transparent);
+				box-shadow:
+					0 4px 14px rgba(0, 0, 0, 0.35),
+					0 0 0 1px color-mix(in srgb,
+						var(--modula-takeover-accent, #2271b1) 35%,
+						transparent);
+			}
+
+			&--drag-over {
+				border-color: color-mix(in srgb,
+						var(--modula-takeover-accent, #2271b1) 40%,
+						rgba(255, 255, 255, 0.2));
+			}
+		}
+
+		.modula-settings-editor__filter-name-list-input .components-text-control__input,
+		.modula-settings-editor__filter-name-list-input input[type='text'] {
+			color: rgba(255, 255, 255, 0.96) !important;
+			background: transparent !important;
+		}
+
+		.modula-settings-editor__filter-name-list-input .components-text-control__input::placeholder,
+		.modula-settings-editor__filter-name-list-input input::placeholder {
+			color: rgba(255, 255, 255, 0.35);
+		}
+
+		.modula-settings-editor__filter-name-list-count {
+			color: rgba(255, 255, 255, 0.42);
+		}
+
+		.modula-settings-editor__filter-name-list-drag {
+			color: rgba(255, 255, 255, 0.38);
+
+			&:hover:not(:disabled) {
+				color: rgba(255, 255, 255, 0.88);
+				background: rgba(255, 255, 255, 0.08);
+			}
+		}
+
+		.modula-settings-editor__filter-name-list-remove.components-button {
+			color: rgba(255, 255, 255, 0.42) !important;
+			border-left-color: rgba(255, 255, 255, 0.1);
+
+			&:hover:not(:disabled),
+			&:focus-visible:not(:disabled) {
+				color: #ffb4b4 !important;
+				background: rgba(220, 50, 50, 0.18) !important;
+			}
+		}
+
+		.modula-settings-editor__filter-name-list-add.components-button.is-secondary {
+			border-color: rgba(109, 179, 250, 0.55) !important;
+			color: #b6d4f5;
+
+			&:hover:not(:disabled) {
+				color: #dfebf9;
+				border-color: rgba(158, 194, 230, 0.75) !important;
+				background: rgba(109, 179, 250, 0.14) !important;
+			}
+		}
+
+		.modula-settings-editor__filter-name-list-help {
+			color: rgba(255, 255, 255, 0.48);
+		}
+
+		.modula-settings-editor__field-label,
+		.modula-settings-editor__inline-field-label {
+			color: rgba(255, 255, 255, 0.88);
+		}
+
+		// Match label chroma; WP SVG paths often default to black without explicit fill.
+		button.modula-settings-editor__field-path-tip {
+			color: rgba(255, 255, 255, 0.88);
+
+			svg,
+			svg path {
+				fill: currentColor !important;
+			}
+
+			&:hover,
+			&:focus-visible {
+				color: #fff;
+				background: rgba(255, 255, 255, 0.08);
+			}
+		}
+
+		.modula-settings-editor__field-error {
+			color: #ff8a8a;
+		}
+
+		.modula-settings-editor__placeholder {
+			color: rgba(255, 255, 255, 0.55);
+		}
+
+		// @wordpress/components — dark surfaces (no official ThemeProvider for dark in public API).
+		.components-base-control__label,
+		.components-base-control__help,
+		.components-toggle-control__label {
+			color: rgba(255, 255, 255, 0.88);
+		}
+
+		.components-base-control__help {
+			color: rgba(255, 255, 255, 0.55);
+		}
+
+		// Text fields — border on the input (no InputBase backdrop).
+		// Shared-ui compact controls keep their own height/chrome.
+		.components-text-control__input,
+		.components-textarea-control__input,
+		input[type="text"]:not(.modula-ui-text-input__field):not(.modula-ui-slider__number):not(.components-form-token-field__input),
+		input[type="number"]:not(.modula-ui-text-input__field):not(.modula-ui-slider__number),
+		input[type="search"]:not(.modula-ui-text-input__field):not(.components-form-token-field__input),
+		textarea {
+			color: rgba(255, 255, 255, 0.92) !important;
+			background: #1e1e1e !important;
+			border: 1px solid #50575e !important;
+			border-radius: $mod-radius-2;
+		}
+
+		// SelectControl / InputControl — flat V2 chrome lives on `.components-input-control__backdrop`.
+		.components-select-control__input,
+		.components-input-control__input,
+		input.components-input-control__input,
+		select {
+			color: rgba(255, 255, 255, 0.92) !important;
+			background: transparent !important;
+			border: none !important;
+			border-radius: $mod-radius-4;
+		}
+
+		.components-input-control__backdrop {
+			background: var(--mod-se-control-bg, #1e1e1e) !important;
+			border: 1px solid var(--mod-se-control-border, #50575e) !important;
+		}
+
+		.components-text-control__input:focus,
+		.components-textarea-control__input:focus,
+		input[type="text"]:not(.components-form-token-field__input):focus,
+		input[type="number"]:not(.components-form-token-field__input):focus,
+		input[type="search"]:not(.components-form-token-field__input):focus,
+		textarea:focus {
+			border-color: var(--modula-takeover-accent, #2271b1) !important;
+			box-shadow: 0 0 0 1px var(--modula-takeover-accent, #2271b1);
+			outline: none;
+		}
+
+		.components-select-control__input:focus,
+		.components-input-control__input:focus,
+		select:focus {
+			outline: none;
+			box-shadow: none;
+		}
+
+		// SelectControl: suffix chevron uses path { fill: currentColor } but InputBase sets dark foreground via Emotion.
+		.components-select-control {
+			color: rgba(255, 255, 255, 0.88) !important;
+		}
+
+		.components-select-control .components-input-control__suffix {
+			color: rgba(255, 255, 255, 0.88) !important;
+		}
+
+		.components-select-control .components-input-control__suffix svg path {
+			fill: rgba(255, 255, 255, 0.78) !important;
+		}
+
+		// Other input suffix/prefix icons (if any) on dark chrome
+		.components-input-control__suffix svg path,
+		.components-input-control__prefix svg path {
+			fill: rgba(255, 255, 255, 0.78) !important;
+		}
+
+		// Same toggle chrome as top bar “Advanced settings” (not default WP light track).
+		@include modula-takeover-toggle-appearance;
+		// Range sliders: dark rail like toggle off-state; blue fill like toggle on (not default gray.300 rail).
+		@include modula-takeover-range-control-appearance;
+		@include range-layout.modula-settings-range-control-inline-layout;
+
+		.components-range-control__number input,
+		.components-range-control__number .components-input-control__input {
+			color: rgba(255, 255, 255, 0.92) !important;
+			background: transparent !important;
+			border: none !important;
+		}
+
+		.components-button.is-secondary {
+			color: rgba(255, 255, 255, 0.92);
+			background: #3c434a;
+			border-color: #50575e;
+
+			&:hover:not(:disabled) {
+				background: #50575e;
+				color: #fff;
+			}
+		}
+
+		.components-notice {
+			background: rgba(0, 0, 0, 0.35);
+			border-color: rgba(255, 255, 255, 0.12);
+			color: rgba(255, 255, 255, 0.9);
+
+			.components-notice__content {
+				color: inherit;
+			}
+		}
+
+		.components-notice.is-info {
+			background: color-mix(in srgb,
+					var(--modula-takeover-accent, #2271b1) 20%,
+					transparent);
+			border-color: color-mix(in srgb,
+					var(--modula-takeover-accent, #2271b1) 45%,
+					transparent);
+		}
+
+		.components-notice.is-error {
+			background: rgba(204, 0, 0, 0.2);
+			border-color: rgba(255, 100, 100, 0.35);
+		}
+
+		.modula-settings-editor__color-swatch-btn--chip .modula-settings-editor__color-swatch {
+			border-color: rgba(255, 255, 255, 0.22);
+		}
+
+		.modula-settings-editor__color-swatch-hex {
+			color: var(--mod-se-ink-2);
+		}
+	}
+}

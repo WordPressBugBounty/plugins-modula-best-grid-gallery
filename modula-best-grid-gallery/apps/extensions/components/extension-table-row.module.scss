@@ -1,0 +1,156 @@
+@use '../../shared-styles/spacing' as *;
+@use '../../shared-styles/radii' as *;
+
+.unavailable {
+	opacity: 0.6;
+}
+
+.checkboxColumn {
+	padding: $mod-space-12 $mod-space-16;
+	text-align: center;
+
+	input[type='checkbox'] {
+		margin: 0;
+		cursor: pointer;
+	}
+}
+
+.extensionColumn {
+	padding: $mod-space-12 $mod-space-16;
+	text-align: left;
+}
+
+.extensionInfo {
+	display: flex;
+	align-items: center;
+	gap: $mod-space-12;
+}
+
+.icon {
+	width: $mod-space-40;
+	height: $mod-space-40;
+	object-fit: contain;
+	flex-shrink: 0;
+}
+
+.extensionDetails {
+	flex: 1;
+	min-width: 0;
+}
+
+.title {
+	display: block;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--theme-text-color);
+	margin-bottom: $mod-space-4;
+}
+
+.actions {
+	margin-top: $mod-space-4;
+	font-size: 13px;
+}
+
+.actionLink {
+	color: var(--theme-link-initial-color);
+	text-decoration: none;
+	cursor: pointer;
+	transition: color 0.2s ease;
+
+	&:hover {
+		color: var(--theme-link-hover-color);
+		text-decoration: underline;
+	}
+}
+
+.separator {
+	color: var(--theme-border-color);
+	margin: 0 $mod-space-6;
+}
+
+.descriptionColumn {
+	padding: $mod-space-12 $mod-space-16;
+	text-align: left;
+}
+
+.description {
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--theme-text-color);
+}
+
+.statusColumn {
+	padding: $mod-space-12 $mod-space-16;
+	text-align: right;
+}
+
+.statusActions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: $mod-space-12;
+}
+
+.upgradeBadge {
+	font-size: 11px;
+	font-weight: 600;
+	color: #d63638;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.toggleWrapper {
+	position: relative;
+	display: inline-block;
+	width: $mod-space-44;
+	height: $mod-space-24;
+	cursor: pointer;
+}
+
+.toggle {
+	opacity: 0;
+	width: 0;
+	height: 0;
+
+	&:disabled+.toggleSlider {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	&:checked+.toggleSlider {
+		background-color: #10b981;
+
+		&::before {
+			transform: translateX($mod-space-20);
+		}
+	}
+
+	&:focus+.toggleSlider {
+		outline: $mod-space-focus-ring solid #10b981;
+		outline-offset: $mod-space-2;
+	}
+}
+
+.toggleSlider {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #d1d5db;
+	border-radius: $mod-radius-24;
+	transition: background-color 0.2s ease, box-shadow 0.2s ease;
+
+	&::before {
+		content: '';
+		position: absolute;
+		height: $mod-space-18;
+		width: $mod-space-18;
+		left: $mod-space-3;
+		bottom: $mod-space-3;
+		background-color: #ffffff;
+		border-radius: 50%;
+		transition: transform 0.2s ease;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+}

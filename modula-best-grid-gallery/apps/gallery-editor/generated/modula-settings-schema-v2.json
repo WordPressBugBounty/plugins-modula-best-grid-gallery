@@ -1,0 +1,2420 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "modula-gallery-settings-v2",
+    "title": "Modula gallery settings – grouped & typed (target for adapter)",
+    "description": "Target grouped structure. Adapter maps flat modula-settings → these groups; canonical post meta for JSON is modula_settings_v2.",
+    "version": "2.0",
+    "settings": {
+        "general": {
+            "type": {
+                "type": "string",
+                "enum": [
+                    "grid",
+                    "uniform-grid",
+                    "creative-gallery",
+                    "custom-grid",
+                    "polaroid",
+                    "slider",
+                    "video",
+                    "bnb",
+                    "justified-grid",
+                    "parallax-masonry",
+                    "story",
+                    "fit-grid",
+                    "showcase",
+                    "template"
+                ],
+                "default": "grid"
+            },
+            "uploadPosition": {
+                "type": "string",
+                "enum": [
+                    "start",
+                    "end"
+                ],
+                "default": "end"
+            },
+            "width": {
+                "type": "string",
+                "default": "100%"
+            },
+            "height": {
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 100,
+                    "maximum": 2000
+                },
+                "minItems": 3,
+                "maxItems": 3,
+                "default": [
+                    800,
+                    800,
+                    800
+                ],
+                "description": "[desktop, tablet, mobile] px"
+            },
+            "randomFactor": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "default": 50
+            },
+            "shuffle": {
+                "type": "boolean",
+                "default": false
+            }
+        },
+        "layout": {
+            "gridType": {
+                "type": "string",
+                "enum": [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                    "10",
+                    "11",
+                    "12"
+                ],
+                "default": "3",
+                "description": "Column count for grid, uniform-grid, fit-grid, and parallax-masonry. Legacy “automatic” is represented as gallery type justified-grid, not stored here."
+            },
+            "uniformGridTileAspect": {
+                "type": "string",
+                "enum": [
+                    "square",
+                    "portrait",
+                    "landscape",
+                    "custom"
+                ],
+                "default": "square",
+                "description": "Shape of each equal-cell grid tile; images fill the tile (uniform grid crops; fit grid shows the full photo)."
+            },
+            "uniformGridTileAspectCustom": {
+                "type": "object",
+                "properties": {
+                    "width": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 20
+                    },
+                    "height": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 20
+                    }
+                },
+                "default": {
+                    "width": 16,
+                    "height": 9
+                },
+                "description": "Width:height for CSS aspect-ratio; each part is clamped 1–20 (e.g. 16 and 9 → 16:9)."
+            },
+            "fitGridImageAlign": {
+                "type": "string",
+                "enum": [
+                    "center",
+                    "top",
+                    "bottom",
+                    "left",
+                    "right"
+                ],
+                "default": "center",
+                "description": "Where each photo sits inside its fit-grid tile."
+            },
+            "gridRowHeight": {
+                "type": "integer",
+                "minimum": 150,
+                "maximum": 350,
+                "default": 250
+            },
+            "gridJustifyLastRow": {
+                "type": "string",
+                "enum": [
+                    "justify",
+                    "nojustify",
+                    "center",
+                    "right"
+                ],
+                "default": "justify"
+            },
+            "gridImageSize": {
+                "type": "string",
+                "default": "medium",
+                "description": "Registered WP image size slug (or custom/default). Options come from PHP wp_localize_script."
+            },
+            "gridImageDimensions": {
+                "type": "object",
+                "properties": {
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    }
+                },
+                "default": {
+                    "width": 600,
+                    "height": 0
+                },
+                "description": "Used when gridImageSize is custom (or default in some layouts): exact width/height for srcset/thumbs."
+            },
+            "imgSize": {
+                "type": "integer",
+                "minimum": 50,
+                "maximum": 250,
+                "default": 200,
+                "description": "Legacy thumbnail tile edge (px) for custom-grid when gridImageSize is custom; not used by v2 React layout."
+            },
+            "imgCrop": {
+                "type": "boolean",
+                "default": true,
+                "description": "Legacy hard-crop flag for custom-grid thumbnails; not used by v2 React layout."
+            },
+            "gridImageCrop": {
+                "type": "boolean",
+                "default": false,
+                "description": "Crop when using a registered size vs custom gridImageSize + gridImageDimensions (see classic Gallery Images Size flow)."
+            },
+            "gutter": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "default": 10
+            },
+            "tabletGutter": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "default": 10
+            },
+            "mobileGutter": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "default": 10
+            },
+            "parallaxOverlayEnabled": {
+                "type": "boolean",
+                "default": true
+            },
+            "parallaxOverlayBackground": {
+                "type": "string",
+                "default": "linear-gradient(180deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.15) 72%, rgba(0,0,0,0) 100%)"
+            },
+            "parallaxCaption": {
+                "type": "string",
+                "default": ""
+            },
+            "parallaxMotionPreset": {
+                "type": "string",
+                "enum": [
+                    "calm",
+                    "balanced",
+                    "dynamic"
+                ],
+                "default": "balanced"
+            }
+        },
+        "lightbox": {
+            "lightbox": {
+                "type": "string",
+                "enum": [
+                    "no-link",
+                    "direct",
+                    "external-url",
+                    "fancybox"
+                ],
+                "default": "fancybox",
+                "description": "Further lightbox options apply when click behavior opens the lightbox."
+            },
+            "showNavigation": {
+                "type": "boolean",
+                "default": true
+            },
+            "openOn": {
+                "type": "string",
+                "enum": [
+                    "both",
+                    "desktop",
+                    "mobile"
+                ],
+                "default": "both"
+            },
+            "doubleClick": {
+                "type": "boolean",
+                "default": false,
+                "description": "On desktop, use a double-click to open the lightbox; on phones and tablets, use a double-tap. Helps prevent accidental opens."
+            },
+            "loop": {
+                "type": "boolean",
+                "default": false
+            },
+            "showTitle": {
+                "type": "boolean",
+                "default": false
+            },
+            "showCaption": {
+                "type": "boolean",
+                "default": true
+            },
+            "captionPosition": {
+                "type": "string",
+                "enum": [
+                    "left",
+                    "right",
+                    "center"
+                ],
+                "default": "left",
+                "description": "Applies when the lightbox shows the title, the caption, or both."
+            },
+            "keyboard": {
+                "type": "boolean",
+                "default": true
+            },
+            "wheel": {
+                "type": "boolean",
+                "default": true,
+                "description": "Scroll wheel moves to the previous or next image while the lightbox is open (legacy mousewheel navigation)."
+            },
+            "toolbar": {
+                "type": "boolean",
+                "default": true
+            },
+            "close": {
+                "type": "boolean",
+                "default": true
+            },
+            "thumbs": {
+                "type": "boolean",
+                "default": false
+            },
+            "download": {
+                "type": "boolean",
+                "default": false
+            },
+            "zoom": {
+                "type": "boolean",
+                "default": false
+            },
+            "share": {
+                "type": "boolean",
+                "default": false
+            },
+            "clickSlide": {
+                "type": "boolean",
+                "default": false,
+                "description": "Closes the lightbox when clicking the image or the dark area around it. When off, clicking the image zooms instead."
+            },
+            "infobar": {
+                "type": "boolean",
+                "default": true
+            },
+            "animationEffect": {
+                "type": "string",
+                "enum": [
+                    "false",
+                    "fade",
+                    "zoom",
+                    "zoom-in-out"
+                ],
+                "default": "false"
+            },
+            "transitionEffect": {
+                "type": "string",
+                "enum": [
+                    "fade",
+                    "crossfade",
+                    "slide",
+                    "classic"
+                ],
+                "default": "fade"
+            },
+            "showAll": {
+                "type": "boolean",
+                "default": false
+            },
+            "touch": {
+                "type": "boolean",
+                "default": true,
+                "description": "Swipe and pinch-zoom on the lightbox image (Fancybox Panzoom). Always enabled in v2; not exposed in the settings UI."
+            },
+            "showThumbnails": {
+                "type": "boolean",
+                "default": false,
+                "description": "Show the thumbnail strip when the lightbox opens (legacy key: thumbsAutoStart)."
+            },
+            "backgroundColor": {
+                "type": "string",
+                "default": "rgba(30,30,30,.9)"
+            },
+            "thumbsPosition": {
+                "type": "string",
+                "enum": [
+                    "left",
+                    "bottom",
+                    "right"
+                ],
+                "default": "bottom",
+                "description": "Thumbnail strip position when thumbnails are visible."
+            },
+            "downloadAllButton": {
+                "type": "boolean",
+                "default": false
+            },
+            "enableFullscreen": {
+                "type": "boolean",
+                "default": false
+            },
+            "openFullscreen": {
+                "type": "boolean",
+                "default": false
+            }
+        },
+        "captions": {
+            "hideGalleryTitle": {
+                "type": "boolean",
+                "default": true
+            },
+            "galleryTitleType": {
+                "type": "string",
+                "enum": [
+                    "p",
+                    "h1",
+                    "h2",
+                    "h3",
+                    "h4",
+                    "h5",
+                    "h6"
+                ],
+                "default": "p"
+            },
+            "hideTitle": {
+                "type": "boolean",
+                "default": true
+            },
+            "hideDescription": {
+                "type": "boolean",
+                "default": false
+            },
+            "contentPlacement": {
+                "type": "string",
+                "enum": [
+                    "inside-image",
+                    "below-image"
+                ],
+                "default": "inside-image"
+            },
+            "compactCaptionPopover": {
+                "type": "boolean",
+                "default": true
+            },
+            "compactCaptionMinSize": {
+                "type": "integer",
+                "minimum": 80,
+                "maximum": 480,
+                "default": 240
+            },
+            "belowImageAlignment": {
+                "type": "string",
+                "enum": [
+                    "left",
+                    "center",
+                    "right"
+                ],
+                "default": "left"
+            },
+            "belowImageSpacing": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 48,
+                "default": 8
+            },
+            "belowImagePadding": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 48,
+                "default": 0
+            },
+            "titleColor": {
+                "type": "string",
+                "default": "#ffffff"
+            },
+            "titleFontSize": {
+                "type": "integer",
+                "minimum": 8,
+                "maximum": 72,
+                "default": 16
+            },
+            "mobileTitleFontSize": {
+                "type": "integer",
+                "minimum": 8,
+                "maximum": 48,
+                "default": 12
+            },
+            "titleFontWeight": {
+                "type": "string",
+                "enum": [
+                    "default",
+                    "300",
+                    "400",
+                    "700"
+                ],
+                "default": "default"
+            },
+            "captionColor": {
+                "type": "string",
+                "default": "#ffffff"
+            },
+            "captionFontSize": {
+                "type": "integer",
+                "minimum": 8,
+                "maximum": 72,
+                "default": 14
+            },
+            "mobileCaptionFontSize": {
+                "type": "integer",
+                "minimum": 8,
+                "maximum": 48,
+                "default": 10
+            },
+            "captionFontWeight": {
+                "type": "string",
+                "enum": [
+                    "normal",
+                    "300",
+                    "400",
+                    "700"
+                ],
+                "default": "normal"
+            },
+            "mobileCaptionCopy": {
+                "type": "boolean",
+                "default": true,
+                "description": "When the lightbox shows the image caption, visitors on phones and tablets can copy it with a double-tap."
+            }
+        },
+        "social": {
+            "enableSocial": {
+                "type": "boolean",
+                "default": false
+            },
+            "enableTwitter": {
+                "type": "boolean",
+                "default": false
+            },
+            "enableFacebook": {
+                "type": "boolean",
+                "default": false
+            },
+            "enableWhatsapp": {
+                "type": "boolean",
+                "default": false
+            },
+            "enableLinkedin": {
+                "type": "boolean",
+                "default": false
+            },
+            "enablePinterest": {
+                "type": "boolean",
+                "default": false
+            },
+            "enableEmail": {
+                "type": "boolean",
+                "default": false
+            },
+            "emailSubject": {
+                "type": "string",
+                "default": "Check out this awesome image !!"
+            },
+            "emailMessage": {
+                "type": "string"
+            },
+            "socialIconColor": {
+                "type": "string",
+                "default": ""
+            },
+            "socialIconSize": {
+                "type": "integer",
+                "minimum": 8,
+                "maximum": 64,
+                "default": 16
+            },
+            "socialIconPadding": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 40,
+                "default": 10
+            },
+            "socialDesktopCollapsed": {
+                "type": "boolean",
+                "default": true
+            }
+        },
+        "loadingEffects": {
+            "enableScale": {
+                "type": "boolean",
+                "default": false
+            },
+            "loadedScale": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200,
+                "default": 100
+            },
+            "enableRotate": {
+                "type": "boolean",
+                "default": false
+            },
+            "loadedRotate": {
+                "type": "integer",
+                "minimum": -100,
+                "maximum": 100,
+                "default": 0
+            },
+            "enableSlide": {
+                "type": "boolean",
+                "default": false
+            },
+            "loadedHSlide": {
+                "type": "integer",
+                "minimum": -100,
+                "maximum": 100,
+                "default": 0
+            },
+            "loadedVSlide": {
+                "type": "integer",
+                "minimum": -100,
+                "maximum": 100,
+                "default": 0
+            },
+            "inView": {
+                "type": "boolean",
+                "default": false
+            }
+        },
+        "hover": {
+            "builder": {
+                "type": "object",
+                "description": "Composable hover: card treatment and per-slot entrance animations. Use the Hover section preview and inspector.",
+                "properties": {
+                    "cardTreatment": {
+                        "type": "string",
+                        "enum": [
+                            "none",
+                            "zoom",
+                            "grayscale",
+                            "lift"
+                        ],
+                        "default": "zoom"
+                    },
+                    "graphicElement": {
+                        "type": "string",
+                        "enum": [
+                            "none",
+                            "frame",
+                            "diamond"
+                        ],
+                        "default": "none"
+                    },
+                    "graphicVisibility": {
+                        "type": "string",
+                        "enum": [
+                            "on-hover",
+                            "always"
+                        ],
+                        "default": "on-hover"
+                    },
+                    "titleEnter": {
+                        "type": "string",
+                        "enum": [
+                            "none",
+                            "fade",
+                            "slide-up",
+                            "slide-down",
+                            "slide-left",
+                            "slide-right",
+                            "blur-in",
+                            "scale"
+                        ],
+                        "default": "fade"
+                    },
+                    "captionEnter": {
+                        "type": "string",
+                        "enum": [
+                            "none",
+                            "fade",
+                            "slide-up",
+                            "slide-down",
+                            "slide-left",
+                            "slide-right",
+                            "blur-in",
+                            "scale"
+                        ],
+                        "default": "fade"
+                    },
+                    "socialEnter": {
+                        "type": "string",
+                        "enum": [
+                            "none",
+                            "fade",
+                            "slide-up",
+                            "slide-down",
+                            "slide-left",
+                            "slide-right",
+                            "blur-in",
+                            "scale"
+                        ],
+                        "default": "fade"
+                    },
+                    "titleVisibility": {
+                        "type": "string",
+                        "enum": [
+                            "on-hover",
+                            "always",
+                            "hide-on-hover",
+                            "hidden"
+                        ],
+                        "default": "on-hover"
+                    },
+                    "captionVisibility": {
+                        "type": "string",
+                        "enum": [
+                            "on-hover",
+                            "always",
+                            "hide-on-hover",
+                            "hidden"
+                        ],
+                        "default": "on-hover"
+                    },
+                    "socialVisibility": {
+                        "type": "string",
+                        "enum": [
+                            "on-hover",
+                            "always",
+                            "hide-on-hover",
+                            "hidden"
+                        ],
+                        "default": "on-hover"
+                    },
+                    "cardEnterDurationMs": {
+                        "type": "integer",
+                        "minimum": 120,
+                        "maximum": 1200,
+                        "default": 280,
+                        "editorLabel": "Image/tile animation duration (ms)"
+                    },
+                    "cardEnterDelayMs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 600,
+                        "default": 0,
+                        "editorLabel": "Image/tile animation delay (ms)"
+                    },
+                    "titleEnterDurationMs": {
+                        "type": "integer",
+                        "minimum": 120,
+                        "maximum": 1200,
+                        "default": 280,
+                        "editorLabel": "Title entrance duration (ms)"
+                    },
+                    "captionEnterDurationMs": {
+                        "type": "integer",
+                        "minimum": 120,
+                        "maximum": 1200,
+                        "default": 280,
+                        "editorLabel": "Caption entrance duration (ms)"
+                    },
+                    "socialEnterDurationMs": {
+                        "type": "integer",
+                        "minimum": 120,
+                        "maximum": 1200,
+                        "default": 280,
+                        "editorLabel": "Social entrance duration (ms)"
+                    },
+                    "titleEnterDelayMs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 600,
+                        "default": 0,
+                        "editorLabel": "Title entrance base delay (ms)"
+                    },
+                    "captionEnterDelayMs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 600,
+                        "default": 0,
+                        "editorLabel": "Caption entrance base delay (ms)"
+                    },
+                    "socialEnterDelayMs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 600,
+                        "default": 0,
+                        "editorLabel": "Social entrance base delay (ms)"
+                    },
+                    "titleEnterStaggerMs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 300,
+                        "default": 45,
+                        "editorLabel": "Title entrance stagger (ms)"
+                    },
+                    "captionEnterStaggerMs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 300,
+                        "default": 45,
+                        "editorLabel": "Caption entrance stagger (ms)"
+                    },
+                    "socialEnterStaggerMs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 300,
+                        "default": 45,
+                        "editorLabel": "Social entrance stagger (ms)"
+                    },
+                    "sourcePresetId": {
+                        "type": "string",
+                        "default": "",
+                        "description": "Last applied hover preset id (for “— customized” labels when builder no longer matches exactly)."
+                    },
+                    "slotPositions": {
+                        "type": "object",
+                        "description": "Per-slot anchor on the image (percent of media box, 0–100).",
+                        "properties": {
+                            "title": {
+                                "type": "object",
+                                "properties": {
+                                    "x": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 100,
+                                        "default": 50
+                                    },
+                                    "y": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 100,
+                                        "default": 18
+                                    }
+                                }
+                            },
+                            "caption": {
+                                "type": "object",
+                                "properties": {
+                                    "x": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 100,
+                                        "default": 50
+                                    },
+                                    "y": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 100,
+                                        "default": 50
+                                    }
+                                }
+                            },
+                            "social": {
+                                "type": "object",
+                                "properties": {
+                                    "x": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 100,
+                                        "default": 50
+                                    },
+                                    "y": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 100,
+                                        "default": 82
+                                    }
+                                }
+                            }
+                        },
+                        "default": {
+                            "title": {
+                                "x": 50,
+                                "y": 18
+                            },
+                            "caption": {
+                                "x": 50,
+                                "y": 50
+                            },
+                            "social": {
+                                "x": 50,
+                                "y": 82
+                            }
+                        }
+                    }
+                },
+                "default": {
+                    "cardTreatment": "zoom",
+                    "graphicElement": "none",
+                    "graphicVisibility": "on-hover",
+                    "dimOverlay": false,
+                    "titleEnter": "fade",
+                    "captionEnter": "fade",
+                    "socialEnter": "fade",
+                    "titleVisibility": "on-hover",
+                    "captionVisibility": "on-hover",
+                    "socialVisibility": "on-hover",
+                    "cardEnterDurationMs": 280,
+                    "cardEnterDelayMs": 0,
+                    "titleEnterDurationMs": 280,
+                    "captionEnterDurationMs": 280,
+                    "socialEnterDurationMs": 280,
+                    "titleEnterDelayMs": 0,
+                    "captionEnterDelayMs": 0,
+                    "socialEnterDelayMs": 0,
+                    "titleEnterStaggerMs": 45,
+                    "captionEnterStaggerMs": 45,
+                    "socialEnterStaggerMs": 45,
+                    "slotPositions": {
+                        "title": {
+                            "x": 50,
+                            "y": 18
+                        },
+                        "caption": {
+                            "x": 50,
+                            "y": 50
+                        },
+                        "social": {
+                            "x": 50,
+                            "y": 82
+                        }
+                    }
+                }
+            },
+            "cursor": {
+                "type": "string",
+                "enum": [
+                    "pointer",
+                    "zoom-in",
+                    "wait",
+                    "cell",
+                    "crosshair",
+                    "nesw-resize",
+                    "nwse-resize",
+                    "custom"
+                ],
+                "default": "zoom-in"
+            },
+            "changeCursor": {
+                "type": "boolean",
+                "default": true
+            },
+            "uploadCursor": {
+                "type": "integer",
+                "default": 0
+            },
+            "dimOverlay": {
+                "type": "boolean",
+                "default": false
+            },
+            "hoverColor": {
+                "type": "string",
+                "default": "rgba(0,0,0,.5)"
+            },
+            "hoverOpacity": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "default": 50
+            }
+        },
+        "interaction": {
+            "respectReducedMotion": {
+                "type": "boolean",
+                "default": true
+            }
+        },
+        "style": {
+            "borderRadius": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "default": 0
+            },
+            "borderSize": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10,
+                "default": 0
+            },
+            "borderColor": {
+                "type": "string",
+                "default": "#ffffff"
+            },
+            "shadowSize": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 20,
+                "default": 0
+            },
+            "shadowColor": {
+                "type": "string",
+                "default": "#ffffff"
+            },
+            "customCss": {
+                "type": "string",
+                "default": ""
+            }
+        },
+        "performance": {
+            "lazyLoad": {
+                "type": "boolean",
+                "default": true
+            },
+            "enableOptimization": {
+                "type": "string",
+                "enum": [
+                    "default",
+                    "enabled",
+                    "disabled"
+                ],
+                "default": "default"
+            },
+            "thumbnailOptimization": {
+                "type": "string",
+                "enum": [
+                    "default",
+                    "lossless",
+                    "lossy",
+                    "glossy",
+                    "disabled"
+                ],
+                "default": "default"
+            },
+            "lightboxOptimization": {
+                "type": "string",
+                "enum": [
+                    "default",
+                    "lossless",
+                    "lossy",
+                    "glossy",
+                    "disabled"
+                ],
+                "default": "default"
+            },
+            "modulaSpeedHelp": {
+                "type": "string",
+                "default": "",
+                "description": "Placeholder key; UI shows help text only in editor."
+            }
+        },
+        "responsive": {
+            "enableResponsive": {
+                "type": "boolean",
+                "default": true,
+                "description": "Different column counts on smaller screens for grids, or slide counts for sliders."
+            },
+            "tabletColumns": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 6,
+                "default": 2
+            },
+            "mobileColumns": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 6,
+                "default": 1
+            },
+            "treatAsTabletUnder": {
+                "type": "integer",
+                "minimum": 768,
+                "maximum": 1400,
+                "default": 1024
+            },
+            "treatAsPhoneUnder": {
+                "type": "integer",
+                "minimum": 320,
+                "maximum": 900,
+                "default": 600
+            }
+        },
+        "polaroid": {
+            "randomFactor": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "default": 50
+            },
+            "rotationMax": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 14,
+                "default": 7
+            },
+            "scatterMax": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 28,
+                "default": 12
+            },
+            "showPin": {
+                "type": "boolean",
+                "default": true
+            },
+            "framePadding": {
+                "type": "integer",
+                "minimum": 4,
+                "maximum": 28,
+                "default": 12
+            },
+            "chinHeight": {
+                "type": "integer",
+                "minimum": 12,
+                "maximum": 80,
+                "default": 36
+            },
+            "uniformSize": {
+                "type": "boolean",
+                "default": true
+            },
+            "uniformColumns": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 12,
+                "default": 3
+            }
+        },
+        "slider": {
+            "lightbox": {
+                "type": "string",
+                "default": "no-link"
+            },
+            "imageSize": {
+                "type": "string",
+                "default": "large",
+                "description": "WordPress size used for the slide image file (quality). The slider still spans the gallery width — pick Large or Full for full-width carousels. Thumbnail is only suitable for small previews; Custom sets a display box below."
+            },
+            "imageDimensions": {
+                "type": "object",
+                "properties": {
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    }
+                },
+                "description": "Used when Slider image size is Custom. “Crop to dimensions” controls hard crop vs preserving aspect ratio."
+            },
+            "imageCrop": {
+                "type": "boolean",
+                "default": false,
+                "description": "When on, images are cropped to the exact width and height. When off, proportions are preserved within that box."
+            },
+            "adaptiveHeight": {
+                "type": "boolean",
+                "default": true
+            },
+            "syncing": {
+                "type": "boolean",
+                "default": true
+            },
+            "syncingNavSize": {
+                "type": "string",
+                "default": "auto",
+                "description": "Size of thumbnails in the strip. Choose Custom to set width and height below."
+            },
+            "syncingNavImageDimensions": {
+                "type": "object",
+                "properties": {
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    }
+                },
+                "description": "Used when Thumbnail image size is Custom. “Crop to dimensions” applies to the thumbnail strip."
+            },
+            "syncingNavImageCrop": {
+                "type": "boolean",
+                "default": false,
+                "description": "When on, thumbnails are cropped to the exact width and height above."
+            },
+            "syncingNavThumbnailsNumber": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 20,
+                "default": 0
+            },
+            "syncingNavThumbnailsGutter": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 50,
+                "default": 10
+            },
+            "syncingNavThumbnailsBorderColor": {
+                "type": "string",
+                "default": "#000000"
+            },
+            "autoplay": {
+                "type": "boolean",
+                "default": false
+            },
+            "pauseOnHover": {
+                "type": "boolean",
+                "default": false
+            },
+            "autoplaySpeed": {
+                "type": "integer",
+                "minimum": 1000,
+                "maximum": 15000,
+                "default": 3000
+            },
+            "arrows": {
+                "type": "boolean",
+                "default": true
+            },
+            "arrowsInside": {
+                "type": "boolean",
+                "default": false
+            },
+            "dots": {
+                "type": "boolean",
+                "default": false
+            },
+            "draggable": {
+                "type": "boolean",
+                "default": true
+            },
+            "centerMode": {
+                "type": "boolean",
+                "default": false
+            },
+            "centerPadding": {
+                "type": "string",
+                "default": "50px"
+            },
+            "fade": {
+                "type": "boolean",
+                "default": false
+            },
+            "infinite": {
+                "type": "boolean",
+                "default": true
+            },
+            "slidesToShow": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 12,
+                "default": 1
+            },
+            "slidesToScroll": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 12,
+                "default": 1
+            },
+            "speed": {
+                "type": "integer",
+                "minimum": 150,
+                "maximum": 350,
+                "default": 300
+            },
+            "rtl": {
+                "type": "boolean",
+                "default": false
+            },
+            "initialSlide": {
+                "type": "integer",
+                "default": 0
+            },
+            "imageInfo": {
+                "type": "boolean",
+                "default": false
+            },
+            "imageInfoPosition": {
+                "type": "string",
+                "enum": [
+                    "top_outside",
+                    "top_inside",
+                    "bot_outside",
+                    "bot_inside"
+                ],
+                "default": "bot_outside"
+            },
+            "tabletSlides": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 6,
+                "default": 1
+            },
+            "tabletScrolls": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 6,
+                "default": 1
+            },
+            "mobileSlides": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 6,
+                "default": 1
+            },
+            "mobileScrolls": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 6,
+                "default": 1
+            }
+        },
+        "story": {
+            "infinite": {
+                "type": "boolean",
+                "default": false
+            }
+        },
+        "showcase": {
+            "visibleCount": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 5,
+                "default": 3
+            },
+            "gap": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 160,
+                "default": 32
+            },
+            "centerScale": {
+                "type": "number",
+                "minimum": 1.1,
+                "maximum": 1.75,
+                "default": 1.4
+            },
+            "centerBias": {
+                "type": "string",
+                "enum": [
+                    "center",
+                    "left"
+                ],
+                "default": "center"
+            },
+            "arrowPosition": {
+                "type": "string",
+                "enum": [
+                    "bottom-right",
+                    "bottom-left",
+                    "sides"
+                ],
+                "default": "bottom-right"
+            },
+            "autoplay": {
+                "type": "boolean",
+                "default": false
+            },
+            "autoplayInterval": {
+                "type": "integer",
+                "minimum": 1500,
+                "maximum": 15000,
+                "default": 4000,
+                "visibleWhen": {
+                    "path": "showcase.autoplay",
+                    "eq": true
+                }
+            },
+            "clickBehavior": {
+                "type": "string",
+                "enum": [
+                    "item-link",
+                    "lightbox",
+                    "none"
+                ],
+                "default": "item-link",
+                "editorVisibleWhen": {
+                    "path": "general.type",
+                    "eq": "__never__"
+                }
+            },
+            "mobileSimplify": {
+                "type": "boolean",
+                "default": true
+            }
+        },
+        "template": {
+            "templateLayout": {
+                "type": "string",
+                "enum": [
+                    "split-stack",
+                    "asymmetric-trio",
+                    "offset-duo",
+                    "minimal-feature",
+                    "editorial-hero",
+                    "magazine-spread",
+                    "lookbook-ladder",
+                    "corner-collage",
+                    "portfolio-statement",
+                    "editorial-cluster"
+                ],
+                "default": "split-stack"
+            }
+        },
+        "pagination": {
+            "maxImagesCount": {
+                "type": "integer",
+                "default": 0
+            },
+            "maxImagesCountMobile": {
+                "type": "integer",
+                "default": 0
+            },
+            "enablePagination": {
+                "type": "boolean",
+                "default": false
+            },
+            "enableInfiniteScroll": {
+                "type": "boolean",
+                "default": true
+            },
+            "enableLoadMore": {
+                "type": "boolean",
+                "default": false
+            },
+            "paginationNumber": {
+                "type": "integer",
+                "minimum": 5,
+                "maximum": 20,
+                "default": 5
+            },
+            "paginationColor": {
+                "type": "string",
+                "default": ""
+            },
+            "activePaginationColor": {
+                "type": "string",
+                "default": ""
+            },
+            "paginationPosition": {
+                "type": "string",
+                "default": "left",
+                "enum": [
+                    "left",
+                    "center",
+                    "right"
+                ]
+            }
+        },
+        "filters": {
+            "showFilterBar": {
+                "type": "boolean",
+                "default": true
+            },
+            "filters": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "default": [
+                    ""
+                ]
+            },
+            "dropdownFilters": {
+                "type": "boolean",
+                "default": false
+            },
+            "filterClick": {
+                "type": "boolean",
+                "default": false
+            },
+            "hideAllFilter": {
+                "type": "boolean",
+                "default": false
+            },
+            "showFilterCount": {
+                "type": "boolean",
+                "default": true
+            },
+            "allFilterLabel": {
+                "type": "string",
+                "default": "All"
+            },
+            "filterLinkColor": {
+                "type": "string",
+                "default": ""
+            },
+            "filterLinkHoverColor": {
+                "type": "string",
+                "default": ""
+            },
+            "defaultActiveFilter": {
+                "type": "string",
+                "default": "All"
+            },
+            "filterPositioning": {
+                "type": "string",
+                "default": "top",
+                "enum": [
+                    "top",
+                    "bottom",
+                    "left",
+                    "right",
+                    "top_bottom",
+                    "left_right"
+                ]
+            },
+            "filterTextAlignment": {
+                "type": "string",
+                "default": "none",
+                "enum": [
+                    "none",
+                    "left",
+                    "center",
+                    "right"
+                ]
+            },
+            "enableCollapsibleFilters": {
+                "type": "boolean",
+                "default": false
+            },
+            "collapsibleActionText": {
+                "type": "string",
+                "default": "Filter by"
+            },
+            "enableMobileDropdownFilters": {
+                "type": "boolean",
+                "default": false
+            }
+        },
+        "deeplink": {
+            "modulaDeeplink": {
+                "type": "boolean",
+                "default": false
+            },
+            "customLinkName": {
+                "type": "string",
+                "default": "modulagallery"
+            }
+        },
+        "passwordProtect": {
+            "enablePassword": {
+                "type": "boolean",
+                "default": false
+            },
+            "password": {
+                "type": "string",
+                "default": ""
+            },
+            "passwordProtectUsername": {
+                "type": "string",
+                "default": ""
+            },
+            "passwordProtectText": {
+                "type": "string",
+                "default": ""
+            }
+        },
+        "slideshow": {
+            "enableSlideshow": {
+                "type": "boolean",
+                "default": false
+            },
+            "enableAutoplay": {
+                "type": "boolean",
+                "default": false
+            },
+            "pauseOnHover": {
+                "type": "boolean",
+                "default": false
+            },
+            "slideshowSpeed": {
+                "type": "integer",
+                "minimum": 1000,
+                "maximum": 15000,
+                "default": 5000
+            }
+        },
+        "video": {
+            "playlistPosition": {
+                "type": "string",
+                "default": "right",
+                "enum": [
+                    "right",
+                    "bottom"
+                ]
+            },
+            "autoplayVideos": {
+                "type": "boolean",
+                "default": false
+            },
+            "loopVideos": {
+                "type": "boolean",
+                "default": false
+            },
+            "showVideoIcon": {
+                "type": "boolean",
+                "default": true
+            },
+            "useCustomIcon": {
+                "type": "boolean",
+                "default": false
+            },
+            "videoIconIcon": {
+                "type": "string",
+                "default": "default",
+                "enum": [
+                    "default",
+                    "play",
+                    "google_play_1",
+                    "google_play_2",
+                    "google_play_3",
+                    "google_play_4",
+                    "google_play_5",
+                    "simple_solid",
+                    "solid_circle_break",
+                    "solid_circle",
+                    "solid_circle_fill",
+                    "simple_solid_reverse"
+                ]
+            },
+            "customVideoIcon": {
+                "type": "integer",
+                "default": 0
+            },
+            "videoIconColor": {
+                "type": "string",
+                "default": "#FFF"
+            },
+            "playIconSize": {
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 200
+                },
+                "minItems": 3,
+                "maxItems": 3,
+                "default": [
+                    48,
+                    40,
+                    32
+                ]
+            },
+            "previewVideo": {
+                "type": "boolean",
+                "default": false
+            },
+            "autoplayThumbnail": {
+                "type": "boolean",
+                "default": false
+            },
+            "previewVideoDuration": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 30,
+                "default": 3
+            }
+        },
+        "protection": {
+            "protection": {
+                "type": "boolean",
+                "default": false
+            },
+            "rightClickMessage": {
+                "type": "string",
+                "default": "",
+                "editorVisibleWhen": {
+                    "path": "protection.protection",
+                    "truthy": true
+                }
+            },
+            "blockDragging": {
+                "type": "boolean",
+                "default": false
+            },
+            "blurProtection": {
+                "type": "boolean",
+                "default": false
+            },
+            "urlProtection": {
+                "type": "boolean",
+                "default": false
+            }
+        },
+        "download": {
+            "enableDownload": {
+                "type": "boolean",
+                "default": false
+            },
+            "downloadGalleryButton": {
+                "type": "boolean",
+                "default": false
+            },
+            "downloadAllGalleryButton": {
+                "type": "boolean",
+                "default": false
+            },
+            "downloadImageSizes": {
+                "type": "string",
+                "default": "thumbnail"
+            },
+            "downloadAllLabel": {
+                "type": "string",
+                "default": "Download All Images"
+            },
+            "downloadAllPosition": {
+                "type": "string",
+                "default": "below_gallery",
+                "enum": [
+                    "above_gallery",
+                    "below_gallery",
+                    "above_below_gallery"
+                ]
+            },
+            "downloadAllHposition": {
+                "type": "string",
+                "default": "center",
+                "enum": [
+                    "left",
+                    "right",
+                    "center"
+                ]
+            },
+            "downloadAllColor": {
+                "type": "string",
+                "default": ""
+            },
+            "downloadAllBackgroundColor": {
+                "type": "string",
+                "default": ""
+            },
+            "downloadAllGalleryButtonIcon": {
+                "type": "boolean",
+                "default": true
+            },
+            "downloadAllGalleryIconColor": {
+                "type": "string",
+                "default": ""
+            },
+            "customZipName": {
+                "type": "string",
+                "default": "%%gallery_title%%"
+            }
+        },
+        "zoom": {
+            "enableZoom": {
+                "type": "boolean",
+                "default": false
+            },
+            "zoomOnHover": {
+                "type": "boolean",
+                "default": true
+            },
+            "zoomType": {
+                "type": "string",
+                "default": "window",
+                "enum": [
+                    "window",
+                    "inner",
+                    "lens"
+                ]
+            },
+            "zoomEffect": {
+                "type": "string",
+                "default": "fade_in",
+                "enum": [
+                    "none",
+                    "fade_in",
+                    "fade_out",
+                    "fade_in_out",
+                    "easing"
+                ]
+            },
+            "zoomWindowPosition": {
+                "type": "string",
+                "default": "upper_left",
+                "enum": [
+                    "upper_left",
+                    "upper_right",
+                    "lower_left",
+                    "lower_right"
+                ]
+            },
+            "zoomWindowSize": {
+                "type": "string",
+                "default": "medium",
+                "enum": [
+                    "small",
+                    "medium",
+                    "large",
+                    "xlarge"
+                ]
+            },
+            "zoomLensSize": {
+                "type": "string",
+                "default": "medium",
+                "enum": [
+                    "small",
+                    "medium",
+                    "large",
+                    "xlarge"
+                ]
+            },
+            "zoomLensShape": {
+                "type": "string",
+                "default": "round",
+                "enum": [
+                    "round",
+                    "square"
+                ]
+            },
+            "zoomTintOpacity": {
+                "type": "integer",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 100
+            },
+            "zoomTintColor": {
+                "type": "string",
+                "default": ""
+            }
+        },
+        "watermark": {
+            "enableWatermark": {
+                "type": "boolean",
+                "default": false
+            },
+            "watermarkType": {
+                "type": "string",
+                "default": "none",
+                "enum": [
+                    "none",
+                    "text",
+                    "image"
+                ]
+            },
+            "customSettingsWatermark": {
+                "type": "boolean",
+                "default": false
+            },
+            "watermarkText": {
+                "type": "string",
+                "default": ""
+            },
+            "watermarkTextSize": {
+                "type": "integer",
+                "default": 18,
+                "minimum": 8,
+                "maximum": 120
+            },
+            "watermarkTextColor": {
+                "type": "string",
+                "default": "#FFFFFF"
+            },
+            "watermarkImage": {
+                "type": "integer",
+                "default": 0,
+                "description": "Media attachment ID for the watermark graphic."
+            },
+            "watermarkImageDimensionWidth": {
+                "type": "integer",
+                "default": 100,
+                "minimum": 0,
+                "maximum": 2000,
+                "description": "Max width in pixels (0 = automatic)."
+            },
+            "watermarkImageDimensionHeight": {
+                "type": "integer",
+                "default": 0,
+                "description": "Max height in pixels (0 = automatic). Classic metabox only; takeover uses width with auto height."
+            },
+            "watermarkPosition": {
+                "type": "string",
+                "default": "bottom_left",
+                "enum": [
+                    "top_left",
+                    "top_center",
+                    "top_right",
+                    "middle_left",
+                    "center",
+                    "middle_right",
+                    "bottom_left",
+                    "bottom_center",
+                    "bottom_right"
+                ]
+            },
+            "watermarkMargin": {
+                "type": "integer",
+                "default": 10,
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Space from the edge of the image (px)."
+            },
+            "watermarkOpacity": {
+                "type": "integer",
+                "default": 60,
+                "minimum": 0,
+                "maximum": 100
+            },
+            "watermarkApplyScope": {
+                "type": "string",
+                "default": "all",
+                "enum": [
+                    "all",
+                    "selected"
+                ]
+            },
+            "watermarkEnableBackup": {
+                "type": "boolean",
+                "default": true
+            },
+            "watermarkApplyToExistingImages": {
+                "type": "string",
+                "default": "",
+                "description": "UI-only placeholder; Pro applies watermark via AJAX (save gallery first)."
+            },
+            "watermarkRemoveWatermark": {
+                "type": "string",
+                "default": "",
+                "description": "UI-only placeholder; Pro removes watermark via AJAX (save gallery first)."
+            }
+        },
+        "exif": {
+            "enableExif": {
+                "type": "boolean",
+                "default": false
+            },
+            "exifCamera": {
+                "type": "boolean",
+                "default": true
+            },
+            "exifLens": {
+                "type": "boolean",
+                "default": true
+            },
+            "exifShutterSpeed": {
+                "type": "boolean",
+                "default": true
+            },
+            "exifAperture": {
+                "type": "boolean",
+                "default": true
+            },
+            "exifFocalLength": {
+                "type": "boolean",
+                "default": true
+            },
+            "exifIso": {
+                "type": "boolean",
+                "default": true
+            },
+            "exifDate": {
+                "type": "boolean",
+                "default": true
+            }
+        },
+        "licensing": {
+            "imageLicensing": {
+                "type": "string",
+                "default": "none",
+                "enum": [
+                    "none",
+                    "by",
+                    "by-sa",
+                    "by-nc",
+                    "by-nc-sa",
+                    "by-nc-nd",
+                    "by-nd",
+                    "cc0"
+                ]
+            },
+            "author": {
+                "type": "string",
+                "default": ""
+            },
+            "company": {
+                "type": "string",
+                "default": ""
+            },
+            "displayWithDescription": {
+                "type": "boolean",
+                "default": false
+            },
+            "showOnLightbox": {
+                "type": "boolean",
+                "default": true
+            }
+        },
+        "comments": {
+            "commentStatus": {
+                "type": "boolean",
+                "default": false
+            },
+            "toggleComments": {
+                "type": "boolean",
+                "default": true
+            },
+            "startCollapsed": {
+                "type": "boolean",
+                "default": false
+            }
+        },
+        "proofing": {
+            "imageProofing": {
+                "type": "boolean",
+                "default": false
+            },
+            "minSelection": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "default": 0
+            },
+            "maxSelection": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "default": 0
+            },
+            "notificationEmail": {
+                "type": "string",
+                "default": ""
+            },
+            "loginRejectionNotice": {
+                "type": "string",
+                "default": ""
+            },
+            "showLoginLink": {
+                "type": "boolean",
+                "default": true
+            },
+            "expireRejectionNotice": {
+                "type": "string",
+                "default": ""
+            },
+            "expireLinkToPage": {
+                "type": "string",
+                "default": "0"
+            },
+            "expireLinkToPageUrl": {
+                "type": "string",
+                "default": ""
+            }
+        },
+        "instagram": {
+            "syncWithInstagram": {
+                "type": "boolean",
+                "default": false
+            }
+        },
+        "exportImport": []
+    },
+    "items": {
+        "description": "Per-item catalog: modula-images rows (attachment id) plus optional modula_images_v2-only rows with itemKind content_block or shortcode (embeddedId, anchors, block/shortcode fields).",
+        "id": {
+            "type": "integer"
+        },
+        "title": {
+            "type": "string",
+            "default": "",
+            "editorLabel": "Title"
+        },
+        "alt": {
+            "type": "string",
+            "default": "",
+            "editorLabel": "Alt text"
+        },
+        "caption": {
+            "type": "string",
+            "default": "",
+            "editorLabel": "Caption",
+            "editorControl": {
+                "kind": "textarea"
+            },
+            "editorStateKey": "description"
+        },
+        "halign": {
+            "type": "string",
+            "enum": [
+                "left",
+                "center",
+                "right"
+            ],
+            "default": "center",
+            "editorLabel": "Horizontal align",
+            "enumOptionLabels": {
+                "left": "Left",
+                "center": "Center",
+                "right": "Right"
+            }
+        },
+        "valign": {
+            "type": "string",
+            "enum": [
+                "top",
+                "middle",
+                "bottom"
+            ],
+            "default": "middle",
+            "editorLabel": "Vertical align",
+            "enumOptionLabels": {
+                "top": "Top",
+                "middle": "Middle",
+                "bottom": "Bottom"
+            }
+        },
+        "focal_x": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "editorLabel": "Focal X"
+        },
+        "focal_y": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "editorLabel": "Focal Y"
+        },
+        "focal_crop_x": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "editorLabel": "Focal crop X"
+        },
+        "focal_crop_y": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "editorLabel": "Focal crop Y"
+        },
+        "focal_crop_w": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "editorLabel": "Focal crop width"
+        },
+        "focal_crop_h": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "editorLabel": "Focal crop height"
+        },
+        "tile_image_fit": {
+            "type": "string",
+            "enum": [
+                "",
+                "cover",
+                "contain"
+            ],
+            "default": "",
+            "editorLabel": "Tile image fit",
+            "description": "Custom grid only: contain shows the full photo inside the tile (letterbox); cover fills the tile and may crop."
+        },
+        "link": {
+            "type": "string",
+            "format": "uri",
+            "default": "",
+            "editorLabel": "Link URL"
+        },
+        "target": {
+            "type": "integer",
+            "enum": [
+                0,
+                1
+            ],
+            "default": 0,
+            "editorLabel": "Open link in",
+            "editorControl": {
+                "kind": "select",
+                "options": [
+                    "0",
+                    "1"
+                ],
+                "optionLabels": [
+                    "Same tab",
+                    "New tab"
+                ]
+            }
+        },
+        "width": {
+            "type": "integer",
+            "default": 2
+        },
+        "height": {
+            "type": "integer",
+            "default": 2
+        },
+        "togglelightbox": {
+            "type": "integer",
+            "enum": [
+                0,
+                1
+            ],
+            "default": 0,
+            "editorLabel": "Hide image from lightbox",
+            "editorControl": {
+                "kind": "toggle",
+                "stringOn": "1",
+                "stringOff": "0"
+            }
+        },
+        "hide_title": {
+            "type": "integer",
+            "enum": [
+                0,
+                1
+            ],
+            "default": 0,
+            "editorLabel": "Hide title",
+            "editorControl": {
+                "kind": "toggle",
+                "stringOn": "1",
+                "stringOff": "0"
+            }
+        },
+        "filters": {
+            "type": "string",
+            "default": "",
+            "editorLabel": "Filters",
+            "editorControl": {
+                "kind": "metadataFiltersAutocomplete"
+            }
+        },
+        "video_url": {
+            "type": "string",
+            "default": "",
+            "editorLabel": "Video URL",
+            "editorControl": {
+                "kind": "text"
+            }
+        },
+        "video_title": {
+            "type": "string",
+            "default": ""
+        },
+        "video_alt": {
+            "type": "string",
+            "default": ""
+        },
+        "video_description": {
+            "type": "string",
+            "default": ""
+        },
+        "video_thumbnail": {
+            "type": "string",
+            "default": "",
+            "editorLabel": "Video thumbnail URL",
+            "editorControl": {
+                "kind": "mediaUrl",
+                "libraryType": "image",
+                "mediaFrameTitle": "Select a thumbnail image",
+                "selectButtonLabel": "Media Library"
+            }
+        },
+        "video_template": {
+            "type": "string",
+            "default": ""
+        },
+        "video_width": {
+            "type": "string",
+            "default": ""
+        },
+        "video_height": {
+            "type": "string",
+            "default": ""
+        },
+        "autoplay_thumbnail": {
+            "type": "string",
+            "default": "inherit",
+            "enum": [
+                "inherit",
+                "on",
+                "off"
+            ],
+            "editorLabel": "Autoplay thumbnail",
+            "enumOptionLabels": {
+                "inherit": "Inherit",
+                "on": "On",
+                "off": "Off"
+            }
+        },
+        "autoplay_lightbox": {
+            "type": "string",
+            "default": "inherit",
+            "enum": [
+                "inherit",
+                "on",
+                "off"
+            ],
+            "editorLabel": "Autoplay in lightbox",
+            "enumOptionLabels": {
+                "inherit": "Inherit",
+                "on": "On",
+                "off": "Off"
+            }
+        },
+        "loop_video": {
+            "type": "string",
+            "default": "inherit",
+            "enum": [
+                "inherit",
+                "on",
+                "off"
+            ],
+            "editorLabel": "Loop video",
+            "enumOptionLabels": {
+                "inherit": "Inherit",
+                "on": "On",
+                "off": "Off"
+            }
+        },
+        "exif_camera": {
+            "type": "string",
+            "default": "",
+            "editorLabel": "Camera model",
+            "editorMetadataIcon": "capturePhoto"
+        },
+        "exif_lens": {
+            "type": "string",
+            "default": "",
+            "editorLabel": "Lens",
+            "editorMetadataIcon": "aspectRatio"
+        },
+        "exif_focal_length": {
+            "type": "string",
+            "default": "",
+            "editorLabel": "Focal length",
+            "editorMetadataIcon": "lineDashed"
+        },
+        "exif_shutter_speed": {
+            "type": "string",
+            "default": "",
+            "editorLabel": "Shutter speed",
+            "editorMetadataIcon": "seen"
+        },
+        "exif_aperture": {
+            "type": "string",
+            "default": "",
+            "editorLabel": "Aperture",
+            "editorMetadataIcon": "plusCircle"
+        },
+        "exif_iso": {
+            "type": "string",
+            "default": "",
+            "editorLabel": "ISO",
+            "editorMetadataIcon": "chartBar"
+        },
+        "exif_date": {
+            "type": "string",
+            "default": "",
+            "editorLabel": "Date taken",
+            "editorMetadataIcon": "postDate"
+        },
+        "exif": {
+            "type": "string",
+            "default": "",
+            "editorLabel": "EXIF / extra",
+            "editorControl": {
+                "kind": "textarea"
+            },
+            "editorStateKey": "exifString"
+        },
+        "image_licensing": {
+            "type": "string",
+            "default": "none"
+        }
+    },
+    "flatToGroupedMappingNote": "Full mapping: Modula\\\\V2\\\\Settings\\\\Field_Registry::get_flat_to_grouped_mapping(). Adapter delegates to Field_Registry.",
+    "flatToGroupedMappingExamples": {
+        "grid_type": {
+            "group": "layout",
+            "key": "gridType",
+            "type": "string"
+        },
+        "uniform_grid_tile_aspect": {
+            "group": "layout",
+            "key": "uniformGridTileAspect",
+            "type": "string"
+        },
+        "uniform_grid_tile_aspect_custom": {
+            "group": "layout",
+            "key": "uniformGridTileAspectCustom",
+            "type": "object"
+        },
+        "fit_grid_image_align": {
+            "group": "layout",
+            "key": "fitGridImageAlign",
+            "type": "string"
+        },
+        "grid_row_height": {
+            "group": "layout",
+            "key": "gridRowHeight",
+            "type": "number"
+        },
+        "grid_justify_last_row": {
+            "group": "layout",
+            "key": "gridJustifyLastRow",
+            "type": "string"
+        },
+        "grid_image_dimensions": {
+            "group": "layout",
+            "key": "gridImageDimensions",
+            "type": "object"
+        },
+        "grid_image_crop": {
+            "group": "layout",
+            "key": "gridImageCrop",
+            "type": "boolean"
+        },
+        "gutter": {
+            "group": "layout",
+            "key": "gutter",
+            "type": "number"
+        },
+        "tablet_gutter": {
+            "group": "layout",
+            "key": "tabletGutter",
+            "type": "number"
+        },
+        "mobile_gutter": {
+            "group": "layout",
+            "key": "mobileGutter",
+            "type": "number"
+        },
+        "height": {
+            "group": "general",
+            "key": "height",
+            "type": "array"
+        },
+        "show_navigation": {
+            "group": "lightbox",
+            "key": "showNavigation",
+            "type": "boolean"
+        },
+        "upload_position": {
+            "group": "general",
+            "key": "uploadPosition",
+            "type": "string"
+        },
+        "hide_title": {
+            "group": "captions",
+            "key": "hideTitle",
+            "type": "boolean"
+        },
+        "titleColor": {
+            "group": "captions",
+            "key": "titleColor",
+            "type": "string"
+        },
+        "enableSocial": {
+            "group": "social",
+            "key": "enableSocial",
+            "type": "boolean"
+        }
+    }
+}

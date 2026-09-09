@@ -185,13 +185,10 @@ class Modula_Troubleshooting {
 		$gridtypes = apply_filters(
 			'modula_troubleshooting_gridtypes_handles',
 			array(
-				'custom-grid'    => array(
+				'custom-grid'  => array(
 					'scripts' => '',
 				),
-				'justified-grid' => array(
-					'scripts' => 'modula-grid-justified-gallery',
-				),
-				'isotope-grid'   => array(
+				'isotope-grid' => array(
 					'scripts' => array( 'modula-isotope-packery', 'modula-isotope' ),
 				),
 			)

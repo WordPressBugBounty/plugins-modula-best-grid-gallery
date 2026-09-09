@@ -191,7 +191,7 @@ wp.Modula = 'undefined' === typeof wp.Modula ? {} : wp.Modula;
 		},
 
 		checkGalleryType: function (type) {
-			if ('creative-gallery' == type || 'grid' == type) {
+			if ('creative-gallery' == type || 'grid' == type || 'polaroid' == type) {
 				// If resizeble is enable we will destroy it
 				if (this.isResizeble) {
 					this.disableResizeble();
@@ -383,7 +383,12 @@ wp.Modula = 'undefined' === typeof wp.Modula ? {} : wp.Modula;
 		},
 
 		checkGalleryType: function (type) {
-			if ('creative-gallery' == type || 'grid' == type || 'bnb' == type) {
+			if (
+				'creative-gallery' == type ||
+				'grid' == type ||
+				'bnb' == type ||
+				'polaroid' == type
+			) {
 				this.$el.hide();
 			} else if ('custom-grid' == type) {
 				this.$el.show();

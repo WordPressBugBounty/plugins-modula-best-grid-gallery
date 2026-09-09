@@ -1,0 +1,200 @@
+.modula .modula-video {
+	.modula-video-player-wrap {
+		position: relative;
+	}
+
+	.modula-video-player-wrap.playlist_right {
+		display: flex;
+		flex-direction: row;
+		gap: 10px;
+	}
+
+	.modula-video-player-wrap.playlist_right .modula-video-main-item {
+		width: 80%;
+		position: relative;
+	}
+
+	.modula-video-player-wrap.playlist_right .modula-video-items-wrap {
+		width: 20%;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.modula-video-player-wrap.playlist_bottom .modula-video-main-item,
+	.modula-video-player-wrap.playlist_bottom .modula-video-items-wrap {
+		width: 100%;
+		position: relative;
+	}
+
+	.modula-video-player-wrap.playlist_right .modula-video-items {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		position: absolute;
+		right: 0;
+		left: 0;
+		height: 100%;
+		overflow-y: auto;
+		padding-right: 10px;
+		padding-bottom: 10px;
+	}
+
+	.modula-video-player-wrap.playlist_bottom .modula-video-items {
+		display: flex;
+		flex-direction: row;
+		column-gap: 10px;
+		width: 100%;
+		overflow-x: auto;
+	}
+
+	.modula-video-player-wrap.playlist_bottom .modula-video-item {
+		flex: 0 0 calc(20% - 8px);
+		box-sizing: border-box;
+		margin-bottom: 10px;
+	}
+
+	.modula-video-player-wrap.playlist_bottom .modula-video-items-wrap {
+		margin-top: 10px;
+	}
+
+	.modula-video-main-item-content,
+	.modula-video-main-item-aspect {
+		position: relative;
+		width: 100%;
+	}
+
+	.modula-video-main-item-aspect {
+		padding-top: 56.25%;
+		background: #000;
+	}
+
+	.modula-video-gallery__player-mount {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	.modula-video-gallery__player-mount iframe,
+	.modula-video-gallery__player-mount video,
+	.modula-video-gallery__html5 {
+		width: 100%;
+		height: 100%;
+		border: 0;
+		display: block;
+		background: #000;
+	}
+
+	.modula-video-gallery__poster-btn {
+		position: absolute;
+		inset: 0;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		cursor: pointer;
+		z-index: 2;
+	}
+
+	.modula_video_preview_image {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
+	.modula-video-icon {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		pointer-events: none;
+		z-index: 3;
+		width: auto;
+		height: auto;
+	}
+
+	.modula-video-items .modula-video-item {
+		position: relative;
+		width: 100%;
+		flex-shrink: 0;
+		box-sizing: border-box;
+	}
+
+	.modula-video-items .modula-item-content {
+		position: relative;
+		background-color: #fff;
+		overflow: hidden;
+		width: 100%;
+		aspect-ratio: 16 / 9;
+	}
+
+	.modula-video-gallery__thumb-frame {
+		display: block;
+		width: 100%;
+		height: 100%;
+		aspect-ratio: 16 / 9;
+		overflow: hidden;
+		line-height: 0;
+		position: relative;
+		z-index: 0;
+	}
+
+	.modula-video-gallery__thumb-frame .modula-video-icon {
+		z-index: 25;
+	}
+
+	.modula-video-list-overlay {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		cursor: pointer;
+		z-index: 20;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: transparent;
+	}
+
+	/*
+	 * Playlist thumbs must not use legacy `.pic` (absolute fill + focal crop from modula.css).
+	 * Frame holds 16:9; image fills the frame centered.
+	 */
+	.modula-video-items img.modula-video-gallery__thumb {
+		display: block !important;
+		position: relative !important;
+		inset: auto !important;
+		top: auto !important;
+		left: auto !important;
+		width: 100% !important;
+		height: 100% !important;
+		max-width: 100% !important;
+		object-fit: contain !important;
+		object-position: center center !important;
+		background: #e8e8e8;
+	}
+
+	.modula-video-gallery__thumb--empty {
+		width: 100%;
+		height: 100%;
+		background: #e8e8e8;
+		object-fit: contain;
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: contain;
+	}
+
+
+	.modula-video--empty {
+		padding: 1rem;
+		text-align: center;
+	}
+
+	.modula-video-gallery__empty {
+		margin: 0;
+		opacity: 0.7;
+	}
+}

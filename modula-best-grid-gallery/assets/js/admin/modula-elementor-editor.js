@@ -32,6 +32,7 @@ jQuery(function ($) {
 						data: {
 							action: 'modula_elementor_ajax_search',
 							s: query,
+							nonce: modula_elementor_ajax.nonce,
 						},
 						error: function () {
 							callback();

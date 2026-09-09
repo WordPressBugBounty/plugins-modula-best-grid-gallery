@@ -1,0 +1,59 @@
+// Schema-driven upsells (`editorLightboxLiteUpsell`, `editorGalleryTypeUpsell`).
+@use '../variables' as *;
+
+.modula-settings-editor__editor-upsell {
+	margin: $mod-space-10 0 0;
+	padding: $mod-space-10 $mod-space-12;
+	max-width: 36rem;
+	box-sizing: border-box;
+	border-radius: $mod-space-4;
+	font-size: 12.5px;
+	line-height: 1.5;
+	color: #50575e;
+	background: #f0f6fc;
+	border: 1px solid #c5d9ed;
+}
+
+.modula-settings-editor__editor-upsell-heading {
+	margin: 0 0 $mod-space-8;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: #1d2327;
+}
+
+.modula-settings-editor__editor-upsell-text {
+	margin: 0 0 $mod-space-10;
+	white-space: pre-line;
+}
+
+.modula-settings-editor__editor-upsell-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: $mod-space-8;
+}
+
+.modula-settings-editor__editor-upsell-btn {
+	white-space: normal;
+	text-align: center;
+
+	&.modula-settings-editor__editor-upsell-btn--secondary {
+		box-shadow: inset 0 0 0 1px #00a32a;
+		color: #00a32a;
+
+		&:hover {
+			color: #008a20;
+			box-shadow: inset 0 0 0 1px #008a20;
+		}
+	}
+
+	&.modula-settings-editor__editor-upsell-btn--primary {
+		background: #00a32a;
+		border-color: #00a32a;
+
+		&:hover {
+			background: #008a20;
+			border-color: #008a20;
+		}
+	}
+}

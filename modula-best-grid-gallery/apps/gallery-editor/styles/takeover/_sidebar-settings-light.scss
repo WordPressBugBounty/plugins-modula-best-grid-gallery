@@ -1,0 +1,77 @@
+@use 'mixins' as *;
+@use '../variables' as *;
+
+// Light sidebar settings body — WP components use admin-like surfaces.
+.modula-settings-editor__app[data-appearance='light'] {
+	.modula-gallery-takeover__sidebar-settings-inner {
+		color-scheme: light;
+
+		.modula-settings-editor__hub-list-icon-wrap {
+			color: var(--mod-se-chrome-ink-secondary);
+		}
+
+		.modula-settings-editor__category-desc {
+			font-size: 12px;
+			line-height: 1.45;
+			margin-bottom: $mod-space-10;
+			color: var(--mod-se-sidebar-settings-ink-muted);
+		}
+
+		.modula-settings-editor__section-title {
+			color: var(--mod-se-ink, var(--mod-se-sidebar-settings-ink));
+			font-size: 11px;
+			font-weight: 600;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+		}
+
+		.modula-settings-editor__section-heading-label {
+			color: var(--mod-se-ink-3);
+			font-size: 11px;
+			font-weight: 600;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+		}
+
+		.modula-settings-editor__field-label,
+		.modula-settings-editor__field-label-with-tip,
+		.modula-settings-editor__inline-field-label {
+			color: var(--mod-se-sidebar-settings-ink);
+		}
+
+		.modula-settings-editor__field-path-tip {
+			color: var(--mod-se-sidebar-settings-ink-muted);
+
+			&:hover,
+			&:focus-visible {
+				color: var(--mod-se-chrome-ink);
+				background: var(--mod-se-hover-overlay);
+			}
+		}
+
+		.modula-settings-editor__field-error {
+			color: #d63638;
+		}
+
+		.modula-settings-editor__placeholder {
+			color: var(--mod-se-sidebar-settings-ink-muted);
+		}
+
+		// Full-width controls under stacked labels (metabox field-rows uses 2-column grid globally).
+		.components-base-control,
+		.components-select-control,
+		.components-text-control,
+		.components-textarea-control,
+		.components-input-control {
+			width: 100%;
+			max-width: none;
+		}
+
+		.components-select-control__input,
+		.components-input-control__container {
+			width: 100%;
+		}
+
+		@include modula-takeover-toggle-appearance;
+	}
+}

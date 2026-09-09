@@ -1,0 +1,227 @@
+@use '../variables' as *;
+
+.modula-settings-editor__category-desc {
+	margin: 0 0 $mod-space-14;
+	padding: 0;
+	color: #646970;
+	font-size: 13px;
+	line-height: 1.45;
+	max-width: 44em;
+}
+
+.modula-settings-editor__sections {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	max-width: 720px;
+}
+
+.modula-settings-editor__category--hub .modula-settings-editor__category-hub-submenu {
+	margin-top: $mod-space-8;
+}
+
+.modula-settings-editor__category-hub-submenu-inner {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	border: none;
+	border-radius: 0;
+	overflow: visible;
+	background: transparent;
+}
+
+.modula-settings-editor__category-hub-drill-row {
+	border-bottom: 1px solid #f0f0f1;
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	@media (hover: hover) {
+		&:hover {
+			background: #f6f7f7;
+		}
+	}
+
+	&:focus-within {
+		background: #f0f0f1;
+	}
+}
+
+.modula-settings-editor__category-hub-drill-btn.components-button {
+	display: flex;
+	width: 100%;
+	justify-content: space-between;
+	align-items: center;
+	gap: $mod-space-8;
+	box-sizing: border-box;
+	min-height: $mod-takeover-sidebar-list-row-min-height;
+	padding: $mod-takeover-sidebar-list-row-pad-y 0;
+	border-radius: 0;
+	text-align: left;
+	color: #1d2327;
+
+	&:hover:not(:disabled) {
+		background: transparent;
+	}
+
+	&:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+}
+
+.modula-settings-editor__category-hub-drill-label {
+	flex: 1;
+	min-width: 0;
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 1.35;
+	text-align: left;
+}
+
+.modula-settings-editor__category-hub-drill-chevron {
+	flex-shrink: 0;
+	color: #787c82;
+}
+
+.modula-settings-editor__hub-note-text {
+	margin: 0;
+	padding: 8px 0 12px;
+	font-size: 12px;
+	line-height: 1.45;
+	color: #787c82;
+}
+
+.modula-settings-editor__category--hub .modula-settings-editor__section--hub-field {
+	margin: 0;
+	padding: 0;
+	border-bottom: 1px solid #f0f0f1;
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	.modula-settings-editor__section-body {
+		max-width: none;
+	}
+
+	.modula-settings-editor__fields {
+		gap: 0;
+	}
+
+	.modula-settings-editor__field-row {
+		padding: $mod-takeover-sidebar-list-row-pad-y 0;
+		min-height: $mod-takeover-sidebar-list-row-min-height;
+		box-sizing: border-box;
+		align-items: center;
+		border-bottom: none;
+	}
+
+	.modula-settings-editor__field-row--toggle {
+		grid-template-rows: minmax($mod-takeover-sidebar-list-row-min-height, auto);
+		row-gap: 0;
+
+		&:has(.modula-settings-editor__field-toggle-foot) {
+			grid-template-rows:
+				minmax($mod-takeover-sidebar-list-row-min-height, auto) auto;
+			row-gap: $mod-space-10;
+		}
+	}
+
+	.modula-settings-editor__field-row--toggle-nested {
+		grid-template-columns: minmax(0, 1fr) auto auto;
+		grid-template-rows: minmax($mod-takeover-sidebar-list-row-min-height, auto);
+		column-gap: $mod-space-12;
+		row-gap: 0;
+		align-items: center;
+
+		&:has(.modula-settings-editor__field-toggle-foot) {
+			grid-template-rows:
+				minmax($mod-takeover-sidebar-list-row-min-height, auto) auto;
+			row-gap: $mod-space-10;
+		}
+	}
+
+	.components-toggle-control,
+	.components-toggle-control .components-base-control__field {
+		margin-bottom: 0 !important;
+	}
+}
+
+.modula-settings-editor__category--hub .modula-settings-editor__section--hub-field-embedded {
+	.modula-settings-editor__field-row {
+		min-height: 0;
+		padding: $mod-space-4 0;
+		align-items: stretch;
+	}
+
+	.modula-settings-editor__field-row--toggle,
+	.modula-settings-editor__field-row--toggle-nested {
+		grid-template-rows: auto auto;
+
+		&:has(.modula-settings-editor__field-toggle-foot) {
+			grid-template-rows: auto auto;
+		}
+	}
+}
+
+.modula-settings-editor__category--nested-stack .modula-settings-editor__section--nested-panel {
+	margin: 0;
+	padding: 0;
+	border-bottom: none;
+
+	.modula-settings-editor__section-body {
+		max-width: none;
+	}
+
+	.modula-settings-editor__nested-panel-upsell {
+		margin-bottom: $mod-space-12;
+	}
+
+	.modula-settings-editor__fields {
+		gap: 0;
+	}
+}
+
+.modula-settings-editor__section {
+	margin: 0;
+	padding: $mod-space-14 0 $mod-space-16;
+	border-bottom: 1px solid #f0f0f1;
+
+	&:first-child {
+		padding-top: $mod-space-2;
+	}
+
+	&:last-child {
+		border-bottom: none;
+		padding-bottom: $mod-space-4;
+	}
+}
+
+.modula-settings-editor__section-head {
+	margin-bottom: $mod-space-10;
+}
+
+.modula-settings-editor__section-titles {
+	min-width: 0;
+}
+
+.modula-settings-editor__section-title {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: #1d2327;
+	letter-spacing: -0.01em;
+}
+
+.modula-settings-editor__section-body {
+	max-width: 640px;
+}
+
+.modula-settings-editor__fields {
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-14;
+}

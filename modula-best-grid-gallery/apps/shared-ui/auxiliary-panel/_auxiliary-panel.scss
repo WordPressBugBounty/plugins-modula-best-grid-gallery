@@ -1,0 +1,73 @@
+// Middle-column tool panel — same furniture as settings (`chrome-2`), elevated on stage.
+// Differentiate via placement + `--mod-ui-shadow-md`; not via radius or foreign blues.
+.modula-ui-auxiliary-panel {
+	box-sizing: border-box;
+	flex: 0 0 min(320px, 36vw);
+	width: min(320px, 36vw);
+	max-width: 420px;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	overflow: hidden;
+	background: var(--mod-ui-chrome-2);
+	border: 1px solid var(--mod-ui-line);
+	border-radius: 0;
+	box-shadow: var(--mod-ui-shadow-md, none);
+	color: var(--mod-ui-ink);
+}
+
+.modula-ui-auxiliary-panel>* {
+	min-height: 0;
+}
+
+.modula-ui-auxiliary-panel__head {
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 8px;
+	min-height: 48px;
+	padding: 16px 20px;
+	box-sizing: border-box;
+	border-bottom: 1px solid var(--mod-ui-line);
+	background: transparent;
+}
+
+.modula-ui-auxiliary-panel__head-text {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 4px;
+}
+
+.modula-ui-auxiliary-panel__title {
+	margin: 0;
+	font-family: var(--mod-ui-font-ui, inherit);
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.25;
+	letter-spacing: -0.01em;
+	color: var(--mod-ui-ink);
+}
+
+.modula-ui-auxiliary-panel__hint {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.5;
+	font-weight: 400;
+	color: var(--mod-ui-ink-3);
+}
+
+.modula-ui-auxiliary-panel__close {
+	flex-shrink: 0;
+	margin: -4px -4px 0 0;
+	color: var(--mod-ui-ink-3);
+
+	&:hover {
+		color: var(--mod-ui-ink-2);
+	}
+}

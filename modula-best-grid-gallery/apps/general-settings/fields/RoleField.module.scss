@@ -1,0 +1,29 @@
+@use '../../shared-styles/spacing' as *;
+
+.roleFieldCard {
+    height: 100%;
+    margin-bottom: var(--theme-content-spacing);
+}
+
+.roleFieldCardHead {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    margin: 0;
+}
+
+.roleHeadToggle {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.roleFieldCardBody {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $mod-space-10 $mod-space-20;
+}
+
+.roleBodyToggle {
+    display: flex;
+    justify-content: space-between;
+}

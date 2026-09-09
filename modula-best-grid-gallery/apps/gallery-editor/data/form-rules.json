@@ -1,0 +1,1710 @@
+{
+	"version": "1.0",
+	"visibility": [
+		{
+			"pathPattern": "^general\\.width$",
+			"when": {
+				"path": "general.type",
+				"neq": "custom-grid"
+			}
+		},
+		{
+			"pathPattern": "^general\\.height$",
+			"when": {
+				"any": [
+					{
+						"path": "general.type",
+						"eq": "creative-gallery"
+					},
+					{
+						"all": [
+							{
+								"path": "general.type",
+								"eq": "polaroid"
+							},
+							{
+								"path": "polaroid.uniformSize",
+								"eq": false
+							}
+						]
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^general\\.randomFactor$",
+			"when": {
+				"path": "general.type",
+				"eq": "creative-gallery"
+			}
+		},
+		{
+			"pathPattern": "^general\\.shuffle$",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^slider\\.(tabletSlides|tabletScrolls|mobileSlides|mobileScrolls)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"eq": "slider"
+					},
+					{
+						"path": "responsive.enableResponsive",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^slider\\.(autoplaySpeed|pauseOnHover)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"eq": "slider"
+					},
+					{
+						"path": "slider.autoplay",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^slider\\.arrowsInside$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"eq": "slider"
+					},
+					{
+						"path": "slider.arrows",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^slider\\.centerPadding$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"eq": "slider"
+					},
+					{
+						"path": "slider.centerMode",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^slider\\.imageDimensions$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"eq": "slider"
+					},
+					{
+						"path": "slider.imageSize",
+						"eq": "custom"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^slider\\.imageCrop$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"eq": "slider"
+					},
+					{
+						"path": "slider.imageSize",
+						"eq": "custom"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^slider\\.(syncingNavImageDimensions|syncingNavImageCrop)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"eq": "slider"
+					},
+					{
+						"path": "slider.syncing",
+						"truthy": true
+					},
+					{
+						"path": "slider.syncingNavSize",
+						"eq": "custom"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^slider\\.(syncingNavSize|syncingNavThumbnailsNumber|syncingNavThumbnailsGutter|syncingNavThumbnailsBorderColor)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"eq": "slider"
+					},
+					{
+						"path": "slider.syncing",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^slider\\.imageInfoPosition$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"eq": "slider"
+					},
+					{
+						"path": "slider.imageInfo",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^slider\\.",
+			"when": {
+				"path": "general.type",
+				"eq": "slider"
+			}
+		},
+		{
+			"pathPattern": "^story\\.",
+			"when": {
+				"path": "general.type",
+				"eq": "story"
+			}
+		},
+		{
+			"pathPattern": "^showcase\\.",
+			"when": {
+				"path": "general.type",
+				"eq": "showcase"
+			}
+		},
+		{
+			"pathPattern": "^video\\.playlistPosition$",
+			"when": {
+				"path": "general.type",
+				"eq": "video"
+			}
+		},
+		{
+			"pathPattern": "^video\\.(autoplayVideos|loopVideos)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^video\\.(previewVideo|autoplayThumbnail|previewVideoDuration)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^video\\.previewVideoOffHint$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "video.previewVideo",
+						"eq": false
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^video\\.customVideoIcon$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "video.showVideoIcon",
+						"truthy": true
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^video\\.(videoIconIcon|videoIconColor|playIconSize)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "video.showVideoIcon",
+						"truthy": true
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^video\\.",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^responsive\\.(mobileColumns|tabletColumns)$",
+			"when": {
+				"all": [
+					{
+						"path": "responsive.enableResponsive",
+						"truthy": true
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^layout\\.gridType$",
+			"when": {
+				"path": "general.type",
+				"in": [
+					"grid",
+					"uniform-grid",
+					"fit-grid",
+					"parallax-masonry"
+				]
+			}
+		},
+		{
+			"pathPattern": "^layout\\.uniformGridTileAspect$",
+			"when": {
+				"path": "general.type",
+				"in": [
+					"uniform-grid",
+					"fit-grid"
+				]
+			}
+		},
+		{
+			"pathPattern": "^layout\\.uniformGridTileAspectCustom$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"in": [
+							"uniform-grid",
+							"fit-grid"
+						]
+					},
+					{
+						"path": "layout.uniformGridTileAspect",
+						"eq": "custom"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^layout\\.fitGridImageAlign$",
+			"when": {
+				"path": "general.type",
+				"eq": "fit-grid"
+			}
+		},
+		{
+			"pathPattern": "^layout\\.(gridRowHeight|gridJustifyLastRow)$",
+			"when": {
+				"path": "general.type",
+				"eq": "justified-grid"
+			}
+		},
+		{
+			"pathPattern": "^layout\\.(parallaxOverlayEnabled|parallaxMotionPreset)$",
+			"when": {
+				"path": "general.type",
+				"eq": "parallax-masonry"
+			}
+		},
+		{
+			"pathPattern": "^layout\\.(parallaxOverlayBackground|parallaxCaption)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"eq": "parallax-masonry"
+					},
+					{
+						"path": "layout.parallaxOverlayEnabled",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^hover\\.(hoverColor|hoverOpacity)$",
+			"when": {
+				"path": "hover.dimOverlay",
+				"truthy": true
+			}
+		},
+		{
+			"pathPattern": "^layout\\.(gutter|tabletGutter|mobileGutter)$",
+			"when": {
+				"path": "general.type",
+				"in": [
+					"grid",
+					"uniform-grid",
+					"fit-grid",
+					"justified-grid",
+					"parallax-masonry",
+					"creative-gallery",
+					"custom-grid",
+					"polaroid"
+				]
+			}
+		},
+		{
+			"pathPattern": "^layout\\.gridImageSize$",
+			"when": {
+				"path": "general.type",
+				"in": [
+					"grid",
+					"uniform-grid",
+					"fit-grid",
+					"justified-grid",
+					"parallax-masonry",
+					"creative-gallery",
+					"custom-grid",
+					"polaroid"
+				]
+			}
+		},
+		{
+			"pathPattern": "^layout\\.gridImageDimensions$",
+			"when": {
+				"all": [
+					{
+						"path": "layout.gridImageSize",
+						"eq": "custom"
+					},
+					{
+						"path": "general.type",
+						"in": [
+							"grid",
+							"uniform-grid",
+							"fit-grid",
+							"justified-grid",
+							"parallax-masonry",
+							"creative-gallery",
+							"polaroid"
+						]
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^layout\\.gridImageCrop$",
+			"when": {
+				"all": [
+					{
+						"path": "layout.gridImageSize",
+						"eq": "custom"
+					},
+					{
+						"path": "general.type",
+						"in": [
+							"grid",
+							"uniform-grid",
+							"fit-grid",
+							"justified-grid",
+							"parallax-masonry",
+							"creative-gallery",
+							"polaroid"
+						]
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^captions\\.galleryTitleType$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "captions.hideGalleryTitle",
+						"eq": false
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^social\\.(emailSubject|emailMessage)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "social.enableEmail",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^social\\.noNetworkStyleHint$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "social.enableTwitter",
+						"eq": false
+					},
+					{
+						"path": "social.enableFacebook",
+						"eq": false
+					},
+					{
+						"path": "social.enableWhatsapp",
+						"eq": false
+					},
+					{
+						"path": "social.enableLinkedin",
+						"eq": false
+					},
+					{
+						"path": "social.enablePinterest",
+						"eq": false
+					},
+					{
+						"path": "social.enableEmail",
+						"eq": false
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^social\\.(?!enableSocial$).+",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^captions\\.contentPlacement$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "bnb"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "general.type",
+						"neq": "parallax-masonry"
+					},
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^captions\\.compactCaptionPopover$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "bnb"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "general.type",
+						"neq": "parallax-masonry"
+					},
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^captions\\.compactCaptionMinSize$",
+			"when": {
+				"all": [
+					{
+						"path": "captions.compactCaptionPopover",
+						"truthy": true
+					},
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "bnb"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "general.type",
+						"neq": "parallax-masonry"
+					},
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^captions\\.(belowImageAlignment|belowImageSpacing|belowImagePadding)$",
+			"when": {
+				"all": [
+					{
+						"path": "captions.contentPlacement",
+						"eq": "below-image"
+					},
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "bnb"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "general.type",
+						"neq": "parallax-masonry"
+					},
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^loadingEffects\\.loadedScale$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "parallax-masonry"
+					},
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "loadingEffects.enableScale",
+						"truthy": true
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^loadingEffects\\.loadedRotate$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "parallax-masonry"
+					},
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "loadingEffects.enableRotate",
+						"truthy": true
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^loadingEffects\\.(loadedHSlide|loadedVSlide)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "parallax-masonry"
+					},
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "loadingEffects.enableSlide",
+						"truthy": true
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^loadingEffects\\.",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "parallax-masonry"
+					},
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^captions\\.(titleColor|titleFontSize|mobileTitleFontSize|titleFontWeight|sectionTitleStyle)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "captions.hideTitle",
+						"eq": false
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^captions\\.(captionColor|captionFontSize|mobileCaptionFontSize|captionFontWeight|sectionCaptionStyle)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "captions.hideDescription",
+						"eq": false
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^captions\\.(mobileCaptionCopy|sectionOnMobile)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "lightbox.lightbox",
+						"eq": "fancybox"
+					},
+					{
+						"path": "lightbox.showCaption",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^captions\\.",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^lightbox\\.toolbarOffHint$",
+			"when": {
+				"all": [
+					{
+						"path": "lightbox.lightbox",
+						"eq": "fancybox"
+					},
+					{
+						"path": "lightbox.toolbar",
+						"eq": false
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^lightbox\\.downloadAllButton$",
+			"when": {
+				"all": [
+					{
+						"path": "lightbox.lightbox",
+						"eq": "fancybox"
+					},
+					{
+						"path": "download.enableDownload",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^lightbox\\.openFullscreen$",
+			"when": {
+				"all": [
+					{
+						"path": "lightbox.lightbox",
+						"eq": "fancybox"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^lightbox\\.captionPosition$",
+			"when": {
+				"all": [
+					{
+						"path": "lightbox.lightbox",
+						"eq": "fancybox"
+					},
+					{
+						"any": [
+							{
+								"path": "lightbox.showTitle",
+								"truthy": true
+							},
+							{
+								"path": "lightbox.showCaption",
+								"truthy": true
+							}
+						]
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^lightbox\\.thumbsPosition$",
+			"when": {
+				"all": [
+					{
+						"path": "lightbox.lightbox",
+						"eq": "fancybox"
+					},
+					{
+						"path": "lightbox.showThumbnails",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^lightbox\\.clickNotLightboxHint$",
+			"when": {
+				"path": "lightbox.lightbox",
+				"neq": "fancybox"
+			}
+		},
+		{
+			"pathPattern": "^lightbox\\.(?!lightbox$|clickNotLightboxHint$).+",
+			"when": {
+				"path": "lightbox.lightbox",
+				"eq": "fancybox"
+			}
+		},
+		{
+			"pathPattern": "^hover\\.uploadCursor$",
+			"when": {
+				"path": "hover.cursor",
+				"eq": "custom"
+			}
+		},
+		{
+			"pathPattern": "^pagination\\.enableInfiniteScroll$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "creative-gallery"
+					},
+					{
+						"any": [
+							{
+								"path": "general.type",
+								"neq": "polaroid"
+							},
+							{
+								"path": "polaroid.uniformSize",
+								"truthy": true
+							}
+						]
+					},
+					{
+						"path": "pagination.enablePagination",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^pagination\\.",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "parallax-masonry"
+					},
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "general.type",
+						"neq": "bnb"
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^pagination\\.(paginationNumber|paginationColor|activePaginationColor)$",
+			"when": {
+				"all": [
+					{
+						"path": "pagination.enablePagination",
+						"truthy": true
+					},
+					{
+						"path": "pagination.enableInfiniteScroll",
+						"eq": false
+					},
+					{
+						"path": "pagination.enableLoadMore",
+						"eq": false
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^pagination\\.(?!enablePagination$).+",
+			"when": {
+				"path": "pagination.enablePagination",
+				"truthy": true
+			}
+		},
+		{
+			"pathPattern": "^licensing\\.displayWithDescription$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^licensing\\.",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^protection\\.",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^instagram\\.",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^performance\\.",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^exif\\.enableExif$",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^zoom\\.enableZoom$",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^deeplink\\.modulaDeeplink$",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^proofing\\.imageProofing$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^zoom\\.magnifiedWindowHint$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "zoom.enableZoom",
+						"truthy": true
+					},
+					{
+						"path": "zoom.zoomType",
+						"eq": "window"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^zoom\\.(?!enableZoom$).+",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "zoom.enableZoom",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^slideshow\\.(?!enableSlideshow$|sectionSlideshow$).+",
+			"when": {
+				"path": "slideshow.enableSlideshow",
+				"truthy": true
+			}
+		},
+		{
+			"pathPattern": "^deeplink\\.(?!modulaDeeplink$|modulaDeeplinkOffHint$).+",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^deeplink\\.modulaDeeplinkOffHint$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "deeplink.modulaDeeplink",
+						"eq": false
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^watermark\\.watermarkType$",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^watermark\\.(sectionText|watermarkText|watermarkTextSize|watermarkTextColor|sectionImage|watermarkImage|watermarkImageDimensionWidth|sectionPlacement|watermarkPosition|watermarkMargin|watermarkOpacity)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "watermark.customSettingsWatermark",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^watermark\\.watermarkTextTypeHint$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "watermark.customSettingsWatermark",
+						"truthy": true
+					},
+					{
+						"path": "watermark.watermarkType",
+						"neq": "text"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^watermark\\.watermarkImageTypeHint$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "watermark.customSettingsWatermark",
+						"truthy": true
+					},
+					{
+						"path": "watermark.watermarkType",
+						"neq": "image"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^watermark\\.(?!enableWatermark$).+",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^passwordProtect\\.(?!enablePassword$).+",
+			"when": {
+				"path": "passwordProtect.enablePassword",
+				"truthy": true
+			}
+		},
+		{
+			"pathPattern": "^download\\.enableDownload$",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^comments\\.commentStatus$",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^comments\\.(?!commentStatus$).+",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "comments.commentStatus",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^download\\.(sectionGalleryButton|sectionHowItLooks|sectionZipName)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "download.enableDownload",
+						"truthy": true
+					},
+					{
+						"path": "download.downloadAllGalleryButton",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^download\\.downloadAllGalleryIconColor$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "download.enableDownload",
+						"truthy": true
+					},
+					{
+						"path": "download.downloadAllGalleryButton",
+						"truthy": true
+					},
+					{
+						"path": "download.downloadAllGalleryButtonIcon",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^download\\.(downloadAllColor|downloadAllBackgroundColor|downloadAllGalleryButtonIcon|downloadAllHposition|downloadAllPosition|downloadAllLabel|customZipName)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "download.enableDownload",
+						"truthy": true
+					},
+					{
+						"path": "download.downloadAllGalleryButton",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^download\\.(?!enableDownload$).+",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "download.enableDownload",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^comments\\.",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^filters\\.(allFilterLabel|sectionAllLabel)$",
+			"when": {
+				"path": "filters.hideAllFilter",
+				"eq": false
+			}
+		},
+		{
+			"pathPattern": "^filters\\.collapsibleActionText$",
+			"when": {
+				"path": "filters.enableCollapsibleFilters",
+				"truthy": true
+			}
+		},
+		{
+			"pathPattern": "^exif\\.(?!enableExif$|enableExifOffHint$).+",
+			"when": {
+				"path": "general.type",
+				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^exif\\.enableExifOffHint$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "exif.enableExif",
+						"eq": false
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^proofing\\.(?!imageProofing$).+",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					},
+					{
+						"path": "__modulaReserved.__proofingShowSchemaFields",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^style\\.sectionFrame$",
+			"when": {
+				"path": "general.type",
+				"neq": "story"
+			}
+		},
+		{
+			"pathPattern": "^style\\.(borderRadius|borderSize)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "polaroid"
+					},
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^style\\.borderColor$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "polaroid"
+					},
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "style.borderSize",
+						"neq": "0"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^style\\.shadowSize$",
+			"when": {
+				"path": "general.type",
+				"neq": "story"
+			}
+		},
+		{
+			"pathPattern": "^style\\.shadowColor$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "style.shadowSize",
+						"neq": "0"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^polaroid\\.uniformColumns$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"eq": "polaroid"
+					},
+					{
+						"path": "polaroid.uniformSize",
+						"truthy": true
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^polaroid\\.",
+			"when": {
+				"path": "general.type",
+				"eq": "polaroid"
+			}
+		},
+		{
+			"pathPattern": "^responsive\\.",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "general.type",
+						"neq": "creative-gallery"
+					},
+					{
+						"path": "general.type",
+						"neq": "bnb"
+					},
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"any": [
+							{
+								"path": "general.type",
+								"neq": "polaroid"
+							},
+							{
+								"path": "polaroid.uniformSize",
+								"truthy": true
+							}
+						]
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^protection\\.rightClickMessage$",
+			"when": {
+				"path": "protection.protection",
+				"truthy": true
+			}
+		},
+		{
+			"pathPattern": "^hover\\.",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^template\\.",
+			"when": {
+				"path": "general.type",
+				"eq": "template"
+			}
+		}
+	]
+}

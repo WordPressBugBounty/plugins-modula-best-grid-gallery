@@ -1,0 +1,133 @@
+// Vertical tabs: nav column + content — saves horizontal space in the metabox.
+@use '../variables' as *;
+
+.modula-settings-editor__tab-panel {
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	width: 100%;
+	min-width: 0;
+	gap: 0;
+
+	.components-tab-panel__tabs {
+		display: flex;
+		flex-direction: column;
+		flex-shrink: 0;
+		width: 168px;
+		max-width: 32%;
+		margin: 0;
+		padding: $mod-space-4 0 $mod-space-8;
+		overflow-x: visible;
+		overflow-y: auto;
+		scrollbar-width: thin;
+		max-height: min(70vh, 900px);
+		border-bottom: none;
+		border-right: 1px solid #c3c4c7;
+		background: #fcfcfd;
+		box-sizing: border-box;
+	}
+
+	.components-tab-panel__tabs-item {
+		flex-shrink: 0;
+		width: 100%;
+		justify-content: flex-start;
+		text-align: left;
+		margin: 0 0 1px;
+		padding: $mod-space-10 $mod-space-12 $mod-space-10 $mod-space-10;
+		font-size: 13px;
+		line-height: 1.35;
+		color: #50575e;
+		border-radius: 0;
+		background: transparent;
+		height: auto !important;
+		min-height: $mod-space-40;
+
+		&:hover {
+			color: #1d2327;
+			background: rgba(0, 0, 0, 0.04);
+		}
+
+		&.is-active {
+			color: var(--modula-takeover-accent, #2271b1);
+			font-weight: 600;
+			background: color-mix(
+				in srgb,
+				var(--modula-takeover-accent, #2271b1) 6%,
+				transparent
+			);
+		}
+
+		&::after {
+			top: 0;
+			right: auto;
+			bottom: 0;
+			left: 0;
+			width: 3px;
+			height: auto !important;
+			background: var(--modula-takeover-accent, #2271b1);
+			border-radius: 0 $mod-space-2 $mod-space-2 0;
+		}
+
+		&.is-active::after {
+			opacity: 1;
+		}
+
+		&:not(.is-active)::after {
+			opacity: 0;
+		}
+	}
+
+	.components-tab-panel__tab-content {
+		flex: 1;
+		min-width: 0;
+		min-height: 120px;
+		padding: $mod-space-4 0 $mod-space-8 $mod-space-16;
+		outline: none;
+		box-sizing: border-box;
+	}
+}
+
+@media (max-width: 600px) {
+	.modula-settings-editor__tab-panel {
+		flex-direction: column;
+		align-items: stretch;
+
+		.components-tab-panel__tabs {
+			flex-direction: row;
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			overflow-y: visible;
+			max-height: none;
+			width: 100%;
+			max-width: none;
+			padding: 0 0 0 $mod-space-2;
+			border-right: none;
+			border-bottom: 1px solid #c3c4c7;
+			background: transparent;
+		}
+
+		.components-tab-panel__tabs-item {
+			width: auto;
+			flex-shrink: 0;
+			min-height: $mod-space-36;
+			padding: $mod-space-8 $mod-space-12 $mod-space-10;
+
+			&::after {
+				top: auto;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				width: auto;
+				height: 3px;
+			}
+
+			&:not(.is-active)::after {
+				opacity: 0;
+			}
+		}
+
+		.components-tab-panel__tab-content {
+			padding: $mod-space-12 0 0;
+		}
+	}
+}

@@ -1,0 +1,25 @@
+/* Self-hosted Playfair Display for Modula content blocks (gf-playfair-display). */
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../../../fonts/content-blocks/gf-playfair-display/playfair-display-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('../../../fonts/content-blocks/gf-playfair-display/playfair-display-latin-600-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url('../../../fonts/content-blocks/gf-playfair-display/playfair-display-latin-700-normal.woff2') format('woff2');
+}

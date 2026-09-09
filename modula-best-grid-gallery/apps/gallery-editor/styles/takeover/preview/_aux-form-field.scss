@@ -1,0 +1,132 @@
+@use '../../variables' as *;
+
+/* Auxiliary panel: form-field picker (enum / hover catalog) */
+.modula-gallery-takeover__aux-form-field {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	height: 100%;
+}
+
+.modula-gallery-takeover__aux-form-field-head {
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-4;
+	min-height: $mod-takeover-workspace-panel-head-min-height;
+	padding: $mod-space-16 $mod-space-20;
+	box-sizing: border-box;
+	border-bottom: 1px solid var(--mod-se-line, #{$mod-takeover-border-light});
+	justify-content: center;
+	background: transparent;
+}
+
+.modula-gallery-takeover__aux-form-field-title {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.25;
+	color: var(--mod-se-ink, #{$mod-takeover-text-strong});
+	letter-spacing: -0.01em;
+}
+
+.modula-gallery-takeover__aux-form-field-hint {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--mod-se-ink-3, #{$mod-takeover-text-muted});
+}
+
+.modula-gallery-takeover__aux-form-field-body {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+	padding: $mod-space-16 $mod-space-16 $mod-space-20;
+}
+
+.modula-gallery-takeover__aux-form-field-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-4;
+}
+
+.modula-gallery-takeover__aux-form-field-option {
+	display: block;
+	width: 100%;
+	margin: 0;
+	padding: $mod-space-12 $mod-space-12;
+	text-align: left;
+	border-radius: 0;
+	background: var(--mod-se-surface, #{$mod-takeover-surface-raised});
+	border: 1px solid var(--mod-se-line-soft, #{$mod-takeover-border-light-muted});
+	color: var(--mod-se-ink, #{$mod-takeover-text-strong});
+	font-size: 13px;
+	line-height: 1.35;
+	cursor: pointer;
+	box-sizing: border-box;
+	transition:
+		background var(--mod-se-duration-fast, 0.12s) ease,
+		border-color var(--mod-se-duration-fast, 0.12s) ease;
+
+	&:hover:not(:disabled) {
+		border-color: var(--mod-se-line, #{$mod-takeover-border-light});
+	}
+
+	&:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
+	&.is-selected {
+		background: var(--mod-se-accent-soft, #edf0fe);
+		border-color: var(--mod-se-accent, #{$modula-takeover-accent});
+		box-shadow: none;
+	}
+}
+
+.modula-gallery-takeover__aux-form-field-option-label {
+	display: block;
+}
+
+.modula-gallery-takeover__aux-form-field-badges {
+	list-style: none;
+	margin: $mod-space-8 0 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: $mod-space-4;
+	font-size: 11px;
+	color: var(--mod-se-ink-3, #{$mod-takeover-text-muted});
+
+	li {
+		margin: 0;
+		padding: $mod-space-2 $mod-space-8;
+		border-radius: 0;
+		background: var(--mod-se-chrome-2, #{$mod-takeover-surface-muted});
+		border: 1px solid var(--mod-se-line-soft, #{$mod-takeover-border-light-muted});
+	}
+}
+
+.modula-gallery-takeover__aux-form-field-error {
+	margin: $mod-space-8 0 0;
+	font-size: 13px;
+	color: var(--mod-se-danger, #d63638);
+}
+
+.modula-gallery-takeover__aux-form-field-fallback {
+	margin: $mod-space-8 0 0;
+	font-size: 13px;
+
+	a {
+		color: var(--mod-se-accent-ink, #{$modula-takeover-accent});
+	}
+}
+
+.modula-gallery-takeover__aux-unknown {
+	padding: $mod-space-16;
+	font-size: 13px;
+	color: var(--mod-se-ink-3, #{$mod-takeover-text-muted});
+}

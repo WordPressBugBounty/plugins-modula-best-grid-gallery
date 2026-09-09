@@ -1,0 +1,341 @@
+@use "../../variables" as *;
+
+/*
+ * Portal root carries appearance (not under `.modula-settings-editor__app`).
+ * Token values match Lite `_appearance-vars.scss` / style kit.
+ */
+.modula-gallery-modal--light,
+.modula-gallery-modal--dark {
+	--mod-ui-surface: var(--mod-se-surface);
+	--mod-ui-chrome: var(--mod-se-chrome);
+	--mod-ui-chrome-2: var(--mod-se-chrome-2);
+	--mod-ui-line: var(--mod-se-line);
+	--mod-ui-line-soft: var(--mod-se-line-soft);
+	--mod-ui-ink: var(--mod-se-ink);
+	--mod-ui-ink-2: var(--mod-se-ink-2);
+	--mod-ui-ink-3: var(--mod-se-ink-3);
+	--mod-ui-accent: var(--mod-se-accent);
+	--mod-ui-accent-ink: var(--mod-se-accent-ink);
+	--mod-ui-accent-soft: var(--mod-se-accent-soft);
+	--mod-ui-danger: var(--mod-se-danger);
+	--mod-ui-shadow-md: var(--mod-se-shadow-md);
+}
+
+.modula-gallery-modal--light {
+	color-scheme: light;
+	--mod-se-surface: #fff;
+	--mod-se-chrome: #f6f6f4;
+	--mod-se-chrome-2: #f0f0ed;
+	--mod-se-line: #e3e3de;
+	--mod-se-line-soft: #edede8;
+	--mod-se-ink: #16161a;
+	--mod-se-ink-2: #56565e;
+	--mod-se-ink-3: #8b8b93;
+	--mod-se-danger: #b4362b;
+	--mod-se-accent: #2e4fe8;
+	--mod-se-accent-ink: #2e4fe8;
+	--mod-se-accent-soft: #edf0fe;
+	--mod-se-shadow-md: 0 4px 22px rgb(0 0 0 / 12%), 0 0 0 1px rgb(0 0 0 / 4%);
+}
+
+.modula-gallery-modal--dark {
+	color-scheme: dark;
+	--mod-se-surface: #202126;
+	--mod-se-chrome: #17181b;
+	--mod-se-chrome-2: #1d1e22;
+	--mod-se-line: #2c2e34;
+	--mod-se-line-soft: #26282d;
+	--mod-se-ink: #ececef;
+	--mod-se-ink-2: #a2a2ac;
+	--mod-se-ink-3: #74747e;
+	--mod-se-danger: #f08a7e;
+	--mod-se-accent: #6b85ff;
+	--mod-se-accent-ink: #93a6ff;
+	--mod-se-accent-soft: #21243a;
+	--mod-se-shadow-md: 0 4px 22px rgb(0 0 0 / 45%), 0 0 0 1px rgb(255 255 255 / 4%);
+}
+
+/* Shared gallery builder modal shell (WordPress media-modal pattern). */
+.modula-gallery-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 1000000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: $mod-space-24;
+	box-sizing: border-box;
+	pointer-events: none;
+
+	&__backdrop {
+		position: absolute;
+		inset: 0;
+		background: $mod-takeover-modal-backdrop;
+		pointer-events: auto;
+	}
+
+	&__panel {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+		background: var(--mod-se-surface, #fff);
+		color: var(--mod-se-ink, #16161a);
+		border: 1px solid var(--mod-se-line, #e3e3de);
+		border-radius: 0;
+		box-shadow: var(
+			--mod-se-shadow-md,
+			0 4px 22px rgb(0 0 0 / 12%),
+			0 0 0 1px rgb(0 0 0 / 4%)
+		);
+		pointer-events: auto;
+
+		&--small {
+			width: min(440px, calc(100vw - #{$mod-space-32}));
+			height: auto;
+			max-height: calc(100vh - 80px);
+		}
+
+		&--medium {
+			width: min(640px, calc(100vw - 48px));
+			height: auto;
+			max-height: calc(100vh - 80px);
+		}
+
+		&--large {
+			width: min(1160px, calc(100vw - 64px));
+			height: min(820px, calc(100vh - 80px));
+			max-height: calc(100vh - 80px);
+		}
+
+		&--xlarge {
+			width: min(1440px, calc(100vw - 48px));
+			height: min(900px, calc(100vh - 48px));
+			max-height: calc(100vh - 48px);
+		}
+	}
+
+	&__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: $mod-space-16;
+		flex: 0 0 auto;
+		min-height: 52px;
+		padding: $mod-space-10 $mod-space-16;
+		background: var(--mod-se-surface, #fff);
+		border-bottom: 1px solid var(--mod-se-line, #e3e3de);
+	}
+
+	&__header-main {
+		display: flex;
+		align-items: center;
+		gap: $mod-space-10;
+		min-width: 0;
+	}
+
+	&__header-icon {
+		flex-shrink: 0;
+		color: var(--mod-se-ink-2, #56565e);
+	}
+
+	&__header-text {
+		min-width: 0;
+	}
+
+	&__title {
+		margin: 0;
+		font-size: 13px;
+		font-weight: 600;
+		line-height: 1.35;
+		color: var(--mod-se-ink, #16161a);
+	}
+
+	&__subtitle {
+		margin: 2px 0 0;
+		font-size: 12px;
+		line-height: 1.35;
+		color: var(--mod-se-ink-2, #56565e);
+	}
+
+	&__header-actions {
+		display: flex;
+		flex-wrap: nowrap;
+		align-items: center;
+		gap: $mod-space-6;
+		flex-shrink: 0;
+	}
+
+	&__header-nav.components-button {
+		min-height: 32px;
+		height: 32px;
+		padding-left: $mod-space-10;
+		padding-right: $mod-space-10;
+		font-size: 13px;
+		white-space: nowrap;
+		color: var(--mod-se-ink, #16161a);
+	}
+
+	&__divider {
+		display: block;
+		flex-shrink: 0;
+		width: 1px;
+		height: 24px;
+		margin: 0 $mod-space-4;
+		background: var(--mod-se-line, #e3e3de);
+	}
+
+	&__close.components-button {
+		min-width: 36px;
+		width: 36px;
+		height: 36px;
+		padding: 0;
+		justify-content: center;
+		color: var(--mod-se-ink-2, #56565e);
+	}
+
+	&__body {
+		flex: 1 1 auto;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+		color: var(--mod-se-ink, #16161a);
+
+		&--overflow-auto {
+			overflow-x: hidden;
+			overflow-y: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+
+		&--overflow-hidden {
+			overflow: hidden;
+		}
+	}
+
+	&__footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: $mod-space-16;
+		flex: 0 0 auto;
+		min-height: 56px;
+		padding: $mod-space-10 $mod-space-16;
+		background: var(--mod-se-chrome, #f6f6f4);
+		border-top: 1px solid var(--mod-se-line, #e3e3de);
+	}
+
+	&__footer-start {
+		display: flex;
+		flex: 1;
+		align-items: center;
+		gap: $mod-space-8;
+		min-width: 0;
+	}
+
+	&__footer-aux {
+		display: none;
+	}
+
+	&__footer-actions {
+		display: flex;
+		flex-wrap: nowrap;
+		justify-content: flex-end;
+		align-items: center;
+		gap: $mod-space-8;
+		flex-shrink: 0;
+	}
+
+	&__footer-link.components-button {
+		padding-left: 0;
+		font-size: 13px;
+		color: var(--mod-se-ink-2, #56565e);
+
+		&:not(:disabled):not([aria-disabled="true"]):hover {
+			color: var(--mod-se-ink, #16161a);
+		}
+	}
+
+	&__footer-cancel.components-button {
+		font-size: 13px;
+		color: var(--mod-se-accent-ink, #2e4fe8);
+
+		&:not(:disabled):not([aria-disabled="true"]):hover {
+			color: var(--mod-se-accent, #2e4fe8);
+		}
+	}
+
+	&__footer-primary.components-button.is-primary {
+		min-height: 32px;
+		font-size: 13px;
+	}
+
+	&__footer-save-close.components-button {
+		min-height: 32px;
+		font-size: 13px;
+	}
+
+	&__footer-destructive.components-button.is-destructive {
+		min-height: 32px;
+		font-size: 13px;
+	}
+}
+
+@media (max-width: 782px) {
+	.modula-gallery-modal {
+		padding: $mod-space-12;
+
+		&__panel--large,
+		&__panel--xlarge {
+			width: calc(100vw - #{$mod-space-24});
+			height: min(820px, calc(100vh - 48px));
+			max-height: calc(100vh - 48px);
+		}
+	}
+}
+
+/* wp.media sits below our modals (z-index ~1M); hide builder modals while it is open. */
+body.modula-wp-media-frame-open .modula-gallery-modal {
+	visibility: hidden;
+	pointer-events: none;
+}
+
+/* Small confirm dialogs (e.g. gallery layout change). Loaded with GalleryModal shell. */
+.modula-settings-editor-confirm-modal__body {
+	padding: $mod-space-20 $mod-space-24;
+}
+
+.modula-settings-editor-confirm-modal__message {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.55;
+	color: var(--mod-se-ink-2, #56565e);
+}
+
+.modula-gallery-modal__preset-json-body {
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-16;
+	padding: $mod-space-20 $mod-space-24;
+}
+
+.modula-gallery-modal__preset-json-intro {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.55;
+	color: var(--mod-se-ink-2, #56565e);
+}
+
+.modula-gallery-modal__preset-json-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: $mod-space-12;
+}
+
+.modula-gallery-modal__preset-json-error {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.45;
+	color: var(--mod-se-danger, #b4362b);
+}

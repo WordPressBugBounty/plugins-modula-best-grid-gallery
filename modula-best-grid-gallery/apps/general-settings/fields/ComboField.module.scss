@@ -1,0 +1,24 @@
+.disabledClass {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.comboFieldItem {
+    flex-shrink: 0;
+
+    &.small {
+        width: 18%;
+    }
+
+    &.medium {
+        width: 38%;
+    }
+
+    &.large {
+        width: 49.2%;
+    }
+
+    &.full {
+        width: 100%;
+    }
+}

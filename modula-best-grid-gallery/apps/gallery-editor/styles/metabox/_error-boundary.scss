@@ -1,0 +1,32 @@
+// Fallback UI when the settings editor hits an uncaught render error.
+.modula-settings-editor__error-boundary {
+	margin: 1rem 0;
+}
+
+.modula-settings-editor__error-boundary-text {
+	margin: 0 0 0.75rem;
+}
+
+.modula-settings-editor__error-boundary-details {
+	margin: 0 0 0.75rem;
+
+	summary {
+		cursor: pointer;
+	}
+
+	pre {
+		margin: 0.5rem 0 0;
+		max-height: 10rem;
+		overflow: auto;
+		font-size: 11px;
+		white-space: pre-wrap;
+		word-break: break-word;
+	}
+}
+
+.modula-settings-editor__error-boundary-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-top: 0.75rem;
+}

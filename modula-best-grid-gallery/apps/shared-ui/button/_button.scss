@@ -1,0 +1,138 @@
+.modula-ui-button {
+	box-sizing: border-box;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	margin: 0;
+	min-height: 32px;
+	height: 32px;
+	padding: 0 12px;
+	border: 1px solid transparent;
+	border-radius: 0;
+	font-family: var(--mod-ui-font-ui, inherit);
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1;
+	text-decoration: none;
+	cursor: pointer;
+	transition:
+		background var(--mod-ui-duration-fast, 0.12s) ease,
+		color var(--mod-ui-duration-fast, 0.12s) ease,
+		border-color var(--mod-ui-duration-fast, 0.12s) ease,
+		box-shadow var(--mod-ui-duration-fast, 0.12s) ease;
+
+	&:disabled,
+	&.is-disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+		pointer-events: none;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: 0 0 0 3px var(--mod-ui-accent-soft, transparent);
+	}
+
+	&.is-confirm-armed {
+		color: var(--mod-ui-danger, #d63638);
+		border-color: var(--mod-ui-danger, #d63638);
+		background: color-mix(in srgb,
+				var(--mod-ui-danger, #d63638) 12%,
+				transparent);
+	}
+
+	&--mini {
+		min-height: 28px;
+		height: 28px;
+		padding: 0 8px;
+	}
+
+	&--primary {
+		font-weight: 600;
+		color: #fff;
+		background: var(--mod-ui-accent);
+		border-color: var(--mod-ui-accent);
+		box-shadow: var(--mod-ui-shadow-sm, none);
+
+		&:hover:not(:disabled):not(.is-disabled) {
+			filter: brightness(1.05);
+		}
+	}
+
+	&--ghost {
+		color: var(--mod-ui-ink);
+		background: transparent;
+		border-color: var(--mod-ui-line);
+
+		&:hover:not(:disabled):not(.is-disabled) {
+			background: var(--mod-ui-chrome-2);
+		}
+	}
+
+	&--plain {
+		color: var(--mod-ui-ink-2);
+		background: transparent;
+		border-color: transparent;
+
+		&:hover:not(:disabled):not(.is-disabled) {
+			color: var(--mod-ui-ink);
+			background: var(--mod-ui-chrome-2);
+		}
+	}
+
+	// Full-width outlined CTA (media pick / watermark / Instagram connect).
+	// Double-class specificity so WP admin `a { … }` resets cannot strip padding.
+	&.modula-ui-button--panel {
+		width: 100%;
+		height: auto;
+		min-height: 44px;
+		gap: 8px;
+		padding: 12px 14px;
+		line-height: 1.25;
+		text-align: center;
+		color: var(--mod-ui-accent-ink, var(--mod-ui-accent));
+		background: transparent;
+		border-color: var(--mod-ui-line);
+		box-shadow: none;
+
+		&:hover:not(:disabled):not(.is-disabled) {
+			color: var(--mod-ui-ink);
+			background: var(--mod-ui-chrome-2);
+			border-color: var(--mod-ui-ink-3);
+		}
+
+		&:focus-visible {
+			border-color: var(--mod-ui-accent);
+			box-shadow: 0 0 0 2px var(--mod-ui-accent-soft, transparent);
+		}
+
+		svg {
+			flex: 0 0 auto;
+			fill: currentColor;
+		}
+
+		/* Compact panel — same colours as watermark CTA, 32px tall (still block by default). */
+		&.modula-ui-button--mini {
+			min-height: 32px;
+			height: 32px;
+			gap: 6px;
+			padding: 0 12px;
+			line-height: 1;
+		}
+	}
+}
+
+// Anchor form — WP admin often zeros link padding; keep panel box model explicit.
+a.modula-ui-button.modula-ui-button--panel {
+	display: inline-flex;
+	box-sizing: border-box;
+	width: 100%;
+	height: auto;
+	min-height: 44px;
+	padding: 12px 14px;
+	text-decoration: none;
+}

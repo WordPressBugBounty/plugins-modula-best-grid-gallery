@@ -399,7 +399,7 @@ jQuery(window).on('elementor/frontend/init', function () {
 			size = Math.floor((containerWidth / columns) * 1000) / 1000;
 		}
 
-		this.$items.not('.jtg-hidden').each(function (i, item) {
+		this.$items.not('.modula-hidden').each(function (i, item) {
 			var slot = {},
 				widthColumns,
 				heightColumns,
@@ -494,14 +494,11 @@ jQuery(window).on('elementor/frontend/init', function () {
 			instance.options.height = instance.options.desktopHeight;
 		}
 
-		this.$itemsCnt.data(
-			'area',
-			this.$itemsCnt.width() * this.options.height
-		);
-
+		var area = this.$itemsCnt.width() * this.options.height;
+		this.$itemsCnt.data('area', area);
 		this.lastWidth = this.$itemsCnt.width();
 
-		for (var i = 0; i < this.$items.not('.jtg-hidden').length; i++) {
+		for (var i = 0; i < this.$items.not('.modula-hidden').length; i++) {
 			this.tiles.push(instance.getSlot());
 		}
 
@@ -509,7 +506,7 @@ jQuery(window).on('elementor/frontend/init', function () {
 			return x.position - y.position;
 		});
 
-		this.$items.not('.jtg-hidden').each(function (i, item) {
+		this.$items.not('.modula-hidden').each(function (i, item) {
 			var slot = instance.tiles[i];
 
 			$(item).data('size', slot);
@@ -551,7 +548,6 @@ jQuery(window).on('elementor/frontend/init', function () {
 	// initialize the justified gallery.
 	Plugin.prototype.createAutoGrid = function () {
 		var plugin = this;
-
 		this.$itemsCnt.justifiedGallery({
 			rowHeight: this.options.rowHeight,
 			margins: this.options.gutter,
@@ -567,7 +563,6 @@ jQuery(window).on('elementor/frontend/init', function () {
 	// create the mansonry gallery
 	Plugin.prototype.createColumnsGrid = function () {
 		var instance = this;
-
 		this.$itemsCnt.modulaisotope({
 			// set itemSelector so .grid-sizer is not used in layout
 			itemSelector: '.modula-item',
@@ -600,7 +595,6 @@ jQuery(window).on('elementor/frontend/init', function () {
 				area: this.$itemsCnt.width() * this.options.height,
 				position: 0,
 			};
-
 			return tile;
 		}
 
@@ -743,6 +737,7 @@ jQuery(window).on('elementor/frontend/init', function () {
 		var img = new Image();
 		img.onload = function () {
 			size = { width: this.width, height: this.height };
+
 			source.data('size', size);
 			instance.placeImage(index);
 		};
@@ -1349,15 +1344,15 @@ jQuery(window).on('elementor/frontend/init', function () {
 	};
 
 	var setupSocials = function ($tiles) {
-		$tiles.find('.jtg-social-expandable').on('click', function (e) {
+		$tiles.find('.modula-social-expandable').on('click', function (e) {
 			e.preventDefault();
 			e.stopPropagation();
 
 			var $parent = $(this).parent();
-			var $icons = $parent.children('.jtg-social-expandable-icons');
+			var $icons = $parent.children('.modula-social-expandable-icons');
 
 			$tiles
-				.find('.jtg-social-expandable-icons')
+				.find('.modula-social-expandable-icons')
 				.not($icons)
 				.removeClass('modula-show-socials');
 

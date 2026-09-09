@@ -1,0 +1,296 @@
+@use '../variables' as *;
+@use 'mixins' as *;
+
+.modula-gallery-takeover__workspace {
+	display: flex;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+}
+
+/* FSE-style canvas: dark gutters around optional aux panel + floating preview card */
+.modula-gallery-takeover__canvas {
+	flex: 1;
+	min-width: 0;
+	min-height: 0;
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	gap: $mod-takeover-canvas-gap;
+	padding: $mod-space-12 $mod-takeover-canvas-gap $mod-space-16;
+	box-sizing: border-box;
+	background: var(--mod-se-stage, var(--mod-se-canvas-bg, #{$mod-takeover-canvas-bg}));
+	transition: gap $mod-takeover-transition-workspace;
+}
+
+/*
+ * Legacy class kept as an alias host wrapper. Prefer shared-ui
+ * `AuxiliaryPanel` (`.modula-ui-auxiliary-panel`) in new shells.
+ */
+.modula-gallery-takeover__aux-panel {
+	/* When still used as a raw div, match shared-ui shell sizing. */
+	flex: 0 0 min(320px, 36vw);
+	width: min(320px, 36vw);
+	max-width: 420px;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.modula-gallery-takeover__preview-column {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	transition:
+		flex $mod-takeover-transition-panel,
+		max-width $mod-takeover-transition-panel;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.modula-gallery-takeover__canvas,
+	.modula-gallery-takeover__preview-column {
+		transition: none;
+	}
+}
+
+.modula-gallery-takeover__sidebar {
+	flex: 0 0 360px;
+	width: 360px;
+	max-width: min(360px, 100%);
+	background: var(--mod-se-sidebar-bg, #{$mod-takeover-sidebar-bg});
+	color: var(--mod-se-sidebar-ink, #{$mod-takeover-ink-on-dark-strong});
+	border-right: 1px solid var(--mod-se-chrome-border, #{$mod-takeover-chrome-border});
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	transition:
+		width 0.2s ease,
+		flex-basis 0.2s ease,
+		min-width 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.modula-gallery-takeover__sidebar {
+		transition: none;
+	}
+}
+
+.modula-gallery-takeover__sidebar-body {
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+}
+
+.modula-gallery-takeover__sidebar-body-main {
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	position: relative;
+}
+
+// Context header (proofing takeover + legacy markup): back button + section title.
+.modula-gallery-takeover__sidebar-context {
+	flex-shrink: 0;
+	display: flex;
+	align-items: stretch;
+	gap: 0;
+	border-bottom: 1px solid var(--mod-se-chrome-border, #{$mod-takeover-chrome-border});
+	background: var(--mod-se-sidebar-context-bg,
+		var(--mod-se-hover-overlay, #{$mod-takeover-dark-backdrop}));
+	box-sizing: border-box;
+}
+
+.modula-gallery-takeover__sidebar-context-back {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	min-width: 44px;
+	min-height: 100%;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: 0;
+	border-right: 1px solid var(--mod-se-chrome-border, #{$mod-takeover-chrome-border});
+	background: transparent;
+	color: var(--mod-se-chrome-ink-secondary, #{$mod-takeover-ink-on-dark-primary});
+	cursor: pointer;
+	fill: var(--mod-se-chrome-ink-secondary, #{$mod-takeover-ink-on-dark-primary});
+	flex-shrink: 0;
+
+	&:hover {
+		color: var(--mod-se-chrome-ink, #{$mod-takeover-ink-on-dark});
+		fill: var(--mod-se-chrome-ink, #{$mod-takeover-ink-on-dark});
+		background: var(--mod-se-hover-overlay, #{$mod-takeover-dark-hover-overlay});
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		outline: $mod-space-focus-ring solid $mod-takeover-focus-ring-neutral;
+		outline-offset: (-$mod-space-2);
+		border-radius: $mod-radius-2;
+	}
+}
+
+.modula-gallery-takeover__sidebar-context-copy {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: $mod-space-4;
+	min-width: 0;
+	flex: 1;
+	padding: $mod-space-11 $mod-space-14;
+}
+
+.modula-gallery-takeover__sidebar-context-label {
+	font-size: 13px;
+	line-height: 1.3;
+	font-weight: 500;
+	color: var(--mod-se-sidebar-ink-muted, #{$mod-takeover-ink-on-dark-muted});
+}
+
+.modula-gallery-takeover__sidebar-context-title {
+	margin: 0;
+	font-size: 22px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	color: var(--mod-se-chrome-ink, #{$mod-takeover-ink-on-dark});
+}
+
+.modula-gallery-takeover__sidebar-save-footer {
+	flex-shrink: 0;
+	border-top: 1px solid var(--mod-se-chrome-border, #{$mod-takeover-chrome-border});
+	background: var(--mod-se-chrome-bg, #{$mod-takeover-chrome-bg});
+	padding: $mod-space-10 $mod-space-12 $mod-space-12;
+	border-radius: 0 0 0 $mod-space-8;
+	box-sizing: border-box;
+}
+
+.modula-gallery-takeover__sidebar-save-footer__row {
+	display: flex;
+	align-items: center;
+	gap: $mod-space-8;
+	min-height: $mod-space-24;
+	color: var(--mod-se-sidebar-ink-muted, #{$mod-takeover-ink-on-dark-muted});
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.modula-gallery-takeover__sidebar-save-footer__row--main {
+	justify-content: space-between;
+	align-items: center;
+	gap: $mod-space-10;
+	flex-wrap: nowrap;
+}
+
+.modula-gallery-takeover__sidebar-save-footer__status {
+	display: flex;
+	align-items: center;
+	gap: $mod-space-8;
+	flex-shrink: 0;
+	min-width: 0;
+}
+
+.modula-gallery-takeover__sidebar-save-footer__actions {
+	display: inline-flex;
+	align-items: center;
+	gap: $mod-space-4;
+	flex-shrink: 0;
+	margin-left: auto;
+}
+
+.modula-gallery-takeover__sidebar-save-footer__icon-btn {
+	min-width: $mod-space-28 !important;
+	width: $mod-space-28 !important;
+	min-height: $mod-space-28 !important;
+	height: $mod-space-28 !important;
+	line-height: 1 !important;
+	padding: 0 !important;
+	justify-content: center;
+	color: var(--mod-se-sidebar-ink-muted, #{$mod-takeover-ink-on-dark-muted}) !important;
+
+	svg {
+		fill: currentColor;
+	}
+
+	&:hover:not(:disabled) {
+		color: var(--mod-se-chrome-ink-secondary, #{$mod-takeover-ink-on-dark-primary}) !important;
+	}
+}
+
+.modula-gallery-takeover__sidebar-save-footer__advanced {
+	flex-shrink: 0;
+	max-width: 100%;
+
+	@include modula-takeover-toggle-appearance;
+
+	.components-base-control__field {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: nowrap;
+		gap: $mod-space-6;
+		margin-bottom: 0;
+	}
+
+	.components-toggle-control__label,
+	label.components-toggle-control__label {
+		color: var(--mod-se-chrome-ink-secondary, #{$mod-takeover-ink-on-dark-primary});
+		font-size: 11px;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+		white-space: nowrap;
+	}
+}
+
+.modula-gallery-takeover__sidebar-save-footer__advanced.modula-gallery-takeover__advanced-toggle {
+	.components-base-control__field {
+		margin-bottom: 0;
+	}
+}
+
+.modula-gallery-takeover__sidebar-save-footer__row--error {
+	flex-wrap: wrap;
+	align-items: flex-start;
+	color: $mod-takeover-warning-ink;
+}
+
+.modula-gallery-takeover__sidebar-save-footer__row--error .components-button {
+	color: var(--mod-se-chrome-ink-secondary, #{$mod-takeover-ink-on-dark-primary});
+	margin-left: auto;
+	flex-shrink: 0;
+}
+
+.modula-gallery-takeover__sidebar-save-footer__check {
+	flex-shrink: 0;
+	fill: var(--mod-se-sidebar-ink-muted, #{$mod-takeover-ink-on-dark-muted});
+}
+
+.modula-gallery-takeover__sidebar-save-footer__label {
+	letter-spacing: 0.01em;
+}
+
+.modula-gallery-takeover__sidebar-save-footer__text {
+	flex: 1;
+	min-width: 0;
+	white-space: pre-wrap;
+}
+
+.modula-gallery-takeover__sidebar-save-footer .components-spinner {
+	margin: 0;
+	width: $mod-space-18;
+	height: $mod-space-18;
+}

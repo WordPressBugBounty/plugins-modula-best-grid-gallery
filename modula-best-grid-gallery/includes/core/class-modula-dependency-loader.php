@@ -8,7 +8,8 @@
  *
  * @since 2.0.0
  */
-class Modula_Dependency_Loader {
+class Modula_Dependency_Loader
+{
 
 	/**
 	 * Dependency configuration.
@@ -21,6 +22,7 @@ class Modula_Dependency_Loader {
 	private $dependencies = array(
 		'core'              => array(
 			'libraries/class-modula-template-loader.php',
+			'core/helpers/modula-compatible-pro.php',
 			'core/helpers/class-modula-helper.php',
 			'admin/media/class-modula-image.php',
 			'core/assets/class-modula-script-manager.php',
@@ -45,8 +47,11 @@ class Modula_Dependency_Loader {
 			'admin/editor/class-modula-editor.php',
 		),
 		'public'            => array(
+			'public/shortcode/class-modula-item-data-processor.php',
 			'public/shortcode/class-modula-shortcode.php',
 			'public/meta/class-modula-meta.php',
+			'public/helpers/class-modula-frontend-adapter.php',
+			'public/helpers/class-modula-settings-adapter.php',
 			'features/gutenberg/class-modula-gutenberg.php',
 			'features/seo/class-modula-image-sitemaps.php',
 		),
@@ -70,6 +75,11 @@ class Modula_Dependency_Loader {
 			'features/telemetry/wpchill-telemetry-loader.php',
 			'features/telemetry/class-modula-telemetry-integration.php',
 		),
+		'v2'                => array(
+			'v2/bootstrap.php',
+			'wpchill-folders-bootstrap.php',
+			'bound-gallery/bootstrap.php',
+		),
 		'admin_conditional' => array(
 			'admin/importer/class-modula-readme-parser.php',
 			'admin/importer/class-modula-importer-exporter.php',
@@ -92,15 +102,17 @@ class Modula_Dependency_Loader {
 	 * @since 2.0.0
 	 * @return void
 	 */
-	public function load_all(): void {
+	public function load_all(): void
+	{
 		$this->load_core_dependencies();
+		$this->load_v2_dependencies();
 		$this->load_admin_dependencies();
 		$this->load_public_dependencies();
 		$this->load_compatibility_dependencies();
 		$this->load_third_party_dependencies();
 		$this->load_feature_modules();
 
-		if ( is_admin() ) {
+		if (is_admin()) {
 			$this->load_conditional_admin_dependencies();
 		}
 	}
@@ -111,8 +123,19 @@ class Modula_Dependency_Loader {
 	 * @since 2.0.0
 	 * @return void
 	 */
-	public function load_core_dependencies(): void {
-		$this->load_category( 'core' );
+	public function load_core_dependencies(): void
+	{
+		$this->load_category('core');
+	}
+
+	/**
+	 * Load v2 dependencies (settings adapter, registry, sanitizer). Loaded after core so extensions can hook.
+	 *
+	 * @return void
+	 */
+	public function load_v2_dependencies(): void
+	{
+		$this->load_category('v2');
 	}
 
 	/**
@@ -121,8 +144,9 @@ class Modula_Dependency_Loader {
 	 * @since 2.0.0
 	 * @return void
 	 */
-	public function load_admin_dependencies(): void {
-		$this->load_category( 'admin' );
+	public function load_admin_dependencies(): void
+	{
+		$this->load_category('admin');
 	}
 
 	/**
@@ -131,8 +155,9 @@ class Modula_Dependency_Loader {
 	 * @since 2.0.0
 	 * @return void
 	 */
-	public function load_public_dependencies(): void {
-		$this->load_category( 'public' );
+	public function load_public_dependencies(): void
+	{
+		$this->load_category('public');
 	}
 
 	/**
@@ -141,8 +166,9 @@ class Modula_Dependency_Loader {
 	 * @since 2.0.0
 	 * @return void
 	 */
-	public function load_compatibility_dependencies(): void {
-		$this->load_category( 'compatibility' );
+	public function load_compatibility_dependencies(): void
+	{
+		$this->load_category('compatibility');
 	}
 
 	/**
@@ -151,8 +177,9 @@ class Modula_Dependency_Loader {
 	 * @since 2.0.0
 	 * @return void
 	 */
-	public function load_third_party_dependencies(): void {
-		$this->load_category( 'third_party' );
+	public function load_third_party_dependencies(): void
+	{
+		$this->load_category('third_party');
 	}
 
 	/**
@@ -161,8 +188,9 @@ class Modula_Dependency_Loader {
 	 * @since 2.0.0
 	 * @return void
 	 */
-	public function load_feature_modules(): void {
-		$this->load_category( 'features' );
+	public function load_feature_modules(): void
+	{
+		$this->load_category('features');
 	}
 
 	/**
@@ -173,8 +201,9 @@ class Modula_Dependency_Loader {
 	 * @since 2.0.0
 	 * @return void
 	 */
-	public function load_conditional_admin_dependencies(): void {
-		$this->load_category( 'admin_conditional' );
+	public function load_conditional_admin_dependencies(): void
+	{
+		$this->load_category('admin_conditional');
 	}
 
 	/**
@@ -184,13 +213,14 @@ class Modula_Dependency_Loader {
 	 * @param string $category Category name from $dependencies array.
 	 * @return void
 	 */
-	private function load_category( string $category ): void {
-		if ( ! isset( $this->dependencies[ $category ] ) ) {
+	private function load_category(string $category): void
+	{
+		if (! isset($this->dependencies[$category])) {
 			return;
 		}
 
-		foreach ( $this->dependencies[ $category ] as $file ) {
-			$this->load_file( $file );
+		foreach ($this->dependencies[$category] as $file) {
+			$this->load_file($file);
 		}
 	}
 
@@ -201,14 +231,15 @@ class Modula_Dependency_Loader {
 	 * @param string $file Relative file path from includes/ directory.
 	 * @return void
 	 */
-	private function load_file( string $file ): void {
+	private function load_file(string $file): void
+	{
 		$full_path = MODULA_PATH . 'includes/' . $file;
 
-		if ( file_exists( $full_path ) ) {
+		if (file_exists($full_path)) {
 			require_once $full_path;
-		} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		} elseif (defined('WP_DEBUG') && WP_DEBUG) {
 			// Log missing file in debug mode only.
-			error_log( sprintf( 'Modula: Missing dependency file: %s', $full_path ) );
+			error_log(sprintf('Modula: Missing dependency file: %s', $full_path));
 		}
 	}
 
@@ -222,11 +253,12 @@ class Modula_Dependency_Loader {
 	 * @param string $file     File path relative to includes/.
 	 * @return void
 	 */
-	public function add_dependency( string $category, string $file ): void {
-		if ( ! isset( $this->dependencies[ $category ] ) ) {
-			$this->dependencies[ $category ] = array();
+	public function add_dependency(string $category, string $file): void
+	{
+		if (! isset($this->dependencies[$category])) {
+			$this->dependencies[$category] = array();
 		}
 
-		$this->dependencies[ $category ][] = $file;
+		$this->dependencies[$category][] = $file;
 	}
 }

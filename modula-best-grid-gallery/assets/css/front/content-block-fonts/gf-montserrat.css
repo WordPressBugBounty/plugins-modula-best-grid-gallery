@@ -1,0 +1,33 @@
+/* Self-hosted Montserrat for Modula content blocks (gf-montserrat). */
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../../../fonts/content-blocks/gf-montserrat/montserrat-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('../../../fonts/content-blocks/gf-montserrat/montserrat-latin-600-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url('../../../fonts/content-blocks/gf-montserrat/montserrat-latin-700-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url('../../../fonts/content-blocks/gf-montserrat/montserrat-latin-800-normal.woff2') format('woff2');
+}

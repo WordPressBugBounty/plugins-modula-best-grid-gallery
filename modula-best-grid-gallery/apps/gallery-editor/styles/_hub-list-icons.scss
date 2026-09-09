@@ -1,0 +1,38 @@
+@use 'variables' as *;
+
+// Shared with takeover hub drill rows + hub-field led icons (metabox + dark sidebar).
+.modula-settings-editor__hub-list-icon-wrap {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: $mod-space-28;
+	height: $mod-space-28;
+	margin-right: $mod-space-4;
+	color: #50575e;
+}
+
+.modula-settings-editor__hub-list-icon {
+	flex-shrink: 0;
+	fill: currentColor;
+}
+
+.modula-settings-editor__hub-field--with-led-icon {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: $mod-space-8;
+	box-sizing: border-box;
+}
+
+.modula-settings-editor__hub-field-led-body {
+	flex: 1;
+	min-width: 0;
+}
+
+.modula-settings-editor__category-hub-drill-btn.components-button
+	.modula-settings-editor__category-hub-drill-label {
+	flex: 1;
+	min-width: 0;
+	text-align: left;
+}

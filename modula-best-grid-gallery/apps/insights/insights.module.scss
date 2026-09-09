@@ -1,0 +1,13 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    margin: 0 auto;
+    margin-top: calc(var(--theme-content-spacing) * 2);
+    max-width: var(--theme-normal-container-max-width);
+
+    @media (max-width: 768px) {
+        max-width: var(--theme-narrow-container-max-width);
+        padding: 0 16px;
+    }
+}

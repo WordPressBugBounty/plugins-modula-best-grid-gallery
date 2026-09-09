@@ -1,0 +1,95 @@
+@use '../../shared-styles/spacing' as *;
+@use '../../shared-styles/radii' as *;
+
+.dividerRow {
+	background-color: rgba(var(--wp-admin-theme-color--rgb), 0.1);
+	border-bottom: 1px solid var(--theme-border-color);
+	border-top: 1px solid var(--theme-border-color);
+
+	&:hover {
+		background-color: rgba(var(--wp-admin-theme-color--rgb), 0.05) !important;
+	}
+}
+
+.dividerCell {
+	padding: $mod-space-14 $mod-space-16;
+	text-align: left;
+}
+
+.dividerContent {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	gap: $mod-space-16;
+	flex-wrap: wrap;
+}
+
+.dividerInfo {
+	display: flex;
+	align-items: center;
+	gap: $mod-space-12;
+	flex-wrap: wrap;
+	flex: 1;
+}
+
+.planBadge {
+	display: inline-flex;
+	align-items: center;
+	padding: $mod-space-4 $mod-space-10;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: capitalize;
+	letter-spacing: 0.3px;
+	color: #ffffff;
+	background-color: var(--theme-palette-color-4);
+	border-radius: $mod-radius-4;
+	white-space: nowrap;
+}
+
+.upgradeText {
+	font-size: 15px;
+	line-height: 1.5;
+	color: var(--theme-text-color);
+	font-weight: 400;
+}
+
+.ctaButton {
+	display: inline-flex;
+	align-items: center;
+	gap: $mod-space-6;
+	padding: $mod-space-8 $mod-space-16;
+	font-size: 13px;
+	font-weight: 600;
+	color: #ffffff;
+	background-color: var(--wp-admin-theme-color);
+	border: none;
+	border-radius: $mod-radius-4;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: background-color 0.2s ease, opacity 0.2s ease;
+
+	&:hover {
+		background-color: var(--theme-palette-color-2);
+		opacity: 0.9;
+	}
+
+	&:active {
+		opacity: 0.8;
+	}
+
+	&:focus {
+		outline: $mod-space-focus-ring solid var(--wp-admin-theme-color);
+		outline-offset: $mod-space-2;
+	}
+
+	&:focus:not(:focus-visible) {
+		outline: none;
+	}
+}
+
+.arrowIcon {
+	flex-shrink: 0;
+	width: $mod-space-12;
+	height: $mod-space-12;
+}

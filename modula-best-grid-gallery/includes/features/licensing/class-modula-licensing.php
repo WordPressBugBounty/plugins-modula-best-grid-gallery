@@ -19,7 +19,25 @@ class Modula_Licensing {
 
 		add_action( 'modula_after_gallery', array( $this, 'display_licensing_license' ) );
 		add_action( 'modula_shortcode_after_item', array( $this, 'generate_licensing_ld_json' ), 10, 2 );
+		add_action( 'modula_v2_shortcode_after_item', array( $this, 'generate_licensing_ld_json' ), 10, 2 );
 		add_action( 'wp_footer', array( $this, 'display_licensing_ld_json' ), 10 );
+	}
+
+	/**
+	 * Global image licensing option (author/company defaults).
+	 *
+	 * @return array<string, mixed>|false
+	 */
+	private function get_global_licensing_options() {
+		$options = get_option( 'modula_image_licensing_option', false );
+		if ( false === $options || ! is_array( $options ) ) {
+			// Legacy typo key — read if present, do not write.
+			$legacy = get_option( 'modula_image_licensing_option ', false );
+			if ( is_array( $legacy ) ) {
+				return $legacy;
+			}
+		}
+		return is_array( $options ) ? $options : false;
 	}
 
 
@@ -32,7 +50,14 @@ class Modula_Licensing {
 	 * @since 2.7.5
 	 */
 	public function display_licensing_license( $settings ) {
-		$image_attrib_options = get_option( 'modula_image_licensing_option ', false );
+		if ( class_exists( '\Modula\V2\Modern_Gallery' ) ) {
+			$post_id = isset( $settings['gallery_id'] ) ? \Modula\V2\Modern_Gallery::gallery_post_id_from_flat( $settings ) : 0;
+			if ( \Modula\V2\Modern_Gallery::is_modern_stack_enabled( $post_id ) ) {
+				return;
+			}
+		}
+
+		$image_attrib_options = $this->get_global_licensing_options();
 		$html                 = apply_filters( 'modula_display_licensing_box', false, $image_attrib_options, $settings );
 
 		if ( false === $html ) {
@@ -56,7 +81,7 @@ class Modula_Licensing {
 	 */
 	public function generate_licensing_ld_json( $settings, $item ) {
 
-		$image_attrib_options = get_option( 'modula_image_licensing_option ', false );
+		$image_attrib_options = $this->get_global_licensing_options();
 		/**
 		 * Hook used for adding custom image licensing ld+json
 		 *

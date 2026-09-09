@@ -1,0 +1,112 @@
+@use '../../shared-styles/spacing' as *;
+@use '../../shared-styles/radii' as *;
+
+.card {
+    padding: var(--theme-content-spacing);
+    background: #f9fafb;
+    border: 1px solid var(--theme-border-color);
+    border-radius: $mod-radius-8;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--theme-content-spacing);
+    margin-bottom: var(--theme-content-spacing);
+}
+
+.compactCard {
+    gap: var(--theme-content-spacing);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--theme-content-spacing);
+    flex-wrap: wrap;
+}
+
+.heading {
+    display: flex;
+    gap: var(--theme-content-spacing);
+    align-items: center;
+}
+
+.icon {
+    width: $mod-space-44;
+    height: $mod-space-44;
+    border-radius: $mod-radius-12;
+    background: linear-gradient(135deg, #f58529, #dd2a7b, #8134af);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.title {
+    margin: 0;
+    font-weight: 600;
+    color: var(--theme-text-color);
+}
+
+.description {
+    margin: $mod-space-4 0 0;
+    color: var(--theme-text-color);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.status {
+    border-radius: $mod-radius-pill;
+    padding: $mod-space-6 $mod-space-10;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.connected {
+    color: #027a48;
+    background: #ecfdf3;
+    border-color: #a6f4c5;
+}
+
+.disconnected {
+    color: #b42318;
+    background: #fef3f2;
+    border-color: #fecdca;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: var(--theme-content-spacing);
+    flex-wrap: wrap;
+}
+
+.docs {
+    font-size: 13px;
+    color: var(--theme-link-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.docs:hover {
+    text-decoration: underline;
+}
+
+.credentialsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--theme-content-spacing);
+}
+
+.credential {
+    display: flex;
+    flex-direction: column;
+}

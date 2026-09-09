@@ -1,0 +1,69 @@
+.modula-ui-tabs {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 8px;
+	width: 100%;
+}
+
+.modula-ui-tabs__tab {
+	position: relative;
+	box-sizing: border-box;
+	display: inline-flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 6px;
+	margin: 0;
+	padding: 4px 8px;
+	/* Transparent border reserves space so active state does not shift layout. */
+	border: 1px solid transparent;
+	border-radius: 0;
+	background: transparent;
+	color: var(--mod-ui-ink-3);
+	font-family: var(--mod-ui-font-ui, inherit);
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.3;
+	cursor: pointer;
+	transition:
+		color var(--mod-ui-duration-fast, 0.12s) ease,
+		border-color var(--mod-ui-duration-fast, 0.12s) ease;
+
+	&:hover:not(:disabled):not(.is-active) {
+		color: var(--mod-ui-ink-2);
+	}
+
+	&.is-active {
+		border-color: var(--mod-ui-line);
+		background: var(--mod-ui-surface);
+		color: var(--mod-ui-ink);
+		font-weight: 600;
+	}
+
+	&:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: 0 0 0 3px var(--mod-ui-accent-soft, transparent);
+	}
+}
+
+.modula-ui-tabs__dot {
+	flex: 0 0 auto;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--mod-ui-accent);
+}
+
+.modula-ui-tabs__label {
+	min-width: 0;
+	color: inherit;
+}

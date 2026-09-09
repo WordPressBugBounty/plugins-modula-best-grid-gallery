@@ -1,0 +1,171 @@
+@use '../shared-styles/spacing' as *;
+
+/*
+ * Slider slide captions (`slider.imageInfo` + `slider.imageInfoPosition`).
+ * Four variants share `.slider-image-info` + placement modifier classes.
+ */
+
+$mod-slider-caption-inside-x: $mod-space-18;
+$mod-slider-caption-inside-y: $mod-space-16;
+$mod-slider-caption-outside-gap: $mod-space-10;
+$mod-slider-caption-scrim-min: 72px;
+$mod-slider-caption-scrim-max: 180px;
+$mod-slider-caption-inside-color: #fff;
+$mod-slider-caption-inside-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+
+.modula .modula-slider .modula-items .modula-slider-image-wrapper {
+
+	/* Clip inside gradients to slide rounded corners. */
+	&[class*='--caption-top_inside'],
+	&[class*='--caption-bot_inside'] {
+		overflow: hidden;
+	}
+
+	&[class*='--caption-top_outside'],
+	&[class*='--caption-bot_outside'] {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+	}
+
+	&[class*='--caption-top_inside'],
+	&[class*='--caption-bot_inside'] {
+		>.modula-item-picture-stack {
+			position: relative;
+			z-index: 1;
+			width: 100%;
+		}
+	}
+}
+
+/* Media shell: image + absolute chrome; outside captions stay siblings in flow. */
+.modula .modula-slider .modula-items .modula-slider-slide-media {
+	position: relative;
+	flex: 0 0 auto;
+	width: 100%;
+	overflow: hidden;
+	border-radius: var(--modula-slider-slide-radius, 0px);
+}
+
+.modula .modula-slider .modula-items .slider-image-info {
+	box-sizing: border-box;
+	margin: 0;
+	width: 100%;
+	text-align: left;
+	line-height: 1.45;
+	font-size: 0.9375rem;
+	transition: opacity 0.2s ease;
+
+	p {
+		margin: 0;
+	}
+
+	.jtg-title,
+	.modula-title {
+		font-weight: 500;
+	}
+
+	.jtg-title+.description,
+	.modula-title+.description {
+		margin-top: $mod-space-4;
+	}
+}
+
+/* Outside: metadata in document flow, no overlay. */
+.modula .modula-slider .modula-items .slider-image-info--top_outside,
+.modula .modula-slider .modula-items .slider-image-info--bot_outside {
+	position: static;
+	color: inherit;
+	padding: 0;
+	background: none;
+	text-shadow: none;
+}
+
+.modula .modula-slider .modula-items .modula-slider-image-wrapper--caption-top_outside .slider-image-info--top_outside {
+	flex: 0 0 auto;
+	order: -1;
+	margin: 0 0 $mod-slider-caption-outside-gap;
+}
+
+.modula .modula-slider .modula-items .modula-slider-image-wrapper--caption-bot_outside .slider-image-info--bot_outside {
+	flex: 0 0 auto;
+	margin: $mod-slider-caption-outside-gap 0 0;
+}
+
+/* Inside: gradient scrim + white caption text. */
+.modula .modula-slider .modula-items .slider-image-info__scrim {
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: clamp(#{$mod-slider-caption-scrim-min},
+		30%,
+		#{$mod-slider-caption-scrim-max});
+	pointer-events: none;
+	z-index: 2;
+}
+
+.modula .modula-slider .modula-items .modula-slider-image-wrapper--caption-top_inside .slider-image-info__scrim {
+	top: 0;
+	background: linear-gradient(to bottom,
+			rgba(0, 0, 0, 0.65) 0%,
+			rgba(0, 0, 0, 0.35) 45%,
+			rgba(0, 0, 0, 0) 100%);
+}
+
+.modula .modula-slider .modula-items .modula-slider-image-wrapper--caption-bot_inside .slider-image-info__scrim {
+	bottom: 0;
+	background: linear-gradient(to bottom,
+			rgba(0, 0, 0, 0) 0%,
+			rgba(0, 0, 0, 0.35) 55%,
+			rgba(0, 0, 0, 0.7) 100%);
+}
+
+.modula .modula-slider .modula-items .slider-image-info--top_inside,
+.modula .modula-slider .modula-items .slider-image-info--bot_inside {
+	position: absolute;
+	left: 0;
+	z-index: 3;
+	padding: $mod-slider-caption-inside-y $mod-slider-caption-inside-x;
+	color: $mod-slider-caption-inside-color;
+	background: none;
+	max-width: 100%;
+
+	>p {
+		color: $mod-slider-caption-inside-color;
+	}
+}
+
+.modula .modula-slider .modula-items .slider-image-info--top_inside {
+	top: 0;
+	right: 0;
+	padding-right: max(#{$mod-slider-caption-inside-x}, 12%);
+}
+
+.modula .modula-slider .modula-items .slider-image-info--bot_inside {
+	bottom: 0;
+	right: 0;
+	/* Reserve bottom-right for slide counters / chrome. */
+	padding-right: clamp(#{$mod-space-72}, 18%, 7.5rem);
+}
+
+.modula .modula-slider .modula-items .slider-image-info--top_inside .jtg-title,
+.modula .modula-slider .modula-items .slider-image-info--top_inside .modula-title,
+.modula .modula-slider .modula-items .slider-image-info--top_inside .description,
+.modula .modula-slider .modula-items .slider-image-info--bot_inside .jtg-title,
+.modula .modula-slider .modula-items .slider-image-info--bot_inside .modula-title,
+.modula .modula-slider .modula-items .slider-image-info--bot_inside .description {
+	text-shadow: $mod-slider-caption-inside-shadow;
+}
+
+@media (max-width: 600px) {
+
+	.modula .modula-slider .modula-items .slider-image-info--top_inside,
+	.modula .modula-slider .modula-items .slider-image-info--bot_inside {
+		padding: $mod-space-12 $mod-space-14;
+		font-size: 0.875rem;
+	}
+
+	.modula .modula-slider .modula-items .slider-image-info--bot_inside {
+		padding-right: clamp(#{$mod-space-52}, 22%, 6rem);
+	}
+}

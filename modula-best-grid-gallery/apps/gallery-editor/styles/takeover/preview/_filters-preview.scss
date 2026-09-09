@@ -1,0 +1,136 @@
+@use '../../variables' as *;
+@use '../../../../frontend-gallery/gallery-chrome';
+
+.modula-gallery-takeover__live-preview-body--filters-preview {
+	position: relative;
+	flex: 1;
+	min-height: 320px;
+	display: flex;
+	flex-direction: column;
+	overflow: auto;
+	background: var(--mod-se-preview-bg, #{$mod-takeover-surface-raised});
+
+	.modula-gallery-takeover__filters-preview-shell .filters {
+		visibility: visible !important;
+		opacity: 1 !important;
+
+		.modula_menu__link:focus,
+		.modula_menu__link:focus-visible,
+		.modula_menu__link:active,
+		.filters__collapse-toggle:focus,
+		.filters__collapse-toggle:focus-visible,
+		.filters__collapse-toggle:active {
+			outline: none !important;
+			box-shadow: none !important;
+		}
+
+		/* All must not keep a selected underline when another chip is current. */
+		.modula_menu__link:not(.selected) {
+			font-weight: inherit;
+			border-bottom-color: transparent !important;
+		}
+	}
+
+	.modula-gallery-takeover__filters-preview-select {
+		width: min(100%, 16rem);
+	}
+}
+
+.modula-gallery-takeover__filters-preview {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 280px;
+	width: 100%;
+	padding: $mod-space-24 $mod-space-16;
+	box-sizing: border-box;
+}
+
+.modula-gallery-takeover__filters-preview-hint {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: min(100%, 720px);
+	margin: 0 0 $mod-space-16;
+	padding: 0;
+	color: $mod-takeover-text-muted;
+	font-size: 0.8125rem;
+	line-height: 1.5;
+	text-align: center;
+}
+
+.modula-gallery-takeover__filters-preview-shell {
+	width: 100%;
+	max-width: min(100%, 720px);
+	margin: 0 auto;
+}
+
+.modula-gallery-takeover__filters-preview-gallery-stub {
+	display: flex !important;
+	align-items: center;
+	justify-content: center;
+	flex: 1 1 auto;
+	width: 100%;
+	min-width: 0;
+	min-height: 200px;
+	margin: 0;
+	padding: $mod-space-24;
+	border: 1px dashed rgb(0 0 0 / 12%);
+	border-radius: $mod-radius-4;
+	background: rgb(0 0 0 / 3%);
+	box-sizing: border-box;
+}
+
+.modula-gallery-takeover__filters-preview-gallery-stub-label {
+	color: $mod-takeover-text-muted;
+	font-size: 0.8125rem;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	user-select: none;
+}
+
+.modula-gallery-takeover__filters-preview--empty,
+.modula-gallery-takeover__filters-preview--loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: $mod-space-12;
+	min-height: 280px;
+	padding: $mod-space-24 $mod-space-16;
+	text-align: center;
+	color: $mod-takeover-text-muted;
+}
+
+.modula-gallery-takeover__preview-wrap--mobile,
+.modula-gallery-takeover__preview-wrap--tablet {
+
+	.modula-gallery-takeover__filters-preview-gallery-stub {
+		min-height: 160px;
+	}
+}
+
+.modula-gallery-takeover__live-preview-body .modula .filters__select {
+	background: var(--mod-ui-surface, #fff);
+	color: var(--mod-ui-ink, inherit);
+	border-color: var(--mod-ui-line, rgb(0 0 0 / 12%));
+	color-scheme: inherit;
+}
+
+.modula-settings-editor__app[data-appearance='dark'] {
+	.modula-gallery-takeover__live-preview-body--filters-preview {
+		.modula-gallery-takeover__filters-preview-gallery-stub {
+			border-color: rgb(255 255 255 / 14%);
+			background: rgb(255 255 255 / 4%);
+		}
+
+		.modula-gallery-takeover__filters-preview-gallery-stub-label {
+			color: var(--mod-se-preview-ink-muted, #{$mod-takeover-ink-on-dark-muted});
+		}
+
+		.modula-gallery-takeover__filters-preview-hint {
+			color: var(--mod-se-preview-ink-muted, #{$mod-takeover-ink-on-dark-muted});
+		}
+	}
+}

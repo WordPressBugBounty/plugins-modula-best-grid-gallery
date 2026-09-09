@@ -1,0 +1,14 @@
+.modula-ui-action-row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: stretch;
+	gap: 12px;
+	box-sizing: border-box;
+	width: 100%;
+
+	>* {
+		flex: 1 1 0;
+		min-width: 0;
+	}
+}

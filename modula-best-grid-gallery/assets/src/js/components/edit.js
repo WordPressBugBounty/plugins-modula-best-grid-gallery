@@ -16,7 +16,7 @@ const { Button, Spinner, ToolbarGroup, ToolbarItem } = wp.components;
 const { BlockControls, useBlockProps } = wp.blockEditor;
 const { compose } = wp.compose;
 
-export const ModulaEdit = ( props ) => {
+export const ModulaEdit = (props) => {
 	const { attributes, galleries, setAttributes } = props;
 	const {
 		id,
@@ -29,83 +29,83 @@ export const ModulaEdit = ( props ) => {
 		currentSelectize,
 	} = attributes;
 
-	const [ alignmentCheck, setAlignment ] = useState( props.attributes.align );
+	const [alignmentCheck, setAlignment] = useState(props.attributes.align);
 
-	const [ idCheck, setIdCheck ] = useState( id );
+	const [idCheck, setIdCheck] = useState(id);
 
-	const modulaInstanceRef = useRef( null );
-	const galleryElRef = useRef( null );
+	const modulaInstanceRef = useRef(null);
+	const galleryElRef = useRef(null);
 	const blockProps = useBlockProps();
 
-	useEffect( () => {
-		if ( id !== 0 ) {
-			onIdChange( id );
+	useEffect(() => {
+		if (id !== 0) {
+			onIdChange(id);
 		}
-	}, [] );
+	}, []);
 
-	useEffect( () => {
-		const handleModulaInit = function( event, inst ) {
+	useEffect(() => {
+		const handleModulaInit = function (event, inst) {
 			modulaInstanceRef.current = inst;
 		};
 
-		jQuery( document ).on( 'modula_api_after_init', handleModulaInit );
+		jQuery(document).on('modula_api_after_init', handleModulaInit);
 
 		return () => {
-			jQuery( document ).off( 'modula_api_after_init', handleModulaInit );
+			jQuery(document).off('modula_api_after_init', handleModulaInit);
 		};
-	}, [] );
+	}, []);
 
-	useEffect( () => {
+	useEffect(() => {
 		// Use the ref instead of attributes.instance to avoid circular references
 		if (
 			modulaInstanceRef.current != null &&
 			settings != undefined &&
 			settings.type == 'grid'
 		) {
-			modulaInstanceRef.current.reset( modulaInstanceRef.current );
+			modulaInstanceRef.current.reset(modulaInstanceRef.current);
 		}
-	}, [ settings ] );
+	}, [settings]);
 
-	const onIdChange = ( id ) => {
-		if ( isNaN( id ) || '' == id ) {
+	const onIdChange = (id) => {
+		if (isNaN(id) || '' == id) {
 			return;
 		}
-		id = parseInt( id );
+		id = parseInt(id);
 
-		wp.apiFetch( { path: `wp/v2/modula-gallery/${ id }` } ).then( ( res ) => {
-			setAttributes( { currentGallery: res } );
-			setAttributes( {
+		wp.apiFetch({ path: `wp/v2/modula-gallery/${id}` }).then((res) => {
+			setAttributes({ currentGallery: res });
+			setAttributes({
 				currentSelectize: [
 					{
 						value: id,
 						label:
 							'' === res.title.rendered
 								? `Unnamed`
-								: escapeHtml( res.title.rendered ),
+								: escapeHtml(res.title.rendered),
 					},
 				],
-			} );
+			});
 
-			setAttributes( { id, images: res.modulaImages } );
-			if ( idCheck != id || undefined == settings ) {
-				getSettings( id );
+			setAttributes({ id, images: res.modulaImages });
+			if (idCheck != id || undefined == settings) {
+				getSettings(id);
 			}
-		} );
+		});
 	};
-	function escapeHtml( text ) {
+	function escapeHtml(text) {
 		return text
-			.replace( '&#8217;', "'" )
-			.replace( '&#8220;', '"' )
-			.replace( '&#8216;', "'" );
+			.replace('&#8217;', "'")
+			.replace('&#8220;', '"')
+			.replace('&#8216;', "'");
 	}
 
-	const getSettings = ( id ) => {
-		fetch( `${ modulaVars.restURL }wp/v2/modula-gallery/${ id }` )
-			.then( ( res ) => res.json() )
-			.then( ( result ) => {
+	const getSettings = (id) => {
+		fetch(`${modulaVars.restURL}wp/v2/modula-gallery/${id}`)
+			.then((res) => res.json())
+			.then((result) => {
 				const settings = result;
-				setAttributes( { status: 'loading' } );
-				jQuery.ajax( {
+				setAttributes({ status: 'loading' });
+				jQuery.ajax({
 					type: 'POST',
 					data: {
 						action: 'modula_get_jsconfig',
@@ -113,52 +113,52 @@ export const ModulaEdit = ( props ) => {
 						settings: settings.modulaSettings,
 					},
 					url: modulaVars.ajaxURL,
-					success: ( result ) => {
-						const galleryId = Math.floor( Math.random() * 999 );
+					success: (result) => {
+						const galleryId = Math.floor(Math.random() * 999);
 
-						setAttributes( {
+						setAttributes({
 							galleryId,
 							settings: settings.modulaSettings,
 							jsConfig: result,
 							status: 'ready',
-						} );
+						});
 					},
-				} );
-			} );
+				});
+			});
 	};
 
-	const modulaRun = ( checker ) => {
-		if ( checker != undefined && galleryElRef.current ) {
-			setAttributes( { status: 'ready' } );
-			const $gallery = jQuery( galleryElRef.current );
-			const modulaSettings = $gallery.data( 'config' );
+	const modulaRun = (checker) => {
+		if (checker != undefined && galleryElRef.current) {
+			setAttributes({ status: 'ready' });
+			const $gallery = jQuery(galleryElRef.current);
+			const modulaSettings = $gallery.data('config');
 			modulaSettings.lazyLoad = 0;
 
-			$gallery.modulaGallery( modulaSettings );
+			$gallery.modulaGallery(modulaSettings);
 		}
 	};
 
 	const modulaCarouselRun = () => {
-		setAttributes( { status: 'ready' } );
-		if ( ! galleryElRef.current ) {
+		setAttributes({ status: 'ready' });
+		if (!galleryElRef.current) {
 			return;
 		}
-		const $gallery = jQuery( galleryElRef.current );
-		if ( ! $gallery.hasClass( 'modula-slider' ) ) {
+		const $gallery = jQuery(galleryElRef.current);
+		if (!$gallery.hasClass('modula-slider')) {
 			return;
 		}
-		const config = $gallery.data( 'config' ),
-			main = $gallery.find( '.modula-items' );
+		const config = $gallery.data('config'),
+			main = $gallery.find('.modula-items');
 
-		if ( 'function' === typeof ModulaCarousel ) {
-			new ModulaCarousel( main[ 0 ], config.slider_settings );
-		} else if ( 'undefined' !== typeof jQuery.fn.slick ) {
-			main.slick( config.slider_settings );
+		if ('function' === typeof ModulaCarousel) {
+			new ModulaCarousel(main[0], config.slider_settings);
+		} else if ('undefined' !== typeof jQuery.fn.slick) {
+			main.slick(config.slider_settings);
 		}
 	};
 
-	const checkHoverEffect = ( effect ) => {
-		jQuery.ajax( {
+	const checkHoverEffect = (effect) => {
+		jQuery.ajax({
 			type: 'POST',
 			data: {
 				action: 'modula_check_hover_effect',
@@ -166,45 +166,45 @@ export const ModulaEdit = ( props ) => {
 				effect,
 			},
 			url: modulaVars.ajaxURL,
-			success: ( result ) => {
-				setAttributes( { effectCheck: result } );
+			success: (result) => {
+				setAttributes({ effectCheck: result });
 			},
-		} );
+		});
 	};
 
 	const selectOptions = () => {
 		const options = [
 			{
 				value: 0,
-				label: __( 'select a gallery', 'modula-best-grid-gallery' ),
+				label: __('select a gallery', 'modula-best-grid-gallery'),
 			},
 		];
 
-		galleries.forEach( function( { title, id } ) {
-			if ( title.rendered.length == 0 ) {
-				options.push( {
+		galleries.forEach(function ({ title, id }) {
+			if (title.rendered.length == 0) {
+				options.push({
 					value: id,
 					label:
-						__( 'Unnamed Gallery', 'modula-best-grid-gallery' ) + id,
-				} );
+						__('Unnamed Gallery', 'modula-best-grid-gallery') + id,
+				});
 			} else {
-				options.push( { value: id, label: title.rendered } );
+				options.push({ value: id, label: title.rendered });
 			}
-		} );
+		});
 
 		return options;
 	};
 
 	const blockControls = (
 		<BlockControls>
-			{ images && images.length > 0 && (
+			{images && images.length > 0 && (
 				<ToolbarGroup>
 					<ToolbarItem>
 						<Button
-							label={ __(
+							label={__(
 								'Edit gallery',
-								'modula-best-grid-gallery',
-							) }
+								'modula-best-grid-gallery'
+							)}
 							icon="edit"
 							href={
 								modulaVars.adminURL +
@@ -216,59 +216,59 @@ export const ModulaEdit = ( props ) => {
 						/>
 					</ToolbarItem>
 				</ToolbarGroup>
-			) }
+			)}
 		</BlockControls>
 	);
 
-	if ( id == 0 && 'none' === attributes.galleryType ) {
+	if (id == 0 && 'none' === attributes.galleryType) {
 		return (
 			<div { ...blockProps }>
 				<div className="modula-block-preview">
 					<div className="modula-block-preview__content">
 						<div className="modula-block-preview__logo" />
 						<div className="modula-button-group">
-							{ galleries.length == 0 && (
+							{galleries.length == 0 && (
 								<p>
-									{ ' ' }
-									{ __(
+									{' '}
+									{__(
 										'Sorry no galleries found',
-										'modula-best-grid-gallery',
-									) }{ ' ' }
+										'modula-best-grid-gallery'
+									)}{' '}
 								</p>
-							) }
-							{ galleries.length > 0 && (
+							)}
+							{galleries.length > 0 && (
 								<Button
 									className="modula-button"
 									target="_blank"
-									onClick={ ( e ) => {
-										setAttributes( {
+									onClick={(e) => {
+										setAttributes({
 											status: 'ready',
 											id: 0,
 											galleryType: 'gallery',
-										} );
-									} }
+										});
+									}}
 								>
-									{ __(
+									{__(
 										'Display An Existing Gallery',
-										'modula-best-grid-gallery',
-									) }
-									{ icons.chevronRightFancy }
+										'modula-best-grid-gallery'
+									)}
+									{icons.chevronRightFancy}
 								</Button>
-							) }
-							{ ! attributes.proInstalled &&
+							)}
+							{!attributes.proInstalled &&
 								galleries.length > 0 && (
-								<Button
-									href="https://wp-modula.com/pricing/?utm_source=modula-lite&utm_campaign=upsell"
-									className="modula-button-upsell"
-									isSecondary
-									target="_blank"
-								>
-									{ __(
-										'Upgrade to PRO to create galleries using a preset ( fastest way )',
-										'modula-best-grid-gallery',
-									) }
-								</Button>
-							) }
+									<Button
+										href="https://wp-modula.com/pricing/?utm_source=modula-lite&utm_campaign=upsell"
+										className="modula-button-upsell"
+										isSecondary
+										target="_blank"
+									>
+										{__(
+											'Upgrade to PRO to create galleries using a preset ( fastest way )',
+											'modula-best-grid-gallery'
+										)}
+									</Button>
+								)}
 						</div>
 					</div>
 				</div>
@@ -276,7 +276,7 @@ export const ModulaEdit = ( props ) => {
 		);
 	}
 
-	if ( status === 'loading' ) {
+	if (status === 'loading') {
 		return (
 			<div { ...blockProps }>
 				<div className="modula-block-preview">
@@ -289,31 +289,31 @@ export const ModulaEdit = ( props ) => {
 		);
 	}
 
-	if ( id == 0 || images.length === 0 ) {
+	if (id == 0 || images.length === 0) {
 		return (
 			<Fragment key="233">
 				<Inspector
-					onIdChange={ ( id ) => onIdChange( id ) }
-					selectOptions={ selectOptions }
-					{ ...props }
+					onIdChange={(id) => onIdChange(id)}
+					selectOptions={selectOptions}
+					{...props}
 				/>
 
 				<div { ...blockProps }>
 				<div className="modula-block-preview">
 					<div className="modula-block-preview__content">
 						<div className="modula-block-preview__logo" />
-						{ galleries.length > 0 && (
+						{galleries.length > 0 && (
 							<Fragment>
 								<ModulaGallerySearch
-									id={ id }
-									key={ id }
-									value={ id }
-									options={ currentSelectize }
-									onIdChange={ onIdChange }
-									galleries={ galleries }
+									id={id}
+									key={id}
+									value={id}
+									options={currentSelectize}
+									onIdChange={onIdChange}
+									galleries={galleries}
 								/>
 
-								{ id != 0 && (
+								{id != 0 && (
 									<Button
 										target="_blank"
 										href={
@@ -324,59 +324,58 @@ export const ModulaEdit = ( props ) => {
 										}
 										isPrimary
 									>
-										{ __( 'Edit Gallery' ) }
+										{__('Edit Gallery')}
 									</Button>
-								) }
+								)}
 							</Fragment>
-						) }
+						)}
 					</div>
 				</div>
 			</div>
 			</Fragment>
 		);
 	}
-	if ( settings ) {
+	if (settings) {
 		return (
 			<Fragment key="1">
-				{ blockControls }
+				{blockControls}
 				<Inspector
-					onIdChange={ ( id ) => {
-						onIdChange( id );
-					} }
-					{ ...props }
+					onIdChange={(id) => {
+						onIdChange(id);
+					}}
+					{...props}
 				/>
-				<div { ...blockProps }>
+				<div {...blockProps}>
 					<ModulaGallery
-						{ ...props }
-						settings={ settings }
-						jsConfig={ jsConfig }
-						modulaRun={ modulaRun }
-						modulaCarouselRun={ modulaCarouselRun }
-						checkHoverEffect={ checkHoverEffect }
-						galleryId={ galleryId }
-						galleryElRef={ galleryElRef }
+						{...props}
+						settings={settings}
+						jsConfig={jsConfig}
+						modulaRun={modulaRun}
+						modulaCarouselRun={modulaCarouselRun}
+						checkHoverEffect={checkHoverEffect}
+						galleryId={galleryId}
+						galleryElRef={galleryElRef}
 					/>
 				</div>
 			</Fragment>
-
 		);
 	}
 
 	return null;
 };
 
-const applyWithSelect = withSelect( ( select, props ) => {
-	const { getEntityRecords } = select( 'core' );
+const applyWithSelect = withSelect((select, props) => {
+	const { getEntityRecords } = select('core');
 	const query = {
 		post_status: 'publish',
 		per_page: 5,
 	};
 
 	return {
-		galleries: getEntityRecords( 'postType', 'modula-gallery', query ) || [],
+		galleries: getEntityRecords('postType', 'modula-gallery', query) || [],
 	};
-} );
+});
 
-const applyWithFilters = withFilters( 'modula.ModulaEdit' )( ModulaEdit );
+const applyWithFilters = withFilters('modula.ModulaEdit')(ModulaEdit);
 
-export default compose( applyWithSelect )( ModulaEdit );
+export default compose(applyWithSelect)(ModulaEdit);

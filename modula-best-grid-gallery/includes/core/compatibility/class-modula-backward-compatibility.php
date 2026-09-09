@@ -479,7 +479,10 @@ class Modula_Backward_Compatibility {
 			if ( isset( $options['slideShow']['speed'] ) ) {
 				$options['Slideshow']['timeout'] = absint( $options['slideShow']['speed'] );
 			}
-			$options['Carousel']['infinite'] = true;
+			// Legacy slideShow must not force wrap; Loop slides owns Carousel.infinite.
+			if ( isset( $settings['loop_lightbox'] ) && 1 === absint( $settings['loop_lightbox'] ) ) {
+				$options['Carousel']['infinite'] = true;
+			}
 			unset( $options['slideShow'] );
 		}
 

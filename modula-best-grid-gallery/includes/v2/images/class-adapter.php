@@ -71,6 +71,7 @@ class Adapter {
 		'hideSocials',
 		'src',
 		'thumbnail',
+		'url',
 		'blockBodyHtmlRendered',
 		'shortcodeHtml',
 		'watermarkApplied',
@@ -496,7 +497,26 @@ class Adapter {
 	 * @return array<int, array<string, mixed>>
 	 */
 	public static function unwrap_items( $decoded ) {
-		return self::unwrap_items_lenient( $decoded );
+		return self::strip_catalog_file_urls_from_items( self::unwrap_items_lenient( $decoded ) );
+	}
+
+	/**
+	 * Drop gallery item file URL snapshots from stored catalog rows (ADR 0022).
+	 *
+	 * @param array<int, mixed> $items Rows.
+	 * @return array<int, mixed>
+	 */
+	public static function strip_catalog_file_urls_from_items( array $items ): array {
+		$out = array();
+		foreach ( $items as $row ) {
+			if ( ! is_array( $row ) ) {
+				$out[] = $row;
+				continue;
+			}
+			unset( $row['url'], $row['src'], $row['thumbnail'] );
+			$out[] = $row;
+		}
+		return $out;
 	}
 
 	/**

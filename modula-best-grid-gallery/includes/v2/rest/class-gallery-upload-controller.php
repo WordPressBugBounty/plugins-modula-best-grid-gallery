@@ -65,10 +65,33 @@ class Gallery_Upload_Controller {
 	 * @return \WP_REST_Response
 	 */
 	private static function write_response( $gallery_id, array $payload ) {
+		if ( isset( $payload['image'] ) && is_array( $payload['image'] ) ) {
+			$payload['image'] = self::hydrate_image_row_src( $payload['image'] );
+		}
 		return new \WP_REST_Response(
 			array_merge( $payload, \Modula\V2\Gallery_Post::rest_response_meta( $gallery_id ) ),
 			200
 		);
+	}
+
+	/**
+	 * Attach a live src for the editor response without persisting a gallery item file URL.
+	 *
+	 * @param array<string, mixed> $row Catalog row.
+	 * @return array<string, mixed>
+	 */
+	private static function hydrate_image_row_src( array $row ) {
+		unset( $row['url'] );
+		$id = isset( $row['id'] ) ? absint( $row['id'] ) : 0;
+		if ( $id < 1 || ! function_exists( 'wp_get_attachment_image_url' ) ) {
+			return $row;
+		}
+		$src = wp_get_attachment_image_url( $id, 'full' );
+		if ( is_string( $src ) && '' !== $src ) {
+			$row['src']       = $src;
+			$row['thumbnail'] = $src;
+		}
+		return $row;
 	}
 
 	/**
@@ -638,16 +661,9 @@ class Gallery_Upload_Controller {
 			$merged = $upload->overlay_modula_row_attachment_text_from_post( $merged, $attachment_id );
 		}
 		$sanitized = $upload->sanitize_modula_image_row( $merged );
-		// Sanitize whitelists every key; missing `id`/`url` become ''. Restore from the row we merged so the client never gets an empty id (would drop the tile).
+		// Sanitize whitelists every key; missing `id` becomes ''. Restore from the row we merged so the client never gets an empty id (would drop the tile).
 		if ( isset( $current['id'] ) && ( ! isset( $sanitized['id'] ) || '' === $sanitized['id'] ) ) {
 			$sanitized['id'] = $current['id'];
-		}
-		$sid = isset( $sanitized['id'] ) ? absint( $sanitized['id'] ) : 0;
-		if ( $sid && get_post( $sid ) && 'attachment' === get_post_type( $sid ) && ( ! isset( $sanitized['url'] ) || '' === $sanitized['url'] ) ) {
-			$full = wp_get_attachment_image_url( $sid, 'full' );
-			if ( $full ) {
-				$sanitized['url'] = $full;
-			}
 		}
 		$images[ $index ] = $sanitized;
 		self::persist_modula_images_list( $gallery_id, $images );

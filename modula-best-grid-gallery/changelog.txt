@@ -1,3 +1,9 @@
+= 3.0.1 - 10.09.2026 =
+Fixed: Standalone settings save can deep-merge options before store (album/gallery toggles).
+
+= 3.0.0 - 09.09.2026 =
+Added: New beta gallery editor.
+
 = 2.14.39 - 08.09.2026 =
 Fixed: Gutenberg gallery block could display as raw, unrendered shortcode text on the frontend with some themes.
 Fixed: Some themes injected stray <p> tags into the gallery markup, breaking the layout.

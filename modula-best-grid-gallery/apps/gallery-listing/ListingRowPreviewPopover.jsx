@@ -20,6 +20,15 @@ const CLOSE_DELAY_MS = 200;
 let closeActivePreview = null;
 
 /**
+ * Close any open listing row preview (e.g. when entering hover actions).
+ */
+export function closeListingRowPreview() {
+	if (closeActivePreview) {
+		closeActivePreview();
+	}
+}
+
+/**
  * @param {() => void} closeFn
  */
 function claimPreview(closeFn) {

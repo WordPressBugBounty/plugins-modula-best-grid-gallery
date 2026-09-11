@@ -31,9 +31,8 @@
 	display: grid;
 	grid-template-columns: 1fr minmax(0, 420px) 1fr;
 	align-items: center;
-	height: 50px;
 	min-height: 50px;
-	padding: 0 $mod-space-16;
+	padding: $mod-space-8 $mod-space-16;
 	gap: $mod-space-8;
 	box-sizing: border-box;
 }
@@ -160,8 +159,12 @@
 
 .modula-gallery-takeover__topbar-title-field {
 	width: 100%;
-	max-width: min(100%, 360px);
+	max-width: min(100%, 420px);
 	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: $mod-space-4;
 }
 
 // Document title — rest is bare text; hover/focus opens a surface box + pencil.
@@ -309,6 +312,89 @@
 
 .modula-settings-editor__app[data-appearance='light'] .modula-gallery-takeover__topbar input.modula-gallery-takeover__topbar-title-input {
 	color-scheme: light;
+}
+
+.modula-gallery-takeover__editor-permalink {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: $mod-space-4;
+	width: 100%;
+	min-width: 0;
+}
+
+.modula-gallery-takeover__editor-permalink-label {
+	font-size: 11px;
+	line-height: 1.2;
+	font-weight: 500;
+	letter-spacing: 0.02em;
+	color: var(--mod-se-chrome-ink-muted, rgb(255 255 255 / 50%));
+}
+
+.modula-gallery-takeover__editor-permalink-row {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: $mod-space-4;
+	width: 100%;
+	min-width: 0;
+	font-size: 11px;
+	line-height: 1.3;
+	color: var(--mod-se-chrome-ink-muted, rgb(255 255 255 / 55%));
+}
+
+.modula-gallery-takeover__editor-permalink-prefix,
+.modula-gallery-takeover__editor-permalink-suffix {
+	min-width: 0;
+	max-width: 42%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.modula-gallery-takeover__topbar input.modula-gallery-takeover__editor-permalink-slug,
+.modula-gallery-takeover__topbar input[type='text'].modula-gallery-takeover__editor-permalink-slug {
+	flex: 0 1 auto;
+	width: auto;
+	min-width: 72px;
+	max-width: 160px;
+	margin: 0;
+	padding: 0 $mod-space-4 !important;
+	box-sizing: border-box;
+	font: inherit;
+	font-size: 11px !important;
+	line-height: 1.3 !important;
+	height: $mod-space-28 !important;
+	min-height: $mod-space-28 !important;
+	color: var(--mod-se-ink, var(--mod-se-chrome-ink)) !important;
+	text-align: center;
+	background: var(--mod-se-topbar-title-pill-bg-focus, var(--mod-se-surface, #fff)) !important;
+	border: 1px solid var(--mod-se-topbar-title-pill-border-focus, var(--mod-se-line, #e3e3de)) !important;
+	border-radius: 0;
+	box-shadow: none !important;
+}
+
+.modula-gallery-takeover__editor-permalink-view {
+	display: inline-flex;
+	align-items: center;
+	gap: $mod-space-4;
+	margin: 0;
+	padding: 0;
+	font-size: 11px;
+	line-height: 1.2;
+	font-weight: 600;
+	color: var(--mod-se-accent);
+	text-decoration: none;
+
+	&:hover {
+		color: var(--mod-se-accent-ink);
+		text-decoration: underline;
+	}
+
+	svg {
+		fill: currentColor;
+	}
 }
 
 .modula-gallery-takeover__topbar-meta {

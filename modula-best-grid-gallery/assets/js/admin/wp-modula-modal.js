@@ -34,7 +34,8 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
 
         open: function( $item ) {
             var wpMediaView = this.get( 'wpMediaView' ),
-                modulaModal = this.get( 'modulaModal' );
+                modulaModal = this.get( 'modulaModal' ),
+                originalClose;
 
             // Set the current item
             this.set( 'item', $item );
@@ -42,6 +43,15 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
             modulaModal.render();
             // Append modulaModalView to wpMediaView
             wpMediaView.content( modulaModal );
+            // Flush caption/fields into the gallery item + hidden field before the modal closes (X / Escape).
+            if ( ! wpMediaView._modulaCommitOnCloseWrapped ) {
+                originalClose = wpMediaView.close;
+                wpMediaView.close = function() {
+                    modulaModal.commitCurrentItemFields();
+                    return originalClose.apply( this, arguments );
+                };
+                wpMediaView._modulaCommitOnCloseWrapped = true;
+            }
             // Open wpMediaView
             wpMediaView.open();
 
@@ -233,10 +243,52 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
         },
 
         /**
+        * Commit visible modal fields (including TinyMCE caption) into the gallery item
+        * and sync the hidden modula-images field so next/prev/close do not discard edits.
+        */
+        commitCurrentItemFields: function() {
+            var view = this;
+
+            if ( ! this.item ) {
+                return;
+            }
+
+            // Flush any named inputs that may not have fired updateItem yet.
+            this.$el.find( 'input[name], textarea[name], select[name]' ).each( function() {
+                var $el = jQuery( this ),
+                    name = $el.attr( 'name' ),
+                    value;
+
+                if ( ! name ) {
+                    return;
+                }
+
+                if ( 'checkbox' === this.type ) {
+                    value = this.checked ? this.value : 0;
+                } else {
+                    value = $el.val();
+                }
+
+                view.item.set( name, value );
+            } );
+
+            // TinyMCE caption — prefer editor content over the raw textarea value.
+            if ( typeof tinymce !== 'undefined' && tinymce.get( 'modula_gallery_description' ) ) {
+                this.item.set( 'description', wp.editor.getContent( 'modula_gallery_description' ) );
+            }
+
+            if ( wp.Modula.Save && typeof wp.Modula.Save.saveImages === 'function' ) {
+                wp.Modula.Save.saveImages();
+            }
+        },
+
+        /**
         * Load the previous model in the collection
         */
         loadPreviousItem: function() {
             var item;
+
+            this.commitCurrentItemFields();
 
             // Decrement the index
             this.attachment_index--;
@@ -254,6 +306,8 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
         */
         loadNextItem: function() {
             var item;
+
+            this.commitCurrentItemFields();
 
             // Increment the index
             this.attachment_index++;

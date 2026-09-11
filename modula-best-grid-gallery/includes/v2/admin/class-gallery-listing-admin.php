@@ -254,25 +254,33 @@ class Gallery_Listing_Admin {
 		wp_localize_script(
 			'modula-gallery-listing',
 			'modulaGalleryListing',
-			array(
-				'nonce'                 => wp_create_nonce( 'wp_rest' ),
-				'listUrl'               => Listing_Controller::admin_url(),
-				'logoUrl'               => MODULA_URL . 'assets/images/modula-site-icon.png',
-				'newGalleryUrl'         => admin_url( 'post-new.php?post_type=modula-gallery' ),
-				'postNewUrl'            => admin_url( 'post-new.php?post_type=modula-gallery' ),
-				'editorChoiceQueryArg'  => Beta_Gallery_Admin::QUERY_ARG,
-				'createGalleryNonce'    => wp_create_nonce( 'modula-gallery-create-choice' ),
-				'createAlbumNonce'      => wp_create_nonce( 'modula-album-create-choice' ),
-				'editorChoiceHeroUrl'   => MODULA_URL . 'assets/images/admin/beta-editor-choice-hero.png',
-				'hasAlbums'             => post_type_exists( 'modula-album' ),
-				'canCreateAlbum'        => self::can_create_album(),
-				'newAlbumUrl'           => self::can_create_album() ? admin_url( 'post-new.php?post_type=modula-album' ) : '',
-				'isPro'                 => modula_is_compatible_pro(),
-				'extensionEntitlements' => Settings_Editor_Metabox::get_extension_entitlements_for_editor(),
-				'upgradeUrl'            => defined( 'MODULA_PRO_STORE_UPGRADE_URL' ) ? MODULA_PRO_STORE_UPGRADE_URL : 'https://wp-modula.com/pricing',
-				'standaloneUpsellUrl'   => 'https://wp-modula.com/pricing/?utm_source=modula-lite&utm_medium=listing&utm_campaign=modula-standalone',
-				'extensionsAdminUrl'    => admin_url( 'edit.php?post_type=modula-gallery&page=modula-addons' ),
+			apply_filters(
+				'modula_gallery_listing_config',
+				array(
+					'nonce'                 => wp_create_nonce( 'wp_rest' ),
+					'listUrl'               => Listing_Controller::admin_url(),
+					'logoUrl'               => MODULA_URL . 'assets/images/modula-site-icon.png',
+					'newGalleryUrl'         => admin_url( 'post-new.php?post_type=modula-gallery' ),
+					'postNewUrl'            => admin_url( 'post-new.php?post_type=modula-gallery' ),
+					'editorChoiceQueryArg'  => Beta_Gallery_Admin::QUERY_ARG,
+					'createGalleryNonce'    => wp_create_nonce( 'modula-gallery-create-choice' ),
+					'createAlbumNonce'      => wp_create_nonce( 'modula-album-create-choice' ),
+					'editorChoiceHeroUrl'   => MODULA_URL . 'assets/images/admin/beta-editor-choice-hero.png',
+					'hasAlbums'             => post_type_exists( 'modula-album' ),
+					'canCreateAlbum'        => self::can_create_album(),
+					'newAlbumUrl'           => self::can_create_album() ? admin_url( 'post-new.php?post_type=modula-album' ) : '',
+					'isPro'                 => modula_is_compatible_pro(),
+					'canUseBulkEditor'      => false,
+					'canUseApplyPreset'     => false,
+					'albumTakeoverAvailable' => false,
+					'extensionEntitlements' => Settings_Editor_Metabox::get_extension_entitlements_for_editor(),
+					'upgradeUrl'            => defined( 'MODULA_PRO_STORE_UPGRADE_URL' ) ? MODULA_PRO_STORE_UPGRADE_URL : 'https://wp-modula.com/pricing',
+					'standaloneUpsellUrl'   => 'https://wp-modula.com/pricing/?utm_source=modula-lite&utm_medium=listing&utm_campaign=modula-standalone&utm_content=v3',
+					'extensionsAdminUrl'    => admin_url( 'edit.php?post_type=modula-gallery&page=modula-addons' ),
+				)
 			)
 		);
+
+		do_action( 'modula_gallery_listing_enqueue' );
 	}
 }

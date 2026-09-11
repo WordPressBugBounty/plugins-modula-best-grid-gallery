@@ -553,7 +553,6 @@ class Modula_Gallery_Upload
 				'width'       => $def_w,
 				'height'      => $def_h,
 				'filters'     => '',
-				'url'         => wp_get_attachment_image_url($image_id, 'full'),
 			);
 			$modula_images[$image_id] = $this->sanitize_image($image);
 		}
@@ -635,7 +634,6 @@ class Modula_Gallery_Upload
 			'width'       => $def_w,
 			'height'      => $def_h,
 			'filters'     => '',
-			'url'         => wp_get_attachment_image_url($image_id, 'full'),
 		);
 		return $this->sanitize_image($image);
 	}
@@ -677,10 +675,22 @@ class Modula_Gallery_Upload
 		$post_data = array('ID' => $attachment_id);
 
 		if (array_key_exists('title', $fields)) {
-			$post_data['post_title'] = sanitize_text_field(wp_unslash($fields['title']));
+			$title_write = modula_resolve_attachment_text_write(
+				sanitize_text_field(wp_unslash($fields['title'])),
+				(string) $attachment->post_title
+			);
+			if (null !== $title_write) {
+				$post_data['post_title'] = $title_write;
+			}
 		}
 		if (array_key_exists('description', $fields)) {
-			$post_data['post_content'] = wp_slash(wp_filter_post_kses(wp_unslash($fields['description'])));
+			$description_write = modula_resolve_attachment_text_write(
+				wp_slash(wp_filter_post_kses(wp_unslash($fields['description']))),
+				(string) $attachment->post_content
+			);
+			if (null !== $description_write) {
+				$post_data['post_content'] = $description_write;
+			}
 		}
 
 		if (count($post_data) > 1) {
@@ -691,11 +701,18 @@ class Modula_Gallery_Upload
 		}
 
 		if (array_key_exists('alt', $fields)) {
-			update_post_meta(
-				$attachment_id,
-				'_wp_attachment_image_alt',
-				sanitize_text_field(wp_unslash($fields['alt']))
+			$existing_alt = get_post_meta($attachment_id, '_wp_attachment_image_alt', true);
+			$alt_write    = modula_resolve_attachment_text_write(
+				sanitize_text_field(wp_unslash($fields['alt'])),
+				is_string($existing_alt) ? $existing_alt : ''
 			);
+			if (null !== $alt_write) {
+				update_post_meta(
+					$attachment_id,
+					'_wp_attachment_image_alt',
+					$alt_write
+				);
+			}
 		}
 
 		return true;
@@ -1334,7 +1351,6 @@ class Modula_Gallery_Upload
 				'gridLocked',
 				'togglelightbox',
 				'hide_title',
-				'url',
 				'focal_x',
 				'focal_y',
 				'focal_crop_x',

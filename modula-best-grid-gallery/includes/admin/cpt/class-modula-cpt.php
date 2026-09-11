@@ -458,12 +458,22 @@ class Modula_CPT
 			}
 			$existing_post = $existing_posts[$attachment_id];
 
-			// Potential new fields
+			// Potential new fields (empty must not wipe non-empty Media Library values).
 			$new_title       = isset($image['title']) ? wp_kses_post(stripslashes($image['title'])) : null;
 			$new_description = isset($image['description']) ? wp_kses_post(stripslashes($image['description'])) : null;
 			$new_alt         = isset($image['alt']) ? sanitize_text_field(wp_unslash($image['alt'])) : null;
 			if (null !== $new_alt && is_serialized($new_alt)) {
 				$new_alt = '';
+			}
+			if (null !== $new_title) {
+				$new_title = modula_resolve_attachment_text_write($new_title, (string) $existing_post->post_title);
+			}
+			if (null !== $new_description) {
+				$new_description = modula_resolve_attachment_text_write($new_description, (string) $existing_post->post_excerpt);
+			}
+			if (null !== $new_alt) {
+				$existing_alt_for_guard = isset($existing_alts[$attachment_id]) ? $existing_alts[$attachment_id] : '';
+				$new_alt                = modula_resolve_attachment_text_write($new_alt, (string) $existing_alt_for_guard);
 			}
 
 			// Compare posts fields

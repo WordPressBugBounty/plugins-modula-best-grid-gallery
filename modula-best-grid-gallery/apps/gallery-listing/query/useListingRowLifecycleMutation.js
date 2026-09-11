@@ -45,6 +45,9 @@ export function useListingRowLifecycleMutation() {
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['modula-listing'] });
+			queryClient.invalidateQueries({
+				queryKey: ['modula-listing-row-preview'],
+			});
 		},
 	});
 }

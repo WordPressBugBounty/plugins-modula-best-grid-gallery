@@ -76,7 +76,11 @@ export function decodeListingTitle(title) {
  * @property {'gallery'|'album'} type
  * @property {string} title
  * @property {string} status
+ * @property {string} [slug]
+ * @property {string} [permalinkPrefix]
+ * @property {string} [permalinkSuffix]
  * @property {boolean} isBeta
+ * @property {boolean} [hasClassicSettingsBackup]
  * @property {boolean} [classicEditorPreferred]
  * @property {boolean} hasPassword
  * @property {boolean} hasProofing

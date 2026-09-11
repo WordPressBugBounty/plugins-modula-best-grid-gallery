@@ -129,6 +129,51 @@ class Settings_Editor_Metabox {
 	}
 
 	/**
+	 * Slug + classic-style permalink pieces for editor permalink seeding.
+	 *
+	 * Mirrors listing Quick edit permalink chrome (prefix + slug + suffix).
+	 *
+	 * @param \WP_Post|null $post Gallery post.
+	 * @return array{slug:string,permalinkPrefix:string,permalinkSuffix:string}
+	 */
+	private static function editor_permalink_pieces( $post ) {
+		$slug   = ( $post instanceof \WP_Post ) ? (string) $post->post_name : '';
+		$prefix = '';
+		$suffix = '';
+
+		if ( ! ( $post instanceof \WP_Post ) || (int) $post->ID < 1 ) {
+			return array(
+				'slug'            => $slug,
+				'permalinkPrefix' => $prefix,
+				'permalinkSuffix' => $suffix,
+			);
+		}
+
+		if ( ! function_exists( 'get_sample_permalink' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/post.php';
+		}
+
+		$sample = get_sample_permalink( (int) $post->ID );
+		if ( is_array( $sample ) ) {
+			$template = isset( $sample[0] ) ? (string) $sample[0] : '';
+			if ( '' === $slug && isset( $sample[1] ) && is_string( $sample[1] ) ) {
+				$slug = (string) $sample[1];
+			}
+			$parts = preg_split( '/%(?:postname|pagename)%/', $template, 2 );
+			if ( is_array( $parts ) ) {
+				$prefix = isset( $parts[0] ) ? (string) $parts[0] : '';
+				$suffix = isset( $parts[1] ) ? (string) $parts[1] : '';
+			}
+		}
+
+		return array(
+			'slug'            => $slug,
+			'permalinkPrefix' => $prefix,
+			'permalinkSuffix' => $suffix,
+		);
+	}
+
+	/**
 	 * Hook admin UI for the settings editor.
 	 *
 	 * @return void
@@ -403,7 +448,8 @@ class Settings_Editor_Metabox {
 		$post_type_object = get_post_type_object( 'modula-gallery' );
 
 		$post_status_choices = array();
-		$status_slugs        = array( 'publish', 'draft', 'pending', 'private' );
+		// Same allowlist as listing Quick edit / editor document status (no pending/future).
+		$status_slugs        = array( 'publish', 'draft', 'private' );
 		foreach ( $status_slugs as $slug ) {
 			$obj = get_post_status_object( $slug );
 			if ( ! is_object( $obj ) || empty( $obj->label ) ) {
@@ -415,12 +461,18 @@ class Settings_Editor_Metabox {
 			);
 		}
 		/**
-		 * Filter status options shown in the takeover title bar status dropdown.
+		 * Filter status options shown in the editor document panel.
 		 *
 		 * @param array<int, array{value: string, label: string}> $post_status_choices Rows for the React editor.
 		 * @param int                                             $post_id            Current gallery post ID.
 		 */
 		$post_status_choices = apply_filters( 'modula_settings_editor_post_status_choices', $post_status_choices, $post_id );
+
+		$permalink_pieces = self::editor_permalink_pieces(
+			$post_id ? get_post( $post_id ) : null
+		);
+	$view_permalink = $post_id ? get_permalink( $post_id ) : false;
+		$view_url       = $view_permalink ? (string) $view_permalink : '';
 
 		$show_rest_debug = ( defined( 'WP_DEBUG' ) && WP_DEBUG && current_user_can( 'manage_options' ) );
 		/**
@@ -469,6 +521,10 @@ class Settings_Editor_Metabox {
 			'postStatusLabel'              => ( $status_object && ! empty( $status_object->label ) ) ? $status_object->label : $post_status,
 			'postStatusChoices'            => $post_status_choices,
 			'canEditGalleryStatus'         => (bool) ( $post_id && current_user_can( 'edit_post', $post_id ) ),
+			'postSlug'                     => $permalink_pieces['slug'],
+			'permalinkPrefix'              => $permalink_pieces['permalinkPrefix'],
+			'permalinkSuffix'              => $permalink_pieces['permalinkSuffix'],
+			'viewUrl'                      => $view_url,
 			'postTypeSingular'             => ( $post_type_object && ! empty( $post_type_object->labels->singular_name ) ) ? $post_type_object->labels->singular_name : __( 'Gallery', 'modula-best-grid-gallery' ),
 			'modulaDocsBaseUrl'            => 'https://wp-modula.com/kb/',
 			'pluginUrl'                    => MODULA_URL,

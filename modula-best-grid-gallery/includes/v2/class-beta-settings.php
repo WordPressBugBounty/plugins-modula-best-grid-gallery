@@ -25,6 +25,13 @@ final class Beta_Settings {
 	public const CLASSIC_EDITOR_PREFERRED_META_KEY = '_modula_classic_editor_preferred';
 
 	/**
+	 * Snapshot of flat modula-settings taken on Convert to new editor (galleries only).
+	 *
+	 * @see docs/adr/0027-classic-settings-backup-and-restore.md
+	 */
+	public const CLASSIC_SETTINGS_BACKUP_META_KEY = '_modula_classic_settings_backup';
+
+	/**
 	 * Legacy site option (removed after one-shot migration).
 	 */
 	public const LEGACY_OPTION = 'modula_modern_beta';
@@ -73,6 +80,67 @@ final class Beta_Settings {
 			return;
 		}
 		update_post_meta( $post_id, self::META_KEY, '1' );
+	}
+
+	/**
+	 * Whether a classic settings backup exists for this gallery.
+	 *
+	 * @param int $post_id Gallery post ID.
+	 * @return bool
+	 */
+	public static function has_classic_settings_backup( $post_id ) {
+		$post_id = absint( $post_id );
+		if ( $post_id < 1 || 'modula-gallery' !== get_post_type( $post_id ) ) {
+			return false;
+		}
+
+		$backup = get_post_meta( $post_id, self::CLASSIC_SETTINGS_BACKUP_META_KEY, true );
+
+		return is_array( $backup );
+	}
+
+	/**
+	 * Snapshot current flat modula-settings into the classic settings backup (replace).
+	 *
+	 * @param int $post_id Gallery post ID.
+	 * @return void
+	 */
+	public static function write_classic_settings_backup( $post_id ) {
+		$post_id = absint( $post_id );
+		if ( $post_id < 1 || 'modula-gallery' !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		$flat = get_post_meta( $post_id, 'modula-settings', true );
+		if ( ! is_array( $flat ) ) {
+			$flat = array();
+		}
+
+		update_post_meta( $post_id, self::CLASSIC_SETTINGS_BACKUP_META_KEY, $flat );
+	}
+
+	/**
+	 * Restore flat settings from backup, clear Beta flag, delete settings v2; keep backup.
+	 *
+	 * @param int $post_id Gallery post ID.
+	 * @return bool True when a backup was restored.
+	 */
+	public static function restore_classic_settings_from_backup( $post_id ) {
+		$post_id = absint( $post_id );
+		if ( $post_id < 1 || 'modula-gallery' !== get_post_type( $post_id ) ) {
+			return false;
+		}
+
+		$backup = get_post_meta( $post_id, self::CLASSIC_SETTINGS_BACKUP_META_KEY, true );
+		if ( ! is_array( $backup ) ) {
+			return false;
+		}
+
+		update_post_meta( $post_id, 'modula-settings', $backup );
+		delete_post_meta( $post_id, Meta_Sync::SETTINGS_V2_META_KEY );
+		delete_post_meta( $post_id, self::META_KEY );
+
+		return true;
 	}
 
 	/**

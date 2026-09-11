@@ -5,6 +5,7 @@ import { getListingThumbnailUrls } from './getListingThumbnailUrls';
 import { listingRowToFields } from './listingRowToFields';
 import { shouldShowBetaEditorPrompt } from './listingBetaEditorPrompt';
 import { ListingRowActionsMenu } from './ListingRowActionsMenu';
+import { ListingRowHoverActions } from './ListingRowHoverActions';
 import { ListingRowPreviewTrigger } from './ListingRowPreviewPopover';
 import { proofingBadgeIcon } from './proofingBadgeIcon';
 import { ShortcodeCell } from './ShortcodeCell';
@@ -66,26 +67,55 @@ function RowBadges({ badges }) {
 /**
  * Field definitions for the gallery listing DataViews.
  *
- * @param {{ hasAlbums?: boolean, rowActionHandlers?: Object, requestGalleryEdit?: (item: Object) => void }} [options]
+ * @param {{
+ *   hasAlbums?: boolean,
+ *   canUseBulkEditor?: boolean,
+ *   albumTakeoverAvailable?: boolean,
+ *   rowActionHandlers?: Object,
+ *   requestGalleryEdit?: (item: Object) => void,
+ *   requestQuickEdit?: (item: Object) => void,
+ * }} [options]
  * @return {import('@wordpress/dataviews').Field[]}
  */
 export function getListingFields({
 	hasAlbums = false,
+	canUseBulkEditor = false,
+	albumTakeoverAvailable = false,
 	rowActionHandlers = {},
 	requestGalleryEdit,
+	requestQuickEdit,
 } = {}) {
+	const { trashListingRows, restoreListingRows, deleteListingRows } =
+		rowActionHandlers;
 	const fields = [
 		{
 			id: 'preview',
 			label: __('Preview', 'modula-best-grid-gallery'),
 			enableSorting: false,
 			getValue: ({ item }) => getListingThumbnailUrls(item)[0] || '',
-			render: ({ item }) => (
-				<div className="modula-gallery-listing__primary-media">
-					<ListingRowActionsMenu item={item} {...rowActionHandlers} />
-					<StackedThumbnails item={item} />
-				</div>
-			),
+			render: ({ item }) => {
+				const previewable =
+					(item.type === 'gallery' || item.type === 'album') &&
+					item.status !== 'trash';
+				const thumbs = <StackedThumbnails item={item} />;
+
+				return (
+					<div className="modula-gallery-listing__primary-media">
+						<ListingRowActionsMenu item={item} {...rowActionHandlers} />
+						{previewable ? (
+							<ListingRowPreviewTrigger
+								item={item}
+								requestGalleryEdit={requestGalleryEdit}
+								className="modula-gallery-listing__row-preview-trigger--thumbs"
+							>
+								{thumbs}
+							</ListingRowPreviewTrigger>
+						) : (
+							thumbs
+						)}
+					</div>
+				);
+			},
 		},
 		{
 			id: 'gallery',
@@ -95,15 +125,19 @@ export function getListingFields({
 			getValue: ({ item }) => listingRowToFields(item).title,
 			render: ({ item }) => {
 				const { badges, title } = listingRowToFields(item);
-				const showEditPrompt = shouldShowBetaEditorPrompt(item);
+				const showEditPrompt = shouldShowBetaEditorPrompt(item, {
+					albumTakeoverAvailable,
+				});
 				const onTitleClick = (event) => {
+					event.stopPropagation();
 					if (!showEditPrompt || !requestGalleryEdit) {
 						return;
 					}
 					event.preventDefault();
 					requestGalleryEdit(item);
 				};
-				const meta = (
+
+				return (
 					<div className="modula-gallery-listing__gallery-meta">
 						<div className="modula-gallery-listing__title-row">
 							<a
@@ -120,25 +154,17 @@ export function getListingFields({
 								{item.layoutLabel}
 							</span>
 						) : null}
+						<ListingRowHoverActions
+							item={item}
+							canUseBulkEditor={canUseBulkEditor}
+							requestGalleryEdit={requestGalleryEdit}
+							requestQuickEdit={requestQuickEdit}
+							trashListingRows={trashListingRows}
+							restoreListingRows={restoreListingRows}
+							deleteListingRows={deleteListingRows}
+						/>
 					</div>
 				);
-
-				if (
-					(item.type === 'gallery' || item.type === 'album') &&
-					item.status !== 'trash'
-				) {
-					return (
-						<ListingRowPreviewTrigger
-							item={item}
-							requestGalleryEdit={requestGalleryEdit}
-							className="modula-gallery-listing__row-preview-trigger--title"
-						>
-							{meta}
-						</ListingRowPreviewTrigger>
-					);
-				}
-
-				return meta;
 			},
 		},
 		{

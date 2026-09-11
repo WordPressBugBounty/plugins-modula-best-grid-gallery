@@ -229,6 +229,23 @@ class Listing_Controller {
 				),
 			)
 		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/listing/(?P<id>\d+)/restore-classic',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( __CLASS__, 'restore_classic_editor' ),
+				'permission_callback' => array( __CLASS__, 'check_gallery_edit_access' ),
+				'args'                => array(
+					'id' => array(
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -391,11 +408,13 @@ class Listing_Controller {
 		self::clear_listing_totals_transient( $id );
 
 		$edit_url = get_edit_post_link( $result, 'raw' );
+		$status   = get_post_status( $result );
 
 		return rest_ensure_response(
 			array(
 				'id'      => $result,
 				'editUrl' => $edit_url ? $edit_url : '',
+				'status'  => $status ? $status : 'draft',
 			)
 		);
 	}
@@ -411,6 +430,47 @@ class Listing_Controller {
 		} else {
 			$result = \Modula\V2\Admin\Beta_Gallery_Admin::convert_to_beta_gallery( $id );
 		}
+		if ( is_wp_error( $result ) ) {
+			$status = (int) $result->get_error_data( 'status' );
+			if ( $status < 400 ) {
+				$status = 500;
+			}
+			return new \WP_Error(
+				$result->get_error_code(),
+				$result->get_error_message(),
+				array( 'status' => $status )
+			);
+		}
+
+		self::clear_listing_totals_transient( $id );
+
+		$edit_url = get_edit_post_link( $result, 'raw' );
+
+		return rest_ensure_response(
+			array(
+				'id'      => $result,
+				'editUrl' => $edit_url ? $edit_url : '',
+			)
+		);
+	}
+
+	/**
+	 * Restore classic editor settings from Convert backup (galleries only).
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public static function restore_classic_editor( $request ) {
+		$id = (int) $request['id'];
+		if ( 'modula-album' === get_post_type( $id ) ) {
+			return new \WP_Error(
+				'modula_restore_classic_album',
+				__( 'Restore classic editor is not available for albums.', 'modula-best-grid-gallery' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$result = \Modula\V2\Admin\Beta_Gallery_Admin::restore_classic_editor_gallery( $id );
 		if ( is_wp_error( $result ) ) {
 			$status = (int) $result->get_error_data( 'status' );
 			if ( $status < 400 ) {
@@ -1244,6 +1304,49 @@ class Listing_Controller {
 	}
 
 	/**
+	 * Slug + classic-style permalink pieces for Quick edit (listing) seeding.
+	 *
+	 * @param \WP_Post $post Gallery or album post.
+	 * @return array{slug:string,permalinkPrefix:string,permalinkSuffix:string}
+	 */
+	private static function listing_permalink_pieces( $post ) {
+		$slug = ( $post instanceof \WP_Post ) ? (string) $post->post_name : '';
+		$prefix = '';
+		$suffix = '';
+
+		if ( ! ( $post instanceof \WP_Post ) || (int) $post->ID < 1 ) {
+			return array(
+				'slug'            => $slug,
+				'permalinkPrefix' => $prefix,
+				'permalinkSuffix' => $suffix,
+			);
+		}
+
+		if ( ! function_exists( 'get_sample_permalink' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/post.php';
+		}
+
+		$sample = get_sample_permalink( (int) $post->ID );
+		if ( is_array( $sample ) ) {
+			$template = isset( $sample[0] ) ? (string) $sample[0] : '';
+			if ( '' === $slug && isset( $sample[1] ) && is_string( $sample[1] ) ) {
+				$slug = (string) $sample[1];
+			}
+			$parts = preg_split( '/%(?:postname|pagename)%/', $template, 2 );
+			if ( is_array( $parts ) ) {
+				$prefix = isset( $parts[0] ) ? (string) $parts[0] : '';
+				$suffix = isset( $parts[1] ) ? (string) $parts[1] : '';
+			}
+		}
+
+		return array(
+			'slug'            => $slug,
+			'permalinkPrefix' => $prefix,
+			'permalinkSuffix' => $suffix,
+		);
+	}
+
+	/**
 	 * @param \WP_Post $post     Gallery post.
 	 * @param bool     $in_album Whether the gallery is referenced by an album.
 	 * @return array<string, mixed>
@@ -1274,33 +1377,38 @@ class Listing_Controller {
 		$shortcode      = ! empty( $shortcode_rows[0]['code'] )
 			? (string) $shortcode_rows[0]['code']
 			: sprintf( '[modula id="%d"]', $id );
+		$permalink      = self::listing_permalink_pieces( $post );
 
 		return array(
-			'id'                     => $id,
-			'type'                   => 'gallery',
-			'title'                  => self::listing_display_title( $post ),
-			'status'                 => $status,
-			'isBeta'                 => \Modula\V2\Beta_Settings::is_beta_gallery( $id ),
-			'classicEditorPreferred' => \Modula\V2\Beta_Settings::has_classic_editor_preference( $id ),
-			'hasPassword'            => '' !== (string) $post->post_password,
-			'hasProofing'            => self::gallery_has_proofing( $id ),
-			'inAlbum'                => (bool) $in_album,
-			'thumbnailUrl'           => ! empty( $thumbnails[0] ) ? $thumbnails[0] : '',
-			'thumbnailUrls'          => $thumbnails,
-			'layoutLabel'            => $layout_label,
-			'items'                  => $item_counts,
-			'shortcode'              => $shortcode,
-			'shortcodes'             => array(
+			'id'                       => $id,
+			'type'                     => 'gallery',
+			'title'                    => self::listing_display_title( $post ),
+			'status'                   => $status,
+			'slug'                     => $permalink['slug'],
+			'permalinkPrefix'          => $permalink['permalinkPrefix'],
+			'permalinkSuffix'          => $permalink['permalinkSuffix'],
+			'isBeta'                   => \Modula\V2\Beta_Settings::is_beta_gallery( $id ),
+			'hasClassicSettingsBackup' => \Modula\V2\Beta_Settings::has_classic_settings_backup( $id ),
+			'classicEditorPreferred'   => \Modula\V2\Beta_Settings::has_classic_editor_preference( $id ),
+			'hasPassword'              => '' !== (string) $post->post_password,
+			'hasProofing'              => self::gallery_has_proofing( $id ),
+			'inAlbum'                  => (bool) $in_album,
+			'thumbnailUrl'             => ! empty( $thumbnails[0] ) ? $thumbnails[0] : '',
+			'thumbnailUrls'            => $thumbnails,
+			'layoutLabel'              => $layout_label,
+			'items'                    => $item_counts,
+			'shortcode'                => $shortcode,
+			'shortcodes'               => array(
 				'rows' => $shortcode_rows,
 			),
-			'updatedAt'              => gmdate( 'c', strtotime( $post->post_modified_gmt . ' UTC' ) ),
-			'createdAt'              => gmdate( 'c', strtotime( $post->post_date_gmt . ' UTC' ) ),
-			'author'                 => $author,
-			'editUrl'                => get_edit_post_link( $id, 'raw' ) ? get_edit_post_link( $id, 'raw' ) : '',
-			'viewUrl'                => get_permalink( $id ) ? get_permalink( $id ) : '',
-			'canEdit'                => current_user_can( 'edit_post', $id ),
-			'canDelete'              => current_user_can( 'delete_post', $id ),
-			'restoreStatus'          => $restore_status,
+			'updatedAt'                => gmdate( 'c', strtotime( $post->post_modified_gmt . ' UTC' ) ),
+			'createdAt'                => gmdate( 'c', strtotime( $post->post_date_gmt . ' UTC' ) ),
+			'author'                   => $author,
+			'editUrl'                  => get_edit_post_link( $id, 'raw' ) ? get_edit_post_link( $id, 'raw' ) : '',
+			'viewUrl'                  => get_permalink( $id ) ? get_permalink( $id ) : '',
+			'canEdit'                  => current_user_can( 'edit_post', $id ),
+			'canDelete'                => current_user_can( 'delete_post', $id ),
+			'restoreStatus'            => $restore_status,
 		);
 	}
 
@@ -1340,12 +1448,16 @@ class Listing_Controller {
 				'description' => '',
 			),
 		);
+		$permalink      = self::listing_permalink_pieces( $post );
 
 		return array(
 			'id'                     => $id,
 			'type'                   => 'album',
 			'title'                  => self::listing_display_title( $post ),
 			'status'                 => $status,
+			'slug'                   => $permalink['slug'],
+			'permalinkPrefix'        => $permalink['permalinkPrefix'],
+			'permalinkSuffix'        => $permalink['permalinkSuffix'],
 			'isBeta'                 => \Modula\V2\Beta_Settings::is_beta_album( $id ),
 			'classicEditorPreferred' => \Modula\V2\Beta_Settings::has_classic_editor_preference( $id ),
 			'hasPassword'            => '' !== (string) $post->post_password,
@@ -1400,6 +1512,30 @@ class Listing_Controller {
 	}
 
 	/**
+	 * Whether a classic album-galleries meta entry is a live gallery member.
+	 *
+	 * Soft-hides trash and missing posts (ADR 0026). Nested albums are not
+	 * counted as gallery members on the listing.
+	 *
+	 * @param mixed $member Meta entry.
+	 * @return bool
+	 */
+	private static function is_live_album_gallery_member( $member ) {
+		if ( ! is_array( $member ) || empty( $member['id'] ) || ! is_numeric( $member['id'] ) ) {
+			return false;
+		}
+		$item_type = ! empty( $member['itemType'] ) ? (string) $member['itemType'] : 'modula-gallery';
+		if ( 'modula-album' === $item_type ) {
+			return false;
+		}
+		$gallery_id = (int) $member['id'];
+		$gallery    = get_post( $gallery_id );
+		return $gallery
+			&& 'modula-gallery' === $gallery->post_type
+			&& 'trash' !== $gallery->post_status;
+	}
+
+	/**
 	 * @param int $album_id Album ID.
 	 * @return array{images: int, videos: int, galleries: int, total: int}
 	 */
@@ -1416,10 +1552,9 @@ class Listing_Controller {
 
 		$galleries = 0;
 		foreach ( $members as $member ) {
-			if ( ! is_array( $member ) ) {
-				continue;
+			if ( self::is_live_album_gallery_member( $member ) ) {
+				++$galleries;
 			}
-			++$galleries;
 		}
 
 		return array(
@@ -1452,6 +1587,9 @@ class Listing_Controller {
 			if ( count( $urls ) >= $limit ) {
 				break;
 			}
+			if ( ! self::is_live_album_gallery_member( $member ) ) {
+				continue;
+			}
 			$url = self::get_album_member_thumbnail_url( $member );
 			if ( $url && ! in_array( $url, $urls, true ) ) {
 				$urls[] = $url;
@@ -1462,6 +1600,9 @@ class Listing_Controller {
 			foreach ( $members as $member ) {
 				if ( count( $urls ) >= $limit ) {
 					break;
+				}
+				if ( ! self::is_live_album_gallery_member( $member ) ) {
+					continue;
 				}
 				if ( ! is_array( $member ) || empty( $member['id'] ) || ! is_numeric( $member['id'] ) ) {
 					continue;

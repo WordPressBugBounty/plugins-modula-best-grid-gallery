@@ -1,6 +1,7 @@
 /**
  * Redesign settings panel column — header + hub body (skeleton: drills only).
  * Image edit and Sort & order replace the hub (settings-column takeovers).
+ * Editor document status lives in the document panel above category settings.
  */
 import { useMemo } from '@wordpress/element';
 import { SETTINGS_EDITOR_CATEGORIES } from '../../../constants/editorStructure';
@@ -19,6 +20,7 @@ import GalleryItemEditPanel from '../../gallery-item-edit-panel/GalleryItemEditP
 import GalleryItemFocusPanel from '../../gallery-item-edit-panel/GalleryItemFocusPanel';
 import GalleryItemContentBlockPanel from '../../gallery-item-edit-panel/GalleryItemContentBlockPanel';
 import GalleryReorderPanel from '../../gallery-reorder/GalleryReorderPanel';
+import EditorDocumentPanel from '../../shell/EditorDocumentPanel';
 import { usePreviewReduxStoreItems } from '../../../hooks/usePreviewReduxStoreItems';
 import { isContentBlockGalleryItemRow } from '../../../utils/embeddedGalleryItems';
 
@@ -26,8 +28,23 @@ import { isContentBlockGalleryItemRow } from '../../../utils/embeddedGalleryItem
  * @param {Object}                 props
  * @param {string}                 props.activeCategory
  * @param {(name: string) => void} props.setActiveCategory
+ * @param {string}                 [props.documentStatus]
+ * @param {string}                 [props.documentStatusLabel]
+ * @param {Array<{ value?: string, label?: string }>} [props.documentStatusChoices]
+ * @param {(status: string, label: string) => void} [props.onDocumentStatusChange]
+ * @param {boolean}                [props.documentStatusBusy]
+ * @param {boolean}                [props.canEditDocumentStatus]
  */
-export default function SettingsPanel({ activeCategory, setActiveCategory }) {
+export default function SettingsPanel({
+	activeCategory,
+	setActiveCategory,
+	documentStatus = '',
+	documentStatusLabel = '',
+	documentStatusChoices = [],
+	onDocumentStatusChange,
+	documentStatusBusy = false,
+	canEditDocumentStatus = false,
+}) {
 	const { stack, stackDepth, popFrame, clearStack } =
 		useTakeoverSidebarStack();
 	const itemEdit = useGalleryItemEditSidebar();
@@ -98,6 +115,11 @@ export default function SettingsPanel({ activeCategory, setActiveCategory }) {
 		return null;
 	}
 
+	const showDocumentPanel =
+		!isNested &&
+		typeof onDocumentStatusChange === 'function' &&
+		canEditDocumentStatus;
+
 	return (
 		<div className="modula-settings-panel">
 			<SettingsPanelHeader
@@ -114,6 +136,15 @@ export default function SettingsPanel({ activeCategory, setActiveCategory }) {
 				}}
 			/>
 			<div className="modula-settings-panel__scroll">
+				{showDocumentPanel ? (
+					<EditorDocumentPanel
+						status={documentStatus}
+						statusLabel={documentStatusLabel}
+						statusChoices={documentStatusChoices}
+						onStatusChange={onDocumentStatusChange}
+						busy={documentStatusBusy}
+					/>
+				) : null}
 				<SettingsPanelBody
 					category={category}
 					onExitCategory={setActiveCategory}

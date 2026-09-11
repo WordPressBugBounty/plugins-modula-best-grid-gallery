@@ -1,10 +1,13 @@
 /**
  * Whether to show the Beta editor choice modal when opening a classic gallery or album.
  *
+ * Albums only when Albums editor takeover is available site-wide.
+ *
  * @param {import('./listingRowToFields').ListingRow} item
+ * @param {{ albumTakeoverAvailable?: boolean }} [options]
  * @return {boolean}
  */
-export function shouldShowBetaEditorPrompt(item) {
+export function shouldShowBetaEditorPrompt(item, options = {}) {
 	if (!item || ('gallery' !== item.type && 'album' !== item.type)) {
 		return false;
 	}
@@ -17,7 +20,13 @@ export function shouldShowBetaEditorPrompt(item) {
 	if ('trash' === item.status) {
 		return false;
 	}
-	return Boolean(item.editUrl);
+	if (!item.editUrl) {
+		return false;
+	}
+	if ('album' === item.type && options.albumTakeoverAvailable !== true) {
+		return false;
+	}
+	return true;
 }
 
 /**

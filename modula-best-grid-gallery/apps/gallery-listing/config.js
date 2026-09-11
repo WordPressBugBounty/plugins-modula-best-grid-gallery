@@ -15,6 +15,9 @@
  *   canCreateAlbum: boolean,
  *   newAlbumUrl: string,
  *   isPro: boolean,
+ *   canUseBulkEditor: boolean,
+ *   canUseApplyPreset: boolean,
+ *   albumTakeoverAvailable: boolean,
  *   extensionEntitlements: Record<string, { available?: boolean, enabled?: boolean }>,
  *   upgradeUrl: string,
  *   standaloneUpsellUrl: string,
@@ -57,6 +60,9 @@ export function getGalleryListingConfig() {
 		canCreateAlbum: Boolean(raw.canCreateAlbum),
 		newAlbumUrl: typeof raw.newAlbumUrl === 'string' ? raw.newAlbumUrl : '',
 		isPro: Boolean(raw.isPro),
+		canUseBulkEditor: Boolean(raw.canUseBulkEditor),
+		canUseApplyPreset: Boolean(raw.canUseApplyPreset),
+		albumTakeoverAvailable: Boolean(raw.albumTakeoverAvailable),
 		extensionEntitlements:
 			raw.extensionEntitlements &&
 			typeof raw.extensionEntitlements === 'object'

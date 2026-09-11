@@ -3,11 +3,13 @@ import { __experimentalConfirmDialog as ConfirmDialog } from '@wordpress/compone
 import { __ } from '@wordpress/i18n';
 import {
 	arrowRight,
+	backup,
 	copy,
 	edit,
 	layout,
 	moreVertical,
 	pages,
+	reusableBlock,
 	seen,
 	trash,
 	undo,
@@ -36,9 +38,11 @@ const ACTION_ICONS = {
 	edit,
 	'try-new-editor': layout,
 	'convert-new-editor': arrowRight,
+	'restore-classic-editor': backup,
 	view: seen,
 	'copy-shortcode': copy,
 	duplicate: pages,
+	'apply-preset': reusableBlock,
 	trash,
 	restore: undo,
 	'delete-permanently': trash,
@@ -51,9 +55,11 @@ const ACTION_ICONS = {
  * @param {(items: Object[]) => Promise<unknown>} [props.trashListingRows]
  * @param {(items: Object[]) => Promise<unknown>} [props.restoreListingRows]
  * @param {(items: Object[]) => Promise<unknown>} [props.deleteListingRows]
+ * @param {(items: Object[]) => Promise<unknown>} [props.applyListingPreset]
  * @param {(item: Object) => void} [props.requestGalleryEdit]
  * @param {(item: Object) => Promise<{ id: number, editUrl?: string }>} [props.tryBetaGallery]
  * @param {(item: Object) => Promise<{ id: number, editUrl?: string }>} [props.convertBetaGallery]
+ * @param {(item: Object) => Promise<{ id: number, editUrl?: string }>} [props.restoreClassicEditor]
  */
 export function ListingRowActionsMenu({
 	item,
@@ -61,18 +67,26 @@ export function ListingRowActionsMenu({
 	trashListingRows,
 	restoreListingRows,
 	deleteListingRows,
+	applyListingPreset,
 	requestGalleryEdit,
 	tryBetaGallery,
 	convertBetaGallery,
+	restoreClassicEditor,
 }) {
 	const [busyId, setBusyId] = useState(/** @type {string|null} */ (null));
 	const [pendingConfirm, setPendingConfirm] = useState(
-		/** @type {'trash'|'delete-permanently'|null} */ (null)
+		/** @type {'trash'|'delete-permanently'|'restore-classic-editor'|null} */ (
+			null
+		)
 	);
 	const [confirmBusy, setConfirmBusy] = useState(false);
 	const listingConfig = getGalleryListingConfig();
 	const canUseStandalone = isStandaloneEntitled(listingConfig);
-	const groups = getListingRowMenuGroups(item, { canUseStandalone });
+	const groups = getListingRowMenuGroups(item, {
+		canUseStandalone,
+		canUseApplyPreset: listingConfig.canUseApplyPreset,
+		albumTakeoverAvailable: listingConfig.albumTakeoverAvailable,
+	});
 
 	if (groups.length === 0) {
 		return null;
@@ -145,6 +159,19 @@ export function ListingRowActionsMenu({
 						await duplicateListingRow(item);
 					}
 					break;
+				case 'apply-preset':
+					if (typeof applyListingPreset === 'function') {
+						// Close the ⋮ before opening the modal so outside-click
+						// from menu teardown does not cancel Apply preset.
+						setBusyId(null);
+						onClose();
+						await new Promise((resolve) => {
+							window.setTimeout(resolve, 0);
+						});
+						await applyListingPreset([item]);
+						return;
+					}
+					break;
 				case 'restore':
 					if (typeof restoreListingRows === 'function') {
 						await restoreListingRows([item]);
@@ -178,6 +205,10 @@ export function ListingRowActionsMenu({
 			if (pendingConfirm === 'trash') {
 				if (typeof trashListingRows === 'function') {
 					await trashListingRows([item]);
+				}
+			} else if (pendingConfirm === 'restore-classic-editor') {
+				if (typeof restoreClassicEditor === 'function') {
+					await restoreClassicEditor(item);
 				}
 			} else if (typeof deleteListingRows === 'function') {
 				await deleteListingRows([item]);

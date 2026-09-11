@@ -14,9 +14,11 @@ $mod-sidebar-v2-trailing-width: $mod-space-32;
 $mod-sidebar-v2-total-w: calc(#{$mod-se-rail-w} + #{$mod-se-panel-w});
 
 .modula-gallery-takeover__sidebar--v2 {
-	flex: 0 0 #{$mod-se-rail-w + $mod-se-panel-w};
-	width: #{$mod-se-rail-w + $mod-se-panel-w};
-	max-width: min(#{$mod-se-rail-w + $mod-se-panel-w}, 100%);
+	flex: 0 0 calc(var(--mod-se-rail-w, #{$mod-se-rail-w}) + var(--mod-se-panel-w, #{$mod-se-panel-w}));
+	width: calc(var(--mod-se-rail-w, #{$mod-se-rail-w}) + var(--mod-se-panel-w, #{$mod-se-panel-w}));
+	max-width: min(calc(var(--mod-se-rail-w, #{$mod-se-rail-w}) + var(--mod-se-panel-w, #{$mod-se-panel-w})),
+		100%);
+	transition: none;
 
 	@include modula-sidebar-v2-flat-form-controls;
 	@include modula-gutenberg-core-range-control-appearance;
@@ -24,9 +26,9 @@ $mod-sidebar-v2-total-w: calc(#{$mod-se-rail-w} + #{$mod-se-panel-w});
 
 	/* Redesign isolation: leftmost category rail only. */
 	&.modula-gallery-takeover__sidebar--rail-only {
-		flex: 0 0 $mod-se-rail-w;
-		width: $mod-se-rail-w;
-		max-width: min(#{$mod-se-rail-w}, 100%);
+		flex: 0 0 var(--mod-se-rail-w, #{$mod-se-rail-w});
+		width: var(--mod-se-rail-w, #{$mod-se-rail-w});
+		max-width: min(var(--mod-se-rail-w, #{$mod-se-rail-w}), 100%);
 
 		.modula-gallery-takeover__sidebar-body--v2 {
 			flex: 1;
@@ -36,6 +38,49 @@ $mod-sidebar-v2-total-w: calc(#{$mod-se-rail-w} + #{$mod-se-panel-w});
 		.modula-gallery-takeover__sidebar-v2-nav-column {
 			flex: 1 1 auto;
 			height: 100%;
+		}
+	}
+
+	&.modula-gallery-takeover__sidebar--rail-compact {
+		flex: 0 0 calc(var(--mod-se-rail-compact-w, #{$mod-se-rail-compact-w}) + var(--mod-se-panel-w, #{$mod-se-panel-w}));
+		width: calc(var(--mod-se-rail-compact-w, #{$mod-se-rail-compact-w}) + var(--mod-se-panel-w, #{$mod-se-panel-w}));
+		max-width: min(calc(var(--mod-se-rail-compact-w, #{$mod-se-rail-compact-w}) + var(--mod-se-panel-w, #{$mod-se-panel-w})),
+			100%);
+
+		.modula-gallery-takeover__sidebar-v2-nav-column {
+			flex: 0 0 var(--mod-se-rail-compact-w, #{$mod-se-rail-compact-w});
+			width: var(--mod-se-rail-compact-w, #{$mod-se-rail-compact-w});
+		}
+
+		.modula-gallery-takeover__sidebar-v2-nav-btn {
+			align-items: center;
+		}
+
+		.modula-gallery-takeover__sidebar-v2-nav-helper {
+			display: none;
+		}
+
+		.modula-gallery-takeover__sidebar-v2-nav-title {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			max-width: 100%;
+		}
+
+		.modula-gallery-takeover__sidebar-rail-footer {
+			flex-direction: column;
+			align-items: stretch;
+			justify-content: flex-start;
+		}
+
+		.modula-gallery-takeover__sidebar-rail-footer-docs {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.components-button.modula-settings-editor__appearance-toggle--sidebar-footer {
+			align-self: flex-start;
 		}
 	}
 }
@@ -56,8 +101,8 @@ $mod-sidebar-v2-total-w: calc(#{$mod-se-rail-w} + #{$mod-se-panel-w});
 }
 
 .modula-gallery-takeover__sidebar-v2-nav-column {
-	flex: 0 0 $mod-se-rail-w;
-	width: $mod-se-rail-w;
+	flex: 0 0 var(--mod-se-rail-w, #{$mod-se-rail-w});
+	width: var(--mod-se-rail-w, #{$mod-se-rail-w});
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
@@ -65,14 +110,15 @@ $mod-sidebar-v2-total-w: calc(#{$mod-se-rail-w} + #{$mod-se-panel-w});
 	position: relative;
 	z-index: 2;
 	overflow: visible;
+	transition: none;
 	border-right: 1px solid var(--mod-se-chrome-border, #{$mod-takeover-chrome-border});
 	background: var(--mod-se-sidebar-nav-bg,
 		var(--mod-se-sidebar-bg, #{$mod-takeover-sidebar-bg}));
 }
 
 .modula-gallery-takeover__sidebar-v2-settings-column {
-	flex: 0 0 $mod-se-panel-w;
-	width: $mod-se-panel-w;
+	flex: 0 0 var(--mod-se-panel-w, #{$mod-se-panel-w});
+	width: var(--mod-se-panel-w, #{$mod-se-panel-w});
 	min-width: 0;
 	display: flex;
 	flex-direction: column;

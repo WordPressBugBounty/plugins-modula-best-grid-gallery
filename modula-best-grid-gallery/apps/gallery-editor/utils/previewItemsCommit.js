@@ -582,19 +582,21 @@ export function mergeModulaRowIntoPreviewItem(prevItem, row) {
 	if (!row || !prevItem) {
 		return prevItem;
 	}
-	const url = row.url || prevItem.url || prevItem.src || prevItem.thumbnail;
-	const videoThumbnail = mergeRowFieldIfPresent(
-		row,
-		prevItem,
-		'video_thumbnail'
-	);
-	const videoUrl = mergeRowFieldIfPresent(row, prevItem, 'video_url');
 	const nextId = mergeRowId(row.id, prevItem.id);
 	const attachmentReplaced =
 		prevItem.id !== undefined &&
 		prevItem.id !== null &&
 		String(prevItem.id).trim() !== '' &&
 		String(nextId) !== String(prevItem.id);
+	const url = attachmentReplaced
+		? String(row.src || row.thumbnail || '').trim()
+		: prevItem.src || prevItem.thumbnail || prevItem.url || '';
+	const videoThumbnail = mergeRowFieldIfPresent(
+		row,
+		prevItem,
+		'video_thumbnail'
+	);
+	const videoUrl = mergeRowFieldIfPresent(row, prevItem, 'video_url');
 	const merged = {
 		...prevItem,
 		id: nextId,
@@ -605,6 +607,8 @@ export function mergeModulaRowIntoPreviewItem(prevItem, row) {
 		caption: row.description ?? prevItem.caption,
 		alt: row.alt ?? prevItem.alt,
 		url,
+		src: url || prevItem.src,
+		thumbnail: url || prevItem.thumbnail,
 		link: row.link ?? prevItem.link,
 		target: row.target ?? prevItem.target,
 		halign: row.halign ?? prevItem.halign,

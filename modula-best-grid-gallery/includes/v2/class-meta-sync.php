@@ -912,6 +912,7 @@ class Meta_Sync {
 	public static function get_images_v2( $post_id ) {
 		if ( Images\Chunked_Storage::has_manifest( $post_id ) ) {
 			$items = Images\Chunked_Storage::read_all_rows( $post_id );
+			$items = Images\Adapter::strip_catalog_file_urls_from_items( $items );
 			return Images\Adapter::repair_video_template_row_ids( $items );
 		}
 

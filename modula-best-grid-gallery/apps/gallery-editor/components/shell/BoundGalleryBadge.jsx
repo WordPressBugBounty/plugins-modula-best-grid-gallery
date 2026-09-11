@@ -1,7 +1,13 @@
 /**
  * Bound gallery badge — top-bar chrome + hidden-from-gallery list / Restore.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from '@wordpress/element';
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Icon, lock, external } from '@wordpress/icons';
 import {
@@ -15,6 +21,7 @@ import {
 import { restoreBoundGalleryExclusion } from '../../api/boundGalleryApi';
 import { useInvalidateGalleryBootstrap } from '../../hooks/useInvalidateGalleryBootstrap';
 import { resolveGalleryAdminPostId } from '../../utils/resolveGalleryAdminPostId';
+import { appendQuery, withV3Utm } from 'gallery-shared/utils/withV3Utm';
 
 export default function BoundGalleryBadge() {
 	const editor = getModulaSettingsEditorConfig();
@@ -82,10 +89,14 @@ export default function BoundGalleryBadge() {
 				displayName || __('bind target', 'modula-best-grid-gallery')
 			);
 
-	const upgradeUrl =
+	const upgradeUrl = withV3Utm(
 		typeof editor.upgradeUrl === 'string' && editor.upgradeUrl !== ''
-			? editor.upgradeUrl
-			: 'https://wp-modula.com/pricing/?utm_source=upsell&utm_medium=editor&utm_campaign=bound-gallery';
+			? appendQuery(
+					editor.upgradeUrl,
+					'utm_source=upsell&utm_medium=gallery-editor&utm_campaign=bound-gallery'
+				)
+			: 'https://wp-modula.com/pricing/?utm_source=upsell&utm_medium=gallery-editor&utm_campaign=bound-gallery'
+	);
 
 	const onRestore = useCallback(
 		async (attachmentId) => {
@@ -169,7 +180,10 @@ export default function BoundGalleryBadge() {
 								target="_blank"
 								rel="noopener noreferrer"
 							>
-								{__('Upgrade to Pro', 'modula-best-grid-gallery')}
+								{__(
+									'Upgrade to Pro',
+									'modula-best-grid-gallery'
+								)}
 							</a>
 						</div>
 					) : (

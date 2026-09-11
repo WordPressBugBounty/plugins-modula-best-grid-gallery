@@ -6,14 +6,18 @@ import { __, sprintf } from '@wordpress/i18n';
 import { decodeListingTitle } from './listingRowToFields';
 import { getListingRowActionLabel } from './listingRowActions';
 
-/** @typedef {'trash'|'delete-permanently'} ListingDestructiveConfirmAction */
+/** @typedef {'trash'|'delete-permanently'|'restore-classic-editor'} ListingDestructiveConfirmAction */
 
 /**
- * @param {ListingDestructiveConfirmAction} actionId
+ * @param {ListingDestructiveConfirmAction|string} actionId
  * @return {boolean}
  */
 export function isListingDestructiveConfirmAction(actionId) {
-	return actionId === 'trash' || actionId === 'delete-permanently';
+	return (
+		actionId === 'trash' ||
+		actionId === 'delete-permanently' ||
+		actionId === 'restore-classic-editor'
+	);
 }
 
 /**
@@ -23,6 +27,13 @@ export function isListingDestructiveConfirmAction(actionId) {
  */
 export function getListingDestructiveConfirmMessage(actionId, item) {
 	const isAlbum = item?.type === 'album';
+
+	if (actionId === 'restore-classic-editor') {
+		return __(
+			'Restore classic editor settings from the Convert backup? Beta editor settings for this gallery will be discarded. The shortcode stays the same.',
+			'modula-best-grid-gallery'
+		);
+	}
 
 	if (actionId === 'trash') {
 		return isAlbum

@@ -8,6 +8,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import { Button, Notice } from '@wordpress/components';
 import { DataViews } from '@wordpress/dataviews/wp';
+import { useQueryClient } from '@tanstack/react-query';
 import { getGalleryListingConfig } from './config';
 import { getListingFields } from './fields';
 import { buildCreateGalleryUrl } from './listingCreateGalleryUrl';
@@ -15,11 +16,22 @@ import { ListingPaginationFooter } from './ListingPaginationFooter';
 import { ListingSearchSummary } from './ListingSearchSummary';
 import { ListingToolbar } from './ListingToolbar';
 import { EditorChoiceModal } from './EditorChoiceModal';
+import { ListingQuickEditModal } from './ListingQuickEditModal';
 import { shouldShowBetaEditorPrompt } from './listingBetaEditorPrompt';
 import { shouldShowMixedStackNotice } from './listingMixedStackNotice';
+import { openListingApplyPreset } from './listingApplyPreset';
+import { ListingSelectAllChooserDialog } from './ListingSelectAllChooserDialog';
+import {
+	getListingSelectionBulkActions,
+	isListingSelectionCheckboxTarget,
+	listingSelectionItemId,
+	resolveListingSelectionChange,
+	selectListingRowsByChoice,
+} from './listingSelection';
 import { useClassicEditorPreferenceMutation } from './query/useClassicEditorPreferenceMutation';
 import { useTryBetaGalleryMutation } from './query/useTryBetaGalleryMutation';
 import { useConvertBetaGalleryMutation } from './query/useConvertBetaGalleryMutation';
+import { useRestoreClassicEditorMutation } from './query/useRestoreClassicEditorMutation';
 import {
 	mergePersistedListingView,
 	normalizeListingViewFields,
@@ -31,9 +43,14 @@ import {
 import { useDuplicateListingRowMutation } from './query/useDuplicateListingRowMutation';
 import { useListingQuery } from './query/useListingQuery';
 import { useListingRowLifecycleMutation } from './query/useListingRowLifecycleMutation';
+import { useListingRowPostDocumentMutation } from './query/useListingRowPostDocumentMutation';
 import { useListingViewMutation } from './query/useListingViewMutation';
 import { useListingViewQuery } from './query/useListingViewQuery';
-import { DEFAULT_LISTING_VIEW } from './viewToListingQuery';
+import {
+	isListingQuickEditEligible,
+	listingQuickEditItemKey,
+} from './listingQuickEdit';
+import { DEFAULT_LISTING_VIEW, viewToListingQuery } from './viewToListingQuery';
 
 const DEFAULT_LAYOUTS = {
 	table: {
@@ -53,6 +70,7 @@ const DEFAULT_LAYOUTS = {
  */
 export default function GalleryListingApp() {
 	const config = getGalleryListingConfig();
+	const queryClient = useQueryClient();
 	const viewQuery = useListingViewQuery();
 	const viewMutation = useListingViewMutation();
 	const [view, setView] = useState(DEFAULT_LISTING_VIEW);
@@ -63,31 +81,155 @@ export default function GalleryListingApp() {
 	const [pendingEditItem, setPendingEditItem] = useState(
 		/** @type {import('./listingRowToFields').ListingRow|null} */ (null)
 	);
+	const [quickEditItem, setQuickEditItem] = useState(
+		/** @type {import('./listingRowToFields').ListingRow|null} */ (null)
+	);
 	const saveTimerRef = useRef(null);
-	const { data, isLoading, isError, error } = useListingQuery(view);
+	const listingRef = useRef(null);
+	/** Only checkbox-column interactions may change listing selection (not row clicks). */
+	const selectionFromCheckboxRef = useRef(false);
+	const [saveResult, setSaveResult] = useState(null);
+	const [refreshBusy, setRefreshBusy] = useState(false);
+	const [focusKey, setFocusKey] = useState(null);
+	const [selection, setSelection] = useState(/** @type {string[]} */ ([]));
+	const [selectionNotice, setSelectionNotice] = useState(
+		/** @type {string|null} */ (null)
+	);
+	const [selectAllChooserOptions, setSelectAllChooserOptions] = useState(
+		/** @type {import('./listingSelection').ListingSelectAllChoice[]|null} */ (
+			null
+		)
+	);
+	const { data, isLoading, isError, error, refetch } = useListingQuery(view);
 	const duplicateMutation = useDuplicateListingRowMutation();
 	const lifecycleMutation = useListingRowLifecycleMutation();
+	const { mutateAsync: savePostDocument } = useListingRowPostDocumentMutation(
+		{ refreshListing: false }
+	);
 	const classicEditorPreferenceMutation =
 		useClassicEditorPreferenceMutation();
 	const tryBetaGalleryMutation = useTryBetaGalleryMutation();
 	const convertBetaGalleryMutation = useConvertBetaGalleryMutation();
+	const restoreClassicEditorMutation = useRestoreClassicEditorMutation();
 
 	const closeEditorChoice = useCallback(() => {
 		setEditorChoiceMode(null);
 		setPendingEditItem(null);
 	}, []);
 
-	const requestGalleryEdit = useCallback((item) => {
-		if (!item?.editUrl) {
+	const requestGalleryEdit = useCallback(
+		(item) => {
+			if (!item?.editUrl) {
+				return;
+			}
+			if (
+				shouldShowBetaEditorPrompt(item, {
+					albumTakeoverAvailable: config.albumTakeoverAvailable,
+				})
+			) {
+				setPendingEditItem(item);
+				setEditorChoiceMode('open');
+				return;
+			}
+			window.location.href = item.editUrl;
+		},
+		[config.albumTakeoverAvailable]
+	);
+
+	const cancelQuickEdit = useCallback(() => {
+		setFocusKey(listingQuickEditItemKey(quickEditItem));
+		setQuickEditItem(null);
+	}, [quickEditItem]);
+
+	const requestQuickEdit = useCallback((item) => {
+		if (!isListingQuickEditEligible(item)) {
 			return;
 		}
-		if (shouldShowBetaEditorPrompt(item)) {
-			setPendingEditItem(item);
-			setEditorChoiceMode('open');
-			return;
-		}
-		window.location.href = item.editUrl;
+		setSaveResult(null);
+		// Capture the edit session; query refreshes must not replace its draft.
+		setQuickEditItem(item);
 	}, []);
+
+	const refreshSavedListing = useCallback(
+		async (item, saved) => {
+			setRefreshBusy(true);
+			try {
+				const result = await refetch({ throwOnError: true });
+				const present = result.data?.rows?.some(
+					(row) =>
+						listingQuickEditItemKey(row) ===
+						listingQuickEditItemKey(item)
+				);
+				const statusFilter = viewToListingQuery(view).status;
+				const excluded =
+					!present &&
+					typeof saved?.status === 'string' &&
+					typeof statusFilter === 'string' &&
+					!statusFilter.split(',').includes(saved.status);
+				setSaveResult({
+					item,
+					saved,
+					failed: false,
+					message: excluded
+						? __(
+								'Changes saved. This item no longer matches the status filter.',
+								'modula-best-grid-gallery'
+							)
+						: present
+							? __('Changes saved.', 'modula-best-grid-gallery')
+							: __(
+									'Changes saved. This item is not visible in the current listing view.',
+									'modula-best-grid-gallery'
+								),
+				});
+			} catch (refreshError) {
+				setSaveResult({
+					item,
+					saved,
+					failed: true,
+					message: __(
+						'Changes saved, but the listing could not be refreshed. Refresh the listing to see the saved values.',
+						'modula-best-grid-gallery'
+					),
+				});
+			} finally {
+				setRefreshBusy(false);
+				setFocusKey(listingQuickEditItemKey(item));
+			}
+		},
+		[refetch, view]
+	);
+
+	const saveQuickEdit = useCallback(
+		async (item, document) => {
+			const saved = await savePostDocument({ item, document });
+			await refreshSavedListing(item, saved);
+			setQuickEditItem(null);
+		},
+		[savePostDocument, refreshSavedListing]
+	);
+
+	useEffect(() => {
+		if (quickEditItem || !focusKey) {
+			return;
+		}
+		const frame = window.requestAnimationFrame(() => {
+			const root = listingRef.current;
+			const shortcut = Array.from(
+				root?.querySelectorAll('[data-quick-edit-key]') || []
+			).find(
+				(element) =>
+					element.getAttribute('data-quick-edit-key') === focusKey
+			);
+			const target =
+				shortcut || root?.querySelector('input[type="search"]') || root;
+			if (target?.isConnected) {
+				target.focus();
+			}
+			setFocusKey(null);
+		});
+		return () => window.cancelAnimationFrame(frame);
+	}, [quickEditItem, focusKey, data]);
 
 	const rowActionHandlers = useMemo(
 		() => ({
@@ -102,6 +244,29 @@ export default function GalleryListingApp() {
 			tryBetaGallery: (item) => tryBetaGalleryMutation.mutateAsync(item),
 			convertBetaGallery: (item) =>
 				convertBetaGalleryMutation.mutateAsync(item),
+			restoreClassicEditor: (item) =>
+				restoreClassicEditorMutation.mutateAsync(item),
+			applyListingPreset: async (items) => {
+				const result = await openListingApplyPreset(items);
+				if (result?.unavailable) {
+					setSelectionNotice(
+						__(
+							'Apply preset is unavailable right now. Refresh the page and try again.',
+							'modula-best-grid-gallery'
+						)
+					);
+					return result;
+				}
+				if (!result || !(result.applied > 0)) {
+					return result;
+				}
+				setSelection([]);
+				setSelectionNotice(null);
+				await queryClient.invalidateQueries({
+					queryKey: ['modula-listing'],
+				});
+				return result;
+			},
 		}),
 		// mutateAsync identities are stable enough for this shell.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -111,16 +276,28 @@ export default function GalleryListingApp() {
 			requestGalleryEdit,
 			tryBetaGalleryMutation.mutateAsync,
 			convertBetaGalleryMutation.mutateAsync,
+			restoreClassicEditorMutation.mutateAsync,
+			queryClient,
 		]
 	);
 	const fields = useMemo(
 		() =>
 			getListingFields({
 				hasAlbums: config.hasAlbums,
+				canUseBulkEditor: config.canUseBulkEditor,
+				albumTakeoverAvailable: config.albumTakeoverAvailable,
 				rowActionHandlers,
 				requestGalleryEdit,
+				requestQuickEdit,
 			}),
-		[config.hasAlbums, rowActionHandlers, requestGalleryEdit]
+		[
+			config.hasAlbums,
+			config.canUseBulkEditor,
+			config.albumTakeoverAvailable,
+			rowActionHandlers,
+			requestGalleryEdit,
+			requestQuickEdit,
+		]
 	);
 
 	useEffect(() => {
@@ -128,13 +305,22 @@ export default function GalleryListingApp() {
 			return;
 		}
 		setView(
-			sanitizeListingOnlyShowFilters(mergePersistedListingView(viewQuery.data), {
-				hasAlbums: config.hasAlbums,
-				isPro: config.isPro,
-			})
+			sanitizeListingOnlyShowFilters(
+				mergePersistedListingView(viewQuery.data),
+				{
+					hasAlbums: config.hasAlbums,
+					isPro: config.isPro,
+				}
+			)
 		);
 		setViewReady(true);
-	}, [viewQuery.data, viewQuery.isLoading, viewReady, config.hasAlbums, config.isPro]);
+	}, [
+		viewQuery.data,
+		viewQuery.isLoading,
+		viewReady,
+		config.hasAlbums,
+		config.isPro,
+	]);
 
 	useEffect(() => {
 		return () => {
@@ -168,7 +354,7 @@ export default function GalleryListingApp() {
 		}, 400);
 	};
 
-	const rows = data?.rows || [];
+	const rows = useMemo(() => data?.rows || [], [data?.rows]);
 	const pagination = data?.pagination || {
 		total: 0,
 		pages: 0,
@@ -177,12 +363,86 @@ export default function GalleryListingApp() {
 	};
 	const totals = data?.totals || { rows: 0, items: 0 };
 	const statusCounts = data?.statusCounts || null;
+	const selectionBulkActions = useMemo(
+		() => getListingSelectionBulkActions(),
+		[]
+	);
+	const handleChangeSelection = useCallback(
+		(nextSelection) => {
+			// DataViews toggles selection on the whole <tr> click. Product rule:
+			// listing selection is checkbox-only (and header select-all).
+			if (!selectionFromCheckboxRef.current) {
+				return;
+			}
+			selectionFromCheckboxRef.current = false;
+			const result = resolveListingSelectionChange({
+				currentSelection: selection,
+				nextSelection,
+				pageRows: rows,
+			});
+			setSelection(result.selection);
+			setSelectionNotice(result.notice);
+			setSelectAllChooserOptions(result.chooserOptions);
+		},
+		[selection, rows]
+	);
+
+	useEffect(() => {
+		const root = listingRef.current;
+		if (!root) {
+			return undefined;
+		}
+		const markCheckboxSource = (event) => {
+			selectionFromCheckboxRef.current =
+				isListingSelectionCheckboxTarget(event.target);
+		};
+		const markCheckboxKey = (event) => {
+			if (event.key !== ' ' && event.key !== 'Enter') {
+				return;
+			}
+			markCheckboxSource(event);
+		};
+		root.addEventListener('pointerdown', markCheckboxSource, true);
+		root.addEventListener('keydown', markCheckboxKey, true);
+		return () => {
+			root.removeEventListener('pointerdown', markCheckboxSource, true);
+			root.removeEventListener('keydown', markCheckboxKey, true);
+		};
+	}, [viewReady]);
+
+	const cancelSelectAllChooser = useCallback(() => {
+		setSelectAllChooserOptions(null);
+	}, []);
+
+	const chooseSelectAll = useCallback(
+		(choice) => {
+			setSelection(selectListingRowsByChoice(choice, rows));
+			setSelectionNotice(null);
+			setSelectAllChooserOptions(null);
+		},
+		[rows]
+	);
+
+	useEffect(() => {
+		setSelection([]);
+		setSelectionNotice(null);
+		setSelectAllChooserOptions(null);
+	}, [
+		view.page,
+		view.perPage,
+		view.search,
+		view.filters,
+		view.sort?.field,
+		view.sort?.direction,
+	]);
+
 	const isMutating =
 		duplicateMutation.isPending ||
 		lifecycleMutation.isPending ||
 		classicEditorPreferenceMutation.isPending ||
 		tryBetaGalleryMutation.isPending ||
-		convertBetaGalleryMutation.isPending;
+		convertBetaGalleryMutation.isPending ||
+		restoreClassicEditorMutation.isPending;
 	const listingBusy =
 		!viewReady || viewQuery.isLoading || isLoading || isMutating;
 
@@ -203,9 +463,13 @@ export default function GalleryListingApp() {
 		if (!config.newAlbumUrl) {
 			return;
 		}
+		if (!config.albumTakeoverAvailable) {
+			window.location.href = config.newAlbumUrl;
+			return;
+		}
 		setPendingEditItem(null);
 		setEditorChoiceMode('create-album');
-	}, [config.newAlbumUrl]);
+	}, [config.newAlbumUrl, config.albumTakeoverAvailable]);
 
 	const chooseEditorAndCreate = useCallback(
 		(choice) => {
@@ -287,7 +551,7 @@ export default function GalleryListingApp() {
 	);
 
 	return (
-		<div className="modula-gallery-listing">
+		<div className="modula-gallery-listing" ref={listingRef} tabIndex={-1}>
 			<header className="modula-gallery-listing__header">
 				<div className="modula-gallery-listing__header-brand">
 					{config.logoUrl ? (
@@ -342,7 +606,41 @@ export default function GalleryListingApp() {
 				</Notice>
 			) : null}
 
-			{isError ? (
+			{selectionNotice ? (
+				<Notice
+					className="modula-gallery-listing__selection-notice"
+					status="warning"
+					isDismissible
+					onRemove={() => setSelectionNotice(null)}
+				>
+					{selectionNotice}
+				</Notice>
+			) : null}
+
+			{saveResult ? (
+				<Notice
+					status={saveResult.failed ? 'warning' : 'success'}
+					spokenMessage={saveResult.message}
+					isDismissible={false}
+				>
+					<span>{saveResult.message}</span>
+					{saveResult.failed ? (
+						<Button
+							variant="secondary"
+							disabled={refreshBusy}
+							onClick={() =>
+								refreshSavedListing(
+									saveResult.item,
+									saveResult.saved
+								)
+							}
+						>
+							{__('Refresh listing', 'modula-best-grid-gallery')}
+						</Button>
+					) : null}
+				</Notice>
+			) : null}
+			{isError && !saveResult?.failed ? (
 				<p className="modula-gallery-listing__error" role="alert">
 					{error?.message ||
 						__(
@@ -402,9 +700,12 @@ export default function GalleryListingApp() {
 						totalPages: Math.max(1, pagination.pages),
 					}}
 					defaultLayouts={DEFAULT_LAYOUTS}
-					getItemId={(item) => `${item.type}-${item.id}`}
+					getItemId={(item) => listingSelectionItemId(item) || ''}
 					isLoading={listingBusy}
 					search={false}
+					selection={selection}
+					onChangeSelection={handleChangeSelection}
+					actions={selectionBulkActions}
 				>
 					<div className="modula-gallery-listing__controls">
 						<ListingToolbar
@@ -413,6 +714,28 @@ export default function GalleryListingApp() {
 							statusCounts={statusCounts}
 							hasAlbums={config.hasAlbums}
 							isPro={config.isPro}
+							selection={selection}
+							pageRows={rows}
+							canUseApplyPreset={config.canUseApplyPreset}
+							onApplyPreset={
+								config.canUseApplyPreset
+									? rowActionHandlers.applyListingPreset
+									: undefined
+							}
+							trashListingRows={
+								rowActionHandlers.trashListingRows
+							}
+							restoreListingRows={
+								rowActionHandlers.restoreListingRows
+							}
+							deleteListingRows={
+								rowActionHandlers.deleteListingRows
+							}
+							onSelectionCleared={() => {
+								setSelection([]);
+								setSelectionNotice(null);
+								setSelectAllChooserOptions(null);
+							}}
 						/>
 						{activeSearch ? (
 							<ListingSearchSummary
@@ -431,12 +754,26 @@ export default function GalleryListingApp() {
 					/>
 				</DataViews>
 			) : null}
+			{quickEditItem ? (
+				<ListingQuickEditModal
+					item={quickEditItem}
+					onCancel={cancelQuickEdit}
+					onSave={(document) =>
+						saveQuickEdit(quickEditItem, document)
+					}
+				/>
+			) : null}
 			<EditorChoiceModal
 				isOpen={editorChoiceMode !== null}
 				mode={editorChoiceMode === 'open' ? 'open' : 'create'}
 				heroUrl={config.editorChoiceHeroUrl}
 				onClose={closeEditorChoice}
 				onChoose={handleEditorChoice}
+			/>
+			<ListingSelectAllChooserDialog
+				options={selectAllChooserOptions}
+				onChoose={chooseSelectAll}
+				onCancel={cancelSelectAllChooser}
 			/>
 		</div>
 	);

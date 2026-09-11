@@ -156,6 +156,14 @@ class Modula_Rest_Api {
 
 			$value = $this->sanitize_setting_value( $value, $sanitization_schema[ $option ], $sanitizer );
 
+			/**
+			 * Filter a general-settings option value after schema sanitize, before it is stored.
+			 *
+			 * @param mixed  $value  Sanitized option value.
+			 * @param string $option Option name.
+			 */
+			$value = apply_filters( 'modula_settings_api_pre_update_' . $option, $value, $option );
+
 			update_option( $option, $value );
 
 			do_action( 'modula_settings_api_update_' . $option, $value );

@@ -611,8 +611,8 @@ final class Bound_Gallery {
 			$source_ids,
 			self::get_exclusions( $gallery_id )
 		);
-
-		return self::overlay_attachment_text( $derived );
+		$derived = self::overlay_attachment_text( $derived );
+		return self::strip_catalog_file_urls( $derived );
 	}
 
 	/**
@@ -628,6 +628,19 @@ final class Bound_Gallery {
 		}
 
 		return self::apply_derived_catalog( $gallery_id, $raw );
+	}
+
+	/**
+	 * Drop stored gallery item file URL snapshots from bound catalog rows.
+	 *
+	 * @param array $rows Rows.
+	 * @return array
+	 */
+	private static function strip_catalog_file_urls( array $rows ) {
+		if ( class_exists( '\Modula\V2\Images\Adapter', false ) ) {
+			return \Modula\V2\Images\Adapter::strip_catalog_file_urls_from_items( $rows );
+		}
+		return $rows;
 	}
 
 	/**
@@ -717,9 +730,6 @@ final class Bound_Gallery {
 				'width'       => 2,
 				'height'      => 2,
 				'filters'     => '',
-				'url'         => function_exists( 'wp_get_attachment_image_url' )
-					? (string) wp_get_attachment_image_url( $attachment_id, 'full' )
-					: '',
 			);
 		}
 
@@ -1048,10 +1058,12 @@ final class Bound_Gallery {
 			$stored = array();
 		}
 
-		$merged = self::merge_source_with_gallery_rows(
-			$stored,
-			$attachment_ids,
-			self::get_exclusions( $gallery_id )
+		$merged = self::strip_catalog_file_urls(
+			self::merge_source_with_gallery_rows(
+				$stored,
+				$attachment_ids,
+				self::get_exclusions( $gallery_id )
+			)
 		);
 		update_post_meta( $gallery_id, 'modula-images', $merged );
 

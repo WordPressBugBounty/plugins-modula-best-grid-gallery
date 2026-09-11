@@ -10,7 +10,7 @@
 	min-height: 60vh;
 }
 
-.modula-gallery-listing {
+@mixin listing-control-tokens {
 	/* shared-ui Button tokens (listing is outside gallery-editor chrome). */
 	--mod-ui-accent: #2271b1;
 	--mod-ui-accent-ink: #135e96;
@@ -32,6 +32,12 @@
 	--listing-toolbar-icon-color: var(--mod-ui-ink-3);
 	--listing-control-focus-border: var(--mod-ui-accent);
 	--listing-control-focus-ring: 0 0 0 1px var(--mod-ui-accent);
+
+}
+
+.modula-gallery-listing {
+
+	@include listing-control-tokens;
 
 	padding: 24px 32px 40px;
 	max-width: 1400px;
@@ -122,6 +128,40 @@
 	flex: 1 1 auto;
 	min-width: 240px;
 	max-width: none;
+}
+
+.modula-gallery-listing-wrap .modula-gallery-listing .modula-gallery-listing__clear-trash.components-button.is-secondary.is-destructive {
+	flex-shrink: 0;
+	height: var(--listing-control-height);
+	min-height: var(--listing-control-height);
+	padding: 0 14px;
+	border-radius: var(--listing-control-radius);
+	box-shadow: inset 0 0 0 1px currentColor;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1;
+}
+
+.modula-gallery-listing__bulk-bar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+.modula-gallery-listing-wrap .modula-gallery-listing .modula-gallery-listing__bulk-bar-action.components-button.is-secondary {
+	flex-shrink: 0;
+	height: var(--listing-control-height);
+	min-height: var(--listing-control-height);
+	padding: 0 14px;
+	border-radius: var(--listing-control-radius);
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1;
+}
+
+.modula-gallery-listing-wrap .modula-gallery-listing .modula-gallery-listing__bulk-bar-action.components-button.is-secondary.is-destructive {
+	box-shadow: inset 0 0 0 1px currentColor;
 }
 
 .modula-gallery-listing__toolbar-actions {
@@ -927,6 +967,343 @@
 	width: 100%;
 }
 
+/* Keep shortcuts in flow so revealing them never changes row geometry. */
+.modula-gallery-listing__row-hover-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0 12px;
+	margin-top: 2px;
+	font-size: 12px;
+	line-height: 1.4;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.modula-gallery-listing .dataviews-view-table tbody tr:hover .modula-gallery-listing__row-hover-actions,
+.modula-gallery-listing .dataviews-view-table tbody tr:focus-within .modula-gallery-listing__row-hover-actions,
+.modula-gallery-listing__gallery-meta:hover .modula-gallery-listing__row-hover-actions,
+.modula-gallery-listing__gallery-meta:focus-within .modula-gallery-listing__row-hover-actions {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.modula-gallery-listing__row-hover-action {
+	appearance: none;
+	margin: 0;
+	/* No horizontal padding — keeps “Edit” flush with the title/layout above. */
+	padding: 0;
+	min-height: 0;
+	border: 0;
+	border-radius: 2px;
+	background: transparent;
+	color: var(--mod-ui-ink-2);
+	font: inherit;
+	line-height: inherit;
+	cursor: pointer;
+	text-decoration: none;
+
+	&:hover,
+	&:focus-visible {
+		color: var(--mod-ui-ink);
+		text-decoration: underline;
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--mod-ui-accent);
+		outline-offset: 2px;
+	}
+
+	&.is-destructive {
+		color: #b32d2e;
+
+		&:hover,
+		&:focus-visible {
+			color: #8a2424;
+			background: transparent;
+		}
+	}
+}
+
+@media (hover: none),
+(pointer: coarse) {
+
+	.modula-gallery-listing__row-hover-actions {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	.modula-gallery-listing__row-hover-action {
+		min-height: 44px;
+		min-width: 44px;
+	}
+}
+
+/* The modal is portalled outside the listing root. */
+.modula-listing-quick-edit-overlay.components-modal__screen-overlay {
+	background: rgba(20, 24, 30, 0.4);
+}
+
+.components-modal__frame.modula-listing-quick-edit {
+
+	@include listing-control-tokens;
+	box-sizing: border-box;
+	flex-direction: column;
+	width: 600px;
+	max-width: calc(100vw - 32px);
+	max-height: calc(100dvh - 32px);
+	min-height: 0;
+	margin: auto;
+	border: 1px solid #dcdcde;
+	border-radius: 16px;
+	background: #fff;
+	color: var(--mod-ui-ink);
+	box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+	font-size: 14px;
+	inset: auto;
+
+	.components-modal__content {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		margin: 0;
+		padding: 0;
+		overflow: hidden;
+	}
+
+	.components-modal__header {
+		position: static;
+		flex-shrink: 0;
+		height: auto;
+		margin: 0;
+		padding: 20px 24px 0;
+		border: 0;
+	}
+
+	.components-modal__header-heading {
+		font-size: 18px;
+		font-weight: 600;
+		line-height: 1.4;
+	}
+
+	.components-modal__children-container,
+	form {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+	}
+
+	.components-button {
+		min-height: var(--listing-control-height);
+		border-radius: var(--listing-control-radius);
+		font-size: 13px;
+		font-weight: 500;
+
+		&.is-primary {
+			background: var(--mod-ui-accent);
+			color: #fff;
+		}
+
+		&.is-secondary {
+			color: var(--mod-ui-ink-2);
+			box-shadow: inset 0 0 0 1px var(--listing-control-border);
+		}
+
+		&:disabled {
+			opacity: 0.5;
+			cursor: default;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--mod-ui-accent);
+			outline-offset: 2px;
+		}
+	}
+
+	input,
+	select {
+		box-sizing: border-box;
+		width: 100%;
+		max-width: 100%;
+		min-height: var(--listing-control-height);
+		margin: 0;
+		padding: 8px 12px;
+		border: 1px solid var(--listing-control-border);
+		border-radius: var(--listing-control-radius);
+		background-color: #fff;
+		color: var(--mod-ui-ink);
+		font: inherit;
+		line-height: 1.4;
+
+		&:focus {
+			border-color: var(--listing-control-focus-border);
+			box-shadow: var(--listing-control-focus-ring);
+			outline: none;
+		}
+
+		&:disabled {
+			opacity: 0.6;
+		}
+	}
+
+	select {
+		padding-right: 28px;
+	}
+}
+
+.modula-listing-quick-edit__body {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	gap: 16px;
+	padding: 16px 24px 24px;
+	overflow-y: auto;
+}
+
+.modula-listing-quick-edit__identity {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding-bottom: 4px;
+
+	img {
+		flex: 0 0 40px;
+		border-radius: 8px;
+		object-fit: cover;
+	}
+
+	div {
+		min-width: 0;
+	}
+
+	strong {
+		display: block;
+		overflow-wrap: anywhere;
+		font-size: 13px;
+	}
+
+	span {
+		display: block;
+		margin-top: 4px;
+		color: var(--mod-ui-ink-3);
+		font-size: 12px;
+	}
+}
+
+.modula-listing-quick-edit__field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+
+	label {
+		font-size: 13px;
+		font-weight: 500;
+		line-height: 1.4;
+	}
+}
+
+.modula-listing-quick-edit__hint {
+	margin: 0;
+	color: var(--mod-ui-ink-3);
+	font-size: 12px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+
+	svg {
+		vertical-align: middle;
+		margin-right: 4px;
+	}
+}
+
+.modula-listing-quick-edit__view {
+	display: inline-flex;
+	align-items: center;
+	align-self: flex-start;
+	gap: 4px;
+	color: var(--mod-ui-accent);
+	font-size: 12px;
+	text-decoration: none;
+
+	&:hover {
+		text-decoration: underline;
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--mod-ui-accent);
+		outline-offset: 2px;
+	}
+}
+
+.modula-listing-quick-edit__pro {
+	padding: 1px 5px;
+	border-radius: 4px;
+	background: #f0f0f1;
+	font-size: 10px;
+	font-weight: 600;
+}
+
+.modula-listing-quick-edit__error {
+	margin: 0;
+	padding: 10px 12px;
+	border-radius: 8px;
+	background: #fcf0f1;
+	color: #8a2424;
+	font-size: 13px;
+	overflow-wrap: anywhere;
+}
+
+.modula-listing-quick-edit__discard-title {
+	margin: 0;
+	font-size: 16px;
+}
+
+.modula-listing-quick-edit__discard-message {
+	margin: 0;
+	line-height: 1.6;
+}
+
+.modula-listing-quick-edit__footer {
+	display: flex;
+	flex-shrink: 0;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 8px;
+	padding: 16px 24px;
+	border-top: 1px solid #e9e9e9;
+}
+
+@media (max-width: 600px) {
+
+	.components-modal__frame.modula-listing-quick-edit {
+
+		.components-modal__header {
+			padding: 16px 16px 0;
+		}
+	}
+
+	.modula-listing-quick-edit__body,
+	.modula-listing-quick-edit__footer {
+		padding: 16px;
+	}
+}
+
+@media (hover: none),
+(pointer: coarse) {
+
+	.components-modal__frame.modula-listing-quick-edit {
+		--listing-control-height: 44px;
+
+		input,
+		select {
+			font-size: 16px;
+		}
+	}
+
+	.modula-listing-quick-edit__view {
+		min-height: 44px;
+	}
+}
+
 .modula-listing-row-preview__popover.components-popover {
 	--mod-ui-accent: #2271b1;
 	--mod-ui-accent-ink: #135e96;
@@ -1312,11 +1689,41 @@
 	background: transparent;
 }
 
-/* Table/footer padding aligned with panel chrome (not thead styling). */
-.modula-gallery-listing .dataviews-view-table__checkbox-column,
+/* Actions column stays hidden (⋮ lives in preview). Bulk footer is not product chrome. */
 .modula-gallery-listing .dataviews-view-table__actions-column,
 .modula-gallery-listing .dataviews-bulk-actions-footer__container {
 	display: none !important;
+}
+
+/* Header select-all is always visible; chooser handles mixed empty pages. */
+
+.modula-gallery-listing .dataviews-view-table__checkbox-column {
+	width: 40px;
+	padding-left: 20px !important;
+	vertical-align: middle;
+}
+
+.modula-gallery-listing .dataviews-view-table tbody td.dataviews-view-table__checkbox-column {
+	vertical-align: middle;
+}
+
+.modula-gallery-listing .dataviews-view-table-selection-checkbox {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	min-height: 2.5rem;
+}
+
+.modula-gallery-listing__select-all-chooser-copy {
+	margin: 0 0 16px;
+}
+
+.modula-gallery-listing__select-all-chooser-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
 }
 
 .modula-gallery-listing .dataviews-view-table tr td:first-child,

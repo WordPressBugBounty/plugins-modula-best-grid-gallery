@@ -4,7 +4,7 @@
  * Full takeover shell with live preview is preserved under `legacy/GalleryTakeoverShell.full.jsx`
  * (quarantine — delete the whole `legacy/` folder when no longer needed).
  */
-import { useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { AuxiliaryPanel } from 'shared-ui';
 import { SETTINGS_EDITOR_CATEGORIES } from '../../constants/editorStructure';
@@ -18,6 +18,7 @@ import { BulkEditProvider } from '../../context/BulkEditContext';
 import { useTakeoverPostMeta } from '../../hooks/useTakeoverPostMeta';
 import { useTakeoverSidebarStateSync } from '../../hooks/useTakeoverSidebarStateSync';
 import { useTakeoverAuxiliarySync } from '../../hooks/useTakeoverAuxiliarySync';
+import { useTakeoverRailDensity } from '../../hooks/useTakeoverRailDensity';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
 import { resolveGalleryAdminPostId } from '../../utils/resolveGalleryAdminPostId';
 import { getGalleryListUrl } from '../../utils/galleryAdminUrls';
@@ -40,7 +41,7 @@ export default function GalleryTakeoverShell() {
 	const config = useModulaSettingsEditorConfig();
 	const galleryId = resolveGalleryAdminPostId(config);
 	const { form } = useGallerySettingsFormBundle();
-	const { runPersistTask } = useTakeoverSaveStatus();
+	const { runPersistTask, registerPostStatusSync } = useTakeoverSaveStatus();
 	const { auxiliary, isAuxiliaryOpen, openFromCategory, closePanel } =
 		useTakeoverAuxiliaryPanel();
 	const { stack } = useTakeoverSidebarStack();
@@ -52,15 +53,38 @@ export default function GalleryTakeoverShell() {
 	);
 	const adminUrl = getGalleryListUrl(config);
 	const docsUrl = config.modulaDocsBaseUrl || '';
-	const { liveTitle, setLiveTitle, commitPostTitle } = useTakeoverPostMeta({
+	const {
+		liveTitle,
+		setLiveTitle,
+		commitPostTitle,
+		livePostStatus,
+		livePostStatusLabel,
+		handlePostStatusChange,
+		statusBusy,
+		applyPostStatusFromServer,
+	} = useTakeoverPostMeta({
 		galleryId,
 		initialTitle: config.postTitle || '',
 		initialStatus: config.postStatus || '',
 		initialStatusLabel: config.postStatusLabel || '',
+		initialSlug: config.postSlug || '',
+		initialPermalinkPrefix: config.permalinkPrefix || '',
+		initialPermalinkSuffix: config.permalinkSuffix || '',
+		initialViewUrl: config.viewUrl || '',
 		runPersistTask,
 	});
 
+	useEffect(() => {
+		registerPostStatusSync(applyPostStatusFromServer);
+		return () => registerPostStatusSync(null);
+	}, [applyPostStatusFromServer, registerPostStatusSync]);
+
 	const showAuxColumn = isAuxiliaryOpen;
+	const workspaceRef = useRef(null);
+	const railDensity = useTakeoverRailDensity({
+		workspaceRef,
+		isAuxiliaryOpen: showAuxColumn,
+	});
 
 	const topFrame = stack[stack.length - 1];
 	const hoverEffectBuilderActive =
@@ -117,11 +141,25 @@ export default function GalleryTakeoverShell() {
 						onPostTitleCommit={commitPostTitle}
 						adminUrl={adminUrl}
 					/>
-					<div className="modula-gallery-takeover__workspace">
+					<div
+						className="modula-gallery-takeover__workspace"
+						ref={workspaceRef}
+					>
 						<GallerySidebarRail
 							activeCategory={activeCategory}
 							setActiveCategory={setActiveCategory}
 							docsUrl={docsUrl}
+							railDensity={railDensity}
+							documentStatus={livePostStatus}
+							documentStatusLabel={livePostStatusLabel}
+							documentStatusChoices={
+								config.postStatusChoices || []
+							}
+							onDocumentStatusChange={handlePostStatusChange}
+							documentStatusBusy={statusBusy}
+							canEditDocumentStatus={Boolean(
+								config.canEditGalleryStatus
+							)}
 						/>
 						{/*
 						 * Canvas column: toolbar is secondary chrome under the app topbar

@@ -91,7 +91,8 @@ class Beta_Gallery_Admin {
 			);
 		}
 
-		$new_id = modula_duplicate_gallery_create_duplicate( $post, $post->post_status );
+		// ADR 0023: Try the beta copy is always draft so the experiment stays off the public site.
+		$new_id = modula_duplicate_gallery_create_duplicate( $post, 'draft' );
 		if ( ! $new_id || is_wp_error( $new_id ) ) {
 			return new \WP_Error(
 				'modula_try_beta_failed',
@@ -160,7 +161,8 @@ class Beta_Gallery_Admin {
 			);
 		}
 
-		$new_id = modula_duplicate_gallery_create_duplicate( $post, $post->post_status );
+		// ADR 0023: Try the beta copy is always draft so the experiment stays off the public site.
+		$new_id = modula_duplicate_gallery_create_duplicate( $post, 'draft' );
 		if ( ! $new_id || is_wp_error( $new_id ) ) {
 			return new \WP_Error(
 				'modula_try_beta_failed',
@@ -231,7 +233,58 @@ class Beta_Gallery_Admin {
 			);
 		}
 
+		\Modula\V2\Beta_Settings::write_classic_settings_backup( $post_id );
 		\Modula\V2\Beta_Settings::mark_as_beta_gallery( $post_id );
+
+		return (int) $post_id;
+	}
+
+	/**
+	 * Restore classic editor settings from the Convert backup and clear Beta.
+	 *
+	 * @param int $post_id Gallery post ID.
+	 * @return int|\WP_Error Same gallery post ID on success.
+	 */
+	public static function restore_classic_editor_gallery( $post_id ) {
+		$post_id = absint( $post_id );
+		if ( $post_id < 1 ) {
+			return new \WP_Error(
+				'modula_restore_classic_invalid',
+				__( 'No gallery to restore has been supplied!', 'modula-best-grid-gallery' )
+			);
+		}
+
+		if ( ! current_user_can( 'edit_post', $post_id ) || 'modula-gallery' !== get_post_type( $post_id ) ) {
+			return new \WP_Error(
+				'modula_restore_classic_forbidden',
+				__( 'You are not allowed to restore this gallery.', 'modula-best-grid-gallery' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		if ( ! \Modula\V2\Beta_Settings::is_beta_gallery( $post_id ) ) {
+			return new \WP_Error(
+				'modula_restore_classic_not_beta',
+				__( 'This gallery does not use the new editor.', 'modula-best-grid-gallery' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! \Modula\V2\Beta_Settings::has_classic_settings_backup( $post_id ) ) {
+			return new \WP_Error(
+				'modula_restore_classic_no_backup',
+				__( 'No classic settings backup is available for this gallery.', 'modula-best-grid-gallery' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! \Modula\V2\Beta_Settings::restore_classic_settings_from_backup( $post_id ) ) {
+			return new \WP_Error(
+				'modula_restore_classic_failed',
+				__( 'Could not restore classic editor settings.', 'modula-best-grid-gallery' ),
+				array( 'status' => 500 )
+			);
+		}
 
 		return (int) $post_id;
 	}

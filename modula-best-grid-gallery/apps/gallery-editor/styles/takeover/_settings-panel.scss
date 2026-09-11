@@ -125,6 +125,19 @@
 	padding-bottom: $mod-space-28;
 }
 
+.modula-editor-document-panel {
+	.modula-settings-panel__section:first-child {
+		margin-top: $mod-space-16;
+	}
+
+	.modula-settings-panel__section-body {
+		display: flex;
+		flex-direction: column;
+		gap: $mod-space-12;
+		padding: $mod-space-12 $mod-space-20 $mod-space-16;
+	}
+}
+
 .modula-settings-editor__composite-stack-heading-row {
 	position: relative;
 	display: flex;

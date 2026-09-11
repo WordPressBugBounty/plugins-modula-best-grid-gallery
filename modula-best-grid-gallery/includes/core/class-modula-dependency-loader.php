@@ -23,6 +23,7 @@ class Modula_Dependency_Loader
 		'core'              => array(
 			'libraries/class-modula-template-loader.php',
 			'core/helpers/modula-compatible-pro.php',
+			'core/helpers/modula-attachment-text-write.php',
 			'core/helpers/class-modula-helper.php',
 			'admin/media/class-modula-image.php',
 			'core/assets/class-modula-script-manager.php',

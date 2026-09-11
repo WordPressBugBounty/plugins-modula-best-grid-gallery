@@ -129,7 +129,7 @@ export function EditorChoiceModal({
 						</h2>
 						<p className="modula-editor-choice-modal__lede">
 							{__(
-								'Faster to move through, easier to understand, better organised. Your galleries and shortcodes stay exactly as they are.',
+								'Faster to move through, easier to understand, better organised. By opting for the new editor, a copy of your gallery will be created so you can safely test out the editor without disrupting your live gallery.',
 								'modula-best-grid-gallery'
 							)}
 						</p>

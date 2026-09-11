@@ -155,8 +155,11 @@ export function bulkEditThumbUrl(row) {
 	if (row?.thumbUrl) {
 		return String(row.thumbUrl);
 	}
-	if (row?.url) {
-		return String(row.url);
+	if (row?.src) {
+		return String(row.src);
+	}
+	if (row?.thumbnail) {
+		return String(row.thumbnail);
 	}
 	return '';
 }

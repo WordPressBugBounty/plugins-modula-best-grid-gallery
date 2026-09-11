@@ -18,6 +18,7 @@ import HoverBuilderCanvasModeNav from './HoverBuilderCanvasModeNav';
 import HoverBuilderPresetsPanel from './HoverBuilderPresetsPanel';
 import HoverBuilderCustomizePanel from './HoverBuilderCustomizePanel';
 import HoverBuilderBelowImageNotice from './HoverBuilderBelowImageNotice';
+import { appendQuery, withV3Utm } from 'gallery-shared/utils/withV3Utm';
 
 const OVERLAY_SLOT_IDS = ['title', 'caption', 'social'];
 
@@ -149,10 +150,14 @@ export default function HoverEffectBuilderAuxiliaryPanel({
 
 	const isPro = Boolean(config?.isPro);
 	const { customizeTabEnabled } = getHoverBuilderEntitlements(config);
-	const upgradeUrl =
+	const upgradeUrl = withV3Utm(
 		typeof config?.upgradeUrl === 'string' && config.upgradeUrl !== ''
-			? config.upgradeUrl
-			: 'https://wp-modula.com/pricing/';
+			? appendQuery(
+					config.upgradeUrl,
+					'utm_source=upsell&utm_medium=gallery-editor&utm_campaign=hover-effects'
+				)
+			: 'https://wp-modula.com/pricing/?utm_source=upsell&utm_medium=gallery-editor&utm_campaign=hover-effects'
+	);
 
 	const showCustomizeContent = customizeOnly || activeTab === 'customize';
 	const showPresetsContent = !customizeOnly && activeTab === 'presets';

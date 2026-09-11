@@ -11,18 +11,7 @@ import {
 	resolveExtensionUpsellBarrier,
 } from '../../logic/proGateLock';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
-
-/**
- * @param {string} url
- * @param {string} query e.g. a=1&b=2 (no leading ?)
- */
-function appendQuery(url, query) {
-	if (!query) {
-		return url;
-	}
-	const sep = url.includes('?') ? '&' : '?';
-	return `${url}${sep}${query}`;
-}
+import { appendQuery, withV3Utm } from 'gallery-shared/utils/withV3Utm';
 
 /**
  * @param {{ schema?: object, control?: object }} field Field descriptor; upsell config lives on `field.schema`.
@@ -46,11 +35,7 @@ export default function EditorUpsellBlurb({ field, wrapperClassName = '' }) {
 		typeof wrapperClassName === 'string' ? wrapperClassName.trim() : '';
 
 	const wrap = (node) =>
-		wrapClass !== '' ? (
-			<div className={wrapClass}>{node}</div>
-		) : (
-			node
-		);
+		wrapClass !== '' ? <div className={wrapClass}>{node}</div> : node;
 
 	if (lightboxCfg && typeof lightboxCfg === 'object') {
 		const extSlugs = getLightboxUpsellExtensionSlugs(lightboxCfg);
@@ -88,12 +73,14 @@ export default function EditorUpsellBlurb({ field, wrapperClassName = '' }) {
 				lightboxCfg.pricingUrl !== ''
 					? lightboxCfg.pricingUrl
 					: '';
-			const upgradeHrefPro = pricingUrlPro
-				? pricingUrlPro
-				: appendQuery(
-						baseUpgrade,
-						'utm_source=modula-pro&utm_medium=settings-editor-extension-upsell&utm_campaign=upgrade'
-					);
+			const upgradeHrefPro = withV3Utm(
+				pricingUrlPro
+					? pricingUrlPro
+					: appendQuery(
+							baseUpgrade,
+							'utm_source=modula-pro&utm_medium=settings-editor-extension-upsell&utm_campaign=upgrade'
+						)
+			);
 			const activateLabel =
 				typeof lightboxCfg.activateExtensionLabel === 'string' &&
 				lightboxCfg.activateExtensionLabel.trim() !== ''
@@ -159,7 +146,7 @@ export default function EditorUpsellBlurb({ field, wrapperClassName = '' }) {
 		const compareUrl =
 			typeof lightboxCfg.compareUrl === 'string' &&
 			lightboxCfg.compareUrl !== ''
-				? lightboxCfg.compareUrl
+				? withV3Utm(lightboxCfg.compareUrl)
 				: '';
 		const premiumLabel =
 			typeof lightboxCfg.getPremiumLabel === 'string' &&
@@ -172,12 +159,14 @@ export default function EditorUpsellBlurb({ field, wrapperClassName = '' }) {
 			lightboxCfg.pricingUrl !== ''
 				? lightboxCfg.pricingUrl
 				: '';
-		const upgradeUrl = pricingUrl
-			? pricingUrl
-			: appendQuery(
-					baseUpgrade,
-					'utm_source=modula-lite&utm_medium=settings-editor-lightbox&utm_campaign=upsell'
-				);
+		const upgradeUrl = withV3Utm(
+			pricingUrl
+				? pricingUrl
+				: appendQuery(
+						baseUpgrade,
+						'utm_source=modula-lite&utm_medium=settings-editor-lightbox&utm_campaign=upsell'
+					)
+		);
 		const showCompare = Boolean(freeLabel && compareUrl);
 
 		return wrap(
@@ -247,9 +236,11 @@ export default function EditorUpsellBlurb({ field, wrapperClassName = '' }) {
 		return null;
 	}
 
-	const upgradeUrl = appendQuery(
-		baseUpgrade,
-		'utm_source=modula-lite&utm_medium=settings-editor-gallery-type&utm_campaign=upsell'
+	const upgradeUrl = withV3Utm(
+		appendQuery(
+			baseUpgrade,
+			'utm_source=modula-lite&utm_medium=settings-editor-gallery-type&utm_campaign=upsell'
+		)
 	);
 	const plansLabel =
 		/* translators: primary CTA on gallery type upsell */

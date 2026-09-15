@@ -54,6 +54,9 @@ class Loader {
 		// REST: AI-assisted custom CSS generation.
 		Rest\Gallery_Css_Ai_Controller::init();
 
+		// WP-CLI: Gallery WP-CLI (list / Convert to new editor / Restore classic editor).
+		add_action( 'cli_init', array( Cli\Gallery_Command::class, 'register' ) );
+
 		// Shortcode [modula]: register on init so Modula_Item_Data_Processor (public) is already loaded.
 		add_action( 'init', array( __CLASS__, 'register_shortcode' ), 5 );
 	}

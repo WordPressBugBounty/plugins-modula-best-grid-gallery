@@ -78,16 +78,37 @@ class Shortcode {
 
 		$gallery_id = $this->validate_gallery_id( $atts['id'] );
 		if ( ! $gallery_id ) {
+			\Modula_Debug_Log::log_failure(
+				\Modula_Debug_Log::CHANNEL_SHORTCODE_BOOTSTRAP,
+				'shortcode missing gallery id',
+				array( 'error_code' => 'missing_id' )
+			);
 			return esc_html__( 'Gallery not found.', 'modula-best-grid-gallery' );
 		}
 
 		$gallery = $this->get_gallery_post( $gallery_id );
 		if ( ! $gallery ) {
+			\Modula_Debug_Log::log_failure(
+				\Modula_Debug_Log::CHANNEL_SHORTCODE_BOOTSTRAP,
+				'gallery post unavailable',
+				array(
+					'gallery_id' => $gallery_id,
+					'error_code' => 'gallery_unavailable',
+				)
+			);
 			return esc_html__( 'Gallery not found.', 'modula-best-grid-gallery' );
 		}
 
 		$settings = $this->get_gallery_settings( $gallery_id, $atts['align'] );
 		if ( empty( $settings ) ) {
+			\Modula_Debug_Log::log_failure(
+				\Modula_Debug_Log::CHANNEL_SHORTCODE_BOOTSTRAP,
+				'gallery settings unavailable',
+				array(
+					'gallery_id' => $gallery_id,
+					'error_code' => 'settings_unavailable',
+				)
+			);
 			return esc_html__( 'Gallery not found.', 'modula-best-grid-gallery' );
 		}
 
@@ -99,7 +120,27 @@ class Shortcode {
 		$shuffle_seed = null;
 		$images       = $this->get_gallery_images( $gallery_id, $settings['flat'], 'public', $shuffle_seed );
 		if ( empty( $images ) ) {
+			\Modula_Debug_Log::log_failure(
+				\Modula_Debug_Log::CHANNEL_SHORTCODE_BOOTSTRAP,
+				'gallery has no images',
+				array(
+					'gallery_id' => $gallery_id,
+					'error_code' => 'empty_catalog',
+				)
+			);
 			return esc_html__( 'Gallery not found.', 'modula-best-grid-gallery' );
+		}
+
+		if ( ! \Modula\V2\Modern_Gallery::visitor_renderer_assets_available() ) {
+			\Modula_Debug_Log::log_failure(
+				\Modula_Debug_Log::CHANNEL_SHORTCODE_BOOTSTRAP,
+				'modern visitor renderer assets missing',
+				array(
+					'gallery_id' => $gallery_id,
+					'error_code' => 'renderer_assets_missing',
+				)
+			);
+			return \Modula\V2\Modern_Gallery::missing_visitor_renderer_html();
 		}
 
 		$this->enqueue_assets( $settings['flat'], $images );
@@ -145,10 +186,6 @@ class Shortcode {
 			return null;
 		}
 
-		if ( 'private' === $gallery->post_status && ! is_user_logged_in() ) {
-			return null;
-		}
-
 		if ( 'modula-gallery' !== get_post_type( $gallery ) ) {
 			$gallery_posts = get_posts(
 				array(
@@ -170,7 +207,11 @@ class Shortcode {
 				return null;
 			}
 
-			return get_post( $gallery_posts[0] );
+			$gallery = get_post( $gallery_posts[0] );
+		}
+
+		if ( ! \Modula_Helper::is_visitor_readable_gallery( $gallery ) ) {
+			return null;
 		}
 
 		return $gallery;
@@ -418,44 +459,10 @@ class Shortcode {
 	 * @param array<int, array<string, mixed>> $images   Gallery rows (for Pro extension scripts).
 	 */
 	private function enqueue_assets( $settings, $images = array() ) {
-		$css_handle = 'modula-gallery';
-		$css_path   = MODULA_URL . 'assets/css/front/modula-gallery.css';
-		$css_file   = MODULA_PATH . 'assets/css/front/modula-gallery.css';
-
-		if ( file_exists( $css_file ) && ! wp_style_is( $css_handle, 'enqueued' ) ) {
-			wp_enqueue_style( $css_handle, $css_path, array(), MODULA_LITE_VERSION );
-			\Modula\V2\Modern_Gallery::attach_gallery_chrome_inline_style( $css_handle );
-		}
-
-		$script_handle = 'modula-gallery';
-		$script_path   = MODULA_URL . 'assets/js/front/modula-gallery.js';
-		$script_file   = MODULA_PATH . 'assets/js/front/modula-gallery.js';
-
-		if ( file_exists( $script_file ) && ! wp_script_is( $script_handle, 'enqueued' ) ) {
-			wp_enqueue_script( $script_handle, $script_path, array(), MODULA_LITE_VERSION, true );
-			wp_localize_script(
-				$script_handle,
-				'modulaGallery',
-				array(
-					'publicPath' => trailingslashit( MODULA_URL . 'assets/' ),
-					'strings'    => array(
-						'loadingGallery' => esc_html__( 'Loading gallery…', 'modula-best-grid-gallery' ),
-						'loadingFailed'  => esc_html__( 'Could not load gallery.', 'modula-best-grid-gallery' ),
-					),
-				)
-			);
-		}
-
-		\Modula\V2\Modern_Gallery::enqueue_bootstrap_stylesheet();
-		\Modula\V2\Modern_Gallery::attach_gallery_chrome_inline_style( 'modula-gallery-bootstrap' );
-		\Modula\V2\Modern_Gallery::preload_bootstrap_stylesheet();
-
-		/**
-		 * Legacy shortcode fires this after enqueue; v2 must too so Pro extensions (e.g. image licensing CSS) load.
-		 *
-		 * @hook modula_extra_scripts
-		 */
-		do_action( 'modula_extra_scripts', $settings, is_array( $images ) ? $images : array() );
+		\Modula\V2\Modern_Gallery::enqueue_visitor_renderer_assets(
+			is_array( $settings ) ? $settings : array(),
+			is_array( $images ) ? $images : array()
+		);
 	}
 
 	/**
@@ -1333,6 +1340,18 @@ class Shortcode {
 		do_action( 'modula_before_gallery', $settings['flat'] );
 		$shell_style = \Modula\V2\Modern_Gallery::gallery_shell_inline_style( $hover_dim_style );
 		?>
+		<noscript>
+			<style>
+				.modula.modula-gallery{opacity:1!important;visibility:visible!important}
+				.modula.modula-gallery:not(.modula-gallery-initialized) .modula-items,
+				.modula.modula-gallery:not(.modula-gallery-initialized) .filters,
+				.modula.modula-gallery:not(.modula-gallery-initialized) .modula-pagination,
+				.modula.modula-gallery:not(.modula-gallery-initialized) a.post-edit-link{
+					visibility:visible!important;position:static!important;width:auto!important;height:auto!important;
+					overflow:visible!important;clip:auto!important;white-space:normal!important;pointer-events:auto!important
+				}
+			</style>
+		</noscript>
 		<div id="modula-<?php echo esc_attr( $gallery_id ); ?>" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" style="<?php echo esc_attr( $shell_style ); ?>">
 			<?php do_action( 'modula_shortcode_before_items', $settings['flat'] ); ?>
 			<div class="modula-items">
@@ -1763,9 +1782,11 @@ class Shortcode {
 
 			$sizes = modula_resolve_image_sizes_attr(
 				array(
-					'settings'      => array(
-						'type' => isset( $data->gallery_type ) ? $data->gallery_type : '',
-					),
+					'settings'      => ( isset( $data->settings ) && is_array( $data->settings ) )
+						? $data->settings
+						: array(
+							'type' => isset( $data->gallery_type ) ? $data->gallery_type : '',
+						),
 					'size_array'    => $size_array,
 					'image_src'     => $image_src,
 					'image_meta'    => $image_meta,

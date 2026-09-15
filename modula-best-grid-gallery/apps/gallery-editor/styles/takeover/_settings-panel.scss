@@ -1,6 +1,6 @@
 @use '../variables' as *;
 
-// Redesign settings panel column (404) — section headings + drill / exit rows.
+// Redesign settings panel column (300) — section headings + drill / exit rows.
 .modula-settings-panel {
 	display: flex;
 	flex-direction: column;
@@ -10,6 +10,71 @@
 	/* Panel chrome-2: header + inter-section gaps read as grey, not empty white rows. */
 	background: var(--mod-se-chrome-2);
 	color: var(--mod-se-ink);
+
+	/*
+	 * Compact tip cluster (option B): label text wraps; ⓘ stays first-line,
+	 * never wraps onto its own row.
+	 */
+	.modula-settings-editor__field-label-with-tip {
+		display: flex;
+		flex-wrap: nowrap;
+		align-items: flex-start;
+		gap: $mod-space-4;
+		min-width: 0;
+		width: 100%;
+		flex: 1 1 auto;
+	}
+
+	.modula-settings-editor__field-label-with-tip>.modula-settings-editor__field-label {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	.modula-settings-editor__field-label-with-tip>.modula-settings-editor__field-path-tip {
+		flex: 0 0 auto;
+		align-self: flex-start;
+	}
+
+	/* Compact density: field labels step down from the 14px settings-row default. */
+	.modula-settings-editor__field-label,
+	.modula-settings-editor__inline-field-label,
+	.modula-ui-settings-row__label {
+		overflow-wrap: anywhere;
+		hyphens: auto;
+		font-size: 13px;
+		font-weight: 500;
+		line-height: 1.4;
+	}
+
+	/*
+	 * Reserve the switch/end column: base SettingsRow uses a 32px end track,
+	 * but status toggles are wider — use auto so labels cannot paint over them.
+	 * Keep align-items: center here so DirtyMark (top: 50%) stays on the label
+	 * midline for drill rows; toggles opt into start below.
+	 */
+	.modula-ui-settings-row {
+		grid-template-columns: minmax(0, 1fr) auto;
+	}
+
+	.modula-ui-settings-row__copy {
+		flex-wrap: nowrap;
+		min-width: 0;
+	}
+
+	.modula-ui-settings-row__label-cluster {
+		flex: 1 1 auto;
+		min-width: 0;
+		width: 100%;
+	}
+
+	.modula-ui-settings-row__label {
+		min-width: 0;
+		max-width: 100%;
+	}
+
+	.modula-ui-settings-row__end {
+		flex-shrink: 0;
+	}
 }
 
 .modula-settings-panel__header {
@@ -20,14 +85,14 @@
 	gap: 0;
 	flex: 0 0 auto;
 	box-sizing: border-box;
-	padding: $mod-space-20 $mod-space-20 $mod-space-20;
+	padding: $mod-space-16 $mod-se-gut $mod-space-16;
 	border-bottom: 1px solid var(--mod-se-line);
 	background: transparent;
 }
 
 .modula-settings-panel__header--nested {
 	/* Mock pane-head: 16 / 20 / 14 — compact back row above left-aligned title. */
-	padding: $mod-space-16 $mod-space-20 $mod-space-14;
+	padding: $mod-space-16 $mod-se-gut $mod-space-12;
 	gap: $mod-space-4;
 }
 
@@ -95,10 +160,10 @@
 
 .modula-settings-panel__title {
 	margin: 0;
-	font-size: 20px;
+	font-size: 16px;
 	font-weight: 600;
-	letter-spacing: -0.02em;
-	line-height: 1.2;
+	letter-spacing: -0.01em;
+	line-height: 1.25;
 	color: var(--mod-se-ink);
 	text-align: left;
 }
@@ -111,9 +176,9 @@
 .modula-settings-panel__desc {
 	/* Tight to title — design keeps ~2px optical gap, not a second rhythm step. */
 	margin: $mod-space-2 0 0;
-	font-size: 13px;
+	font-size: 12px;
 	font-weight: 400;
-	line-height: 1.35;
+	line-height: 1.4;
 	color: var(--mod-se-ink-2);
 }
 
@@ -123,19 +188,6 @@
 	overflow-y: auto;
 	scrollbar-width: thin;
 	padding-bottom: $mod-space-28;
-}
-
-.modula-editor-document-panel {
-	.modula-settings-panel__section:first-child {
-		margin-top: $mod-space-16;
-	}
-
-	.modula-settings-panel__section-body {
-		display: flex;
-		flex-direction: column;
-		gap: $mod-space-12;
-		padding: $mod-space-12 $mod-space-20 $mod-space-16;
-	}
 }
 
 .modula-settings-editor__composite-stack-heading-row {
@@ -171,7 +223,7 @@
 		.modula-settings-editor__proofing-lock-placeholder {
 			box-sizing: border-box;
 			margin: 0;
-			padding: $mod-space-16 $mod-space-20 $mod-space-20;
+			padding: $mod-space-16 $mod-se-gut $mod-space-16;
 		}
 	}
 
@@ -190,7 +242,7 @@
 
 .modula-settings-panel__nested-upsell {
 	box-sizing: border-box;
-	padding: $mod-space-16 $mod-space-20;
+	padding: $mod-space-16 $mod-se-gut;
 	border-bottom: 1px solid var(--mod-se-line-soft);
 	background: var(--mod-se-surface);
 }
@@ -203,7 +255,7 @@
 	 * No top/side padding on the stage — section strips are full-bleed chrome.
 	 * Field rows paint their own surface + horizontal gut (like hub section-body).
 	 */
-	padding: 0 0 $mod-space-28;
+	padding: 0 0 $mod-space-20;
 	background: transparent;
 
 	/* Nested panels that start with a field (not a section strip) need top air. */
@@ -232,8 +284,8 @@
 		margin-left: 0;
 		margin-right: 0;
 		/* Hub `.modula-settings-panel__section + &` gap — grey on chrome-2 stage. */
-		margin-top: $mod-space-28;
-		padding: $mod-space-8 $mod-space-20;
+		margin-top: $mod-space-20;
+		padding: $mod-space-8 $mod-se-gut;
 		border-bottom: none;
 		background: var(--mod-se-chrome-2);
 
@@ -242,7 +294,7 @@
 		 * — grey on the chrome-2 nested stage (not a white dungă).
 		 */
 		&:first-child {
-			margin-top: $mod-space-28;
+			margin-top: $mod-space-20;
 		}
 
 		.modula-settings-editor__section-heading-label {
@@ -266,7 +318,7 @@
 		gap: $mod-space-8;
 		align-items: stretch;
 		/* Match hub row rhythm — was 20/16 and read as “labartat”. */
-		padding: $mod-space-12 $mod-space-20;
+		padding: $mod-space-12 $mod-se-gut;
 		border-bottom: 1px solid var(--mod-se-line-soft);
 
 		&:first-child {
@@ -292,9 +344,9 @@
 		}
 
 		.modula-settings-editor__field-label {
-			font-size: 14px;
+			font-size: 13px;
 			font-weight: 500;
-			line-height: 1.5;
+			line-height: 1.4;
 			color: var(--mod-se-ink);
 		}
 	}
@@ -313,11 +365,11 @@
 		grid-template-rows: auto;
 		column-gap: $mod-space-16;
 		row-gap: 0;
-		align-items: center;
+		align-items: start;
 		/* Match hub `.modula-ui-settings-row` — 52px / 12×20, not the airy 20/16 stack. */
 		box-sizing: border-box;
 		min-height: 52px;
-		padding: $mod-space-12 $mod-space-20;
+		padding: $mod-space-12 $mod-se-gut;
 		border-bottom: 1px solid var(--mod-se-line-soft);
 
 		&:has(.modula-ui-switch__help),
@@ -333,7 +385,7 @@
 		>.modula-settings-editor__field-label-col {
 			grid-column: 1;
 			grid-row: 1;
-			align-self: center;
+			align-self: start;
 			min-width: 0;
 			width: auto;
 			max-width: none;
@@ -354,7 +406,7 @@
 			grid-column: 2;
 			grid-row: 1;
 			justify-self: end;
-			align-self: center;
+			align-self: start;
 		}
 
 		.modula-ui-switch__help {
@@ -373,16 +425,16 @@
 		}
 
 		.modula-settings-editor__field-label {
-			font-size: 14px;
+			font-size: 13px;
 			font-weight: 500;
-			line-height: 1.5;
+			line-height: 1.4;
 			color: var(--mod-se-ink);
 		}
 	}
 
 	.modula-settings-editor__field-row--composite,
 	.modula-settings-editor__field-row--device-tabs {
-		padding: $mod-space-12 $mod-space-20;
+		padding: $mod-space-12 $mod-se-gut;
 		border-bottom: 1px solid var(--mod-se-line-soft);
 
 		&:last-child {
@@ -395,8 +447,8 @@
 	 * borders — neutralize inside nested so dark mode does not flash white.
 	 */
 	.modula-settings-editor__field-row--compact-stack {
-		padding-left: $mod-space-20;
-		padding-right: $mod-space-20;
+		padding-left: $mod-se-gut;
+		padding-right: $mod-se-gut;
 	}
 
 	.modula-settings-editor__field-row--compact-stack+.modula-settings-editor__field-row:not(.modula-settings-editor__field-row--compact-stack):not(.modula-settings-editor__field-row--section-heading) {
@@ -416,7 +468,7 @@
 		row-gap: 0;
 		box-sizing: border-box;
 		min-height: 52px;
-		padding: $mod-space-12 $mod-space-20;
+		padding: $mod-space-12 $mod-se-gut;
 
 		.modula-settings-editor__field-label-col {
 			grid-column: 1;
@@ -455,7 +507,7 @@
 		row-gap: 0;
 		box-sizing: border-box;
 		min-height: 52px;
-		padding: $mod-space-12 $mod-space-20;
+		padding: $mod-space-12 $mod-se-gut;
 
 		.modula-settings-editor__field-label-col {
 			grid-column: 1;
@@ -536,7 +588,7 @@
 	}
 
 	.modula-settings-editor__field-row--stacked.modula-settings-editor__field-row--control-only {
-		padding: $mod-space-12 $mod-space-20 $mod-space-16;
+		padding: $mod-space-12 $mod-se-gut $mod-space-16;
 	}
 
 	.modula-settings-editor__composite-stack-heading {
@@ -584,7 +636,7 @@
 
 .modula-settings-panel__nested-empty {
 	margin: 0;
-	padding: $mod-space-20;
+	padding: $mod-space-16 $mod-se-gut;
 	font-size: 13px;
 	line-height: 1.45;
 	color: var(--mod-se-ink-3);
@@ -598,11 +650,11 @@
 
 	/* Same 28px “above section heading” rhythm for Structure after the panel header. */
 	&:first-child {
-		margin-top: $mod-space-28;
+		margin-top: $mod-space-20;
 	}
 
 	&+& {
-		margin-top: $mod-space-28;
+		margin-top: $mod-space-20;
 	}
 }
 
@@ -610,7 +662,7 @@
 	box-sizing: border-box;
 	width: 100%;
 	margin: 0;
-	padding: $mod-space-8 $mod-space-20;
+	padding: $mod-space-8 $mod-se-gut;
 	background: var(--mod-se-chrome-2);
 	color: var(--mod-se-ink-3);
 }
@@ -636,7 +688,7 @@
 
 .modula-settings-panel__note-text {
 	margin: 0;
-	padding: $mod-space-12 $mod-space-20 $mod-space-16;
+	padding: $mod-space-12 $mod-se-gut $mod-space-16;
 	font-size: 12px;
 	line-height: 1.45;
 	color: var(--mod-se-ink-3);
@@ -644,8 +696,8 @@
 
 .modula-settings-panel__drill-row {
 	/* shared-ui SettingsRow; panel just scopes if needed */
-	padding-left: $mod-space-20;
-	padding-right: $mod-space-20;
+	padding-left: $mod-se-gut;
+	padding-right: $mod-se-gut;
 
 	/*
 	 * SettingsRow copy defaults to baseline — fine for text-only values, but a
@@ -704,16 +756,16 @@
 	flex-direction: column;
 	gap: $mod-space-8;
 	margin: 0;
-	padding: $mod-space-16 $mod-space-20 $mod-space-12;
+	padding: $mod-space-16 $mod-se-gut $mod-space-12;
 	border: none;
 	border-radius: 0;
 	background: transparent;
 }
 
 .modula-settings-panel__embedded-label {
-	font-size: 14px;
+	font-size: 13px;
 	font-weight: 500;
-	line-height: 1.5;
+	line-height: 1.4;
 	color: var(--mod-se-ink);
 }
 
@@ -762,8 +814,24 @@
 }
 
 .modula-settings-panel__toggle-row {
-	padding-left: $mod-space-20;
-	padding-right: $mod-space-20;
+	padding-left: $mod-se-gut;
+	padding-right: $mod-se-gut;
+	align-items: start;
+
+	/* First-line dirty: row is start-aligned, so 50% would sit below the label. */
+	.modula-ui-settings-row__dirty {
+		top: calc(#{$mod-space-12} + 0.7em);
+		margin-top: 0;
+		transform: translateY(-50%);
+	}
+
+	.modula-ui-settings-row__copy {
+		align-items: flex-start;
+	}
+
+	.modula-ui-settings-row__label-cluster {
+		align-items: flex-start;
+	}
 
 	/* Beat `__app[data-appearance=dark] .field-label` (metabox secondary ink). */
 	.modula-settings-editor__app[data-appearance] & .modula-settings-editor__field-label {
@@ -779,6 +847,8 @@
 		height: auto;
 		justify-content: flex-end;
 		gap: 0;
+		flex-shrink: 0;
+		align-self: start;
 	}
 
 	.modula-settings-panel__switch {
@@ -832,8 +902,8 @@
 }
 
 .modula-settings-panel__color-row {
-	padding-left: $mod-space-20;
-	padding-right: $mod-space-20;
+	padding-left: $mod-se-gut;
+	padding-right: $mod-se-gut;
 
 	.modula-ui-settings-row__end {
 		width: auto;
@@ -848,8 +918,8 @@
 }
 
 .modula-settings-panel__segmented-row {
-	padding-left: $mod-space-20;
-	padding-right: $mod-space-20;
+	padding-left: $mod-se-gut;
+	padding-right: $mod-se-gut;
 
 	.modula-ui-settings-row__end {
 		width: auto;
@@ -869,7 +939,7 @@
 	flex-direction: column;
 	align-items: stretch;
 	gap: $mod-space-8;
-	padding: $mod-space-12 $mod-space-20;
+	padding: $mod-space-12 $mod-se-gut;
 	border-bottom: 1px solid var(--mod-se-line);
 
 	.modula-ui-segmented {
@@ -878,7 +948,7 @@
 }
 
 .modula-settings-panel__position-grid-row {
-	padding: $mod-space-12 $mod-space-20;
+	padding: $mod-space-12 $mod-se-gut;
 	border-bottom: 1px solid var(--mod-se-line);
 
 	.modula-settings-editor__position-grid {
@@ -900,8 +970,8 @@
 }
 
 .modula-settings-panel__select-row {
-	padding-left: $mod-space-20;
-	padding-right: $mod-space-20;
+	padding-left: $mod-se-gut;
+	padding-right: $mod-se-gut;
 
 	.modula-ui-settings-row__end {
 		width: auto;
@@ -922,7 +992,7 @@
 	flex-direction: column;
 	align-items: stretch;
 	gap: $mod-space-8;
-	padding: $mod-space-12 $mod-space-20;
+	padding: $mod-space-12 $mod-se-gut;
 	border-bottom: 1px solid var(--mod-se-line);
 
 	.modula-ui-menu-select {
@@ -964,7 +1034,7 @@
 	box-sizing: border-box;
 	width: 100%;
 	margin: 0;
-	padding: $mod-space-12 $mod-space-20 $mod-space-16;
+	padding: $mod-space-12 $mod-se-gut $mod-space-16;
 	font-size: 12px;
 	line-height: 1.45;
 	color: var(--mod-se-ink-2);
@@ -1063,7 +1133,7 @@
 
 .modula-settings-editor__field-row--help-only {
 	grid-template-columns: 1fr;
-	padding: $mod-space-12 $mod-space-20 $mod-space-16;
+	padding: $mod-space-12 $mod-se-gut $mod-space-16;
 	border-bottom: 1px solid var(--mod-se-line-soft);
 }
 
@@ -1080,14 +1150,14 @@
 	.modula-settings-editor__gallery-defaults-shell {
 		box-sizing: border-box;
 		margin: 0;
-		padding: $mod-space-16 $mod-space-20;
+		padding: $mod-space-16 $mod-se-gut;
 	}
 }
 
 .modula-settings-editor__field-row--exif-result,
 .modula-settings-editor__field-row--deeplink-url,
 .modula-settings-editor__field-row--instagram-account {
-	padding: $mod-space-12 $mod-space-20 $mod-space-16;
+	padding: $mod-space-12 $mod-se-gut $mod-space-16;
 }
 
 .modula-settings-editor__settings-preview {
@@ -1098,7 +1168,7 @@
 
 .modula-settings-editor__settings-preview-label {
 	margin: 0;
-	font-size: 14px;
+	font-size: 13px;
 	font-weight: 600;
 	line-height: 1.4;
 	color: var(--mod-se-ink);
@@ -1145,7 +1215,7 @@
 
 .modula-settings-editor__instagram-account-status {
 	margin: 0 0 $mod-space-6;
-	font-size: 14px;
+	font-size: 13px;
 	font-weight: 500;
 	line-height: 1.4;
 	color: var(--mod-se-ink);
@@ -1163,14 +1233,14 @@
 	flex-direction: column;
 	gap: $mod-space-8;
 	box-sizing: border-box;
-	padding: $mod-space-12 $mod-space-20;
+	padding: $mod-space-12 $mod-se-gut;
 	border-bottom: 1px solid var(--mod-se-line-soft);
 }
 
 .modula-settings-panel__toggle-upsell-label {
-	font-size: 14px;
+	font-size: 13px;
 	font-weight: 500;
-	line-height: 1.5;
+	line-height: 1.4;
 	color: var(--mod-se-ink);
 }
 
@@ -1184,7 +1254,7 @@
 	width: 100%;
 	min-height: $mod-space-52;
 	margin: 0;
-	padding: $mod-space-12 $mod-space-20;
+	padding: $mod-space-12 $mod-se-gut;
 	border: none;
 	border-bottom: 1px solid var(--mod-se-line-soft);
 	border-radius: 0;
@@ -1209,9 +1279,9 @@
 }
 
 .modula-settings-panel__exit-row-label {
-	font-size: 14px;
+	font-size: 13px;
 	font-weight: 500;
-	line-height: 1.5;
+	line-height: 1.4;
 	color: var(--mod-se-ink);
 	min-width: 0;
 }

@@ -1,47 +1,83 @@
-wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
+wp.Modula = 'undefined' === typeof wp.Modula ? {} : wp.Modula;
 
-(function( $, modula ){
+(function ($, modula) {
+	var modulaSaveImages = {
+		updateInterval: false,
 
-    var modulaSaveImages = {
-        updateInterval: false,
+		checkSave: function () {
+			var self = this;
 
-        checkSave: function() {
-            var self = this;
+			$('#publishing-action .spinner').addClass('is-active');
+			$('#publishing-action #publish').attr('disabled', 'disabled');
 
-            $('#publishing-action .spinner').addClass( 'is-active' );
-            $('#publishing-action #publish').attr( 'disabled', 'disabled' );
+			if (!self.updateInterval) {
+				self.updateInterval = setInterval(
+					$.proxy(self.saveImages, self),
+					1000
+				);
+			} else {
+				clearInterval(self.updateInterval);
+				self.updateInterval = setInterval(
+					$.proxy(self.saveImages, self),
+					1000
+				);
+			}
+		},
 
-            if ( ! self.updateInterval ) {
-                self.updateInterval = setInterval( $.proxy( self.saveImages, self), 1000);
-            }else{
-                clearInterval( self.updateInterval );
-                self.updateInterval = setInterval( $.proxy( self.saveImages, self), 1000);
-            }
-        },
+		/**
+		 * Write current Items into #modula-editor-images (no publish UI side effects).
+		 * Dense collection order — sparse images[index] can JSON.stringify to [] / null holes.
+		 */
+		syncHiddenImagesField: function () {
+			var images = [];
+			var collection = wp.Modula.Items;
 
-    	saveImages: function( callback = false ) {
-            var images = [],
-                self = this,
-                ajaxData;
+			if (collection && typeof collection.each === 'function') {
+				collection.each(function (item) {
+					var attributes =
+						item && typeof item.getAttributes === 'function'
+							? item.getAttributes()
+							: null;
+					if (!attributes || typeof attributes !== 'object') {
+						return;
+					}
+					attributes.index = images.length;
+					images.push(attributes);
+				});
+			}
 
-            clearInterval( self.updateInterval );
+			$('#modula-editor-images').val(JSON.stringify(images));
+		},
 
-            wp.Modula.Items.each( function( item ) {
-                var attributes = item.getAttributes();
-                images[ attributes['index'] ] = attributes;
-            });
+		saveImages: function (callback) {
+			var self = this;
 
-            jQuery( '#modula-editor-images' ).val( JSON.stringify( images ) );
+			clearInterval(self.updateInterval);
+			self.updateInterval = false;
 
-            $('#publishing-action .spinner').removeClass( 'is-active' );
-            $('#publishing-action #publish').removeAttr( 'disabled' );
+			self.syncHiddenImagesField();
 
-            if( typeof callback === "function" ) {
-                callback();
-            }
-        },
-    }
+			$('#publishing-action .spinner').removeClass('is-active');
+			$('#publishing-action #publish').removeAttr('disabled');
 
-    modula.Save = modulaSaveImages;
+			if (typeof callback === 'function') {
+				callback();
+			}
+		},
 
-}( jQuery, wp.Modula ))
+		bindFormSubmit: function () {
+			var self = this;
+			$('#post').on('submit.modulaClassicImages', function () {
+				self.syncHiddenImagesField();
+			});
+		},
+	};
+
+	modula.Save = modulaSaveImages;
+
+	$(function () {
+		if (modula.Save && typeof modula.Save.bindFormSubmit === 'function') {
+			modula.Save.bindFormSubmit();
+		}
+	});
+})(jQuery, wp.Modula);

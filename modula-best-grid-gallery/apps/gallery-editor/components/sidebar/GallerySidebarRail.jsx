@@ -13,29 +13,15 @@ import { useGalleryReorderSidebar } from '../../context/GalleryReorderSidebarCon
 import { useTakeoverSidebarStack } from '../../context/TakeoverSidebarStackContext';
 
 /**
- * @param {Object}                  props
- * @param {string}                  props.activeCategory
- * @param {(name: string) => void}  props.setActiveCategory
- * @param {string}                  [props.docsUrl]
- * @param {'comfortable'|'compact'} [props.railDensity]
- * @param {string}                  [props.documentStatus]
- * @param {string}                  [props.documentStatusLabel]
- * @param {Array<{ value?: string, label?: string }>} [props.documentStatusChoices]
- * @param {(status: string, label: string) => void} [props.onDocumentStatusChange]
- * @param {boolean}                 [props.documentStatusBusy]
- * @param {boolean}                 [props.canEditDocumentStatus]
+ * @param {Object}                 props
+ * @param {string}                 props.activeCategory
+ * @param {(name: string) => void} props.setActiveCategory
+ * @param {string}                 [props.docsUrl]
  */
 export default function GallerySidebarRail({
 	activeCategory,
 	setActiveCategory,
 	docsUrl = '',
-	railDensity = 'comfortable',
-	documentStatus = '',
-	documentStatusLabel = '',
-	documentStatusChoices = [],
-	onDocumentStatusChange,
-	documentStatusBusy = false,
-	canEditDocumentStatus = false,
 }) {
 	const itemEdit = useGalleryItemEditSidebar();
 	const reorderSidebar = useGalleryReorderSidebar();
@@ -57,12 +43,7 @@ export default function GallerySidebarRail({
 
 	return (
 		<aside
-			className={`modula-gallery-takeover__sidebar modula-gallery-takeover__sidebar--v2${
-				railDensity === 'compact'
-					? ' modula-gallery-takeover__sidebar--rail-compact'
-					: ''
-			}`}
-			data-rail-density={railDensity}
+			className="modula-gallery-takeover__sidebar modula-gallery-takeover__sidebar--v2"
 			aria-label={__('Settings', 'modula-best-grid-gallery')}
 		>
 			<div className="modula-gallery-takeover__sidebar-body modula-gallery-takeover__sidebar-body--v2">
@@ -79,12 +60,6 @@ export default function GallerySidebarRail({
 						<SettingsPanel
 							activeCategory={activeCategory}
 							setActiveCategory={selectCategory}
-							documentStatus={documentStatus}
-							documentStatusLabel={documentStatusLabel}
-							documentStatusChoices={documentStatusChoices}
-							onDocumentStatusChange={onDocumentStatusChange}
-							documentStatusBusy={documentStatusBusy}
-							canEditDocumentStatus={canEditDocumentStatus}
 						/>
 					</div>
 				</div>

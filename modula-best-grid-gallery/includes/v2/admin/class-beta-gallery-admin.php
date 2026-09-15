@@ -483,7 +483,25 @@ class Beta_Gallery_Admin {
 	}
 
 	/**
-	 * post-new.php without a choice: block both editors (gallery or album).
+	 * Whether Albums editor takeover may be offered site-wide.
+	 *
+	 * Same filters as Pro Album_Takeover_Admin::is_takeover_ui_available()
+	 * (`modula_enable_modern_settings_editor` + `modula_album_takeover_ui`).
+	 * Default force-OFF until albums beta launch.
+	 *
+	 * @return bool
+	 */
+	public static function is_album_takeover_available() {
+		if ( ! apply_filters( 'modula_enable_modern_settings_editor', false, 0 ) ) {
+			return false;
+		}
+		return (bool) apply_filters( 'modula_album_takeover_ui', false );
+	}
+
+	/**
+	 * post-new.php without a create-choice: block gallery editors.
+	 * Albums only await when Albums editor takeover is available; otherwise
+	 * classic album create stays visible (no blank Add New Album screen).
 	 *
 	 * @return bool
 	 */
@@ -498,6 +516,9 @@ class Beta_Gallery_Admin {
 
 		$is_album = ( 'modula-album' === $screen->post_type );
 		if ( $is_album ) {
+			if ( ! self::is_album_takeover_available() ) {
+				return false;
+			}
 			if ( \Modula\V2\Beta_Settings::is_beta_album( \Modula\V2\Beta_Settings::current_album_id() ) ) {
 				return false;
 			}
@@ -509,8 +530,10 @@ class Beta_Gallery_Admin {
 			$nonce_action = 'modula-gallery-create-choice';
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- create-choice query routing; nonce verified below when present.
 		$choice = isset( $_GET[ self::QUERY_ARG ] ) ? sanitize_key( wp_unslash( $_GET[ self::QUERY_ARG ] ) ) : '';
-		$nonce  = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- verified on the next line.
+		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
 		if ( ! $nonce || ! wp_verify_nonce( $nonce, $nonce_action ) ) {
 			return true;
 		}
@@ -604,6 +627,9 @@ class Beta_Gallery_Admin {
 		<div id="modula-beta-create-modal" class="modula-beta-create-modal" hidden>
 			<div class="modula-beta-create-modal__backdrop" data-modula-beta-dismiss></div>
 			<div class="modula-beta-create-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modula-beta-create-modal-title">
+				<button type="button" class="modula-beta-create-modal__close" data-modula-beta-dismiss aria-label="<?php esc_attr_e( 'Close', 'modula-best-grid-gallery' ); ?>">
+					<span aria-hidden="true">&times;</span>
+				</button>
 				<h2 id="modula-beta-create-modal-title"><?php esc_html_e( 'Choose an editor', 'modula-best-grid-gallery' ); ?></h2>
 				<p><?php esc_html_e( 'Use the new editor for the modern gallery experience, or the classic editor.', 'modula-best-grid-gallery' ); ?></p>
 				<p class="modula-beta-create-modal__actions">

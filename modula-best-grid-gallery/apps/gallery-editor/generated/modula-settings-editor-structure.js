@@ -537,8 +537,16 @@ export default {
 					type: "submenu",
 					label: __( "Opening", 'modula-best-grid-gallery' ),
 					visibleWhen: {
-						path: "lightbox.lightbox",
-						eq: "fancybox"
+						any: [
+							{
+								path: "lightbox.lightbox",
+								eq: "fancybox"
+							},
+							{
+								path: "lightbox.lightbox",
+								eq: "lightbox-prefer-url"
+							}
+						]
 					},
 					items: [
 						{
@@ -602,8 +610,16 @@ export default {
 					type: "submenu",
 					label: __( "Controls", 'modula-best-grid-gallery' ),
 					visibleWhen: {
-						path: "lightbox.lightbox",
-						eq: "fancybox"
+						any: [
+							{
+								path: "lightbox.lightbox",
+								eq: "fancybox"
+							},
+							{
+								path: "lightbox.lightbox",
+								eq: "lightbox-prefer-url"
+							}
+						]
 					},
 					items: [
 						{
@@ -646,8 +662,16 @@ export default {
 					type: "submenu",
 					label: __( "Appearance", 'modula-best-grid-gallery' ),
 					visibleWhen: {
-						path: "lightbox.lightbox",
-						eq: "fancybox"
+						any: [
+							{
+								path: "lightbox.lightbox",
+								eq: "fancybox"
+							},
+							{
+								path: "lightbox.lightbox",
+								eq: "lightbox-prefer-url"
+							}
+						]
 					},
 					items: [
 						{
@@ -665,8 +689,16 @@ export default {
 					type: "submenu",
 					label: __( "Text", 'modula-best-grid-gallery' ),
 					visibleWhen: {
-						path: "lightbox.lightbox",
-						eq: "fancybox"
+						any: [
+							{
+								path: "lightbox.lightbox",
+								eq: "fancybox"
+							},
+							{
+								path: "lightbox.lightbox",
+								eq: "lightbox-prefer-url"
+							}
+						]
 					},
 					items: [
 						{

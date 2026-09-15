@@ -4,6 +4,20 @@ import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import styles from './ButtonField.module.scss';
 
+function triggerBrowserDownload(filename, body) {
+	const blob = new Blob([body ?? ''], {
+		type: 'application/x-ndjson;charset=utf-8',
+	});
+	const url = URL.createObjectURL(blob);
+	const link = document.createElement('a');
+	link.href = url;
+	link.download = filename || 'modula-debug.jsonl';
+	document.body.appendChild(link);
+	link.click();
+	link.remove();
+	URL.revokeObjectURL(url);
+}
+
 export default function ButtonField({ field, variant = 'primary' }) {
 	const [loading, setLoading] = useState(false);
 	const [notice, setNotice] = useState(null);
@@ -33,8 +47,13 @@ export default function ButtonField({ field, variant = 'primary' }) {
 				response = await doApiCall(
 					field.api.path,
 					field.api.method || 'POST',
-					field.api.data || {}
+					field.api.data || {},
+					{ download: Boolean(field.api.download) }
 				);
+			}
+
+			if (field.api?.download && response) {
+				triggerBrowserDownload(response.filename, response.body);
 			}
 
 			if (field.reload) {

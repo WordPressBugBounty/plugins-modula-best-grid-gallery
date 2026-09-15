@@ -8,6 +8,7 @@ import { useCallback } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useSelector } from 'react-redux';
 import { openModulaGalleryLightboxAtRoot } from '../lightbox/lightboxOpenFacade';
+import { galleryUsesFancyboxLightbox } from '../utils/resolveGalleryItemLink';
 
 function BnbGridIcon() {
 	return (
@@ -119,10 +120,10 @@ export default function BnbShowAllPhotosButton({ moreCount, config }) {
 			// BnB hides all but the featured tiles, so the "Show all photos"
 			// action is the only way to view the rest — always open the
 			// lightbox, even when the gallery link mode is "no-link".
-			const lightboxConfig =
-				config?.lightbox === 'fancybox'
-					? config
-					: { ...config, lightbox: 'fancybox' };
+			// Keep hybrid mode so linked tiles stay out of the Fancybox set.
+			const lightboxConfig = galleryUsesFancyboxLightbox(config?.lightbox)
+				? config
+				: { ...config, lightbox: 'fancybox' };
 			openModulaGalleryLightboxAtRoot(host, lightboxConfig, 0, {
 				items,
 				settings,

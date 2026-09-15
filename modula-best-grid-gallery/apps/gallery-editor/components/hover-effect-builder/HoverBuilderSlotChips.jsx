@@ -1,5 +1,9 @@
 import HoverBuilderSocialPreview from './HoverBuilderSocialPreview';
 import HoverImageSlotChip from './HoverImageSlotChip';
+import {
+	ITEM_DESCRIPTION_CLASS_NAME,
+	ITEM_TITLE_CLASS_NAME,
+} from 'gallery-shared/utils/itemChromeLegacyCssAliases';
 
 /**
  * @param {{
@@ -53,7 +57,10 @@ export default function HoverBuilderSlotChips({
 					onSelect={() => setSelectedTarget('title')}
 					onCommit={(next) => onCommit('title', next)}
 				>
-					<div className="modula-title" style={titleTypographyStyle}>
+					<div
+						className={ITEM_TITLE_CLASS_NAME}
+						style={titleTypographyStyle}
+					>
 						{titleText}
 					</div>
 				</HoverImageSlotChip>
@@ -70,7 +77,10 @@ export default function HoverBuilderSlotChips({
 					onSelect={() => setSelectedTarget('caption')}
 					onCommit={(next) => onCommit('caption', next)}
 				>
-					<div className="jtg-description" style={captionTypographyStyle}>
+					<div
+						className={ITEM_DESCRIPTION_CLASS_NAME}
+						style={captionTypographyStyle}
+					>
 						{captionText}
 					</div>
 				</HoverImageSlotChip>

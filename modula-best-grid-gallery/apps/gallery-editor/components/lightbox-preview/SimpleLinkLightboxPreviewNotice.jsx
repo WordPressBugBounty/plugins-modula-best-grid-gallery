@@ -42,7 +42,7 @@ export function getSimpleLinkLightboxNoticeText(mode) {
 			);
 		case 'external-url':
 			return __(
-				'External URL: click a tile to open that image’s Link & display URL in the current tab.',
+				'Go to URL: click a tile to open that image’s Link & display URL in the current tab.',
 				'modula-best-grid-gallery'
 			);
 		case 'attachment-page':

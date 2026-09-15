@@ -1,15 +1,16 @@
 /**
- * Top-level category list for sidebar layout V2 — subtle icon + label + helper.
+ * Top-level category list for sidebar layout V2 — fixed icon + short label rail.
  */
 
 import { useLayoutEffect, useMemo } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { Tooltip } from '@wordpress/components';
 import { Icon } from '@wordpress/icons';
 import { SETTINGS_EDITOR_CATEGORIES } from '../../constants/editorStructure';
 import { TAKEOVER_CATEGORY_ICONS } from '../../constants/takeoverCategoryIcons';
 import { getVisibleCategories } from '../../logic/categoryVisibility';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
-import { getSidebarV2CategoryNavHelp } from '../../constants/sidebarV2Meta';
+import { getSidebarRailNavLabel } from '../../constants/sidebarRailLabels';
 import SidebarRailFooter from './SidebarRailFooter';
 
 /**
@@ -86,11 +87,12 @@ function TakeoverSidebarNavV2Inner({
 				<ul className="modula-gallery-takeover__sidebar-v2-list">
 					{visible.map((cat) => {
 						const isActive = cat.name === activeCategory;
-						const helper = getSidebarV2CategoryNavHelp(
-							cat.name,
-							cat.description
-						);
 						const categoryIcon = TAKEOVER_CATEGORY_ICONS[cat.name];
+						const accessibleName = sprintf(
+							/* translators: %s: settings section title. */
+							__('Open %s settings', 'modula-best-grid-gallery'),
+							cat.title
+						);
 						return (
 							<li
 								key={cat.name}
@@ -98,43 +100,36 @@ function TakeoverSidebarNavV2Inner({
 									isActive ? ' is-active' : ''
 								}`}
 							>
-								<button
-									type="button"
-									className="modula-gallery-takeover__sidebar-v2-nav-btn"
-									onClick={() => onSelect(cat.name)}
-									aria-current={isActive ? 'true' : undefined}
-									aria-label={sprintf(
-										/* translators: %s: settings section title. */
-										__(
-											'Open %s settings',
-											'modula-best-grid-gallery'
-										),
-										cat.title
-									)}
-								>
-									<span
-										className="modula-gallery-takeover__sidebar-v2-nav-icon-wrap"
-										aria-hidden="true"
+								<Tooltip text={cat.title} delay={0}>
+									<button
+										type="button"
+										className="modula-gallery-takeover__sidebar-v2-nav-btn"
+										onClick={() => onSelect(cat.name)}
+										aria-current={
+											isActive ? 'true' : undefined
+										}
+										aria-label={accessibleName}
 									>
-										{categoryIcon ? (
-											<Icon
-												icon={categoryIcon}
-												size={16}
-												className="modula-gallery-takeover__sidebar-v2-nav-icon"
-											/>
-										) : null}
-									</span>
-									<span className="modula-gallery-takeover__sidebar-v2-nav-copy">
-										<span className="modula-gallery-takeover__sidebar-v2-nav-title">
-											{cat.title}
+										<span
+											className="modula-gallery-takeover__sidebar-v2-nav-icon-wrap"
+											aria-hidden="true"
+										>
+											{categoryIcon ? (
+												<Icon
+													icon={categoryIcon}
+													size={20}
+													className="modula-gallery-takeover__sidebar-v2-nav-icon"
+												/>
+											) : null}
 										</span>
-										{helper ? (
-											<span className="modula-gallery-takeover__sidebar-v2-nav-helper">
-												{helper}
-											</span>
-										) : null}
-									</span>
-								</button>
+										<span
+											className="modula-gallery-takeover__sidebar-v2-nav-title"
+											aria-hidden="true"
+										>
+											{getSidebarRailNavLabel(cat)}
+										</span>
+									</button>
+								</Tooltip>
 							</li>
 						);
 					})}

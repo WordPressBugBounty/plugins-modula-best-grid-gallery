@@ -23,6 +23,7 @@ import { __ } from '@wordpress/i18n';
  *   deleteListingRows?: (items: Object[]) => Promise<unknown>,
  *   canUseApplyPreset?: boolean,
  *   onApplyPreset?: (items: Object[]) => void|Promise<unknown>,
+ *   onConvertToNewEditor?: (items: Object[]) => void|Promise<unknown>,
  *   onSelectionCleared?: () => void,
  * }} props
  */
@@ -39,6 +40,7 @@ export function ListingToolbar({
 	deleteListingRows,
 	canUseApplyPreset = false,
 	onApplyPreset,
+	onConvertToNewEditor,
 	onSelectionCleared,
 }) {
 	const searchLabel = __('Search galleries…', 'modula-best-grid-gallery');
@@ -67,6 +69,7 @@ export function ListingToolbar({
 						restoreListingRows={restoreListingRows}
 						deleteListingRows={deleteListingRows}
 						onApplyPreset={onApplyPreset}
+						onConvertToNewEditor={onConvertToNewEditor}
 						onSelectionCleared={onSelectionCleared}
 					/>
 				) : null}

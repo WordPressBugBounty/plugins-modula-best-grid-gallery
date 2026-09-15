@@ -342,12 +342,17 @@ class Meta_Sync {
 				0
 			);
 
-			$synced = $upload->apply_modula_media_fields_to_attachment( $attachment_id, $media_subset );
+			$explicit_clear_keys = modula_attachment_text_keys_explicitly_cleared( $media_subset );
+			$synced              = $upload->apply_modula_media_fields_to_attachment( $attachment_id, $media_subset );
 			if ( is_wp_error( $synced ) ) {
 				return $synced;
 			}
 
-			$out[] = $upload->overlay_modula_row_attachment_text_from_post( $row, $attachment_id );
+			$out[] = $upload->overlay_modula_row_attachment_text_from_post(
+				$row,
+				$attachment_id,
+				$explicit_clear_keys
+			);
 		}
 
 		return $out;

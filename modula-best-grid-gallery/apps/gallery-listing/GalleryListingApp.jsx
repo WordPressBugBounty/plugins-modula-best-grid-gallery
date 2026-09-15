@@ -6,31 +6,44 @@ import {
 	useCallback,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Button, Notice } from '@wordpress/components';
+import { Button, Notice, Snackbar } from '@wordpress/components';
 import { DataViews } from '@wordpress/dataviews/wp';
 import { useQueryClient } from '@tanstack/react-query';
 import { getGalleryListingConfig } from './config';
 import { getListingFields } from './fields';
-import { buildCreateGalleryUrl } from './listingCreateGalleryUrl';
 import { ListingPaginationFooter } from './ListingPaginationFooter';
 import { ListingSearchSummary } from './ListingSearchSummary';
 import { ListingToolbar } from './ListingToolbar';
 import { EditorChoiceModal } from './EditorChoiceModal';
 import { ListingQuickEditModal } from './ListingQuickEditModal';
+import {
+	completeCreateEditorChoice,
+	completeDismissEditorChoice,
+	navigateAdminHref,
+	skipActiveViewTransition,
+} from './completeEditorChoice';
 import { shouldShowBetaEditorPrompt } from './listingBetaEditorPrompt';
 import { shouldShowMixedStackNotice } from './listingMixedStackNotice';
 import { openListingApplyPreset } from './listingApplyPreset';
+import {
+	formatListingBulkConvertToast,
+	runListingBulkConvert,
+} from './listingBulkConvert';
 import { ListingSelectAllChooserDialog } from './ListingSelectAllChooserDialog';
 import {
 	getListingSelectionBulkActions,
 	isListingSelectionCheckboxTarget,
+	isListingSelectionHeaderTarget,
 	listingSelectionItemId,
 	resolveListingSelectionChange,
 	selectListingRowsByChoice,
 } from './listingSelection';
 import { useClassicEditorPreferenceMutation } from './query/useClassicEditorPreferenceMutation';
 import { useTryBetaGalleryMutation } from './query/useTryBetaGalleryMutation';
-import { useConvertBetaGalleryMutation } from './query/useConvertBetaGalleryMutation';
+import {
+	postConvertBetaGallery,
+	useConvertBetaGalleryMutation,
+} from './query/useConvertBetaGalleryMutation';
 import { useRestoreClassicEditorMutation } from './query/useRestoreClassicEditorMutation';
 import {
 	mergePersistedListingView,
@@ -88,6 +101,8 @@ export default function GalleryListingApp() {
 	const listingRef = useRef(null);
 	/** Only checkbox-column interactions may change listing selection (not row clicks). */
 	const selectionFromCheckboxRef = useRef(false);
+	/** Header select-all vs row checkbox — last-row checks must not clear. */
+	const selectionFromHeaderRef = useRef(false);
 	const [saveResult, setSaveResult] = useState(null);
 	const [refreshBusy, setRefreshBusy] = useState(false);
 	const [focusKey, setFocusKey] = useState(null);
@@ -100,6 +115,7 @@ export default function GalleryListingApp() {
 			null
 		)
 	);
+	const [convertNotice, setConvertNotice] = useState('');
 	const { data, isLoading, isError, error, refetch } = useListingQuery(view);
 	const duplicateMutation = useDuplicateListingRowMutation();
 	const lifecycleMutation = useListingRowLifecycleMutation();
@@ -113,9 +129,21 @@ export default function GalleryListingApp() {
 	const restoreClassicEditorMutation = useRestoreClassicEditorMutation();
 
 	const closeEditorChoice = useCallback(() => {
+		skipActiveViewTransition(
+			typeof document !== 'undefined' ? document : undefined
+		);
 		setEditorChoiceMode(null);
 		setPendingEditItem(null);
+		if (listingRef.current) {
+			listingRef.current.focus();
+		}
 	}, []);
+
+	const dismissEditorChoice = useCallback(() => {
+		completeDismissEditorChoice({
+			close: closeEditorChoice,
+		});
+	}, [closeEditorChoice]);
 
 	const requestGalleryEdit = useCallback(
 		(item) => {
@@ -127,11 +155,14 @@ export default function GalleryListingApp() {
 					albumTakeoverAvailable: config.albumTakeoverAvailable,
 				})
 			) {
+				skipActiveViewTransition(
+					typeof document !== 'undefined' ? document : undefined
+				);
 				setPendingEditItem(item);
 				setEditorChoiceMode('open');
 				return;
 			}
-			window.location.href = item.editUrl;
+			navigateAdminHref(item.editUrl);
 		},
 		[config.albumTakeoverAvailable]
 	);
@@ -267,6 +298,23 @@ export default function GalleryListingApp() {
 				});
 				return result;
 			},
+			convertListingGalleries: async (items) => {
+				const result = await runListingBulkConvert(
+					items,
+					postConvertBetaGallery
+				);
+				setConvertNotice(formatListingBulkConvertToast(result));
+				if (!(result.converted > 0)) {
+					return result;
+				}
+				setSelection([]);
+				setSelectionNotice(null);
+				setSelectAllChooserOptions(null);
+				await queryClient.invalidateQueries({
+					queryKey: ['modula-listing'],
+				});
+				return result;
+			},
 		}),
 		// mutateAsync identities are stable enough for this shell.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -374,11 +422,14 @@ export default function GalleryListingApp() {
 			if (!selectionFromCheckboxRef.current) {
 				return;
 			}
+			const fromHeader = selectionFromHeaderRef.current;
 			selectionFromCheckboxRef.current = false;
+			selectionFromHeaderRef.current = false;
 			const result = resolveListingSelectionChange({
 				currentSelection: selection,
 				nextSelection,
 				pageRows: rows,
+				fromHeader,
 			});
 			setSelection(result.selection);
 			setSelectionNotice(result.notice);
@@ -393,8 +444,12 @@ export default function GalleryListingApp() {
 			return undefined;
 		}
 		const markCheckboxSource = (event) => {
-			selectionFromCheckboxRef.current =
-				isListingSelectionCheckboxTarget(event.target);
+			selectionFromCheckboxRef.current = isListingSelectionCheckboxTarget(
+				event.target
+			);
+			selectionFromHeaderRef.current = isListingSelectionHeaderTarget(
+				event.target
+			);
 		};
 		const markCheckboxKey = (event) => {
 			if (event.key !== ' ' && event.key !== 'Enter') {
@@ -455,6 +510,9 @@ export default function GalleryListingApp() {
 		if (!config.postNewUrl) {
 			return;
 		}
+		skipActiveViewTransition(
+			typeof document !== 'undefined' ? document : undefined
+		);
 		setPendingEditItem(null);
 		setEditorChoiceMode('create');
 	}, [config.postNewUrl]);
@@ -463,8 +521,11 @@ export default function GalleryListingApp() {
 		if (!config.newAlbumUrl) {
 			return;
 		}
+		skipActiveViewTransition(
+			typeof document !== 'undefined' ? document : undefined
+		);
 		if (!config.albumTakeoverAvailable) {
-			window.location.href = config.newAlbumUrl;
+			navigateAdminHref(config.newAlbumUrl);
 			return;
 		}
 		setPendingEditItem(null);
@@ -473,63 +534,45 @@ export default function GalleryListingApp() {
 
 	const chooseEditorAndCreate = useCallback(
 		(choice) => {
-			const creatingAlbum = 'create-album' === editorChoiceMode;
-			const href = buildCreateGalleryUrl({
-				postNewUrl: creatingAlbum
-					? config.newAlbumUrl
-					: config.postNewUrl,
-				queryArg: config.editorChoiceQueryArg,
-				createNonce: creatingAlbum
-					? config.createAlbumNonce
-					: config.createGalleryNonce,
+			completeCreateEditorChoice({
 				choice,
+				mode: editorChoiceMode,
+				config,
+				close: closeEditorChoice,
 			});
-			if (!href) {
-				return;
-			}
-			window.location.href = href;
 		},
-		[
-			editorChoiceMode,
-			config.newAlbumUrl,
-			config.postNewUrl,
-			config.editorChoiceQueryArg,
-			config.createAlbumNonce,
-			config.createGalleryNonce,
-		]
+		[editorChoiceMode, config, closeEditorChoice]
 	);
 
 	const chooseEditorForOpen = useCallback(
 		async (choice) => {
 			const item = pendingEditItem;
+			skipActiveViewTransition(
+				typeof document !== 'undefined' ? document : undefined
+			);
+			closeEditorChoice();
 			if (!item?.editUrl) {
-				closeEditorChoice();
 				return;
 			}
 
 			if ('classic' === choice) {
 				try {
 					await classicEditorPreferenceMutation.mutateAsync(item);
-				} catch (e) {
-					closeEditorChoice();
+				} catch {
 					return;
 				}
-				window.location.href = item.editUrl;
+				navigateAdminHref(item.editUrl);
 				return;
 			}
 
 			try {
 				const result = await tryBetaGalleryMutation.mutateAsync(item);
 				if (result?.editUrl) {
-					window.location.href = result.editUrl;
-					return;
+					navigateAdminHref(result.editUrl);
 				}
-			} catch (e) {
-				closeEditorChoice();
-				return;
+			} catch {
+				// Listing is already usable; the modal was closed first.
 			}
-
-			closeEditorChoice();
 		},
 		[
 			pendingEditItem,
@@ -722,6 +765,9 @@ export default function GalleryListingApp() {
 									? rowActionHandlers.applyListingPreset
 									: undefined
 							}
+							onConvertToNewEditor={
+								rowActionHandlers.convertListingGalleries
+							}
 							trashListingRows={
 								rowActionHandlers.trashListingRows
 							}
@@ -767,7 +813,7 @@ export default function GalleryListingApp() {
 				isOpen={editorChoiceMode !== null}
 				mode={editorChoiceMode === 'open' ? 'open' : 'create'}
 				heroUrl={config.editorChoiceHeroUrl}
-				onClose={closeEditorChoice}
+				onClose={dismissEditorChoice}
 				onChoose={handleEditorChoice}
 			/>
 			<ListingSelectAllChooserDialog
@@ -775,6 +821,14 @@ export default function GalleryListingApp() {
 				onChoose={chooseSelectAll}
 				onCancel={cancelSelectAllChooser}
 			/>
+			{convertNotice ? (
+				<Snackbar
+					className="modula-gallery-listing__convert-toast"
+					onRemove={() => setConvertNotice('')}
+				>
+					{convertNotice}
+				</Snackbar>
+			) : null}
 		</div>
 	);
 }

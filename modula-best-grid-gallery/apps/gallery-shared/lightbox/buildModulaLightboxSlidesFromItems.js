@@ -25,6 +25,7 @@ import {
 	isVideoGalleryItem,
 	resolveItemLightboxVideoFlags,
 } from '../video/videoGalleryModel';
+import { galleryUsesFancyboxLightbox } from '../utils/resolveGalleryItemLink';
 
 /**
  * @param {unknown} row
@@ -70,7 +71,21 @@ function isLightboxSlideRow(row, config) {
 		typeof row.lightbox === 'string' && row.lightbox.trim() !== ''
 			? row.lightbox
 			: config?.lightbox || 'fancybox';
-	return mode === 'fancybox';
+	if (!galleryUsesFancyboxLightbox(mode)) {
+		return false;
+	}
+	/*
+	 * Hybrid: custom URL tiles navigate away — exclude from Fancybox slides
+	 * (parity with DOM `.modula-simple-link` filtering).
+	 */
+	if (mode === 'lightbox-prefer-url') {
+		const itemLink =
+			typeof row.link === 'string' ? row.link.trim() : '';
+		if (itemLink) {
+			return false;
+		}
+	}
+	return true;
 }
 
 /**

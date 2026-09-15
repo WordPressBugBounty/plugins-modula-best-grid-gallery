@@ -721,11 +721,15 @@ class Modula_Gallery_Upload
 	/**
 	 * Overwrite title / alt / description on a modula-images row from attachment post data (after attachment updates).
 	 *
-	 * @param array $row            Row being saved.
-	 * @param int   $attachment_id Attachment ID.
+	 * Keys listed in $explicit_clear_keys stay '' on the gallery row so an intentional
+	 * clear is not undone when Media Library still holds non-empty text.
+	 *
+	 * @param array    $row                 Row being saved.
+	 * @param int      $attachment_id       Attachment ID.
+	 * @param string[] $explicit_clear_keys Keys among title, alt, description to keep empty.
 	 * @return array
 	 */
-	public function overlay_modula_row_attachment_text_from_post($row, $attachment_id)
+	public function overlay_modula_row_attachment_text_from_post($row, $attachment_id, $explicit_clear_keys = array())
 	{
 		if (! is_array($row)) {
 			return $row;
@@ -738,9 +742,21 @@ class Modula_Gallery_Upload
 		if (! $attachment || 'attachment' !== $attachment->post_type) {
 			return $row;
 		}
-		$row['title']       = $attachment->post_title;
-		$row['alt']         = get_post_meta($attachment_id, '_wp_attachment_image_alt', true);
-		$row['description'] = $attachment->post_content;
+		if (! is_array($explicit_clear_keys)) {
+			$explicit_clear_keys = array();
+		}
+		$row['title'] = modula_resolve_gallery_row_attachment_text_after_sync(
+			$attachment->post_title,
+			in_array('title', $explicit_clear_keys, true)
+		);
+		$row['alt'] = modula_resolve_gallery_row_attachment_text_after_sync(
+			get_post_meta($attachment_id, '_wp_attachment_image_alt', true),
+			in_array('alt', $explicit_clear_keys, true)
+		);
+		$row['description'] = modula_resolve_gallery_row_attachment_text_after_sync(
+			$attachment->post_content,
+			in_array('description', $explicit_clear_keys, true)
+		);
 		return $row;
 	}
 

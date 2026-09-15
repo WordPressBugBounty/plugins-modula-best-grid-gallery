@@ -700,13 +700,8 @@ class Listing_Controller {
 	private static function get_gallery_preview_items( $gallery_id, $limit = 8 ) {
 		$limit  = max( 1, (int) $limit );
 		$items  = array();
-		$images = get_post_meta( $gallery_id, 'modula-images', true );
-		if ( ! is_array( $images ) || empty( $images ) ) {
-			if ( class_exists( '\Modula\V2\Meta_Sync', false ) ) {
-				$images = \Modula\V2\Meta_Sync::get_images_v2( $gallery_id );
-			}
-		}
-		if ( ! is_array( $images ) ) {
+		$images = self::get_gallery_images_catalog( $gallery_id );
+		if ( empty( $images ) ) {
 			return $items;
 		}
 
@@ -1740,34 +1735,25 @@ class Listing_Controller {
 	 * @return array{images: int, videos: int, galleries: int, total: int}
 	 */
 	private static function count_gallery_items( $gallery_id ) {
-		$images = get_post_meta( $gallery_id, 'modula-images', true );
-		if ( ! is_array( $images ) ) {
-			return array(
-				'images'    => 0,
-				'videos'    => 0,
-				'galleries' => 0,
-				'total'     => 0,
-			);
-		}
-		$image_count = 0;
-		$video_count = 0;
-		foreach ( $images as $row ) {
-			if ( ! is_array( $row ) || ! isset( $row['id'] ) ) {
-				continue;
-			}
-			$id = (string) $row['id'];
-			if ( 0 === strpos( $id, 'video_' ) ) {
-				++$video_count;
-			} else {
-				++$image_count;
-			}
-		}
-		return array(
-			'images'    => $image_count,
-			'videos'    => $video_count,
-			'galleries' => 0,
-			'total'     => $image_count + $video_count,
+		return Listing_Gallery_Item_Counts::count_rows(
+			self::get_gallery_images_catalog( $gallery_id )
 		);
+	}
+
+	/**
+	 * Classic `modula-images` when non-empty; otherwise v2 images meta.
+	 * Matches listing thumbnails / preview tiles so counts agree with visible items.
+	 *
+	 * @param int $gallery_id Gallery ID.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function get_gallery_images_catalog( $gallery_id ) {
+		$classic = get_post_meta( $gallery_id, 'modula-images', true );
+		$v2      = array();
+		if ( ( ! is_array( $classic ) || empty( $classic ) ) && class_exists( '\Modula\V2\Meta_Sync', false ) ) {
+			$v2 = \Modula\V2\Meta_Sync::get_images_v2( $gallery_id );
+		}
+		return Listing_Gallery_Item_Counts::select_catalog( $classic, $v2 );
 	}
 
 	/**
@@ -1787,13 +1773,8 @@ class Listing_Controller {
 			}
 		}
 
-		$images = get_post_meta( $gallery_id, 'modula-images', true );
-		if ( ! is_array( $images ) || empty( $images ) ) {
-			if ( class_exists( '\Modula\V2\Meta_Sync', false ) ) {
-				$images = \Modula\V2\Meta_Sync::get_images_v2( $gallery_id );
-			}
-		}
-		if ( ! is_array( $images ) ) {
+		$images = self::get_gallery_images_catalog( $gallery_id );
+		if ( empty( $images ) ) {
 			return array_values( array_slice( $urls, 0, $limit ) );
 		}
 

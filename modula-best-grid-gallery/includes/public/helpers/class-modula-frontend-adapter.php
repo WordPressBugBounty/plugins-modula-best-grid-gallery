@@ -36,6 +36,38 @@ class Modula_Frontend_Adapter {
 	}
 
 	/**
+	 * Resolve visitor bootstrap lazyLoad (0|1) from gallery settings and optional item data.
+	 *
+	 * Item-level lazyLoad wins when present (processor / intentional opt-out).
+	 * Gallery setting accepts flat `lazy_load` or camelCase `lazyLoad`, including
+	 * v2 boolean values (not only integer 1).
+	 *
+	 * @param array      $settings  Flat gallery settings.
+	 * @param array|null $item_data Optional processed item data.
+	 * @return int 1 when lazy, 0 when eager.
+	 */
+	public static function resolve_visitor_lazy_load( $settings, $item_data = null ) {
+		if ( is_array( $item_data ) && array_key_exists( 'lazyLoad', $item_data ) ) {
+			return empty( $item_data['lazyLoad'] ) ? 0 : 1;
+		}
+
+		$settings = is_array( $settings ) ? $settings : array();
+		if ( array_key_exists( 'lazy_load', $settings ) ) {
+			$raw = $settings['lazy_load'];
+		} elseif ( array_key_exists( 'lazyLoad', $settings ) ) {
+			$raw = $settings['lazyLoad'];
+		} else {
+			return 0;
+		}
+
+		if ( false === $raw || null === $raw || 0 === $raw || '0' === $raw || '' === $raw ) {
+			return 0;
+		}
+
+		return 1;
+	}
+
+	/**
 	 * Convert settings to new config format
 	 *
 	 * @param array  $settings - Existing Modula settings
@@ -92,7 +124,7 @@ class Modula_Frontend_Adapter {
 			// Display options
 			'hideTitle'              => isset( $settings['hide_title'] ) ? Modula_Helper::is_truthy_flag( $settings['hide_title'] ) : false,
 			'hideDescription'        => isset( $settings['hide_description'] ) ? Modula_Helper::is_truthy_flag( $settings['hide_description'] ) : false,
-			'lazyLoad'               => 1,
+			'lazyLoad'               => self::resolve_visitor_lazy_load( $settings ),
 
 			// Other settings
 			'randomFactor'           => isset( $js_config['randomFactor'] ) ? floatval( $js_config['randomFactor'] ) : 0,
@@ -195,7 +227,7 @@ class Modula_Frontend_Adapter {
 			'enableLinkedin'         => boolval( $settings['enableLinkedin'] ),
 			'enableEmail'            => boolval( $settings['enableEmail'] ),
 			'socialDesktopCollapsed' => boolval( $settings['socialDesktopCollapsed'] ),
-			'lazyLoad'               => 1,
+			'lazyLoad'               => self::resolve_visitor_lazy_load( $settings ),
 			'item_classes'           => array( 'modula-item' ),
 			'item_attributes'        => array(),
 			'link_classes'           => array( 'tile-inner', 'modula-item-link' ),
@@ -256,7 +288,7 @@ class Modula_Frontend_Adapter {
 			'hideTitle'       => Modula_Helper::is_truthy_flag( $item_data['hide_title'] ?? false ),
 			'hideDescription' => Modula_Helper::is_truthy_flag( $item_data['hide_description'] ?? false ),
 			'hideSocials'     => isset( $item_data['hide_socials'] ) ? boolval( $item_data['hide_socials'] ) : false,
-			'lazyLoad'        => 1,
+			'lazyLoad'        => self::resolve_visitor_lazy_load( $settings, $item_data ),
 			'itemClasses'     => isset( $item_data['item_classes'] ) ? $item_data['item_classes'] : array( 'modula-item' ),
 			'itemAttributes'  => isset( $item_data['item_attributes'] ) ? $item_data['item_attributes'] : array(),
 			'linkClasses'     => isset( $item_data['link_classes'] ) ? $item_data['link_classes'] : array(),
@@ -388,7 +420,7 @@ class Modula_Frontend_Adapter {
 			'hideTitle'       => Modula_Helper::is_truthy_flag( $item_data['hide_title'] ?? false ),
 			'hideDescription' => Modula_Helper::is_truthy_flag( $item_data['hide_description'] ?? false ),
 			'hideSocials'     => isset( $item_data['hide_socials'] ) ? (bool) $item_data['hide_socials'] : false,
-			'lazyLoad'        => 1,
+			'lazyLoad'        => self::resolve_visitor_lazy_load( $settings, $item_data ),
 			'itemClasses'     => isset( $item_data['item_classes'] ) ? $item_data['item_classes'] : array( 'modula-item' ),
 			'itemAttributes'  => isset( $item_data['item_attributes'] ) ? $item_data['item_attributes'] : array(),
 			'linkClasses'     => isset( $item_data['link_classes'] ) ? $item_data['link_classes'] : array(),

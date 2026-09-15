@@ -49,6 +49,34 @@ class Modula_Helper {
 	}
 
 	/**
+	 * Whether the current request may expose a gallery on the front end.
+	 *
+	 * Visitor-readable: published, or the current user can read_post for it.
+	 * Used by the visitor shortcode and social share meta. Not REST bootstrap
+	 * access and not Password Protect. See ADR 0028.
+	 *
+	 * @since 3.0.2
+	 *
+	 * @param int|WP_Post|null $gallery Gallery post or ID.
+	 * @return bool
+	 */
+	public static function is_visitor_readable_gallery( $gallery ) {
+		if ( ! $gallery instanceof WP_Post ) {
+			$gallery = get_post( $gallery );
+		}
+
+		if ( ! $gallery || 'modula-gallery' !== $gallery->post_type ) {
+			return false;
+		}
+
+		if ( 'publish' === $gallery->post_status ) {
+			return true;
+		}
+
+		return current_user_can( 'read_post', $gallery->ID );
+	}
+
+	/**
 	 * CSS id for a classic visitor gallery (no leading #).
 	 *
 	 * The shortcode stores `gallery_id` as `modula-{postId}`. Selectors must not

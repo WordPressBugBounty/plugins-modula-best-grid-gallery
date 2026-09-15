@@ -257,8 +257,10 @@ export function getGalleryItemViewModel(itemData, config, options = {}) {
 
 	/*
 	 * Pro Lightbox_Enhancer historically forced modula-simple-link when an
-	 * image had a custom URL, which skipped Fancybox. Strip it for fancybox
-	 * so the tile opens the lightbox; URL is handled inside the lightbox.
+	 * image had a custom URL, which skipped Fancybox. For fancybox mode we
+	 * strip it so the tile opens the lightbox; URL is handled inside the
+	 * lightbox. Hybrid lightbox-prefer-url keeps simple-link via
+	 * resolveGalleryItemLink when a custom URL is set.
 	 */
 	if (!linkResolution.isSimpleLink) {
 		for (let i = cleanedItemClasses.length - 1; i >= 0; i--) {

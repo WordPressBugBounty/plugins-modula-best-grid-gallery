@@ -151,6 +151,7 @@ return array(
 		'lightbox.lightbox::direct'                   => 'Opens the image file directly in the browser.',
 		'lightbox.lightbox::external-url'             => 'Uses the custom URL set on each image.',
 		'lightbox.lightbox::fancybox'                 => 'Opens the Modula lightbox viewer. If an image has a custom URL, the lightbox opens first; clicking the image inside the lightbox follows that URL.',
+		'lightbox.lightbox::lightbox-prefer-url'      => 'Opens the lightbox when an image has no custom URL. If an image has a custom URL, clicking the tile goes to that URL (like older Modula Pro).',
 		'performance.thumbnailOptimization::lossless' => 'Smaller files with no visible quality loss.',
 		'performance.thumbnailOptimization::lossy'    => 'Balanced compression — good for most galleries.',
 		'performance.thumbnailOptimization::glossy'   => 'Smallest files; best when speed matters more than fine detail.',

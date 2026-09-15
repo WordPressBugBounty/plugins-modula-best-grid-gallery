@@ -51,6 +51,18 @@ wp.Modula.upload =
 		$.each(modulaHelper.items, function (index, image) {
 			var imageModel = new wp.Modula.items['model'](image);
 		});
+		// Hidden #modula-editor-images starts empty in PHP; sync once so Update Gallery posts the grid.
+		if (
+			wp.Modula.Save &&
+			typeof wp.Modula.Save.syncHiddenImagesField === 'function'
+		) {
+			wp.Modula.Save.syncHiddenImagesField();
+		} else if (
+			wp.Modula.Save &&
+			typeof wp.Modula.Save.saveImages === 'function'
+		) {
+			wp.Modula.Save.saveImages();
+		}
 	}
 
 	// Initiate Modula Gallery Upload

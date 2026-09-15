@@ -1,10 +1,13 @@
 /**
- * Optional info-tip (the “i” control). Uses `editorTooltip` only — not `editorDescription`.
- * `editorDescription` is the help text under the field control. Tip UI stays available when a field sets editorTooltip.
+ * Optional info-tip (the “i” control).
+ * Uses editorTooltip and/or editorDescription without duplicating identical copy.
+ * Under-control help is intentionally empty in the compact settings panel.
  */
 
 import { Tooltip } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 import { Icon, info } from '@wordpress/icons';
+import { resolveFieldHelpTipText } from '../field/fieldControlHelp';
 
 /**
  * @param {Object} props
@@ -12,19 +15,17 @@ import { Icon, info } from '@wordpress/icons';
  * @param {string} [props.path] Reserved for debugging; not shown when tip text is missing.
  */
 export default function FieldHelpInfoTip({ field }) {
-	const tipText =
-		typeof field?.editorTooltip === 'string'
-			? field.editorTooltip.trim()
-			: '';
+	const tipText = resolveFieldHelpTipText(field);
 	if (!tipText) {
 		return null;
 	}
+	const tipName = __('More information', 'modula-best-grid-gallery');
 	return (
 		<Tooltip text={tipText} delay={0} hideOnClick={false}>
 			<button
 				type="button"
 				className="modula-settings-editor__field-path-tip"
-				aria-label={tipText}
+				aria-label={tipName}
 			>
 				<Icon icon={info} size={16} />
 			</button>

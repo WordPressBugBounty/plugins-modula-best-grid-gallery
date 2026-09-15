@@ -946,7 +946,7 @@
 					},
 					{
 						"path": "lightbox.lightbox",
-						"eq": "fancybox"
+						"in": ["fancybox", "lightbox-prefer-url"]
 					},
 					{
 						"path": "lightbox.showCaption",
@@ -968,7 +968,7 @@
 				"all": [
 					{
 						"path": "lightbox.lightbox",
-						"eq": "fancybox"
+						"in": ["fancybox", "lightbox-prefer-url"]
 					},
 					{
 						"path": "lightbox.toolbar",
@@ -983,7 +983,7 @@
 				"all": [
 					{
 						"path": "lightbox.lightbox",
-						"eq": "fancybox"
+						"in": ["fancybox", "lightbox-prefer-url"]
 					},
 					{
 						"path": "download.enableDownload",
@@ -998,7 +998,7 @@
 				"all": [
 					{
 						"path": "lightbox.lightbox",
-						"eq": "fancybox"
+						"in": ["fancybox", "lightbox-prefer-url"]
 					}
 				]
 			}
@@ -1009,7 +1009,7 @@
 				"all": [
 					{
 						"path": "lightbox.lightbox",
-						"eq": "fancybox"
+						"in": ["fancybox", "lightbox-prefer-url"]
 					},
 					{
 						"any": [
@@ -1032,7 +1032,7 @@
 				"all": [
 					{
 						"path": "lightbox.lightbox",
-						"eq": "fancybox"
+						"in": ["fancybox", "lightbox-prefer-url"]
 					},
 					{
 						"path": "lightbox.showThumbnails",
@@ -1044,15 +1044,23 @@
 		{
 			"pathPattern": "^lightbox\\.clickNotLightboxHint$",
 			"when": {
-				"path": "lightbox.lightbox",
-				"neq": "fancybox"
+				"all": [
+					{
+						"path": "lightbox.lightbox",
+						"neq": "fancybox"
+					},
+					{
+						"path": "lightbox.lightbox",
+						"neq": "lightbox-prefer-url"
+					}
+				]
 			}
 		},
 		{
 			"pathPattern": "^lightbox\\.(?!lightbox$|clickNotLightboxHint$).+",
 			"when": {
 				"path": "lightbox.lightbox",
-				"eq": "fancybox"
+				"in": ["fancybox", "lightbox-prefer-url"]
 			}
 		},
 		{

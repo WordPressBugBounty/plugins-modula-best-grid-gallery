@@ -171,6 +171,11 @@ class Modula_Shortcode {
 		$atts     = wp_parse_args( $raw_atts, $default_atts );
 
 		if ( ! $atts['id'] ) {
+			Modula_Debug_Log::log_failure(
+				Modula_Debug_Log::CHANNEL_SHORTCODE_BOOTSTRAP,
+				'classic shortcode missing gallery id',
+				array( 'error_code' => 'classic_missing_id' )
+			);
 			return esc_html__( 'Gallery not found.', 'modula-best-grid-gallery' );
 		}
 
@@ -182,7 +187,7 @@ class Modula_Shortcode {
 		// Check if is an old Modula post or new.
 		$gallery = get_post( $atts['id'] );
 
-		if ( null === $gallery || 'private' === $gallery->post_status && ! is_user_logged_in() ) {
+		if ( null === $gallery ) {
 			return;
 		}
 
@@ -202,10 +207,23 @@ class Modula_Shortcode {
 			);
 
 			if ( empty( $gallery_posts ) ) {
+				Modula_Debug_Log::log_failure(
+					Modula_Debug_Log::CHANNEL_SHORTCODE_BOOTSTRAP,
+					'classic shortcode gallery not found',
+					array(
+						'gallery_id' => absint( $atts['id'] ),
+						'error_code' => 'classic_not_found',
+					)
+				);
 				return esc_html__( 'Gallery not found.', 'modula-best-grid-gallery' );
 			}
 
 			$atts['id'] = $gallery_posts[0]->ID;
+			$gallery    = $gallery_posts[0];
+		}
+
+		if ( ! Modula_Helper::is_visitor_readable_gallery( $gallery ) ) {
+			return;
 		}
 
 		self::$classic_stack_rendered = true;
@@ -270,6 +288,14 @@ class Modula_Shortcode {
 		$images = apply_filters( 'modula_gallery_images', $images, $settings );
 
 		if ( empty( $settings ) || empty( $images ) ) {
+			Modula_Debug_Log::log_failure(
+				Modula_Debug_Log::CHANNEL_SHORTCODE_BOOTSTRAP,
+				'classic shortcode empty settings or images',
+				array(
+					'gallery_id' => absint( $atts['id'] ),
+					'error_code' => 'classic_empty',
+				)
+			);
 			return esc_html__( 'Gallery not found.', 'modula-best-grid-gallery' );
 		}
 
@@ -388,7 +414,7 @@ class Modula_Shortcode {
 
 		// Check for lightbox
 		$js_config['lightbox'] = $settings['lightbox'];
-		if ( apply_filters( 'modula_disable_lightboxes', true ) && ! in_array( $settings['lightbox'], array( 'no-link', 'direct', 'external-url', 'attachment-page' ) ) ) {
+		if ( apply_filters( 'modula_disable_lightboxes', true ) && ! in_array( $settings['lightbox'], array( 'no-link', 'direct', 'external-url', 'attachment-page', 'lightbox-prefer-url' ), true ) ) {
 			$js_config['lightbox'] = 'fancybox';
 		}
 

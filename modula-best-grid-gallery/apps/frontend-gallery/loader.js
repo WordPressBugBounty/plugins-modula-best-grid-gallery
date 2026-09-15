@@ -1,6 +1,9 @@
+import { getDeeplinkGalleryIdFromHash } from 'gallery-shared/runtime';
 import {
-	getDeeplinkGalleryIdFromHash,
-} from 'gallery-shared/runtime';
+	BOOTSTRAP_FORCE_GRACE_MS,
+	BOOTSTRAP_STALL_MS,
+	resolveBootstrapStallAction,
+} from './bootstrapStall';
 import './loader.scss';
 
 const GALLERY_SELECTOR =
@@ -23,6 +26,9 @@ const galleryObservers = new WeakMap();
 
 /** @type {WeakSet<HTMLElement>} */
 const destroyedGalleries = new WeakSet();
+
+/** @type {WeakMap<HTMLElement, { scheduledAt: number, forceMountAttempted: boolean, timerId: number }>} */
+const stallWatchdogs = new WeakMap();
 
 /**
  * @returns {string}
@@ -129,6 +135,105 @@ function markVisible(element) {
 }
 
 /**
+ * @param {HTMLElement} element
+ */
+function clearStallWatchdog(element) {
+	const existing = stallWatchdogs.get(element);
+	if (existing?.timerId) {
+		window.clearTimeout(existing.timerId);
+	}
+	stallWatchdogs.delete(element);
+}
+
+/**
+ * @param {HTMLElement} element
+ * @param {number} delayMs
+ */
+function scheduleStallCheck(element, delayMs) {
+	const state = stallWatchdogs.get(element);
+	if (!state) {
+		return;
+	}
+	if (state.timerId) {
+		window.clearTimeout(state.timerId);
+	}
+	state.timerId = window.setTimeout(() => {
+		void onStallTick(element);
+	}, delayMs);
+}
+
+/**
+ * @param {HTMLElement} element
+ */
+async function onStallTick(element) {
+	const state = stallWatchdogs.get(element);
+	if (!state || destroyedGalleries.has(element)) {
+		clearStallWatchdog(element);
+		return;
+	}
+
+	const action = resolveBootstrapStallAction({
+		now: Date.now(),
+		scheduledAt: state.scheduledAt,
+		initialized: element.classList.contains('modula-gallery-initialized'),
+		pending: element.classList.contains(
+			'modula-gallery--bootstrap-pending'
+		),
+		forceMountAttempted: state.forceMountAttempted,
+	});
+
+	if (action === 'none') {
+		clearStallWatchdog(element);
+		return;
+	}
+
+	if (action === 'wait') {
+		const elapsed = Date.now() - state.scheduledAt;
+		const nextIn = state.forceMountAttempted
+			? Math.max(
+					250,
+					BOOTSTRAP_STALL_MS + BOOTSTRAP_FORCE_GRACE_MS - elapsed
+				)
+			: Math.max(250, BOOTSTRAP_STALL_MS - elapsed);
+		scheduleStallCheck(element, nextIn);
+		return;
+	}
+
+	if (action === 'force-mount') {
+		state.forceMountAttempted = true;
+		console.warn(
+			'Modula: gallery still Loading after stall — forcing bootstrap mount'
+		);
+		await mountWhenVisible(element, { fromStall: true });
+		scheduleStallCheck(element, BOOTSTRAP_FORCE_GRACE_MS);
+		return;
+	}
+
+	if (action === 'show-error') {
+		clearStallWatchdog(element);
+		console.error(
+			'Modula: gallery bootstrap stalled with no successful mount'
+		);
+		showBootstrapError(element, loadingFailedMessage(), {
+			withRetry: true,
+		});
+	}
+}
+
+/**
+ * @param {HTMLElement} element
+ */
+function armStallWatchdog(element) {
+	clearStallWatchdog(element);
+	stallWatchdogs.set(element, {
+		scheduledAt: Date.now(),
+		forceMountAttempted: false,
+		timerId: 0,
+	});
+	scheduleStallCheck(element, BOOTSTRAP_STALL_MS);
+}
+
+/**
  * @returns {Promise<import('./bootstrap').default>}
  */
 function loadBootstrap() {
@@ -156,8 +261,9 @@ function loadBootstrap() {
 
 /**
  * @param {HTMLElement} element
+ * @param {{ fromStall?: boolean }} [options]
  */
-async function mountWhenVisible(element) {
+async function mountWhenVisible(element, options = {}) {
 	if (destroyedGalleries.has(element)) {
 		return;
 	}
@@ -165,8 +271,19 @@ async function mountWhenVisible(element) {
 	try {
 		const api = await loadBootstrap();
 		await api.initGalleries();
+		if (
+			!element.classList.contains('modula-gallery-initialized') &&
+			!element._modulaRoot
+		) {
+			throw new Error('Gallery mount did not commit');
+		}
+		clearStallWatchdog(element);
 	} catch (err) {
 		console.error('Modula: gallery bootstrap failed', err);
+		if (options.fromStall) {
+			return;
+		}
+		clearStallWatchdog(element);
 		showBootstrapError(element, loadingFailedMessage(), {
 			withRetry: true,
 		});
@@ -263,6 +380,7 @@ function scheduleGallery(element) {
 		return;
 	}
 	showPendingState(element);
+	armStallWatchdog(element);
 	if (shouldEagerMountForDeeplink(element)) {
 		void mountWhenVisible(element);
 		return;
@@ -278,6 +396,7 @@ function onGalleryDestroyed(event) {
 		return;
 	}
 	destroyedGalleries.add(el);
+	clearStallWatchdog(el);
 	const observer = galleryObservers.get(el);
 	if (observer) {
 		observer.disconnect();

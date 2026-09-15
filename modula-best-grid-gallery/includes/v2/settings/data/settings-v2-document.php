@@ -475,6 +475,7 @@ return array(
 					1 => 'direct',
 					2 => 'external-url',
 					3 => 'fancybox',
+					4 => 'lightbox-prefer-url',
 				),
 				'default'                  => 'fancybox',
 				'editorLabel'              => 'What happens when an image is clicked',
@@ -482,10 +483,11 @@ return array(
 				'description'              => 'Further lightbox options apply when click behavior opens the lightbox.',
 				'enumOptionLabels'         =>
 				array(
-					'no-link'      => 'No link',
-					'direct'       => 'Direct link to image file',
-					'external-url' => 'External URL',
-					'fancybox'     => 'Open in lightbox',
+					'no-link'              => 'No link',
+					'direct'               => 'Direct link to image file',
+					'external-url'         => 'Go to URL',
+					'fancybox'             => 'Open in lightbox',
+					'lightbox-prefer-url'  => 'Lightbox, or link when set',
 				),
 				'editorLightboxLiteUpsell' =>
 				array(
@@ -500,7 +502,7 @@ return array(
 				'type'                    => 'string',
 				'default'                 => '',
 				'editorLabel'             => 'Click behavior hint',
-				'editorDescription'       => 'Opening and lightbox controls only apply when click opens the lightbox. For Direct link or External URL, set each photo’s link with Edit on that image.',
+				'editorDescription'       => 'Opening and lightbox controls only apply when click opens the lightbox (including Lightbox, or link when set). For Direct link or Go to URL, set each photo’s link with Edit on that image.',
 				'editorControl'           =>
 				array(
 					'kind' => 'infoCallout',

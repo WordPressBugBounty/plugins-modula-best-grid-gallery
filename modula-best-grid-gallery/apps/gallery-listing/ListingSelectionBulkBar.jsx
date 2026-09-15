@@ -10,8 +10,8 @@ import { getListingBulkBarActions } from './listingBulkBar';
 /**
  * Listing bulk bar in the listing toolbar for the current listing selection.
  *
- * Lifecycle only in this ticket; Apply preset is catalogued when entitled and
- * rendered only when onApplyPreset is provided (Pro Defaults, ticket 04).
+ * Lifecycle + Convert to new editor (galleries). Apply preset is catalogued when
+ * entitled and rendered only when onApplyPreset is provided (Pro Defaults).
  *
  * @param {Object}                                     props
  * @param {string[]}                                   props.selection
@@ -21,6 +21,7 @@ import { getListingBulkBarActions } from './listingBulkBar';
  * @param {(items: Object[]) => Promise<unknown>}      [props.restoreListingRows]
  * @param {(items: Object[]) => Promise<unknown>}      [props.deleteListingRows]
  * @param {(items: Object[]) => void|Promise<unknown>} [props.onApplyPreset]
+ * @param {(items: Object[]) => void|Promise<unknown>} [props.onConvertToNewEditor]
  * @param {() => void}                                 [props.onSelectionCleared]
  */
 export function ListingSelectionBulkBar({
@@ -31,6 +32,7 @@ export function ListingSelectionBulkBar({
 	restoreListingRows,
 	deleteListingRows,
 	onApplyPreset,
+	onConvertToNewEditor,
 	onSelectionCleared,
 }) {
 	const [pendingAction, setPendingAction] = useState(
@@ -53,9 +55,18 @@ export function ListingSelectionBulkBar({
 			if (action.id === 'apply-preset') {
 				return typeof onApplyPreset === 'function';
 			}
+			if (action.id === 'convert-new-editor') {
+				return typeof onConvertToNewEditor === 'function';
+			}
 			return true;
 		});
-	}, [selection, pageRows, canUseApplyPreset, onApplyPreset]);
+	}, [
+		selection,
+		pageRows,
+		canUseApplyPreset,
+		onApplyPreset,
+		onConvertToNewEditor,
+	]);
 
 	if (actions.length === 0) {
 		return null;
@@ -119,6 +130,13 @@ export function ListingSelectionBulkBar({
 				typeof deleteListingRows === 'function'
 			) {
 				await deleteListingRows(pendingAction.items);
+			} else if (
+				pendingAction.id === 'convert-new-editor' &&
+				typeof onConvertToNewEditor === 'function'
+			) {
+				await onConvertToNewEditor(pendingAction.items);
+				setPendingAction(null);
+				return;
 			}
 			setPendingAction(null);
 			if (typeof onSelectionCleared === 'function') {

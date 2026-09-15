@@ -121,17 +121,10 @@ class Modula_Shortcode_Modern {
 	private function get_gallery_post( $gallery_id ) {
 		$gallery = get_post( $gallery_id );
 
-		// Check if post exists and is accessible
 		if ( ! $gallery ) {
 			return null;
 		}
 
-		// Handle private posts
-		if ( 'private' === $gallery->post_status && ! is_user_logged_in() ) {
-			return null;
-		}
-
-		// Handle legacy gallery IDs
 		if ( 'modula-gallery' !== get_post_type( $gallery ) ) {
 			$gallery_posts = get_posts(
 				array(
@@ -153,7 +146,11 @@ class Modula_Shortcode_Modern {
 				return null;
 			}
 
-			return get_post( $gallery_posts[0] );
+			$gallery = get_post( $gallery_posts[0] );
+		}
+
+		if ( ! Modula_Helper::is_visitor_readable_gallery( $gallery ) ) {
+			return null;
 		}
 
 		return $gallery;
@@ -936,9 +933,11 @@ class Modula_Shortcode_Modern {
 
 			$sizes = modula_resolve_image_sizes_attr(
 				array(
-					'settings'      => array(
-						'type' => isset( $data->gallery_type ) ? $data->gallery_type : '',
-					),
+					'settings'      => ( isset( $data->settings ) && is_array( $data->settings ) )
+						? $data->settings
+						: array(
+							'type' => isset( $data->gallery_type ) ? $data->gallery_type : '',
+						),
 					'size_array'    => $size_array,
 					'image_src'     => $image_src,
 					'image_meta'    => $image_meta,

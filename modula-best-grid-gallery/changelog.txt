@@ -1,8 +1,39 @@
+= 3.0.2 - 11.09.2026 =
+Added: Convert to new editor on the gallery listing bulk bar for selected classic galleries (same classic settings backup as row Convert).
+Added: Restore classic editor on the gallery listing (⋮) for Beta galleries that have a Convert backup — restores flat classic settings and clears the Beta flag (shortcode unchanged).
+Fixed: New gallery editor choice no longer stays stuck when a View Transition aborts; each choice and dismiss finishes (Beta gallery, classic gallery editor, or back to the listing).
+Fixed: Modern/Beta visitor galleries no longer stay forever on “Loading gallery…” — renderer assets enqueue reliably (with cache-busting), stalled mounts recover or fail visibly with retry, and missing assets show an alert instead of an invisible shell.
+Added: Modula Debug Log in Settings → Diagnostics — opt-in JSONL failure log (enable, status, Download, Clear) for support, without requiring WP_DEBUG.
+Added: Debug Log instrumentation for settings REST, gallery persist, and shortcode bootstrap failures (plus album.persist channel for Compatible Pro).
+Added: WP-CLI gallery helpers to list, convert, and restore galleries from the command line.
+Added: Compact Beta gallery editor chrome — fixed 72px icon-only sidebar rail with accessible names/tooltips and short rail labels.
+Added: Gallery document status (publish / draft / private) in the takeover topbar, ahead of save status.
+Added: Image click behavior “Lightbox, or link when set” — tile opens the lightbox when an image has no custom URL, or goes to that URL when one is set (pre-3.0 Pro hybrid; no automatic migration).
+Changed: Gallery settings panel narrowed to 300px; supplementary field help moved into accessible info tips for a denser, cleaner canvas.
+Changed: Hub drill-row secondary value summaries hidden so nested settings navigation stays scannable.
+Changed: Takeover topbar layout cleaned up (shared select sizing, style-guide spacing/typography).
+Changed: Renamed Image click behavior “External URL” to “Go to URL” (same `external-url` mode).
+Fixed: Security issue — social share meta and visitor shortcode no longer expose non-visitor-readable galleries (private/draft) to unauthorized requests.
+Fixed: Classic Update Gallery no longer wipes stored images when the modula-images payload is blank, invalid, or an empty array.
+Fixed: Classic gallery items now sync into the hidden field on Update Gallery (including after bootstrap and before submit).
+Fixed: Classic Save no longer empties the gallery when image captions contain quote characters (e.g. 30" × 40") — JSON is decoded after a single unslash, without a second stripslashes.
+Fixed: Clearing Alt / Title / Caption completely in the Beta item panel now persists after autosave (Media Library non-empty text is still not wiped by empty sync).
+Fixed: Lazy load gallery setting honored on modern visitor bootstrap (turning Lazy load off actually reaches the frontend).
+Fixed: Gallery `sizes` attribute matches column breakpoints so eager thumbnails no longer default to undersized srcset candidates.
+Fixed: Admin gallery listing and Beta editor status bar no longer show “0 images” when the gallery catalog has items (classic and/or v2).
+Fixed: Gallery editor Captions & Titles Size number input no longer snaps to the minimum on each keystroke, so multi-digit sizes (e.g. 16) can be typed; the value clamps after a short pause or when leaving the field.
+Fixed: Gallery listing checkboxes keep accumulating selection across galleries and albums (mixed-type bulk); a second row check no longer replaces the first.
+Fixed: New album no longer opens a blank Add New Album screen when Albums editor takeover is off; the classic album editor is shown.
+Compat: Beta gallery pagination dual-classes legacy hooks (.modula-navigation, .page-numbers, .current) alongside .modula-pagination* so shallow custom CSS keeps working; deep selectors (a.page-numbers, list wrappers, sibling #gallery + .modula-navigation) still need updating to the Beta markup.
+Compat: Item chrome dual-classes Justified Grid Gallery hooks (.jtg-title, .jtg-description, .jtg-social) alongside .modula-title / .modula-description / .modula-social so theme and Defaults CSS keep matching; nested .jtg-body wrappers and #jtg-* root ids are unchanged (see ADR 0029).
+Info: Read more about Modula 3.0 Beta: https://wp-modula.com/modula-3-0-beta/
+
 = 3.0.1 - 10.09.2026 =
 Fixed: Standalone settings save can deep-merge options before store (album/gallery toggles).
 
 = 3.0.0 - 09.09.2026 =
 Added: New beta gallery editor.
+Info: Read more about Modula 3.0 Beta: https://wp-modula.com/modula-3-0-beta/
 
 = 2.14.39 - 08.09.2026 =
 Fixed: Gutenberg gallery block could display as raw, unrendered shortcode text on the frontend with some themes.

@@ -35,6 +35,11 @@ import {
 } from '../utils/sliderCaptionPosition';
 import GalleryItemSocialLinks from './social/GalleryItemSocialLinks';
 import GalleryItemExpandableSocials from './social/GalleryItemExpandableSocials';
+import {
+	ITEM_DESCRIPTION_CLASS_NAME,
+	ITEM_SOCIAL_CLASS_NAME,
+	ITEM_TITLE_CLASS_NAME,
+} from '../utils/itemChromeLegacyCssAliases';
 
 function parseInlineStyle(styleValue) {
 	if (!styleValue || typeof styleValue !== 'string') {
@@ -160,17 +165,19 @@ export function GalleryItemTextContent({
 }) {
 	return (
 		<>
-			{hasTitle ? <div className="modula-title">{item.title}</div> : null}
+			{hasTitle ? (
+				<div className={ITEM_TITLE_CLASS_NAME}>{item.title}</div>
+			) : null}
 			{hasDescription ? (
 				<div
-					className="jtg-description"
+					className={ITEM_DESCRIPTION_CLASS_NAME}
 					dangerouslySetInnerHTML={{
 						__html: String(item.description),
 					}}
 				/>
 			) : null}
 			{hasSocials ? (
-				<div className="modula-social">
+				<div className={ITEM_SOCIAL_CLASS_NAME}>
 					<GalleryItemSocialLinks
 						itemId={item.id}
 						socials={item.socials}

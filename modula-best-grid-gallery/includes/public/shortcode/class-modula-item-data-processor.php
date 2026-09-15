@@ -141,6 +141,9 @@ class Modula_Item_Data_Processor {
 			'enableEmail'            => boolval( $settings['enableEmail'] ),
 			'socialDesktopCollapsed' => boolval( $settings['socialDesktopCollapsed'] ),
 			'lazyLoad'               => boolval( $settings['lazy_load'] ),
+			/* Full gallery settings for HTML sizes estimate (add_responsive_attributes). */
+			'settings'               => $settings,
+			'gallery_type'           => isset( $settings['type'] ) ? $settings['type'] : 'creative-gallery',
 			'item_classes'           => array( 'modula-item' ),
 			'item_attributes'        => array(),
 			'link_classes'           => array( 'tile-inner', 'modula-item-link' ),
@@ -464,6 +467,17 @@ class Modula_Item_Data_Processor {
 				$item_data['link_attributes']['href'] = function_exists( 'modula_resolve_simple_link_href' )
 					? modula_resolve_simple_link_href( $image, $fallback )
 					: $fallback;
+			}
+		} elseif ( 'lightbox-prefer-url' === $lightbox && isset( $image['link'] ) && '' !== $image['link'] ) {
+			$item_data['link_classes'][]                = 'modula-simple-link';
+			$item_data['item_classes'][]                = 'modula-simple-link';
+			$item_data['link_attributes']['aria-label'] = esc_html__( 'Open external link', 'modula-best-grid-gallery' );
+			$item_data['link_attributes']['href']       = $image['link'];
+			if ( isset( $image['target'] ) && '1' === $image['target'] ) {
+				$item_data['link_attributes']['target'] = '_blank';
+			}
+			if ( isset( $item_data['link_attributes']['role'] ) ) {
+				unset( $item_data['link_attributes']['role'] );
 			}
 		} elseif ( 'direct' === $lightbox ) {
 			$item_data['link_attributes']['href']       = $item_data['image_full'];

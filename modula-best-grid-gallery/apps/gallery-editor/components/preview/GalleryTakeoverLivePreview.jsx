@@ -258,7 +258,9 @@ function GalleryTakeoverLivePreviewMounted({
 		groupedSettings?.lightbox?.lightbox
 	);
 	const useFancyboxLightboxPreview =
-		isLightboxPreview && lightboxClickMode === 'fancybox';
+		isLightboxPreview &&
+		(lightboxClickMode === 'fancybox' ||
+			lightboxClickMode === 'lightbox-prefer-url');
 	const isVideoGallery = galleryType === 'video';
 	const hasGalleryImages = hasGalleryPreviewImageRows(bootstrap?.items);
 	const hasGalleryVideos = hasGalleryPreviewVideoRows(bootstrap?.items);

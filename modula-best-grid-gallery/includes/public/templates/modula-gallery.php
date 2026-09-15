@@ -53,6 +53,8 @@
 				'enableEmail'            => Modula_Helper::is_truthy_flag( $data->settings['enableEmail'] ),
 				'socialDesktopCollapsed' => $social_desktop_collapsed,
 				'lazyLoad'               => modula_run_lazy_load( $data->settings ),
+				/* Full gallery settings for sizes/srcset estimate (modula_sources_and_sizes). */
+				'settings'               => $data->settings,
 				'gallery_type'           => $data->settings['type'],
 				// Video defaults (some extensions expect these properties to exist).
 				'video_template'         => false,

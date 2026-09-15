@@ -1,6 +1,7 @@
 import { createPortal, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon, close } from '@wordpress/icons';
+import { skipActiveViewTransition } from './completeEditorChoice';
 
 const FEATURES = [
 	{
@@ -56,9 +57,11 @@ export function EditorChoiceModal({
 		document.body.style.overflow = 'hidden';
 
 		const onKeyDown = (event) => {
-			if ('Escape' === event.key) {
-				onClose();
+			if ('Escape' !== event.key) {
+				return;
 			}
+			skipActiveViewTransition(document);
+			onClose();
 		};
 
 		document.addEventListener('keydown', onKeyDown);
@@ -79,6 +82,16 @@ export function EditorChoiceModal({
 		return null;
 	}
 
+	const handleClose = () => {
+		skipActiveViewTransition(document);
+		onClose();
+	};
+
+	const handleChoose = (choice) => {
+		skipActiveViewTransition(document);
+		onChoose(choice);
+	};
+
 	const showHeroImage = Boolean(heroUrl) && !heroFailed;
 	const disclaimer =
 		'open' === mode
@@ -96,7 +109,7 @@ export function EditorChoiceModal({
 			<button
 				type="button"
 				className="modula-editor-choice-modal__backdrop"
-				onClick={onClose}
+				onClick={handleClose}
 				aria-label={__('Close dialog', 'modula-best-grid-gallery')}
 			/>
 			<div
@@ -137,7 +150,7 @@ export function EditorChoiceModal({
 					<button
 						type="button"
 						className="modula-editor-choice-modal__close"
-						onClick={onClose}
+						onClick={handleClose}
 						aria-label={__('Close', 'modula-best-grid-gallery')}
 					>
 						<Icon icon={close} size={20} />
@@ -189,14 +202,14 @@ export function EditorChoiceModal({
 						<button
 							type="button"
 							className="modula-editor-choice-modal__button modula-editor-choice-modal__button--secondary"
-							onClick={() => onChoose('classic')}
+							onClick={() => handleChoose('classic')}
 						>
 							{__('Not now', 'modula-best-grid-gallery')}
 						</button>
 						<button
 							type="button"
 							className="modula-editor-choice-modal__button modula-editor-choice-modal__button--primary"
-							onClick={() => onChoose('beta')}
+							onClick={() => handleChoose('beta')}
 						>
 							{__(
 								'Try the new editor',

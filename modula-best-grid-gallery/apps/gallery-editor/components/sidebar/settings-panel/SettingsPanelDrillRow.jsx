@@ -14,6 +14,7 @@ import {
 	resetSettingsFieldValue,
 } from '../../../logic/settingsFieldDefault';
 import DrillValueSummary from './DrillValueSummary';
+import { shouldShowDrillRowValueSummary } from './drillRowValueSummaryVisibility';
 
 /**
  * @param {string[]} groupedPaths
@@ -90,10 +91,12 @@ export default function SettingsPanelDrillRow({
 						className="modula-settings-panel__drill-row"
 						label={label}
 						value={
-							<DrillValueSummary
-								section={section}
-								values={values}
-							/>
+							shouldShowDrillRowValueSummary() ? (
+								<DrillValueSummary
+									section={section}
+									values={values}
+								/>
+							) : undefined
 						}
 						end={
 							<Icon

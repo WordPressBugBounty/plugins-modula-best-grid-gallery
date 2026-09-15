@@ -112,7 +112,7 @@ function GalleryItem({
 
 	/*
 	 * Settings-editor preview never renders navigable tile links (including
-	 * Direct / External URL / attachment-page) so click opens Image edit.
+	 * Direct / Go to URL / attachment-page) so click opens Image edit.
 	 * Visitor galleries still get those overlays via renderLinks: true.
 	 */
 	const linkRender = getTileLinkRenderOptions(isPreviewContext);

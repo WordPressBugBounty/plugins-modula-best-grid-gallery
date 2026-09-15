@@ -11,6 +11,7 @@ import {
 } from './modulaDeeplinkFromHash';
 import { openModulaGalleryLightboxAtRoot } from './lightboxOpenFacade';
 import { resolveModulaLightboxSlides } from './modulaGalleryLightbox';
+import { galleryUsesFancyboxLightbox } from '../utils/resolveGalleryItemLink';
 
 /**
  * @param {HTMLElement|null} hostEl React host (display:contents) or gallery root.
@@ -90,7 +91,7 @@ async function openGalleryFromDeeplinkHash(
 	if (!matched) {
 		return false;
 	}
-	if (config?.lightbox !== 'fancybox') {
+	if (!galleryUsesFancyboxLightbox(config?.lightbox)) {
 		return false;
 	}
 
@@ -137,7 +138,7 @@ export function useModulaGalleryDeeplink(hostRef, config, options = {}) {
 	configRef.current = config;
 
 	useEffect(() => {
-		if (!enabled || configRef.current?.lightbox !== 'fancybox') {
+		if (!enabled || !galleryUsesFancyboxLightbox(configRef.current?.lightbox)) {
 			return undefined;
 		}
 

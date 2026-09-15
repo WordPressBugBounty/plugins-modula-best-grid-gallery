@@ -1,6 +1,6 @@
 import formRules from '../data/form-rules.json';
 import { getModulaSettingsEditorConfig } from '../config/modulaSettingsEditorConfig';
-import { getByPath } from './getByPath';
+import { getEffectiveGroupedPathValue } from './effectiveSettingsValue';
 import { resolveProGateLock } from './proGateLock';
 import { isWpTruthy } from './wpTruthy';
 
@@ -15,7 +15,7 @@ import { isWpTruthy } from './wpTruthy';
  *   any?: Array<{ path?: string, eq?: string|boolean, in?: string[], truthy?: boolean, all?: unknown[], any?: unknown[] }>,
  * }} when Rule condition (`all` = AND, `any` = OR of sub-conditions).
  * @param {Record<string, Record<string, unknown>>}                                                                                 grouped Current grouped settings.
- * @return {boolean} Whether the rule’s condition matches the current grouped state.
+ * @return {boolean} Whether the rule’s condition matches the current grouped state (missing/empty paths use schema defaults).
  */
 export function evaluateWhen(when, grouped) {
 	if (!when) {
@@ -30,7 +30,7 @@ export function evaluateWhen(when, grouped) {
 	if (!when.path) {
 		return true;
 	}
-	const value = getByPath(grouped, when.path);
+	const value = getEffectiveGroupedPathValue(grouped, when.path);
 	const normStr = (v) =>
 		v === null || v === undefined ? '' : String(v).trim();
 	if (when.neq !== undefined) {

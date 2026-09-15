@@ -1,5 +1,5 @@
 /**
- * Listing selection policy — type lock, select-all chooser, eligibility.
+ * Listing selection policy — row accumulate (including mixed), select-all chooser, eligibility.
  *
  * Pure helpers for checkbox multi-select on the current listing page.
  * Product chrome (checkboxes + listing bulk bar) lives in the gallery listing app;
@@ -30,6 +30,25 @@ export function isListingSelectionCheckboxTarget(target) {
 	return Boolean(
 		target.closest('.dataviews-view-table__checkbox-column') ||
 			target.closest('.dataviews-selection-checkbox')
+	);
+}
+
+/**
+ * Whether a DOM event target is the listing header select-all checkbox.
+ *
+ * Row checkbox clicks that complete the page must not be treated as header
+ * select-all (non-empty header still clears).
+ *
+ * @param {EventTarget|null|undefined} target
+ * @return {boolean}
+ */
+export function isListingSelectionHeaderTarget(target) {
+	if (!target || typeof target.closest !== 'function') {
+		return false;
+	}
+	return Boolean(
+		target.closest('th.dataviews-view-table__checkbox-column') ||
+			target.closest('.dataviews-view-table-selection-checkbox')
 	);
 }
 
@@ -149,20 +168,11 @@ export function selectListingRowsByChoice(choice, pageRows) {
 }
 
 /**
- * @return {string} Short notice for mixed gallery/album selection via row checks.
- */
-export function getListingSelectionIncompatibleNotice() {
-	return __(
-		'Select galleries or albums, not both.',
-		'modula-best-grid-gallery'
-	);
-}
-
-/**
  * Apply a proposed selection change under listing selection row-check rules.
  *
- * Homogeneous lock: first selected type wins; incompatible adds are refused.
- * Mixed selections (from header All) may shrink without re-locking.
+ * Row checks accumulate, including mixed gallery+album. DataViews `nextSelection`
+ * is the full proposed set; a checkbox add reported as a single-id replace is
+ * unioned so multi-select is not collapsed.
  *
  * @param {{
  *   currentSelection?: string[],
@@ -199,56 +209,48 @@ export function applyListingSelectionChange({
 		return { selection: [], notice: null };
 	}
 
-	const mode = getListingSelectionMode(current, pageRows);
-	if (mode === 'mixed') {
-		return { selection: candidates, notice: null };
-	}
-
-	const lockedType = mode;
-	const preferredType =
-		lockedType || rowsById.get(candidates[0])?.type || null;
-
 	/** @type {string[]} */
-	const selection = [];
-	let sawIncompatible = false;
-	for (const id of candidates) {
+	const currentSelectable = [];
+	for (const id of current) {
 		const row = rowsById.get(id);
-		if (preferredType && row?.type !== preferredType) {
-			sawIncompatible = true;
+		if (!isListingRowSelectable(row) || currentSelectable.includes(id)) {
 			continue;
 		}
-		selection.push(id);
+		currentSelectable.push(id);
 	}
 
-	// Incompatible add alone (no new same-type ids): refuse and keep current.
-	if (
-		sawIncompatible &&
-		lockedType &&
-		selection.length === current.length &&
-		selection.every((id) => current.includes(id))
-	) {
-		return {
-			selection: current,
-			notice: getListingSelectionIncompatibleNotice(),
-		};
+	const nextSet = new Set(candidates);
+	const currentSet = new Set(currentSelectable);
+	const added = candidates.filter((id) => !currentSet.has(id));
+	const keptFromCurrent = currentSelectable.filter((id) => nextSet.has(id));
+
+	// Checkbox add reported as replace (old ids dropped, new ids added).
+	if (added.length > 0 && keptFromCurrent.length < currentSelectable.length) {
+		/** @type {string[]} */
+		const selection = [...currentSelectable];
+		for (const id of added) {
+			if (!selection.includes(id)) {
+				selection.push(id);
+			}
+		}
+		return { selection, notice: null };
 	}
 
-	return {
-		selection,
-		notice: null,
-	};
+	return { selection: candidates, notice: null };
 }
 
 /**
  * Resolve a DataViews selection change, including header select-all.
  *
- * Non-empty + select-all proposal → clear. Empty + mixed select-all → chooser.
- * Empty + homogeneous select-all → select that type. Otherwise row-check policy.
+ * Non-empty + header select-all → clear. Empty + mixed select-all → chooser.
+ * Empty + homogeneous select-all → select that type. Row checks (including a
+ * last-row check that covers the page) use the accumulate policy.
  *
  * @param {{
  *   currentSelection?: string[],
  *   nextSelection?: string[],
  *   pageRows?: Object[],
+ *   fromHeader?: boolean,
  * }} options
  * @return {{ selection: string[], notice: string|null, chooserOptions: ListingSelectAllChoice[]|null }} Resolved selection change.
  */
@@ -256,6 +258,7 @@ export function resolveListingSelectionChange({
 	currentSelection = [],
 	nextSelection = [],
 	pageRows = [],
+	fromHeader,
 } = {}) {
 	const current = Array.isArray(currentSelection) ? currentSelection : [];
 	const next = Array.isArray(nextSelection) ? nextSelection : [];
@@ -264,7 +267,8 @@ export function resolveListingSelectionChange({
 		return { selection: [], notice: null, chooserOptions: null };
 	}
 
-	const selectAllProposal = isListingSelectAllProposal(next, pageRows);
+	const coversAll = isListingSelectAllProposal(next, pageRows);
+	const selectAllProposal = fromHeader === false ? false : coversAll;
 
 	if (current.length > 0 && selectAllProposal) {
 		return { selection: [], notice: null, chooserOptions: null };

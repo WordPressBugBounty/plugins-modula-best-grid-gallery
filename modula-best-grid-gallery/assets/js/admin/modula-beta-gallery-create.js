@@ -22,6 +22,74 @@
 		return;
 	}
 
+	function isAbortedViewTransitionError( error ) {
+		if ( ! error ) {
+			return false;
+		}
+		var name = error.name || '';
+		var message = error.message || '';
+		if ( 'AbortError' === name && /transition/i.test( message ) ) {
+			return true;
+		}
+		return (
+			'InvalidStateError' === name &&
+			/transition was aborted/i.test( message )
+		);
+	}
+
+	function skipActiveViewTransition() {
+		var active = document.activeViewTransition;
+		if ( ! active ) {
+			return;
+		}
+		try {
+			if ( typeof active.skipTransition === 'function' ) {
+				active.skipTransition();
+			}
+		} catch ( error ) {
+			if ( ! isAbortedViewTransitionError( error ) ) {
+				throw error;
+			}
+		}
+		var swallow = function () {};
+		if ( active.ready && typeof active.ready.catch === 'function' ) {
+			active.ready.catch( swallow );
+		}
+		if ( active.finished && typeof active.finished.catch === 'function' ) {
+			active.finished.catch( swallow );
+		}
+		if (
+			active.updateCallbackDone &&
+			typeof active.updateCallbackDone.catch === 'function'
+		) {
+			active.updateCallbackDone.catch( swallow );
+		}
+	}
+
+	function navigateAdminHref( href ) {
+		if ( ! href ) {
+			return;
+		}
+		skipActiveViewTransition();
+		try {
+			window.location.assign( href );
+		} catch ( error ) {
+			if ( ! isAbortedViewTransitionError( error ) ) {
+				throw error;
+			}
+			try {
+				window.location.replace( href );
+			} catch ( retryError ) {
+				if ( ! isAbortedViewTransitionError( retryError ) ) {
+					throw retryError;
+				}
+				window.setTimeout( function () {
+					window.location.href = href;
+				}, 0 );
+			}
+		}
+	}
+
 	function isCreateUrl( href ) {
 		if ( ! href ) {
 			return false;
@@ -46,6 +114,7 @@
 	}
 
 	function openModal( href ) {
+		skipActiveViewTransition();
 		pendingHref = href || '';
 		modal.hidden = false;
 		modal.classList.add( 'is-open' );
@@ -56,27 +125,38 @@
 	}
 
 	function closeModal() {
+		skipActiveViewTransition();
 		modal.hidden = true;
 		modal.classList.remove( 'is-open' );
 		pendingHref = '';
 	}
 
 	function goChoice( choice ) {
+		skipActiveViewTransition();
+		var href = pendingHref || data.postNewBase;
+		closeModal();
 		if ( data.awaitingChoice && data.choiceUrl ) {
 			var dest = data.choiceUrl;
 			dest +=
 				( dest.indexOf( '?' ) === -1 ? '?' : '&' ) +
 				'choice=' +
 				encodeURIComponent( choice );
-			window.location.href = dest;
+			navigateAdminHref( dest );
 			return;
 		}
-
-		var href = pendingHref || data.postNewBase;
 		if ( ! href ) {
 			return;
 		}
-		window.location.href = withChoice( href, choice );
+		navigateAdminHref( withChoice( href, choice ) );
+	}
+
+	function dismissModal() {
+		skipActiveViewTransition();
+		var listUrl = data.awaitingChoice ? data.listUrl : '';
+		closeModal();
+		if ( listUrl ) {
+			navigateAdminHref( listUrl );
+		}
 	}
 
 	document.addEventListener( 'click', function ( event ) {
@@ -98,11 +178,7 @@
 			? event.target.closest( '[data-modula-beta-dismiss]' )
 			: null;
 		if ( dismiss ) {
-			if ( data.awaitingChoice && data.listUrl ) {
-				window.location.href = data.listUrl;
-				return;
-			}
-			closeModal();
+			dismissModal();
 			return;
 		}
 		var choiceBtn = event.target.closest
@@ -120,11 +196,7 @@
 		if ( modal.hidden ) {
 			return;
 		}
-		if ( data.awaitingChoice && data.listUrl ) {
-			window.location.href = data.listUrl;
-			return;
-		}
-		closeModal();
+		dismissModal();
 	} );
 
 	if ( data.awaitingChoice ) {

@@ -97,7 +97,7 @@ export const MODULA_IMG_FOCAL_POINT_CLASS = 'modula-item-img--focal-point';
  * Lazy images should prefer `auto` instead.
  *
  * @param {Object|null|undefined} config Flat gallery config.
- * @return {string|undefined}
+ * @return {string|undefined} Column-based sizes string when estimable.
  */
 export function estimateGalleryImageSizes(config) {
 	if (!config || typeof config !== 'object') {
@@ -120,8 +120,32 @@ export function estimateGalleryImageSizes(config) {
 		return Math.min(12, n);
 	};
 
+	const conservativeAutomatic =
+		'(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 33vw';
+	const gridTypeLayouts = [
+		'grid',
+		'uniform-grid',
+		'fit-grid',
+		'parallax-masonry',
+	];
+	const usesGridType = gridTypeLayouts.includes(type);
+
+	let colsDesktop;
+	if (usesGridType) {
+		const gridType = config.gridType ?? config.grid_type;
+		const parsed = parseInt(gridType, 10);
+		if (Number.isFinite(parsed) && String(gridType) !== 'automatic') {
+			colsDesktop = clampCols(parsed, 4);
+		} else if (type === 'grid') {
+			return conservativeAutomatic;
+		} else {
+			colsDesktop = clampCols(config.columns ?? 4, 4);
+		}
+	} else {
+		colsDesktop = clampCols(config.columns ?? 4, 4);
+	}
+
 	const enableResponsive = Boolean(config.enableResponsive);
-	const colsDesktop = clampCols(config.columns ?? 4, 4);
 	const colsTablet = enableResponsive
 		? clampCols(config.tabletColumns ?? 2, colsDesktop)
 		: colsDesktop;

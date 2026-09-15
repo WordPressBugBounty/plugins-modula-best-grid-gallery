@@ -1,5 +1,8 @@
 import { useSyncExternalStore } from '@wordpress/element';
-import { getGalleryPreviewReduxStore } from '../utils/previewReduxStoreRef';
+import {
+	getGalleryPreviewReduxStore,
+	subscribeGalleryPreviewReduxStore,
+} from '../utils/previewReduxStoreRef';
 
 /** Stable snapshot when bulk edit is closed or preview items are not ready yet. */
 const EMPTY_PREVIEW_ITEMS = [];
@@ -8,11 +11,18 @@ const EMPTY_PREVIEW_ITEMS = [];
  * Subscribe to live preview Redux `items.items` without a react-redux Provider
  * (bulk modal renders at takeover shell level, outside preview `<Provider>`).
  *
+ * Also re-subscribes when the module-level store ref is registered after mount
+ * (status bar is a sibling of the preview column).
+ *
  * @param {boolean} [enabled=true]
  * @return {Object[]}
  */
 export function usePreviewReduxStoreItems(enabled = true) {
-	const store = getGalleryPreviewReduxStore();
+	const store = useSyncExternalStore(
+		subscribeGalleryPreviewReduxStore,
+		getGalleryPreviewReduxStore,
+		getGalleryPreviewReduxStore
+	);
 
 	return useSyncExternalStore(
 		(onStoreChange) => {

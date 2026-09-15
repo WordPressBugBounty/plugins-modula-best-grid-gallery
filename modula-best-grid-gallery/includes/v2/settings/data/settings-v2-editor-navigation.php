@@ -564,8 +564,16 @@ return array(
 					'type'        => 'submenu',
 					'label'       => 'Opening',
 					'visibleWhen' => array(
-						'path' => 'lightbox.lightbox',
-						'eq'   => 'fancybox',
+						'any' => array(
+							array(
+								'path' => 'lightbox.lightbox',
+								'eq'   => 'fancybox',
+							),
+							array(
+								'path' => 'lightbox.lightbox',
+								'eq'   => 'lightbox-prefer-url',
+							),
+						),
 					),
 					'items'       =>
 					array(
@@ -630,8 +638,16 @@ return array(
 					'type'        => 'submenu',
 					'label'       => 'Controls',
 					'visibleWhen' => array(
-						'path' => 'lightbox.lightbox',
-						'eq'   => 'fancybox',
+						'any' => array(
+							array(
+								'path' => 'lightbox.lightbox',
+								'eq'   => 'fancybox',
+							),
+							array(
+								'path' => 'lightbox.lightbox',
+								'eq'   => 'lightbox-prefer-url',
+							),
+						),
 					),
 					'items'       =>
 					array(
@@ -675,8 +691,16 @@ return array(
 					'type'        => 'submenu',
 					'label'       => 'Appearance',
 					'visibleWhen' => array(
-						'path' => 'lightbox.lightbox',
-						'eq'   => 'fancybox',
+						'any' => array(
+							array(
+								'path' => 'lightbox.lightbox',
+								'eq'   => 'fancybox',
+							),
+							array(
+								'path' => 'lightbox.lightbox',
+								'eq'   => 'lightbox-prefer-url',
+							),
+						),
 					),
 					'items'       =>
 					array(
@@ -695,8 +719,16 @@ return array(
 					'type'        => 'submenu',
 					'label'       => 'Text',
 					'visibleWhen' => array(
-						'path' => 'lightbox.lightbox',
-						'eq'   => 'fancybox',
+						'any' => array(
+							array(
+								'path' => 'lightbox.lightbox',
+								'eq'   => 'fancybox',
+							),
+							array(
+								'path' => 'lightbox.lightbox',
+								'eq'   => 'lightbox-prefer-url',
+							),
+						),
 					),
 					'items'       =>
 					array(

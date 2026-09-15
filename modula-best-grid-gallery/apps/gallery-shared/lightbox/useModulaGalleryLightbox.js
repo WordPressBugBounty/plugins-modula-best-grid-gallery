@@ -6,6 +6,7 @@
  */
 import { useEffect, useRef } from '@wordpress/element';
 import { bindModulaGalleryLightbox } from './modulaGalleryLightbox';
+import { galleryUsesFancyboxLightbox } from '../utils/resolveGalleryItemLink';
 
 /**
  * @param {object} config Gallery config from store.
@@ -29,7 +30,7 @@ export function useModulaGalleryLightbox(config, options = {}) {
 	const enabled = options.enabled !== false;
 
 	useEffect(() => {
-		if (!enabled || configRef.current?.lightbox !== 'fancybox') {
+		if (!enabled || !galleryUsesFancyboxLightbox(configRef.current?.lightbox)) {
 			return undefined;
 		}
 		const host = hostRef.current;

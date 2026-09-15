@@ -25,6 +25,7 @@ import {
 	isProbableModulaVideoPlaybackUrl,
 	resolveItemLightboxVideoFlags,
 } from '../video/videoGalleryModel';
+import { galleryUsesFancyboxLightbox } from '../utils/resolveGalleryItemLink';
 
 /**
  * @param {object} config
@@ -379,7 +380,7 @@ export async function openModulaGalleryLightboxAtRoot(
 	startIndex = 0,
 	context = {}
 ) {
-	if (!rootEl || config?.lightbox !== 'fancybox') {
+	if (!rootEl || !galleryUsesFancyboxLightbox(config?.lightbox)) {
 		return false;
 	}
 	if (!isModulaLightboxAllowedOnDevice(config)) {
@@ -429,7 +430,7 @@ export async function openModulaGalleryLightboxFromClick({
 	resolveItems,
 	openedViaKeyboard = false,
 }) {
-	if (!rootEl || !clickedLink || config?.lightbox !== 'fancybox') {
+	if (!rootEl || !clickedLink || !galleryUsesFancyboxLightbox(config?.lightbox)) {
 		return false;
 	}
 	if (!isModulaLightboxAllowedOnDevice(config)) {
@@ -530,7 +531,10 @@ export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 		};
 	};
 	const initialContext = resolveContext();
-	if (!hostEl || initialContext.config?.lightbox !== 'fancybox') {
+	if (
+		!hostEl ||
+		!galleryUsesFancyboxLightbox(initialContext.config?.lightbox)
+	) {
 		return () => {};
 	}
 
@@ -614,7 +618,9 @@ export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 		if (!link) {
 			return;
 		}
-		if (resolveContext().config?.lightbox !== 'fancybox') {
+		if (
+			!galleryUsesFancyboxLightbox(resolveContext().config?.lightbox)
+		) {
 			return;
 		}
 		event.preventDefault();
@@ -704,7 +710,9 @@ export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 		if (!link) {
 			return;
 		}
-		if (resolveContext().config?.lightbox !== 'fancybox') {
+		if (
+			!galleryUsesFancyboxLightbox(resolveContext().config?.lightbox)
+		) {
 			return;
 		}
 

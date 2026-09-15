@@ -293,12 +293,12 @@ async function initGalleriesInner(options = {}) {
  * @returns {Promise<void>}
  */
 function initGalleries(options = {}) {
-	initGalleriesChain = initGalleriesChain
-		.then(() => initGalleriesInner(options))
-		.catch((err) => {
-			console.error('Modula: gallery init failed', err);
-		});
-	return initGalleriesChain;
+	const run = initGalleriesChain.then(() => initGalleriesInner(options));
+	// Keep the serial chain alive after a failure, but let callers observe the error.
+	initGalleriesChain = run.catch((err) => {
+		console.error('Modula: gallery init failed', err);
+	});
+	return run;
 }
 
 function destroyGallery(identifier) {

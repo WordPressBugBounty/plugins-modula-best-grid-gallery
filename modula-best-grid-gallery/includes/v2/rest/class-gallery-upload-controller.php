@@ -616,8 +616,9 @@ class Gallery_Upload_Controller {
 		}
 		$current = isset( $images[ $index ] ) && is_array( $images[ $index ] ) ? $images[ $index ] : array();
 
-		$attachment_id = isset( $current['id'] ) ? absint( $current['id'] ) : 0;
-		$media_keys    = array( 'title', 'alt', 'description' );
+		$attachment_id       = isset( $current['id'] ) ? absint( $current['id'] ) : 0;
+		$media_keys          = array( 'title', 'alt', 'description' );
+		$explicit_clear_keys = array();
 
 		// Title / alt / caption-description live on the attachment; sync there first, then mirror into modula-images.
 		if ( $attachment_id && get_post( $attachment_id ) && 'attachment' === get_post_type( $attachment_id ) ) {
@@ -643,7 +644,8 @@ class Gallery_Upload_Controller {
 					$gallery_id,
 					$index
 				);
-				$synced       = $upload->apply_modula_media_fields_to_attachment( $attachment_id, $media_subset );
+				$explicit_clear_keys = modula_attachment_text_keys_explicitly_cleared( $media_subset );
+				$synced              = $upload->apply_modula_media_fields_to_attachment( $attachment_id, $media_subset );
 				if ( is_wp_error( $synced ) ) {
 					return $synced;
 				}
@@ -658,7 +660,11 @@ class Gallery_Upload_Controller {
 			$merged['id'] = $current['id'];
 		}
 		if ( $attachment_id && get_post( $attachment_id ) && 'attachment' === get_post_type( $attachment_id ) ) {
-			$merged = $upload->overlay_modula_row_attachment_text_from_post( $merged, $attachment_id );
+			$merged = $upload->overlay_modula_row_attachment_text_from_post(
+				$merged,
+				$attachment_id,
+				$explicit_clear_keys
+			);
 		}
 		$sanitized = $upload->sanitize_modula_image_row( $merged );
 		// Sanitize whitelists every key; missing `id` becomes ''. Restore from the row we merged so the client never gets an empty id (would drop the tile).
@@ -907,6 +913,14 @@ class Gallery_Upload_Controller {
 	public static function save_merged_items( $request ) {
 		$upload = \Modula_Gallery_Upload::get_instance();
 		if ( ! $upload->check_user_upload_rights() ) {
+			\Modula_Debug_Log::log_failure(
+				\Modula_Debug_Log::CHANNEL_GALLERY_PERSIST,
+				'gallery items merge save forbidden',
+				array(
+					'gallery_id' => (int) $request['id'],
+					'error_code' => 'modula_forbidden',
+				)
+			);
 			return new \WP_Error(
 				'modula_forbidden',
 				__( 'You do not have the rights to upload files.', 'modula-best-grid-gallery' ),
@@ -915,11 +929,27 @@ class Gallery_Upload_Controller {
 		}
 		$prepared = self::prepare_gallery_write( $request );
 		if ( is_wp_error( $prepared ) ) {
+			\Modula_Debug_Log::log_failure(
+				\Modula_Debug_Log::CHANNEL_GALLERY_PERSIST,
+				'gallery items merge prepare failed',
+				array(
+					'gallery_id' => (int) $request['id'],
+					'error_code' => $prepared->get_error_code(),
+				)
+			);
 			return $prepared;
 		}
 		$gallery_id = $prepared;
 		$params     = $request->get_json_params();
 		if ( ! is_array( $params ) || ! isset( $params['items'] ) || ! is_array( $params['items'] ) ) {
+			\Modula_Debug_Log::log_failure(
+				\Modula_Debug_Log::CHANNEL_GALLERY_PERSIST,
+				'gallery items merge save rejected: invalid items',
+				array(
+					'gallery_id' => (int) $gallery_id,
+					'error_code' => 'modula_bad_request',
+				)
+			);
 			return new \WP_Error(
 				'modula_bad_request',
 				__( 'Invalid items payload.', 'modula-best-grid-gallery' ),
@@ -928,6 +958,14 @@ class Gallery_Upload_Controller {
 		}
 		$result = \Modula\V2\Meta_Sync::persist_merged_gallery_items( $gallery_id, $params['items'] );
 		if ( is_wp_error( $result ) ) {
+			\Modula_Debug_Log::log_failure(
+				\Modula_Debug_Log::CHANNEL_GALLERY_PERSIST,
+				'gallery items merge save failed',
+				array(
+					'gallery_id' => (int) $gallery_id,
+					'error_code' => $result->get_error_code(),
+				)
+			);
 			return $result;
 		}
 		return self::write_response( $gallery_id, array( 'ok' => true ) );

@@ -51,6 +51,47 @@ export function filterEditorDocumentStatusChoices(choices) {
 }
 
 /**
+ * Options for the Editor document status select (topbar or elsewhere).
+ * When the live status is outside the allowlist, prepend it disabled so the
+ * control can still show the current value.
+ *
+ * @param {{
+ *   status?: string,
+ *   statusLabel?: string,
+ *   statusChoices?: Array<{ value?: string, label?: string }>|null,
+ * }} args
+ * @return {Array<{ value: string, label: string, disabled?: boolean }>}
+ */
+export function buildEditorDocumentStatusSelectOptions({
+	status = '',
+	statusLabel = '',
+	statusChoices = [],
+} = {}) {
+	const allowed = filterEditorDocumentStatusChoices(statusChoices);
+	if (allowed.length === 0) {
+		return [];
+	}
+
+	const options = [...allowed];
+	if (
+		typeof status === 'string' &&
+		status !== '' &&
+		!options.some((row) => row.value === status)
+	) {
+		options.unshift({
+			value: status,
+			label:
+				typeof statusLabel === 'string' && statusLabel !== ''
+					? statusLabel
+					: status,
+			disabled: true,
+		});
+	}
+
+	return options;
+}
+
+/**
  * Build a partial CPT REST body for editor document writes.
  *
  * @param {{ title?: string, status?: string, slug?: string }} patch

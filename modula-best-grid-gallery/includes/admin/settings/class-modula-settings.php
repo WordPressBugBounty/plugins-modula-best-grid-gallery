@@ -98,6 +98,7 @@ class Modula_Settings {
 		add_action( 'modula_settings_api_update_modula_roles', array( $this, 'set_capabilities' ) );
 
 		add_action( 'modula_settings_api_update_' . self::OPTION_STANDALONE, array( $this, 'schedule_rewrite_flush' ) );
+		add_filter( 'modula_settings_api_pre_update_' . Modula_Debug_Log::OPTION_KEY, array( $this, 'sync_debug_log_option' ), 10, 1 );
 		add_action( 'init', array( $this, 'maybe_flush_rewrite_rules' ), 999 );
 	}
 
@@ -110,6 +111,26 @@ class Modula_Settings {
 			flush_rewrite_rules();
 			delete_option( 'modula_flush_rewrite_rules' );
 		}
+	}
+
+	/**
+	 * Drive Modula Debug Log enable/disable from Diagnostics Save (sets TTL via the service).
+	 *
+	 * @param mixed $value Posted option value.
+	 * @return array Persisted debug log state.
+	 */
+	public function sync_debug_log_option( $value ) {
+		$log     = Modula_Debug_Log::get_instance();
+		$enabled = is_array( $value ) ? ! empty( $value['enabled'] ) : ! empty( $value );
+
+		if ( $enabled ) {
+			$log->enable();
+		} else {
+			$log->disable();
+		}
+
+		$stored = get_option( Modula_Debug_Log::OPTION_KEY, array() );
+		return is_array( $stored ) ? $stored : array();
 	}
 
 	// =============================================================================
@@ -597,6 +618,11 @@ class Modula_Settings {
 				'locked' => false,
 				'config' => apply_filters( 'modula_ai_settings_tab', $this->get_modula_ai() ),
 			),
+			'diagnostics'     => array(
+				'label'  => esc_html__( 'Debug Log', 'modula-best-grid-gallery' ),
+				'locked' => false,
+				'config' => apply_filters( 'modula_diagnostics_settings_tab', $this->get_diagnostics() ),
+			),
 		);
 
 		$subtabs = apply_filters( 'modula_admin_page_subtabs', $subtabs );
@@ -632,6 +658,13 @@ class Modula_Settings {
 				'slug'    => 'social_media',
 				'subtabs' => array(
 					'social_media' => $subtabs['social_media'],
+				),
+			),
+			array(
+				'label'   => esc_html__( 'Diagnostics', 'modula-best-grid-gallery' ),
+				'slug'    => 'diagnostics',
+				'subtabs' => array(
+					'diagnostics' => $subtabs['diagnostics'],
 				),
 			),
 		);
@@ -1363,6 +1396,91 @@ class Modula_Settings {
 							),
 						),
 					)
+				),
+			),
+		);
+	}
+
+	/**
+	 * Diagnostics tab: Modula Debug Log controls.
+	 *
+	 * @return array Diagnostics settings configuration.
+	 */
+	private function get_diagnostics() {
+		$log    = Modula_Debug_Log::get_instance();
+		$status = $log->get_status();
+		$active = ! empty( $status['active'] );
+
+		$size_label = ! empty( $status['has_file'] )
+			? size_format( max( 0, (int) $status['size'] ), 2 )
+			: esc_html__( 'empty', 'modula-best-grid-gallery' );
+
+		if ( $active && ! empty( $status['expires_at'] ) ) {
+			/* translators: 1: local datetime when logging auto-disables, 2: current log size label */
+			$status_text = sprintf(
+				esc_html__( 'Logging is active until %1$s. Log size: %2$s. This is the Modula Debug Log, not WordPress WP_DEBUG / debug.log.', 'modula-best-grid-gallery' ),
+				esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $status['expires_at'] ) ),
+				esc_html( $size_label )
+			);
+		} elseif ( ! empty( $status['has_file'] ) ) {
+			/* translators: %s: current log size label */
+			$status_text = sprintf(
+				esc_html__( 'Logging is off. A previous Modula Debug Log file is still available to download (size: %s). This is not WordPress WP_DEBUG / debug.log.', 'modula-best-grid-gallery' ),
+				esc_html( $size_label )
+			);
+		} else {
+			$status_text = esc_html__( 'Logging is off. Enable Modula Debug Log to capture Modula failures for support. This is not WordPress WP_DEBUG / debug.log.', 'modula-best-grid-gallery' );
+		}
+
+		return array(
+			'option' => Modula_Debug_Log::OPTION_KEY,
+			'fields' => array(
+				$this->build_paragraph_field(
+					'modula_debug_log_intro',
+					esc_html__( 'Modula Debug Log', 'modula-best-grid-gallery' ),
+					esc_html__( 'Turn this on when support asks for diagnostics. It records Modula failures only (not browser console errors) into a protected log you can download.', 'modula-best-grid-gallery' )
+				),
+				$this->build_toggle_field(
+					'enabled',
+					esc_html__( 'Enable Modula Debug Log', 'modula-best-grid-gallery' ),
+					$active,
+					array(
+						'description' => esc_html__( 'Stays on for about 7 days, then stops writing automatically. The file is kept until you Clear it.', 'modula-best-grid-gallery' ),
+					)
+				),
+				$this->build_paragraph_field(
+					'modula_debug_log_status',
+					esc_html__( 'Status', 'modula-best-grid-gallery' ),
+					$status_text
+				),
+				array(
+					'type'           => 'button',
+					'text'           => esc_html__( 'Download log', 'modula-best-grid-gallery' ),
+					'loadingText'    => esc_html__( 'Preparing…', 'modula-best-grid-gallery' ),
+					'successMessage' => esc_html__( 'Download started.', 'modula-best-grid-gallery' ),
+					'errorMessage'   => esc_html__( 'Could not download the Modula Debug Log.', 'modula-best-grid-gallery' ),
+					'variant'        => 'secondary',
+					'disabled'       => empty( $status['has_file'] ),
+					'api'            => array(
+						'path'     => '/modula-best-grid-gallery/v1/debug-log/download',
+						'method'   => 'GET',
+						'download' => true,
+					),
+				),
+				array(
+					'type'           => 'button',
+					'text'           => esc_html__( 'Clear log', 'modula-best-grid-gallery' ),
+					'loadingText'    => esc_html__( 'Clearing…', 'modula-best-grid-gallery' ),
+					'successMessage' => esc_html__( 'Modula Debug Log cleared.', 'modula-best-grid-gallery' ),
+					'errorMessage'   => esc_html__( 'Could not clear the Modula Debug Log.', 'modula-best-grid-gallery' ),
+					'variant'        => 'secondary',
+					'disabled'       => empty( $status['has_file'] ),
+					'reload'         => true,
+					'api'            => array(
+						'path'   => '/modula-best-grid-gallery/v1/debug-log',
+						'method' => 'POST',
+						'data'   => array( 'action' => 'clear' ),
+					),
 				),
 			),
 		);

@@ -1,9 +1,14 @@
-import { useId } from '@wordpress/element';
+import { useEffect, useId, useRef, useState } from '@wordpress/element';
+
+import {
+	createSliderNumberCommit,
+	resolveSliderNumberCommit,
+} from './sliderNumberCommitPolicy';
 
 /**
  * @param {Object}   props
  * @param {number}   props.value
- * @param {Function} props.onChange Receives number
+ * @param {Function} props.onChange          Receives number
  * @param {number}   [props.min=0]
  * @param {number}   [props.max=100]
  * @param {number}   [props.step=1]
@@ -29,22 +34,59 @@ export function Slider({
 	const id = idProp || `modula-ui-slider-${genId}`;
 	const safeMin = Number(min);
 	const safeMax = Number(max);
-	const numeric = Number(value);
-	const safe = Number.isFinite(numeric)
-		? Math.min(safeMax, Math.max(safeMin, numeric))
-		: safeMin;
+	const safe = resolveSliderNumberCommit(value, safeMin, safeMax);
 	const classes = ['modula-ui-slider', className].filter(Boolean).join(' ');
+	const [numberDraft, setNumberDraft] = useState(null);
+	const onChangeRef = useRef(onChange);
+	onChangeRef.current = onChange;
+	const mountedRef = useRef(true);
+	const prevSafeRef = useRef(safe);
+	const sessionRef = useRef(null);
 
-	const emit = (raw) => {
-		if (typeof onChange !== 'function') {
+	if (!sessionRef.current) {
+		sessionRef.current = createSliderNumberCommit({
+			min: safeMin,
+			max: safeMax,
+			onChange: (n) => {
+				if (mountedRef.current) {
+					setNumberDraft(String(n));
+				}
+				if (typeof onChangeRef.current === 'function') {
+					onChangeRef.current(n);
+				}
+			},
+		});
+	}
+
+	sessionRef.current.setBounds(safeMin, safeMax);
+
+	useEffect(() => {
+		mountedRef.current = true;
+		const session = sessionRef.current;
+		return () => {
+			mountedRef.current = false;
+			session.flush();
+		};
+	}, []);
+
+	useEffect(() => {
+		if (prevSafeRef.current === safe) {
 			return;
 		}
-		const n = Number(raw);
-		if (!Number.isFinite(n)) {
+		prevSafeRef.current = safe;
+		sessionRef.current.cancel();
+		setNumberDraft(null);
+	}, [safe]);
+
+	useEffect(() => {
+		if (!disabled) {
 			return;
 		}
-		onChange(Math.min(safeMax, Math.max(safeMin, n)));
-	};
+		sessionRef.current.cancel();
+		setNumberDraft(null);
+	}, [disabled]);
+
+	const numberValue = numberDraft !== null ? numberDraft : safe;
 
 	return (
 		<div className={classes}>
@@ -62,7 +104,10 @@ export function Slider({
 						aria-valuemin={safeMin}
 						aria-valuemax={safeMax}
 						aria-valuenow={safe}
-						onChange={(e) => emit(e.target.value)}
+						onChange={(e) => {
+							setNumberDraft(null);
+							sessionRef.current.commitNow(e.target.value);
+						}}
 					/>
 				</div>
 				{showNumber ? (
@@ -72,10 +117,16 @@ export function Slider({
 						min={safeMin}
 						max={safeMax}
 						step={step}
-						value={safe}
+						value={numberValue}
 						disabled={disabled}
 						aria-label="Value"
-						onChange={(e) => emit(e.target.value)}
+						onChange={(e) => {
+							setNumberDraft(e.target.value);
+							sessionRef.current.schedule(e.target.value);
+						}}
+						onBlur={() => {
+							sessionRef.current.flush();
+						}}
 					/>
 				) : null}
 			</div>

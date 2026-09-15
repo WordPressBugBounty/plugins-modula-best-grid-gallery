@@ -1,5 +1,5 @@
 /**
- * Listing bulk bar action catalog — lifecycle (+ optional Apply preset).
+ * Listing bulk bar action catalog — lifecycle, Convert to new editor, optional Apply preset.
  *
  * Pure helpers: given selection, page rows, and entitlement, return available
  * bulk actions and count-based confirm copy. Product chrome lives in the
@@ -12,11 +12,16 @@ import {
 	isListingRowActionEligible,
 } from './listingRowActions';
 import {
+	getListingBulkConvertConfirmButtonLabel,
+	getListingBulkConvertConfirmMessage,
+	isListingBulkConvertEligible,
+} from './listingBulkConvert';
+import {
 	getListingSelectionMode,
 	listingSelectionItemId,
 } from './listingSelection';
 
-/** @typedef {'trash'|'restore'|'delete-permanently'|'apply-preset'} ListingBulkBarActionId */
+/** @typedef {'trash'|'restore'|'delete-permanently'|'apply-preset'|'convert-new-editor'} ListingBulkBarActionId */
 /** @typedef {'trash'|'delete-permanently'} ListingBulkDestructiveConfirmAction */
 
 /**
@@ -159,7 +164,9 @@ export function getListingBulkDestructiveConfirmButtonLabel(actionId) {
 /**
  * Bulk actions for the current listing selection.
  *
- * Live homogeneous: Move to trash; Apply preset when Defaults-entitled.
+ * Live homogeneous galleries: Convert to new editor when ≥1 classic convertible
+ * row; Apply preset when Defaults-entitled; Move to trash.
+ * Live homogeneous albums: Apply preset when entitled; Move to trash (no Convert).
  * Live mixed: Move to trash; Apply preset shown disabled when entitled.
  * Trash: Restore (no confirm) and Delete permanently (confirm with count).
  *
@@ -223,6 +230,28 @@ export function getListingBulkBarActions({
 						'modula-best-grid-gallery'
 					),
 					items: [],
+				});
+			}
+		}
+
+		if (liveHomogeneous && mode === 'gallery') {
+			const convertEligible = liveItems.filter((row) =>
+				isListingBulkConvertEligible(row)
+			);
+			if (convertEligible.length > 0) {
+				actions.push({
+					id: 'convert-new-editor',
+					label: __(
+						'Convert to new editor',
+						'modula-best-grid-gallery'
+					),
+					requiresConfirm: true,
+					confirmMessage: getListingBulkConvertConfirmMessage(
+						convertEligible.length
+					),
+					confirmButtonLabel:
+						getListingBulkConvertConfirmButtonLabel(),
+					items: convertEligible,
 				});
 			}
 		}

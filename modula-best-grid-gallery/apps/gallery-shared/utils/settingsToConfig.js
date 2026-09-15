@@ -21,6 +21,7 @@ import {
 	isGalleryTypeWithoutLightbox,
 	isGalleryTypeWithoutLoadingEffects,
 	DEFAULT_GALLERY_TYPE,
+	DEFAULT_MASONRY_GRID_TYPE,
 } from '../constants/galleryLayoutDefaults';
 import {
 	galleryTypeSupportsBelowImageCaptions,
@@ -213,9 +214,16 @@ export function settingsToConfig(settings, opts = {}) {
 		'linear-gradient(180deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.15) 72%, rgba(0,0,0,0) 100%)';
 
 	const type = general.type || DEFAULT_GALLERY_TYPE;
-	let gridType = layout.gridType || 'automatic';
+	let gridType = layout.gridType;
 	if (type === 'justified-grid' || type === 'parallax-masonry') {
 		gridType = 'automatic';
+	} else if (
+		type === DEFAULT_GALLERY_TYPE &&
+		(gridType === undefined || gridType === null || gridType === '')
+	) {
+		gridType = DEFAULT_MASONRY_GRID_TYPE;
+	} else {
+		gridType = gridType || 'automatic';
 	}
 
 	let columns = 12;
@@ -279,7 +287,13 @@ export function settingsToConfig(settings, opts = {}) {
 	if (
 		typeof window !== 'undefined' &&
 		window.ModulaDisableLightboxes &&
-		!['no-link', 'direct', 'external-url', 'attachment-page'].includes(lb)
+		![
+			'no-link',
+			'direct',
+			'external-url',
+			'attachment-page',
+			'lightbox-prefer-url',
+		].includes(lb)
 	) {
 		lb = 'fancybox';
 	}

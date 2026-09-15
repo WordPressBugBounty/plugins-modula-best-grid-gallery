@@ -10,6 +10,7 @@ import {
 	ModulaSocialSvgTwitter,
 	ModulaSocialSvgWhatsapp,
 } from 'gallery-shared/preview';
+import { ITEM_SOCIAL_CLASS_NAME } from 'gallery-shared/utils/itemChromeLegacyCssAliases';
 import { __ } from '@wordpress/i18n';
 
 const SOCIAL_PREVIEW_DEFS = [
@@ -90,7 +91,7 @@ export default function HoverBuilderSocialPreview({ social }) {
 
 	return (
 		<div
-			className="modula-social modula-hover-builder-card__social-preview"
+			className={`${ITEM_SOCIAL_CLASS_NAME} modula-hover-builder-card__social-preview`}
 			style={{
 				color,
 				gap: `${pad}px`,

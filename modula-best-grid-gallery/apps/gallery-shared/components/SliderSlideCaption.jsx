@@ -8,6 +8,10 @@ import {
 	normalizeSliderCaptionPosition,
 	sliderCaptionElementId,
 } from '../utils/sliderCaptionPosition';
+import {
+	ITEM_DESCRIPTION_CLASS_NAME,
+	ITEM_TITLE_CLASS_NAME,
+} from '../utils/itemChromeLegacyCssAliases';
 
 /**
  * @param {Object} props
@@ -42,9 +46,13 @@ export default function SliderSlideCaption({
 			className={`slider-image-info slider-image-info--${pos} ${pos}`}
 			{...(captionId ? { id: captionId } : {})}
 		>
-			{hasTitle ? <div className="modula-title">{title}</div> : null}
+			{hasTitle ? (
+				<div className={ITEM_TITLE_CLASS_NAME}>{title}</div>
+			) : null}
 			{hasDescription ? (
-				<p className="description">{description}</p>
+				<p className={`${ITEM_DESCRIPTION_CLASS_NAME} description`}>
+					{description}
+				</p>
 			) : null}
 		</figcaption>
 	);

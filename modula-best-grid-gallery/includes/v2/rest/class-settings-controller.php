@@ -332,6 +332,11 @@ class Settings_Controller {
 
 		$prepared = \Modula\V2\Gallery_Post::ensure_persistable( $id, $title );
 		if ( is_wp_error( $prepared ) ) {
+			self::log_gallery_persist_failure(
+				$id,
+				$prepared->get_error_code(),
+				'gallery settings promote/prepare failed'
+			);
 			return $prepared;
 		}
 		$id = $prepared;
@@ -340,6 +345,7 @@ class Settings_Controller {
 
 		$raw = $request->get_body();
 		if ( '' === trim( (string) $raw ) ) {
+			self::log_gallery_persist_failure( $id, 'rest_empty_request', 'gallery settings save rejected: empty body' );
 			return new \WP_Error(
 				'rest_empty_request',
 				__( 'Request body must contain a JSON object of grouped settings.', 'modula-best-grid-gallery' ),
@@ -351,6 +357,7 @@ class Settings_Controller {
 		if ( ! is_array( $incoming ) ) {
 			$decoded = json_decode( $raw, true );
 			if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $decoded ) ) {
+				self::log_gallery_persist_failure( $id, 'rest_invalid_json', 'gallery settings save rejected: invalid JSON' );
 				return new \WP_Error(
 					'rest_invalid_json',
 					__( 'Invalid JSON body. Send a JSON object of settings groups.', 'modula-best-grid-gallery' ),
@@ -362,6 +369,7 @@ class Settings_Controller {
 
 		foreach ( $incoming as $group => $keys ) {
 			if ( ! is_string( $group ) || '' === $group ) {
+				self::log_gallery_persist_failure( $id, 'rest_invalid_param', 'gallery settings save rejected: invalid group name' );
 				return new \WP_Error(
 					'rest_invalid_param',
 					__( 'Each top-level key must be a non-empty settings group name (string).', 'modula-best-grid-gallery' ),
@@ -369,6 +377,7 @@ class Settings_Controller {
 				);
 			}
 			if ( null !== $keys && ! is_array( $keys ) ) {
+				self::log_gallery_persist_failure( $id, 'rest_invalid_param', 'gallery settings save rejected: invalid group shape' );
 				return new \WP_Error(
 					'rest_invalid_param',
 					sprintf(
@@ -476,6 +485,15 @@ class Settings_Controller {
 		$payload   = $shortcode->get_bootstrap_payload( $id, $align, $context );
 
 		if ( null === $payload ) {
+			\Modula_Debug_Log::log_failure(
+				\Modula_Debug_Log::CHANNEL_SHORTCODE_BOOTSTRAP,
+				'bootstrap payload unavailable',
+				array(
+					'gallery_id' => $id,
+					'route'      => '/modula/v2/gallery/' . $id . '/bootstrap',
+					'error_code' => 'rest_not_found',
+				)
+			);
 			return new \WP_Error(
 				'rest_not_found',
 				__( 'Gallery not found.', 'modula-best-grid-gallery' ),
@@ -561,6 +579,26 @@ class Settings_Controller {
 				),
 			),
 			200
+		);
+	}
+
+	/**
+	 * Log a gallery.persist failure through Modula Debug Log.
+	 *
+	 * @param int    $gallery_id Gallery id.
+	 * @param string $error_code Error code.
+	 * @param string $message    Message.
+	 * @return void
+	 */
+	private static function log_gallery_persist_failure( $gallery_id, $error_code, $message ) {
+		\Modula_Debug_Log::log_failure(
+			\Modula_Debug_Log::CHANNEL_GALLERY_PERSIST,
+			$message,
+			array(
+				'gallery_id' => (int) $gallery_id,
+				'route'      => '/modula/v2/gallery/' . (int) $gallery_id . '/settings',
+				'error_code' => (string) $error_code,
+			)
 		);
 	}
 }

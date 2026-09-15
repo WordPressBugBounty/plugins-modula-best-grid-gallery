@@ -1,11 +1,12 @@
 /**
- * Full-width editor chrome: back to galleries, centered title, save status, shortcodes.
+ * Full-width editor chrome: back to galleries, centered title, document status, save status, shortcodes.
  */
 import { useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronLeft, pencil } from '@wordpress/icons';
 import TakeoverTopBarShortcodes from './TakeoverTopBarShortcodes';
 import TakeoverTopBarSaveStatus from './TakeoverTopBarSaveStatus';
+import TakeoverTopBarDocumentStatus from './TakeoverTopBarDocumentStatus';
 import BoundGalleryBadge from './BoundGalleryBadge';
 
 /**
@@ -17,6 +18,12 @@ import BoundGalleryBadge from './BoundGalleryBadge';
  * @param {boolean}                                  props.titleDisabled
  * @param {string}                                   props.adminUrl
  * @param {import('react').ReactNode}                [props.undoRedoControls]
+ * @param {string}                                   [props.documentStatus]
+ * @param {string}                                   [props.documentStatusLabel]
+ * @param {Array<{ value?: string, label?: string }>} [props.documentStatusChoices]
+ * @param {(status: string, label: string) => void}  [props.onDocumentStatusChange]
+ * @param {boolean}                                  [props.documentStatusBusy]
+ * @param {boolean}                                  [props.canEditDocumentStatus]
  */
 export default function GalleryTakeoverTopBar({
 	galleryId,
@@ -26,9 +33,17 @@ export default function GalleryTakeoverTopBar({
 	titleDisabled = false,
 	adminUrl,
 	undoRedoControls = null,
+	documentStatus = '',
+	documentStatusLabel = '',
+	documentStatusChoices = [],
+	onDocumentStatusChange,
+	documentStatusBusy = false,
+	canEditDocumentStatus = false,
 }) {
 	const titleInputRef = useRef(/** @type {HTMLInputElement|null} */ (null));
 	const backLabel = __('Galleries', 'modula-best-grid-gallery');
+	const showDocumentStatus =
+		typeof onDocumentStatusChange === 'function' && canEditDocumentStatus;
 
 	return (
 		<header className="modula-gallery-takeover__topbar" role="banner">
@@ -118,6 +133,15 @@ export default function GalleryTakeoverTopBar({
 				<div className="modula-gallery-takeover__topbar-right">
 					<TakeoverTopBarSaveStatus />
 					<TakeoverTopBarShortcodes galleryId={galleryId} />
+					{showDocumentStatus ? (
+						<TakeoverTopBarDocumentStatus
+							status={documentStatus}
+							statusLabel={documentStatusLabel}
+							statusChoices={documentStatusChoices}
+							onStatusChange={onDocumentStatusChange}
+							busy={documentStatusBusy}
+						/>
+					) : null}
 				</div>
 			</div>
 		</header>

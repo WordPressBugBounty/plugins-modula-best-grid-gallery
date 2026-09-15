@@ -298,13 +298,13 @@ export default function GalleryItemCaptionPopover({
 					style={{ left: '0px', top: '0px' }}
 				>
 					{showTitle ? (
-						<div className="modula-caption-popover__title jtg-title">
+						<div className="modula-caption-popover__title modula-title jtg-title">
 							{title}
 						</div>
 					) : null}
 					{showDescription ? (
 						<div
-							className="modula-caption-popover__description description jtg-description"
+							className="modula-caption-popover__description description jtg-description modula-description"
 							dangerouslySetInnerHTML={{
 								__html: String(descriptionHtml),
 							}}

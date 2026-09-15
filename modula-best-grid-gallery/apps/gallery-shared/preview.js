@@ -33,6 +33,7 @@ export * from './utils/customGridEditorPagedLayout';
 export * from './utils/repackCustomGridPreviewItems';
 export * from './utils/resolveGalleryWidthCss';
 export * from './utils/paginationFromSettings';
+export * from './utils/paginationLegacyCssAliases';
 export * from './utils/buildPaginationDynamicCss';
 export * from './utils/galleryRootSelector';
 export * from './utils/buildFilterBarDynamicCss';

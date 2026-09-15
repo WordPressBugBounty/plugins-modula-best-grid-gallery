@@ -229,6 +229,17 @@ function modula_check_lightboxes_and_links( $item_data, $item, $settings ) {
 			$fallback                             = isset( $item_data['image_full'] ) ? (string) $item_data['image_full'] : '';
 			$item_data['link_attributes']['href'] = modula_resolve_simple_link_href( $item, $fallback );
 		}
+	} elseif ( 'lightbox-prefer-url' === $settings['lightbox'] && isset( $item['link'] ) && '' !== $item['link'] ) {
+		$item_data['link_attributes']['class'][]    = 'modula-simple-link';
+		$item_data['item_classes'][]                = 'modula-simple-link';
+		$item_data['link_attributes']['aria-label'] = esc_html__( 'Open external link', 'modula-best-grid-gallery' );
+		$item_data['link_attributes']['href']       = $item['link'];
+		if ( isset( $item['target'] ) && '1' == $item['target'] ) {
+			$item_data['link_attributes']['target'] = '_blank';
+		}
+		if ( isset( $item_data['link_attributes']['role'] ) ) {
+			unset( $item_data['link_attributes']['role'] );
+		}
 	} elseif ( 'direct' === $settings['lightbox'] ) {
 		$item_data['link_attributes']['href']       = $item_data['image_full'];
 		$item_data['link_attributes']['class'][]    = 'modula-simple-link';
@@ -434,7 +445,7 @@ function modula_add_scripts( $scripts, $settings ) {
 		$needed_scripts[] = 'modula-isotope-packery';
 	}
 
-	if ( 'fancybox' === $settings['lightbox'] ) {
+	if ( 'fancybox' === $settings['lightbox'] || 'lightbox-prefer-url' === $settings['lightbox'] ) {
 		$needed_scripts[] = 'modula-fancybox';
 		$needed_scripts[] = 'modulaFancybox';
 	}
@@ -493,9 +504,31 @@ function modula_estimate_gallery_image_sizes( $settings ) {
 		return '(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw';
 	}
 
+	/*
+	 * Masonry (`grid`): desktop cols from numeric grid_type. automatic/missing
+	 * → conservative estimate (no stable column count).
+	 * Uniform / fit / parallax: numeric grid_type when set; otherwise columns
+	 * (matches settingsToConfig / layout CSS, where parallax may force
+	 * gridType=automatic while columns holds the real count).
+	 */
+	$grid_type_layouts = array( 'grid', 'uniform-grid', 'fit-grid', 'parallax-masonry' );
+	$uses_grid_type    = in_array( $type, $grid_type_layouts, true );
+
+	if ( $uses_grid_type ) {
+		$grid_type = modula_get_setting_value( $settings, 'grid_type', 'gridType', null );
+		if ( is_numeric( $grid_type ) ) {
+			$cols_desktop = absint( $grid_type );
+		} elseif ( 'grid' === $type ) {
+			return '(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 33vw';
+		} else {
+			$cols_desktop = absint( modula_get_setting_value( $settings, 'columns', 'columns', 4 ) );
+		}
+	} else {
+		$cols_desktop = absint( modula_get_setting_value( $settings, 'columns', 'columns', 4 ) );
+	}
+	$cols_desktop = max( 1, min( 12, $cols_desktop ? $cols_desktop : 4 ) );
+
 	$enable_responsive = (bool) modula_get_setting_value( $settings, 'enable_responsive', 'enableResponsive', false );
-	$cols_desktop      = absint( modula_get_setting_value( $settings, 'columns', 'columns', 4 ) );
-	$cols_desktop      = max( 1, min( 12, $cols_desktop ? $cols_desktop : 4 ) );
 
 	$cols_tablet = $enable_responsive
 		? absint( modula_get_setting_value( $settings, 'tablet_columns', 'tabletColumns', 2 ) )

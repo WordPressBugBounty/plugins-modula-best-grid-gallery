@@ -12,6 +12,11 @@ import {
 	buildPaginationLinkItems,
 	resolvePaginationNumber,
 } from '../utils/paginationFromSettings';
+import {
+	buildPaginationEdgeButtonClassName,
+	buildPaginationNavClassName,
+	buildPaginationPageButtonClassName,
+} from '../utils/paginationLegacyCssAliases';
 
 export default function PaginationControls() {
 	const pagination = useSelector((state) => state.pagination);
@@ -41,9 +46,7 @@ export default function PaginationControls() {
 		return () => observer.disconnect();
 	}, [pagination.mode, pagination.loading, pagination.hasMore, loadMore]);
 
-	const positionClass = config.paginationPosition
-		? ` modula-pagination--${config.paginationPosition}`
-		: '';
+	const position = config.paginationPosition || '';
 
 	if (pagination.mode === 'infinite-scroll') {
 		return (
@@ -70,7 +73,10 @@ export default function PaginationControls() {
 	if (pagination.mode === 'load-more') {
 		return (
 			<nav
-				className={`modula-pagination modula-pagination--load-more${positionClass}`}
+				className={buildPaginationNavClassName({
+					position,
+					loadMore: true,
+				})}
 				aria-label="Gallery pagination"
 				role="navigation"
 			>
@@ -100,12 +106,13 @@ export default function PaginationControls() {
 
 	return (
 		<nav
-			className={`modula-pagination${positionClass}`}
+			className={buildPaginationNavClassName({ position })}
 			aria-label="Gallery pagination"
 			role="navigation"
 		>
 			<button
 				type="button"
+				className={buildPaginationEdgeButtonClassName('prev')}
 				disabled={currentPage <= 1 || pagination.loading}
 				onClick={() => goToPage(currentPage - 1)}
 				aria-label="Previous page"
@@ -129,7 +136,9 @@ export default function PaginationControls() {
 					<button
 						key={`page-${p}`}
 						type="button"
-						className={p === currentPage ? 'active' : ''}
+						className={buildPaginationPageButtonClassName(
+							p === currentPage
+						)}
 						disabled={pagination.loading}
 						onClick={() => goToPage(p)}
 						aria-label={`Page ${p}`}
@@ -141,6 +150,7 @@ export default function PaginationControls() {
 			})}
 			<button
 				type="button"
+				className={buildPaginationEdgeButtonClassName('next')}
 				disabled={currentPage >= totalPages || pagination.loading}
 				onClick={() => goToPage(currentPage + 1)}
 				aria-label="Next page"

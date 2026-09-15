@@ -164,6 +164,14 @@
 	box-shadow: inset 0 0 0 1px currentColor;
 }
 
+.modula-gallery-listing__convert-toast {
+	position: fixed;
+	z-index: 100000;
+	bottom: 40px;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
 .modula-gallery-listing__toolbar-actions {
 	display: flex;
 	align-items: center;
@@ -1989,6 +1997,7 @@
 
 .modula-editor-choice-modal__dialog {
 	position: relative;
+	z-index: 1;
 	box-sizing: border-box;
 	width: min(920px, 100%);
 	max-height: calc(100vh - 48px);

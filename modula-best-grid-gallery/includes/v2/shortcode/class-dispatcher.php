@@ -29,6 +29,56 @@ class Dispatcher {
 
 		add_shortcode( 'modula', array( $this, 'render' ) );
 		add_shortcode( 'Modula', array( $this, 'render' ) );
+
+		// Early enqueue so page caches / builders that print head before shortcode still get assets.
+		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_visitor_assets_early' ), 20 );
+	}
+
+	/**
+	 * Enqueue modern visitor assets when the singular content embeds a Beta gallery,
+	 * or when viewing a Beta gallery singular.
+	 *
+	 * @return void
+	 */
+	public function maybe_enqueue_visitor_assets_early() {
+		if ( ! is_singular() ) {
+			return;
+		}
+
+		$post = get_queried_object();
+		if ( ! $post instanceof \WP_Post ) {
+			return;
+		}
+
+		if ( 'modula-gallery' === $post->post_type && \Modula\V2\Beta_Settings::is_beta_gallery( (int) $post->ID ) ) {
+			\Modula\V2\Modern_Gallery::enqueue_visitor_renderer_assets( array(), array(), false );
+			return;
+		}
+
+		$content = (string) $post->post_content;
+		if ( '' === $content ) {
+			return;
+		}
+
+		if ( ! has_shortcode( $content, 'modula' ) && ! has_shortcode( $content, 'Modula' ) ) {
+			return;
+		}
+
+		$pattern = get_shortcode_regex( array( 'modula', 'Modula' ) );
+		if ( ! preg_match_all( '/' . $pattern . '/s', $content, $matches ) ) {
+			return;
+		}
+
+		foreach ( $matches[3] as $atts_string ) {
+			$atts = shortcode_parse_atts( $atts_string );
+			if ( empty( $atts['id'] ) ) {
+				continue;
+			}
+			if ( \Modula\V2\Beta_Settings::is_beta_gallery( absint( $atts['id'] ) ) ) {
+				\Modula\V2\Modern_Gallery::enqueue_visitor_renderer_assets( array(), array(), false );
+				return;
+			}
+		}
 	}
 
 	/**
@@ -51,6 +101,14 @@ class Dispatcher {
 		if ( $gallery_id && \Modula\V2\Beta_Settings::is_beta_gallery( $gallery_id ) ) {
 			// Classic-first mix: another [modula] already ran the classic renderer this request.
 			if ( class_exists( 'Modula_Shortcode', false ) && \Modula_Shortcode::classic_stack_has_rendered() ) {
+				\Modula_Debug_Log::log_failure(
+					\Modula_Debug_Log::CHANNEL_SHORTCODE_BOOTSTRAP,
+					'beta gallery blocked by classic stack on page',
+					array(
+						'gallery_id' => $gallery_id,
+						'error_code' => 'mixed_stack',
+					)
+				);
 				return self::mixed_stack_error_html();
 			}
 			return $this->visitor_gallery->render( $atts );

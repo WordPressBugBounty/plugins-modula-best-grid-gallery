@@ -11,6 +11,7 @@ import {
 	normalizeUniformGridColumnSetting,
 } from 'gallery-shared/preview';
 import { normalizeCaptionsBelowImageDefaults } from './captionsBelowImageDefaults';
+import { hydrateEmptyGroupedPathsFromSchemaDefaults } from './effectiveSettingsValue';
 import { normalizeLoadingEffectsEnables } from './loadingEffectsEnableSideEffects';
 import { normalizeSocialEnableFromNetworks } from './socialEnableSideEffects';
 import { getModulaSettingsEditorConfig } from '../config/modulaSettingsEditorConfig';
@@ -204,4 +205,10 @@ export function normalizeGroupedDefaults(grouped) {
 			);
 		}
 	}
+
+	/*
+	 * After migrate/normalize, fill still-empty keys from schema defaults so
+	 * grouped settings (preview + save) match first-paint toggle/display state.
+	 */
+	hydrateEmptyGroupedPathsFromSchemaDefaults(grouped);
 }

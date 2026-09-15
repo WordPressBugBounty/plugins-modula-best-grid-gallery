@@ -3,6 +3,7 @@ import {
 	MODULA_LIGHTBOX_CAPTION_GUTTER,
 	resolveLightboxCaptionPositionAlignment,
 } from '../utils/lightboxSettingsToFancyboxOpts';
+import { galleryUsesFancyboxLightbox } from '../utils/resolveGalleryItemLink';
 import { galleryRootSelector } from '../utils/galleryRootSelector';
 import { getForcedPreviewViewport } from '../utils/resolvePreviewViewport';
 import { buildHoverCursorCss } from '../utils/hoverCursorCss';
@@ -605,7 +606,7 @@ export default function GalleryDynamicStyle() {
 
 	const lightboxType =
 		safeString(groupedLightbox.lightbox) || safeString(config.lightbox);
-	if (lightboxType === 'fancybox' || lightboxType === '') {
+	if (galleryUsesFancyboxLightbox(lightboxType) || lightboxType === '') {
 		const { alignSelf, textAlign } =
 			resolveLightboxCaptionPositionAlignment(
 				groupedLightbox.captionPosition

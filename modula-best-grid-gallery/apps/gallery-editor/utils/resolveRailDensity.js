@@ -1,18 +1,25 @@
 /**
- * Takeover sidebar rail density from hypothetical canvas leftover.
+ * Takeover sidebar layout measurement helpers.
  *
- * Leftover is computed as if the rail were comfortable, so compacting
- * the rail does not change the measurement (no oscillation).
+ * The sidebar rail is a fixed 72 CSS px icon-only column. Comfortable/compact
+ * density switching is retired; these fallbacks stay aligned with theme tokens
+ * (`--mod-se-rail-w` / `--mod-se-panel-w`) for any leftover math callers.
  */
 
-/** Layout fallbacks plus the compact leftover floor (`minLeftover`). */
-export const RAIL_DENSITY_FALLBACKS = {
-	railWidth: 232,
-	panelWidth: 404,
+/** Layout measurement fallbacks matching takeover theme tokens. */
+export const RAIL_LAYOUT_FALLBACKS = {
+	railWidth: 72,
+	panelWidth: 300,
 	stagePaddingX: 24,
-	/** Compact when hypothetical canvas leftover is below this (px). */
+	/**
+	 * Unused when density switching is retired. Kept so transitional callers
+	 * that still read `RAIL_DENSITY_FALLBACKS.minLeftover` do not throw.
+	 */
 	minLeftover: 1020,
 };
+
+/** @deprecated Use RAIL_LAYOUT_FALLBACKS. Kept for any transitional imports. */
+export const RAIL_DENSITY_FALLBACKS = RAIL_LAYOUT_FALLBACKS;
 
 /**
  * @param {string} value CSS length from getComputedStyle / a custom property.
@@ -38,33 +45,12 @@ export function parseCssPx(value) {
 }
 
 /**
- * @param {Object} props
- * @param {number} props.mountWidth    Workspace width in px.
- * @param {number} props.railWidth     Comfortable sidebar rail width in px.
- * @param {number} props.panelWidth    Settings panel width in px.
- * @param {number} [props.auxWidth=0]  Auxiliary column width in px.
- * @param {number} props.stagePaddingX Horizontal stage padding (both sides) in px.
- * @param {number} props.minLeftover   Canvas leftover floor in px.
- * @return {'comfortable'|'compact'} Rail density.
+ * @deprecated Automatic comfortable/compact rail switching is retired.
+ * Transitional callers may still import this; always returns `comfortable`
+ * so leftover-based oscillation cannot return.
+ *
+ * @return {'comfortable'}
  */
-export function resolveRailDensity({
-	mountWidth,
-	railWidth,
-	panelWidth,
-	auxWidth = 0,
-	stagePaddingX,
-	minLeftover,
-}) {
-	if (
-		typeof mountWidth !== 'number' ||
-		!Number.isFinite(mountWidth) ||
-		mountWidth <= 0
-	) {
-		return 'comfortable';
-	}
-
-	const leftover =
-		mountWidth - railWidth - panelWidth - auxWidth - stagePaddingX;
-
-	return leftover < minLeftover ? 'compact' : 'comfortable';
+export function resolveRailDensity() {
+	return 'comfortable';
 }

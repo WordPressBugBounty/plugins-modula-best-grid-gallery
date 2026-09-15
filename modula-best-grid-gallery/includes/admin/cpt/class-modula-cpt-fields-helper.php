@@ -367,10 +367,11 @@ class Modula_CPT_Fields_Helper {
 						'type'      => 'select',
 						'default'   => 'fancybox',
 						'values'    => array(
-							'no-link'      => esc_html__( 'No link', 'modula-best-grid-gallery' ),
-							'direct'       => esc_html__( 'Direct link to image', 'modula-best-grid-gallery' ),
-							'external-url' => esc_html__( 'External URL', 'modula-best-grid-gallery' ),
-							'fancybox'     => esc_html__( 'Open Images in a Lightbox', 'modula-best-grid-gallery' ),
+							'no-link'             => esc_html__( 'No link', 'modula-best-grid-gallery' ),
+							'direct'              => esc_html__( 'Direct link to image', 'modula-best-grid-gallery' ),
+							'external-url'        => esc_html__( 'Go to URL', 'modula-best-grid-gallery' ),
+							'fancybox'            => esc_html__( 'Open Images in a Lightbox', 'modula-best-grid-gallery' ),
+							'lightbox-prefer-url' => esc_html__( 'Lightbox, or link when set', 'modula-best-grid-gallery' ),
 
 						),
 						'priority'  => 1,

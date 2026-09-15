@@ -48,25 +48,39 @@ class Modula_Meta {
 	 * @since 2.8.0
 	 */
 	public function add_metas() {
-		// Check if we should add the meta information
-		if ( empty( $_GET['modula_image_id'] ) || empty( 'modula_gallery_id' ) ) {
+		// Check if we should add the meta information.
+		if ( empty( $_GET['modula_image_id'] ) || empty( $_GET['modula_gallery_id'] ) ) {
 			return;
 		}
-		// Retrieve the gallery
-		$gallery = get_post( $_GET['modula_gallery_id'] );
-		// Check if we have the correct post type
+
+		$image_id   = absint( wp_unslash( $_GET['modula_image_id'] ) );
+		$gallery_id = absint( wp_unslash( $_GET['modula_gallery_id'] ) );
+
+		if ( ! $image_id || ! $gallery_id ) {
+			return;
+		}
+
+		$gallery = get_post( $gallery_id );
+
+		// Correct post type and visitor-readable (publish or read_post). See ADR 0028.
 		if ( empty( $gallery ) || 'modula-gallery' !== $gallery->post_type ) {
 			return;
 		}
-		// Set variables
-		$image_id              = absint( $_GET['modula_image_id'] );
-		$gallery_id            = absint( $_GET['modula_gallery_id'] );
+
+		if ( ! Modula_Helper::is_visitor_readable_gallery( $gallery ) ) {
+			return;
+		}
+
 		$gallery_images        = get_post_meta( $gallery_id, 'modula-images', true );
 		$current_gallery_image = false;
 
-		// Cycle through the gallery images and find the one we need
+		if ( empty( $gallery_images ) || ! is_array( $gallery_images ) ) {
+			return;
+		}
+
+		// Cycle through the gallery images and find the one we need.
 		foreach ( $gallery_images as $gallery_image ) {
-			if ( absint( $gallery_image['id'] ) === absint( $image_id ) ) {
+			if ( absint( $gallery_image['id'] ) === $image_id ) {
 				$current_gallery_image = $gallery_image;
 				break;
 			}
@@ -96,9 +110,9 @@ class Modula_Meta {
 		// If there's a post, get the permalink.
 		$social_url = false;
 		if ( ! empty( $meta_post ) && $meta_post->ID ) {
-			$social_url = get_permalink( $meta_post->ID );
-			$social_url .= '?modula_gallery_id=' . intval( $_GET['modula_gallery_id'] );
-			$social_url .= '&modula_image_id=' . intval( $_GET['modula_image_id'] );
+			$social_url  = get_permalink( $meta_post->ID );
+			$social_url .= '?modula_gallery_id=' . $gallery_id;
+			$social_url .= '&modula_image_id=' . $image_id;
 		}
 		// Default to gallery title
 		$title = $gallery->post_title;

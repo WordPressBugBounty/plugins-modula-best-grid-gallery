@@ -94,7 +94,7 @@ export function resolveGalleryItemLink(itemData, config, ctx = {}) {
 
 	/*
 	 * Gallery “No link”: tiles are not clickable. Per-image URLs are ignored on
-	 * the tile (they only matter for External URL mode, or inside the lightbox
+	 * the tile (they only matter for Go to URL mode, or inside the lightbox
 	 * when Open in lightbox is selected).
 	 */
 	if (lightbox === '' || lightbox === 'no-link') {
@@ -114,6 +114,21 @@ export function resolveGalleryItemLink(itemData, config, ctx = {}) {
 		return {
 			showLink: true,
 			href,
+			isSimpleLink: true,
+			...(forceNewTab || opensInNewTab(itemData)
+				? { target: '_blank' }
+				: {}),
+		};
+	}
+
+	/*
+	 * Pre-3.0 Pro hybrid: custom URL skips Fancybox on that tile; otherwise
+	 * open lightbox. Distinct from external-url (no lightbox for URL-less items).
+	 */
+	if (lightbox === 'lightbox-prefer-url' && itemLink) {
+		return {
+			showLink: true,
+			href: itemLink,
 			isSimpleLink: true,
 			...(forceNewTab || opensInNewTab(itemData)
 				? { target: '_blank' }
@@ -182,6 +197,7 @@ export function resolveGalleryItemLink(itemData, config, ctx = {}) {
 
 /**
  * Lightbox modes that use a plain `<a href>` (no Fancybox open).
+ * Hybrid `lightbox-prefer-url` is not always-simple (per-item).
  *
  * @param {unknown} lightbox
  * @returns {boolean}
@@ -198,10 +214,22 @@ export function isSimpleGalleryLinkMode(lightbox) {
 }
 
 /**
+ * Whether the gallery lightbox stack (Fancybox bind, scripts, editor Opening/
+ * Controls) should be active for this click mode.
+ *
+ * @param {unknown} lightbox
+ * @returns {boolean}
+ */
+export function galleryUsesFancyboxLightbox(lightbox) {
+	const mode = typeof lightbox === 'string' ? lightbox.trim() : '';
+	return mode === 'fancybox' || mode === 'lightbox-prefer-url';
+}
+
+/**
  * Tile link overlay options for gallery-shared hosts.
  *
  * Settings-editor preview must never render a navigable tile `<a>` (Direct /
- * External URL / attachment-page included) so click opens Image edit.
+ * Go to URL / attachment-page included) so click opens Image edit.
  * Visitor galleries still render those links.
  *
  * @param {boolean} isPreviewContext Settings-editor preview display context.

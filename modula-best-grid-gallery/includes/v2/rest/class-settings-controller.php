@@ -393,6 +393,7 @@ class Settings_Controller {
 		$existing  = \Modula\V2\Meta_Sync::get_settings_v2( $id );
 		$merged    = self::merge_grouped_settings( $existing, $incoming );
 		$sanitized = \Modula\V2\Settings\Sanitizer::sanitize_grouped( $merged );
+		$sanitized = self::protect_gallery_filter_list_on_save( $existing, $incoming, $sanitized );
 
 		$json = wp_json_encode( $sanitized, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
 		update_post_meta( $id, \Modula\V2\Meta_Sync::SETTINGS_V2_META_KEY, wp_slash( false !== $json ? $json : '{}' ) );
@@ -440,6 +441,57 @@ class Settings_Controller {
 			$base[ $group ] = array_merge( $base[ $group ], $keys );
 		}
 		return $base;
+	}
+
+	/**
+	 * Keep a non-empty gallery filter list when sanitize fills schema placeholder defaults.
+	 *
+	 * @param array<string, array<string, mixed>> $existing  Grouped settings before merge.
+	 * @param array<string, array<string, mixed>> $incoming  Raw PATCH body.
+	 * @param array<string, array<string, mixed>> $sanitized Sanitized merged settings.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function protect_gallery_filter_list_on_save( array $existing, array $incoming, array $sanitized ) {
+		if ( ! function_exists( 'modula_resolve_gallery_filter_list_save' ) ) {
+			return $sanitized;
+		}
+
+		$key_present = isset( $incoming['filters'] ) && is_array( $incoming['filters'] )
+			&& array_key_exists( 'filters', $incoming['filters'] );
+
+		$existing_list = ( isset( $existing['filters'] ) && is_array( $existing['filters'] )
+			&& array_key_exists( 'filters', $existing['filters'] ) )
+			? $existing['filters']['filters']
+			: array( '' );
+
+		/*
+		 * Use the client payload when the key was present. Schema sanitize fills
+		 * default `['']` for empty arrays, which would block intentional clear.
+		 */
+		$incoming_list = $key_present ? $incoming['filters']['filters'] : null;
+
+		if ( ! isset( $sanitized['filters'] ) || ! is_array( $sanitized['filters'] ) ) {
+			$sanitized['filters'] = array();
+		}
+
+		$resolved = modula_resolve_gallery_filter_list_save(
+			$incoming_list,
+			$existing_list,
+			$key_present
+		);
+
+		if ( is_array( $resolved ) ) {
+			$resolved = array_map(
+				static function ( $entry ) {
+					return sanitize_text_field( (string) $entry );
+				},
+				$resolved
+			);
+		}
+
+		$sanitized['filters']['filters'] = $resolved;
+
+		return $sanitized;
 	}
 
 	/**

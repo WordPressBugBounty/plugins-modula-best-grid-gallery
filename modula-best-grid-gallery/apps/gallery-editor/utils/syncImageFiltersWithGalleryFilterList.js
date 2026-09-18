@@ -64,6 +64,10 @@ export function stripRemovedImageFiltersFromCoreItems(coreItems, removedNames) {
 /**
  * Remove image tags that no longer exist in the gallery filter list.
  *
+ * An empty gallery list must not mass-strip image tags (wiped-list repair
+ * path / empty placeholder). Only strip orphans when the gallery list has
+ * at least one real name.
+ *
  * @param {Object[]} coreItems Preview catalog (gallery items).
  * @param {string[]} galleryFilterNames Active gallery filter labels.
  * @return {{ items: Object[], changed: boolean }}
@@ -79,7 +83,12 @@ export function stripOrphanedImageFiltersFromCoreItems(
 		};
 	}
 
-	const allowed = new Set(galleryFilterNames);
+	const allowedNames = normalizeGalleryFilterNames(galleryFilterNames);
+	if (allowedNames.length === 0) {
+		return { items: coreItems, changed: false };
+	}
+
+	const allowed = new Set(allowedNames);
 	const removedNames = [];
 
 	for (const row of coreItems) {

@@ -24,6 +24,13 @@ class Meta_Sync {
 	 */
 	private static $internal_modula_images_write = false;
 
+	/**
+	 * When true, skip recursive meta hooks while repairing gallery filter lists.
+	 *
+	 * @var bool
+	 */
+	private static $internal_filter_list_repair = false;
+
 	/** Meta key for grouped settings (v2). */
 	const SETTINGS_V2_META_KEY = 'modula_settings_v2';
 
@@ -171,6 +178,9 @@ class Meta_Sync {
 	 * @param mixed  $meta_value Meta value that was just saved.
 	 */
 	public static function on_updated_post_meta( $meta_id, $post_id, $meta_key, $meta_value ) {
+		if ( self::$internal_filter_list_repair ) {
+			return;
+		}
 		if ( get_post_type( $post_id ) !== 'modula-gallery' ) {
 			return;
 		}
@@ -688,6 +698,8 @@ class Meta_Sync {
 	 * @return array<string, array<string, mixed>>
 	 */
 	public static function get_settings_v2( $post_id ) {
+		self::maybe_repair_gallery_filter_list( $post_id );
+
 		$raw = get_post_meta( $post_id, self::SETTINGS_V2_META_KEY, true );
 		if ( is_string( $raw ) ) {
 			$decoded = json_decode( $raw, true );
@@ -696,6 +708,77 @@ class Meta_Sync {
 			$out = is_array( $raw ) ? $raw : array();
 		}
 		return self::normalize_settings_v2_read( $out );
+	}
+
+	/**
+	 * Refill a wiped gallery filter name list from per-image tags and persist flat + grouped.
+	 *
+	 * @param int $post_id Gallery post ID.
+	 * @return bool True when a repair was persisted.
+	 */
+	public static function maybe_repair_gallery_filter_list( $post_id ) {
+		if ( self::$internal_filter_list_repair ) {
+			return false;
+		}
+		if ( ! function_exists( 'modula_maybe_repair_gallery_filter_list' ) ) {
+			return false;
+		}
+
+		$post_id = absint( $post_id );
+		if ( ! $post_id ) {
+			return false;
+		}
+
+		$flat = get_post_meta( $post_id, 'modula-settings', true );
+		if ( ! is_array( $flat ) ) {
+			$flat = array();
+		}
+
+		$stored = array_key_exists( 'filters', $flat ) ? $flat['filters'] : array( '' );
+
+		$images = get_post_meta( $post_id, 'modula-images', true );
+		$result = modula_maybe_repair_gallery_filter_list(
+			$stored,
+			is_array( $images ) ? $images : array()
+		);
+
+		if ( empty( $result['repaired'] ) ) {
+			return false;
+		}
+
+		$flat['filters'] = $result['list'];
+
+		self::$internal_filter_list_repair = true;
+		try {
+			update_post_meta( $post_id, 'modula-settings', $flat );
+
+			$v2 = self::read_settings_v2_raw( $post_id );
+			if ( ! isset( $v2['filters'] ) || ! is_array( $v2['filters'] ) ) {
+				$v2['filters'] = array();
+			}
+			$v2['filters']['filters'] = $result['list'];
+			$json                     = wp_json_encode( $v2, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+			self::update_json_post_meta( $post_id, self::SETTINGS_V2_META_KEY, false !== $json ? $json : '{}' );
+		} finally {
+			self::$internal_filter_list_repair = false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Decode settings v2 without triggering repair (avoids recursion).
+	 *
+	 * @param int $post_id Gallery post ID.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function read_settings_v2_raw( $post_id ) {
+		$raw = get_post_meta( $post_id, self::SETTINGS_V2_META_KEY, true );
+		if ( is_string( $raw ) ) {
+			$decoded = json_decode( $raw, true );
+			return is_array( $decoded ) ? $decoded : array();
+		}
+		return is_array( $raw ) ? $raw : array();
 	}
 
 	/**

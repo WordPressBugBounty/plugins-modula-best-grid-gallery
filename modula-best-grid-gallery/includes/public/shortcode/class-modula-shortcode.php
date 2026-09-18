@@ -228,7 +228,10 @@ class Modula_Shortcode {
 
 		self::$classic_stack_rendered = true;
 
-		/* Get gallery settings */
+		/* Get gallery settings — repair wiped filter lists before visitor consume. */
+		if ( class_exists( '\Modula\V2\Meta_Sync' ) ) {
+			\Modula\V2\Meta_Sync::maybe_repair_gallery_filter_list( (int) $atts['id'] );
+		}
 		$settings = apply_filters( 'modula_backwards_compatibility_front', get_post_meta( $atts['id'], 'modula-settings', true ), $atts );
 
 		unset( $raw_atts['id'], $raw_atts['align'] );

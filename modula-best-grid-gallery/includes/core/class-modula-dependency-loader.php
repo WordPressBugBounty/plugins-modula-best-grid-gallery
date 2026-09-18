@@ -25,6 +25,7 @@ class Modula_Dependency_Loader
 			'core/helpers/modula-compatible-pro.php',
 			'core/helpers/modula-attachment-text-write.php',
 			'core/helpers/modula-classic-images-save.php',
+			'core/helpers/modula-gallery-filter-list.php',
 			'core/helpers/class-modula-helper.php',
 			'admin/media/class-modula-image.php',
 			'core/assets/class-modula-script-manager.php',

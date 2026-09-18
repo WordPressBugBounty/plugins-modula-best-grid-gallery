@@ -1,3 +1,7 @@
+= 3.0.6 - 18.09.2026 =
+Fixed: Gallery filter name list is no longer wiped to empty/placeholder on classic or Beta save while image tags remain; already-wiped galleries refill the list from per-image tags.
+Info: Read more about Modula 3.0 Beta: https://wp-modula.com/modula-3-0-beta/
+
 = 3.0.5 - 18.09.2026 =
 Fixed: Frontend Edit gallery link no longer triggers an undefined array key warning on classic (`jtg-`) galleries.
 Fixed: Gallery listing shows gallery type product names from the settings schema (Masonry for type `grid`, not Grid).

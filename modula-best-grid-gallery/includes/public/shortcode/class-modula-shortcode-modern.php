@@ -166,6 +166,10 @@ class Modula_Shortcode_Modern {
 	private function get_gallery_settings( $gallery_id, $align ) {
 		$gallery_id_string = 'modula-' . $gallery_id;
 
+		if ( class_exists( '\Modula\V2\Meta_Sync' ) ) {
+			\Modula\V2\Meta_Sync::maybe_repair_gallery_filter_list( (int) $gallery_id );
+		}
+
 		// Get raw settings
 		$settings = apply_filters(
 			'modula_backwards_compatibility_front',

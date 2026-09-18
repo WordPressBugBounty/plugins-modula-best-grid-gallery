@@ -17,7 +17,6 @@ import {
 	SettingsRow,
 	StatePill,
 	Switch,
-	Textarea,
 	TextInput,
 } from 'shared-ui';
 import { isWpTruthy } from '../../logic/wpTruthy';
@@ -46,6 +45,7 @@ import SettingsPanelHeader from '../sidebar/settings-panel/SettingsPanelHeader';
 import SettingsPanelSection from '../sidebar/settings-panel/SettingsPanelSection';
 import WatermarkActionButtonSlot from '../field/WatermarkActionButtonSlot';
 import MetadataFiltersAutocompleteControl from '../field/MetadataFiltersAutocompleteControl';
+import WpClassicCaptionEditor from '../field/WpClassicCaptionEditor';
 import GalleryItemAiGenerateButton from './GalleryItemAiGenerateButton';
 import ImageMetadataAiSparkleIcon from '../image-metadata-modal/ImageMetadataAiSparkleIcon';
 
@@ -519,14 +519,20 @@ export default function GalleryItemEditPanel({ storeIndex }) {
 									'Caption',
 									'modula-best-grid-gallery'
 								)}
-								htmlFor={`${baseId}-caption`}
 								labelEnd={renderAiFieldEnd('caption')}
 							>
-								<Textarea
-									id={`${baseId}-caption`}
-									rows={3}
+								<WpClassicCaptionEditor
+									editorInstanceKey={`${storeIndex}-${attachmentId}`}
 									value={field.state.value ?? ''}
 									onChange={(v) => field.handleChange(v)}
+									disabled={false}
+									accessibleLabel={__(
+										'Caption',
+										'modula-best-grid-gallery'
+									)}
+									rows={4}
+									preventInitFocus
+									enableCodeView
 								/>
 							</FieldStack>
 						)}

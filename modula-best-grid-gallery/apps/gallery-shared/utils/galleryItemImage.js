@@ -93,13 +93,90 @@ export const MODULA_IMG_FOCAL_CROP_CLASS = 'modula-item-img--focal-crop';
 export const MODULA_IMG_FOCAL_POINT_CLASS = 'modula-item-img--focal-point';
 
 /**
+ * Format responsive sizes from three vw terms + config breakpoints.
+ *
+ * @param {Object} config Flat gallery config.
+ * @param {string} mobileVw Mobile term.
+ * @param {string} tabletVw Tablet term.
+ * @param {string} desktopVw Desktop term.
+ * @return {string}
+ */
+function formatResponsiveImageSizes(config, mobileVw, tabletVw, desktopVw) {
+	const phoneUnder = (() => {
+		const n = parseInt(config?.treatAsPhoneUnder ?? 600, 10);
+		return Number.isFinite(n) && n > 0 ? n : 600;
+	})();
+	let tabletUnder = (() => {
+		const n = parseInt(config?.treatAsTabletUnder ?? 1024, 10);
+		return Number.isFinite(n) && n > 0 ? n : 1024;
+	})();
+	if (tabletUnder <= phoneUnder) {
+		tabletUnder = phoneUnder + 1;
+	}
+
+	return `(max-width: ${phoneUnder}px) ${mobileVw}, (max-width: ${tabletUnder}px) ${tabletVw}, ${desktopVw}`;
+}
+
+/**
+ * @param {number} cols Column count.
+ * @return {string}
+ */
+function columnsToVwTerm(cols) {
+	return `${Math.round((100 / Math.max(1, cols)) * 100) / 100}vw`;
+}
+
+/**
+ * Custom-grid data-width is on a fixed 12-unit base.
+ *
+ * @param {number} span Span width 1–12.
+ * @return {string}
+ */
+function customGridSpanToVwTerm(span) {
+	const clamped = Math.max(1, Math.min(12, Math.floor(span) || 1));
+	return `${Math.round(((100 * clamped) / 12) * 100) / 100}vw`;
+}
+
+/**
+ * @param {unknown} value Raw span.
+ * @return {number|undefined}
+ */
+export function parseCustomGridSpanWidth(value) {
+	const n = parseInt(value, 10);
+	if (!Number.isFinite(n) || n < 1) {
+		return undefined;
+	}
+	return Math.min(12, n);
+}
+
+/**
+ * Estimate sizes for a custom-grid tile from its 12-unit span.
+ *
+ * @param {Object} config Flat gallery config.
+ * @param {number} span Span width 1–12.
+ * @return {string}
+ */
+export function estimateCustomGridSpanSizes(config, span) {
+	const spanVw = customGridSpanToVwTerm(span);
+	const enableResponsive = Boolean(config?.enableResponsive);
+	const mobileCols = enableResponsive
+		? parseInt(config?.mobileColumns ?? 1, 10)
+		: 0;
+	const mobileVw =
+		enableResponsive && Number.isFinite(mobileCols) && mobileCols === 1
+			? '100vw'
+			: spanVw;
+	return formatResponsiveImageSizes(config || {}, mobileVw, spanVw, spanVw);
+}
+
+/**
  * Estimate a sizes attribute from gallery column breakpoints (eager images).
  * Lazy images should prefer `auto` instead.
  *
  * @param {Object|null|undefined} config Flat gallery config.
+ * @param {number|null|undefined} [spanWidth] Custom-grid 12-unit span when known.
  * @return {string|undefined} Column-based sizes string when estimable.
  */
-export function estimateGalleryImageSizes(config) {
+export function estimateGalleryImageSizes(config, spanWidth) {
 	if (!config || typeof config !== 'object') {
 		return undefined;
 	}
@@ -110,6 +187,27 @@ export function estimateGalleryImageSizes(config) {
 	}
 	if (type === 'template') {
 		return '(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw';
+	}
+
+	const parsedSpan = parseCustomGridSpanWidth(spanWidth);
+	if (type === 'custom-grid' && parsedSpan) {
+		return estimateCustomGridSpanSizes(config, parsedSpan);
+	}
+
+	/*
+	 * Custom-grid packing columns ≠ visual column count. Without a span,
+	 * prefer a conservative half-width estimate over 100/columns.
+	 */
+	if (type === 'custom-grid') {
+		const enableResponsive = Boolean(config.enableResponsive);
+		const mobileCols = enableResponsive
+			? parseInt(config.mobileColumns ?? 1, 10)
+			: 0;
+		const mobileVw =
+			enableResponsive && Number.isFinite(mobileCols) && mobileCols === 1
+				? '100vw'
+				: '50vw';
+		return formatResponsiveImageSizes(config, mobileVw, '50vw', '50vw');
 	}
 
 	const clampCols = (value, fallback) => {
@@ -153,46 +251,44 @@ export function estimateGalleryImageSizes(config) {
 		? clampCols(config.mobileColumns ?? 1, colsDesktop)
 		: colsDesktop;
 
-	const phoneUnder = (() => {
-		const n = parseInt(config.treatAsPhoneUnder ?? 600, 10);
-		return Number.isFinite(n) && n > 0 ? n : 600;
-	})();
-	let tabletUnder = (() => {
-		const n = parseInt(config.treatAsTabletUnder ?? 1024, 10);
-		return Number.isFinite(n) && n > 0 ? n : 1024;
-	})();
-	if (tabletUnder <= phoneUnder) {
-		tabletUnder = phoneUnder + 1;
-	}
-
-	const vw = (cols) =>
-		`${Math.round((100 / Math.max(1, cols)) * 100) / 100}vw`;
-
-	return `(max-width: ${phoneUnder}px) ${vw(colsMobile)}, (max-width: ${tabletUnder}px) ${vw(colsTablet)}, ${vw(colsDesktop)}`;
+	return formatResponsiveImageSizes(
+		config,
+		columnsToVwTerm(colsMobile),
+		columnsToVwTerm(colsTablet),
+		columnsToVwTerm(colsDesktop)
+	);
 }
 
 /**
  * Compute effective sizes attribute for <img>/<source>.
  *
- * Priority: measured/layout slot width → sizes="auto" when lazy → column
- * estimate → server sizes. Never use attachment/file pixel width (that made
- * browsers pick 2×–4× oversized srcset candidates in multi-column grids).
+ * Priority: measured/layout slot width → sizes="auto" when lazy → custom-grid
+ * span estimate → column estimate → server sizes. Never use attachment/file
+ * pixel width (that made browsers pick 2×–4× oversized srcset candidates in
+ * multi-column grids).
  *
  * @param {Object}                params
  * @param {number|null|undefined} params.slotWidth
  * @param {string}                [params.imageSizes] Server-provided sizes string
  * @param {unknown}               [params.lazyLoad]
  * @param {Object|null|undefined} [params.config]
+ * @param {number|null|undefined} [params.spanWidth] Custom-grid 12-unit span
  * @return {string|undefined} Effective `sizes` string when derivable.
  */
-export function getEffectiveSizes({ slotWidth, imageSizes, lazyLoad, config }) {
+export function getEffectiveSizes({
+	slotWidth,
+	imageSizes,
+	lazyLoad,
+	config,
+	spanWidth,
+}) {
 	if (isValidPositiveNumber(slotWidth)) {
 		return `${Math.round(Number(slotWidth))}px`;
 	}
 	if (isLazyLoadEnabled(lazyLoad)) {
 		return 'auto';
 	}
-	const estimated = estimateGalleryImageSizes(config);
+	const estimated = estimateGalleryImageSizes(config, spanWidth);
 	if (estimated) {
 		return estimated;
 	}

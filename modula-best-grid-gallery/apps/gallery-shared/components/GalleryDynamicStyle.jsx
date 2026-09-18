@@ -20,7 +20,10 @@ import {
 } from '../utils/sliderCaptionPosition';
 import { isGalleryTypeWithoutLoadingEffects } from '../constants/galleryLayoutDefaults';
 import {
+	resolvePolaroidChinCaptionSize,
 	resolvePolaroidChinInset,
+	resolvePolaroidChinTitleSize,
+	resolvePolaroidChinTopSpacing,
 	resolvePolaroidEffectiveChinHeight,
 } from '../utils/polaroidCaptionChin';
 import { selectGalleryDynamicStyleInputs } from '../store/selectors/galleryShellSelectors';
@@ -307,30 +310,35 @@ export default function GalleryDynamicStyle() {
 		css += `${root} .modula-item.modula-caption-below-image .modula-item-below-caption{flex:0 0 auto;width:100%;}`;
 		css += `${root} .modula-item.modula-caption-below-image .modula-item-below-caption{margin-top:${belowSpacing}px;padding:${belowPadding}px;text-align:${belowAlign};}`;
 		if (safeString(config.type) === 'polaroid') {
-			const polaroidChinHeight = resolvePolaroidEffectiveChinHeight(
-				safeNumber(config.polaroid?.chinHeight) ?? 36
-			);
 			const polaroidFramePadding = Math.min(
 				28,
 				Math.max(4, safeNumber(config.polaroid?.framePadding) ?? 12)
 			);
-			const polaroidChinInset =
-				resolvePolaroidChinInset(polaroidFramePadding);
+			const polaroidChinInset = resolvePolaroidChinInset(
+				polaroidFramePadding,
+				belowPadding
+			);
+			const polaroidTopSpacing =
+				resolvePolaroidChinTopSpacing(belowSpacing);
+			const polaroidTitleSize = resolvePolaroidChinTitleSize(titleSize);
+			const polaroidCaptionSize =
+				resolvePolaroidChinCaptionSize(captionSize);
+			const polaroidChinHeight = resolvePolaroidEffectiveChinHeight(
+				safeNumber(config.polaroid?.chinHeight) ?? 36,
+				{
+					topSpacing: polaroidTopSpacing,
+					inset: polaroidChinInset,
+					titleFontSize: polaroidTitleSize,
+					captionFontSize: polaroidCaptionSize,
+				}
+			);
 			const polaroidItemSel = `${root} .modula-polaroid-gallery--caption-in-chin .modula-polaroid-frame__media .modula-item.modula-caption-below-image`;
 			const polaroidBelowSel = `${polaroidItemSel} .modula-item-below-caption--polaroid-chin`;
 			const polaroidTitleSel = `${polaroidBelowSel} .modula-title`;
 			const polaroidCaptionSel = `${polaroidBelowSel} .jtg-description,${polaroidBelowSel} .jtg-description p`;
 			css += `${polaroidItemSel}{display:grid;grid-template-rows:minmax(0,1fr) ${polaroidChinHeight}px;height:100%;min-height:0;}`;
 			css += `${polaroidItemSel} .modula-item-image-area{grid-row:1;flex:none;min-height:0;overflow:hidden;}`;
-			css += `${polaroidBelowSel}{grid-row:2;flex:none;height:${polaroidChinHeight}px;max-height:${polaroidChinHeight}px;margin-top:0;padding:4px ${polaroidChinInset}px ${polaroidChinInset}px;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:1px;text-align:${belowAlign};line-height:1.25;font-size:12px;}`;
-			const polaroidTitleSize =
-				titleSize && titleSize > 0
-					? Math.min(Math.round(titleSize), 13)
-					: 12;
-			const polaroidCaptionSize =
-				captionSize && captionSize > 0
-					? Math.min(Math.round(captionSize), 13)
-					: 12;
+			css += `${polaroidBelowSel}{grid-row:2;flex:none;height:${polaroidChinHeight}px;max-height:${polaroidChinHeight}px;margin-top:0;padding:${polaroidTopSpacing}px ${polaroidChinInset}px ${polaroidChinInset}px;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:1px;text-align:${belowAlign};line-height:1.25;}`;
 			css += `${polaroidTitleSel},${polaroidCaptionSel}{margin:0;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;line-clamp:1;}`;
 			css += `${polaroidTitleSel}{font-size:${polaroidTitleSize}px;}`;
 			css += `${polaroidCaptionSel}{font-size:${polaroidCaptionSize}px;}`;

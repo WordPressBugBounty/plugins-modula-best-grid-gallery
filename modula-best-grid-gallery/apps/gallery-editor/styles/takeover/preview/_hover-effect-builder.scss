@@ -786,8 +786,9 @@
 }
 
 /*
- * Preview: simulate the hovered card via `.is-forced-hover` (Preview tab) plus real
- * :hover / :focus-within. Disable editing only on controls.
+ * Preview: rest vs hover like the visitor tile (`:hover` / `:focus-within`).
+ * Do not leave `.is-forced-hover` on for the whole Preview tab — on-hover captions
+ * stay hidden at rest. Disable editing only on controls.
  * Slot chips live in __image-slot (not .figc) — mirror entrance presets for that DOM.
  */
 .modula-hover-builder-card-shell.is-preview-mode {
@@ -801,12 +802,17 @@
 		visibility: visible;
 	}
 
+	.modula-item,
+	.modula-hover-builder-card__media {
+		pointer-events: auto;
+	}
+
 	.modula-hover-builder-card__select-card,
 	.modula-hover-builder-card__image-slot {
 		pointer-events: none;
 	}
 
-	/* Preview tab is the hovered card — dim + zoom without requiring a mouse hover. */
+	/* Dim + zoom follow pointer hover (same as visitor). */
 	.modula-item.modula-hover-v2.modula-hover-card--dim .modula-item-overlay,
 	.modula-item.modula-hover-v2.modula-hover-card--dim-addon .modula-item-overlay {
 		background-color: var(--modula-hover-overlay-tint, rgba(0, 0, 0, 0.55));

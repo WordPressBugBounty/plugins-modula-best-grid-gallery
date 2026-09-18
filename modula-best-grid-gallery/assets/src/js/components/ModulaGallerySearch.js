@@ -5,7 +5,11 @@ export const ModulaGallerySearch = (props) => {
 	const inputRef = useRef(null);
 
 	useEffect(() => {
-		let galleriesArray = [];
+		if (!inputRef.current) {
+			return undefined;
+		}
+
+		const galleriesArray = [];
 		if (galleries != undefined && 0 == galleriesArray.length) {
 			galleries.forEach((gallery) => {
 				galleriesArray.push({
@@ -14,7 +18,9 @@ export const ModulaGallerySearch = (props) => {
 				});
 			});
 		}
-		jQuery(inputRef.current).selectize({
+
+		const $input = jQuery(inputRef.current);
+		$input.selectize({
 			valueField: 'value',
 			labelField: 'label',
 			searchField: ['label', 'value'],
@@ -24,9 +30,13 @@ export const ModulaGallerySearch = (props) => {
 			preload: true,
 			allowEmptyOptions: true,
 			closeAfterSelect: true,
+			// Portal outside `.modula-block-preview { overflow: hidden }` so the
+			// list can scroll without clipping or closing on scrollbar click.
+			dropdownParent: 'body',
+			dropdownClass: 'selectize-dropdown modula-gallery-picker-dropdown',
 			options: options.concat(galleriesArray),
 			render: {
-				option: function (item, escape) {
+				option(item, escape) {
 					return (
 						'<div>' +
 						'<span className="title">' +
@@ -38,7 +48,7 @@ export const ModulaGallerySearch = (props) => {
 					);
 				},
 			},
-			load: function (query, callback) {
+			load(query, callback) {
 				if (!query.length) {
 					return callback();
 				}
@@ -60,6 +70,12 @@ export const ModulaGallerySearch = (props) => {
 				onIdChange(value);
 			},
 		});
+
+		return () => {
+			if ($input[0] && $input[0].selectize) {
+				$input[0].selectize.destroy();
+			}
+		};
 	}, []);
 
 	return (

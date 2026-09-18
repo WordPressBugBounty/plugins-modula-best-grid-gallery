@@ -29,7 +29,7 @@
 
 .modula-gallery-takeover__topbar-inner {
 	display: grid;
-	grid-template-columns: 1fr minmax(0, 420px) 1fr;
+	grid-template-columns: minmax(0, 1fr) auto;
 	align-items: center;
 	min-height: 50px;
 	padding: $mod-space-8 $mod-space-16;
@@ -41,14 +41,17 @@
 	display: flex;
 	align-items: center;
 	gap: $mod-space-8;
-	justify-self: start;
+	justify-self: stretch;
 	min-width: 0;
 }
 
 .modula-gallery-takeover__topbar-left-cluster {
 	display: inline-flex;
 	align-items: center;
-	flex-wrap: wrap;
+	flex-shrink: 0;
+	padding-right: $mod-space-16;
+	margin-right: $mod-space-4;
+	border-right: 1px solid var(--mod-se-chrome-border);
 	gap: $mod-space-2;
 	min-width: 0;
 }
@@ -94,7 +97,8 @@
 	text-transform: none;
 	white-space: nowrap;
 	color: var(--mod-se-chrome-ink-secondary, rgb(255 255 255 / 88%));
-	border-radius: $mod-space-2;
+	border-radius: $mod-radius-4;
+	background: var(--mod-se-hover-overlay, rgb(255 255 255 / 8%));
 
 	svg {
 		display: block;
@@ -142,24 +146,15 @@
 	justify-content: center;
 }
 
-.modula-gallery-takeover__topbar-center {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	text-align: center;
+.modula-gallery-takeover__topbar-title {
+	flex: 0 1 clamp(280px, 26vw, 500px);
 	min-width: 0;
-	width: 100%;
-	justify-self: center;
-	max-width: 100%;
-	overflow: visible;
-	position: relative;
-	z-index: 2;
-	line-height: 1.2;
+	max-width: 500px;
 }
 
 .modula-gallery-takeover__topbar-title-field {
 	width: 100%;
-	max-width: min(100%, 420px);
+	max-width: 100%;
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
@@ -167,16 +162,17 @@
 	gap: $mod-space-4;
 }
 
-// Document title — rest is bare text; hover/focus opens a surface box + pencil.
+// The hidden text sizes the editable title to its contents, capped by available space.
 .modula-gallery-takeover__topbar-title-row {
-	display: flex;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
 	align-items: center;
-	justify-content: center;
+	justify-content: start;
 	gap: $mod-space-4;
 	width: 100%;
 	min-width: 0;
 	min-height: $mod-space-32;
-	padding: 0 $mod-space-12;
+	padding: 0 $mod-space-4;
 	line-height: 1.2;
 	border-radius: 0;
 	background: var(--mod-se-topbar-title-pill-bg, transparent);
@@ -193,6 +189,19 @@
 	}
 }
 
+.modula-gallery-takeover__topbar-title-size {
+	grid-area: 1 / 1;
+	visibility: hidden;
+	white-space: pre;
+	font-family: var(--mod-se-font-ui, inherit);
+	font-size: 16px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	line-height: 1.25;
+	min-width: 0;
+	overflow: hidden;
+}
+
 .modula-gallery-takeover__topbar-title-pencil {
 	flex-shrink: 0;
 	display: inline-flex;
@@ -207,8 +216,8 @@
 	background: transparent !important;
 	color: var(--mod-se-ink-3, var(--mod-se-chrome-ink-muted));
 	cursor: pointer;
-	opacity: 0;
-	pointer-events: none;
+	grid-area: 1 / 2;
+	opacity: 1;
 	transition:
 		color var(--mod-se-duration-fast, 0.12s) ease,
 		opacity var(--mod-se-duration-fast, 0.12s) ease;
@@ -244,9 +253,10 @@
 .modula-gallery-takeover__topbar input.modula-gallery-takeover__topbar-title-input,
 .modula-gallery-takeover__topbar input[type='text'].modula-gallery-takeover__topbar-title-input {
 	display: block;
+	grid-area: 1 / 1;
 	flex: 1 1 auto;
-	width: 100%;
-	min-width: 0;
+	width: 0;
+	min-width: 100%;
 	max-width: 100%;
 	margin: 0;
 	padding: 0 !important;
@@ -260,7 +270,7 @@
 	min-height: 0 !important;
 	max-height: none;
 	color: var(--mod-se-ink, var(--mod-se-chrome-ink)) !important;
-	text-align: center;
+	text-align: left;
 	vertical-align: baseline;
 	appearance: none;
 	-webkit-appearance: none;
@@ -444,30 +454,83 @@
 }
 
 .modula-gallery-takeover__topbar-document-status {
+	position: relative;
+	padding-left: $mod-space-12;
+	border-left: 1px solid var(--mod-se-chrome-border);
 	flex-shrink: 0;
 	min-width: 0;
 
-	.modula-ui-select {
-		min-width: 120px;
-		width: auto;
-	}
+}
 
-	/* Match topbar shortcode field height (28px), not settings-panel 34px select. */
-	.modula-ui-select__field {
-		height: $mod-space-28 !important;
-		min-height: $mod-space-28 !important;
-		max-height: $mod-space-28 !important;
-		padding: 0 28px 0 $mod-space-10 !important;
-		line-height: #{ $mod-space-28 - 2 } !important;
-		font-size: 12px !important;
-		font-weight: 400 !important;
-		border-color: var(--mod-se-topbar-input-border, var(--mod-se-line)) !important;
-		background: var(--mod-se-topbar-input-bg, var(--mod-se-chrome-2)) !important;
-		color: var(--mod-se-ink-2, var(--mod-se-flyout-ink)) !important;
-	}
+.modula-gallery-takeover__topbar-document-status-trigger {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	min-width: 120px;
+	height: 28px;
+	padding: 0 8px 0 28px;
+	border: 1px solid var(--mod-se-topbar-input-border, var(--mod-se-line));
+	border-radius: 4px;
+	background: var(--mod-se-topbar-input-bg, var(--mod-se-chrome-2));
+	color: var(--mod-se-ink-2);
+	font: inherit;
+	font-size: 12px;
+	cursor: pointer;
 
-	.modula-ui-select__caret {
-		right: $mod-space-10;
+	svg { fill: currentColor; }
+	&:disabled { opacity: 0.5; cursor: not-allowed; }
+	&:focus-visible { outline: 2px solid var(--modula-takeover-accent); outline-offset: 2px; }
+}
+
+.modula-gallery-takeover__topbar-document-status-menu {
+	position: absolute;
+	top: calc(100% + 6px);
+	right: 0;
+	z-index: 100003;
+	width: 168px;
+	padding: 5px;
+	border: 1px solid var(--mod-se-flyout-border);
+	border-radius: 8px;
+	background: var(--mod-se-flyout-bg);
+	box-shadow: var(--mod-se-palette-shadow, 0 8px 28px rgb(0 0 0 / 30%));
+
+	button {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		min-height: 34px;
+		padding: 6px 10px;
+		border: 0;
+		border-radius: 4px;
+		background: transparent;
+		color: var(--mod-se-flyout-ink);
+		font: inherit;
+		font-size: 13px;
+		text-align: left;
+		cursor: pointer;
+		svg { fill: currentColor; color: var(--mod-se-good); }
+		&:hover:not(:disabled), &:focus-visible { background: var(--mod-se-flyout-row-hover); outline: none; }
+		&[aria-checked='true'] { background: var(--mod-se-press-overlay); }
+		&:disabled { opacity: 0.5; cursor: not-allowed; }
+	}
+}
+
+.modula-gallery-takeover__topbar-document-status-dot {
+	position: absolute;
+	left: 24px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--mod-se-ink-3);
+	pointer-events: none;
+	z-index: 1;
+
+	[data-status='publish'] > & {
+		background: var(--mod-se-good);
 	}
 }
 
@@ -744,10 +807,10 @@
 	right: 0;
 	top: calc(100% + #{$mod-space-6});
 	z-index: 100003;
-	width: min(360px, 92vw);
+	width: min(400px, calc(100vw - 32px));
 	max-height: min(70vh, 440px);
 	overflow-y: auto;
-	padding: $mod-space-10;
+	padding: $mod-space-16;
 	margin: 0;
 	box-sizing: border-box;
 	color-scheme: inherit;
@@ -759,36 +822,55 @@
 	scrollbar-width: thin;
 }
 
-.modula-gallery-takeover__topbar-shortcodes-dropdown-row {
-	padding-top: $mod-space-10;
-
-	&:first-child {
-		padding-top: 0;
-	}
-
-	&+& {
-		margin-top: $mod-space-10;
-		padding-top: $mod-space-10;
-		border-top: 1px solid var(--mod-se-flyout-border, rgba(255, 255, 255, 0.1));
-	}
+.modula-gallery-takeover__topbar-shortcodes-heading {
+	margin: 0 0 16px;
+	font-size: 18px;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--mod-se-flyout-ink);
 }
 
-.modula-gallery-takeover__topbar-shortcodes-dropdown-label {
-	font-size: 11px;
-	font-weight: 600;
-	letter-spacing: 0.02em;
-	color: var(--mod-se-flyout-ink, rgba(255, 255, 255, 0.88));
-	margin-bottom: $mod-space-6;
+.modula-gallery-takeover__topbar-shortcodes-tabs {
+	display: flex;
+	gap: 4px;
+	padding: 4px;
+	margin-bottom: 16px;
+	border-radius: 8px;
+	background: var(--mod-se-hover-overlay);
+
+	button {
+		flex: 1 1 auto;
+		padding: 8px;
+		border: 0;
+		border-radius: 6px;
+		background: transparent;
+		color: var(--mod-se-flyout-ink-muted);
+		font: inherit;
+		font-size: 12px;
+		line-height: 1.3;
+		cursor: pointer;
+
+		&[aria-selected='true'] {
+			background: var(--mod-se-press-overlay);
+			color: var(--mod-se-flyout-ink);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--modula-takeover-accent);
+			outline-offset: 1px;
+		}
+	}
 }
 
 .modula-gallery-takeover__topbar-shortcodes-dropdown-field {
 	display: flex;
-	align-items: stretch;
-	min-height: 32px;
-	max-height: 32px;
+	align-items: center;
+	gap: 8px;
+	padding: 10px;
+	min-height: 64px;
 	box-sizing: border-box;
 	border: 1px solid var(--mod-se-topbar-input-border, #50575e);
-	border-radius: $mod-space-2;
+	border-radius: 6px;
 	background: var(--mod-se-topbar-input-bg, rgba(0, 0, 0, 0.5));
 	overflow: hidden;
 }
@@ -797,8 +879,11 @@
 	flex: 1;
 	min-width: 0;
 	margin: 0 !important;
-	padding: $mod-space-6 $mod-space-8 !important;
-	font-size: 11px !important;
+	padding: 0 !important;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	user-select: text;
+	font-size: 12px !important;
 	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
 		'Liberation Mono', 'Courier New', monospace !important;
 	line-height: 1.35 !important;
@@ -821,13 +906,15 @@
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
-	width: 34px;
-	min-width: 34px;
+	gap: 5px;
+	min-width: 76px;
+	min-height: 34px;
+	font-size: 12px;
 	margin: 0;
-	padding: 0;
+	padding: 6px 8px;
 	border: none;
-	border-left: 1px solid var(--mod-se-chrome-border, rgba(255, 255, 255, 0.12));
-	border-radius: 0;
+
+	border-radius: 6px;
 	background: var(--mod-se-flyout-row-hover, rgba(255, 255, 255, 0.04));
 	color: var(--mod-se-flyout-ink, rgba(255, 255, 255, 0.9));
 	cursor: pointer;
@@ -860,8 +947,8 @@
 }
 
 .modula-gallery-takeover__topbar-shortcodes-dropdown-desc {
-	margin: $mod-space-6 0 0;
-	font-size: 11px;
+	margin: $mod-space-16 0 0;
+	font-size: 12px;
 	line-height: 1.45;
 	color: var(--mod-se-flyout-ink-muted, rgba(255, 255, 255, 0.65));
 
@@ -916,7 +1003,8 @@
 	position: relative;
 	display: inline-flex;
 	align-items: center;
-	margin-left: $mod-space-8;
+	min-width: 0;
+	flex: 0 1 auto;
 }
 
 .modula-gallery-takeover__bound-badge-trigger {
@@ -924,6 +1012,7 @@
 	align-items: center;
 	gap: 6px;
 	max-width: 220px;
+	min-width: 0;
 	padding: 4px 10px;
 	border: 1px solid var(--mod-se-chrome-border, #3c434a);
 	border-radius: 999px;

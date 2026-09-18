@@ -77,10 +77,52 @@ class Modula_Helper {
 	}
 
 	/**
+	 * Escaped message when a gallery exists but is not visitor-readable.
+	 *
+	 * Shared by classic, modern, and v2 shortcodes. Does not disclose title or
+	 * admin URLs. Exposure rule stays ADR 0028; this is copy only.
+	 *
+	 * @since 3.0.3
+	 *
+	 * @return string
+	 */
+	public static function visitor_unpublished_gallery_message() {
+		return esc_html__( 'This gallery is not published.', 'modula-best-grid-gallery' );
+	}
+
+	/**
+	 * Escaped shortcode message when the visitor cannot see a gallery.
+	 *
+	 * Distinguishes a real modula-gallery that fails the visitor-readable check
+	 * (draft/private without read_post) from missing / wrong-type galleries.
+	 *
+	 * @since 3.0.3
+	 *
+	 * @param int|WP_Post|null $gallery Gallery post or ID when known.
+	 * @return string
+	 */
+	public static function visitor_shortcode_unavailable_message( $gallery = null ) {
+		if ( ! $gallery instanceof WP_Post ) {
+			$gallery = get_post( $gallery );
+		}
+
+		if (
+			$gallery
+			&& 'modula-gallery' === $gallery->post_type
+			&& ! self::is_visitor_readable_gallery( $gallery )
+		) {
+			return self::visitor_unpublished_gallery_message();
+		}
+
+		return esc_html__( 'Gallery not found.', 'modula-best-grid-gallery' );
+	}
+
+	/**
 	 * CSS id for a classic visitor gallery (no leading #).
 	 *
-	 * The shortcode stores `gallery_id` as `modula-{postId}`. Selectors must not
-	 * prefix `modula-` again.
+	 * The classic shortcode stores `gallery_id` as `jtg-{postId}`. The modern
+	 * stack uses `modula-{postId}` instead. Selectors must not prefix again when
+	 * either form is already present (transition / mistaken callers).
 	 *
 	 * @param string $gallery_id Shortcode gallery_id or numeric post id.
 	 * @return string
@@ -90,7 +132,28 @@ class Modula_Helper {
 		if ( 0 === strpos( $gallery_id, 'modula-' ) || 0 === strpos( $gallery_id, 'jtg-' ) ) {
 			return $gallery_id;
 		}
-		return 'modula-' . $gallery_id;
+		return 'jtg-' . $gallery_id;
+	}
+
+	/**
+	 * Numeric gallery post ID from a classic visitor gallery_id.
+	 *
+	 * Classic shortcode stores `gallery_id` as `jtg-{postId}`. Callers may also
+	 * pass `modula-{postId}` (modern / transition) or a bare numeric id.
+	 *
+	 * @param mixed $gallery_id Shortcode gallery_id or numeric post id.
+	 * @return int
+	 */
+	public static function classic_gallery_post_id( $gallery_id ) {
+		if ( is_int( $gallery_id ) || ( is_string( $gallery_id ) && ctype_digit( $gallery_id ) ) ) {
+			return absint( $gallery_id );
+		}
+
+		$gallery_id = (string) $gallery_id;
+		$parts      = explode( '-', $gallery_id );
+		$tail       = end( $parts );
+
+		return absint( $tail );
 	}
 
 	/**

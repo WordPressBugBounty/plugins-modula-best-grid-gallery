@@ -11,7 +11,7 @@ import {
 } from './ListingDropdown';
 import { proofingBadgeIcon } from './proofingBadgeIcon';
 import {
-	LISTING_STATUS_ALL,
+	LISTING_STATUS_FILTER_VALUES,
 	applyListingStatusFilter,
 	getListingOnlyShowFields,
 	getListingStatusTriggerLabel,
@@ -24,7 +24,6 @@ import {
 
 /**
  * @typedef {Object} ListingStatusCounts
- * @property {number} everything
  * @property {number} publish
  * @property {number} draft
  * @property {number} private
@@ -52,45 +51,28 @@ export function ListingStatusFilter({
 	const triggerLabel = useMemo(() => {
 		const key = getListingStatusTriggerLabel(statusValue);
 		const labels = {
-			'All statuses': __('All statuses', 'modula-best-grid-gallery'),
 			Published: __('Published', 'modula-best-grid-gallery'),
 			Drafts: __('Drafts', 'modula-best-grid-gallery'),
 			Private: __('Private', 'modula-best-grid-gallery'),
 			'In the trash': __('In the trash', 'modula-best-grid-gallery'),
 		};
-		return labels[key] || labels['All statuses'];
+		return labels[key] || labels.Published;
 	}, [statusValue]);
 
-	const showOptions = useMemo(
-		() => [
-			{
-				value: LISTING_STATUS_ALL,
-				label: __('Everything', 'modula-best-grid-gallery'),
-				countKey: 'everything',
-			},
-			{
-				value: 'publish',
-				label: __('Published', 'modula-best-grid-gallery'),
-				countKey: 'publish',
-			},
-			{
-				value: 'draft',
-				label: __('Drafts', 'modula-best-grid-gallery'),
-				countKey: 'draft',
-			},
-			{
-				value: 'private',
-				label: __('Private', 'modula-best-grid-gallery'),
-				countKey: 'private',
-			},
-			{
-				value: 'trash',
-				label: __('In the trash', 'modula-best-grid-gallery'),
-				countKey: 'trash',
-			},
-		],
-		[]
-	);
+	const showOptions = useMemo(() => {
+		/** @type {Record<string, string>} */
+		const labels = {
+			publish: __('Published', 'modula-best-grid-gallery'),
+			draft: __('Drafts', 'modula-best-grid-gallery'),
+			private: __('Private', 'modula-best-grid-gallery'),
+			trash: __('In the trash', 'modula-best-grid-gallery'),
+		};
+		return LISTING_STATUS_FILTER_VALUES.map((value) => ({
+			value,
+			label: labels[value],
+			countKey: value,
+		}));
+	}, []);
 
 	const onlyShowOptions = useMemo(() => {
 		/** @type {Record<string, { label: string, icon: import('@wordpress/icons').IconType }>} */

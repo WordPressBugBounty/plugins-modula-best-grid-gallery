@@ -42,14 +42,14 @@ function readExistingHref(itemData) {
 }
 
 /**
- * Full-size image URL for "direct" mode (PHP `$item_data['image_full']` parity).
+ * Full-size image URL for Fancybox href (PHP `$item_data['image_full']` parity).
  * Prefer `url` / `full` over display `src` / `thumbnail`. Skip video playback URLs.
  *
  * @param {Object} itemData
  * @param {{ imageFull?: string }} [ctx]
  * @returns {string}
  */
-function resolveDirectImageHref(itemData, ctx = {}) {
+function resolveFullImageHref(itemData, ctx = {}) {
 	const candidates = [
 		typeof itemData?.url === 'string' ? itemData.url : '',
 		typeof itemData?.full === 'string' ? itemData.full : '',
@@ -74,6 +74,21 @@ function resolveDirectImageHref(itemData, ctx = {}) {
 }
 
 /**
+ * Coerce retired lightbox click modes to their replacements.
+ * Legacy `direct` (Direct link to image file) becomes Fancybox.
+ *
+ * @param {unknown} mode
+ * @returns {string}
+ */
+export function coerceLightboxClickMode(mode) {
+	const trimmed = typeof mode === 'string' ? mode.trim() : '';
+	if (trimmed === 'direct') {
+		return 'fancybox';
+	}
+	return trimmed;
+}
+
+/**
  * @param {Object}      itemData
  * @param {Object}      config
  * @param {{ imageFull?: string, forceNewTab?: boolean }} [ctx]
@@ -86,8 +101,9 @@ function resolveDirectImageHref(itemData, ctx = {}) {
  * }}
  */
 export function resolveGalleryItemLink(itemData, config, ctx = {}) {
-	const lightbox =
-		typeof config?.lightbox === 'string' ? config.lightbox.trim() : '';
+	const lightbox = coerceLightboxClickMode(
+		typeof config?.lightbox === 'string' ? config.lightbox.trim() : ''
+	);
 	const itemLink = normalizeItemLink(itemData);
 	const existingHref = readExistingHref(itemData);
 	const forceNewTab = Boolean(ctx.forceNewTab);
@@ -122,10 +138,15 @@ export function resolveGalleryItemLink(itemData, config, ctx = {}) {
 	}
 
 	/*
-	 * Pre-3.0 Pro hybrid: custom URL skips Fancybox on that tile; otherwise
-	 * open lightbox. Distinct from external-url (no lightbox for URL-less items).
+	 * Per-item Redirect (“Opens this address”) and hybrid lightbox-prefer-url:
+	 * a non-empty custom URL skips the lightbox on that tile. Follow-gallery
+	 * items (empty URL) still open the lightbox. Distinct from external-url
+	 * (no lightbox for URL-less items).
 	 */
-	if (lightbox === 'lightbox-prefer-url' && itemLink) {
+	if (
+		(lightbox === 'fancybox' || lightbox === 'lightbox-prefer-url') &&
+		itemLink
+	) {
 		return {
 			showLink: true,
 			href: itemLink,
@@ -133,19 +154,6 @@ export function resolveGalleryItemLink(itemData, config, ctx = {}) {
 			...(forceNewTab || opensInNewTab(itemData)
 				? { target: '_blank' }
 				: {}),
-		};
-	}
-
-	if (lightbox === 'direct') {
-		const imageFull = resolveDirectImageHref(itemData, ctx);
-		if (!imageFull) {
-			return { showLink: false, href: '', isSimpleLink: false };
-		}
-		return {
-			showLink: true,
-			href: imageFull,
-			isSimpleLink: true,
-			...(forceNewTab ? { target: '_blank' } : {}),
 		};
 	}
 
@@ -176,7 +184,7 @@ export function resolveGalleryItemLink(itemData, config, ctx = {}) {
 	}
 
 	const fancyboxHref =
-		resolveDirectImageHref(itemData, ctx) || existingHref || '#';
+		resolveFullImageHref(itemData, ctx) || existingHref || '#';
 
 	if (!fancyboxHref || fancyboxHref === '#') {
 		return {
@@ -203,9 +211,8 @@ export function resolveGalleryItemLink(itemData, config, ctx = {}) {
  * @returns {boolean}
  */
 export function isSimpleGalleryLinkMode(lightbox) {
-	const mode = typeof lightbox === 'string' ? lightbox.trim() : '';
+	const mode = coerceLightboxClickMode(lightbox);
 	return (
-		mode === 'direct' ||
 		mode === 'external-url' ||
 		mode === 'attachment-page' ||
 		mode === 'no-link' ||
@@ -221,15 +228,15 @@ export function isSimpleGalleryLinkMode(lightbox) {
  * @returns {boolean}
  */
 export function galleryUsesFancyboxLightbox(lightbox) {
-	const mode = typeof lightbox === 'string' ? lightbox.trim() : '';
+	const mode = coerceLightboxClickMode(lightbox);
 	return mode === 'fancybox' || mode === 'lightbox-prefer-url';
 }
 
 /**
  * Tile link overlay options for gallery-shared hosts.
  *
- * Settings-editor preview must never render a navigable tile `<a>` (Direct /
- * Go to URL / attachment-page included) so click opens Image edit.
+ * Settings-editor preview must never render a navigable tile `<a>` (Go to URL /
+ * attachment-page included) so click opens Image edit.
  * Visitor galleries still render those links.
  *
  * @param {boolean} isPreviewContext Settings-editor preview display context.

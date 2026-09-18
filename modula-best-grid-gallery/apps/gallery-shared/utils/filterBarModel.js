@@ -157,6 +157,8 @@ export function buildFilteringFromSettings(settings) {
 		type: 'client',
 		activeFilters: [],
 		availableFilters,
+		usageCounts: null,
+		filterableImageCount: null,
 	};
 }
 

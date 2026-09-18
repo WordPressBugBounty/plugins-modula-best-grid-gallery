@@ -4,7 +4,11 @@
 
 /** @typedef {import('./viewToListingQuery').ListingView} ListingView */
 
+/** Legacy SHOW “Everything” value. Applying it now selects Published. */
 export const LISTING_STATUS_ALL = 'all';
+
+/** Default SHOW filter: Published. */
+export const LISTING_STATUS_DEFAULT = 'publish';
 
 /** @type {readonly ['publish', 'draft', 'private', 'trash']} */
 export const LISTING_STATUS_FILTER_VALUES = [
@@ -88,7 +92,7 @@ export function getListingStatusValue(view) {
 	const filters = Array.isArray(view.filters) ? view.filters : [];
 	const statusFilter = filters.find((filter) => filter.field === 'status');
 	if (!statusFilter || statusFilter.value == null) {
-		return LISTING_STATUS_ALL;
+		return LISTING_STATUS_DEFAULT;
 	}
 
 	const values = Array.isArray(statusFilter.value)
@@ -96,7 +100,7 @@ export function getListingStatusValue(view) {
 		: [statusFilter.value];
 
 	if (values.length === 0) {
-		return LISTING_STATUS_ALL;
+		return LISTING_STATUS_DEFAULT;
 	}
 
 	if (
@@ -104,14 +108,14 @@ export function getListingStatusValue(view) {
 		EVERYTHING_STATUSES.every((status) => values.includes(status)) &&
 		!values.includes('trash')
 	) {
-		return LISTING_STATUS_ALL;
+		return LISTING_STATUS_DEFAULT;
 	}
 
 	if (values.length === 1 && typeof values[0] === 'string') {
 		return values[0];
 	}
 
-	return LISTING_STATUS_ALL;
+	return LISTING_STATUS_DEFAULT;
 }
 
 /**
@@ -120,17 +124,14 @@ export function getListingStatusValue(view) {
  * @return {ListingView}
  */
 export function applyListingStatusFilter(view, statusValue) {
-	const otherFilters = (Array.isArray(view.filters) ? view.filters : []).filter(
-		(filter) => filter.field !== 'status'
-	);
+	const otherFilters = (
+		Array.isArray(view.filters) ? view.filters : []
+	).filter((filter) => filter.field !== 'status');
 
-	if (statusValue === LISTING_STATUS_ALL || !statusValue) {
-		return {
-			...view,
-			page: 1,
-			filters: otherFilters,
-		};
-	}
+	const nextStatus =
+		statusValue === LISTING_STATUS_ALL || !statusValue
+			? LISTING_STATUS_DEFAULT
+			: statusValue;
 
 	return {
 		...view,
@@ -140,10 +141,34 @@ export function applyListingStatusFilter(view, statusValue) {
 			{
 				field: 'status',
 				operator: 'isAny',
-				value: [statusValue],
+				value: [nextStatus],
 			},
 		],
 	};
+}
+
+/**
+ * Whether SHOW is In the trash (Trash filter control active).
+ *
+ * @param {ListingView} view
+ * @return {boolean}
+ */
+export function isListingTrashFilterActive(view) {
+	return getListingStatusValue(view) === 'trash';
+}
+
+/**
+ * Toggle the listing toolbar Trash filter control.
+ * Off → SHOW In the trash. On → SHOW Published (listing default).
+ *
+ * @param {ListingView} view
+ * @return {ListingView}
+ */
+export function toggleListingTrashFilter(view) {
+	if (isListingTrashFilterActive(view)) {
+		return applyListingStatusFilter(view, 'publish');
+	}
+	return applyListingStatusFilter(view, 'trash');
 }
 
 /**
@@ -217,17 +242,16 @@ export function shouldShowListingSearchSummary(view) {
  */
 export function getListingStatusTriggerLabel(statusValue) {
 	switch (statusValue) {
-		case 'publish':
-			return 'Published';
 		case 'draft':
 			return 'Drafts';
 		case 'private':
 			return 'Private';
 		case 'trash':
 			return 'In the trash';
+		case 'publish':
 		case LISTING_STATUS_ALL:
 		default:
-			return 'All statuses';
+			return 'Published';
 	}
 }
 
@@ -257,9 +281,9 @@ export function isListingOnlyShowFilterActive(view, field) {
  * @return {ListingView}
  */
 export function setListingOnlyShowFilter(view, field, active) {
-	const otherFilters = (Array.isArray(view.filters) ? view.filters : []).filter(
-		(filter) => filter.field !== field
-	);
+	const otherFilters = (
+		Array.isArray(view.filters) ? view.filters : []
+	).filter((filter) => filter.field !== field);
 
 	if (!active) {
 		return {

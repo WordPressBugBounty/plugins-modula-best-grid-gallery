@@ -38,10 +38,11 @@ class Modula_Item_Data_Processor {
 
 		// Apply transformations in order
 		$item_data = $this->process_image_sizes( $item_data, $image, $settings );
+		// Custom-grid span must exist before srcset/sizes so eager sizes can use it.
+		$item_data = $this->process_custom_grid( $item_data, $image, $settings );
 		$item_data = $this->process_srcset_sizes( $item_data, $image, $settings );
 		$item_data = $this->process_lightbox_and_links( $item_data, $image, $settings );
 		$item_data = $this->process_hover_effects( $item_data, $settings );
-		$item_data = $this->process_custom_grid( $item_data, $image, $settings );
 		$item_data = $this->process_grid_settings( $item_data, $image, $settings );
 
 		return $item_data;
@@ -446,7 +447,9 @@ class Modula_Item_Data_Processor {
 		$item_data['img_attributes']['data-caption'] = $caption;
 
 		// Handle different lightbox types
-		$lightbox = $settings['lightbox'] ?? '';
+		$lightbox = function_exists( 'modula_coerce_lightbox_click_mode' )
+			? modula_coerce_lightbox_click_mode( $settings['lightbox'] ?? '' )
+			: ( $settings['lightbox'] ?? '' );
 
 		if ( '' === $lightbox || 'no-link' === $lightbox ) {
 			return modula_apply_per_image_link_for_no_link_mode( $item_data, $image );
@@ -468,22 +471,11 @@ class Modula_Item_Data_Processor {
 					? modula_resolve_simple_link_href( $image, $fallback )
 					: $fallback;
 			}
-		} elseif ( 'lightbox-prefer-url' === $lightbox && isset( $image['link'] ) && '' !== $image['link'] ) {
-			$item_data['link_classes'][]                = 'modula-simple-link';
-			$item_data['item_classes'][]                = 'modula-simple-link';
-			$item_data['link_attributes']['aria-label'] = esc_html__( 'Open external link', 'modula-best-grid-gallery' );
-			$item_data['link_attributes']['href']       = $image['link'];
-			if ( isset( $image['target'] ) && '1' === $image['target'] ) {
-				$item_data['link_attributes']['target'] = '_blank';
-			}
-			if ( isset( $item_data['link_attributes']['role'] ) ) {
-				unset( $item_data['link_attributes']['role'] );
-			}
-		} elseif ( 'direct' === $lightbox ) {
-			$item_data['link_attributes']['href']       = $item_data['image_full'];
-			$item_data['link_classes'][]                = 'modula-simple-link';
-			$item_data['item_classes'][]                = 'modula-simple-link';
-			$item_data['link_attributes']['aria-label'] = esc_html__( 'Open image', 'modula-best-grid-gallery' );
+		} elseif (
+			( 'fancybox' === $lightbox || 'lightbox-prefer-url' === $lightbox )
+			&& '' !== modula_item_redirect_url( $image )
+		) {
+			$item_data = modula_apply_per_item_redirect_link( $item_data, $image );
 		} else {
 			// Standard lightbox
 			if ( modula_href_required() ) {
@@ -751,8 +743,13 @@ class Modula_Item_Data_Processor {
 			return $item_data;
 		}
 
-		$item_data['item_attributes']['data-width']  = isset( $image['width'] ) ? absint( $image['width'] ) : 2;
-		$item_data['item_attributes']['data-height'] = isset( $image['height'] ) ? absint( $image['height'] ) : 2;
+		$span_w = isset( $image['width'] ) ? absint( $image['width'] ) : 2;
+		$span_h = isset( $image['height'] ) ? absint( $image['height'] ) : 2;
+
+		$item_data['width']                          = $span_w;
+		$item_data['height']                         = $span_h;
+		$item_data['item_attributes']['data-width']  = $span_w;
+		$item_data['item_attributes']['data-height'] = $span_h;
 
 		return $item_data;
 	}

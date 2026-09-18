@@ -1075,13 +1075,13 @@ class Listing_Controller {
 	 */
 	private static function resolve_post_status( $status ) {
 		if ( '' === $status ) {
-			return array( 'publish', 'draft', 'private' );
+			return 'publish';
 		}
 		$parts   = array_filter( array_map( 'sanitize_key', explode( ',', $status ) ) );
 		$allowed = array( 'publish', 'draft', 'private', 'trash', 'pending', 'future' );
 		$parts   = array_values( array_intersect( $parts, $allowed ) );
 		if ( empty( $parts ) ) {
-			return array( 'publish', 'draft', 'private' );
+			return 'publish';
 		}
 		if ( 1 === count( $parts ) ) {
 			return $parts[0];
@@ -1193,11 +1193,11 @@ class Listing_Controller {
 	/**
 	 * Row counts per status for the listing status filter menu.
 	 *
-	 * @return array{everything: int, publish: int, draft: int, private: int, trash: int}
+	 * @return array{publish: int, draft: int, private: int, trash: int}
 	 */
 	private static function get_listing_status_counts() {
 		$cached = get_transient( 'modula_v2_listing_status_counts' );
-		if ( is_array( $cached ) && isset( $cached['everything'] ) ) {
+		if ( is_array( $cached ) && isset( $cached['publish'] ) && ! isset( $cached['everything'] ) ) {
 			return $cached;
 		}
 
@@ -1207,11 +1207,10 @@ class Listing_Controller {
 		}
 
 		$counts = array(
-			'everything' => 0,
-			'publish'    => 0,
-			'draft'      => 0,
-			'private'    => 0,
-			'trash'      => 0,
+			'publish' => 0,
+			'draft'   => 0,
+			'private' => 0,
+			'trash'   => 0,
 		);
 
 		foreach ( $post_types as $post_type ) {
@@ -1222,8 +1221,6 @@ class Listing_Controller {
 				}
 			}
 		}
-
-		$counts['everything'] = $counts['publish'] + $counts['draft'] + $counts['private'];
 
 		set_transient( 'modula_v2_listing_status_counts', $counts, 2 * MINUTE_IN_SECONDS );
 
@@ -1834,21 +1831,7 @@ class Listing_Controller {
 		if ( '' === $type ) {
 			return '';
 		}
-		$labels = array(
-			'creative-gallery' => __( 'Creative', 'modula-best-grid-gallery' ),
-			'custom-grid'      => __( 'Custom grid', 'modula-best-grid-gallery' ),
-			'grid'             => __( 'Grid', 'modula-best-grid-gallery' ),
-			'masonry'          => __( 'Masonry', 'modula-best-grid-gallery' ),
-			'slider'           => __( 'Slider', 'modula-best-grid-gallery' ),
-			'video'            => __( 'Video', 'modula-best-grid-gallery' ),
-			'bnb'              => __( 'BnB', 'modula-best-grid-gallery' ),
-			'showcase'         => __( 'Showcase', 'modula-best-grid-gallery' ),
-			'story'            => __( 'Story', 'modula-best-grid-gallery' ),
-			'polaroid'         => __( 'Polaroid', 'modula-best-grid-gallery' ),
-			'fit-grid'         => __( 'Fit grid', 'modula-best-grid-gallery' ),
-			'uniform-grid'     => __( 'Uniform grid', 'modula-best-grid-gallery' ),
-		);
-		return isset( $labels[ $type ] ) ? $labels[ $type ] : $type;
+		return \Modula\V2\Settings\Gallery_Type_Labels::label_for( $type );
 	}
 
 	/**

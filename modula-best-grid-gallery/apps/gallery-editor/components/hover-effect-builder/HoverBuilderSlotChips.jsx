@@ -20,7 +20,7 @@ import {
  *   onCommit: (slot: 'title'|'caption'|'social', next:{x:number,y:number}) => void,
  *   titleText: string,
  *   titleTypographyStyle: Record<string, string>,
- *   captionText: string,
+ *   captionHtml: string,
  *   captionTypographyStyle: Record<string, string>,
  *   social: Record<string, any> | undefined,
  * }} props
@@ -39,7 +39,7 @@ export default function HoverBuilderSlotChips({
 	onCommit,
 	titleText,
 	titleTypographyStyle,
-	captionText,
+	captionHtml,
 	captionTypographyStyle,
 	social,
 }) {
@@ -80,9 +80,10 @@ export default function HoverBuilderSlotChips({
 					<div
 						className={ITEM_DESCRIPTION_CLASS_NAME}
 						style={captionTypographyStyle}
-					>
-						{captionText}
-					</div>
+						dangerouslySetInnerHTML={{
+							__html: captionHtml,
+						}}
+					/>
 				</HoverImageSlotChip>
 			) : null}
 			{showSocialSlot ? (

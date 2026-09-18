@@ -99,6 +99,10 @@ class Shortcode {
 			return esc_html__( 'Gallery not found.', 'modula-best-grid-gallery' );
 		}
 
+		if ( ! \Modula_Helper::is_visitor_readable_gallery( $gallery ) ) {
+			return \Modula_Helper::visitor_shortcode_unavailable_message( $gallery );
+		}
+
 		$settings = $this->get_gallery_settings( $gallery_id, $atts['align'] );
 		if ( empty( $settings ) ) {
 			\Modula_Debug_Log::log_failure(
@@ -210,10 +214,6 @@ class Shortcode {
 			$gallery = get_post( $gallery_posts[0] );
 		}
 
-		if ( ! \Modula_Helper::is_visitor_readable_gallery( $gallery ) ) {
-			return null;
-		}
-
 		return $gallery;
 	}
 
@@ -228,7 +228,7 @@ class Shortcode {
 	private function get_gallery_settings( $gallery_id, $align ) {
 		$grouped = \Modula\V2\Meta_Sync::get_settings_v2( $gallery_id );
 
-		if ( ! empty( $grouped ) && is_array( $grouped ) ) {
+		if ( \Modula\V2\Meta_Sync::settings_v2_is_usable( $grouped ) ) {
 			\Modula\V2\Settings\Adapter::enrich_video_media_urls( $grouped );
 			$flat = \Modula\V2\Settings\Adapter::to_flat( $grouped );
 			$flat = $this->normalize_flat( $flat, $gallery_id, $align );
@@ -511,7 +511,12 @@ class Shortcode {
 		$effective_catalog = $server_catalog && ! $editor_preview;
 
 		$pagination_cfg = $this->build_pagination_config( $grouped, $flat, $total_images, $effective_catalog );
-		$filtering_cfg  = $this->build_filtering_config( $grouped, $effective_catalog );
+		$filtering_cfg  = $this->build_filtering_config(
+			$grouped,
+			$effective_catalog,
+			is_array( $images ) ? $images : array(),
+			\Modula\V2\Modern_Gallery::is_pagination_mode_enabled( $flat )
+		);
 
 		$types_without_chrome = $this->get_types_without_filter_pagination_chrome();
 		$skips_chrome         = in_array( $type, $types_without_chrome, true );
@@ -1197,13 +1202,16 @@ class Shortcode {
 	}
 
 	/**
-	 * Filtering config; server mode when catalog is paged on server and filters exist.
+	 * Filtering config; server mode when catalog is paged and visitor pagination is on.
+	 * Always embeds full-catalog usage counts so the filter bar is not capped at perPage.
 	 *
-	 * @param array<string, mixed> $grouped          Grouped settings.
-	 * @param bool                 $server_catalog   Whether bootstrap uses server pages.
+	 * @param array<string, mixed>             $grouped            Grouped settings.
+	 * @param bool                             $server_catalog     Whether bootstrap uses server pages.
+	 * @param array<int, array<string, mixed>> $images             Full gallery rows (pre-slice).
+	 * @param bool                             $pagination_mode_on Whether visitor pagination is enabled.
 	 * @return array<string, mixed>
 	 */
-	private function build_filtering_config( array $grouped, $server_catalog ) {
+	private function build_filtering_config( array $grouped, $server_catalog, array $images = array(), $pagination_mode_on = false ) {
 		$fg    = isset( $grouped['filters'] ) && is_array( $grouped['filters'] ) ? $grouped['filters'] : array();
 		$names = isset( $fg['filters'] ) && is_array( $fg['filters'] ) ? $fg['filters'] : array();
 
@@ -1229,13 +1237,19 @@ class Shortcode {
 			$show_on = ( true === $show || 1 === $show || '1' === (string) $show );
 			$enabled = $enabled && $show_on;
 		}
-		$type = ( $enabled && $server_catalog ) ? 'server' : 'client';
+		// Server filter fetches only when the grid is page-limited; with pagination off the
+		// bootstrap embeds the full list (or filter apply uses `all`), so prefer client when off.
+		$type = ( $enabled && $server_catalog && $pagination_mode_on ) ? 'server' : 'client';
+
+		$stats = \Modula\V2\Images\Catalog_Service::build_filter_usage_stats( $images );
 
 		return array(
-			'enabled'          => $enabled,
-			'type'             => $type,
-			'activeFilters'    => array(),
-			'availableFilters' => $available,
+			'enabled'              => $enabled,
+			'type'                 => $type,
+			'activeFilters'        => array(),
+			'availableFilters'     => $available,
+			'usageCounts'          => $stats['usageCounts'],
+			'filterableImageCount' => $stats['filterableImageCount'],
 		);
 	}
 

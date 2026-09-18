@@ -12,7 +12,7 @@ import { closeListingRowPreview } from './ListingRowPreviewPopover';
 /**
  * Shortcuts in the reserved area under a listing row title.
  *
- * Live: Edit / Quick Edit / Bulk Editor / Trash.
+ * Live: Edit / Quick Edit / Duplicate / Bulk Editor / Trash.
  * Trash: Restore / Delete permanently.
  *
  * @param {Object}                                props
@@ -20,6 +20,7 @@ import { closeListingRowPreview } from './ListingRowPreviewPopover';
  * @param {boolean}                               [props.canUseBulkEditor]
  * @param {(item: Object) => void}                [props.requestGalleryEdit]
  * @param {(item: Object) => void}                [props.requestQuickEdit]
+ * @param {(item: Object) => Promise<unknown>}    [props.duplicateListingRow]
  * @param {(items: Object[]) => Promise<unknown>} [props.trashListingRows]
  * @param {(items: Object[]) => Promise<unknown>} [props.restoreListingRows]
  * @param {(items: Object[]) => Promise<unknown>} [props.deleteListingRows]
@@ -29,6 +30,7 @@ export function ListingRowHoverActions({
 	canUseBulkEditor = false,
 	requestGalleryEdit,
 	requestQuickEdit,
+	duplicateListingRow,
 	trashListingRows,
 	restoreListingRows,
 	deleteListingRows,
@@ -64,6 +66,11 @@ export function ListingRowHoverActions({
 			case 'quick-edit':
 				if (typeof requestQuickEdit === 'function') {
 					requestQuickEdit(item);
+				}
+				break;
+			case 'duplicate':
+				if (typeof duplicateListingRow === 'function') {
+					void duplicateListingRow(item);
 				}
 				break;
 			case 'bulk-editor':

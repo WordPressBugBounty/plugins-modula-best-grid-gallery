@@ -227,7 +227,6 @@
                 "type": "string",
                 "enum": [
                     "no-link",
-                    "direct",
                     "external-url",
                     "fancybox",
                     "lightbox-prefer-url"

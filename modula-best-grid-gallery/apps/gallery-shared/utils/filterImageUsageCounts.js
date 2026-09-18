@@ -65,6 +65,58 @@ export function countFilterableGalleryImages(items) {
 }
 
 /**
+ * Resolve visitor filter-bar counts from a full-catalog bootstrap map when present,
+ * otherwise from the provided item list (page slice or full client catalog).
+ *
+ * @param {Object} args
+ * @param {unknown} [args.items]
+ * @param {Map<string, number>|Record<string, number>|null|undefined} [args.catalogUsageCounts]
+ * @param {number|null|undefined} [args.catalogFilterableCount]
+ * @return {{ filterCounts: Map<string, number>, allCount: number }}
+ */
+export function resolveFilterBarUsageCounts({
+	items,
+	catalogUsageCounts = null,
+	catalogFilterableCount = null,
+} = {}) {
+	if (catalogUsageCounts instanceof Map) {
+		return {
+			filterCounts: catalogUsageCounts,
+			allCount:
+				typeof catalogFilterableCount === 'number'
+					? catalogFilterableCount
+					: countFilterableGalleryImages(items),
+		};
+	}
+	if (
+		catalogUsageCounts &&
+		typeof catalogUsageCounts === 'object' &&
+		!Array.isArray(catalogUsageCounts)
+	) {
+		/** @type {Map<string, number>} */
+		const filterCounts = new Map();
+		for (const [key, value] of Object.entries(catalogUsageCounts)) {
+			const name = String(key).trim();
+			if (!name) {
+				continue;
+			}
+			filterCounts.set(name, Number(value) || 0);
+		}
+		return {
+			filterCounts,
+			allCount:
+				typeof catalogFilterableCount === 'number'
+					? catalogFilterableCount
+					: countFilterableGalleryImages(items),
+		};
+	}
+	return {
+		filterCounts: buildFilterImageUsageCounts(items),
+		allCount: countFilterableGalleryImages(items),
+	};
+}
+
+/**
  * Append a usage count to a filter label for native `<option>` text.
  *
  * @param {string}              label

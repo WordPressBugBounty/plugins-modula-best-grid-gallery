@@ -26,15 +26,21 @@ html body .modula-block-preview {
 	.modula-gallery-input {
 		text-align: left;
 
-
-		.selectize-dropdown-content {
-			max-height: 100px;
-		}
-
 		.selectize-input::after {
 			content: "";
 			border: 0;
 		}
+	}
+}
+
+// Portaled via selectize `dropdownParent: 'body'` (see ModulaGallerySearch).
+html body .selectize-dropdown.modula-gallery-picker-dropdown {
+	z-index: 1000000;
+
+	.selectize-dropdown-content {
+		max-height: 240px;
+		overflow-y: auto;
+		overflow-x: hidden;
 	}
 }
 
@@ -138,4 +144,3 @@ html body .modula-button-group .modula-button-upsell {
 	font-size: 14px;
 	width: calc(100% + 20px);
 }
-

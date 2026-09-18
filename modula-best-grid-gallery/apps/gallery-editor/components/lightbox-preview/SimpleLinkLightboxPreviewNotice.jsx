@@ -1,12 +1,12 @@
 /**
- * Copy for Lightbox click modes that are not Fancybox (direct / URL / no-link).
+ * Copy for Lightbox click modes that are not Fancybox (URL / no-link).
  * Shown under Image click behavior in the sidebar — not in the live preview.
  */
 import { __ } from '@wordpress/i18n';
+import { coerceLightboxClickMode } from 'gallery-shared/utils/resolveGalleryItemLink';
 
 /** @type {ReadonlySet<string>} */
 const SIMPLE_LINK_LIGHTBOX_MODES = new Set([
-	'direct',
 	'external-url',
 	'attachment-page',
 	'no-link',
@@ -18,7 +18,7 @@ const SIMPLE_LINK_LIGHTBOX_MODES = new Set([
  * @returns {string}
  */
 export function normalizeLightboxClickMode(mode) {
-	return String(mode ?? 'fancybox').trim();
+	return coerceLightboxClickMode(String(mode ?? 'fancybox').trim());
 }
 
 /**
@@ -35,11 +35,6 @@ export function isSimpleLinkLightboxMode(mode) {
  */
 export function getSimpleLinkLightboxNoticeText(mode) {
 	switch (mode) {
-		case 'direct':
-			return __(
-				'Direct link: click a tile to open the full image file in the current tab.',
-				'modula-best-grid-gallery'
-			);
 		case 'external-url':
 			return __(
 				'Go to URL: click a tile to open that image’s Link & display URL in the current tab.',

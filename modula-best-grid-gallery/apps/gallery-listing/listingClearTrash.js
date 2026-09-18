@@ -6,7 +6,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import {
 	getListingStatusValue,
-	LISTING_STATUS_ALL,
+	LISTING_STATUS_DEFAULT,
 } from './listingToolbarView';
 
 /**
@@ -16,7 +16,7 @@ import {
  * @return {boolean}
  */
 export function shouldShowClearTrash({
-	statusFilter = LISTING_STATUS_ALL,
+	statusFilter = LISTING_STATUS_DEFAULT,
 	trashCount = 0,
 } = {}) {
 	return statusFilter === 'trash' && Number(trashCount) > 0;

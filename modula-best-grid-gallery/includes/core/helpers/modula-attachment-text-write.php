@@ -86,3 +86,19 @@ function modula_resolve_gallery_row_attachment_text_after_sync( $attachment_valu
 
 	return is_string( $attachment_value ) ? $attachment_value : (string) $attachment_value;
 }
+
+/**
+ * Sanitize attachment description for wp_update_post().
+ *
+ * wp_kses_post() returns unslashed HTML; wp_update_post() unslashes once.
+ * Slash exactly once. Do not wrap wp_filter_post_kses() (already slashed)
+ * in another wp_slash() — that leaves literal \" in post_content.
+ *
+ * @param mixed $description Incoming description (REST/JSON is typically unslashed).
+ * @return string Slashed post-kses HTML for wp_update_post().
+ */
+function modula_sanitize_attachment_description_for_write( $description ) {
+	$description = is_string( $description ) ? $description : (string) $description;
+
+	return wp_slash( wp_kses_post( wp_unslash( $description ) ) );
+}

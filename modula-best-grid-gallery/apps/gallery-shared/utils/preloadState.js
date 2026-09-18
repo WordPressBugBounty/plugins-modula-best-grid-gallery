@@ -196,6 +196,16 @@ export function buildPreloadedState(data, element) {
 		type: data.filtering?.type || 'client',
 		activeFilters: [],
 		availableFilters: data.filtering?.availableFilters || [],
+		usageCounts:
+			data.filtering?.usageCounts &&
+			typeof data.filtering.usageCounts === 'object' &&
+			!Array.isArray(data.filtering.usageCounts)
+				? data.filtering.usageCounts
+				: null,
+		filterableImageCount:
+			typeof data.filtering?.filterableImageCount === 'number'
+				? data.filtering.filterableImageCount
+				: null,
 	};
 
 	// Initial display items: client pagination slices the first page only.
@@ -237,6 +247,8 @@ export function buildPreloadedState(data, element) {
 		filtering.enabled = false;
 		filtering.type = 'client';
 		filtering.activeFilters = [];
+		filtering.usageCounts = null;
+		filtering.filterableImageCount = null;
 	}
 
 	if (skipPagination && !isSettingsEditorPreviewContext) {

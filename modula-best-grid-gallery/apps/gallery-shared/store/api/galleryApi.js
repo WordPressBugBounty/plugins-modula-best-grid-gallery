@@ -39,6 +39,9 @@ async function galleryItemsQueryFn(arg, { getState }) {
 		if (arg.type === 'pagination') {
 			params.mode = arg.mode || 'page';
 		}
+		if (arg.all === true) {
+			params.all = true;
+		}
 		const response = await fetchFn(params);
 		if (response && Array.isArray(response.items)) {
 			return {

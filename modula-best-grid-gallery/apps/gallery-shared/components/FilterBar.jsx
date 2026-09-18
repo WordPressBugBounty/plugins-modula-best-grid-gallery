@@ -29,10 +29,7 @@ import {
 	shouldUseCollapsibleFilterBar,
 	shouldUseFilterDropdown,
 } from '../utils/filterBarModel';
-import {
-	buildFilterImageUsageCounts,
-	countFilterableGalleryImages,
-} from '../utils/filterImageUsageCounts';
+import { resolveFilterBarUsageCounts } from '../utils/filterImageUsageCounts';
 
 /**
  * @param {string} label
@@ -55,9 +52,12 @@ function FilterBarLabel({ label, count, showCount }) {
  * Filter links styled via gallery chrome CSS + GalleryDynamicStyle color settings.
  */
 export default function FilterBar() {
-	const { availableFilters, activeFilters } = useSelector(
-		(state) => state.filtering
-	);
+	const {
+		availableFilters,
+		activeFilters,
+		usageCounts: catalogUsageCounts,
+		filterableImageCount: catalogFilterableCount,
+	} = useSelector((state) => state.filtering);
 	const config = useSelector((state) => state.gallery.config || {});
 	const settings = useSelector((state) => state.gallery.settings || {});
 	const originalItems = useSelector(
@@ -121,13 +121,14 @@ export default function FilterBar() {
 			? config.allFilterLabel.trim()
 			: 'All');
 
-	const filterCounts = useMemo(
-		() => buildFilterImageUsageCounts(originalItems),
-		[originalItems]
-	);
-	const allCount = useMemo(
-		() => countFilterableGalleryImages(originalItems),
-		[originalItems]
+	const { filterCounts, allCount } = useMemo(
+		() =>
+			resolveFilterBarUsageCounts({
+				items: originalItems,
+				catalogUsageCounts,
+				catalogFilterableCount,
+			}),
+		[originalItems, catalogUsageCounts, catalogFilterableCount]
 	);
 
 	const defaultActive = useMemo(() => {

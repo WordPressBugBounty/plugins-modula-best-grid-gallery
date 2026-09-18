@@ -24,7 +24,10 @@ import {
 } from './completeEditorChoice';
 import { shouldShowBetaEditorPrompt } from './listingBetaEditorPrompt';
 import { shouldShowMixedStackNotice } from './listingMixedStackNotice';
-import { openListingApplyPreset } from './listingApplyPreset';
+import {
+	getListingApplyPresetFeedback,
+	openListingApplyPreset,
+} from './listingApplyPreset';
 import {
 	formatListingBulkConvertToast,
 	runListingBulkConvert,
@@ -116,6 +119,7 @@ export default function GalleryListingApp() {
 		)
 	);
 	const [convertNotice, setConvertNotice] = useState('');
+	const [applyPresetNotice, setApplyPresetNotice] = useState('');
 	const { data, isLoading, isError, error, refetch } = useListingQuery(view);
 	const duplicateMutation = useDuplicateListingRowMutation();
 	const lifecycleMutation = useListingRowLifecycleMutation();
@@ -279,14 +283,11 @@ export default function GalleryListingApp() {
 				restoreClassicEditorMutation.mutateAsync(item),
 			applyListingPreset: async (items) => {
 				const result = await openListingApplyPreset(items);
-				if (result?.unavailable) {
-					setSelectionNotice(
-						__(
-							'Apply preset is unavailable right now. Refresh the page and try again.',
-							'modula-best-grid-gallery'
-						)
-					);
-					return result;
+				const feedback = getListingApplyPresetFeedback(result);
+				if (feedback?.type === 'notice') {
+					setSelectionNotice(feedback.message);
+				} else if (feedback?.type === 'toast') {
+					setApplyPresetNotice(feedback.message);
 				}
 				if (!result || !(result.applied > 0)) {
 					return result;
@@ -821,12 +822,15 @@ export default function GalleryListingApp() {
 				onChoose={chooseSelectAll}
 				onCancel={cancelSelectAllChooser}
 			/>
-			{convertNotice ? (
+			{convertNotice || applyPresetNotice ? (
 				<Snackbar
 					className="modula-gallery-listing__convert-toast"
-					onRemove={() => setConvertNotice('')}
+					onRemove={() => {
+						setConvertNotice('');
+						setApplyPresetNotice('');
+					}}
 				>
-					{convertNotice}
+					{convertNotice || applyPresetNotice}
 				</Snackbar>
 			) : null}
 		</div>

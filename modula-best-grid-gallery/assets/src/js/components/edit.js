@@ -6,6 +6,7 @@ import ModulaGallery from './ModulaGallery';
 import ModulaGallerySearch from './ModulaGallerySearch';
 import { withFilters } from '@wordpress/components';
 import icons from '../utils/icons';
+import { getModulaGalleryPickerQuery } from '../utils/modulaGalleryPickerQuery';
 /**
  * WordPress dependencies
  */
@@ -366,10 +367,7 @@ export const ModulaEdit = (props) => {
 
 const applyWithSelect = withSelect((select, props) => {
 	const { getEntityRecords } = select('core');
-	const query = {
-		post_status: 'publish',
-		per_page: 5,
-	};
+	const query = getModulaGalleryPickerQuery();
 
 	return {
 		galleries: getEntityRecords('postType', 'modula-gallery', query) || [],

@@ -689,7 +689,7 @@ class Modula_CPT {
 					}
 
 					// Values for selects
-					$lightbox_values = apply_filters( 'modula_lightbox_values', array( 'no-link', 'direct', 'fancybox', 'lightbox-prefer-url', 'external-url' ) );
+					$lightbox_values = apply_filters( 'modula_lightbox_values', array( 'no-link', 'fancybox', 'lightbox-prefer-url', 'external-url' ) );
 
 					switch ( $field_id ) {
 						case 'type':
@@ -712,8 +712,14 @@ class Modula_CPT {
 							$modula_settings[ $field_id ] = absint( $settings[ $field_id ] );
 							break;
 						case 'lightbox':
-							if ( in_array( $settings[ $field_id ], $lightbox_values ) ) {
-								$modula_settings[ $field_id ] = sanitize_text_field( wp_unslash( $settings[ $field_id ] ) );
+							$lightbox_val = sanitize_text_field( wp_unslash( $settings[ $field_id ] ) );
+							if ( function_exists( 'modula_coerce_lightbox_click_mode' ) ) {
+								$lightbox_val = modula_coerce_lightbox_click_mode( $lightbox_val );
+							} elseif ( 'direct' === $lightbox_val ) {
+								$lightbox_val = 'fancybox';
+							}
+							if ( in_array( $lightbox_val, $lightbox_values, true ) ) {
+								$modula_settings[ $field_id ] = $lightbox_val;
 							} else {
 								$modula_settings[ $field_id ] = 'fancybox';
 							}

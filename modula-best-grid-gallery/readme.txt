@@ -4,7 +4,7 @@ Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPres
 Requires at least: 5.3
 Tested up to: 7.1
 Requires PHP: 5.6
-Stable tag: 3.0.2
+Stable tag: 3.0.5
 
 License: GNU General Public License v3.0 or later  
 
@@ -325,6 +325,32 @@ The simplest way to install is to click on 'Plugins' then 'Add' and type 'Modula
 4. Mobile Responsive Image Galleries - Galleries automatically adapt to smartphone and tablet screen sizes
 
 == Changelog ==
+
+= 3.0.5 - 18.09.2026 =
+Fixed: Frontend Edit gallery link no longer triggers an undefined array key warning on classic (`jtg-`) galleries.
+Fixed: Gallery listing shows gallery type product names from the settings schema (Masonry for type `grid`, not Grid).
+Fixed: Release zip again includes classic admin `modula-gallery-upload.min.js` and `wp-modula-gallery.min.js` (uglify no longer skips them).
+Info: Read more about Modula 3.0 Beta: https://wp-modula.com/modula-3-0-beta/
+
+= 3.0.4 - 18.09.2026 =
+Added: Duplicate on gallery listing row hover actions (same as ⋮; short label).
+Changed: Classic visitor shortcode gallery root is `id="jtg-{id}"` again; `#modula-{id}` is only the Beta / modern renderer root.
+Compat: Classic Custom CSS and theme root selectors stay `#jtg-{id}`. Beta / modern galleries use `#modula-{id}`.
+Info: Read more about Modula 3.0 Beta: https://wp-modula.com/modula-3-0-beta/
+
+= 3.0.3 - 16.09.2026 =
+Added: Listing toolbar Trash icon that switches SHOW to In the trash (and toggles back to Published).
+Added: Classic WYSIWYG Caption editor on the gallery item edit panel (same TinyMCE toolbar as bulk-edit captions).
+Changed: Gallery listing default SHOW is Published; removed the Everything (all live) status option.
+Changed: Removed Image click behavior “Direct link to image file”; existing galleries stored as `direct` are treated as Fancybox.
+Changed: Gallery editor top bar and shortcode panels refined (document status and embed chrome).
+Fixed: Listing ⋮ action labels (e.g. Restore classic editor, Apply preset) wrap instead of forcing a horizontal scrollbar.
+Fixed: Draft and private galleries no longer show “Gallery not found.” to visitors who cannot read them — they see “This gallery is not published.”
+Fixed: Per-image Redirect to URL skips the lightbox and navigates on tile click, even when the gallery Image click behavior is Open in lightbox.
+Fixed: Gutenberg Modula Gallery block chooser is no longer capped at five galleries; search matches by title as well as ID.
+Fixed: New Beta galleries paint phones-and-tablets / Masonry column controls from schema defaults on first open (empty grouped settings no longer hide them).
+Fixed: Omitted Masonry grid type on new Beta galleries defaults to 3 columns, not justified automatic.
+Info: Read more about Modula 3.0 Beta: https://wp-modula.com/modula-3-0-beta/
 
 = 3.0.2 - 11.09.2026 =
 Added: Convert to new editor on the gallery listing bulk bar for selected classic galleries (same classic settings backup as row Convert).

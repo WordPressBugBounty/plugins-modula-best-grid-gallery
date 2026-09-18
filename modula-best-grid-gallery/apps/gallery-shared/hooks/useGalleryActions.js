@@ -14,6 +14,7 @@ import {
 	getPageSlice,
 	isAppendPaginationMode,
 } from '../store/clientLogic';
+import { buildServerFilterRequestArg } from '../utils/buildServerFilterRequestArg';
 import {
 	setItems,
 	setFilteredItems,
@@ -198,12 +199,14 @@ export function useGalleryActions() {
 			return;
 		}
 
-		triggerGetItems({
-			type: 'filter',
-			page: 1,
-			perPage: pagination.perPage,
-			filters: newFilters,
-		});
+		triggerGetItems(
+			buildServerFilterRequestArg({
+				filters: newFilters,
+				page: 1,
+				perPage: pagination.perPage,
+				paginationEnabled: pagination.enabled,
+			})
+		);
 	}
 
 	function removeFilter(filterKey) {
@@ -236,12 +239,14 @@ export function useGalleryActions() {
 			return;
 		}
 
-		triggerGetItems({
-			type: 'filter',
-			page: 1,
-			perPage: pagination.perPage,
-			filters: newFilters,
-		});
+		triggerGetItems(
+			buildServerFilterRequestArg({
+				filters: newFilters,
+				page: 1,
+				perPage: pagination.perPage,
+				paginationEnabled: pagination.enabled,
+			})
+		);
 	}
 
 	function clearFilters() {
@@ -260,12 +265,14 @@ export function useGalleryActions() {
 			return;
 		}
 
-		triggerGetItems({
-			type: 'filter',
-			page: 1,
-			perPage: pagination.perPage,
-			filters: [],
-		});
+		triggerGetItems(
+			buildServerFilterRequestArg({
+				filters: [],
+				page: 1,
+				perPage: pagination.perPage,
+				paginationEnabled: pagination.enabled,
+			})
+		);
 	}
 
 	return {

@@ -153,11 +153,18 @@ export function getGalleryItemViewModel(itemData, config, options = {}) {
 	const imageSrcset = itemData?.srcset || '';
 	const imageSizes = itemData?.sizes || '';
 
+	const spanWidth =
+		itemData?.width ??
+		item?.itemAttributes?.['data-width'] ??
+		item?.width ??
+		null;
+
 	const effectiveSizes = getEffectiveSizes({
 		slotWidth,
 		imageSizes,
 		lazyLoad: item.lazyLoad ?? config?.lazyLoad,
 		config,
+		spanWidth,
 	});
 
 	const valign =
@@ -256,10 +263,8 @@ export function getGalleryItemViewModel(itemData, config, options = {}) {
 	});
 
 	/*
-	 * Pro Lightbox_Enhancer historically forced modula-simple-link when an
-	 * image had a custom URL, which skipped Fancybox. For fancybox mode we
-	 * strip it so the tile opens the lightbox; URL is handled inside the
-	 * lightbox. Hybrid lightbox-prefer-url keeps simple-link via
+	 * Strip leftover PHP/Pro `modula-simple-link` when this tile opens the
+	 * lightbox. Per-item Redirect and hybrid keep the class via
 	 * resolveGalleryItemLink when a custom URL is set.
 	 */
 	if (!linkResolution.isSimpleLink) {

@@ -1,6 +1,6 @@
 /**
  * Takeover Hover: preview card with gallery aspect ratio, free-position slots on the image (build),
- * and Build / Preview toggle to simulate hover.
+ * and Build / Preview toggle. Preview rest vs hover matches the visitor tile.
  */
 import { editorCaptionsAreBelowImage } from '../../utils/editorCaptionsAreBelowImage';
 import { useEffect, useId, useMemo, useRef } from '@wordpress/element';
@@ -17,6 +17,7 @@ import {
 	getSlotOrderFromPositions,
 } from './hoverBuilderCardHelpers';
 import {
+	chipCaptionPreviewHtml,
 	chipPlainPreviewText,
 	getCaptionsTypographyStyle,
 } from './hoverBuilderUtils';
@@ -120,7 +121,6 @@ export default function HoverEffectBuilderCard({
 								buildHoverBuilderItemClassName({
 									...cardState,
 									captionBelowImage,
-									forceHover: previewMode,
 								});
 							const visualSlotOrder =
 								getSlotOrderFromPositions(positions);
@@ -160,14 +160,14 @@ export default function HoverEffectBuilderCard({
 
 							const titleFromRow =
 								chipPlainPreviewText(previewItemTitle);
-							const captionFromRow = chipPlainPreviewText(
+							const captionHtmlFromRow = chipCaptionPreviewHtml(
 								previewItemDescription
 							);
 							const titleText =
 								titleFromRow ||
 								__('Sample title', 'modula-best-grid-gallery');
-							const captionText =
-								captionFromRow ||
+							const captionHtml =
+								captionHtmlFromRow ||
 								__(
 									'Sample caption text',
 									'modula-best-grid-gallery'
@@ -325,8 +325,8 @@ export default function HoverEffectBuilderCard({
 														titleTypographyStyle={
 															titleTypographyStyle
 														}
-														captionText={
-															captionText
+														captionHtml={
+															captionHtml
 														}
 														captionTypographyStyle={
 															captionTypographyStyle

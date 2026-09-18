@@ -99,11 +99,18 @@ final class Catalog_Service {
 	}
 
 	/**
-	 * Tokens from modula-images `filters` field (comma-separated).
+	 * Tokens for category/tag matching (mirrors gallery-shared itemFilterTokens).
 	 *
+	 * @param array<string, mixed> $row Image row.
 	 * @return string[]
 	 */
-	private static function row_filter_tokens( array $row ): array {
+	public static function row_filter_tokens( array $row ): array {
+		if ( isset( $row['categories'] ) && is_array( $row['categories'] ) && count( $row['categories'] ) > 0 ) {
+			return array_map( 'strval', $row['categories'] );
+		}
+		if ( isset( $row['tags'] ) && is_array( $row['tags'] ) && count( $row['tags'] ) > 0 ) {
+			return array_map( 'strval', $row['tags'] );
+		}
 		if ( ! isset( $row['filters'] ) ) {
 			return array();
 		}
@@ -115,7 +122,54 @@ final class Catalog_Service {
 		if ( '' === trim( $s ) ) {
 			return array();
 		}
-		return array_map( 'trim', explode( ',', $s ) );
+		$parts = array_map( 'trim', explode( ',', $s ) );
+		return array_values(
+			array_filter(
+				$parts,
+				static function ( $part ) {
+					return '' !== $part;
+				}
+			)
+		);
+	}
+
+	/**
+	 * Full-catalog filter usage for the visitor filter bar (independent of page slice).
+	 *
+	 * @param array<int, array<string, mixed>> $rows Full gallery rows before first-page slice.
+	 * @return array{usageCounts: array<string, int>, filterableImageCount: int}
+	 */
+	public static function build_filter_usage_stats( array $rows ): array {
+		$counts     = array();
+		$filterable = 0;
+
+		foreach ( $rows as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			if ( Adapter::is_embedded_gallery_item( $row ) ) {
+				continue;
+			}
+			if ( ! array_key_exists( 'id', $row ) || null === $row['id'] || '' === trim( (string) $row['id'] ) ) {
+				continue;
+			}
+			++$filterable;
+			foreach ( self::row_filter_tokens( $row ) as $tag ) {
+				$key = trim( (string) $tag );
+				if ( '' === $key ) {
+					continue;
+				}
+				if ( ! isset( $counts[ $key ] ) ) {
+					$counts[ $key ] = 0;
+				}
+				++$counts[ $key ];
+			}
+		}
+
+		return array(
+			'usageCounts'           => $counts,
+			'filterableImageCount'  => $filterable,
+		);
 	}
 
 	/**

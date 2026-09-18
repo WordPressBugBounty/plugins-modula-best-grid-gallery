@@ -9,12 +9,58 @@ const TINYMCE_OPTIONS = {
 	forced_root_block: false,
 	forced_br_newlines: true,
 	force_p_newlines: false,
+	statusbar: false,
 	plugins: 'lists link textcolor colorpicker',
 	toolbar1:
 		'bold italic underline strikethrough | bullist numlist | link unlink | forecolor backcolor',
 	content_style:
-		'a[data-mce-selected]{box-shadow:none!important;background-color:transparent!important;}',
+		'body{background:transparent;color:inherit;}a[data-mce-selected]{box-shadow:none!important;background-color:transparent!important;}',
 };
+
+/**
+ * @return {{ background: string, color: string }|null}
+ */
+function readEditorAppearanceColors() {
+	if (typeof document === 'undefined') {
+		return null;
+	}
+	const app = document.querySelector('.modula-settings-editor__app');
+	if (!(app instanceof HTMLElement)) {
+		return null;
+	}
+	const styles = window.getComputedStyle(app);
+	return {
+		background: styles.getPropertyValue('--mod-se-surface').trim() || '#202126',
+		color: styles.getPropertyValue('--mod-se-ink').trim() || '#ececef',
+	};
+}
+
+/**
+ * @param {{ getBody?: () => HTMLElement|null, getDoc?: () => Document|null }} editor
+ */
+function applyTinyMceAppearanceColors(editor) {
+	const colors = readEditorAppearanceColors();
+	if (!colors) {
+		return;
+	}
+	try {
+		const body = editor.getBody?.();
+		if (body) {
+			body.style.backgroundColor = colors.background;
+			body.style.color = colors.color;
+		}
+		const doc = editor.getDoc?.();
+		if (doc?.documentElement) {
+			doc.documentElement.style.backgroundColor = colors.background;
+		}
+		if (doc?.body && doc.body !== body) {
+			doc.body.style.backgroundColor = colors.background;
+			doc.body.style.color = colors.color;
+		}
+	} catch {
+		// Non-fatal: iframe may not be ready yet.
+	}
+}
 
 /** Stable fallback — never use `tinymceOptions = {}` in props (new object every render). */
 const EMPTY_TINYMCE_OPTIONS = Object.freeze({});
@@ -92,6 +138,7 @@ function setTinyMceReadOnly(editor, readOnly) {
  * @param {Record<string, unknown>} [props.tinymceOptions] Merged into default TinyMCE config.
  * @param {boolean}             [props.preventInitFocus] When true, blur TinyMCE after init and call `onAfterInit` (modal keeps focus on another field).
  * @param {boolean}             [props.autoFocusOnInit]  When true, focus TinyMCE after init (bulk-edit inline description).
+ * @param {boolean}             [props.enableCodeView]   When true, enable Quicktags + Visual/Text tabs so authors can inspect/edit HTML source.
  * @param {() => void}          [props.onAfterInit]      Run after init when `preventInitFocus` is set.
  * @param {() => void}          [props.onEscape]         Called when Escape is pressed in the caption field (textarea or TinyMCE).
  */
@@ -106,14 +153,19 @@ export default function WpClassicCaptionEditor({
 	tinymceOptions,
 	preventInitFocus = false,
 	autoFocusOnInit = false,
+	enableCodeView = false,
 	onAfterInit,
 	onEscape,
 }) {
 	const editorId = `modula-img-meta-caption-${editorInstanceKey}`;
 	const mergedTinymceOptions = tinymceOptions ?? EMPTY_TINYMCE_OPTIONS;
 	const tinymceOptionsKey = useMemo(
-		() => JSON.stringify(mergedTinymceOptions),
-		[mergedTinymceOptions]
+		() =>
+			JSON.stringify({
+				tinymce: mergedTinymceOptions,
+				enableCodeView,
+			}),
+		[mergedTinymceOptions, enableCodeView]
 	);
 
 	const onChangeRef = useRef(onChange);
@@ -123,6 +175,7 @@ export default function WpClassicCaptionEditor({
 	const onAfterInitRef = useRef(onAfterInit);
 	const preventInitFocusRef = useRef(preventInitFocus);
 	const autoFocusOnInitRef = useRef(autoFocusOnInit);
+	const enableCodeViewRef = useRef(enableCodeView);
 	const suppressChangeRef = useRef(false);
 	const tinymceOptionsRef = useRef(mergedTinymceOptions);
 	onChangeRef.current = onChange;
@@ -132,6 +185,7 @@ export default function WpClassicCaptionEditor({
 	onAfterInitRef.current = onAfterInit;
 	preventInitFocusRef.current = preventInitFocus;
 	autoFocusOnInitRef.current = autoFocusOnInit;
+	enableCodeViewRef.current = enableCodeView;
 	tinymceOptionsRef.current = mergedTinymceOptions;
 
 	const setEditorContentSilently = (editor, html) => {
@@ -186,18 +240,19 @@ export default function WpClassicCaptionEditor({
 		delete extraOptions.setup;
 
 		window.wp.oldEditor.initialize(editorId, {
-				tinymce: {
-					...TINYMCE_OPTIONS,
-					...extraOptions,
-					auto_focus: false,
-					setup: (editor) => {
-						parentSetup?.(editor);
+			tinymce: {
+				...TINYMCE_OPTIONS,
+				...extraOptions,
+				auto_focus: false,
+				setup: (editor) => {
+					parentSetup?.(editor);
 						editor.on('init', () => {
 							const html =
 								typeof valueRef.current === 'string'
 									? valueRef.current
 									: '';
 							setEditorContentSilently(editor, html);
+							applyTinyMceAppearanceColors(editor);
 							if (disabledRef.current) {
 								setTinyMceReadOnly(editor, true);
 							}
@@ -217,33 +272,32 @@ export default function WpClassicCaptionEditor({
 								});
 							}
 						});
-						editor.on('change keyup paste input NodeChange', () => {
-							if (
-								suppressChangeRef.current ||
-								disabledRef.current
-							) {
-								return;
-							}
-							onChangeRef.current(editor.getContent());
-						});
-						editor.on('keydown', (event) => {
-							if (
-								event.key !== 'Escape' ||
-								!onEscapeRef.current
-							) {
-								return;
-							}
-							event.preventDefault();
-							event.stopPropagation();
-							onEscapeRef.current();
-						});
-					},
+					editor.on('change keyup paste input NodeChange', () => {
+						if (suppressChangeRef.current || disabledRef.current) {
+							return;
+						}
+						onChangeRef.current(editor.getContent());
+					});
+					editor.on('keydown', (event) => {
+						if (event.key !== 'Escape' || !onEscapeRef.current) {
+							return;
+						}
+						event.preventDefault();
+						event.stopPropagation();
+						onEscapeRef.current();
+					});
 				},
-				// Quicktags assumes a visible editor canvas; TabPanel keeps inactive tabs hidden, which
-				// breaks QTags._init (undefined 'canvas'). Visual mode (TinyMCE) is enough for captions here.
-				quicktags: false,
-				mediaButtons: false,
-			});
+			},
+			// Quicktags assumes a visible editor canvas; TabPanel keeps inactive tabs hidden, which
+			// breaks QTags._init (undefined 'canvas'). Opt in via enableCodeView for sidebar panels.
+			quicktags: enableCodeViewRef.current
+				? {
+						buttons:
+							'strong,em,link,block,del,ins,ul,ol,li,code,close',
+					}
+				: false,
+			mediaButtons: false,
+		});
 
 		return () => {
 			textarea.removeEventListener('input', onQuickTagsInput);
@@ -255,10 +309,14 @@ export default function WpClassicCaptionEditor({
 	}, [editorId, tinymceOptionsKey]);
 
 	useEffect(() => {
+		const next = typeof value === 'string' ? value : '';
+		const wrap = document.getElementById(`wp-${editorId}-wrap`);
+		const htmlActive =
+			wrap instanceof HTMLElement &&
+			wrap.classList.contains('html-active');
 		const ed = window.tinymce?.get(editorId);
-		if (!ed || ed.removed) {
+		if (htmlActive || !ed || ed.removed) {
 			const ta = document.getElementById(editorId);
-			const next = typeof value === 'string' ? value : '';
 			if (ta && ta.value !== next) {
 				suppressChangeRef.current = true;
 				ta.value = next;
@@ -268,7 +326,6 @@ export default function WpClassicCaptionEditor({
 			}
 			return;
 		}
-		const next = typeof value === 'string' ? value : '';
 		if (ed.getContent() !== next) {
 			setEditorContentSilently(ed, next);
 		}

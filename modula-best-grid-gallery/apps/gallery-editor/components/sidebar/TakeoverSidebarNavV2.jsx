@@ -4,7 +4,6 @@
 
 import { useLayoutEffect, useMemo } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { Tooltip } from '@wordpress/components';
 import { Icon } from '@wordpress/icons';
 import { SETTINGS_EDITOR_CATEGORIES } from '../../constants/editorStructure';
 import { TAKEOVER_CATEGORY_ICONS } from '../../constants/takeoverCategoryIcons';
@@ -100,36 +99,34 @@ function TakeoverSidebarNavV2Inner({
 									isActive ? ' is-active' : ''
 								}`}
 							>
-								<Tooltip text={cat.title} delay={0}>
-									<button
-										type="button"
-										className="modula-gallery-takeover__sidebar-v2-nav-btn"
-										onClick={() => onSelect(cat.name)}
-										aria-current={
-											isActive ? 'true' : undefined
-										}
-										aria-label={accessibleName}
+								<button
+									type="button"
+									className="modula-gallery-takeover__sidebar-v2-nav-btn"
+									onClick={() => onSelect(cat.name)}
+									aria-current={
+										isActive ? 'true' : undefined
+									}
+									aria-label={accessibleName}
+								>
+									<span
+										className="modula-gallery-takeover__sidebar-v2-nav-icon-wrap"
+										aria-hidden="true"
 									>
-										<span
-											className="modula-gallery-takeover__sidebar-v2-nav-icon-wrap"
-											aria-hidden="true"
-										>
-											{categoryIcon ? (
-												<Icon
-													icon={categoryIcon}
-													size={20}
-													className="modula-gallery-takeover__sidebar-v2-nav-icon"
-												/>
-											) : null}
-										</span>
-										<span
-											className="modula-gallery-takeover__sidebar-v2-nav-title"
-											aria-hidden="true"
-										>
-											{getSidebarRailNavLabel(cat)}
-										</span>
-									</button>
-								</Tooltip>
+										{categoryIcon ? (
+											<Icon
+												icon={categoryIcon}
+												size={20}
+												className="modula-gallery-takeover__sidebar-v2-nav-icon"
+											/>
+										) : null}
+									</span>
+									<span
+										className="modula-gallery-takeover__sidebar-v2-nav-title"
+										aria-hidden="true"
+									>
+										{getSidebarRailNavLabel(cat)}
+									</span>
+								</button>
 							</li>
 						);
 					})}

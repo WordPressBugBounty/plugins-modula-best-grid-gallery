@@ -224,6 +224,41 @@ class Modula_Gutenberg {
 		die();
 	}
 
+	/**
+	 * WP_Query args for Gutenberg gallery picker search.
+	 *
+	 * @param string $term Title fragment or gallery post id.
+	 * @return array
+	 */
+	public static function get_gallery_search_query_args( $term ) {
+		$term = is_string( $term ) ? trim( $term ) : (string) $term;
+
+		return array(
+			'post_type'      => 'modula-gallery',
+			'posts_per_page' => -1,
+			's'              => $term,
+		);
+	}
+
+	/**
+	 * WP_Query args to match a gallery by post id, or null when $term is not an id.
+	 *
+	 * @param string $term Title fragment or gallery post id.
+	 * @return array|null
+	 */
+	public static function get_gallery_id_search_query_args( $term ) {
+		$term = is_string( $term ) ? trim( $term ) : (string) $term;
+		if ( ! ctype_digit( $term ) ) {
+			return null;
+		}
+
+		return array(
+			'post_type'      => 'modula-gallery',
+			'posts_per_page' => 1,
+			'p'              => (int) $term,
+		);
+	}
+
 	public function get_gallery() {
 
 		$nonce = '';
@@ -236,20 +271,30 @@ class Modula_Gutenberg {
 		}
 
 		$suggestions = array();
+		$seen        = array();
 		$term        = isset( $_GET['term'] ) ? sanitize_text_field( wp_unslash( $_GET['term'] ) ) : '';
+		$queries     = array( self::get_gallery_search_query_args( $term ) );
+		$id_args     = self::get_gallery_id_search_query_args( $term );
 
-		$loop = new WP_Query(
-			array(
-				'p'              => $term,
-				'post_type'      => 'modula-gallery',
-				'posts_per_page' => -1,
-			)
-		);
-		while ( $loop->have_posts() ) {
-			$loop->the_post();
-			$suggestion['label'] = get_the_title();
-			$suggestion['value'] = get_the_ID();
-			$suggestions[]       = $suggestion;
+		if ( is_array( $id_args ) ) {
+			$queries[] = $id_args;
+		}
+
+		foreach ( $queries as $query_args ) {
+			$loop = new WP_Query( $query_args );
+			while ( $loop->have_posts() ) {
+				$loop->the_post();
+				$gallery_id = get_the_ID();
+				if ( isset( $seen[ $gallery_id ] ) ) {
+					continue;
+				}
+				$seen[ $gallery_id ] = true;
+				$suggestions[]       = array(
+					'label' => get_the_title(),
+					'value' => $gallery_id,
+				);
+			}
+			wp_reset_postdata();
 		}
 
 		wp_send_json( $suggestions );

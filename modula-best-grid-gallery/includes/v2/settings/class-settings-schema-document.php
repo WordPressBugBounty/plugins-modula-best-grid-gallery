@@ -98,6 +98,34 @@ class Settings_Schema_Document {
 	}
 
 	/**
+	 * English option labels for an enum field (`enumOptionLabels`).
+	 *
+	 * @param string $group Group id (e.g. `general`).
+	 * @param string $key   Field key (e.g. `type`).
+	 * @return array<string, string> Stored value => product name.
+	 */
+	public static function get_enum_option_labels( $group, $key ) {
+		if ( ! is_string( $group ) || '' === $group || ! is_string( $key ) || '' === $key ) {
+			return array();
+		}
+		$tree = self::get_settings_tree_raw();
+		if ( ! isset( $tree[ $group ][ $key ] ) || ! is_array( $tree[ $group ][ $key ] ) ) {
+			return array();
+		}
+		$map = isset( $tree[ $group ][ $key ]['enumOptionLabels'] ) && is_array( $tree[ $group ][ $key ]['enumOptionLabels'] )
+			? $tree[ $group ][ $key ]['enumOptionLabels']
+			: array();
+		$out = array();
+		foreach ( $map as $slug => $label ) {
+			if ( ! is_string( $slug ) || '' === $slug || ! is_string( $label ) || '' === $label ) {
+				continue;
+			}
+			$out[ $slug ] = $label;
+		}
+		return $out;
+	}
+
+	/**
 	 * Remove keys used only by the settings editor export (labels, select option text, product gates). Keeps runtime / REST schema lean.
 	 *
 	 * @param array<string, array<string, mixed>> $settings Group => field key => definition.

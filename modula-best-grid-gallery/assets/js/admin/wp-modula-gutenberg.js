@@ -135,7 +135,10 @@ const ModulaGallerySearch = props => {
   } = props;
   const inputRef = useRef(null);
   useEffect(() => {
-    let galleriesArray = [];
+    if (!inputRef.current) {
+      return undefined;
+    }
+    const galleriesArray = [];
     if (galleries != undefined && 0 == galleriesArray.length) {
       galleries.forEach(gallery => {
         galleriesArray.push({
@@ -144,7 +147,8 @@ const ModulaGallerySearch = props => {
         });
       });
     }
-    jQuery(inputRef.current).selectize({
+    const $input = jQuery(inputRef.current);
+    $input.selectize({
       valueField: 'value',
       labelField: 'label',
       searchField: ['label', 'value'],
@@ -154,13 +158,17 @@ const ModulaGallerySearch = props => {
       preload: true,
       allowEmptyOptions: true,
       closeAfterSelect: true,
+      // Portal outside `.modula-block-preview { overflow: hidden }` so the
+      // list can scroll without clipping or closing on scrollbar click.
+      dropdownParent: 'body',
+      dropdownClass: 'selectize-dropdown modula-gallery-picker-dropdown',
       options: options.concat(galleriesArray),
       render: {
-        option: function (item, escape) {
+        option(item, escape) {
           return '<div>' + '<span className="title">' + item.label + '<span className="name"> (#' + escape(item.value) + ')</span>' + '</div>';
         }
       },
-      load: function (query, callback) {
+      load(query, callback) {
         if (!query.length) {
           return callback();
         }
@@ -181,6 +189,11 @@ const ModulaGallerySearch = props => {
         onIdChange(value);
       }
     });
+    return () => {
+      if ($input[0] && $input[0].selectize) {
+        $input[0].selectize.destroy();
+      }
+    };
   }, []);
   return /*#__PURE__*/React.createElement("input", {
     ref: inputRef,
@@ -1977,12 +1990,27 @@ function withFilters(hookName) {
 
 //# sourceMappingURL=index.js.map
 
+;// ./assets/src/js/utils/modulaGalleryPickerQuery.js
+/**
+ * REST query used by the Gutenberg gallery picker preload.
+ *
+ * WordPress REST `per_page` max is 100; -1 is rejected.
+ *
+ * @return {{ post_status: string, per_page: number }} Query for getEntityRecords.
+ */
+function getModulaGalleryPickerQuery() {
+  return {
+    post_status: 'publish',
+    per_page: 100
+  };
+}
 ;// ./assets/src/js/components/edit.js
 
 
 /**
  * Internal dependencies
  */
+
 
 
 
@@ -2270,10 +2298,7 @@ const applyWithSelect = withSelect((select, props) => {
   const {
     getEntityRecords
   } = select('core');
-  const query = {
-    post_status: 'publish',
-    per_page: 5
-  };
+  const query = getModulaGalleryPickerQuery();
   return {
     galleries: getEntityRecords('postType', 'modula-gallery', query) || []
   };

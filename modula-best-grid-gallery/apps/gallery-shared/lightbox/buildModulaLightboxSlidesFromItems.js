@@ -75,15 +75,12 @@ function isLightboxSlideRow(row, config) {
 		return false;
 	}
 	/*
-	 * Hybrid: custom URL tiles navigate away — exclude from Fancybox slides
-	 * (parity with DOM `.modula-simple-link` filtering).
+	 * Per-item Redirect and hybrid: custom URL tiles navigate away — exclude
+	 * from lightbox slides (parity with DOM `.modula-simple-link` filtering).
 	 */
-	if (mode === 'lightbox-prefer-url') {
-		const itemLink =
-			typeof row.link === 'string' ? row.link.trim() : '';
-		if (itemLink) {
-			return false;
-		}
+	const itemLink = typeof row.link === 'string' ? row.link.trim() : '';
+	if (itemLink) {
+		return false;
 	}
 	return true;
 }

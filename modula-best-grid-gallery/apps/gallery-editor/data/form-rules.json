@@ -444,14 +444,14 @@
 			}
 		},
 		{
-			"pathPattern": "^layout\\.(parallaxOverlayEnabled|parallaxMotionPreset)$",
+			"pathPattern": "^layout\\.(parallaxOverlayEnabled|parallaxMotionPreset|parallaxCaption)$",
 			"when": {
 				"path": "general.type",
 				"eq": "parallax-masonry"
 			}
 		},
 		{
-			"pathPattern": "^layout\\.(parallaxOverlayBackground|parallaxCaption)$",
+			"pathPattern": "^layout\\.parallaxOverlayBackground$",
 			"when": {
 				"all": [
 					{

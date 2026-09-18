@@ -35,7 +35,10 @@ export const DEFAULT_LISTING_VIEW = {
 	mediaField: 'preview',
 };
 
-/** Status values that mean “everything” (non-trash library). */
+/** Default SHOW status when the view has no (or former Everything) status filter. */
+const DEFAULT_LISTING_STATUS = 'publish';
+
+/** Former SHOW “Everything” values (non-trash library). Map to Published. */
 const EVERYTHING_STATUSES = ['publish', 'draft', 'private'];
 
 /**
@@ -61,25 +64,25 @@ function sortFieldToOrderby(field) {
  * Resolve status query arg from DataViews filters.
  *
  * @param {ListingFilter[]} filters
- * @return {string|undefined}
+ * @return {string}
  */
 function statusFromFilters(filters) {
 	const statusFilter = filters.find((f) => f.field === 'status');
 	if (!statusFilter || statusFilter.value == null) {
-		return undefined;
+		return DEFAULT_LISTING_STATUS;
 	}
 	const values = Array.isArray(statusFilter.value)
 		? statusFilter.value
 		: [statusFilter.value];
 	if (values.length === 0) {
-		return undefined;
+		return DEFAULT_LISTING_STATUS;
 	}
 	if (
 		values.length >= EVERYTHING_STATUSES.length &&
 		EVERYTHING_STATUSES.every((s) => values.includes(s)) &&
 		!values.includes('trash')
 	) {
-		return undefined;
+		return DEFAULT_LISTING_STATUS;
 	}
 	if (values.length === 1) {
 		return values[0];

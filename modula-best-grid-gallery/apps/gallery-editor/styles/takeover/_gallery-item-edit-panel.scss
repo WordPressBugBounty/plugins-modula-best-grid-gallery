@@ -206,6 +206,128 @@
 	}
 }
 
+/* Classic caption WYSIWYG (same TinyMCE contract as bulk-edit description). */
+.modula-gallery-item-edit-panel {
+	.modula-image-metadata-modal__wp-caption-editor {
+		min-height: 120px;
+		box-sizing: border-box;
+		width: 100%;
+	}
+
+	.wp-editor-wrap {
+		box-sizing: border-box;
+		width: 100%;
+		border: 1px solid var(--mod-se-line);
+		overflow: hidden;
+		background: var(--mod-se-surface);
+	}
+
+	/* Beat WP admin defaults that force light chrome into dark appearance. */
+	.wp-editor-container,
+	.mce-tinymce,
+	.mce-container,
+	.mce-panel,
+	.mce-edit-area,
+	.mce-toolbar-grp {
+		background: var(--mod-se-surface) !important;
+		border-color: var(--mod-se-line) !important;
+		box-shadow: none !important;
+	}
+
+	.mce-statusbar {
+		display: none !important;
+	}
+
+	/* Visual | Text tabs (enableCodeView) — Text shows generated HTML. */
+	.wp-editor-tabs {
+		float: none;
+		display: flex;
+		justify-content: flex-end;
+		gap: 0;
+		padding: 0 $mod-space-8;
+		background: var(--mod-se-chrome-2);
+		border-bottom: 1px solid var(--mod-se-line);
+	}
+
+	.wp-switch-editor {
+		float: none !important;
+		margin: 0 !important;
+		padding: 6px 10px !important;
+		border: none !important;
+		border-radius: 0 !important;
+		background: transparent !important;
+		color: var(--mod-se-ink-3) !important;
+		font-size: 12px;
+		line-height: 1.2;
+		cursor: pointer;
+		box-shadow: none !important;
+
+		&:hover {
+			color: var(--mod-se-ink) !important;
+			background: transparent !important;
+		}
+	}
+
+	.wp-editor-wrap.html-active .switch-html,
+	.wp-editor-wrap.tmce-active .switch-tmce {
+		color: var(--mod-se-ink) !important;
+		background: var(--mod-se-surface) !important;
+		box-shadow: inset 0 -1px 0 var(--mod-se-surface) !important;
+	}
+
+	.quicktags-toolbar {
+		border-bottom: 1px solid var(--mod-se-line) !important;
+		background: var(--mod-se-chrome-2) !important;
+		padding: $mod-space-6 $mod-space-8;
+
+		input.button,
+		.button,
+		.ed_button {
+			background: var(--mod-se-surface) !important;
+			border: 1px solid var(--mod-se-line) !important;
+			border-radius: 0 !important;
+			box-shadow: none !important;
+			color: var(--mod-se-ink) !important;
+			text-shadow: none !important;
+
+			&:hover {
+				background: var(--mod-se-chrome) !important;
+				border-color: var(--mod-se-ink-3) !important;
+				color: var(--mod-se-ink) !important;
+			}
+		}
+	}
+
+	.mce-toolbar-grp {
+		border-bottom: 1px solid var(--mod-se-line) !important;
+		background: var(--mod-se-chrome-2) !important;
+	}
+
+	.mce-btn button {
+		color: var(--mod-se-ink) !important;
+	}
+
+	.mce-edit-area iframe {
+		min-height: 100px !important;
+		background: var(--mod-se-surface) !important;
+	}
+
+	.wp-editor-area {
+		min-height: 120px;
+		box-sizing: border-box;
+		width: 100% !important;
+		padding: $mod-space-8;
+		border: none !important;
+		background: var(--mod-se-surface) !important;
+		color: var(--mod-se-ink) !important;
+		caret-color: var(--mod-se-ink);
+		font-family: Menlo, Consolas, monaco, monospace;
+		font-size: 12px;
+		line-height: 1.45;
+		resize: vertical;
+	}
+}
+
 /* Image focus nested view in settings column */
 .modula-gallery-item-focus-panel {
 	display: flex;

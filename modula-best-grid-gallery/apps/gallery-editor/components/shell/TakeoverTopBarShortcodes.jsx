@@ -56,6 +56,10 @@ function TakeoverTopBarShortcodesInner({
 	hasExtras,
 }) {
 	const [open, setOpen] = useState(false);
+	const [activeId, setActiveId] = useState('modula_link');
+	const activeRow =
+		extraRows.find((row) => row.id === activeId) || extraRows[0];
+	const triggerRef = useRef(null);
 	const [copiedId, setCopiedId] = useState(/** @type {string|null} */ (null));
 	const wrapRef = useRef(null);
 	const copiedTimerRef = useRef(0);
@@ -73,6 +77,7 @@ function TakeoverTopBarShortcodesInner({
 		const onKey = (e) => {
 			if (e.key === 'Escape') {
 				setOpen(false);
+				triggerRef.current?.focus();
 			}
 		};
 		const t = window.setTimeout(() => {
@@ -170,12 +175,19 @@ function TakeoverTopBarShortcodesInner({
 								type="button"
 								className="modula-gallery-takeover__topbar-shortcodes-inline-action modula-gallery-takeover__topbar-shortcodes-inline-action--chevron"
 								aria-expanded={open}
-								aria-haspopup="menu"
+								ref={triggerRef}
+								aria-haspopup="dialog"
+								aria-controls={
+									open ? 'modula-extra-shortcodes' : undefined
+								}
 								aria-label={__(
 									'More shortcodes',
 									'modula-best-grid-gallery'
 								)}
-								onClick={() => setOpen((o) => !o)}
+								onClick={() => {
+									setActiveId('modula_link');
+									setOpen((o) => !o);
+								}}
 							>
 								<Icon
 									icon={chevronDown}
@@ -195,30 +207,83 @@ function TakeoverTopBarShortcodesInner({
 			{open && hasExtras ? (
 				<div
 					className="modula-gallery-takeover__topbar-shortcodes-dropdown"
-					role="menu"
-					aria-label={__(
-						'Additional gallery shortcodes',
-						'modula-best-grid-gallery'
-					)}
+					id="modula-extra-shortcodes"
+					role="dialog"
+					aria-labelledby="modula-extra-shortcodes-heading"
 				>
+					<h2
+						id="modula-extra-shortcodes-heading"
+						className="modula-gallery-takeover__topbar-shortcodes-heading"
+					>
+						{__('Use this gallery', 'modula-best-grid-gallery')}
+					</h2>
+					<div
+						className="modula-gallery-takeover__topbar-shortcodes-tabs"
+						role="tablist"
+						aria-label={__(
+							'Gallery links and shortcodes',
+							'modula-best-grid-gallery'
+						)}
+					>
+						{extraRows.map((row, index) => (
+							<button
+								key={row.id}
+								type="button"
+								role="tab"
+								id={`modula-shortcode-tab-${row.id}`}
+								aria-controls={`modula-shortcode-panel-${row.id}`}
+								aria-selected={activeRow?.id === row.id}
+								tabIndex={activeRow?.id === row.id ? 0 : -1}
+								onClick={() => setActiveId(row.id)}
+								onKeyDown={(event) => {
+									let next;
+									if (event.key === 'ArrowRight') {
+										next = (index + 1) % extraRows.length;
+									}
+									if (event.key === 'ArrowLeft') {
+										next =
+											(index - 1 + extraRows.length) %
+											extraRows.length;
+									}
+									if (event.key === 'Home') {
+										next = 0;
+									}
+									if (event.key === 'End') {
+										next = extraRows.length - 1;
+									}
+									if (next === undefined) {
+										return;
+									}
+									event.preventDefault();
+									setActiveId(extraRows[next].id);
+									event.currentTarget.parentElement.children[
+										next
+									].focus();
+								}}
+							>
+								{row.id === 'modula_link'
+									? __('Link', 'modula-best-grid-gallery')
+									: row.label}
+							</button>
+						))}
+					</div>
 					{extraRows.map((row) => (
 						<div
 							key={row.id}
 							className="modula-gallery-takeover__topbar-shortcodes-dropdown-row"
-							role="none"
+							role="tabpanel"
+							id={`modula-shortcode-panel-${row.id}`}
+							aria-labelledby={`modula-shortcode-tab-${row.id}`}
+							hidden={activeRow?.id !== row.id}
 						>
-							<div className="modula-gallery-takeover__topbar-shortcodes-dropdown-label">
-								{row.label}
-							</div>
 							<div className="modula-gallery-takeover__topbar-shortcodes-dropdown-field">
-								<input
-									type="text"
-									readOnly
+								<code
 									className="modula-gallery-takeover__topbar-shortcodes-dropdown-input"
-									value={row.code}
-									onFocus={(e) => e.currentTarget.select()}
+									tabIndex={0}
 									aria-label={dropdownInputAriaLabel(row)}
-								/>
+								>
+									{row.code}
+								</code>
 								<button
 									type="button"
 									className={
@@ -239,6 +304,17 @@ function TakeoverTopBarShortcodesInner({
 										size={14}
 										aria-hidden="true"
 									/>
+									<span aria-live="polite">
+										{copiedId === row.id
+											? __(
+													'Copied',
+													'modula-best-grid-gallery'
+												)
+											: __(
+													'Copy',
+													'modula-best-grid-gallery'
+												)}
+									</span>
 								</button>
 							</div>
 							{row.description ? (

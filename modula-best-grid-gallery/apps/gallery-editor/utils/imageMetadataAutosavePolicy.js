@@ -23,6 +23,17 @@ function asPlainFieldText(value) {
 }
 
 /**
+ * Classic caption editor id from WpClassicCaptionEditor
+ * (`modula-img-meta-caption-${storeIndex}-${attachmentId}`), plus TinyMCE iframe.
+ *
+ * @param {string} token
+ * @return {boolean}
+ */
+function isClassicCaptionEditorToken(token) {
+	return token.trim().toLowerCase().startsWith('modula-img-meta-caption-');
+}
+
+/**
  * @param {string|null|undefined} fieldName
  * @return {boolean}
  */
@@ -32,6 +43,9 @@ export function isProtectedImageMetadataFieldName(fieldName) {
 	}
 	const n = fieldName.trim().toLowerCase();
 	if (n === 'title' || n === 'description' || n === 'caption') {
+		return true;
+	}
+	if (isClassicCaptionEditorToken(n)) {
 		return true;
 	}
 	return n.endsWith('-title') || n.endsWith('-caption');

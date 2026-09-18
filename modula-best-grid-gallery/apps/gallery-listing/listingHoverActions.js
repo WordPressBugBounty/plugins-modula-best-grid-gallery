@@ -9,7 +9,7 @@ import { isListingBulkEditorEligible } from './listingBulkEditor';
 import { isListingQuickEditEligible } from './listingQuickEdit';
 import { isListingRowActionEligible } from './listingRowActions';
 
-/** @typedef {'edit'|'quick-edit'|'bulk-editor'|'trash'|'restore'|'delete-permanently'} ListingRowHoverActionId */
+/** @typedef {'edit'|'quick-edit'|'duplicate'|'bulk-editor'|'trash'|'restore'|'delete-permanently'} ListingRowHoverActionId */
 
 /**
  * @typedef {Object} ListingRowHoverAction
@@ -37,6 +37,11 @@ const LIVE_ROW_HOVER_ACTIONS = [
 		id: 'quick-edit',
 		label: __('Quick Edit', 'modula-best-grid-gallery'),
 		isEligible: (item) => isListingQuickEditEligible(item),
+	},
+	{
+		id: 'duplicate',
+		label: __('Duplicate', 'modula-best-grid-gallery'),
+		isEligible: (item) => isListingRowActionEligible('duplicate', item),
 	},
 	{
 		id: 'bulk-editor',
@@ -71,9 +76,10 @@ const TRASH_ROW_HOVER_ACTIONS = [
 /**
  * Ordered hover actions for a gallery or album listing row.
  *
- * Live rows: Edit / Quick Edit / Bulk Editor / Trash.
+ * Live rows: Edit / Quick Edit / Duplicate / Bulk Editor / Trash.
  * Trash rows: Restore / Delete permanently.
  * Bulk Editor (listing) only when entitled (galleries only; never albums).
+ * Duplicate uses the same eligibility as listing row actions; hover label is the short verb.
  *
  * @param {Object|null|undefined}                                    item Listing row.
  * @param {{ canUseBulkEditor?: boolean }}                  [options]

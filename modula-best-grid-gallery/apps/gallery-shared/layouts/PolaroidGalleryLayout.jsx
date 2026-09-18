@@ -22,7 +22,10 @@ import {
 	uniformPolaroidSectionHeight,
 } from '../utils/polaroidUniformSlots';
 import {
+	resolvePolaroidChinCaptionSize,
 	resolvePolaroidChinInset,
+	resolvePolaroidChinTitleSize,
+	resolvePolaroidChinTopSpacing,
 	resolvePolaroidEffectiveChinHeight,
 } from '../utils/polaroidCaptionChin';
 import { polaroidTransformForIndex } from '../utils/polaroidTransform';
@@ -102,10 +105,25 @@ export default function PolaroidGalleryLayout() {
 		config?.shadowColor
 	);
 	const captionInChin = isCaptionBelowImage(config);
+	const chinTopSpacing = captionInChin
+		? resolvePolaroidChinTopSpacing(config?.belowImageSpacing)
+		: 4;
+	const chinInset = resolvePolaroidChinInset(
+		framePadding,
+		captionInChin ? config?.belowImagePadding : undefined
+	);
+	const chinTitleSize = resolvePolaroidChinTitleSize(config?.titleFontSize);
+	const chinCaptionSize = resolvePolaroidChinCaptionSize(
+		config?.captionFontSize
+	);
 	const effectiveChinHeight = captionInChin
-		? resolvePolaroidEffectiveChinHeight(chinHeight)
+		? resolvePolaroidEffectiveChinHeight(chinHeight, {
+				topSpacing: chinTopSpacing,
+				inset: chinInset,
+				titleFontSize: chinTitleSize,
+				captionFontSize: chinCaptionSize,
+			})
 		: chinHeight;
-	const chinInset = resolvePolaroidChinInset(framePadding);
 
 	const chunks = usePreviewCatalogChunks(items, config);
 
@@ -252,6 +270,7 @@ export default function PolaroidGalleryLayout() {
 												: `${framePadding}px ${framePadding}px ${effectiveChinHeight}px`,
 											'--modula-polaroid-chin-height': `${effectiveChinHeight}px`,
 											'--modula-polaroid-chin-inset': `${chinInset}px`,
+											'--modula-polaroid-chin-top': `${chinTopSpacing}px`,
 											boxShadow: frameShadow,
 											transform,
 											transformOrigin: 'center center',

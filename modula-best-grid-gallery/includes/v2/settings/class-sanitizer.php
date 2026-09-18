@@ -235,6 +235,11 @@ class Sanitizer {
 					$keys[ $dim_key ] = Adapter::normalize_width_height_object( $keys[ $dim_key ] );
 				}
 			}
+			if ( array_key_exists( 'lightbox', $keys ) ) {
+				$keys['lightbox'] = function_exists( 'modula_coerce_lightbox_click_mode' )
+					? modula_coerce_lightbox_click_mode( $keys['lightbox'] )
+					: ( 'direct' === $keys['lightbox'] ? 'fancybox' : $keys['lightbox'] );
+			}
 		}
 		if ( 'layout' === $group && array_key_exists( 'gridImageDimensions', $keys ) ) {
 			$keys['gridImageDimensions'] = Adapter::normalize_width_height_object( $keys['gridImageDimensions'] );
@@ -513,17 +518,23 @@ class Sanitizer {
 
 	/**
 	 * Map renamed / legacy lightbox keys before schema validation.
+	 * Public for CLI seam tests.
 	 *
 	 * @param array<string, mixed> $keys Raw lightbox group.
 	 * @return array<string, mixed>
 	 */
-	private static function migrate_lightbox_legacy_keys( array $keys ) {
+	public static function migrate_lightbox_legacy_keys( array $keys ) {
 		if ( isset( $keys['thumbsAutoStart'] ) && ! array_key_exists( 'showThumbnails', $keys ) ) {
 			$keys['showThumbnails'] = $keys['thumbsAutoStart'];
 		}
 		unset( $keys['thumbsAutoStart'] );
 		// Touch navigation is always on in v2 (control removed from the settings UI).
 		$keys['touch'] = true;
+		if ( array_key_exists( 'lightbox', $keys ) ) {
+			$keys['lightbox'] = function_exists( 'modula_coerce_lightbox_click_mode' )
+				? modula_coerce_lightbox_click_mode( $keys['lightbox'] )
+				: ( 'direct' === $keys['lightbox'] ? 'fancybox' : $keys['lightbox'] );
+		}
 		return $keys;
 	}
 

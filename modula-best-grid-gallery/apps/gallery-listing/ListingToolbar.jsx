@@ -4,6 +4,7 @@ import { ListingSearch } from './ListingSearch';
 import { ListingSelectionBulkBar } from './ListingSelectionBulkBar';
 import { ListingSortFilter } from './ListingSortFilter';
 import { ListingStatusFilter } from './ListingStatusFilter';
+import { ListingTrashFilterButton } from './ListingTrashFilterButton';
 import { shouldShowClearTrashForView } from './listingClearTrash';
 import { __ } from '@wordpress/i18n';
 
@@ -74,6 +75,10 @@ export function ListingToolbar({
 					/>
 				) : null}
 				<div className="modula-gallery-listing__toolbar-actions">
+					<ListingTrashFilterButton
+						view={view}
+						onChangeView={onChangeView}
+					/>
 					<ListingStatusFilter
 						view={view}
 						onChangeView={onChangeView}

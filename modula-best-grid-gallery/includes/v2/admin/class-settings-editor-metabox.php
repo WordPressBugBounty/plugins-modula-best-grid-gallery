@@ -434,14 +434,7 @@ class Settings_Editor_Metabox {
 
 		$extension_entitlements = self::get_extension_entitlements_for_editor();
 
-		$uploads           = wp_upload_dir();
-		$folder_browse_src = isset( $uploads['basedir'] ) ? $uploads['basedir'] : '';
-		/**
-		 * Default server path for the folder-import browser (matches {@see Modula_Gallery_Upload::$default_dir}).
-		 *
-		 * @param string $folder_browse_src `wp_upload_dir()['basedir']`.
-		 */
-		$folder_browse_root = (string) apply_filters( 'modula_gallery_upload_default_dir', $folder_browse_src );
+		$folder_browse_root = (string) \Modula_Gallery_Upload::get_instance()->get_folder_import_browse_root();
 
 		$post_status      = $post_id ? get_post_status( $post_id ) : '';
 		$status_object    = $post_status ? get_post_status_object( $post_status ) : null;

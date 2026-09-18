@@ -76,10 +76,10 @@ export function boundGalleryAllowsReplace(summary) {
  * Primary Add new control action when bound vs unbound.
  *
  * @param {BoundGallerySummary|null|undefined} summary
- * @return {'content-block'|'upload'}
+ * @return {'content-block'|'library'}
  */
 export function boundGalleryPrimaryAddNewAction(summary) {
-	return isBoundGallerySummary(summary) ? 'content-block' : 'upload';
+	return isBoundGallerySummary(summary) ? 'content-block' : 'library';
 }
 
 /** Caret menu row ids kept when the gallery is bound. */

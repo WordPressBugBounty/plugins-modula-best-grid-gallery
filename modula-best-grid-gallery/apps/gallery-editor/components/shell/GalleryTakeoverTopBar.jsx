@@ -1,5 +1,5 @@
 /**
- * Full-width editor chrome: back to galleries, centered title, document status, save status, shortcodes.
+ * Full-width editor chrome: gallery identity and save status on the left; shortcodes and document status on the right.
  */
 import { useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -69,69 +69,83 @@ export default function GalleryTakeoverTopBar({
 							</span>
 						</a>
 						{undoRedoControls}
-						<BoundGalleryBadge />
 					</div>
-				</div>
 
-				<div className="modula-gallery-takeover__topbar-center">
-					<div className="modula-gallery-takeover__topbar-title-field">
-						<div className="modula-gallery-takeover__topbar-title-row">
-							<input
-								ref={titleInputRef}
-								id="modula-takeover-topbar-title"
-								type="text"
-								className="modula-gallery-takeover__topbar-title-input"
-								value={postTitle}
-								placeholder={__(
-									'Untitled gallery',
-									'modula-best-grid-gallery'
-								)}
-								disabled={titleDisabled || !galleryId}
-								aria-label={__(
-									'Gallery title',
-									'modula-best-grid-gallery'
-								)}
-								onChange={(e) =>
-									onPostTitleChange(e.target.value)
-								}
-								onBlur={(e) =>
-									onPostTitleCommit?.(e.currentTarget.value)
-								}
-								onKeyDown={(e) => {
-									if (e.key === 'Enter') {
-										e.preventDefault();
-										const el = e.currentTarget;
-										onPostTitleCommit?.(el.value);
-										el.blur();
-									}
-								}}
-							/>
-							{galleryId && !titleDisabled ? (
-								<button
-									type="button"
-									className="modula-gallery-takeover__topbar-title-pencil"
-									tabIndex={-1}
-									aria-label={__(
-										'Edit gallery title',
+					<div className="modula-gallery-takeover__topbar-title">
+						<div className="modula-gallery-takeover__topbar-title-field">
+							<div className="modula-gallery-takeover__topbar-title-row">
+								<span
+									className="modula-gallery-takeover__topbar-title-size"
+									aria-hidden="true"
+								>
+									{postTitle ||
+										__(
+											'Untitled gallery',
+											'modula-best-grid-gallery'
+										)}
+								</span>
+								<input
+									ref={titleInputRef}
+									id="modula-takeover-topbar-title"
+									type="text"
+									className="modula-gallery-takeover__topbar-title-input"
+									value={postTitle}
+									title={postTitle}
+									placeholder={__(
+										'Untitled gallery',
 										'modula-best-grid-gallery'
 									)}
-									onClick={() => {
-										const el = titleInputRef.current;
-										if (el && !el.disabled) {
-											el.focus();
-											el.select();
+									disabled={titleDisabled || !galleryId}
+									aria-label={__(
+										'Gallery title',
+										'modula-best-grid-gallery'
+									)}
+									onChange={(e) =>
+										onPostTitleChange(e.target.value)
+									}
+									onBlur={(e) =>
+										onPostTitleCommit?.(
+											e.currentTarget.value
+										)
+									}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter') {
+											e.preventDefault();
+											const el = e.currentTarget;
+											onPostTitleCommit?.(el.value);
+											el.blur();
 										}
 									}}
-								>
-									<Icon icon={pencil} size={14} />
-								</button>
-							) : null}
+								/>
+								{galleryId && !titleDisabled ? (
+									<button
+										type="button"
+										className="modula-gallery-takeover__topbar-title-pencil"
+										tabIndex={-1}
+										aria-label={__(
+											'Edit gallery title',
+											'modula-best-grid-gallery'
+										)}
+										onClick={() => {
+											const el = titleInputRef.current;
+											if (el && !el.disabled) {
+												el.focus();
+												el.select();
+											}
+										}}
+									>
+										<Icon icon={pencil} size={14} />
+									</button>
+								) : null}
+							</div>
 						</div>
 					</div>
+
+					<TakeoverTopBarSaveStatus />
+					<BoundGalleryBadge />
 				</div>
 
 				<div className="modula-gallery-takeover__topbar-right">
-					<TakeoverTopBarSaveStatus />
 					<TakeoverTopBarShortcodes galleryId={galleryId} />
 					{showDocumentStatus ? (
 						<TakeoverTopBarDocumentStatus

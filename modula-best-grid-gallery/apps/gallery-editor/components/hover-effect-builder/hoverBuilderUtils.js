@@ -30,13 +30,24 @@ function normalizePercent(value, fallback) {
 }
 
 /**
- * Title/caption for hover chips: same normalization as image metadata, strip tags for chip display.
+ * Caption Preview/Build slot markup: same payload normalization as titles, keep tags
+ * so the slot can match visitor description HTML (`<strong>`, `<br />`, …).
  *
- * @param {unknown} value
- * @returns {string}
+ * @param {unknown} value Caption or description from REST/bootstrap.
+ * @return {string} Markup string for the caption slot (may be empty).
+ */
+export function chipCaptionPreviewHtml(value) {
+	return captionToPlainString(value).trim();
+}
+
+/**
+ * Title chip copy: same normalization as image metadata, strip tags (title is plain text).
+ *
+ * @param {unknown} value Title from REST/bootstrap.
+ * @return {string} Tag-stripped plain text for the title slot (may be empty).
  */
 export function chipPlainPreviewText(value) {
-	const s = captionToPlainString(value).trim();
+	const s = chipCaptionPreviewHtml(value);
 	if (!s) {
 		return '';
 	}

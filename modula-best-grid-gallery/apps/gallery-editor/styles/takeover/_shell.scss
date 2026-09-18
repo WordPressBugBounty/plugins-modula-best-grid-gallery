@@ -50,6 +50,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
+		overflow: hidden;
 	}
 
 	.modula-gallery-takeover__redesign-stage {
@@ -63,6 +64,8 @@
 		padding: $mod-space-12 $mod-takeover-canvas-gap $mod-space-16;
 		box-sizing: border-box;
 		background: var(--mod-se-stage, var(--mod-se-canvas-bg, #{$mod-takeover-canvas-bg}));
+		/* Keep gallery inside the stage so it cannot paint over the status bar. */
+		overflow: hidden;
 	}
 
 	.modula-gallery-takeover__redesign-stage-fill,
@@ -73,8 +76,10 @@
 	}
 
 	/*
-	 * Redesign artboard: desktop = full stage width + 18px inset.
-	 * Tablet/mobile wrap modifiers keep device frames (viewport toolbar).
+	 * Redesign artboard: desktop = flush to stage (no raised paper / inset).
+	 * Keep overflow containment so `__live-preview-gallery-scroll` still scrolls.
+	 * Selection outline room stays on `__live-preview-gallery-shell` (8px).
+	 * Preview chrome toolbar keeps its own surface. Tablet/mobile keep device frames.
 	 */
 	.modula-gallery-takeover__preview-card {
 		width: 100%;
@@ -82,12 +87,30 @@
 		margin-inline: 0;
 	}
 
-	.modula-gallery-takeover__preview-wrap:not(.modula-gallery-takeover__preview-wrap--tablet):not(.modula-gallery-takeover__preview-wrap--mobile) .modula-gallery-takeover__live-preview-body {
-		max-width: none;
-		width: 100%;
-		margin-left: 0;
-		margin-right: 0;
-		padding: $mod-space-18;
+	.modula-gallery-takeover__preview-card:has(> .modula-gallery-takeover__preview-wrap:not(.modula-gallery-takeover__preview-wrap--tablet):not(.modula-gallery-takeover__preview-wrap--mobile)) {
+		background: transparent;
+		border-color: transparent;
+		box-shadow: none;
+	}
+
+	.modula-gallery-takeover__preview-wrap:not(.modula-gallery-takeover__preview-wrap--tablet):not(.modula-gallery-takeover__preview-wrap--mobile) {
+		.modula-gallery-takeover__live-preview {
+			background: transparent;
+		}
+
+		.modula-gallery-takeover__live-preview-body {
+			max-width: none;
+			width: 100%;
+			margin-left: 0;
+			margin-right: 0;
+			padding: 0;
+		}
+
+		.modula-gallery-takeover__preview-loading,
+		.modula-gallery-takeover__preview-placeholder {
+			background: transparent;
+			border-bottom-color: transparent;
+		}
 	}
 
 	.modula-gallery-takeover__preview-wrap--tablet .modula-gallery-takeover__live-preview-body,

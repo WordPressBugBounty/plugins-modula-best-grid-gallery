@@ -38,6 +38,7 @@ import {
 	mergeLegacyJsConfigIntoConfig,
 } from './mergeLegacyJsConfig';
 import { clampMasonryGalleryWidth } from './clampMasonryGalleryWidth';
+import { coerceLightboxClickMode } from './resolveGalleryItemLink';
 
 /**
  * @param {unknown} openOn
@@ -271,9 +272,11 @@ export function settingsToConfig(settings, opts = {}) {
 	const h1 = parseInt(heightArr[1] ?? h0, 10);
 	const h2 = parseInt(heightArr[2] ?? h0, 10);
 
-	let lb = lightbox.lightbox || 'fancybox';
+	let lb = coerceLightboxClickMode(lightbox.lightbox || 'fancybox');
 	if (type === 'showcase') {
-		lb = resolveShowcaseLightboxMode(lightbox, showcase);
+		lb = coerceLightboxClickMode(
+			resolveShowcaseLightboxMode(lightbox, showcase)
+		);
 	} else if (isGalleryTypeWithoutLightbox(type)) {
 		lb = 'no-link';
 	} else if (
@@ -281,7 +284,7 @@ export function settingsToConfig(settings, opts = {}) {
 		slider.lightbox !== undefined &&
 		slider.lightbox !== ''
 	) {
-		lb = slider.lightbox;
+		lb = coerceLightboxClickMode(slider.lightbox);
 	}
 	// Allow host to override via global (e.g. modula_disable_lightboxes)
 	if (
@@ -289,7 +292,6 @@ export function settingsToConfig(settings, opts = {}) {
 		window.ModulaDisableLightboxes &&
 		![
 			'no-link',
-			'direct',
 			'external-url',
 			'attachment-page',
 			'lightbox-prefer-url',

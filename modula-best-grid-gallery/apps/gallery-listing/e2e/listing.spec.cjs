@@ -590,7 +590,7 @@ for (const name of ['City lights', 'Summer collection']) {
 			},
 		});
 		await page
-			.getByRole('button', { name: 'All statuses', exact: true })
+			.getByRole('button', { name: 'Published', exact: true })
 			.click();
 		await page
 			.getByRole('menuitemradio', { name: 'Published', exact: true })
@@ -677,9 +677,9 @@ test('03: unsupported status is preserved and canonical server values determine 
 	await expect(
 		page.getByRole('textbox', { name: 'URL slug', exact: true })
 	).toHaveValue('canonical-slug');
-	await expect(
-		page.getByText('Saved URL:', { exact: false })
-	).toContainText('/gallery/canonical-slug/');
+	await expect(page.getByText('Saved URL:', { exact: false })).toContainText(
+		'/gallery/canonical-slug/'
+	);
 	await expect(
 		page.getByRole('link', { name: /View saved page/ })
 	).toHaveCount(0);

@@ -20,6 +20,7 @@ class Modula_Backward_Compatibility {
 		// Lightbox set by default to fancybox
 		add_filter( 'modula_admin_field_value', array( $this, 'backward_compatibility_admin_fancybox' ), 10, 3 );
 		add_filter( 'modula_backbone_settings', array( $this, 'backward_compatibility_backbone_fancybox' ), 10 );
+		add_filter( 'modula_backwards_compatibility_front', array( $this, 'backward_compatibility_backbone_fancybox' ), 10 );
 
 		// Responsive gutter
 		add_filter( 'modula_admin_field_value', array( $this, 'backward_compatibility_admin_responsive_gutter' ), 10, 3 );
@@ -84,15 +85,36 @@ class Modula_Backward_Compatibility {
 
 	public function backward_compatibility_admin_fancybox( $value, $key, $settings ) {
 
-		if ( 'lightbox' == $key && apply_filters( 'modula_disable_lightboxes', true ) && ! in_array( $value, array( 'no-link', 'direct', 'external-url', 'attachment-page', 'lightbox-prefer-url' ), true ) ) {
-			return 'fancybox';
+		if ( 'lightbox' == $key ) {
+			if ( function_exists( 'modula_coerce_lightbox_click_mode' ) ) {
+				$value = modula_coerce_lightbox_click_mode( $value );
+			} elseif ( 'direct' === $value ) {
+				$value = 'fancybox';
+			}
+			if ( apply_filters( 'modula_disable_lightboxes', true ) && ! in_array( $value, array( 'no-link', 'external-url', 'attachment-page', 'lightbox-prefer-url' ), true ) ) {
+				return 'fancybox';
+			}
 		}
 
 		return $value;
 	}
 
 	public function backward_compatibility_backbone_fancybox( $settings ) {
-		if ( apply_filters( 'modula_disable_lightboxes', true ) && isset( $settings['lightbox'] ) && ! in_array( $settings['lightbox'], array( 'no-link', 'direct', 'external-url', 'attachment-page', 'lightbox-prefer-url' ), true ) ) {
+		if ( isset( $settings['lightbox'] ) ) {
+			if ( function_exists( 'modula_coerce_lightbox_click_mode' ) ) {
+				$settings['lightbox'] = modula_coerce_lightbox_click_mode( $settings['lightbox'] );
+			} elseif ( 'direct' === $settings['lightbox'] ) {
+				$settings['lightbox'] = 'fancybox';
+			}
+		}
+		if ( isset( $settings['slider_lightbox'] ) ) {
+			if ( function_exists( 'modula_coerce_lightbox_click_mode' ) ) {
+				$settings['slider_lightbox'] = modula_coerce_lightbox_click_mode( $settings['slider_lightbox'] );
+			} elseif ( 'direct' === $settings['slider_lightbox'] ) {
+				$settings['slider_lightbox'] = 'fancybox';
+			}
+		}
+		if ( apply_filters( 'modula_disable_lightboxes', true ) && isset( $settings['lightbox'] ) && ! in_array( $settings['lightbox'], array( 'no-link', 'external-url', 'attachment-page', 'lightbox-prefer-url' ), true ) ) {
 			$settings['lightbox'] = 'fancybox';
 		}
 

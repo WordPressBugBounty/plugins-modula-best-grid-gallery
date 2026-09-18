@@ -472,22 +472,20 @@ return array(
 				'enum'                     =>
 				array(
 					0 => 'no-link',
-					1 => 'direct',
-					2 => 'external-url',
-					3 => 'fancybox',
-					4 => 'lightbox-prefer-url',
+					1 => 'external-url',
+					2 => 'fancybox',
+					3 => 'lightbox-prefer-url',
 				),
 				'default'                  => 'fancybox',
 				'editorLabel'              => 'What happens when an image is clicked',
-				'editorDescription'        => 'Per-image links in the editor can still open a URL instead of the lightbox.',
+				'editorDescription'        => 'Per-image Redirect to URL skips the lightbox on that tile even when Open in lightbox is selected. An empty address follows the gallery setting.',
 				'description'              => 'Further lightbox options apply when click behavior opens the lightbox.',
 				'enumOptionLabels'         =>
 				array(
-					'no-link'              => 'No link',
-					'direct'               => 'Direct link to image file',
-					'external-url'         => 'Go to URL',
-					'fancybox'             => 'Open in lightbox',
-					'lightbox-prefer-url'  => 'Lightbox, or link when set',
+					'no-link'             => 'No link',
+					'external-url'        => 'Go to URL',
+					'fancybox'            => 'Open in lightbox',
+					'lightbox-prefer-url' => 'Lightbox, or link when set',
 				),
 				'editorLightboxLiteUpsell' =>
 				array(
@@ -502,7 +500,7 @@ return array(
 				'type'                    => 'string',
 				'default'                 => '',
 				'editorLabel'             => 'Click behavior hint',
-				'editorDescription'       => 'Opening and lightbox controls only apply when click opens the lightbox (including Lightbox, or link when set). For Direct link or Go to URL, set each photo’s link with Edit on that image.',
+				'editorDescription'       => 'Opening and lightbox controls only apply when click opens the lightbox (including Lightbox, or link when set). For Go to URL, set each photo’s link with Edit on that image.',
 				'editorControl'           =>
 				array(
 					'kind' => 'infoCallout',

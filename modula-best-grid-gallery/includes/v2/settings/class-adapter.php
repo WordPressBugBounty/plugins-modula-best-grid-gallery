@@ -396,31 +396,368 @@ class Adapter {
 	}
 
 	/**
-	 * Map a legacy hover effect slug to a reasonable builder preset.
+	 * Hover effect family for a classic effect slug (approximate builder starting point).
+	 *
+	 * @param string $slug Classic effect slug.
+	 * @return string Family id: none|reveal-center|title-only|social-forward|under|grayscale|tilt|fallback.
+	 */
+	public static function hover_effect_family_for_slug( $slug ) {
+		$slug = is_string( $slug ) ? sanitize_key( $slug ) : '';
+		if ( '' === $slug || 'none' === $slug ) {
+			return 'none';
+		}
+		if ( 'under' === $slug ) {
+			return 'under';
+		}
+		if ( 'greyscale' === $slug || false !== strpos( $slug, 'greyscale' ) ) {
+			return 'grayscale';
+		}
+		if ( preg_match( '/^tilt/', $slug ) ) {
+			return 'tilt';
+		}
+		if ( 'catinelle' === $slug ) {
+			return 'social-forward';
+		}
+		$title_only = array(
+			'quiet',
+			'curtain',
+			'appear',
+			'seemo',
+			'comodo',
+			'honey',
+			'hera',
+			'winston',
+			'terry',
+			'phoebe',
+		);
+		if ( in_array( $slug, $title_only, true ) ) {
+			return 'title-only';
+		}
+		$known_reveal = array(
+			'pufrobo',
+			'lily',
+			'sadie',
+			'layla',
+			'zoe',
+			'oscar',
+			'marley',
+			'ruby',
+			'roxy',
+			'bubba',
+			'dexter',
+			'sarah',
+			'chico',
+			'milo',
+			'julia',
+			'selena',
+			'ming',
+			'fluid-up',
+			'hide',
+			'reflex',
+			'lens',
+			'crafty',
+			'apollo',
+			'steve',
+			'jazz',
+			'lexi',
+			'duke',
+			'centered-bottom',
+		);
+		if ( in_array( $slug, $known_reveal, true ) ) {
+			return 'reveal-center';
+		}
+		return 'fallback';
+	}
+
+	/**
+	 * Slot paint flags for a classic effect slug.
+	 *
+	 * Mirrors {@see \Modula_Helper::hover_effects_elements()} title/description/social.
+	 *
+	 * @param string $slug Classic effect slug.
+	 * @return array{title: bool, caption: bool, social: bool}
+	 */
+	public static function legacy_hover_slot_paint( $slug ) {
+		$slug = is_string( $slug ) ? sanitize_key( $slug ) : '';
+		if ( class_exists( '\Modula_Helper' ) ) {
+			$el = \Modula_Helper::hover_effects_elements( $slug );
+			return array(
+				'title'   => ! empty( $el['title'] ),
+				'caption' => ! empty( $el['description'] ),
+				'social'  => ! empty( $el['social'] ),
+			);
+		}
+		return array(
+			'title'   => false,
+			'caption' => false,
+			'social'  => false,
+		);
+	}
+
+	/**
+	 * Family → builder shape (before classic slot paint / sourcePresetId stamp).
+	 *
+	 * @param string $family Family id from {@see hover_effect_family_for_slug()}.
+	 * @return array{builder: array<string, mixed>, hover: array{hoverColor: string, hoverOpacity: int}}
+	 */
+	public static function hover_builder_template_for_family( $family ) {
+		$family = is_string( $family ) ? sanitize_key( $family ) : 'fallback';
+		$base   = self::default_hover_builder();
+		$hover  = array(
+			'hoverColor'   => 'rgba(17,17,17,.46)',
+			'hoverOpacity' => 46,
+		);
+
+		switch ( $family ) {
+			case 'none':
+				$base['cardTreatment']          = 'none';
+				$base['dimOverlay']             = false;
+				$base['titleEnter']             = 'none';
+				$base['captionEnter']           = 'none';
+				$base['socialEnter']            = 'none';
+				$base['titleVisibility']        = 'hidden';
+				$base['captionVisibility']      = 'hidden';
+				$base['socialVisibility']       = 'hidden';
+				$base['cardEnterDurationMs']    = 180;
+				$base['titleEnterDurationMs']   = 180;
+				$base['captionEnterDurationMs'] = 180;
+				$base['socialEnterDurationMs']  = 180;
+				$base['titleEnterStaggerMs']    = 0;
+				$base['captionEnterStaggerMs']  = 0;
+				$base['socialEnterStaggerMs']   = 0;
+				$hover                          = array(
+					'hoverColor'   => 'rgba(0,0,0,0)',
+					'hoverOpacity' => 0,
+				);
+				break;
+			case 'title-only':
+				$base['cardTreatment']     = 'zoom';
+				$base['dimOverlay']        = true;
+				$base['titleEnter']        = 'fade';
+				$base['captionEnter']      = 'none';
+				$base['socialEnter']       = 'fade';
+				$base['titleVisibility']   = 'on-hover';
+				$base['captionVisibility'] = 'hidden';
+				$base['socialVisibility']  = 'on-hover';
+				$base['slotPositions']     = array(
+					'title'   => array(
+						'x' => 50,
+						'y' => 28,
+					),
+					'caption' => array(
+						'x' => 50,
+						'y' => 50,
+					),
+					'social'  => array(
+						'x' => 50,
+						'y' => 82,
+					),
+				);
+				break;
+			case 'social-forward':
+				$base['cardTreatment']          = 'none';
+				$base['dimOverlay']             = true;
+				$base['titleEnter']             = 'slide-down';
+				$base['captionEnter']           = 'slide-right';
+				$base['socialEnter']            = 'slide-up';
+				$base['titleVisibility']        = 'on-hover';
+				$base['captionVisibility']      = 'on-hover';
+				$base['socialVisibility']       = 'on-hover';
+				$base['cardEnterDurationMs']    = 300;
+				$base['titleEnterDurationMs']   = 300;
+				$base['captionEnterDurationMs'] = 300;
+				$base['socialEnterDurationMs']  = 300;
+				$base['titleEnterDelayMs']      = 25;
+				$base['captionEnterDelayMs']    = 25;
+				$base['socialEnterDelayMs']     = 25;
+				$base['titleEnterStaggerMs']    = 55;
+				$base['captionEnterStaggerMs']  = 55;
+				$base['socialEnterStaggerMs']   = 55;
+				$base['slotPositions']          = array(
+					'title'   => array(
+						'x' => 50,
+						'y' => 20,
+					),
+					'caption' => array(
+						'x' => 50,
+						'y' => 36,
+					),
+					'social'  => array(
+						'x' => 50,
+						'y' => 88,
+					),
+				);
+				$hover                          = array(
+					'hoverColor'   => 'rgba(11,18,32,.56)',
+					'hoverOpacity' => 56,
+				);
+				break;
+			case 'under':
+				$base['cardTreatment']     = 'none';
+				$base['dimOverlay']        = false;
+				$base['titleEnter']        = 'none';
+				$base['captionEnter']      = 'none';
+				$base['socialEnter']       = 'none';
+				$base['titleVisibility']   = 'hidden';
+				$base['captionVisibility'] = 'hidden';
+				$base['socialVisibility']  = 'hidden';
+				$hover                     = array(
+					'hoverColor'   => 'rgba(0,0,0,0)',
+					'hoverOpacity' => 0,
+				);
+				break;
+			case 'grayscale':
+				$base['cardTreatment']     = 'grayscale';
+				$base['dimOverlay']        = true;
+				$base['titleEnter']        = 'fade';
+				$base['captionEnter']      = 'fade';
+				$base['socialEnter']       = 'fade';
+				$base['titleVisibility']   = 'on-hover';
+				$base['captionVisibility'] = 'on-hover';
+				$base['socialVisibility']  = 'on-hover';
+				$base['slotPositions']     = array(
+					'title'   => array(
+						'x' => 50,
+						'y' => 24,
+					),
+					'caption' => array(
+						'x' => 50,
+						'y' => 36,
+					),
+					'social'  => array(
+						'x' => 50,
+						'y' => 78,
+					),
+				);
+				break;
+			case 'tilt':
+				$base['cardTreatment']          = 'lift';
+				$base['dimOverlay']             = true;
+				$base['titleEnter']             = 'slide-up';
+				$base['captionEnter']           = 'slide-up';
+				$base['socialEnter']            = 'fade';
+				$base['titleVisibility']        = 'on-hover';
+				$base['captionVisibility']      = 'on-hover';
+				$base['socialVisibility']       = 'on-hover';
+				$base['cardEnterDurationMs']    = 320;
+				$base['titleEnterDurationMs']   = 320;
+				$base['captionEnterDurationMs'] = 320;
+				$base['socialEnterDurationMs']  = 320;
+				$base['slotPositions']          = array(
+					'title'   => array(
+						'x' => 50,
+						'y' => 22,
+					),
+					'caption' => array(
+						'x' => 50,
+						'y' => 34,
+					),
+					'social'  => array(
+						'x' => 50,
+						'y' => 76,
+					),
+				);
+				$hover                          = array(
+					'hoverColor'   => 'rgba(15,23,42,.54)',
+					'hoverOpacity' => 54,
+				);
+				break;
+			case 'reveal-center':
+			case 'fallback':
+			default:
+				$base['cardTreatment']         = 'zoom';
+				$base['dimOverlay']            = true;
+				$base['titleEnter']            = 'fade';
+				$base['captionEnter']          = 'fade';
+				$base['socialEnter']           = 'fade';
+				$base['titleVisibility']       = 'on-hover';
+				$base['captionVisibility']     = 'on-hover';
+				$base['socialVisibility']      = 'on-hover';
+				$base['titleEnterStaggerMs']   = 40;
+				$base['captionEnterStaggerMs'] = 40;
+				$base['socialEnterStaggerMs']  = 40;
+				$base['slotPositions']         = array(
+					'title'   => array(
+						'x' => 50,
+						'y' => 24,
+					),
+					'caption' => array(
+						'x' => 50,
+						'y' => 36,
+					),
+					'social'  => array(
+						'x' => 50,
+						'y' => 78,
+					),
+				);
+				break;
+		}
+
+		return array(
+			'builder' => $base,
+			'hover'   => $hover,
+		);
+	}
+
+	/**
+	 * Map a legacy hover effect slug to an approximate Hover Effect Builder starting point.
+	 *
+	 * Stamps `sourcePresetId` as `legacy-{slug}` so ensure does not re-migrate.
 	 *
 	 * @param string $slug Legacy effect slug.
 	 * @return array<string, mixed>
 	 */
 	public static function hover_builder_from_legacy_effect_slug( $slug ) {
-		$slug = is_string( $slug ) ? $slug : '';
-		$b    = self::default_hover_builder();
-		if ( '' === $slug || 'none' === $slug ) {
-			$b['cardTreatment'] = 'none';
-			return $b;
+		$slug   = is_string( $slug ) ? sanitize_key( $slug ) : '';
+		$family = self::hover_effect_family_for_slug( $slug );
+		$pack   = self::hover_builder_template_for_family( $family );
+		$b      = $pack['builder'];
+
+		if ( 'none' !== $family && 'under' !== $family ) {
+			$paint                  = self::legacy_hover_slot_paint( $slug );
+			$b['titleVisibility']   = $paint['title'] ? 'on-hover' : 'hidden';
+			$b['captionVisibility'] = $paint['caption'] ? 'on-hover' : 'hidden';
+			$b['socialVisibility']  = $paint['social'] ? 'on-hover' : 'hidden';
 		}
-		if ( false !== strpos( $slug, 'greyscale' ) || 'greyscale' === $slug ) {
-			$b['cardTreatment'] = 'grayscale';
-			return $b;
-		}
-		if ( preg_match( '/^tilt/', $slug ) ) {
-			$b['cardTreatment'] = 'lift';
-			return $b;
-		}
+
+		$stamp               = '' === $slug ? 'none' : $slug;
+		$b['sourcePresetId'] = 'legacy-' . $stamp;
 		return $b;
 	}
 
 	/**
+	 * Family hover chrome defaults for migrate when flat has no color/opacity yet.
+	 *
+	 * @param string $slug Classic effect slug.
+	 * @return array{hoverColor: string, hoverOpacity: int}
+	 */
+	public static function hover_chrome_from_legacy_effect_slug( $slug ) {
+		$family = self::hover_effect_family_for_slug( $slug );
+		$pack   = self::hover_builder_template_for_family( $family );
+		return $pack['hover'];
+	}
+
+	/**
+	 * Whether a hover builder document already owns hover (non-empty sourcePresetId).
+	 *
+	 * Empty sourcePresetId means “generic / needs legacy approximate migrate”.
+	 *
+	 * @param array<string, mixed>|null $builder Builder array.
+	 * @return bool
+	 */
+	public static function hover_builder_has_source_stamp( $builder ) {
+		if ( ! is_array( $builder ) ) {
+			return false;
+		}
+		$source = isset( $builder['sourcePresetId'] ) ? sanitize_key( (string) $builder['sourcePresetId'] ) : '';
+		return '' !== $source;
+	}
+
+	/**
 	 * Ensure grouped.hover.builder exists (migrate from legacy flat `effect` when needed).
+	 *
+	 * Overwrites an existing builder only when `sourcePresetId` is empty (generic).
+	 * Migrated builders stamp `legacy-{effect}` and are sticky thereafter.
 	 *
 	 * @param array<string, array<string, mixed>> $grouped Grouped settings (by ref).
 	 * @param array<string, mixed>                $flat    Flat settings used for migration hints.
@@ -429,34 +766,42 @@ class Adapter {
 		if ( ! isset( $grouped['hover'] ) || ! is_array( $grouped['hover'] ) ) {
 			$grouped['hover'] = array();
 		}
-		$h = &$grouped['hover'];
-		if ( isset( $h['builder'] ) && is_array( $h['builder'] ) ) {
-			$pos_ok = ( isset( $h['builder']['slotPositions'] ) && is_array( $h['builder']['slotPositions'] ) && count( $h['builder']['slotPositions'] ) > 0 )
-				|| ( isset( $h['builder']['slotpositions'] ) && is_array( $h['builder']['slotpositions'] ) && count( $h['builder']['slotpositions'] ) > 0 );
-			if ( $pos_ok ) {
-				$defaults      = self::default_hover_builder();
-				$has_positions = ( isset( $h['builder']['slotPositions'] ) && is_array( $h['builder']['slotPositions'] ) )
-					|| ( isset( $h['builder']['slotpositions'] ) && is_array( $h['builder']['slotpositions'] ) );
-				if ( ! $has_positions ) {
-					$h['builder']['slotPositions'] = $defaults['slotPositions'];
-				}
-				if ( ! array_key_exists( 'dimOverlay', $h['builder'] ) ) {
-					$h['builder']['dimOverlay'] = $defaults['dimOverlay'];
-				}
-				if ( array_key_exists( 'dimOverlay', $h ) ) {
-					$h['builder']['dimOverlay'] = (bool) $h['dimOverlay'];
-				} else {
-					$h['dimOverlay'] = (bool) $h['builder']['dimOverlay'];
-				}
-				return;
+		$h       = &$grouped['hover'];
+		$builder = ( isset( $h['builder'] ) && is_array( $h['builder'] ) ) ? $h['builder'] : null;
+
+		if ( is_array( $builder ) && self::hover_builder_has_source_stamp( $builder ) ) {
+			$defaults      = self::default_hover_builder();
+			$has_positions = ( isset( $builder['slotPositions'] ) && is_array( $builder['slotPositions'] ) && count( $builder['slotPositions'] ) > 0 )
+				|| ( isset( $builder['slotpositions'] ) && is_array( $builder['slotpositions'] ) && count( $builder['slotpositions'] ) > 0 );
+			if ( ! $has_positions ) {
+				$h['builder']['slotPositions'] = $defaults['slotPositions'];
 			}
-		}
-		if ( isset( $flat['effect'] ) && is_string( $flat['effect'] ) && '' !== $flat['effect'] ) {
-			$h['builder']    = self::hover_builder_from_legacy_effect_slug( $flat['effect'] );
-			$h['dimOverlay'] = (bool) $h['builder']['dimOverlay'];
+			if ( ! array_key_exists( 'dimOverlay', $h['builder'] ) ) {
+				$h['builder']['dimOverlay'] = $defaults['dimOverlay'];
+			}
+			if ( array_key_exists( 'dimOverlay', $h ) ) {
+				$h['builder']['dimOverlay'] = (bool) $h['dimOverlay'];
+			} else {
+				$h['dimOverlay'] = (bool) $h['builder']['dimOverlay'];
+			}
 			return;
 		}
-		$h['builder']    = self::default_hover_builder();
+
+		$effect = ( isset( $flat['effect'] ) && is_string( $flat['effect'] ) && '' !== $flat['effect'] )
+			? $flat['effect']
+			: '';
+		if ( '' !== $effect ) {
+			$h['builder'] = self::hover_builder_from_legacy_effect_slug( $effect );
+			$chrome       = self::hover_chrome_from_legacy_effect_slug( $effect );
+			if ( ! isset( $h['hoverColor'] ) || ! is_string( $h['hoverColor'] ) || '' === $h['hoverColor'] ) {
+				$h['hoverColor'] = $chrome['hoverColor'];
+			}
+			if ( ! isset( $h['hoverOpacity'] ) || ! is_numeric( $h['hoverOpacity'] ) ) {
+				$h['hoverOpacity'] = $chrome['hoverOpacity'];
+			}
+		} else {
+			$h['builder'] = self::default_hover_builder();
+		}
 		$h['dimOverlay'] = (bool) $h['builder']['dimOverlay'];
 	}
 

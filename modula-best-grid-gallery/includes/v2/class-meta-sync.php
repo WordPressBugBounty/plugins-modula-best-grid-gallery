@@ -67,6 +67,21 @@ class Meta_Sync {
 	}
 
 	/**
+	 * Whether decoded settings v2 is a usable gallery document (not an empty stub).
+	 *
+	 * Empty/`""` meta decodes to `[]`, then {@see normalize_settings_v2_read()} injects
+	 * default responsive breakpoints — so `! empty( $v2 )` is true even when `general.type`
+	 * is missing. Callers that treated that as “has v2” skipped flat fallback and fell through
+	 * to CPT defaults (`type` => `grid` / masonry), which broke classic custom-grid after Convert.
+	 *
+	 * @param array<string, mixed> $v2 Grouped settings from {@see get_settings_v2()}.
+	 * @return bool
+	 */
+	public static function settings_v2_is_usable( array $v2 ) {
+		return isset( $v2['general'] ) && is_array( $v2['general'] ) && array_key_exists( 'type', $v2['general'] );
+	}
+
+	/**
 	 * If modula_settings_v2 is missing or empty but modula-settings (flat) exists, build v2 from flat.
 	 *
 	 * @param int $post_id Gallery post ID.
@@ -77,7 +92,7 @@ class Meta_Sync {
 			return;
 		}
 		$v2 = self::get_settings_v2( $post_id );
-		if ( ! empty( $v2 ) ) {
+		if ( self::settings_v2_is_usable( $v2 ) ) {
 			return;
 		}
 		$flat = get_post_meta( $post_id, 'modula-settings', true );
@@ -100,7 +115,7 @@ class Meta_Sync {
 
 		self::ensure_settings_v2_from_flat( $post_id );
 
-		if ( ! empty( self::get_settings_v2( $post_id ) ) ) {
+		if ( self::settings_v2_is_usable( self::get_settings_v2( $post_id ) ) ) {
 			return;
 		}
 
@@ -186,7 +201,7 @@ class Meta_Sync {
 			self::sync_images_v2( $post_id, $meta_value );
 			// Backfill settings v2 if missing (e.g. images-only save like reorder).
 			$v2_settings = self::get_settings_v2( $post_id );
-			if ( empty( $v2_settings ) ) {
+			if ( ! self::settings_v2_is_usable( $v2_settings ) ) {
 				$settings = get_post_meta( $post_id, 'modula-settings', true );
 				if ( is_array( $settings ) ) {
 					self::sync_settings_v2( $post_id, $settings );
@@ -696,8 +711,20 @@ class Meta_Sync {
 				$lb['showThumbnails'] = $lb['thumbsAutoStart'];
 			}
 			unset( $lb['thumbsAutoStart'] );
+			if ( array_key_exists( 'lightbox', $lb ) && function_exists( 'modula_coerce_lightbox_click_mode' ) ) {
+				$lb['lightbox'] = modula_coerce_lightbox_click_mode( $lb['lightbox'] );
+			} elseif ( isset( $lb['lightbox'] ) && 'direct' === $lb['lightbox'] ) {
+				$lb['lightbox'] = 'fancybox';
+			}
 			if ( ! array_key_exists( 'share', $lb ) && ! empty( $v2['social']['enableSocial'] ) ) {
 				$lb['share'] = true;
+			}
+		}
+		if ( isset( $v2['slider'] ) && is_array( $v2['slider'] ) && array_key_exists( 'lightbox', $v2['slider'] ) ) {
+			if ( function_exists( 'modula_coerce_lightbox_click_mode' ) ) {
+				$v2['slider']['lightbox'] = modula_coerce_lightbox_click_mode( $v2['slider']['lightbox'] );
+			} elseif ( 'direct' === $v2['slider']['lightbox'] ) {
+				$v2['slider']['lightbox'] = 'fancybox';
 			}
 		}
 		if ( isset( $v2['captions'] ) && is_array( $v2['captions'] ) ) {

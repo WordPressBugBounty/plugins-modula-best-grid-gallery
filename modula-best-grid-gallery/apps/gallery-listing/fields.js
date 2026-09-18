@@ -85,8 +85,12 @@ export function getListingFields({
 	requestGalleryEdit,
 	requestQuickEdit,
 } = {}) {
-	const { trashListingRows, restoreListingRows, deleteListingRows } =
-		rowActionHandlers;
+	const {
+		duplicateListingRow,
+		trashListingRows,
+		restoreListingRows,
+		deleteListingRows,
+	} = rowActionHandlers;
 	const fields = [
 		{
 			id: 'preview',
@@ -159,6 +163,7 @@ export function getListingFields({
 							canUseBulkEditor={canUseBulkEditor}
 							requestGalleryEdit={requestGalleryEdit}
 							requestQuickEdit={requestQuickEdit}
+							duplicateListingRow={duplicateListingRow}
 							trashListingRows={trashListingRows}
 							restoreListingRows={restoreListingRows}
 							deleteListingRows={deleteListingRows}

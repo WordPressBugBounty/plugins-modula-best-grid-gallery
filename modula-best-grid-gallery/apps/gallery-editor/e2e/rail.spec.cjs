@@ -95,7 +95,7 @@ test.describe('Gallery editor compact sidebar rail', () => {
 		});
 	}
 
-	test('exposes accessible names, tooltips and footer icons', async ({
+	test('exposes accessible names and footer icons without category tooltips', async ({
 		page,
 	}) => {
 		await openRail(page, { width: 1440 });
@@ -105,6 +105,8 @@ test.describe('Gallery editor compact sidebar rail', () => {
 		await expect(general).toBeVisible();
 		await general.focus();
 		await expect(general).toHaveAttribute('aria-current', 'true');
+		await general.hover();
+		await expect(page.locator('.components-tooltip')).toHaveCount(0);
 		await expect(
 			page.getByRole('link', { name: 'Documentation', exact: true })
 		).toBeVisible();

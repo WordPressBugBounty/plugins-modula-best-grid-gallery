@@ -11,6 +11,10 @@ const initialState = {
 	type: 'client',
 	activeFilters: [],
 	availableFilters: [],
+	/** Full-catalog filter→count map from PHP bootstrap (server/chunked catalogs). */
+	usageCounts: null,
+	/** Full-catalog filterable image count for the All label. */
+	filterableImageCount: null,
 };
 
 const filteringSlice = createSlice({

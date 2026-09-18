@@ -17,13 +17,13 @@ import {
 	triggerAddNewRow,
 } from '../utils/takeoverAddNewMenuModel';
 import {
-	boundGalleryPrimaryAddNewAction,
 	filterAddNewRowsForBoundGallery,
 	getBoundGallerySummaryFromEditor,
 } from '../utils/boundGalleryChromePolicy';
 import { getTakeoverPreviewLibraryAttachmentIds } from '../utils/getTakeoverPreviewLibraryAttachmentIds';
 import { openTakeoverMediaLibrary } from '../utils/openTakeoverMediaLibrary';
 import { openTakeoverVideoMediaLibrary } from '../utils/openTakeoverVideoMediaLibrary';
+import { resolveTakeoverPrimaryAddNewAction } from '../utils/resolveTakeoverPrimaryAddNewAction';
 
 const PREVIEW_IMPORT_REACT_FLOWS = new Set([
 	'folder',
@@ -92,6 +92,20 @@ export function useTakeoverPreviewAddNewMenu({
 		});
 	};
 
+	const openImageLibraryPicker = () => {
+		if (!galleryId) {
+			return;
+		}
+		openTakeoverMediaLibrary({
+			galleryId,
+			uploadPosition,
+			runPersistTask,
+			existingAttachmentIds: getTakeoverPreviewLibraryAttachmentIds(),
+			onSuccess: () => onLibraryAdded?.(),
+			onError: (msg) => onLibraryError?.(msg),
+		});
+	};
+
 	const createContentBlock = () => {
 		if (!galleryId) {
 			return;
@@ -124,13 +138,22 @@ export function useTakeoverPreviewAddNewMenu({
 	};
 
 	const handlePrimaryAddNew = () => {
-		if (boundGalleryPrimaryAddNewAction(boundSummary) === 'content-block') {
+		const action = resolveTakeoverPrimaryAddNewAction({
+			boundSummary,
+			galleryType,
+		});
+		if (action === 'content-block') {
 			createContentBlock();
 			return;
 		}
-		if (typeof onTakeoverOpenUpload === 'function') {
-			onTakeoverOpenUpload();
+		if (!editor.takeover || !galleryId) {
+			return;
 		}
+		if (action === 'video-library') {
+			openVideoLibraryPicker();
+			return;
+		}
+		openImageLibraryPicker();
 	};
 
 	const handleRowAction = (row) => {
@@ -164,14 +187,7 @@ export function useTakeoverPreviewAddNewMenu({
 		}
 		if (editor.takeover && row.id === 'library' && galleryId) {
 			closeMenu();
-			openTakeoverMediaLibrary({
-				galleryId,
-				uploadPosition,
-				runPersistTask,
-				existingAttachmentIds: getTakeoverPreviewLibraryAttachmentIds(),
-				onSuccess: () => onLibraryAdded?.(),
-				onError: (msg) => onLibraryError?.(msg),
-			});
+			openImageLibraryPicker();
 			return;
 		}
 		if (editor.takeover && row.reactFlow === 'content-block' && galleryId) {

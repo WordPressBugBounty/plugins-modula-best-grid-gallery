@@ -4,6 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { galleryUploadPost } from '../api/galleryUploadApi';
+import { preferWpMediaLibraryBrowseTab } from './preferWpMediaLibraryBrowseTab';
 
 /**
  * @param {{
@@ -39,6 +40,7 @@ export function openTakeoverMediaLibrary({
 			: async (fn) => {
 					await fn();
 				};
+	preferWpMediaLibraryBrowseTab(undefined, window.setUserSetting);
 	const frame = window.wp.media({
 		title: __(
 			'Add images from the Media Library',
@@ -63,6 +65,7 @@ export function openTakeoverMediaLibrary({
 		: [];
 
 	frame.on('open', () => {
+		preferWpMediaLibraryBrowseTab(frame, window.setUserSetting);
 		const selection = frame.state().get('selection');
 		selection.reset();
 		const { media } = window.wp;

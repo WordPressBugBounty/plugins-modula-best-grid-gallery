@@ -1,6 +1,6 @@
 /**
  * Short labels for the fixed 72px sidebar rail (icon + caption).
- * Full category titles stay on tooltips and accessible names.
+ * Full category titles stay on accessible names (aria-label).
  */
 
 import { __ } from '@wordpress/i18n';

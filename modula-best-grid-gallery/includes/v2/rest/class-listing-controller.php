@@ -833,7 +833,6 @@ class Listing_Controller {
 		$has_videos   = rest_sanitize_boolean( $request->get_param( 'hasVideos' ) );
 
 		if ( 'album' === $row_type && ! post_type_exists( 'modula-album' ) ) {
-			$meta = self::get_listing_index_meta();
 			return rest_ensure_response(
 				array(
 					'rows'         => array(),
@@ -843,8 +842,7 @@ class Listing_Controller {
 						'page'    => $page,
 						'perPage' => $per_page,
 					),
-					'totals'       => $meta['totals'],
-					'stack'        => $meta['stack'],
+					'totals'       => self::get_listing_totals(),
 					'statusCounts' => self::get_listing_status_counts(),
 				)
 			);
@@ -946,8 +944,6 @@ class Listing_Controller {
 			);
 		}
 
-		$meta = self::get_listing_index_meta();
-
 		return rest_ensure_response(
 			array(
 				'rows'         => $rows,
@@ -957,8 +953,7 @@ class Listing_Controller {
 					'page'    => $page,
 					'perPage' => $per_page,
 				),
-				'totals'       => $meta['totals'],
-				'stack'        => $meta['stack'],
+				'totals'       => self::get_listing_totals(),
 				'statusCounts' => self::get_listing_status_counts(),
 			)
 		);
@@ -1090,36 +1085,17 @@ class Listing_Controller {
 	}
 
 	/**
-	 * Header totals plus mixed-stack flags for the listing index.
-	 *
-	 * @return array{totals: array{rows: int, items: int}, stack: array{hasClassicGalleries: bool, hasBetaGalleries: bool}}
-	 */
-	private static function get_listing_index_meta() {
-		$totals = self::get_listing_totals();
-		return array(
-			'totals' => array(
-				'rows'  => (int) $totals['rows'],
-				'items' => (int) $totals['items'],
-			),
-			'stack'  => array(
-				'hasClassicGalleries' => ! empty( $totals['hasClassicGalleries'] ),
-				'hasBetaGalleries'    => ! empty( $totals['hasBetaGalleries'] ),
-			),
-		);
-	}
-
-	/**
 	 * Non-trash listing totals for the header.
 	 *
-	 * @return array{rows: int, items: int, hasClassicGalleries: bool, hasBetaGalleries: bool}
+	 * @return array{rows: int, items: int}
 	 */
 	private static function get_listing_totals() {
 		$cached = get_transient( 'modula_v2_listing_totals' );
-		if (
-			is_array( $cached )
-			&& isset( $cached['rows'], $cached['items'], $cached['hasClassicGalleries'], $cached['hasBetaGalleries'] )
-		) {
-			return $cached;
+		if ( is_array( $cached ) && isset( $cached['rows'], $cached['items'] ) ) {
+			return array(
+				'rows'  => (int) $cached['rows'],
+				'items' => (int) $cached['items'],
+			);
 		}
 
 		$counts = wp_count_posts( 'modula-gallery' );
@@ -1130,10 +1106,8 @@ class Listing_Controller {
 			}
 		}
 
-		$item_total  = 0;
-		$has_classic = false;
-		$has_beta    = false;
-		$ids         = get_posts(
+		$item_total = 0;
+		$ids        = get_posts(
 			array(
 				'post_type'              => 'modula-gallery',
 				'post_status'            => array( 'publish', 'draft', 'private', 'pending', 'future' ),
@@ -1145,14 +1119,7 @@ class Listing_Controller {
 			)
 		);
 		foreach ( $ids as $id ) {
-			$gallery_id  = (int) $id;
-			$counts_row  = self::count_gallery_items( $gallery_id );
-			$item_total += $counts_row['total'];
-			if ( \Modula\V2\Beta_Settings::is_beta_gallery( $gallery_id ) ) {
-				$has_beta = true;
-			} else {
-				$has_classic = true;
-			}
+			$item_total += self::count_gallery_items( (int) $id )['total'];
 		}
 
 		if ( post_type_exists( 'modula-album' ) ) {
@@ -1180,10 +1147,8 @@ class Listing_Controller {
 		}
 
 		$totals = array(
-			'rows'                => $rows,
-			'items'               => $item_total,
-			'hasClassicGalleries' => $has_classic,
-			'hasBetaGalleries'    => $has_beta,
+			'rows'  => $rows,
+			'items' => $item_total,
 		);
 		set_transient( 'modula_v2_listing_totals', $totals, 2 * MINUTE_IN_SECONDS );
 

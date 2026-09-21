@@ -13,6 +13,7 @@ import {
 	fetchGalleryBootstrap,
 	getBootstrapMode,
 	isModulaLightboxActiveForGalleryElement,
+	MODERN_VISITOR_ROOT_PENDING_SELECTOR,
 	parseGalleryPostId,
 	resolveGalleryDataFromDom,
 } from 'gallery-shared/runtime';
@@ -34,18 +35,15 @@ const mountingElements = new WeakSet();
 /** @type {Promise<void>} */
 let initGalleriesChain = Promise.resolve();
 
-const PENDING_SELECTOR =
-	'.modula.modula-gallery:not(.modula-gallery-initialized)';
-
 /**
  * @param {boolean} [forceAll] When true, mount every pending gallery (manual init).
  * @returns {string}
  */
 function pendingGallerySelector(forceAll = false) {
 	if (forceAll) {
-		return PENDING_SELECTOR;
+		return MODERN_VISITOR_ROOT_PENDING_SELECTOR;
 	}
-	return `${PENDING_SELECTOR}[data-modula-visible="1"]`;
+	return `${MODERN_VISITOR_ROOT_PENDING_SELECTOR}[data-modula-visible="1"]`;
 }
 
 /**

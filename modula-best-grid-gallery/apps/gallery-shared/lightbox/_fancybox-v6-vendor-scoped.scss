@@ -1,0 +1,18 @@
+/**
+ * Vendor Fancybox 6 CSS scoped under the lightbox CSS host
+ * (`.modula-best-grid-gallery` on body / preview wrap) — same idea as legacy
+ * `assets/css/front/fancybox.css` via postcss-prefix-selector.
+ *
+ * Lightbox mounts under body (front) or the preview host (editor); both carry
+ * this class, so descendant selectors match.
+ */
+@use 'sass:meta';
+
+.modula-best-grid-gallery {
+	@include meta.load-css(
+		'../../../node_modules/@fancyapps/ui/dist/fancybox/fancybox.css'
+	);
+	@include meta.load-css(
+		'../../../node_modules/@fancyapps/ui/dist/fancybox/fancybox.sidebar.css'
+	);
+}

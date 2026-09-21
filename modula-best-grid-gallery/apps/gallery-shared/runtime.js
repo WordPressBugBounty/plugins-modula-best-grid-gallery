@@ -19,3 +19,4 @@ export {
 	isModulaLightboxActiveForGalleryElement,
 } from './lightbox/lightboxOpenFacade.session';
 export * from './lightbox/modulaDeeplinkFromHash';
+export * from './utils/visitorRootClassification';

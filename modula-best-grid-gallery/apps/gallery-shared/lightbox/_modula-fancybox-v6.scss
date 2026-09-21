@@ -5,6 +5,18 @@
  * `--f-carousel-slide-width: 100%` from carousel.css does not apply.
  * Without full-width slides, Carousel.transition "fade" falls back to pan tween (looks like slide).
  */
+
+/*
+ * Lightbox instance class: beat foreign Fancybox-5-era hide rules such as
+ * `.fancybox__container:not([aria-hidden]) { opacity: 0 }` (e.g. Easy FancyBox).
+ * Fancybox 6 opens via `.is-ready` / visibility and does not set aria-hidden on
+ * the container, so those global rules would keep our lightbox invisible.
+ * Compound on the same node — lightbox mounts outside the gallery root.
+ */
+.modula-fancybox-container.fancybox__container.is-ready {
+	opacity: 1;
+}
+
 .modula-fancybox-container {
 	--f-carousel-slide-width: 100%;
 	--f-carousel-slide-height: 100%;

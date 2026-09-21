@@ -99,18 +99,6 @@ class Dispatcher {
 
 		$gallery_id = absint( $atts['id'] );
 		if ( $gallery_id && \Modula\V2\Beta_Settings::is_beta_gallery( $gallery_id ) ) {
-			// Classic-first mix: another [modula] already ran the classic renderer this request.
-			if ( class_exists( 'Modula_Shortcode', false ) && \Modula_Shortcode::classic_stack_has_rendered() ) {
-				\Modula_Debug_Log::log_failure(
-					\Modula_Debug_Log::CHANNEL_SHORTCODE_BOOTSTRAP,
-					'beta gallery blocked by classic stack on page',
-					array(
-						'gallery_id' => $gallery_id,
-						'error_code' => 'mixed_stack',
-					)
-				);
-				return self::mixed_stack_error_html();
-			}
 			return $this->visitor_gallery->render( $atts );
 		}
 
@@ -120,17 +108,5 @@ class Dispatcher {
 		}
 
 		return '';
-	}
-
-	/**
-	 * Visitor-visible error when a classic gallery already ran on this page.
-	 *
-	 * @return string
-	 */
-	public static function mixed_stack_error_html() {
-		return '<div class="modula-beta-stack-conflict">' . esc_html__(
-			'This gallery uses the new Modula experience and cannot display on a page that already has a classic Modula gallery. Use only new galleries or only classic galleries on this page.',
-			'modula-best-grid-gallery'
-		) . '</div>';
 	}
 }

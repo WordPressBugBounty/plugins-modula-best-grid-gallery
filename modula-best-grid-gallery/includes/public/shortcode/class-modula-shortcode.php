@@ -14,13 +14,6 @@ class Modula_Shortcode {
 	private static $instance = null;
 
 	/**
-	 * Whether a classic [modula] renderer has already output on this request.
-	 *
-	 * @var bool
-	 */
-	private static $classic_stack_rendered = false;
-
-	/**
 	 * Collected gallery CSS to be printed in the footer (keyed by gallery_id).
 	 *
 	 * @var array<string>
@@ -32,15 +25,6 @@ class Modula_Shortcode {
 	 */
 	public static function get_instance() {
 		return self::$instance;
-	}
-
-	/**
-	 * Classic stack already initiated on this request (classic-first mix).
-	 *
-	 * @return bool
-	 */
-	public static function classic_stack_has_rendered() {
-		return self::$classic_stack_rendered;
 	}
 
 	public function __construct() {
@@ -225,8 +209,6 @@ class Modula_Shortcode {
 		if ( ! Modula_Helper::is_visitor_readable_gallery( $gallery ) ) {
 			return Modula_Helper::visitor_shortcode_unavailable_message( $gallery );
 		}
-
-		self::$classic_stack_rendered = true;
 
 		/* Get gallery settings — repair wiped filter lists before visitor consume. */
 		if ( class_exists( '\Modula\V2\Meta_Sync' ) ) {

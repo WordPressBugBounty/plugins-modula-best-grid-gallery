@@ -1425,8 +1425,13 @@ jQuery(window).on('elementor/frontend/init', function () {
 	};
 })(jQuery, window, document);
 
+// Same isolation hinge as gallery-shared visitorRootClassification
+// CLASSIC_VISITOR_ROOT_SELECTOR — ignore Beta / modern roots.
+var modulaClassicVisitorRootSelector =
+	'.modula.modula-gallery:not(.modula-gallery-modern)';
+
 jQuery(document).ready(function () {
-	var modulaGalleries = jQuery('.modula.modula-gallery');
+	var modulaGalleries = jQuery(modulaClassicVisitorRootSelector);
 	if (!jQuery('body').hasClass('modula-best-grid-gallery')) {
 		jQuery('body').addClass('modula-best-grid-gallery');
 	}
@@ -1439,7 +1444,7 @@ jQuery(document).ready(function () {
 // initiliaza galleries that are in elementor popup
 jQuery(document).on('elementor/popup/show', (event, id, instance) => {
 	var modulaGalleries = jQuery('#elementor-popup-modal-' + id).find(
-		'.modula.modula-gallery'
+		modulaClassicVisitorRootSelector
 	);
 	if (!jQuery('body').hasClass('modula-best-grid-gallery')) {
 		jQuery('body').addClass('modula-best-grid-gallery');

@@ -1,4 +1,7 @@
-import { getDeeplinkGalleryIdFromHash } from 'gallery-shared/runtime';
+import {
+	getDeeplinkGalleryIdFromHash,
+	MODERN_VISITOR_ROOT_PENDING_SELECTOR,
+} from 'gallery-shared/runtime';
 import {
 	BOOTSTRAP_FORCE_GRACE_MS,
 	BOOTSTRAP_STALL_MS,
@@ -6,8 +9,6 @@ import {
 } from './bootstrapStall';
 import './loader.scss';
 
-const GALLERY_SELECTOR =
-	'.modula.modula-gallery:not(.modula-gallery-initialized)';
 const ROOT_MARGIN = '200px 0px';
 
 if (
@@ -407,7 +408,9 @@ function onGalleryDestroyed(event) {
 document.addEventListener('modula:gallery:destroyed', onGalleryDestroyed);
 
 function scanGalleries() {
-	document.querySelectorAll(GALLERY_SELECTOR).forEach(scheduleGallery);
+	document
+		.querySelectorAll(MODERN_VISITOR_ROOT_PENDING_SELECTOR)
+		.forEach(scheduleGallery);
 }
 
 function onReady() {

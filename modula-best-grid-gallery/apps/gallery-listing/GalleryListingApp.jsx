@@ -23,7 +23,6 @@ import {
 	skipActiveViewTransition,
 } from './completeEditorChoice';
 import { shouldShowBetaEditorPrompt } from './listingBetaEditorPrompt';
-import { shouldShowMixedStackNotice } from './listingMixedStackNotice';
 import {
 	getListingApplyPresetFeedback,
 	openListingApplyPreset,
@@ -636,19 +635,6 @@ export default function GalleryListingApp() {
 					) : null}
 				</div>
 			</header>
-
-			{shouldShowMixedStackNotice(data?.stack) ? (
-				<Notice
-					className="modula-gallery-listing__mixed-stack-notice"
-					status="warning"
-					isDismissible={false}
-				>
-					{__(
-						'Galleries that use the new editor and galleries that use the classic editor cannot be displayed on the same page.',
-						'modula-best-grid-gallery'
-					)}
-				</Notice>
-			) : null}
 
 			{selectionNotice ? (
 				<Notice

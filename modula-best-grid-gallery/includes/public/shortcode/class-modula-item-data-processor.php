@@ -562,7 +562,7 @@ class Modula_Item_Data_Processor {
 
 		$item_data['item_classes'][] = 'modula-hover-v2';
 
-		$card_raw = isset( $builder['cardTreatment'] ) ? $builder['cardTreatment'] : ( isset( $builder['cardtreatment'] ) ? $builder['cardtreatment'] : 'zoom' );
+		$card_raw = isset( $builder['cardTreatment'] ) ? $builder['cardTreatment'] : ( isset( $builder['cardtreatment'] ) ? $builder['cardtreatment'] : 'none' );
 		$card     = sanitize_key( (string) $card_raw );
 		$dim_raw  = isset( $builder['dimOverlay'] ) ? $builder['dimOverlay'] : ( isset( $builder['dimoverlay'] ) ? $builder['dimoverlay'] : false );
 		$dim_on   = ( true === $dim_raw || 1 === $dim_raw || '1' === (string) $dim_raw );

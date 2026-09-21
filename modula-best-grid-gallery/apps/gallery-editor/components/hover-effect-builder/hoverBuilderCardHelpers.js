@@ -58,7 +58,7 @@ function readSlotTiming(builder, slot, kind, fallback, min, max) {
 export function getHoverBuilderCardState(builder) {
 	return {
 		positions: mergeSlotPositions(builder),
-		cardTreatment: readHoverBuilderKey(builder, 'cardTreatment') || 'zoom',
+		cardTreatment: readHoverBuilderKey(builder, 'cardTreatment') || 'none',
 		dimOverlayOn: isEnabledFlag(readHoverBuilderKey(builder, 'dimOverlay')),
 		titleEnter: readHoverBuilderKey(builder, 'titleEnter') || 'fade',
 		captionEnter: readHoverBuilderKey(builder, 'captionEnter') || 'fade',

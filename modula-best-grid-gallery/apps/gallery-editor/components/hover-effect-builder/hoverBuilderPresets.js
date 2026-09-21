@@ -580,7 +580,7 @@ function normalizeBuilderForPresetCompare(builder) {
 		cardTreatment:
 			typeof builder?.cardTreatment === 'string'
 				? builder.cardTreatment
-				: 'zoom',
+				: 'none',
 		graphicElement:
 			typeof builder?.graphicElement === 'string'
 				? builder.graphicElement

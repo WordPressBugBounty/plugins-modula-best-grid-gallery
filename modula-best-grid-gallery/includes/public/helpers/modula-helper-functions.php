@@ -299,9 +299,11 @@ function modula_check_lightboxes_and_links( $item_data, $item, $settings ) {
 }
 
 /**
- * Whether flat visitor settings carry a Hover Effect Builder with slot positions.
+ * Whether flat visitor settings carry a Hover Effect Builder that owns item chrome.
  *
- * When true, classic `effect-*` classes and legacy slot hide flags must not apply.
+ * Ownership requires slot positions plus a non-empty `sourcePresetId` stamp (convert /
+ * editor preset). Classic CPT defaults merge can fill a hover_builder with slots and an
+ * empty stamp; that must not suppress classic `effect-*` classes or legacy hide flags.
  *
  * @param array<string, mixed> $settings Flat gallery settings.
  * @return bool
@@ -315,6 +317,15 @@ function modula_settings_use_hover_builder( $settings ) {
 		$builder = $settings['hover_builder'];
 	}
 	if ( ! is_array( $builder ) ) {
+		return false;
+	}
+	$source = '';
+	if ( isset( $builder['sourcePresetId'] ) ) {
+		$source = sanitize_key( (string) $builder['sourcePresetId'] );
+	} elseif ( isset( $builder['sourcepresetid'] ) ) {
+		$source = sanitize_key( (string) $builder['sourcepresetid'] );
+	}
+	if ( '' === $source ) {
 		return false;
 	}
 	$positions = null;
@@ -331,7 +342,7 @@ function modula_check_hover_effect( $item_data, $item, $settings ) {
 	// v2 settings use hover.builder; legacy flat `effect` may be absent after migration.
 	$effect = isset( $settings['effect'] ) ? (string) $settings['effect'] : 'none';
 
-	// Hover builder owns Beta item hover when slot positions exist.
+	// Hover Effect Builder owns chrome when stamped with slot positions (not CPT defaults fill-in).
 	$uses_hover_builder = modula_settings_use_hover_builder( $settings );
 	$captions_below     = isset( $settings['contentPlacement'] )
 		&& 'below-image' === $settings['contentPlacement'];

@@ -14,6 +14,7 @@ import { isFieldVisible } from '../../logic/fieldVisibility';
 import { getGroupedPathsForHubDrillSection } from '../../utils/getGroupedPathsForHubDrillSection';
 import { shouldRenderHubSection } from '../../logic/hubSectionVisibility';
 import { getSimpleLinkLightboxSidebarFootnote } from '../lightbox-preview/SimpleLinkLightboxPreviewNotice';
+import ZoomOnHoverHubToggle from './ZoomOnHoverHubToggle';
 
 /** @param {Object} section Hub section from editorNavigation. @param {Record<string, Record<string, unknown>>} values Grouped form values. @returns {boolean} */
 function isHubSectionVisible(section, values) {
@@ -100,6 +101,21 @@ function renderHubSectionWithValues(section, groupLabel, values, reactKey) {
 					? { nestedUpsellGroupedPath }
 					: {})}
 			/>
+		);
+	}
+	if (section.type === 'zoomOnHoverToggle') {
+		return (
+			<section
+				key={reactKey}
+				className="modula-settings-editor__section modula-settings-editor__section--hub-field"
+				aria-label={__('Zoom on hover', 'modula-best-grid-gallery')}
+			>
+				<div className="modula-settings-editor__section-body">
+					<div className="modula-settings-editor__fields">
+						<ZoomOnHoverHubToggle />
+					</div>
+				</div>
+			</section>
 		);
 	}
 	if (section.type === 'field' && typeof section.groupedPath === 'string') {

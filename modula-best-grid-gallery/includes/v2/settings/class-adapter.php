@@ -356,7 +356,7 @@ class Adapter {
 	 */
 	public static function default_hover_builder() {
 		return array(
-			'cardTreatment'          => 'zoom',
+			'cardTreatment'          => 'none',
 			'graphicElement'         => 'none',
 			'graphicVisibility'      => 'on-hover',
 			'dimOverlay'             => false,

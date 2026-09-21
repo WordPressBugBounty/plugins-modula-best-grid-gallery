@@ -561,6 +561,43 @@ return array(
 					),
 				),
 				array(
+					'type'  => 'submenu',
+					'label' => 'Lightbox zoom',
+					'items' =>
+					array(
+						array(
+							'type'        => 'field',
+							'groupedPath' => 'zoom.enableZoom',
+							'icon'        => 'search',
+						),
+						array(
+							'type'         => 'drill',
+							'label'        => 'Zoom options',
+							'icon'         => 'search',
+							'summaryKind'  => 'zoom',
+							'groupedPaths' =>
+							array(
+								0  => 'zoom.sectionStyle',
+								1  => 'zoom.zoomType',
+								2  => 'zoom.zoomEffect',
+								3  => 'zoom.sectionMagnifiedWindow',
+								4  => 'zoom.magnifiedWindowHint',
+								5  => 'zoom.zoomWindowPosition',
+								6  => 'zoom.zoomWindowSize',
+								7  => 'zoom.zoomLensSize',
+								8  => 'zoom.zoomLensShape',
+								9  => 'zoom.sectionTint',
+								10 => 'zoom.zoomTintOpacity',
+								11 => 'zoom.zoomTintColor',
+							),
+							'visibleWhen'  => array(
+								'path'   => 'zoom.enableZoom',
+								'truthy' => true,
+							),
+						),
+					),
+				),
+				array(
 					'type'        => 'submenu',
 					'label'       => 'Opening',
 					'visibleWhen' => array(
@@ -928,43 +965,20 @@ return array(
 							),
 						),
 						array(
-							'type'        => 'field',
-							'groupedPath' => 'zoom.enableZoom',
-							'icon'        => 'search',
+							'type'        => 'zoomOnHoverToggle',
 							'visibleWhen' => array(
-								'path' => 'general.type',
-								'neq'  => 'video',
-							),
-						),
-						array(
-							'type'         => 'drill',
-							'label'        => 'Zoom options',
-							'icon'         => 'search',
-							'summaryKind'  => 'zoom',
-							'groupedPaths' =>
-							array(
-								0  => 'zoom.sectionStyle',
-								1  => 'zoom.zoomType',
-								2  => 'zoom.zoomEffect',
-								3  => 'zoom.sectionMagnifiedWindow',
-								4  => 'zoom.magnifiedWindowHint',
-								5  => 'zoom.zoomWindowPosition',
-								6  => 'zoom.zoomWindowSize',
-								7  => 'zoom.zoomLensSize',
-								8  => 'zoom.zoomLensShape',
-								9  => 'zoom.sectionTint',
-								10 => 'zoom.zoomTintOpacity',
-								11 => 'zoom.zoomTintColor',
-							),
-							'visibleWhen'  => array(
 								'all' => array(
-									array(
-										'path'   => 'zoom.enableZoom',
-										'truthy' => true,
-									),
 									array(
 										'path' => 'general.type',
 										'neq'  => 'video',
+									),
+									array(
+										'path' => 'general.type',
+										'neq'  => 'story',
+									),
+									array(
+										'path' => 'general.type',
+										'neq'  => 'slider',
 									),
 								),
 							),

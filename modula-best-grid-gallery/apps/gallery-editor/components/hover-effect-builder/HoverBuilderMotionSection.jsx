@@ -105,7 +105,7 @@ export default function HoverBuilderMotionSection({
 							: {};
 					const currentValue =
 						selectedTarget === 'card'
-							? builder.cardTreatment || 'zoom'
+							? builder.cardTreatment || 'none'
 							: selectedTarget === 'title'
 								? builder.titleEnter || 'fade'
 								: selectedTarget === 'caption'

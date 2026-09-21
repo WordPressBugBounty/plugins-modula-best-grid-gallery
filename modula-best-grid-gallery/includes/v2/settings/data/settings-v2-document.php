@@ -1653,7 +1653,7 @@ return array(
 							2 => 'grayscale',
 							3 => 'lift',
 						),
-						'default' => 'zoom',
+						'default' => 'none',
 					),
 					'graphicElement'         =>
 					array(
@@ -1943,7 +1943,7 @@ return array(
 				),
 				'default'                       =>
 				array(
-					'cardTreatment'          => 'zoom',
+					'cardTreatment'          => 'none',
 					'graphicElement'         => 'none',
 					'graphicVisibility'      => 'on-hover',
 					'dimOverlay'             => false,
@@ -4055,7 +4055,7 @@ return array(
 			array(
 				'type'                     => 'boolean',
 				'default'                  => false,
-				'editorLabel'              => 'Zoom on hover',
+				'editorLabel'              => 'Enable lightbox zoom',
 				'editorShowInLite'         => true,
 				'editorOmitControlInLite'  => true,
 				'editorLightboxLiteUpsell' =>
@@ -4085,7 +4085,7 @@ return array(
 			array(
 				'type'                    => 'boolean',
 				'default'                 => true,
-				'editorLabel'             => 'Zoom on hover',
+				'editorLabel'             => 'Trigger on hover',
 				'editorDescription'       => 'Magnifies when the pointer rests on the image. When off, zoom still needs enable, but hover does not trigger it.',
 				'editorShowInLite'        => false,
 				'editorSidebarNestedOnly' => true,

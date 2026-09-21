@@ -4,7 +4,7 @@ Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPres
 Requires at least: 5.3
 Tested up to: 7.1
 Requires PHP: 5.6
-Stable tag: 3.0.7
+Stable tag: 3.0.8
 
 License: GNU General Public License v3.0 or later  
 
@@ -325,6 +325,11 @@ The simplest way to install is to click on 'Plugins' then 'Add' and type 'Modula
 4. Mobile Responsive Image Galleries - Galleries automatically adapt to smartphone and tablet screen sizes
 
 == Changelog ==
+
+= 3.0.8 - 21.09.2026 =
+Changed: Zoom on hover is a Lite Interact control for gallery-tile soft scale (Hover card treatment); new galleries default it off. Modula ZOOM (lightbox magnify) and its upsell live under Lightbox → Lightbox zoom.
+Fixed: Classic galleries again emit legacy hover `effect-*` classes when CPT defaults fill in a Hover Effect Builder; Under Image captions return below the image on columns layouts.
+Info: Read more about Modula 3.0 Beta: https://wp-modula.com/modula-3-0-beta/
 
 = 3.0.7 - 21.09.2026 =
 Fixed: Modern lightbox vendor CSS is scoped under the body Modula host class, and open-state opacity is protected when another plugin styles shared Fancybox container classes (e.g. Easy FancyBox).

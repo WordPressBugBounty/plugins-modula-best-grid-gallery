@@ -612,7 +612,7 @@
                             "grayscale",
                             "lift"
                         ],
-                        "default": "zoom"
+                        "default": "none"
                     },
                     "graphicElement": {
                         "type": "string",
@@ -858,7 +858,7 @@
                     }
                 },
                 "default": {
-                    "cardTreatment": "zoom",
+                    "cardTreatment": "none",
                     "graphicElement": "none",
                     "graphicVisibility": "on-hover",
                     "dimOverlay": false,

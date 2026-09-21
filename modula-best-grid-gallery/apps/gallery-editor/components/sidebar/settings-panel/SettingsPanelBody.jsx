@@ -22,6 +22,7 @@ import SettingsPanelSelectRow from './SettingsPanelSelectRow';
 import SettingsPanelPositionGridRow from './SettingsPanelPositionGridRow';
 import SettingsPanelNestedFields from './SettingsPanelNestedFields';
 import SchemaFieldRow from '../../schema/SchemaFieldRow';
+import ZoomOnHoverHubToggle from '../ZoomOnHoverHubToggle';
 
 /**
  * @param {Object} section
@@ -256,6 +257,17 @@ export default function SettingsPanelBody({ category, onExitCategory }) {
 										>
 											{noteText}
 										</p>
+									);
+								}
+
+								if (item.type === 'zoomOnHoverToggle') {
+									return (
+										<div
+											key={`zoom-on-hover-${i}-${j}`}
+											className="modula-settings-panel__hub-field"
+										>
+											<ZoomOnHoverHubToggle />
+										</div>
 									);
 								}
 

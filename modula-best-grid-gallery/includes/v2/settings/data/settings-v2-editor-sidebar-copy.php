@@ -65,7 +65,7 @@ return array(
 		'comments.commentStatus'      => 'Enable comments on gallery images',
 		'hover.changeCursor'          => 'Use a special cursor over gallery images',
 		'exif.enableExif'             => 'Display camera metadata on images',
-		'zoom.enableZoom'             => 'A magnified view that follows the pointer across the image',
+		'zoom.enableZoom'             => 'Magnify images inside the lightbox (Modula ZOOM)',
 		'deeplink.modulaDeeplink'     => 'Link directly to a specific image',
 	),
 	'hubHelpByDrillLabel'  =>
@@ -76,8 +76,7 @@ return array(
 		'Filters'                => 'Names visitors can use to narrow the gallery',
 		'Page size & navigation' => 'Images per page, scroll or load more, and control styling',
 		'Hover effect'           => 'Presets, motion, and overlay for image hover',
-		'Zoom'                   => 'Magnify images on hover',
-		'Zoom options'           => 'Kind, window, and tint for hover zoom',
+		'Zoom options'           => 'Lightbox magnify style, window, lens, and tint',
 		'Loading effect'         => 'Scale, rotate, and slide when images load',
 		'Download'               => 'Let visitors save images from your gallery',
 		'Download options'       => 'What visitors can take, the gallery button, and zip name',

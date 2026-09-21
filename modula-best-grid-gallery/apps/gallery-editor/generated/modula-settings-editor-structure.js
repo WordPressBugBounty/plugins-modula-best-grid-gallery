@@ -535,6 +535,43 @@ export default {
 				},
 				{
 					type: "submenu",
+					label: __( "Lightbox zoom", 'modula-best-grid-gallery' ),
+					items: [
+						{
+							type: "field",
+							groupedPath: "zoom.enableZoom",
+							icon: "search",
+							hubHelp: __( "Magnify images inside the lightbox (Modula ZOOM)", 'modula-best-grid-gallery' )
+						},
+						{
+							type: "drill",
+							label: __( "Zoom options", 'modula-best-grid-gallery' ),
+							icon: "search",
+							summaryKind: "zoom",
+							groupedPaths: [
+								"zoom.sectionStyle",
+								"zoom.zoomType",
+								"zoom.zoomEffect",
+								"zoom.sectionMagnifiedWindow",
+								"zoom.magnifiedWindowHint",
+								"zoom.zoomWindowPosition",
+								"zoom.zoomWindowSize",
+								"zoom.zoomLensSize",
+								"zoom.zoomLensShape",
+								"zoom.sectionTint",
+								"zoom.zoomTintOpacity",
+								"zoom.zoomTintColor"
+							],
+							visibleWhen: {
+								path: "zoom.enableZoom",
+								truthy: true
+							},
+							hubHelp: __( "Lightbox magnify style, window, lens, and tint", 'modula-best-grid-gallery' )
+						}
+					]
+				},
+				{
+					type: "submenu",
 					label: __( "Opening", 'modula-best-grid-gallery' ),
 					visibleWhen: {
 						any: [
@@ -894,47 +931,23 @@ export default {
 							hubHelp: __( "Presets, motion, and overlay for image hover", 'modula-best-grid-gallery' )
 						},
 						{
-							type: "field",
-							groupedPath: "zoom.enableZoom",
-							icon: "search",
-							visibleWhen: {
-								path: "general.type",
-								neq: "video"
-							},
-							hubHelp: __( "A magnified view that follows the pointer across the image", 'modula-best-grid-gallery' )
-						},
-						{
-							type: "drill",
-							label: __( "Zoom options", 'modula-best-grid-gallery' ),
-							icon: "search",
-							summaryKind: "zoom",
-							groupedPaths: [
-								"zoom.sectionStyle",
-								"zoom.zoomType",
-								"zoom.zoomEffect",
-								"zoom.sectionMagnifiedWindow",
-								"zoom.magnifiedWindowHint",
-								"zoom.zoomWindowPosition",
-								"zoom.zoomWindowSize",
-								"zoom.zoomLensSize",
-								"zoom.zoomLensShape",
-								"zoom.sectionTint",
-								"zoom.zoomTintOpacity",
-								"zoom.zoomTintColor"
-							],
+							type: "zoomOnHoverToggle",
 							visibleWhen: {
 								all: [
 									{
-										path: "zoom.enableZoom",
-										truthy: true
+										path: "general.type",
+										neq: "video"
 									},
 									{
 										path: "general.type",
-										neq: "video"
+										neq: "story"
+									},
+									{
+										path: "general.type",
+										neq: "slider"
 									}
 								]
-							},
-							hubHelp: __( "Kind, window, and tint for hover zoom", 'modula-best-grid-gallery' )
+							}
 						},
 						{
 							type: "field",

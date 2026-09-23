@@ -5,6 +5,7 @@ import {
 	TextControl,
 	SelectControl,
 	__experimentalSpacer as Spacer,
+	Notice,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import styles from './claim-credits.module.css';
@@ -14,15 +15,41 @@ import { LANGUAGES } from './languages';
 import useStateContext from '../../context/useStateContext';
 import { setOptions } from '../../context/actions';
 import LoadingSkeleton from '../loading-skeleton';
+import { mapWpLocaleToAiLanguage } from 'gallery-shared/utils/modulaAiAvailability';
 
-export default function ClaimCredits() {
-	const { data, isLoading } = useSettingsQuery();
+function getUnavailableOnLocalhost(data) {
+	if (typeof data?.unavailable_on_localhost === 'boolean') {
+		return data.unavailable_on_localhost;
+	}
+	if (
+		typeof window !== 'undefined' &&
+		window.modulaAiAvailability?.unavailableOnLocalhost
+	) {
+		return true;
+	}
+	return false;
+}
+
+function resolveDefaultLanguage(data) {
+	if (data?.language) {
+		return data.language;
+	}
+	const codes = LANGUAGES.map((lang) => lang.value);
+	const siteLocale =
+		typeof window !== 'undefined' && window.modulaAiAvailability?.siteLocale
+			? window.modulaAiAvailability.siteLocale
+			: '';
+	return mapWpLocaleToAiLanguage(siteLocale || 'en', codes);
+}
+
+function ClaimCreditsForm({ data }) {
 	const { state, dispatch } = useStateContext();
+	const unavailableOnLocalhost = getUnavailableOnLocalhost(data);
 
 	const form = useForm({
 		defaultValues: {
 			modula_ai_api_key: data?.api_key || '',
-			modula_ai_language: data?.language || 'en',
+			modula_ai_language: resolveDefaultLanguage(data),
 			email: data?.readonly?.email,
 			first_name: data?.readonly?.first_name,
 			last_name: data?.readonly?.last_name,
@@ -31,12 +58,14 @@ export default function ClaimCredits() {
 	});
 
 	const claimCredits = () => {
+		if (unavailableOnLocalhost) {
+			return;
+		}
 		window.open('https://wp-modula.com/my-account', '_blank');
 	};
 
 	const handleChange = (val, field) => {
 		field.handleChange(val);
-		console.error(field);
 		dispatch(
 			setOptions({
 				...state.options,
@@ -57,13 +86,18 @@ export default function ClaimCredits() {
 			)
 		: __('Insert an API key', 'modula-best-grid-gallery');
 
-	if (isLoading) {
-		return <LoadingSkeleton />;
-	}
-
 	return (
 		<div className={styles.container}>
-			{!validKey && (
+			{unavailableOnLocalhost ? (
+				<Notice status="warning" isDismissible={false}>
+					{__(
+						'AI unavailable on localhost',
+						'modula-best-grid-gallery'
+					)}
+				</Notice>
+			) : null}
+
+			{!validKey && !unavailableOnLocalhost && (
 				<>
 					<p className={styles.description}>
 						{__(
@@ -95,6 +129,7 @@ export default function ClaimCredits() {
 								help={helpText}
 								value={field.state.value}
 								onChange={(val) => handleChange(val, field)}
+								disabled={unavailableOnLocalhost && !validKey}
 							/>
 						)}
 					/>
@@ -124,7 +159,7 @@ export default function ClaimCredits() {
 				gap={4}
 				className={styles.buttonContainer}
 			>
-				{!validKey && (
+				{!validKey && !unavailableOnLocalhost && (
 					<Button variant="link" onClick={claimCredits}>
 						{__('Claim Credits', 'modula-best-grid-gallery')}
 					</Button>
@@ -132,4 +167,14 @@ export default function ClaimCredits() {
 			</Flex>
 		</div>
 	);
+}
+
+export default function ClaimCredits() {
+	const { data, isLoading } = useSettingsQuery();
+
+	if (isLoading) {
+		return <LoadingSkeleton />;
+	}
+
+	return <ClaimCreditsForm data={data} />;
 }

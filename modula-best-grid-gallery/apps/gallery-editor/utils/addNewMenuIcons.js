@@ -71,8 +71,8 @@ export const addMenuContentBlockIcon = (
 	</SVG>
 );
 
-/** 2×2 tiles — Another gallery */
-export const addMenuAnotherGalleryIcon = (
+/** 2×2 tiles — Content Galleries */
+export const addMenuContentGalleriesIcon = (
 	<SVG
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 24 24"

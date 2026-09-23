@@ -1408,6 +1408,10 @@
                     "center",
                     "right"
                 ]
+            },
+            "themeInheritControls": {
+                "type": "boolean",
+                "default": false
             }
         },
         "filters": {

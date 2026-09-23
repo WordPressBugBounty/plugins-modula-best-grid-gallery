@@ -20,6 +20,7 @@ import { getGalleryPreviewReduxStore } from '../utils/previewReduxStoreRef';
 import { stripRestPostMeta } from '../utils/applyRestPostStatus';
 import { getModulaSettingsEditorConfig } from '../config/modulaSettingsEditorConfig';
 import { applyGalleryTypeSideEffects } from '../logic/applyGalleryTypeSideEffects';
+import { dropGalleryEditorLayoutStepsIfNeeded } from '../utils/galleryEditorLayoutHistoryHygiene';
 
 /**
  * Modal + PATCH flow when changing `general.type` while slide/image focus data exists.
@@ -67,6 +68,10 @@ export function useGalleryTypeChangeConfirm(groupedPath) {
 		const previewStore = getGalleryPreviewReduxStore();
 		if (!gid || !previewStore) {
 			fieldApi.handleChange(nextValue);
+			dropGalleryEditorLayoutStepsIfNeeded(undoRedo.dropLayoutSteps, {
+				prevType: pending.prevValue,
+				nextType: nextValue,
+			});
 			setGalleryTypeConfirmOpen(false);
 			pendingGalleryTypeRef.current = null;
 			return;
@@ -122,6 +127,10 @@ export function useGalleryTypeChangeConfirm(groupedPath) {
 			await queryClient.refetchQueries({
 				queryKey: getGalleryBootstrapQueryKey(gid),
 			});
+			dropGalleryEditorLayoutStepsIfNeeded(undoRedo.dropLayoutSteps, {
+				prevType: pending.prevValue,
+				nextType: nextValue,
+			});
 			setGalleryTypeConfirmOpen(false);
 			pendingGalleryTypeRef.current = null;
 		} catch (e) {
@@ -167,6 +176,13 @@ export function useGalleryTypeChangeConfirm(groupedPath) {
 					form.setFieldValue('general.type', v);
 					applyGalleryTypeSideEffects(form, prev, v);
 					markCustomGridRepackAfterGalleryTypeChange(prev, v, items);
+					dropGalleryEditorLayoutStepsIfNeeded(
+						undoRedo.dropLayoutSteps,
+						{
+							prevType: prev,
+							nextType: v,
+						}
+					);
 					return;
 				}
 				pendingGalleryTypeRef.current = {
@@ -178,7 +194,7 @@ export function useGalleryTypeChangeConfirm(groupedPath) {
 				setGalleryTypeConfirmOpen(true);
 			};
 		},
-		[isGalleryTypeField, form]
+		[isGalleryTypeField, form, undoRedo]
 	);
 
 	return {

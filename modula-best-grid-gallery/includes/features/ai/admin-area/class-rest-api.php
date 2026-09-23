@@ -1,6 +1,7 @@
 <?php
 namespace Modula\Ai\Admin_Area;
 
+use Modula\Ai\Ai_Helper;
 use Modula\Ai\Cloud_User;
 use Modula\Ai\Optimizer\Optimizer;
 
@@ -179,12 +180,29 @@ class Rest_Api {
 	}
 
 	/**
+	 * REST error when Modula AI cannot run on a local site host.
+	 *
+	 * @return \WP_Error
+	 */
+	private function unavailable_on_localhost_error() {
+		return new \WP_Error(
+			'modula_ai_unavailable_localhost',
+			__( 'AI unavailable on localhost', 'modula-best-grid-gallery' ),
+			array( 'status' => 403 )
+		);
+	}
+
+	/**
 	 * Starts the optimization process for a gallery.
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 * @return WP_REST_Response The response object.
 	 */
 	public function optimize_gallery( $request ) {
+		if ( Ai_Helper::is_unavailable_on_localhost() ) {
+			return $this->unavailable_on_localhost_error();
+		}
+
 		$body      = $request->get_json_params();
 		$optimizer = Optimizer::get_instance( (string) $body['id'] );
 		$status    = $optimizer->start( $body['action'] );
@@ -212,16 +230,18 @@ class Rest_Api {
 	 * @return WP_REST_Response The response object.
 	 */
 	public function ai_settings() {
-		$api_key  = get_option( 'modula_ai_api_key' );
-		$language = get_option( 'modula_ai_language', get_locale() );
-		$data     = $this->get_user();
+		$api_key                   = get_option( 'modula_ai_api_key' );
+		$language                  = Ai_Helper::get_ai_language_for_settings();
+		$unavailable_on_localhost  = Ai_Helper::is_unavailable_on_localhost();
+		$data                      = $this->get_user();
 
 		if ( ! $data['success'] ) {
 			return rest_ensure_response(
 				array(
-					'api_key'  => $api_key,
-					'language' => $language,
-					'readonly' => array(
+					'api_key'                   => $api_key,
+					'language'                  => $language,
+					'unavailable_on_localhost'  => $unavailable_on_localhost,
+					'readonly'                  => array(
 						'valid_key' => false,
 					),
 				)
@@ -233,9 +253,10 @@ class Rest_Api {
 			$data['data']['user']['currentRequestImages'];
 
 		$output = array(
-			'api_key'  => $api_key,
-			'language' => $language,
-			'readonly' => array(
+			'api_key'                  => $api_key,
+			'language'                 => $language,
+			'unavailable_on_localhost' => $unavailable_on_localhost,
+			'readonly'                 => array(
 				'credits'    => $credits,
 				'email'      => $data['data']['user']['email'],
 				'first_name' => $data['data']['user']['firstName'] ?? '',
@@ -253,6 +274,10 @@ class Rest_Api {
 	 * @return WP_REST_Response The response object.
 	 */
 	public function register_user() {
+		if ( Ai_Helper::is_unavailable_on_localhost() ) {
+			return $this->unavailable_on_localhost_error();
+		}
+
 		$user = Cloud_User::get_instance();
 		return $user->register_user();
 	}
@@ -274,6 +299,10 @@ class Rest_Api {
 	 * @return WP_REST_Response The response object.
 	 */
 	public function generate_alt_text( $request ) {
+		if ( Ai_Helper::is_unavailable_on_localhost() ) {
+			return $this->unavailable_on_localhost_error();
+		}
+
 		$body          = $request->get_json_params();
 		$optimizer     = Optimizer::get_instance( (string) $body['id'] );
 		$action        = $body['action'];

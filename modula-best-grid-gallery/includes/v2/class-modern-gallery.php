@@ -176,15 +176,15 @@ final class Modern_Gallery {
 			. '.modula .filters{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;align-items:center}'
 			. '.modula .filters--align-center{justify-content:center}'
 			. '.modula .filters--align-right{justify-content:flex-end}'
-			. '.modula .filters button{border:1px solid rgba(0,0,0,.12);background:transparent;padding:.35rem .75rem;border-radius:8px;cursor:pointer;font:inherit;color:inherit}'
+			. '.modula:not(.modula--theme-inherit-controls) .filters button{border:1px solid rgba(0,0,0,.12);background:transparent;padding:.35rem .75rem;border-radius:8px;cursor:pointer;font:inherit;color:inherit}'
 			. '.modula .filters button.active{font-weight:600}'
 			. '.modula .filters--dropdown{position:relative}'
-			. '.modula .filters__select{appearance:auto;border:1px solid rgba(0,0,0,.12);background:#fff;padding:.35rem .75rem;border-radius:8px;cursor:pointer;font:inherit;color:inherit;max-width:100%;min-width:10rem}'
+			. '.modula:not(.modula--theme-inherit-controls) .filters__select{appearance:auto;border:1px solid rgba(0,0,0,.12);background:#fff;padding:.35rem .75rem;border-radius:8px;cursor:pointer;font:inherit;color:inherit;max-width:100%;min-width:10rem}'
 			. '.modula .modula-pagination{display:flex;flex-wrap:wrap;gap:.35rem;justify-content:center;margin-top:1rem}'
 			. '.modula .modula-pagination.modula-pagination--left{justify-content:flex-start}'
 			. '.modula .modula-pagination.modula-pagination--center{justify-content:center}'
 			. '.modula .modula-pagination.modula-pagination--right{justify-content:flex-end}'
-			. '.modula .modula-pagination button,.modula .modula-pagination__load-more{border:1px solid rgba(0,0,0,.15);background:#fff;padding:.4rem .75rem;border-radius:8px;cursor:pointer;font:inherit;color:inherit}'
+			. '.modula:not(.modula--theme-inherit-controls) .modula-pagination button,.modula:not(.modula--theme-inherit-controls) .modula-pagination__load-more{border:1px solid rgba(0,0,0,.15);background:#fff;padding:.4rem .75rem;border-radius:8px;cursor:pointer;font:inherit;color:inherit}'
 			. '.modula .modula-pagination button.active{font-weight:700}'
 			. '.modula .modula-pagination__ellipsis{display:inline-flex;align-items:center;justify-content:center;min-width:2rem;padding:.4rem .35rem;opacity:.65;user-select:none}';
 	}

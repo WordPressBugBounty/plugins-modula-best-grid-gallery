@@ -7,6 +7,8 @@
  *   as soon as its image finishes loading.
  * - respectReducedMotion ON (visitor frontend only): `modula-respect-reduced-motion`
  *   so CSS/JS can honor `prefers-reduced-motion` and drop gallery motion.
+ * - themeInheritControls ON: `modula--theme-inherit-controls` so chrome CSS skips
+ *   opinionated pagination/filter control paint.
  *
  * @package
  */
@@ -15,6 +17,21 @@ import { useEffect } from '@wordpress/element';
 import { isGalleryTypeWithoutLoadingEffects } from '../constants/galleryLayoutDefaults';
 import { isSettingsEditorPreview } from '../utils/displayContext';
 import { isRespectReducedMotionSettingOn } from '../utils/reducedMotion';
+import {
+	THEME_INHERIT_CONTROLS_ROOT_CLASS,
+	isThemeInheritControlsOn,
+} from '../utils/themeInheritControls';
+
+/**
+ * @param {HTMLElement} host
+ * @return {HTMLElement|null}
+ */
+function resolveGalleryRoot(host) {
+	return (
+		host.closest('.modula.modula-gallery') ||
+		host.closest('.modula-gallery-modern')
+	);
+}
 
 /**
  * @param {import('react').RefObject<HTMLElement|null>} hostRef
@@ -27,9 +44,7 @@ export function useGalleryRootClasses(hostRef, config, metadata) {
 		if (!host) {
 			return undefined;
 		}
-		const root =
-			host.closest('.modula.modula-gallery') ||
-			host.closest('.modula-gallery-modern');
+		const root = resolveGalleryRoot(host);
 		if (!root) {
 			return undefined;
 		}
@@ -53,9 +68,28 @@ export function useGalleryRootClasses(hostRef, config, metadata) {
 		if (!host) {
 			return undefined;
 		}
-		const root =
-			host.closest('.modula.modula-gallery') ||
-			host.closest('.modula-gallery-modern');
+		const root = resolveGalleryRoot(host);
+		if (!root) {
+			return undefined;
+		}
+
+		if (isThemeInheritControlsOn(config?.themeInheritControls)) {
+			root.classList.add(THEME_INHERIT_CONTROLS_ROOT_CLASS);
+		} else {
+			root.classList.remove(THEME_INHERIT_CONTROLS_ROOT_CLASS);
+		}
+
+		return () => {
+			root.classList.remove(THEME_INHERIT_CONTROLS_ROOT_CLASS);
+		};
+	}, [hostRef, config?.themeInheritControls]);
+
+	useEffect(() => {
+		const host = hostRef.current;
+		if (!host) {
+			return undefined;
+		}
+		const root = resolveGalleryRoot(host);
 		if (!root) {
 			return undefined;
 		}

@@ -380,7 +380,7 @@ function CustomGridEditorRglLayout({
 	);
 
 	const commitSectionLayout = useCallback(
-		(sectionIndex, layout) => {
+		(sectionIndex, layout, kind) => {
 			if (!gridEditable || !Array.isArray(layout)) {
 				return;
 			}
@@ -391,6 +391,9 @@ function CustomGridEditorRglLayout({
 				chunks
 			);
 			previewAdmin?.schedulePersistPreviewItems?.();
+			if (kind === 'drag' || kind === 'resize') {
+				previewAdmin?.onCustomGridLayoutCommit?.({ kind });
+			}
 		},
 		[gridEditable, store, chunks, previewAdmin]
 	);
@@ -416,18 +419,21 @@ function CustomGridEditorRglLayout({
 			if (!gridEditable) {
 				return;
 			}
+			previewAdmin?.onCustomGridLayoutInteractionStart?.({ kind });
 			interactionRef.current = {
 				kind,
 				sectionIndex,
 				layout: null,
 			};
 		},
-		[gridEditable]
+		[gridEditable, previewAdmin]
 	);
 
 	const endInteraction = useCallback(
 		(sectionIndex, layout) => {
-			const buffered = interactionRef.current.layout;
+			const interaction = interactionRef.current;
+			const kind = interaction.kind;
+			const buffered = interaction.layout;
 			interactionRef.current = {
 				kind: null,
 				sectionIndex: null,
@@ -438,7 +444,7 @@ function CustomGridEditorRglLayout({
 			}
 			const finalLayout = Array.isArray(layout) ? layout : buffered;
 			if (Array.isArray(finalLayout)) {
-				commitSectionLayout(sectionIndex, finalLayout);
+				commitSectionLayout(sectionIndex, finalLayout, kind);
 			}
 		},
 		[gridEditable, commitSectionLayout]

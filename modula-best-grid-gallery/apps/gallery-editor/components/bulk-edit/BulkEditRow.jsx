@@ -54,6 +54,7 @@ function SparkleIcon() {
  * @param {boolean}             props.showFiltersColumn
  * @param {string[]}            props.filterSuggestions
  * @param {boolean}             props.aiConfigured
+ * @param {boolean}             [props.unavailableOnLocalhost]
  * @param {(rowOrId: Object|string, patch: Record<string, unknown>) => void} props.patchRow
  * @param {(row: Object, field: string) => unknown} props.getRowField
  * @param {number}              props.galleryId
@@ -74,6 +75,7 @@ export default function BulkEditRow({
 	showFiltersColumn,
 	filterSuggestions,
 	aiConfigured,
+	unavailableOnLocalhost = false,
 	patchRow,
 	getRowField,
 	galleryId,
@@ -190,7 +192,7 @@ export default function BulkEditRow({
 	const rowBusy = aiAltMutation.isPending || aiTitleMutation.isPending;
 
 	const renderAiIcon = (kind) => {
-		if (!canUseAi) {
+		if (!canUseAi || unavailableOnLocalhost) {
 			return null;
 		}
 		const isTitle = kind === 'title';

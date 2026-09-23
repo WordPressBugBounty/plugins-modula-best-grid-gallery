@@ -36,6 +36,21 @@ export function Actions() {
 		return <Spinner />;
 	}
 
+	const unavailableOnLocalhost = Boolean(data?.unavailable_on_localhost);
+
+	if (unavailableOnLocalhost) {
+		return (
+			<div className="modula-ai-actions">
+				<Button icon={<SparkleIcon />} variant="secondary" disabled>
+					{__(
+						'AI unavailable on localhost',
+						'modula-best-grid-gallery'
+					)}
+				</Button>
+			</div>
+		);
+	}
+
 	if ((isError && error) || !data?.readonly?.valid_key) {
 		return (
 			<>

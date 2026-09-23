@@ -37,6 +37,7 @@ export * from './utils/paginationLegacyCssAliases';
 export * from './utils/buildPaginationDynamicCss';
 export * from './utils/galleryRootSelector';
 export * from './utils/buildFilterBarDynamicCss';
+export * from './utils/themeInheritControls';
 export * from './utils/filterBarModel';
 export * from './utils/filterImageUsageCounts';
 export * from './utils/contentBlockContrast';

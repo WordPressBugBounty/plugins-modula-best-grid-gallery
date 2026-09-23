@@ -138,15 +138,15 @@ export function resolveGalleryItemLink(itemData, config, ctx = {}) {
 	}
 
 	/*
-	 * Per-item Redirect (“Opens this address”) and hybrid lightbox-prefer-url:
-	 * a non-empty custom URL skips the lightbox on that tile. Follow-gallery
-	 * items (empty URL) still open the lightbox. Distinct from external-url
-	 * (no lightbox for URL-less items).
+	 * Hybrid lightbox-prefer-url: a non-empty Custom URL skips the lightbox on
+	 * that tile. Follow-gallery items (empty URL) still open the lightbox.
+	 * Distinct from external-url (no lightbox for URL-less items).
+	 *
+	 * Fancybox (Open in lightbox): always lightbox-first on Beta; Custom URL is
+	 * exposed as data-modula-item-url for in-lightbox follow (see view model).
+	 * Classic PHP still applies tile redirect for Fancybox + Custom URL.
 	 */
-	if (
-		(lightbox === 'fancybox' || lightbox === 'lightbox-prefer-url') &&
-		itemLink
-	) {
+	if (lightbox === 'lightbox-prefer-url' && itemLink) {
 		return {
 			showLink: true,
 			href: itemLink,

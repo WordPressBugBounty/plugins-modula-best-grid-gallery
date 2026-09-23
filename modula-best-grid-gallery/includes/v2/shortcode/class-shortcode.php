@@ -1571,6 +1571,19 @@ class Shortcode {
 			$classes[] = 'modula-respect-reduced-motion';
 		}
 
+		$theme_inherit = false;
+		if ( is_array( $grouped ) && isset( $grouped['pagination'] ) && is_array( $grouped['pagination'] ) ) {
+			$raw = $grouped['pagination']['themeInheritControls'] ?? null;
+			if ( true === $raw || 1 === $raw || '1' === $raw ) {
+				$theme_inherit = true;
+			} elseif ( is_string( $raw ) && 'true' === strtolower( trim( $raw ) ) ) {
+				$theme_inherit = true;
+			}
+		}
+		if ( $theme_inherit ) {
+			$classes[] = 'modula--theme-inherit-controls';
+		}
+
 		return apply_filters(
 			'modula_modern_shortcode_container_classes',
 			$classes,

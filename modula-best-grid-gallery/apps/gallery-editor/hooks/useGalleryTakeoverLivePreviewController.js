@@ -12,6 +12,7 @@ import { useCustomGridPaginationLayoutEffect } from './takeover-live-preview/use
 import { useFitGridClearImageFocus } from './useFitGridClearImageFocus';
 import { useTemplateLayoutSideEffects } from './useTemplateLayoutSideEffects';
 import { runCustomGridPreviewItemMutation } from '../utils/customGridPreviewItemMutation';
+import { useGallerySettingsFormBundle } from '../form/GallerySettingsFormContext';
 
 /**
  * @param {{
@@ -36,6 +37,7 @@ export function useGalleryTakeoverLivePreviewController({
 		typeof groupedSettings.general.type === 'string'
 			? groupedSettings.general.type
 			: '';
+	const { undoRedo } = useGallerySettingsFormBundle();
 	const preservePreviewItemsRef = useRef(() => false);
 
 	const { store, storeRef } = useTakeoverPreviewStore({
@@ -66,6 +68,7 @@ export function useGalleryTakeoverLivePreviewController({
 		galleryType,
 		enablePagination: groupedSettings?.pagination?.enablePagination,
 		schedulePersistPreviewItems,
+		dropLayoutSteps: undoRedo.dropLayoutSteps,
 	});
 
 	const runPreviewItemMutation = useCallback(

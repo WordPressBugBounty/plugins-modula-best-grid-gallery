@@ -32,7 +32,7 @@
 	font-weight: 400;
 }
 
-.modula .filters .modula_menu__link {
+.modula:not(.modula--theme-inherit-controls) .filters .modula_menu__link {
 	display: inline-block;
 	padding: 0.15rem 0;
 	margin: 0;
@@ -52,10 +52,10 @@
 		border-color 0.2s ease;
 }
 
-.modula .filters .modula_menu__link:hover,
-.modula .filters .modula_menu__link:focus,
-.modula .filters .modula_menu__link:focus-visible,
-.modula .filters .modula_menu__link:active {
+.modula:not(.modula--theme-inherit-controls) .filters .modula_menu__link:hover,
+.modula:not(.modula--theme-inherit-controls) .filters .modula_menu__link:focus,
+.modula:not(.modula--theme-inherit-controls) .filters .modula_menu__link:focus-visible,
+.modula:not(.modula--theme-inherit-controls) .filters .modula_menu__link:active {
 	text-decoration: none;
 	outline: none;
 	box-shadow: none;
@@ -67,10 +67,14 @@
 .modula .filters .modula_menu__item--current .modula_menu__link,
 .modula .filters .modula_menu__link.selected {
 	font-weight: 600;
+}
+
+.modula:not(.modula--theme-inherit-controls) .filters .modula_menu__item--current .modula_menu__link,
+.modula:not(.modula--theme-inherit-controls) .filters .modula_menu__link.selected {
 	border-bottom-color: currentcolor;
 }
 
-.modula .filters .modula_menu__link:focus-visible {
+.modula:not(.modula--theme-inherit-controls) .filters .modula_menu__link:focus-visible {
 	border-bottom-color: currentcolor;
 }
 
@@ -107,9 +111,9 @@
 	border-color: transparent transparent currentcolor;
 }
 
-.modula .filters__collapse-toggle:focus,
-.modula .filters__collapse-toggle:focus-visible,
-.modula .filters__collapse-toggle:active {
+.modula:not(.modula--theme-inherit-controls) .filters__collapse-toggle:focus,
+.modula:not(.modula--theme-inherit-controls) .filters__collapse-toggle:focus-visible,
+.modula:not(.modula--theme-inherit-controls) .filters__collapse-toggle:active {
 	outline: none;
 	box-shadow: none;
 }
@@ -118,7 +122,7 @@
 	display: none;
 }
 
-.modula .filters__select {
+.modula:not(.modula--theme-inherit-controls) .filters__select {
 	appearance: auto;
 	border: 1px solid rgb(0 0 0 / 12%);
 	background: #fff;
@@ -129,6 +133,21 @@
 	color: inherit;
 	max-width: 100%;
 	min-width: 10rem;
+}
+
+/* Keep in sync with critical chrome CSS in class-modern-gallery.php. */
+.modula:not(.modula--theme-inherit-controls) .filters button {
+	border: 1px solid rgb(0 0 0 / 12%);
+	background: transparent;
+	padding: 0.35rem 0.75rem;
+	border-radius: $mod-radius-8;
+	cursor: pointer;
+	font: inherit;
+	color: inherit;
+}
+
+.modula .filters button.active {
+	font-weight: 600;
 }
 
 .modula .modula-pagination {
@@ -151,8 +170,8 @@
 	justify-content: flex-end;
 }
 
-.modula .modula-pagination button,
-.modula .modula-pagination__load-more {
+.modula:not(.modula--theme-inherit-controls) .modula-pagination button,
+.modula:not(.modula--theme-inherit-controls) .modula-pagination__load-more {
 	border: 1px solid rgb(0 0 0 / 15%);
 	background: #fff;
 	padding: 0.4rem 0.75rem;
@@ -164,12 +183,12 @@
 	outline: none;
 }
 
-.modula .modula-pagination button:focus,
-.modula .modula-pagination button:focus-visible,
-.modula .modula-pagination button:active,
-.modula .modula-pagination__load-more:focus,
-.modula .modula-pagination__load-more:focus-visible,
-.modula .modula-pagination__load-more:active {
+.modula:not(.modula--theme-inherit-controls) .modula-pagination button:focus,
+.modula:not(.modula--theme-inherit-controls) .modula-pagination button:focus-visible,
+.modula:not(.modula--theme-inherit-controls) .modula-pagination button:active,
+.modula:not(.modula--theme-inherit-controls) .modula-pagination__load-more:focus,
+.modula:not(.modula--theme-inherit-controls) .modula-pagination__load-more:focus-visible,
+.modula:not(.modula--theme-inherit-controls) .modula-pagination__load-more:active {
 	outline: none;
 	box-shadow: none;
 }

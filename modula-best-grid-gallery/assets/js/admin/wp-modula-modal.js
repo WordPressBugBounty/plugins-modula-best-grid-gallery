@@ -415,6 +415,10 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
         generateReport: async function( event ) {
             event.preventDefault();
 
+            if ( this.isAiUnavailableOnLocalhost ) {
+                return;
+            }
+
             // If API is not configured, redirect to settings
             if (!this.isApiConfigured) {
                 window.location.href = modulaHelper.settings_url;
@@ -509,7 +513,24 @@ wp.Modula = 'undefined' === typeof( wp.Modula ) ? {} : wp.Modula;
                 });
         
                 const $button = this.$el.find('#modula-ai-report-generate-button');
+                const unavailableOnLocalhost = response?.unavailable_on_localhost
+                    || ( typeof modulaHelper !== 'undefined' && modulaHelper.unavailable_on_localhost );
                 const isKeyValid = response?.readonly?.valid_key ?? false;
+
+                if ( unavailableOnLocalhost ) {
+                    $button.find('.modula-ai-btn-text').text(
+                        ( typeof modulaHelper !== 'undefined' && modulaHelper.strings && modulaHelper.strings.unavailable_localhost )
+                            ? modulaHelper.strings.unavailable_localhost
+                            : 'AI unavailable on localhost'
+                    );
+                    $button.prop('disabled', true).addClass('ai-unavailable-localhost').removeClass('configure-api');
+                    self.isApiConfigured = false;
+                    self.isAiUnavailableOnLocalhost = true;
+                    return;
+                }
+
+                self.isAiUnavailableOnLocalhost = false;
+                $button.prop('disabled', false).removeClass('ai-unavailable-localhost');
                 
                 if (!isKeyValid) {
                     $button.find('.modula-ai-btn-text').text(modulaHelper.strings.configure_api_key || 'Configure API Key');

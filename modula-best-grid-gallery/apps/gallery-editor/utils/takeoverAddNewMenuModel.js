@@ -18,8 +18,8 @@ import { firstPresentDomSelector as firstPresent } from './firstPresentDomSelect
 import { getModulaSettingsEditorConfig } from '../config/modulaSettingsEditorConfig';
 import { isAddNewProFeatureEntitled } from './addNewEntitlements';
 import {
-	addMenuAnotherGalleryIcon,
 	addMenuContentBlockIcon,
+	addMenuContentGalleriesIcon,
 	addMenuFolderIcon,
 	addMenuInstagramIcon,
 	addMenuMediaLibraryIcon,
@@ -186,8 +186,8 @@ export function getTakeoverAddNewMenuDefinition() {
 		{
 			id: 'content-galleries',
 			group: 'site',
-			label: __('Another gallery', 'modula-best-grid-gallery'),
-			icon: addMenuAnotherGalleryIcon,
+			label: __('Content Galleries', 'modula-best-grid-gallery'),
+			icon: addMenuContentGalleriesIcon,
 			extensionSlug: EXT_CONTENT_GALLERIES,
 			reactFlow: 'content-galleries',
 		},

@@ -46,6 +46,7 @@ import SettingsPanelSection from '../sidebar/settings-panel/SettingsPanelSection
 import WatermarkActionButtonSlot from '../field/WatermarkActionButtonSlot';
 import MetadataFiltersAutocompleteControl from '../field/MetadataFiltersAutocompleteControl';
 import WpClassicCaptionEditor from '../field/WpClassicCaptionEditor';
+import { resolveModulaAiGenerateUiState } from 'gallery-shared/utils/modulaAiAvailability';
 import GalleryItemAiGenerateButton from './GalleryItemAiGenerateButton';
 import ImageMetadataAiSparkleIcon from '../image-metadata-modal/ImageMetadataAiSparkleIcon';
 
@@ -122,8 +123,10 @@ export default function GalleryItemEditPanel({ storeIndex }) {
 	const aiSettingsQuery = useModulaAiDescriptorSettingsQuery({
 		enabled: attachmentId > 0,
 	});
-	/* Query `select` already returns boolean (valid API key). */
-	const aiConfigured = Boolean(aiSettingsQuery.data);
+	const aiConfigured = Boolean(aiSettingsQuery.data?.aiConfigured);
+	const unavailableOnLocalhost = Boolean(
+		aiSettingsQuery.data?.unavailableOnLocalhost
+	);
 	const {
 		aiBusy,
 		aiStatus,
@@ -138,11 +141,23 @@ export default function GalleryItemEditPanel({ storeIndex }) {
 		editorConfig: editor,
 	});
 
-	const aiGenerateAllLabel = aiBusy
-		? __('Generating…', 'modula-best-grid-gallery')
-		: aiConfigured
-			? __('Generate metadata with AI', 'modula-best-grid-gallery')
-			: __('Configure Modula AI', 'modula-best-grid-gallery');
+	const aiUi = resolveModulaAiGenerateUiState({
+		unavailableOnLocalhost,
+		aiConfigured,
+		aiBusy,
+	});
+
+	const aiGenerateAllLabel =
+		aiUi.primaryLabelKey === 'unavailable_localhost'
+			? __('AI unavailable on localhost', 'modula-best-grid-gallery')
+			: aiUi.primaryLabelKey === 'generating'
+				? __('Generating…', 'modula-best-grid-gallery')
+				: aiUi.primaryLabelKey === 'generate'
+					? __(
+							'Generate metadata with AI',
+							'modula-best-grid-gallery'
+						)
+					: __('Configure Modula AI', 'modula-best-grid-gallery');
 
 	/**
 	 * @param {'title'|'alt'|'caption'} fieldKey
@@ -157,23 +172,28 @@ export default function GalleryItemEditPanel({ storeIndex }) {
 						{__('AI suggestion', 'modula-best-grid-gallery')}
 					</span>
 				) : null}
-				<GalleryItemAiGenerateButton
-					busy={aiBusy}
-					ariaLabel={
-						fieldKey === 'title'
-							? __('Generate title', 'modula-best-grid-gallery')
-							: fieldKey === 'alt'
+				{aiUi.showFieldGenerate ? (
+					<GalleryItemAiGenerateButton
+						busy={aiBusy}
+						ariaLabel={
+							fieldKey === 'title'
 								? __(
-										'Generate alt text',
+										'Generate title',
 										'modula-best-grid-gallery'
 									)
-								: __(
-										'Generate caption',
-										'modula-best-grid-gallery'
-									)
-					}
-					onClick={() => generateField(fieldKey)}
-				/>
+								: fieldKey === 'alt'
+									? __(
+											'Generate alt text',
+											'modula-best-grid-gallery'
+										)
+									: __(
+											'Generate caption',
+											'modula-best-grid-gallery'
+										)
+						}
+						onClick={() => generateField(fieldKey)}
+					/>
+				) : null}
 			</span>
 		);
 	};
@@ -436,12 +456,14 @@ export default function GalleryItemEditPanel({ storeIndex }) {
 						<Button
 							variant="panel"
 							mini
-							disabled={aiBusy}
+							disabled={aiUi.primaryDisabled}
 							className="modula-gallery-item-edit-panel__ai-btn"
 							onClick={
-								aiConfigured
+								aiUi.primaryAction === 'generate'
 									? generateAllMetadata
-									: redirectToAiSettings
+									: aiUi.primaryAction === 'configure'
+										? redirectToAiSettings
+										: undefined
 							}
 						>
 							<span

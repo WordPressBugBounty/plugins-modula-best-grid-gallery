@@ -35,6 +35,11 @@ class Client {
 	public function __construct() {
 		$this->rest_api = Rest_Api::get_instance();
 
+		add_filter(
+			'modula_settings_api_pre_update_use_modula_ai',
+			array( Ai_Helper::class, 'filter_pre_update_use_modula_ai' )
+		);
+
 		if ( get_option( 'use_modula_ai', 0 ) ) {
 			$this->image_descriptor = new Image_Descriptor();
 			$this->include_action_scheduler();

@@ -23,6 +23,7 @@ import {
 	skipActiveViewTransition,
 } from './completeEditorChoice';
 import { shouldShowBetaEditorPrompt } from './listingBetaEditorPrompt';
+import { shouldShowCreateOnlyEmptyState } from './listingEmptyState';
 import {
 	getListingApplyPresetFeedback,
 	openListingApplyPreset,
@@ -501,10 +502,9 @@ export default function GalleryListingApp() {
 	const listingBusy =
 		!viewReady || viewQuery.isLoading || isLoading || isMutating;
 
-	const hasActiveQuery =
-		Boolean(getActiveListingSearch(view)) ||
-		(Array.isArray(view.filters) && view.filters.length > 0);
 	const activeSearch = getActiveListingSearch(view);
+	const showCreateOnlyEmptyState =
+		shouldShowCreateOnlyEmptyState(statusCounts);
 
 	const openCreateEditorChoice = useCallback(() => {
 		if (!config.postNewUrl) {
@@ -684,7 +684,7 @@ export default function GalleryListingApp() {
 			!listingBusy &&
 			!isError &&
 			rows.length === 0 &&
-			!hasActiveQuery ? (
+			showCreateOnlyEmptyState ? (
 				<div className="modula-gallery-listing__empty">
 					<p>
 						{config.hasAlbums

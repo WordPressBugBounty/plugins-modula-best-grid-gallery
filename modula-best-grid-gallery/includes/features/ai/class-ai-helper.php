@@ -106,9 +106,9 @@ class Ai_Helper {
 	 * @return array|Exception The API response as an array on success, Exception on failure.
 	 */
 	public function send_request_to_api( $images, $single = false ) {
-		$locale = get_option( 'modula_ai_language', get_locale() );
+		$locale = self::get_ai_language_for_settings();
 		if ( empty( $locale ) ) {
-			$locale = 'en_US';
+			$locale = 'en';
 		}
 
 		$data_obj = array(
@@ -276,5 +276,157 @@ class Ai_Helper {
 		$optimized = get_post_meta( $id, self::REPORT, true );
 
 		return $optimized;
+	}
+
+	/**
+	 * Whether a hostname is local (AI cloud cannot reach it).
+	 *
+	 * Host-only: does not use WP_ENVIRONMENT_TYPE.
+	 *
+	 * @param string|null $hostname Hostname from the site URL.
+	 * @return bool
+	 */
+	public static function is_local_hostname( $hostname ) {
+		if ( ! is_string( $hostname ) || '' === trim( $hostname ) ) {
+			return false;
+		}
+
+		$host = strtolower( trim( $hostname ) );
+		$host = trim( $host, '[]' );
+
+		if ( in_array( $host, array( 'localhost', '127.0.0.1', '::1' ), true ) ) {
+			return true;
+		}
+
+		$len = strlen( $host );
+		if ( $len >= 6 && '.local' === substr( $host, -6 ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Whether the given site URL (or current site_url) is on a local host.
+	 *
+	 * @param string|null $url Full site URL. Defaults to site_url().
+	 * @return bool
+	 */
+	public static function is_local_site_host( $url = null ) {
+		if ( null === $url ) {
+			$url = site_url();
+		}
+
+		$host = wp_parse_url( (string) $url, PHP_URL_HOST );
+
+		return self::is_local_hostname( is_string( $host ) ? $host : '' );
+	}
+
+	/**
+	 * Whether Modula AI generate/activation should present as unavailable (local host).
+	 *
+	 * @return bool
+	 */
+	public static function is_unavailable_on_localhost() {
+		return self::is_local_site_host( site_url() );
+	}
+
+	/**
+	 * Map WordPress Site Language locale to an AI language option value.
+	 *
+	 * @param string     $locale        WP locale (e.g. en_US, ro_RO).
+	 * @param array|null $allowed_codes Optional allow-list of AI language codes. When set,
+	 *                                  unmapped locales fall back to en (if allowed) or the first code.
+	 * @return string Short language code for the AI language selector.
+	 */
+	public static function map_wp_locale_to_ai_language( $locale, $allowed_codes = null ) {
+		$fallback = 'en';
+		if ( is_array( $allowed_codes ) && ! empty( $allowed_codes ) ) {
+			$fallback = in_array( 'en', $allowed_codes, true ) ? 'en' : (string) reset( $allowed_codes );
+		}
+
+		if ( ! is_string( $locale ) || '' === trim( $locale ) ) {
+			return $fallback;
+		}
+
+		$normalized = str_replace( '_', '-', trim( $locale ) );
+		if ( '' === $normalized ) {
+			return $fallback;
+		}
+
+		$lower_map = array();
+		if ( is_array( $allowed_codes ) ) {
+			foreach ( $allowed_codes as $code ) {
+				$lower_map[ strtolower( (string) $code ) ] = (string) $code;
+			}
+		}
+
+		$normalized_lower = strtolower( $normalized );
+		if ( isset( $lower_map[ $normalized_lower ] ) ) {
+			return $lower_map[ $normalized_lower ];
+		}
+
+		// Prefer exact regional match when the selector uses it (e.g. zh-TW).
+		$known_regional = array( 'zh-TW', 'zh-CN' );
+		foreach ( $known_regional as $code ) {
+			if ( 0 === strcasecmp( $normalized, $code ) ) {
+				if ( empty( $lower_map ) || isset( $lower_map[ strtolower( $code ) ] ) ) {
+					return $code;
+				}
+			}
+		}
+
+		$primary = strtolower( explode( '-', $normalized )[0] );
+		if ( '' === $primary ) {
+			return $fallback;
+		}
+
+		if ( isset( $lower_map[ $primary ] ) ) {
+			return $lower_map[ $primary ];
+		}
+
+		if ( is_array( $allowed_codes ) ) {
+			return $fallback;
+		}
+
+		return $primary;
+	}
+
+	/**
+	 * AI language for settings/API: saved option, or Site Language when unset.
+	 *
+	 * @return string
+	 */
+	public static function get_ai_language_for_settings() {
+		$stored = get_option( 'modula_ai_language', null );
+
+		if ( null !== $stored && false !== $stored && '' !== $stored ) {
+			return (string) $stored;
+		}
+
+		return self::map_wp_locale_to_ai_language( get_locale() );
+	}
+
+	/**
+	 * Block newly enabling use_modula_ai on a local site host.
+	 *
+	 * Existing enabled state is left alone (can stay on or be turned off).
+	 *
+	 * @param mixed $value Incoming option value.
+	 * @return mixed
+	 */
+	public static function filter_pre_update_use_modula_ai( $value ) {
+		if ( ! self::is_unavailable_on_localhost() ) {
+			return $value;
+		}
+
+		$enabling  = (bool) $value;
+		$currently = (bool) get_option( 'use_modula_ai', 0 );
+
+		if ( $enabling && ! $currently ) {
+			return 0;
+		}
+
+		return $value;
 	}
 }

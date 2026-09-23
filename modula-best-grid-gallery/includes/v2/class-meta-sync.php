@@ -146,6 +146,53 @@ class Meta_Sync {
 	}
 
 	/**
+	 * New Beta gallery create: theme-inherit visitor controls ON.
+	 *
+	 * Schema default stays false so existing galleries (missing key) keep plugin paint.
+	 * Call only from create paths — never from Convert to beta or Try the beta duplicate.
+	 *
+	 * @param int $post_id Gallery post ID.
+	 * @return void
+	 */
+	public static function stamp_theme_inherit_controls_create_default( $post_id ) {
+		$post_id = absint( $post_id );
+		if ( ! $post_id || 'modula-gallery' !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		$v2 = self::get_settings_v2( $post_id );
+		if ( ! is_array( $v2 ) ) {
+			$v2 = array();
+		}
+		if ( ! isset( $v2['pagination'] ) || ! is_array( $v2['pagination'] ) ) {
+			$v2['pagination'] = array();
+		}
+		$v2['pagination']['themeInheritControls'] = true;
+
+		$sanitized = Settings\Sanitizer::sanitize_grouped( $v2 );
+		$json      = wp_json_encode( $sanitized, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+		self::update_json_post_meta( $post_id, self::SETTINGS_V2_META_KEY, false !== $json ? $json : '{}' );
+	}
+
+	/**
+	 * Ensure defaults exist, then stamp create-only theme-inherit ON (new Beta galleries).
+	 *
+	 * @param int $post_id Gallery post ID.
+	 * @return void
+	 */
+	public static function apply_new_beta_gallery_create_defaults( $post_id ) {
+		$post_id = absint( $post_id );
+		if ( ! $post_id || 'modula-gallery' !== get_post_type( $post_id ) ) {
+			return;
+		}
+		if ( ! Beta_Settings::is_beta_gallery( $post_id ) ) {
+			return;
+		}
+		self::ensure_default_settings( $post_id );
+		self::stamp_theme_inherit_controls_create_default( $post_id );
+	}
+
+	/**
 	 * On gallery save (after meta boxes). Sync both v2 metas from current modula-settings and modula-images.
 	 * This runs every time the gallery is saved, so v2 stays in sync even when WordPress skips updated_post_meta (unchanged value).
 	 *

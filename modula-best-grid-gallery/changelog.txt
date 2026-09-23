@@ -1,3 +1,12 @@
+= 3.0.9 - 23.09.2026 =
+Fixed: Beta Video gallery main player starts on the first poster click (marking user interaction no longer remounts the provider mid-gesture).
+Fixed: Classic gallery drag reorder no longer shifts items off-by-one on Update.
+Fixed: Gallery listing keeps search/status/Trash toolbar when another SHOW status still has items (empty Published no longer hides trash).
+Added: Beta setting “Let the theme style pagination and filters” — when on, Modula skips opinionated skins on pagination and filter-bar controls so the active theme can style them (colors still apply). On by default for newly created Beta galleries; existing galleries keep today’s plugin paint until enabled.
+Changed: Classic galleries restore the pre-3.0 habit: Fancybox + Custom URL is again a tile redirect. Beta galleries keep Fancybox lightbox-first with Custom URL as in-lightbox follow; hybrid Image click remains the explicit mixed-gallery redirect.
+Compat: Admin notice and Settings → Diagnostics “Fix Custom URL links” opt-in tool switches Beta Fancybox galleries that still have Custom URLs to Image click “Lightbox, or link when set” (hybrid). Classic galleries are left on Fancybox + Custom URL tile redirect. No silent meta rewrite on upgrade; dismiss hides the notice permanently while Diagnostics stays available to re-run.
+Info: Read more about Modula 3.0 Beta: https://wp-modula.com/modula-3-0-beta/
+
 = 3.0.8 - 21.09.2026 =
 Changed: Zoom on hover is a Lite Interact control for gallery-tile soft scale (Hover card treatment); new galleries default it off. Modula ZOOM (lightbox magnify) and its upsell live under Lightbox → Lightbox zoom.
 Fixed: Classic galleries again emit legacy hover `effect-*` classes when CPT defaults fill in a Hover Effect Builder; Under Image captions return below the image on columns layouts.

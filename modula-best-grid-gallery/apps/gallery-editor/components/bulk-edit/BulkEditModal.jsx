@@ -105,7 +105,10 @@ export default function BulkEditModal() {
 	const aiSettingsQuery = useModulaAiDescriptorSettingsQuery({
 		enabled: isOpen,
 	});
-	const aiConfigured = Boolean(aiSettingsQuery.data);
+	const aiConfigured = Boolean(aiSettingsQuery.data?.aiConfigured);
+	const unavailableOnLocalhost = Boolean(
+		aiSettingsQuery.data?.unavailableOnLocalhost
+	);
 
 	const addNotice = useCallback((text, status = 'info') => {
 		const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -323,6 +326,17 @@ export default function BulkEditModal() {
 					</ButtonGroup>
 				}
 			>
+				{unavailableOnLocalhost ? (
+					<div className="modula-bulk-edit-modal__notices">
+						<Notice status="warning" isDismissible={false}>
+							{__(
+								'AI unavailable on localhost',
+								'modula-best-grid-gallery'
+							)}
+						</Notice>
+					</div>
+				) : null}
+
 				{notices.length > 0 ? (
 					<div className="modula-bulk-edit-modal__notices">
 						{notices.map((n) => (
@@ -367,6 +381,7 @@ export default function BulkEditModal() {
 						showFiltersColumn={showFiltersColumn}
 						filterSuggestions={filterSuggestions}
 						aiConfigured={aiConfigured}
+						unavailableOnLocalhost={unavailableOnLocalhost}
 						selectedIds={draft.selectedIds}
 						draft={draft}
 						galleryId={galleryId}

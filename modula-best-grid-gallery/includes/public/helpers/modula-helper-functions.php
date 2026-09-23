@@ -182,8 +182,9 @@ function modula_item_redirect_url( $item ) {
 /**
  * Apply a per-item Redirect URL as a simple tile link (no lightbox).
  *
- * Used for gallery “no link” (when a URL is set) and for Open in lightbox /
- * hybrid when the item click override is Redirect to URL.
+ * Used for gallery “no link” (when a URL is set) and for hybrid Image click
+ * (`lightbox-prefer-url`) when the item has a Custom URL. Classic Fancybox +
+ * Custom URL also uses this path; Beta Fancybox stays lightbox-first.
  *
  * @param array<string, mixed> $item_data Item data.
  * @param array<string, mixed> $item      Image row.
@@ -247,6 +248,36 @@ function modula_coerce_lightbox_click_mode( $mode ) {
 	return $trimmed;
 }
 
+/**
+ * Whether shortcode/settings belong to a Beta gallery (`_modula_beta`).
+ *
+ * Settings use gallery_id like `jtg-123` (classic) or `modula-123` (Beta).
+ *
+ * @param array<string, mixed> $settings Gallery settings.
+ * @return bool
+ */
+function modula_settings_is_beta_gallery( $settings ) {
+	if ( ! is_array( $settings ) ) {
+		return false;
+	}
+
+	$raw = isset( $settings['gallery_id'] ) ? (string) $settings['gallery_id'] : '';
+	if ( '' === $raw ) {
+		return false;
+	}
+
+	$post_id = absint( preg_replace( '/[^0-9]/', '', $raw ) );
+	if ( $post_id < 1 ) {
+		return false;
+	}
+
+	if ( class_exists( '\Modula\V2\Beta_Settings' ) ) {
+		return \Modula\V2\Beta_Settings::is_beta_gallery( $post_id );
+	}
+
+	return '1' === (string) get_post_meta( $post_id, '_modula_beta', true );
+}
+
 function modula_check_lightboxes_and_links( $item_data, $item, $settings ) {
 
 	// Create link attributes like : title/rel
@@ -281,9 +312,21 @@ function modula_check_lightboxes_and_links( $item_data, $item, $settings ) {
 			$item_data['link_attributes']['href'] = modula_resolve_simple_link_href( $item, $fallback );
 		}
 	} elseif (
-		( 'fancybox' === $lightbox || 'lightbox-prefer-url' === $lightbox )
+		'lightbox-prefer-url' === $lightbox
 		&& '' !== modula_item_redirect_url( $item )
 	) {
+		// Hybrid: Custom URL → tile redirect; items without URL keep Fancybox below.
+		$item_data = modula_apply_per_item_redirect_link( $item_data, $item );
+	} elseif (
+		'fancybox' === $lightbox
+		&& '' !== modula_item_redirect_url( $item )
+		&& ! modula_settings_is_beta_gallery( $settings )
+	) {
+		/*
+		 * Classic habit: Fancybox + Custom URL is still a tile redirect.
+		 * Beta Fancybox stays lightbox-first (Pro adds data-modula-item-url);
+		 * use hybrid Image click for mixed-gallery tile redirects.
+		 */
 		$item_data = modula_apply_per_item_redirect_link( $item_data, $item );
 	} else {
 		if ( modula_href_required() ) {

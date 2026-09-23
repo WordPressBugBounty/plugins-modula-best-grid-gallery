@@ -4,6 +4,7 @@
  * @package
  */
 import { licensingTruthy } from './licensing';
+import { isThemeInheritControlsOn } from './themeInheritControls';
 
 /**
  * Explicit enable* Off wins; missing flag keeps legacy numeric behaviour.
@@ -190,6 +191,9 @@ export function groupedUiSettingsToConfig(settings) {
 		paginationPosition: pagination.paginationPosition || '',
 		paginationNumber: pagination.paginationNumber,
 		enableLoadMore: !!pagination.enableLoadMore,
+		themeInheritControls: isThemeInheritControlsOn(
+			pagination.themeInheritControls
+		),
 		loadedScale: isLoadingEffectToggleOn(loading, 'enableScale')
 			? parseInt(loading.loadedScale ?? 100, 10) || 100
 			: 100,

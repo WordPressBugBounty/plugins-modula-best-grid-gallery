@@ -25,7 +25,10 @@ import {
 	isVideoGalleryItem,
 	resolveItemLightboxVideoFlags,
 } from '../video/videoGalleryModel';
-import { galleryUsesFancyboxLightbox } from '../utils/resolveGalleryItemLink';
+import {
+	coerceLightboxClickMode,
+	galleryUsesFancyboxLightbox,
+} from '../utils/resolveGalleryItemLink';
 
 /**
  * @param {unknown} row
@@ -67,19 +70,21 @@ function isLightboxSlideRow(row, config) {
 	if (isGalleryItemHiddenFromLightbox(row)) {
 		return false;
 	}
-	const mode =
+	const mode = coerceLightboxClickMode(
 		typeof row.lightbox === 'string' && row.lightbox.trim() !== ''
 			? row.lightbox
-			: config?.lightbox || 'fancybox';
+			: config?.lightbox || 'fancybox'
+	);
 	if (!galleryUsesFancyboxLightbox(mode)) {
 		return false;
 	}
 	/*
-	 * Per-item Redirect and hybrid: custom URL tiles navigate away — exclude
-	 * from lightbox slides (parity with DOM `.modula-simple-link` filtering).
+	 * Hybrid: Custom URL tiles navigate away — exclude from lightbox slides
+	 * (parity with DOM `.modula-simple-link` filtering).
+	 * Fancybox: keep URL tiles in the lightbox (lightbox-first; URL for follow).
 	 */
 	const itemLink = typeof row.link === 'string' ? row.link.trim() : '';
-	if (itemLink) {
+	if (itemLink && mode === 'lightbox-prefer-url') {
 		return false;
 	}
 	return true;

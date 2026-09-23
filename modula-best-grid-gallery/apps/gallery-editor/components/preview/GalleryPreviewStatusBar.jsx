@@ -11,6 +11,7 @@ import {
 	statusBarRedoIcon,
 	statusBarUndoIcon,
 } from '../../utils/statusBarHistoryIcons';
+import GalleryEditorHistoryJumpControl from './GalleryEditorHistoryJumpControl';
 
 /**
  * @param {{
@@ -30,6 +31,10 @@ export default function GalleryPreviewStatusBar({
 		undoStepLabel,
 		redoStepLabel,
 		stackVersion,
+		historyEntries,
+		jumpTo,
+		undoableCount,
+		clearHistory,
 	} = undoRedo;
 	const items = usePreviewReduxStoreItems();
 
@@ -56,35 +61,37 @@ export default function GalleryPreviewStatusBar({
 			role="status"
 			aria-live="polite"
 		>
-			<form.Subscribe selector={(s) => s.values}>
-				{(values) => {
-					const facts = buildPreviewStatusBarFacts({
-						items,
-						values: values || {},
-						previewViewport,
-					});
+			<div className="modula-gallery-takeover__status-bar-facts">
+				<form.Subscribe selector={(s) => s.values}>
+					{(values) => {
+						const facts = buildPreviewStatusBarFacts({
+							items,
+							values: values || {},
+							previewViewport,
+						});
 
-					return (
-						<>
-							{facts.map((fact, index) => (
-								<Fragment key={`${index}-${fact}`}>
-									{index > 0 ? (
-										<span
-											className="modula-gallery-takeover__status-bar-sep"
-											aria-hidden="true"
-										>
-											·
+						return (
+							<>
+								{facts.map((fact, index) => (
+									<Fragment key={`${index}-${fact}`}>
+										{index > 0 ? (
+											<span
+												className="modula-gallery-takeover__status-bar-sep"
+												aria-hidden="true"
+											>
+												·
+											</span>
+										) : null}
+										<span className="modula-gallery-takeover__status-bar-fact">
+											{fact}
 										</span>
-									) : null}
-									<span className="modula-gallery-takeover__status-bar-fact">
-										{fact}
-									</span>
-								</Fragment>
-							))}
-						</>
-					);
-				}}
-			</form.Subscribe>
+									</Fragment>
+								))}
+							</>
+						);
+					}}
+				</form.Subscribe>
+			</div>
 			<span
 				className="modula-gallery-takeover__status-bar-spacer"
 				aria-hidden="true"
@@ -94,14 +101,20 @@ export default function GalleryPreviewStatusBar({
 				role="group"
 				aria-label={__('Settings history', 'modula-best-grid-gallery')}
 			>
-				{lastStepLabel ? (
-					<span
-						key={`step-${stackVersion}-${lastStepLabel}`}
-						className="modula-gallery-takeover__status-bar-step"
-					>
-						{lastStepLabel}
-					</span>
-				) : null}
+				<GalleryEditorHistoryJumpControl
+					lastStepLabel={lastStepLabel}
+					stackVersion={stackVersion}
+					historyEntries={historyEntries}
+					jumpTo={jumpTo}
+					undo={undo}
+					redo={redo}
+					canUndo={canUndo}
+					canRedo={canRedo}
+					undoStepLabel={undoStepLabel}
+					redoStepLabel={redoStepLabel}
+					undoableCount={undoableCount}
+					clearHistory={clearHistory}
+				/>
 				<button
 					type="button"
 					className="modula-gallery-takeover__status-bar-hbtn"

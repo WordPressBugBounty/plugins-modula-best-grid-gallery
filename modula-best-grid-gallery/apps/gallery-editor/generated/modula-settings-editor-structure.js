@@ -206,6 +206,11 @@ export default {
 							hubHelp: __( "Split large galleries into pages", 'modula-best-grid-gallery' )
 						},
 						{
+							type: "field",
+							groupedPath: "pagination.themeInheritControls",
+							icon: "styles"
+						},
+						{
 							type: "drill",
 							label: __( "Page size & navigation", 'modula-best-grid-gallery' ),
 							icon: "queryPagination",

@@ -3142,6 +3142,18 @@ return array(
 					'right'  => 'Right',
 				),
 			),
+			/*
+			 * Schema default OFF: hydrate/sanitize must not flip existing galleries.
+			 * New Beta gallery create stamps ON (THEME_INHERIT_CONTROLS_CREATE_DEFAULT).
+			 */
+			'themeInheritControls'  =>
+			array(
+				'type'              => 'boolean',
+				'default'           => false,
+				'editorLabel'       => 'Let the theme style pagination and filters',
+				'editorDescription' => 'When on, Modula skips its own button/select skins so the active theme can style pagination and filter-bar controls. Your pagination and filter colors still apply.',
+				'editorShowInLite'  => true,
+			),
 		),
 		'filters'         =>
 		array(

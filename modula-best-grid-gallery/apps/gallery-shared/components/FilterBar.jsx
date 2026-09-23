@@ -29,7 +29,10 @@ import {
 	shouldUseCollapsibleFilterBar,
 	shouldUseFilterDropdown,
 } from '../utils/filterBarModel';
-import { resolveFilterBarUsageCounts } from '../utils/filterImageUsageCounts';
+import {
+	formatFilterCountToken,
+	resolveFilterBarUsageCounts,
+} from '../utils/filterImageUsageCounts';
 
 /**
  * @param {string} label
@@ -43,7 +46,9 @@ function FilterBarLabel({ label, count, showCount }) {
 	return (
 		<>
 			{label}{' '}
-			<span className="modula_menu__count">{Number(count) || 0}</span>
+			<span className="modula_menu__count">
+				{formatFilterCountToken(count)}
+			</span>
 		</>
 	);
 }
@@ -109,7 +114,9 @@ export default function FilterBar() {
 		filtersSettings.hideAllFilter ?? config.hideAllFilter
 	);
 	const showFilterCount = !!(
-		filtersSettings.showFilterCount ?? config.showFilterCount ?? true
+		filtersSettings.showFilterCount ??
+		config.showFilterCount ??
+		true
 	);
 	const allLabel =
 		(typeof filtersSettings.allFilterLabel === 'string' &&

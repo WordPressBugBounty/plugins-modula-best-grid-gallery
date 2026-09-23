@@ -117,7 +117,17 @@ export function resolveFilterBarUsageCounts({
 }
 
 /**
- * Append a usage count to a filter label for native `<option>` text.
+ * Parenthesized usage-count token for filter-bar labels (e.g. `(12)`).
+ *
+ * @param {number} count
+ * @return {string}
+ */
+export function formatFilterCountToken(count) {
+	return `(${Number(count) || 0})`;
+}
+
+/**
+ * Append a parenthesized usage count to a filter label for native `<option>` text.
  *
  * @param {string}              label
  * @param {number|undefined|null} count
@@ -129,5 +139,5 @@ export function formatFilterLabelWithCount(label, count, showCount) {
 	if (!showCount || count === undefined || count === null) {
 		return base;
 	}
-	return `${base} ${Number(count) || 0}`;
+	return `${base} ${formatFilterCountToken(count)}`;
 }

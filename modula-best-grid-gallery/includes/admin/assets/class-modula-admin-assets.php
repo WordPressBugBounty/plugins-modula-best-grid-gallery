@@ -230,6 +230,21 @@ class Modula_Admin_Assets {
 			'const modulaUrl = ' . wp_json_encode( MODULA_URL ),
 			'before'
 		);
+
+		$unavailable_on_localhost = class_exists( '\Modula\Ai\Ai_Helper' )
+			? \Modula\Ai\Ai_Helper::is_unavailable_on_localhost()
+			: false;
+
+		wp_add_inline_script(
+			'modula-settings',
+			'const modulaAiAvailability = ' . wp_json_encode(
+				array(
+					'unavailableOnLocalhost' => (bool) $unavailable_on_localhost,
+					'siteLocale'             => function_exists( 'get_locale' ) ? get_locale() : 'en_US',
+				)
+			),
+			'before'
+		);
 	}
 
 	public function extensions_scripts() {

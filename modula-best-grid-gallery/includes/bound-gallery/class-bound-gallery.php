@@ -931,6 +931,7 @@ final class Bound_Gallery {
 
 		if ( class_exists( '\Modula\V2\Meta_Sync', false ) ) {
 			\Modula\V2\Meta_Sync::ensure_default_settings( $gallery_id );
+			\Modula\V2\Meta_Sync::apply_new_beta_gallery_create_defaults( $gallery_id );
 			\Modula\V2\Meta_Sync::sync_modula_images_v2_from_list( $gallery_id, $image_rows );
 		}
 

@@ -219,6 +219,11 @@ return array(
 							),
 						),
 						array(
+							'type'        => 'field',
+							'groupedPath' => 'pagination.themeInheritControls',
+							'icon'        => 'styles',
+						),
+						array(
 							'type'         => 'drill',
 							'label'        => 'Page size & navigation',
 							'icon'         => 'queryPagination',

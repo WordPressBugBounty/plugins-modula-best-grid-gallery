@@ -9,6 +9,7 @@ import {
 	buildFilterSelectOptions,
 	buildFilteringFromSettings,
 	countFilterableGalleryImages,
+	formatFilterCountToken,
 	isFilterBarDefaultAll,
 	isFilterBarPhoneViewport,
 	normalizeFilterBarEntry,
@@ -40,7 +41,9 @@ function FilterPreviewLabel({ label, count, showCount }) {
 	return (
 		<>
 			{label}{' '}
-			<span className="modula_menu__count">{Number(count) || 0}</span>
+			<span className="modula_menu__count">
+				{formatFilterCountToken(count)}
+			</span>
 		</>
 	);
 }
@@ -295,7 +298,11 @@ export default function FiltersPreviewBar({
 				>
 					<FilterPreviewLabel
 						label={entry.label}
-						count={filterCounts.get(String(entry.value || entry.label || '')) || 0}
+						count={
+							filterCounts.get(
+								String(entry.value || entry.label || '')
+							) || 0
+						}
 						showCount={showFilterCount}
 					/>
 				</button>

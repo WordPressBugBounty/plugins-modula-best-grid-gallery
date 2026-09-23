@@ -7,10 +7,11 @@ import {
 	useSyncExternalStore,
 } from '@wordpress/element';
 import { describeSettingsChange } from '../utils/describeSettingsChange';
+import { buildSettingsHistoryChange } from '../utils/galleryEditorHistoryPresentation';
 import { applyGroupedSettingsToForm } from '../utils/applyGroupedSettingsToForm';
+import { createGalleryEditorHistory } from '../utils/galleryEditorHistory';
 
 const DEBOUNCE_MS = 400;
-const MAX_PAST = 50;
 /**
  * After undo/redo, TanStack (or a sync effect) can briefly echo a non-current document
  * while `lastSnapshot` is already the restored one. Re-assert `lastSnapshot` for a short
@@ -28,14 +29,13 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 		[cloneGroupedSettings]
 	);
 
-	const pastRef = useRef(
-		/** @type {Record<string, Record<string, unknown>>[]} */ ([])
-	);
-	const futureRef = useRef(
-		/** @type {Record<string, Record<string, unknown>>[]} */ ([])
-	);
-	const pastLabelsRef = useRef(/** @type {string[]} */ ([]));
-	const futureLabelsRef = useRef(/** @type {string[]} */ ([]));
+	const historyRef = useRef(null);
+	if (historyRef.current === null) {
+		historyRef.current = createGalleryEditorHistory({
+			initialSettings: cloneGroupedSettings(form.store.state.values),
+		});
+	}
+
 	const lastSnapshotRef = useRef(
 		cloneGroupedSettings(form.store.state.values)
 	);
@@ -46,6 +46,8 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 		canonicalSerialize(form.store.state.values)
 	);
 	const ghostEchoUntilRef = useRef(0);
+	/** @type {import('react').MutableRefObject<((layout: Record<string, unknown>) => void)|null>} */
+	const layoutApplierRef = useRef(null);
 	const [stackVersion, setStackVersion] = useState(0);
 
 	const bump = useCallback(() => {
@@ -81,6 +83,28 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 		getSerializedSnapshot
 	);
 
+	const clearDebounce = useCallback(() => {
+		if (debounceTimerRef.current) {
+			clearTimeout(debounceTimerRef.current);
+			debounceTimerRef.current = null;
+		}
+	}, []);
+
+	/**
+	 * @param {{ settings: Record<string, Record<string, unknown>> }} snap
+	 */
+	const applySettingsSnapshot = useCallback(
+		(snap) => {
+			const applied = applyDocument(
+				cloneGroupedSettings(snap.settings ?? {})
+			);
+			lastSnapshotRef.current = applied;
+			pendingSerializedRef.current = canonicalSerialize(applied);
+			return applied;
+		},
+		[applyDocument, canonicalSerialize, cloneGroupedSettings]
+	);
+
 	/**
 	 * Full reset: new document from server (refetch / replace). Clears undo/redo stacks.
 	 * Optional `values` avoids reading TanStack store one tick behind `form.reset`.
@@ -91,19 +115,14 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 		(values) => {
 			const source =
 				values !== undefined ? values : form.store.state.values;
-			pastRef.current = [];
-			futureRef.current = [];
-			pastLabelsRef.current = [];
-			futureLabelsRef.current = [];
-			lastSnapshotRef.current = cloneGroupedSettings(source);
+			const next = cloneGroupedSettings(source);
+			historyRef.current.syncCheckpoint({ settings: next });
+			lastSnapshotRef.current = next;
 			pendingSerializedRef.current = canonicalSerialize(source);
-			if (debounceTimerRef.current) {
-				clearTimeout(debounceTimerRef.current);
-				debounceTimerRef.current = null;
-			}
+			clearDebounce();
 			bump();
 		},
-		[form, cloneGroupedSettings, bump, canonicalSerialize]
+		[form, cloneGroupedSettings, bump, canonicalSerialize, clearDebounce]
 	);
 
 	/**
@@ -113,15 +132,14 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 		(values) => {
 			const source =
 				values !== undefined ? values : form.store.state.values;
-			lastSnapshotRef.current = cloneGroupedSettings(source);
+			const next = cloneGroupedSettings(source);
+			historyRef.current.adoptCheckpoint({ settings: next });
+			lastSnapshotRef.current = next;
 			pendingSerializedRef.current = canonicalSerialize(source);
-			if (debounceTimerRef.current) {
-				clearTimeout(debounceTimerRef.current);
-				debounceTimerRef.current = null;
-			}
+			clearDebounce();
 			bump();
 		},
-		[form, cloneGroupedSettings, bump, canonicalSerialize]
+		[form, cloneGroupedSettings, bump, canonicalSerialize, clearDebounce]
 	);
 
 	useEffect(() => {
@@ -130,20 +148,14 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 		const lastCanonical = canonicalSerialize(lastSnapshotRef.current);
 
 		if (liveCanonical === lastCanonical) {
-			if (debounceTimerRef.current) {
-				clearTimeout(debounceTimerRef.current);
-				debounceTimerRef.current = null;
-			}
+			clearDebounce();
 			pendingSerializedRef.current = liveCanonical;
 			return undefined;
 		}
 
 		// Right after undo/redo: any divergence is treated as echo of the previous doc.
 		if (isInGhostEchoWindow()) {
-			if (debounceTimerRef.current) {
-				clearTimeout(debounceTimerRef.current);
-				debounceTimerRef.current = null;
-			}
+			clearDebounce();
 			const restored = applyDocument(lastSnapshotRef.current);
 			pendingSerializedRef.current = canonicalSerialize(restored);
 			return undefined;
@@ -154,10 +166,7 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 		}
 
 		pendingSerializedRef.current = ser;
-
-		if (debounceTimerRef.current) {
-			clearTimeout(debounceTimerRef.current);
-		}
+		clearDebounce();
 
 		debounceTimerRef.current = window.setTimeout(() => {
 			debounceTimerRef.current = null;
@@ -175,24 +184,18 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 			const previous = lastSnapshotRef.current;
 			const next = cloneGroupedSettings(values);
 			const stepLabel = describeSettingsChange(previous, next);
-			pastRef.current.push(cloneGroupedSettings(previous));
-			pastLabelsRef.current.push(stepLabel);
-			if (pastRef.current.length > MAX_PAST) {
-				pastRef.current.shift();
-				pastLabelsRef.current.shift();
-			}
-			futureRef.current = [];
-			futureLabelsRef.current = [];
+			historyRef.current.commitSettingsStep({
+				label: stepLabel,
+				settings: next,
+				change: buildSettingsHistoryChange(previous, next),
+			});
 			lastSnapshotRef.current = next;
 			pendingSerializedRef.current = snapSerCanon;
 			bump();
 		}, DEBOUNCE_MS);
 
 		return () => {
-			if (debounceTimerRef.current) {
-				clearTimeout(debounceTimerRef.current);
-				debounceTimerRef.current = null;
-			}
+			clearDebounce();
 		};
 	}, [
 		serialized,
@@ -202,105 +205,162 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 		canonicalSerialize,
 		isInGhostEchoWindow,
 		applyDocument,
+		clearDebounce,
 	]);
 
+	/**
+	 * Preview host registers how to apply a layout slice to the catalog + persist.
+	 *
+	 * @param {((layout: Record<string, unknown>) => void)|null} applyLayout
+	 * @return {() => void} Unsubscribe.
+	 */
+	const registerLayoutApplier = useCallback((applyLayout) => {
+		layoutApplierRef.current =
+			typeof applyLayout === 'function' ? applyLayout : null;
+		return () => {
+			if (layoutApplierRef.current === applyLayout) {
+				layoutApplierRef.current = null;
+			}
+		};
+	}, []);
+
+	const applyLayoutSnapshot = useCallback((layout) => {
+		layoutApplierRef.current?.(layout);
+	}, []);
+
 	const undo = useCallback(() => {
-		if (debounceTimerRef.current) {
-			clearTimeout(debounceTimerRef.current);
-			debounceTimerRef.current = null;
-		}
-		if (pastRef.current.length === 0) {
+		clearDebounce();
+		const snap = historyRef.current.undo();
+		if (!snap) {
 			return;
 		}
-		const target = pastRef.current.pop();
-		if (!target) {
-			return;
-		}
-		/*
-		 * Push the committed current document (`lastSnapshot`), not `form.store.state.values`.
-		 * The store can lag the Field UI / committed checkpoint; capturing it polluted `future`
-		 * and made redo appear to no-op (reset target already matched the stale store).
-		 */
-		const currentDoc = cloneGroupedSettings(lastSnapshotRef.current);
-		const stepLabel = pastLabelsRef.current.pop() || '';
-		futureRef.current.push(currentDoc);
-		futureLabelsRef.current.push(stepLabel);
 		armGhostEchoWindow();
-		const applied = applyDocument(target);
-		lastSnapshotRef.current = applied;
-		pendingSerializedRef.current = canonicalSerialize(applied);
+		if (snap.type === 'settings') {
+			applySettingsSnapshot(snap);
+		} else if (snap.type === 'layout') {
+			applyLayoutSnapshot(snap.layout);
+		}
 		bump();
 	}, [
-		cloneGroupedSettings,
 		bump,
-		canonicalSerialize,
 		armGhostEchoWindow,
-		applyDocument,
+		applySettingsSnapshot,
+		applyLayoutSnapshot,
+		clearDebounce,
 	]);
 
 	const redo = useCallback(() => {
-		if (debounceTimerRef.current) {
-			clearTimeout(debounceTimerRef.current);
-			debounceTimerRef.current = null;
-		}
-		if (futureRef.current.length === 0) {
+		clearDebounce();
+		const snap = historyRef.current.redo();
+		if (!snap) {
 			return;
-		}
-		const target = futureRef.current.pop();
-		if (!target) {
-			return;
-		}
-		const currentDoc = cloneGroupedSettings(lastSnapshotRef.current);
-		const stepLabel = futureLabelsRef.current.pop() || '';
-		pastRef.current.push(currentDoc);
-		pastLabelsRef.current.push(stepLabel);
-		if (pastRef.current.length > MAX_PAST) {
-			pastRef.current.shift();
-			pastLabelsRef.current.shift();
 		}
 		armGhostEchoWindow();
-		const applied = applyDocument(target);
-		lastSnapshotRef.current = applied;
-		pendingSerializedRef.current = canonicalSerialize(applied);
+		if (snap.type === 'settings') {
+			applySettingsSnapshot(snap);
+		} else if (snap.type === 'layout') {
+			applyLayoutSnapshot(snap.layout);
+		}
 		bump();
 	}, [
-		cloneGroupedSettings,
 		bump,
-		canonicalSerialize,
 		armGhostEchoWindow,
-		applyDocument,
+		applySettingsSnapshot,
+		applyLayoutSnapshot,
+		clearDebounce,
 	]);
 
-	const canUndo = pastRef.current.length > 0;
-	const canRedo = futureRef.current.length > 0;
-	const undoStepLabel = pastLabelsRef.current.at(-1) || '';
-	const redoStepLabel = futureLabelsRef.current.at(-1) || '';
-	const lastStepLabel = undoStepLabel;
-
-	return useMemo(
-		() => ({
-			undo,
-			redo,
-			canUndo,
-			canRedo,
-			lastStepLabel,
-			undoStepLabel,
-			redoStepLabel,
-			syncCheckpointFromForm,
-			adoptCheckpointFromForm,
-			stackVersion,
-		}),
+	/**
+	 * Restore the snapshot at `index` and truncate every step after it.
+	 *
+	 * @param {number} index
+	 */
+	const jumpTo = useCallback(
+		(index) => {
+			clearDebounce();
+			const snap = historyRef.current.jumpTo(index);
+			if (!snap) {
+				return null;
+			}
+			armGhostEchoWindow();
+			applySettingsSnapshot(snap);
+			applyLayoutSnapshot(snap.layout);
+			bump();
+			return snap;
+		},
 		[
-			undo,
-			redo,
-			canUndo,
-			canRedo,
-			lastStepLabel,
-			undoStepLabel,
-			redoStepLabel,
-			syncCheckpointFromForm,
-			adoptCheckpointFromForm,
-			stackVersion,
+			bump,
+			armGhostEchoWindow,
+			applySettingsSnapshot,
+			applyLayoutSnapshot,
+			clearDebounce,
 		]
 	);
+
+	/**
+	 * @param {{ label: string, layout: Record<string, unknown> }} args
+	 */
+	const commitLayoutStep = useCallback(
+		(args) => {
+			if (historyRef.current.commitLayoutStep(args) === false) {
+				return;
+			}
+			bump();
+		},
+		[bump]
+	);
+
+	/**
+	 * @param {Record<string, unknown>|null|undefined} layout
+	 */
+	const adoptLayoutCheckpoint = useCallback((layout) => {
+		historyRef.current.adoptLayoutCheckpoint(layout);
+	}, []);
+
+	const dropLayoutSteps = useCallback(() => {
+		historyRef.current.dropLayoutSteps();
+		bump();
+	}, [bump]);
+
+	const clearHistory = useCallback(() => {
+		clearDebounce();
+		historyRef.current.clear();
+		bump();
+	}, [bump, clearDebounce]);
+
+	return useMemo(() => {
+		const history = historyRef.current;
+		return {
+			undo,
+			redo,
+			canUndo: history.canUndo(),
+			canRedo: history.canRedo(),
+			undoableCount: history.undoableCount(),
+			lastStepLabel: history.lastStepLabel(),
+			undoStepLabel: history.undoStepLabel(),
+			redoStepLabel: history.redoStepLabel(),
+			syncCheckpointFromForm,
+			adoptCheckpointFromForm,
+			stackVersion,
+			historyEntries: history.listEntries(),
+			jumpTo,
+			clearHistory,
+			commitLayoutStep,
+			adoptLayoutCheckpoint,
+			dropLayoutSteps,
+			registerLayoutApplier,
+		};
+	}, [
+		undo,
+		redo,
+		syncCheckpointFromForm,
+		adoptCheckpointFromForm,
+		stackVersion,
+		jumpTo,
+		clearHistory,
+		commitLayoutStep,
+		adoptLayoutCheckpoint,
+		dropLayoutSteps,
+		registerLayoutApplier,
+	]);
 }

@@ -381,6 +381,7 @@ class Beta_Gallery_Admin {
 		} elseif ( 'modula-gallery' === $type ) {
 			if ( 'beta' === $choice ) {
 				\Modula\V2\Beta_Settings::mark_as_beta_gallery( $post_id );
+				\Modula\V2\Meta_Sync::apply_new_beta_gallery_create_defaults( $post_id );
 			}
 		} else {
 			wp_die( esc_html__( 'You are not allowed to create this item.', 'modula-best-grid-gallery' ) );
@@ -447,6 +448,7 @@ class Beta_Gallery_Admin {
 		}
 
 		\Modula\V2\Beta_Settings::mark_as_beta_gallery( $post_id );
+		\Modula\V2\Meta_Sync::apply_new_beta_gallery_create_defaults( $post_id );
 	}
 
 	/**

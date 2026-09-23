@@ -22,7 +22,9 @@ wp.Modula = 'undefined' === typeof (wp.Modula) ? {} : wp.Modula;
             if (currentIndex != index) {
                 // silence this to stop excess event triggers
                 this.remove(model, { silent: true });
-                this.add(model, { at: index - 1 });
+                // `index` from sortable / Packery updateIndex is already 0-based
+                // (contract: assets/src/js/utils/classicGalleryCollectionMove.js).
+                this.add(model, { at: index });
             }
         },
 

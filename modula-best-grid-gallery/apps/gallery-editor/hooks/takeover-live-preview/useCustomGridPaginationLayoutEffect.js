@@ -7,10 +7,11 @@ import {
 	repackCustomGridAfterPaginationEnable,
 } from 'gallery-shared/preview';
 import { useLayoutEffect, useRef } from '@wordpress/element';
+import { dropGalleryEditorLayoutStepsIfNeeded } from '../../utils/galleryEditorLayoutHistoryHygiene';
 
 /**
  * @param {unknown} value
- * @return {boolean}
+ * @return {boolean} True when pagination is on.
  */
 function isPaginationEnabled(value) {
 	if (value === true || value === 1 || value === '1') {
@@ -28,6 +29,7 @@ function isPaginationEnabled(value) {
  *   galleryType: string,
  *   enablePagination: unknown,
  *   schedulePersistPreviewItems: () => void,
+ *   dropLayoutSteps?: () => void,
  * }} args
  */
 export function useCustomGridPaginationLayoutEffect({
@@ -35,6 +37,7 @@ export function useCustomGridPaginationLayoutEffect({
 	galleryType,
 	enablePagination,
 	schedulePersistPreviewItems,
+	dropLayoutSteps,
 }) {
 	const prevEnabledRef = useRef(/** @type {boolean|null} */ (null));
 
@@ -73,6 +76,17 @@ export function useCustomGridPaginationLayoutEffect({
 
 		if (changed) {
 			schedulePersistPreviewItems();
+			dropGalleryEditorLayoutStepsIfNeeded(dropLayoutSteps, {
+				prevType: galleryType,
+				nextType: galleryType,
+				cellsMutated: changed,
+			});
 		}
-	}, [store, galleryType, enablePagination, schedulePersistPreviewItems]);
+	}, [
+		store,
+		galleryType,
+		enablePagination,
+		schedulePersistPreviewItems,
+		dropLayoutSteps,
+	]);
 }

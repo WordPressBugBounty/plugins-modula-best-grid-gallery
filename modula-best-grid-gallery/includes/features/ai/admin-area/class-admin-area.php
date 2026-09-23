@@ -1,6 +1,8 @@
 <?php
 namespace Modula\Ai\Admin_Area;
 
+use Modula\Ai\Ai_Helper;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -24,8 +26,11 @@ class Admin_Area {
 				'generate_report'            => esc_html__( 'Generate with Modula AI', 'modula-best-grid-gallery' ),
 				'configure_api_key'          => esc_html__( 'Configure API Key', 'modula-best-grid-gallery' ),
 				'refresh_report'             => esc_html__( 'Regenerate with Modula AI', 'modula-best-grid-gallery' ),
+				'unavailable_localhost'      => esc_html__( 'AI unavailable on localhost', 'modula-best-grid-gallery' ),
 			)
 		);
+
+		$helper['unavailable_on_localhost'] = Ai_Helper::is_unavailable_on_localhost();
 
 		return $helper;
 	}

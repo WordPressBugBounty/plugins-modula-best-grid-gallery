@@ -291,6 +291,7 @@ export const EDITOR_UI_BY_PATH = {
 	'social.socialDesktopCollapsed': { sortIndex: 140 },
 
 	'pagination.enablePagination': { sortIndex: 9990 },
+	'pagination.themeInheritControls': { sortIndex: 9995 },
 	'pagination.enableInfiniteScroll': { sortIndex: 10000 },
 	'pagination.enableLoadMore': { sortIndex: 10020 },
 	'deeplink.modulaDeeplink': { sortIndex: 10 },

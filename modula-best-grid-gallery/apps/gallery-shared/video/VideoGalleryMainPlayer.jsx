@@ -8,6 +8,11 @@ import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { loadYouTubeIframeApi } from './loadYouTubeIframeApi';
 import { loadVimeoPlayerApi } from './loadVimeoPlayerApi';
 import { destroyVideoGalleryPlayer } from './destroyVideoGalleryPlayer';
+import {
+	getVideoGalleryPlayerRemountInputs,
+	playVideoGalleryPlayer,
+	resolveVideoGalleryStartMuted,
+} from './videoGalleryPlayerControls';
 import VideoGalleryPlayIcon, {
 	resolveVideoPlayIconAttachmentId,
 	resolveVideoPlayIconCustomSrc,
@@ -34,9 +39,16 @@ export default function VideoGalleryMainPlayer({
 	const playerRef = useRef(null);
 	const html5Ref = useRef(null);
 	const vimeoEndedHandlerRef = useRef(null);
+	const userHasInteractedRef = useRef(!!userHasInteracted);
+	const onEndedRef = useRef(onEnded);
 	const [showPoster, setShowPoster] = useState(
 		() => !video?.autoplayThumbnail
 	);
+
+	userHasInteractedRef.current = !!userHasInteracted;
+	onEndedRef.current = onEnded;
+
+	const remountInputs = getVideoGalleryPlayerRemountInputs(video);
 
 	const videoSettings = config?.video || {};
 	const showIcon = videoSettings.showVideoIcon !== false;
@@ -53,38 +65,30 @@ export default function VideoGalleryMainPlayer({
 	const hidePosterAndPlay = useCallback(() => {
 		onUserInteract?.();
 		setShowPoster(false);
-		const player = playerRef.current;
-		if (!player || !video) {
-			return;
-		}
-		if (
-			video.kind === 'youtube' &&
-			typeof player.playVideo === 'function'
-		) {
-			if (typeof player.unMute === 'function') {
-				player.unMute();
-			}
-			player.playVideo();
-		} else if (
-			video.kind === 'vimeo' &&
-			typeof player.play === 'function'
-		) {
-			if (typeof player.setMuted === 'function') {
-				player.setMuted(false);
-			}
-			player.play();
-		} else if (html5Ref.current) {
-			html5Ref.current.muted = false;
-			const p = html5Ref.current.play?.();
-			if (p && typeof p.catch === 'function') {
-				p.catch(() => {});
-			}
-		}
-	}, [onUserInteract, video]);
+		playVideoGalleryPlayer({
+			kind: video?.kind,
+			player: playerRef.current,
+			html5El: html5Ref.current,
+		});
+	}, [onUserInteract, video?.kind]);
 
 	useEffect(() => {
 		setShowPoster(!video?.autoplayThumbnail);
 	}, [video?.playbackUrl, video?.autoplayThumbnail, video?.poster]);
+
+	// First gesture during muted autoplay: unmute in place (do not remount).
+	useEffect(() => {
+		if (!userHasInteracted || !video?.autoplayThumbnail) {
+			return;
+		}
+		playVideoGalleryPlayer({
+			kind: video?.kind,
+			player: playerRef.current,
+			html5El: html5Ref.current,
+		});
+		// Only when the interaction flag flips — item changes remount separately.
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- intentional
+	}, [userHasInteracted]);
 
 	useEffect(() => {
 		const mountEl = mountRef.current;
@@ -103,20 +107,25 @@ export default function VideoGalleryMainPlayer({
 			}
 
 			const autoplay = !!video.autoplayThumbnail;
-			const startMuted = autoplay && !userHasInteracted;
+			const startMuted = () =>
+				resolveVideoGalleryStartMuted(
+					autoplay,
+					userHasInteractedRef.current
+				);
 
 			if (video.kind === 'youtube' && video.youtubeId) {
 				const YT = await loadYouTubeIframeApi();
 				if (cancelled) {
 					return;
 				}
+				const muted = startMuted();
 				playerRef.current = new YT.Player(mountEl, {
 					videoId: video.youtubeId,
 					width: '100%',
 					height: '100%',
 					playerVars: {
 						autoplay: autoplay ? 1 : 0,
-						mute: startMuted ? 1 : 0,
+						mute: muted ? 1 : 0,
 						playsinline: 1,
 						rel: 0,
 					},
@@ -125,11 +134,20 @@ export default function VideoGalleryMainPlayer({
 							if (cancelled) {
 								return;
 							}
+							playerRef.current = event.target;
 							if (
-								startMuted &&
+								startMuted() &&
 								typeof event.target.mute === 'function'
 							) {
 								event.target.mute();
+							} else if (
+								autoplay &&
+								userHasInteractedRef.current
+							) {
+								playVideoGalleryPlayer({
+									kind: 'youtube',
+									player: event.target,
+								});
 							}
 							if (autoplay) {
 								event.target.playVideo();
@@ -139,9 +157,9 @@ export default function VideoGalleryMainPlayer({
 						onStateChange(event) {
 							if (
 								event.data === YT.PlayerState.ENDED &&
-								typeof onEnded === 'function'
+								typeof onEndedRef.current === 'function'
 							) {
-								onEnded();
+								onEndedRef.current();
 							}
 						},
 					},
@@ -154,26 +172,34 @@ export default function VideoGalleryMainPlayer({
 				if (cancelled) {
 					return;
 				}
+				const muted = startMuted();
 				playerRef.current = new Vimeo.Player(mountEl, {
 					id: video.vimeoId,
 					width: '100%',
 					height: '100%',
 					autoplay,
-					muted: startMuted,
+					muted,
 					autopause: false,
 				});
 				vimeoEndedHandlerRef.current = () => {
-					if (typeof onEnded === 'function') {
-						onEnded();
+					if (typeof onEndedRef.current === 'function') {
+						onEndedRef.current();
 					}
 				};
 				playerRef.current.on('ended', vimeoEndedHandlerRef.current);
 				if (autoplay) {
 					setShowPoster(false);
+					if (userHasInteractedRef.current) {
+						playVideoGalleryPlayer({
+							kind: 'vimeo',
+							player: playerRef.current,
+						});
+					}
 				}
 				return;
 			}
 
+			const muted = startMuted();
 			const videoEl = document.createElement('video');
 			videoEl.className = 'modula-video-gallery__html5';
 			videoEl.controls = true;
@@ -182,7 +208,7 @@ export default function VideoGalleryMainPlayer({
 			if (video.poster) {
 				videoEl.poster = video.poster;
 			}
-			if (startMuted) {
+			if (muted) {
 				videoEl.muted = true;
 			}
 			if (autoplay) {
@@ -193,17 +219,24 @@ export default function VideoGalleryMainPlayer({
 			source.type = 'video/mp4';
 			videoEl.appendChild(source);
 			videoEl.addEventListener('ended', () => {
-				if (typeof onEnded === 'function') {
-					onEnded();
+				if (typeof onEndedRef.current === 'function') {
+					onEndedRef.current();
 				}
 			});
 			mountEl.appendChild(videoEl);
 			html5Ref.current = videoEl;
 			playerRef.current = videoEl;
 			if (autoplay) {
-				const p = videoEl.play?.();
-				if (p && typeof p.catch === 'function') {
-					p.catch(() => {});
+				if (userHasInteractedRef.current) {
+					playVideoGalleryPlayer({
+						kind: 'html5',
+						html5El: videoEl,
+					});
+				} else {
+					const p = videoEl.play?.();
+					if (p && typeof p.catch === 'function') {
+						p.catch(() => {});
+					}
 				}
 				setShowPoster(false);
 			}
@@ -224,15 +257,16 @@ export default function VideoGalleryMainPlayer({
 			}
 			html5Ref.current = null;
 		};
+		// Remount only when the active item / autoplay mode changes — not on
+		// userHasInteracted (that would cancel poster-click play intent).
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- remountInputs
 	}, [
-		video?.playbackUrl,
-		video?.youtubeId,
-		video?.vimeoId,
-		video?.kind,
-		video?.autoplayThumbnail,
-		video?.poster,
-		userHasInteracted,
-		onEnded,
+		remountInputs.playbackUrl,
+		remountInputs.youtubeId,
+		remountInputs.vimeoId,
+		remountInputs.kind,
+		remountInputs.autoplayThumbnail,
+		remountInputs.poster,
 	]);
 
 	const posterVisible = showPoster && video?.poster;

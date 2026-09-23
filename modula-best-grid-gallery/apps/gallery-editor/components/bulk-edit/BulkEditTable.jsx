@@ -15,6 +15,7 @@ export default function BulkEditTable({
 	showFiltersColumn,
 	filterSuggestions,
 	aiConfigured,
+	unavailableOnLocalhost = false,
 	selectedIds,
 	draft,
 	galleryId,
@@ -119,6 +120,9 @@ export default function BulkEditTable({
 										showFiltersColumn={showFiltersColumn}
 										filterSuggestions={filterSuggestions}
 										aiConfigured={aiConfigured}
+										unavailableOnLocalhost={
+											unavailableOnLocalhost
+										}
 										patchRow={draft.patchRow}
 										getRowField={draft.getRowField}
 										galleryId={galleryId}

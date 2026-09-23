@@ -6,9 +6,10 @@ import {
 	modulaImagesRowIndexForPreviewWrite,
 	movePreviewItemToAdjacentPage,
 	normalizeGalleryItemLookupString,
+	previewItemRowLookupKey,
 	storeIndexToCoreIndex,
 } from 'gallery-shared/preview';
-import { useCallback, useMemo } from '@wordpress/element';
+import { useCallback, useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	galleryRemoveImageByIndex,
@@ -36,6 +37,13 @@ import {
 	boundGalleryAllowsReplace,
 	getBoundGallerySummaryFromEditor,
 } from '../../utils/boundGalleryChromePolicy';
+import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
+import { snapshotCustomGridItemCells } from '../../utils/customGridItemCells';
+import {
+	commitCustomGridLayoutHistoryStep,
+	commitCustomGridLockHistoryStep,
+	restoreCatalogFromLayoutHistory,
+} from '../../utils/customGridLayoutHistory';
 
 /**
  * Preview item admin actions (remove, replace, content blocks) and context value.
@@ -66,6 +74,51 @@ export function usePreviewItemAdminActions({
 	schedulePersistPreviewItems,
 }) {
 	const itemEditSidebar = useGalleryItemEditSidebar();
+	const { undoRedo } = useGallerySettingsFormBundle();
+	const { adoptLayoutCheckpoint, commitLayoutStep, registerLayoutApplier } =
+		undoRedo;
+
+	useEffect(() => {
+		return registerLayoutApplier((layout) => {
+			const st = storeRef.current;
+			if (!st) {
+				return;
+			}
+			const core = asGalleryItemList(st.getState().items.items);
+			commitPreviewCatalog(
+				st,
+				restoreCatalogFromLayoutHistory(core, layout)
+			);
+			schedulePersistPreviewItems();
+		});
+	}, [registerLayoutApplier, schedulePersistPreviewItems, storeRef]);
+
+	const onCustomGridLayoutInteractionStart = useCallback(
+		(_args) => {
+			const st = storeRef.current;
+			if (!st) {
+				return;
+			}
+			const core = asGalleryItemList(st.getState().items.items);
+			adoptLayoutCheckpoint(snapshotCustomGridItemCells(core));
+		},
+		[adoptLayoutCheckpoint, storeRef]
+	);
+
+	const onCustomGridLayoutCommit = useCallback(
+		({ kind }) => {
+			const st = storeRef.current;
+			if (!st) {
+				return;
+			}
+			const core = asGalleryItemList(st.getState().items.items);
+			commitCustomGridLayoutHistoryStep(
+				{ commitLayoutStep },
+				{ kind, catalog: core }
+			);
+		},
+		[commitLayoutStep, storeRef]
+	);
 
 	const performRemoveItem = useCallback(
 		async (storeIndex) => {
@@ -334,15 +387,33 @@ export function usePreviewItemAdminActions({
 			if (!prev) {
 				return;
 			}
+			const beforeCells = snapshotCustomGridItemCells([prev]);
+			adoptLayoutCheckpoint(beforeCells);
 			const nextLocked = !isGridItemLocked(prev);
 			core[coreIndex] = {
 				...prev,
 				gridLocked: nextLocked ? 1 : 0,
 			};
 			commitPreviewCatalog(st, core);
+			const galleryItemId = previewItemRowLookupKey(prev);
+			if (galleryItemId !== undefined && galleryItemId !== null) {
+				commitCustomGridLockHistoryStep(
+					{ commitLayoutStep },
+					{
+						locked: nextLocked,
+						galleryItemId,
+						catalog: core,
+					}
+				);
+			}
 			schedulePersistPreviewItems();
 		},
-		[schedulePersistPreviewItems, storeRef]
+		[
+			adoptLayoutCheckpoint,
+			commitLayoutStep,
+			schedulePersistPreviewItems,
+			storeRef,
+		]
 	);
 
 	const openEditContentBlock = useCallback(
@@ -458,6 +529,14 @@ export function usePreviewItemAdminActions({
 			moveItemToPreviousPage,
 			moveItemToNextPage,
 			schedulePersistPreviewItems,
+			onCustomGridLayoutInteractionStart:
+				galleryType === 'custom-grid'
+					? onCustomGridLayoutInteractionStart
+					: undefined,
+			onCustomGridLayoutCommit:
+				galleryType === 'custom-grid'
+					? onCustomGridLayoutCommit
+					: undefined,
 			selectedEditStoreIndex: itemEditSidebar?.storeIndex ?? null,
 			isItemEditSelected: (idx) =>
 				itemEditSidebar?.storeIndex !== null &&
@@ -472,6 +551,8 @@ export function usePreviewItemAdminActions({
 			moveItemToPreviousPage,
 			moveItemToNextPage,
 			schedulePersistPreviewItems,
+			onCustomGridLayoutInteractionStart,
+			onCustomGridLayoutCommit,
 			saveMetaModalReturnFocus,
 			itemEditSidebar,
 		]

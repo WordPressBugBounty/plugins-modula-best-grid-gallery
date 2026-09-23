@@ -4,6 +4,7 @@
  * @package
  */
 
+import { formatFilterLabelWithCount } from './filterImageUsageCounts';
 import { getForcedPreviewViewport } from './resolvePreviewViewport';
 
 /** Select option value for the aggregate “All” filter. */
@@ -317,10 +318,7 @@ export function buildFilterSelectOptions({
 		const base = allLabel || 'All';
 		options.push({
 			value: FILTER_SELECT_ALL_VALUE,
-			label:
-				showFilterCount && allCount !== undefined && allCount !== null
-					? `${base} ${Number(allCount) || 0}`
-					: base,
+			label: formatFilterLabelWithCount(base, allCount, showFilterCount),
 		});
 	}
 	(availableFilters || []).forEach((filter, index) => {
@@ -329,9 +327,11 @@ export function buildFilterSelectOptions({
 		const count = countFor(countKey);
 		options.push({
 			value: entry.optionValue,
-			label: showFilterCount
-				? `${entry.label} ${count}`
-				: entry.label,
+			label: formatFilterLabelWithCount(
+				entry.label,
+				count,
+				showFilterCount
+			),
 			key: entry.key,
 			filterValue: entry.value,
 		});

@@ -10,6 +10,8 @@ import {
 	resolveFilterLayoutShellClass,
 	resolveFilterPositioning,
 	shouldUseCollapsibleFilterBar,
+	THEME_INHERIT_CONTROLS_ROOT_CLASS,
+	isThemeInheritControlsOn,
 } from 'gallery-shared/preview';
 import { useMemo } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
@@ -43,6 +45,13 @@ export default function FiltersPreviewPanel({
 		[groupedSettings]
 	);
 
+	const themeInheritClass = isThemeInheritControlsOn(
+		groupedSettings?.pagination?.themeInheritControls
+	)
+		? ` ${THEME_INHERIT_CONTROLS_ROOT_CLASS}`
+		: '';
+	const filtersPreviewShellClass = `modula modula-gallery modula-gallery-modern modula-gallery-initialized modula-gallery-chrome-ready modula-gallery-takeover__filters-preview-shell${themeInheritClass}`;
+
 	const rootSelector = galleryRootSelector(galleryId);
 	const filterDynamicCss = useMemo(
 		() =>
@@ -69,7 +78,7 @@ export default function FiltersPreviewPanel({
 				</p>
 				<div
 					id={`modula-${galleryId}`}
-					className="modula modula-gallery modula-gallery-modern modula-gallery-initialized modula-gallery-chrome-ready modula-gallery-takeover__filters-preview-shell"
+					className={filtersPreviewShellClass}
 					data-preview-viewport={previewViewport}
 				>
 					<div className={filterLayoutShellClass}>
@@ -109,7 +118,7 @@ export default function FiltersPreviewPanel({
 			) : null}
 			<div
 				id={`modula-${galleryId}`}
-				className="modula modula-gallery modula-gallery-modern modula-gallery-initialized modula-gallery-chrome-ready modula-gallery-takeover__filters-preview-shell"
+				className={filtersPreviewShellClass}
 				data-preview-viewport={previewViewport}
 			>
 				{filterDynamicCss ? <style>{filterDynamicCss}</style> : null}

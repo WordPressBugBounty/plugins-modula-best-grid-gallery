@@ -47,7 +47,10 @@ import {
 	parseItemTileImageFit,
 	TILE_IMAGE_FIT_CONTAIN,
 } from './customGridTileImageFit';
-import { resolveGalleryItemLink } from './resolveGalleryItemLink';
+import {
+	galleryUsesFancyboxLightbox,
+	resolveGalleryItemLink,
+} from './resolveGalleryItemLink';
 import { getItemVideoUrl } from '../video/videoGalleryModel';
 
 /**
@@ -297,6 +300,29 @@ export function getGalleryItemViewModel(itemData, config, options = {}) {
 		} else {
 			delete linkAttrs.role;
 		}
+	}
+
+	/*
+	 * Beta Fancybox lightbox-first: expose Custom URL for in-lightbox follow.
+	 * Hybrid / simple-link tiles navigate away and must not carry this attr.
+	 */
+	const itemCustomUrl =
+		typeof itemData?.link === 'string' ? itemData.link.trim() : '';
+	if (
+		!linkResolution.isSimpleLink &&
+		itemCustomUrl &&
+		galleryUsesFancyboxLightbox(config?.lightbox)
+	) {
+		linkAttrs['data-modula-item-url'] = itemCustomUrl;
+		const itemTarget = itemData?.target;
+		if (itemTarget === 1 || itemTarget === '1' || itemTarget === true) {
+			linkAttrs['data-modula-item-url-target'] = '_blank';
+		} else {
+			delete linkAttrs['data-modula-item-url-target'];
+		}
+	} else {
+		delete linkAttrs['data-modula-item-url'];
+		delete linkAttrs['data-modula-item-url-target'];
 	}
 	const tileVideoUrl = getItemVideoUrl(itemData);
 	if (tileVideoUrl && linkResolution.showLink) {

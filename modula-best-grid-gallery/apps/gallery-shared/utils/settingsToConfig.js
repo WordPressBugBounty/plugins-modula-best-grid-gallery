@@ -38,6 +38,8 @@ import {
 	mergeLegacyJsConfigIntoConfig,
 } from './mergeLegacyJsConfig';
 import { clampMasonryGalleryWidth } from './clampMasonryGalleryWidth';
+import { normalizeGalleryAlignment } from './resolveGalleryAlignmentCss';
+import { resolveVideoMaxHeightCss } from './resolveVideoMaxHeightCss';
 import { coerceLightboxClickMode } from './resolveGalleryItemLink';
 
 /**
@@ -359,6 +361,7 @@ export function settingsToConfig(settings, opts = {}) {
 			? general.width.trim()
 			: '100%';
 	const galleryWidth = clampMasonryGalleryWidth(galleryWidthRaw, type);
+	const galleryAlignment = normalizeGalleryAlignment(general.alignment);
 
 	const uiConfig = groupedUiSettingsToConfig(settings);
 	if (isGalleryTypeWithoutLoadingEffects(type)) {
@@ -380,6 +383,7 @@ export function settingsToConfig(settings, opts = {}) {
 	const baseConfig = {
 		type,
 		width: galleryWidth,
+		alignment: galleryAlignment,
 		galleryId: opts.galleryId || '',
 		...(opts.previewViewport === 'desktop' ||
 		opts.previewViewport === 'tablet' ||
@@ -631,6 +635,11 @@ export function settingsToConfig(settings, opts = {}) {
 							video.playlistPosition === 'bottom'
 								? 'bottom'
 								: 'right',
+						maxHeight: resolveVideoMaxHeightCss(video.maxHeight),
+						showPlaylistScrollbar:
+							video.showPlaylistScrollbar === true ||
+							video.showPlaylistScrollbar === 1 ||
+							video.showPlaylistScrollbar === '1',
 						autoplayVideos:
 							video.autoplayVideos === true ||
 							video.autoplayVideos === 1 ||

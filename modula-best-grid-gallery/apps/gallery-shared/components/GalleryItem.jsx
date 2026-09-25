@@ -156,6 +156,7 @@ function GalleryItem({
 					: '#FFF'
 			}
 			size={iconSize}
+			icon={videoSettings.videoIconIcon}
 			customSrc={resolveVideoPlayIconCustomSrc(videoSettings)}
 			attachmentId={resolveVideoPlayIconAttachmentId(videoSettings)}
 		/>

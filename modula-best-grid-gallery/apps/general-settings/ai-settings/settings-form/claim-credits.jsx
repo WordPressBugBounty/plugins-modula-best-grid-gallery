@@ -5,7 +5,6 @@ import {
 	TextControl,
 	SelectControl,
 	__experimentalSpacer as Spacer,
-	Notice,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import styles from './claim-credits.module.css';
@@ -88,15 +87,6 @@ function ClaimCreditsForm({ data }) {
 
 	return (
 		<div className={styles.container}>
-			{unavailableOnLocalhost ? (
-				<Notice status="warning" isDismissible={false}>
-					{__(
-						'AI unavailable on localhost',
-						'modula-best-grid-gallery'
-					)}
-				</Notice>
-			) : null}
-
 			{!validKey && !unavailableOnLocalhost && (
 				<>
 					<p className={styles.description}>

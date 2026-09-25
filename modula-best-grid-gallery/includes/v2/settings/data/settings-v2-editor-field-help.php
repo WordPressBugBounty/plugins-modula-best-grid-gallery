@@ -114,6 +114,8 @@ return array(
 	'slideshow.slideshowSpeed'               => 'Milliseconds between automatic slide changes during autoplay (for example 5000 = 5 seconds).',
 	'video.customVideoIcon'                  => 'A square PNG with transparency works best.',
 	'video.playlistPosition'                 => 'Whether the playlist sits beside or under the main player.',
+	'video.showPlaylistScrollbar'            => 'When off, the scrollbar stays hidden and visitors can drag the thumb strip to scroll.',
+	'video.maxHeight'                        => 'Maximum height for the player and playlist together. Use vh or px (for example 100vh or 800px).',
 	'video.previewVideoDuration'             => 'Seconds. The tile goes back to its poster image afterwards.',
 	'video.previewVideoOffHint'              => 'Preview on hover is off, so nothing here runs.',
 	'protection.rightClickMessage'           => 'Leave it empty to block the menu without saying anything.',

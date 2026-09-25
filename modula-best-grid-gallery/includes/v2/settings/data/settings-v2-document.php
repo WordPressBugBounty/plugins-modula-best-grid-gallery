@@ -151,6 +151,29 @@ return array(
 				'editorLabel'       => 'How wide the gallery is',
 				'editorDescription' => 'How wide the gallery is on the page. Common values are 100% (full width of the content area) or a fixed width such as 1200px.',
 			),
+			'alignment'      =>
+			array(
+				'type'             => 'string',
+				'enum'             =>
+				array(
+					0 => 'left',
+					1 => 'center',
+					2 => 'right',
+				),
+				'default'          => 'center',
+				'editorLabel'      => 'Alignment',
+				'editorDescription' => 'Where the gallery sits when it is narrower than the content area. Gutenberg or shortcode alignment overrides this when set.',
+				'enumOptionLabels' =>
+				array(
+					'left'   => 'Left',
+					'center' => 'Center',
+					'right'  => 'Right',
+				),
+				'editorControl'    =>
+				array(
+					'kind' => 'segmentedEnum',
+				),
+			),
 			'height'         =>
 			array(
 				'type'              => 'array',
@@ -3592,6 +3615,20 @@ return array(
 					'bottom' => 'Bottom',
 				),
 			),
+			'showPlaylistScrollbar' =>
+			array(
+				'type'              => 'boolean',
+				'default'           => false,
+				'editorLabel'       => 'Show playlist scrollbar',
+				'editorDescription' => 'When off, the scrollbar stays hidden and visitors can drag the thumb strip to scroll.',
+			),
+			'maxHeight'            =>
+			array(
+				'type'              => 'string',
+				'default'           => '100vh',
+				'editorLabel'       => 'Max height',
+				'editorDescription' => 'Caps the height of the player and playlist together. Use vh (viewport height) or px, for example 100vh or 800px. With the playlist below, the player shrinks so the thumbs stay in view.',
+			),
 			'autoplayVideos'       =>
 			array(
 				'type'          => 'boolean',
@@ -3610,7 +3647,7 @@ return array(
 			array(
 				'type'        => 'boolean',
 				'default'     => true,
-				'editorLabel' => 'Show the play badge',
+				'editorLabel' => 'Show the play icon',
 			),
 			'useCustomIcon'        =>
 			array(
@@ -3637,7 +3674,7 @@ return array(
 					10 => 'solid_circle_fill',
 					11 => 'simple_solid_reverse',
 				),
-				'editorLabel'      => 'Badge',
+				'editorLabel'      => 'Icon',
 				'enumOptionLabels' =>
 				array(
 					'default'              => 'Default',
@@ -3668,7 +3705,7 @@ return array(
 				array(
 					'kind'               => 'mediaAttachment',
 					'libraryType'        => 'image',
-					'mediaFrameTitle'    => 'Choose play badge image',
+					'mediaFrameTitle'    => 'Choose play icon image',
 					'selectButtonLabel'  => 'Choose from the media library',
 					'replaceButtonLabel' => 'Replace image',
 					'removeButtonLabel'  => 'Remove',
@@ -3698,7 +3735,7 @@ return array(
 					2 => 32,
 				),
 				'editorLabel'       => 'Size',
-				'editorDescription' => '0 scales the badge with the tile. Anything else pins it to that many pixels.',
+				'editorDescription' => '0 scales the icon with the tile. Anything else pins it to that many pixels.',
 			),
 			'previewVideo'         =>
 			array(
@@ -3713,8 +3750,17 @@ return array(
 				'editorLabel'        => 'Start playing by itself',
 				'editorDisabledWhen' =>
 				array(
-					'path' => 'video.previewVideo',
-					'eq'   => false,
+					'all' =>
+					array(
+						array(
+							'path' => 'general.type',
+							'neq'  => 'video',
+						),
+						array(
+							'path' => 'video.previewVideo',
+							'eq'   => false,
+						),
+					),
 				),
 			),
 			'previewVideoDuration' =>

@@ -213,7 +213,21 @@
 			}
 		},
 		{
-			"pathPattern": "^video\\.(autoplayVideos|loopVideos)$",
+			"pathPattern": "^video\\.showPlaylistScrollbar$",
+			"when": {
+				"path": "general.type",
+				"eq": "video"
+			}
+		},
+		{
+			"pathPattern": "^video\\.maxHeight$",
+			"when": {
+				"path": "general.type",
+				"eq": "video"
+			}
+		},
+		{
+			"pathPattern": "^video\\.autoplayVideos$",
 			"when": {
 				"all": [
 					{
@@ -240,7 +254,30 @@
 			}
 		},
 		{
-			"pathPattern": "^video\\.(previewVideo|autoplayThumbnail|previewVideoDuration)$",
+			"pathPattern": "^video\\.(loopVideos|autoplayThumbnail)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "story"
+					},
+					{
+						"path": "general.type",
+						"neq": "showcase"
+					},
+					{
+						"path": "general.type",
+						"neq": "slider"
+					},
+					{
+						"path": "general.type",
+						"neq": "template"
+					}
+				]
+			}
+		},
+		{
+			"pathPattern": "^video\\.(previewVideo|previewVideoDuration)$",
 			"when": {
 				"all": [
 					{

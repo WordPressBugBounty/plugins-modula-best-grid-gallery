@@ -12,6 +12,7 @@ import {
 	getVideoGalleryPlayerRemountInputs,
 	playVideoGalleryPlayer,
 	resolveVideoGalleryStartMuted,
+	shouldAdvancePlaylistOnVideoEnd,
 } from './videoGalleryPlayerControls';
 import VideoGalleryPlayIcon, {
 	resolveVideoPlayIconAttachmentId,
@@ -107,6 +108,15 @@ export default function VideoGalleryMainPlayer({
 			}
 
 			const autoplay = !!video.autoplayThumbnail;
+			const loop = !!video.loopVideos;
+			const notifyEnded = () => {
+				if (!shouldAdvancePlaylistOnVideoEnd(loop)) {
+					return;
+				}
+				if (typeof onEndedRef.current === 'function') {
+					onEndedRef.current();
+				}
+			};
 			const startMuted = () =>
 				resolveVideoGalleryStartMuted(
 					autoplay,
@@ -119,16 +129,21 @@ export default function VideoGalleryMainPlayer({
 					return;
 				}
 				const muted = startMuted();
+				const playerVars = {
+					autoplay: autoplay ? 1 : 0,
+					mute: muted ? 1 : 0,
+					playsinline: 1,
+					rel: 0,
+				};
+				if (loop) {
+					playerVars.loop = 1;
+					playerVars.playlist = video.youtubeId;
+				}
 				playerRef.current = new YT.Player(mountEl, {
 					videoId: video.youtubeId,
 					width: '100%',
 					height: '100%',
-					playerVars: {
-						autoplay: autoplay ? 1 : 0,
-						mute: muted ? 1 : 0,
-						playsinline: 1,
-						rel: 0,
-					},
+					playerVars,
 					events: {
 						onReady(event) {
 							if (cancelled) {
@@ -155,12 +170,24 @@ export default function VideoGalleryMainPlayer({
 							}
 						},
 						onStateChange(event) {
-							if (
-								event.data === YT.PlayerState.ENDED &&
-								typeof onEndedRef.current === 'function'
-							) {
-								onEndedRef.current();
+							if (event.data !== YT.PlayerState.ENDED) {
+								return;
 							}
+							if (!shouldAdvancePlaylistOnVideoEnd(loop)) {
+								if (
+									typeof event.target.seekTo === 'function'
+								) {
+									event.target.seekTo(0);
+								}
+								if (
+									typeof event.target.playVideo ===
+									'function'
+								) {
+									event.target.playVideo();
+								}
+								return;
+							}
+							notifyEnded();
 						},
 					},
 				});
@@ -179,12 +206,11 @@ export default function VideoGalleryMainPlayer({
 					height: '100%',
 					autoplay,
 					muted,
+					loop,
 					autopause: false,
 				});
 				vimeoEndedHandlerRef.current = () => {
-					if (typeof onEndedRef.current === 'function') {
-						onEndedRef.current();
-					}
+					notifyEnded();
 				};
 				playerRef.current.on('ended', vimeoEndedHandlerRef.current);
 				if (autoplay) {
@@ -205,6 +231,7 @@ export default function VideoGalleryMainPlayer({
 			videoEl.controls = true;
 			videoEl.playsInline = true;
 			videoEl.preload = 'metadata';
+			videoEl.loop = loop;
 			if (video.poster) {
 				videoEl.poster = video.poster;
 			}
@@ -219,9 +246,7 @@ export default function VideoGalleryMainPlayer({
 			source.type = 'video/mp4';
 			videoEl.appendChild(source);
 			videoEl.addEventListener('ended', () => {
-				if (typeof onEndedRef.current === 'function') {
-					onEndedRef.current();
-				}
+				notifyEnded();
 			});
 			mountEl.appendChild(videoEl);
 			html5Ref.current = videoEl;
@@ -266,6 +291,7 @@ export default function VideoGalleryMainPlayer({
 		remountInputs.vimeoId,
 		remountInputs.kind,
 		remountInputs.autoplayThumbnail,
+		remountInputs.loopVideos,
 		remountInputs.poster,
 	]);
 
@@ -297,6 +323,7 @@ export default function VideoGalleryMainPlayer({
 							<VideoGalleryPlayIcon
 								color={iconColor}
 								size={iconSize}
+								icon={videoSettings.videoIconIcon}
 								customSrc={customSrc}
 								attachmentId={customAttachmentId}
 							/>

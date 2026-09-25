@@ -949,6 +949,28 @@ class Adapter {
 		}
 	}
 
+	/**
+	 * Classic flat `effect` slug from a Hover Effect Builder `sourcePresetId` stamp.
+	 *
+	 * ADR 0032: flat `effect` stays in meta for classic restore. Migrated builders
+	 * stamp `legacy-{slug}` (including `legacy-none`); non-legacy stamps (Beta
+	 * Hover Effect Builder presets) do not imply a classic effect slug.
+	 *
+	 * @param array<string, mixed>|null $builder Hover builder document.
+	 * @return string Classic effect slug, or empty when not a legacy stamp.
+	 */
+	public static function classic_effect_slug_from_hover_builder( $builder ) {
+		if ( ! is_array( $builder ) ) {
+			return '';
+		}
+		$source = isset( $builder['sourcePresetId'] ) ? sanitize_key( (string) $builder['sourcePresetId'] ) : '';
+		if ( '' === $source || 0 !== strpos( $source, 'legacy-' ) ) {
+			return '';
+		}
+		$slug = substr( $source, strlen( 'legacy-' ) );
+		return (string) $slug;
+	}
+
 	/** @param array<string, array<string, mixed>> $grouped */
 	public static function to_flat( array $grouped ) {
 		self::normalize_equal_cell_gallery_layouts( $grouped );
@@ -969,6 +991,13 @@ class Adapter {
 		}
 		if ( isset( $grouped['captions']['hideGalleryTitle'] ) ) {
 			$flat['show_gallery_title'] = $grouped['captions']['hideGalleryTitle'] ? 0 : 1;
+		}
+		$builder = ( isset( $grouped['hover']['builder'] ) && is_array( $grouped['hover']['builder'] ) )
+			? $grouped['hover']['builder']
+			: null;
+		$effect  = self::classic_effect_slug_from_hover_builder( $builder );
+		if ( '' !== $effect ) {
+			$flat['effect'] = $effect;
 		}
 		return $flat;
 	}

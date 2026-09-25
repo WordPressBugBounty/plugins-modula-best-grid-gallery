@@ -29,6 +29,7 @@ class Modula_Shortcode_Modern {
 		add_shortcode( 'Modula', array( $this, 'render' ) );
 
 		// Keep actions for template hooks (these are for output, not data transformation)
+		add_action( 'modula_shortcode_before_items', 'modula_edit_gallery', 100 );
 		add_action( 'modula_shortcode_after_items', 'modula_show_schemaorg', 90 );
 		add_action( 'modula_shortcode_after_items', 'modula_edit_gallery', 100 );
 	}

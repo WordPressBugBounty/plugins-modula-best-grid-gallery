@@ -1,3 +1,19 @@
+= 3.0.10 - 25.09.2026 =
+Added: Beta gallery Alignment next to Width (Left / Center / Right; Center by default), including on block themes with constrained content.
+Added: Beta Video max-height cap (default 100vh; vh or px) in Layout under Width & alignment — caps the player + playlist composition.
+Added: Beta Video-type Playback controls again on the Video hub (start by itself / repeat when it ends).
+Added: Beta Video play icon controls on the Video hub when show is on (colour, size, icon preset, custom image); non-Video types keep a Play icon drill. Author-facing copy uses “Play icon”, not badge.
+Changed: Width and Alignment stack vertically on full-width Layout rows; Video max-height sits below that composite (not on the Video hub).
+Changed: Beta Video playlist scrollbar is hidden by default; drag-to-scroll is on while the scrollbar is hidden.
+Changed: Modula AI settings are disabled on local hosts (same grayed-toggle pattern as compression), with matching environment copy.
+Fixed: Beta Video playlist Bottom no longer overflows the gallery width or paints thumbs over the main player.
+Fixed: Beta Video playlist drag-to-scroll no longer blocks thumbnail click-to-play.
+Fixed: Beta Video playlist Bottom keeps a ~16:9 main player under the max-height cap (no longer forces wrap height to 100vh / a tall letterboxed square).
+Fixed: Beta Play icon Icon presets and custom Image file update the admin preview and visitor overlays (no longer stuck on the hardcoded default / gated behind a hidden toggle).
+Fixed: Frontend “Edit gallery” links show above and below the gallery when enabled.
+Fixed: Applying a preset from the gallery listing now correctly sets hover effect to None (no longer leaves classic galleries on Pufrobo).
+Info: Read more about Modula 3.0 Beta: https://wp-modula.com/modula-3-0-beta/
+
 = 3.0.9 - 23.09.2026 =
 Fixed: Beta Video gallery main player starts on the first poster click (marking user interaction no longer remounts the provider mid-gesture).
 Fixed: Classic gallery drag reorder no longer shifts items off-by-one on Update.

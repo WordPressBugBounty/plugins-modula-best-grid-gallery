@@ -1340,64 +1340,104 @@ class Modula_Settings {
 	 * @since 2.11.0
 	 */
 	public function get_modula_ai() {
-		$enabled = (int) $this->get_option_value( self::OPTION_MODULA_AI, null, 0 ) ? true : false;
+		$enabled     = (int) $this->get_option_value( self::OPTION_MODULA_AI, null, 0 ) ? true : false;
+		$unavailable = class_exists( '\Modula\Ai\Ai_Helper' ) && \Modula\Ai\Ai_Helper::is_unavailable_on_localhost();
+
+		$fields = array(
+			$this->build_toggle_field(
+				'use_modula_ai',
+				esc_html__( 'Use AI Features', 'modula-best-grid-gallery' ),
+				$enabled,
+				array(
+					'disabled' => $unavailable,
+				)
+			),
+		);
+
+		if ( $unavailable ) {
+			$fields[] = $this->build_modula_ai_localhost_notice();
+		}
+
+		$fields[] = $this->build_paragraph_field(
+			'modula_ai_description',
+			'',
+			esc_html__( 'This is a powerful feature designed to optimize images within your galleries by automatically adding alt texts, titles, and captions. You no longer need to edit all these details manually, instead you can generate these with the help of AI.', 'modula-best-grid-gallery' )
+		);
+		$fields[] = $this->build_field(
+			self::FIELD_TYPE_MODULA_AI,
+			'',
+			array(
+				'conditions' => array(
+					array(
+						'field'      => 'use_modula_ai',
+						'comparison' => '===',
+						'value'      => true,
+					),
+				),
+			)
+		);
+		$fields[] = $this->build_text_field(
+			'modula_ai_api_key',
+			'',
+			'',
+			array(
+				'conditions' => array(
+					array(
+						'field'      => 'use_modula_ai',
+						'comparison' => '===',
+						// TRICK TO ADD SANITIZATION SCHEMA FOR THE MODULA_AI FIELD
+						'value'      => 'hello world',
+					),
+				),
+			)
+		);
+		$fields[] = $this->build_field(
+			self::FIELD_TYPE_SELECT,
+			'modula_ai_language',
+			array(
+				'sanitization' => array( 'text' ),
+				'conditions'   => array(
+					array(
+						'field'      => 'use_modula_ai',
+						'comparison' => '===',
+						// TRICK TO ADD SANITIZATION SCHEMA FOR THE MODULA_AI FIELD
+						'value'      => 'hello world',
+					),
+				),
+			)
+		);
 
 		return array(
-			'fields' => array(
-				$this->build_toggle_field(
-					'use_modula_ai',
-					esc_html__( 'Use AI Features', 'modula-best-grid-gallery' ),
-					$enabled
-				),
-				$this->build_paragraph_field(
-					'modula_ai_description',
-					'',
-					esc_html__( 'This is a powerful feature designed to optimize images within your galleries by automatically adding alt texts, titles, and captions. You no longer need to edit all these details manually, instead you can generate these with the help of AI.', 'modula-best-grid-gallery' ),
-				),
-				$this->build_field(
-					self::FIELD_TYPE_MODULA_AI,
-					'',
-					array(
-						'conditions' => array(
-							array(
-								'field'      => 'use_modula_ai',
-								'comparison' => '===',
-								'value'      => true,
-							),
-						),
-					)
-				),
-				$this->build_text_field(
-					'modula_ai_api_key',
-					'',
-					'',
-					array(
-						'conditions' => array(
-							array(
-								'field'      => 'use_modula_ai',
-								'comparison' => '===',
-								// TRICK TO ADD SANITIZATION SCHEMA FOR THE MODULA_AI FIELD
-								'value'      => 'hello world',
-							),
-						),
-					)
-				),
-				$this->build_field(
-					self::FIELD_TYPE_SELECT,
-					'modula_ai_language',
-					array(
-						'sanitization' => array( 'text' ),
-						'conditions'   => array(
-							array(
-								'field'      => 'use_modula_ai',
-								'comparison' => '===',
-								// TRICK TO ADD SANITIZATION SCHEMA FOR THE MODULA_AI FIELD
-								'value'      => 'hello world',
-							),
-						),
-					)
-				),
-			),
+			'fields' => $fields,
+		);
+	}
+
+	/**
+	 * Explain that Modula AI is disabled because the site URL host is local.
+	 *
+	 * Same sentence as the compression environment notice. The highlighted word
+	 * is the literal "local" (the host gate), not wp_get_environment_type().
+	 *
+	 * @return array Paragraph field.
+	 */
+	private function build_modula_ai_localhost_notice() {
+		$message = sprintf(
+			// translators: %1$s and %3$s = <strong>, </strong>; %2$s = local; %4$s and %5$s = <a href="mailto:...">, </a>
+			esc_html__( 'We\'ve detected that your site is running in a %1$s %2$s environment%3$s, and as a result, Modula AI features have been disabled. If you have questions, please contact us at %4$shello@wp-modula.com%5$s', 'modula-best-grid-gallery' ),
+			'<strong>',
+			'local',
+			'</strong>',
+			'<a target="_BLANK" href="mailto:support@wpchill.com">',
+			'</a>'
+		);
+
+		return $this->build_paragraph_field(
+			'modula_ai_localhost_notice',
+			'',
+			$message,
+			array(
+				'value' => $message,
+			)
 		);
 	}
 

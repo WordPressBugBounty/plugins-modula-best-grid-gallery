@@ -70,9 +70,13 @@ function renderHubFieldItem(item, values, reactKey) {
 		);
 	}
 
-	if (isEmbedded) {
+	/*
+	 * Hub `embedded` means “surface on the hub, not a drill” — not stacked chrome.
+	 * Boolean toggles always use the label|switch row (same as non-embedded hubs).
+	 */
+	if (kind === 'toggle' || kind === 'toggleWithNested') {
 		return (
-			<SettingsPanelEmbeddedField
+			<SettingsPanelToggleRow
 				key={reactKey}
 				groupKey={hit.groupId}
 				field={hit.field}
@@ -81,9 +85,9 @@ function renderHubFieldItem(item, values, reactKey) {
 		);
 	}
 
-	if (kind === 'toggle' || kind === 'toggleWithNested') {
+	if (isEmbedded) {
 		return (
-			<SettingsPanelToggleRow
+			<SettingsPanelEmbeddedField
 				key={reactKey}
 				groupKey={hit.groupId}
 				field={hit.field}

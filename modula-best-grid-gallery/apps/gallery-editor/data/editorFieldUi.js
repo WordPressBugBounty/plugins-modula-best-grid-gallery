@@ -21,8 +21,25 @@ export const EDITOR_UI_COMPOSITE_EQUAL_PAIR = {
 export const EDITOR_UI_BY_PATH = {
 	'general.type': { sortIndex: 10 },
 	'template.templateLayout': { sortIndex: 11 },
-	'general.width': { sortIndex: 20 },
-	'general.height': { sortIndex: 21 },
+	'general.width': {
+		sortIndex: 20,
+		row: 'gen-width-align',
+		slot: 0,
+		compositeHeading: true,
+		compositeStackTitle: __(
+			'Width & alignment',
+			'modula-best-grid-gallery'
+		),
+		compositeStackColumns: true,
+	},
+	'general.alignment': {
+		sortIndex: 20,
+		row: 'gen-width-align',
+		slot: 1,
+		compositeStackColumns: true,
+	},
+	'general.height': { sortIndex: 22 },
+	'video.maxHeight': { sortIndex: 21 },
 	'general.shuffle': { sortIndex: 99 },
 	'general.uploadPosition': { sortIndex: 31 },
 	'general.randomFactor': {
@@ -355,6 +372,7 @@ export const EDITOR_UI_BY_PATH = {
 	'pagination.paginationPosition': { sortIndex: 10070 },
 
 	'video.playlistPosition': { sortIndex: 10 },
+	'video.showPlaylistScrollbar': { sortIndex: 15 },
 	'video.autoplayVideos': { sortIndex: 20 },
 	'video.loopVideos': { sortIndex: 30 },
 	'video.showVideoIcon': { sortIndex: 40 },

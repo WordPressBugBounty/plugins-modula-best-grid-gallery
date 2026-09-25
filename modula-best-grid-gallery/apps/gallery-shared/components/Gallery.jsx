@@ -35,6 +35,7 @@ import {
 } from '../constants/galleryLayoutDefaults';
 import GalleryTitle from './GalleryTitle';
 import GalleryChunkLoadingFallback from './GalleryChunkLoadingFallback';
+import VisitorEditGalleryLink from './VisitorEditGalleryLink';
 import { selectGalleryShellState } from '../store/selectors/galleryShellSelectors';
 import {
 	isSettingsEditorPreview,
@@ -169,6 +170,7 @@ export default function Gallery() {
 			style={{ display: 'contents' }}
 		>
 			<GalleryDynamicStyle />
+			<VisitorEditGalleryLink />
 			<GalleryTitle />
 			<Suspense fallback={null}>
 				<LazyGalleryDownloadAllButton placement="above" />
@@ -198,6 +200,7 @@ export default function Gallery() {
 					<LazyGalleryLicensingBox />
 				</Suspense>
 			)}
+			<VisitorEditGalleryLink />
 		</div>
 	);
 }

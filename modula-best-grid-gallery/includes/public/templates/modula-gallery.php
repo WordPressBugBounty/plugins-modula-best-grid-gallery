@@ -1,5 +1,12 @@
 <div <?php echo Modula_Helper::generate_attributes( $data->gallery_container ); ?>>
-	<?php do_action( 'modula_shortcode_before_items', $data->settings ); ?>
+	<?php
+	/**
+	 * Hook: modula_shortcode_before_items.
+	 *
+	 * @hooked modula_edit_gallery - 100
+	 */
+	do_action( 'modula_shortcode_before_items', $data->settings );
+	?>
 	<div <?php echo Modula_Helper::generate_attributes( $data->items_container ); ?>>
 		<?php
 

@@ -32,6 +32,8 @@ export * from './utils/customGridLayout';
 export * from './utils/customGridEditorPagedLayout';
 export * from './utils/repackCustomGridPreviewItems';
 export * from './utils/resolveGalleryWidthCss';
+export * from './utils/resolveGalleryAlignmentCss';
+export * from './utils/resolveVideoMaxHeightCss';
 export * from './utils/paginationFromSettings';
 export * from './utils/paginationLegacyCssAliases';
 export * from './utils/buildPaginationDynamicCss';

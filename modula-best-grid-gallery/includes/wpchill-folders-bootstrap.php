@@ -18,11 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function modula_wpchill_folders_host_config() {
 	return array(
-		'text_domain'  => 'modula-best-grid-gallery',
-		'capability'   => 'upload_files',
-		'asset_url'    => MODULA_URL . 'wpchill-folders/build/',
-		'asset_path'   => MODULA_PATH . 'wpchill-folders/build/',
-		'object_types' => array( 'attachment' ),
+		'text_domain'        => 'modula-best-grid-gallery',
+		'capability'         => 'upload_files',
+		'asset_url'          => MODULA_URL . 'wpchill-folders/build/',
+		'asset_path'         => MODULA_PATH . 'wpchill-folders/build/',
+		'object_types'       => array( 'attachment' ),
+		'folders_upsell_url' => 'https://wp-modula.com/pricing/?utm_source=modula-lite&utm_medium=folders&utm_campaign=folders-entitlement',
 	);
 }
 

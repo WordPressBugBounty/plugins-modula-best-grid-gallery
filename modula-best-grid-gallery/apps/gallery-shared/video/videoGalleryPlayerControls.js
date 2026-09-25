@@ -17,6 +17,7 @@
  *   vimeoId: string|null,
  *   kind: string|null,
  *   autoplayThumbnail: boolean,
+ *   loopVideos: boolean,
  *   poster: string|null,
  * }}
  */
@@ -27,6 +28,7 @@ export function getVideoGalleryPlayerRemountInputs(video) {
 		vimeoId: video?.vimeoId ?? null,
 		kind: video?.kind ?? null,
 		autoplayThumbnail: !!video?.autoplayThumbnail,
+		loopVideos: !!video?.loopVideos,
 		poster: video?.poster ?? null,
 	};
 }
@@ -43,6 +45,16 @@ export function resolveVideoGalleryStartMuted(
 	userHasInteracted
 ) {
 	return !!autoplayThumbnail && !userHasInteracted;
+}
+
+/**
+ * When the active clip ends: advance playlist, or keep looping the same clip.
+ *
+ * @param {boolean} loopVideos
+ * @return {boolean}
+ */
+export function shouldAdvancePlaylistOnVideoEnd(loopVideos) {
+	return !loopVideos;
 }
 
 /**

@@ -87,7 +87,7 @@ return array(
 		'Image Guardian'         => 'Modula’s name for the anti-saving tools. They make casual saving harder. None of them stops a screenshot.',
 		'Watermark'              => 'Burned into the delivered image, so it survives a screenshot.',
 		'License'                => 'States what people may do with these images',
-		'Play badge'             => 'The mark that tells a visitor a tile is a video, not a photo.',
+		'Play icon'              => 'The mark that tells a visitor a tile is a video, not a photo.',
 		'Hover preview'          => 'A short silent clip that plays in the tile while the pointer is on it.',
 		'Shooting data'          => 'Read from the file and shown under the image in the lightbox.',
 		'Link to one image'      => 'Share a URL that opens one image in this gallery.',

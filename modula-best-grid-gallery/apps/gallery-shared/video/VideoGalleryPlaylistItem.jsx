@@ -71,6 +71,7 @@ export default function VideoGalleryPlaylistItem({
 						<VideoGalleryPlayIcon
 							color={iconColor}
 							size={iconSize}
+							icon={videoSettings.videoIconIcon}
 							customSrc={customSrc}
 							attachmentId={customAttachmentId}
 						/>

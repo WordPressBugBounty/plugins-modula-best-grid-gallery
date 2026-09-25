@@ -66,33 +66,50 @@ return array(
 							'groupedPaths' =>
 							array(
 								0  => 'general.width',
-								1  => 'general.height',
-								2  => 'layout.gridType',
-								3  => 'polaroid.uniformSize',
-								4  => 'polaroid.uniformColumns',
-								5  => 'layout.uniformGridTileAspect',
-								6  => 'layout.uniformGridTileAspectCustom',
-								7  => 'layout.fitGridImageAlign',
-								8  => 'layout.gridRowHeight',
-								9  => 'layout.gridJustifyLastRow',
-								10 => 'layout.gutter',
-								11 => 'layout.tabletGutter',
-								12 => 'layout.mobileGutter',
-								13 => 'layout.gridImageSize',
-								14 => 'layout.gridImageDimensions',
-								15 => 'layout.gridImageCrop',
-								16 => 'layout.parallaxOverlayEnabled',
-								17 => 'layout.parallaxOverlayBackground',
-								18 => 'layout.parallaxCaption',
-								19 => 'layout.parallaxMotionPreset',
-								20 => 'general.randomFactor',
-								21 => 'polaroid.randomFactor',
-								22 => 'polaroid.rotationMax',
-								23 => 'polaroid.scatterMax',
-								24 => 'polaroid.showPin',
-								25 => 'polaroid.framePadding',
-								26 => 'polaroid.chinHeight',
-								27 => 'general.shuffle',
+								1  => 'general.alignment',
+								2  => 'video.maxHeight',
+								3  => 'general.height',
+								4  => 'layout.gridType',
+								5  => 'polaroid.uniformSize',
+								6  => 'polaroid.uniformColumns',
+								7  => 'layout.uniformGridTileAspect',
+								8  => 'layout.uniformGridTileAspectCustom',
+								9  => 'layout.fitGridImageAlign',
+								10 => 'layout.gridRowHeight',
+								11 => 'layout.gridJustifyLastRow',
+								12 => 'layout.gutter',
+								13 => 'layout.tabletGutter',
+								14 => 'layout.mobileGutter',
+								15 => 'layout.gridImageSize',
+								16 => 'layout.gridImageDimensions',
+								17 => 'layout.gridImageCrop',
+								18 => 'layout.parallaxOverlayEnabled',
+								19 => 'layout.parallaxOverlayBackground',
+								20 => 'layout.parallaxCaption',
+								21 => 'layout.parallaxMotionPreset',
+								22 => 'general.randomFactor',
+								23 => 'polaroid.randomFactor',
+								24 => 'polaroid.rotationMax',
+								25 => 'polaroid.scatterMax',
+								26 => 'polaroid.showPin',
+								27 => 'polaroid.framePadding',
+								28 => 'polaroid.chinHeight',
+								29 => 'general.shuffle',
+							),
+						),
+						array(
+							'type'         => 'drill',
+							'label'        => 'Gallery layout',
+							'icon'         => 'layout',
+							'summaryKind'  => 'galleryLayout',
+							'visibleWhen'  => array(
+								'path' => 'general.type',
+								'eq'   => 'template',
+							),
+							'groupedPaths' =>
+							array(
+								0 => 'general.width',
+								1 => 'general.alignment',
 							),
 						),
 						array(
@@ -103,6 +120,7 @@ return array(
 							array(
 								0 => 'slider.sectionSize',
 								1 => 'general.width',
+								2 => 'general.alignment',
 							),
 							'group'               => 'slider',
 							'summaryParts'        =>
@@ -131,6 +149,7 @@ return array(
 							array(
 								0 => 'story.sectionSize',
 								1 => 'general.width',
+								2 => 'general.alignment',
 							),
 							'group'               => 'story',
 							'summaryParts'        =>
@@ -160,6 +179,7 @@ return array(
 							array(
 								0 => 'showcase.sectionLayout',
 								1 => 'general.width',
+								2 => 'general.alignment',
 							),
 							'group'               => 'showcase',
 							'summaryParts'        =>
@@ -1513,7 +1533,7 @@ return array(
 		array(
 			'name'        => 'video',
 			'title'       => 'Video',
-			'description' => 'Video playback, play badges, lightbox autoplay, and hover preview for Video galleries and mixed image galleries that include videos.',
+			'description' => 'Video playback, play icons, lightbox autoplay, and hover preview for Video galleries and mixed image galleries that include videos.',
 			'visibleWhen' => array(
 				'all' => array(
 					array(
@@ -1537,6 +1557,27 @@ return array(
 			'hubSections' =>
 			array(
 				array(
+					'type'        => 'submenu',
+					'label'       => 'Playback',
+					'visibleWhen' => array(
+						'path' => 'general.type',
+						'eq'   => 'video',
+					),
+					'items'       =>
+					array(
+						array(
+							'type'              => 'field',
+							'groupedPath'       => 'video.autoplayThumbnail',
+							'fieldPresentation' => 'embedded',
+						),
+						array(
+							'type'              => 'field',
+							'groupedPath'       => 'video.loopVideos',
+							'fieldPresentation' => 'embedded',
+						),
+					),
+				),
+				array(
 					'type'  => 'submenu',
 					'label' => 'In the lightbox',
 					'items' =>
@@ -1544,6 +1585,15 @@ return array(
 						array(
 							'type'              => 'field',
 							'groupedPath'       => 'video.playlistPosition',
+							'fieldPresentation' => 'embedded',
+							'visibleWhen'       => array(
+								'path' => 'general.type',
+								'eq'   => 'video',
+							),
+						),
+						array(
+							'type'              => 'field',
+							'groupedPath'       => 'video.showPlaylistScrollbar',
 							'fieldPresentation' => 'embedded',
 							'visibleWhen'       => array(
 								'path' => 'general.type',
@@ -1576,10 +1626,59 @@ return array(
 					'items' =>
 					array(
 						array(
+							'type'              => 'field',
+							'groupedPath'       => 'video.showVideoIcon',
+							'fieldPresentation' => 'embedded',
+							'visibleWhen'       => array(
+								'path' => 'general.type',
+								'eq'   => 'video',
+							),
+						),
+						array(
+							'type'              => 'field',
+							'groupedPath'       => 'video.videoIconColor',
+							'fieldPresentation' => 'embedded',
+							'visibleWhen'       => array(
+								'path' => 'general.type',
+								'eq'   => 'video',
+							),
+						),
+						array(
+							'type'              => 'field',
+							'groupedPath'       => 'video.playIconSize',
+							'fieldPresentation' => 'embedded',
+							'visibleWhen'       => array(
+								'path' => 'general.type',
+								'eq'   => 'video',
+							),
+						),
+						array(
+							'type'              => 'field',
+							'groupedPath'       => 'video.videoIconIcon',
+							'fieldPresentation' => 'embedded',
+							'visibleWhen'       => array(
+								'path' => 'general.type',
+								'eq'   => 'video',
+							),
+						),
+						array(
+							'type'              => 'field',
+							'groupedPath'       => 'video.customVideoIcon',
+							'fieldPresentation' => 'embedded',
+							'visibleWhen'       => array(
+								'path' => 'general.type',
+								'eq'   => 'video',
+							),
+						),
+						array(
 							'type'         => 'drill',
-							'label'        => 'Play badge',
+							'label'        => 'Play icon',
 							'icon'         => 'image',
-							'summaryKind'  => 'playBadge',
+							'summaryKind'  => 'playIcon',
+							'visibleWhen'  => array(
+								'path' => 'general.type',
+								'neq'  => 'video',
+							),
 							'groupedPaths' =>
 							array(
 								0 => 'video.showVideoIcon',
@@ -1594,6 +1693,10 @@ return array(
 							'label'        => 'Hover preview',
 							'icon'         => 'search',
 							'summaryKind'  => 'hoverPreview',
+							'visibleWhen'  => array(
+								'path' => 'general.type',
+								'neq'  => 'video',
+							),
 							'groupedPaths' =>
 							array(
 								0 => 'video.previewVideo',

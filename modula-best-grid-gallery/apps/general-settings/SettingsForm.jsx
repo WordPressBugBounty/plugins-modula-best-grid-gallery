@@ -13,32 +13,6 @@ import styles from './SettingsForm.module.scss';
 import OAuthField from './fields/OAuthField';
 import SubmenuToggle from './SubMenuToggle';
 import CredentialsGroup from './fields/CredentialsGroup';
-import { __ } from '@wordpress/i18n';
-
-function isTruthyToggle(value) {
-	return (
-		value === 'enabled' ||
-		value === true ||
-		value === 1 ||
-		value === 'true' ||
-		value === 'on' ||
-		value === '1'
-	);
-}
-
-function isAiActivationBlockedOnLocalhost(fieldName, currentValue) {
-	if (fieldName !== 'use_modula_ai') {
-		return false;
-	}
-	const unavailable =
-		typeof window !== 'undefined' &&
-		Boolean(window.modulaAiAvailability?.unavailableOnLocalhost);
-	if (!unavailable) {
-		return false;
-	}
-	// Stop new activation only; already-on can still be turned off.
-	return !isTruthyToggle(currentValue);
-}
 
 function setDefaultValue(acc, option, name, defaultValue) {
 	if (!name) {
@@ -155,14 +129,6 @@ export default function SettingsForm({ config, locked, badge }) {
 	};
 
 	const handleChange = (fieldState, fieldName, newValue) => {
-		if (
-			fieldName === 'use_modula_ai' &&
-			isAiActivationBlockedOnLocalhost(fieldName, fieldState.state.value) &&
-			isTruthyToggle(newValue)
-		) {
-			return;
-		}
-
 		fieldState.handleChange(newValue);
 
 		const allValues = form.store.state.values;
@@ -351,36 +317,14 @@ export default function SettingsForm({ config, locked, badge }) {
 											: field.name
 									}
 								>
-									{(fieldState) => {
-										const blockAiActivation =
-											isAiActivationBlockedOnLocalhost(
-												field.name,
-												fieldState.state.value
-											);
-										const fieldWithHelp =
-											blockAiActivation
-												? {
-														...field,
-														description: __(
-															'AI unavailable on localhost',
-															'modula-best-grid-gallery'
-														),
-													}
-												: field;
-										return (
-											<FieldRenderer
-												field={fieldWithHelp}
-												fieldState={fieldState}
-												handleChange={handleChange}
-												disabled={
-													field.disabled ||
-													fieldLocked ||
-													blockAiActivation ||
-													false
-												}
-											/>
-										);
-									}}
+									{(fieldState) => (
+										<FieldRenderer
+											field={field}
+											fieldState={fieldState}
+											handleChange={handleChange}
+											disabled={field.disabled || fieldLocked}
+										/>
+									)}
 								</form.Field>
 								{fieldLocked && (
 									<LockedForm badge={fieldBadge} />

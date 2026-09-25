@@ -514,15 +514,44 @@ function modula_show_schemaorg( $settings = array() ) {
 	<?php
 }
 
-function modula_edit_gallery( $settings ) {
+/**
+ * Admin edit URL for the visitor edit gallery link, or empty when it must not show.
+ *
+ * Respects troubleshooting disable and `edit_post` (via `get_edit_post_link`).
+ *
+ * @param int $gallery_id Gallery post ID.
+ * @return string
+ */
+function modula_visitor_edit_gallery_url( $gallery_id ) {
 	$troubleshooting_options = get_option( 'modula_troubleshooting_option', array() );
 	$disable_edit            = isset( $troubleshooting_options['disable_edit'] ) ? $troubleshooting_options['disable_edit'] : false;
 	if ( apply_filters( 'modula_troubleshooting_disable_edit', $disable_edit ) ) {
+		return '';
+	}
+
+	$gallery_id = absint( $gallery_id );
+	if ( $gallery_id < 1 ) {
+		return '';
+	}
+
+	$url = get_edit_post_link( $gallery_id, 'raw' );
+	return ( is_string( $url ) && '' !== $url ) ? $url : '';
+}
+
+/**
+ * Visitor edit gallery link (classic shortcode only).
+ *
+ * Beta galleries omit PHP output — React renders the same links from bootstrap.
+ *
+ * @param array<string, mixed> $settings Gallery settings.
+ */
+function modula_edit_gallery( $settings ) {
+	if ( modula_settings_is_beta_gallery( $settings ) ) {
 		return;
 	}
 
 	$gallery_id = isset( $settings['gallery_id'] ) ? Modula_Helper::classic_gallery_post_id( $settings['gallery_id'] ) : 0;
-	if ( $gallery_id < 1 ) {
+	if ( $gallery_id < 1 || '' === modula_visitor_edit_gallery_url( $gallery_id ) ) {
 		return;
 	}
 

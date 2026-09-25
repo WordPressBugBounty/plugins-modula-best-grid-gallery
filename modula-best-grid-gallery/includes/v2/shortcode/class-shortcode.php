@@ -40,7 +40,6 @@ class Shortcode {
 		add_shortcode( 'Modula', array( $this, 'render' ) );
 
 		add_action( 'modula_shortcode_after_items', 'modula_show_schemaorg', 90 );
-		add_action( 'modula_shortcode_after_items', 'modula_edit_gallery', 100 );
 	}
 
 	/**
@@ -552,9 +551,16 @@ class Shortcode {
 			'outputSchema'         => \Modula\V2\Modern_Gallery::OUTPUT_SCHEMA_VERSION,
 			'catalogPaged'         => $effective_catalog,
 			'imageSizeDimensions'  => \Modula_Helper::get_image_sizes( false ),
+			'blockAlign'           => is_string( $settings['align'] ?? null ) ? (string) $settings['align'] : '',
 		);
 		if ( ! $editor_preview && null !== $shuffle_seed && (int) $shuffle_seed > 0 ) {
 			$metadata['shuffleSeed'] = (int) $shuffle_seed;
+		}
+		if ( ! $editor_preview ) {
+			$edit_gallery_url = modula_visitor_edit_gallery_url( absint( $gallery_id ) );
+			if ( '' !== $edit_gallery_url ) {
+				$metadata['editGalleryUrl'] = $edit_gallery_url;
+			}
 		}
 
 		$gallery_data = array(

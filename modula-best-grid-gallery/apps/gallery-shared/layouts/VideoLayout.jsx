@@ -4,11 +4,13 @@
  * @package
  */
 
-import { useMemo } from '@wordpress/element';
+import { useMemo, useRef } from '@wordpress/element';
 import { useSelector } from 'react-redux';
+import usePlaylistDragScroll from '../hooks/usePlaylistDragScroll';
 import { useVideoGalleryController } from '../hooks/useVideoGalleryController';
 import VideoGalleryMainPlayer from '../video/VideoGalleryMainPlayer';
 import VideoGalleryPlaylistItem from '../video/VideoGalleryPlaylistItem';
+import { resolvePlaylistScrollbarChrome } from '../video/playlistScrollbarChrome';
 import {
 	normalizeVideoGalleryItems,
 	resolvePlaylistPosition,
@@ -19,6 +21,7 @@ export default function VideoLayout() {
 	const items = useSelector((state) => state.items.items);
 	const config = useSelector((state) => state.gallery.config);
 	const galleryId = config.galleryId || '0';
+	const playlistItemsRef = useRef(null);
 
 	const videos = useMemo(
 		() => normalizeVideoGalleryItems(items, config),
@@ -35,9 +38,22 @@ export default function VideoLayout() {
 
 	const activeVideo = videos[activeIndex] || null;
 	const playlistPosition = resolvePlaylistPosition(config);
+	const { showScrollbar, dragEnabled } =
+		resolvePlaylistScrollbarChrome(config);
 	const wrapClass = `modula-video-player-wrap playlist_${playlistPosition}`;
 	const playerId = `modula-video-player-${galleryId}`;
 	const showPlaylist = videos.length > 1;
+	const playlistItemsClass = [
+		'modula-video-items',
+		!showScrollbar ? 'modula-video-items--scrollbar-hidden' : '',
+	]
+		.filter(Boolean)
+		.join(' ');
+
+	usePlaylistDragScroll(playlistItemsRef, {
+		enabled: showPlaylist && dragEnabled,
+		axis: playlistPosition === 'bottom' ? 'x' : 'y',
+	});
 
 	if (!activeVideo) {
 		return (
@@ -70,7 +86,10 @@ export default function VideoLayout() {
 				</div>
 				{showPlaylist ? (
 					<div className="modula-video-items-wrap">
-						<div className="modula-video-items">
+						<div
+							ref={playlistItemsRef}
+							className={playlistItemsClass}
+						>
 							{videos.map((video, index) => (
 								<VideoGalleryPlaylistItem
 									key={

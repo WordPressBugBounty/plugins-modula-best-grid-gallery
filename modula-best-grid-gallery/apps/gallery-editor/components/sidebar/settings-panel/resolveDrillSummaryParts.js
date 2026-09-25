@@ -733,12 +733,12 @@ function formatImageGuardianSummary(values) {
 }
 
 /**
- * Hub summary for the play badge on video tiles.
+ * Hub summary for the play icon on video tiles.
  *
  * @param {Record<string, Record<string, unknown>>} values
  * @return {Array<{ kind: 'text', text: string }>}
  */
-function formatPlayBadgeSummary(values) {
+function formatPlayIconSummary(values) {
 	if (!isTruthySetting(getByPath(values, 'video.showVideoIcon'))) {
 		return [
 			{
@@ -1115,8 +1115,8 @@ export function resolveDrillSummaryParts(section, values, extras = {}) {
 	if (kind === 'watermark') {
 		return formatWatermarkSummary(extras.bootstrapItems);
 	}
-	if (kind === 'playBadge') {
-		return formatPlayBadgeSummary(values || {});
+	if (kind === 'playIcon') {
+		return formatPlayIconSummary(values || {});
 	}
 	if (kind === 'hoverPreview') {
 		return formatHoverPreviewSummary(values || {});

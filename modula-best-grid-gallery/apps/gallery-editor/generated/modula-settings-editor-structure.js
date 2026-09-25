@@ -59,6 +59,8 @@ export default {
 							},
 							groupedPaths: [
 								"general.width",
+								"general.alignment",
+								"video.maxHeight",
 								"general.height",
 								"layout.gridType",
 								"polaroid.uniformSize",
@@ -91,10 +93,25 @@ export default {
 						{
 							type: "drill",
 							label: __( "Gallery layout", 'modula-best-grid-gallery' ),
+							icon: "layout",
+							summaryKind: "galleryLayout",
+							visibleWhen: {
+								path: "general.type",
+								eq: "template"
+							},
+							groupedPaths: [
+								"general.width",
+								"general.alignment"
+							]
+						},
+						{
+							type: "drill",
+							label: __( "Gallery layout", 'modula-best-grid-gallery' ),
 							icon: "gallery",
 							prependGroupedPaths: [
 								"slider.sectionSize",
-								"general.width"
+								"general.width",
+								"general.alignment"
 							],
 							group: "slider",
 							summaryParts: [
@@ -120,7 +137,8 @@ export default {
 							icon: "gallery",
 							prependGroupedPaths: [
 								"story.sectionSize",
-								"general.width"
+								"general.width",
+								"general.alignment"
 							],
 							group: "story",
 							summaryParts: [
@@ -147,7 +165,8 @@ export default {
 							icon: "gallery",
 							prependGroupedPaths: [
 								"showcase.sectionLayout",
-								"general.width"
+								"general.width",
+								"general.alignment"
 							],
 							group: "showcase",
 							summaryParts: [
@@ -1474,7 +1493,7 @@ export default {
 		{
 			name: "video",
 			title: __( "Video", 'modula-best-grid-gallery' ),
-			description: __( "Video playback, play badges, lightbox autoplay, and hover preview for Video galleries and mixed image galleries that include videos.", 'modula-best-grid-gallery' ),
+			description: __( "Video playback, play icons, lightbox autoplay, and hover preview for Video galleries and mixed image galleries that include videos.", 'modula-best-grid-gallery' ),
 			visibleWhen: {
 				all: [
 					{
@@ -1498,11 +1517,40 @@ export default {
 			hubSections: [
 				{
 					type: "submenu",
+					label: __( "Playback", 'modula-best-grid-gallery' ),
+					visibleWhen: {
+						path: "general.type",
+						eq: "video"
+					},
+					items: [
+						{
+							type: "field",
+							groupedPath: "video.autoplayThumbnail",
+							fieldPresentation: "embedded"
+						},
+						{
+							type: "field",
+							groupedPath: "video.loopVideos",
+							fieldPresentation: "embedded"
+						}
+					]
+				},
+				{
+					type: "submenu",
 					label: __( "In the lightbox", 'modula-best-grid-gallery' ),
 					items: [
 						{
 							type: "field",
 							groupedPath: "video.playlistPosition",
+							fieldPresentation: "embedded",
+							visibleWhen: {
+								path: "general.type",
+								eq: "video"
+							}
+						},
+						{
+							type: "field",
+							groupedPath: "video.showPlaylistScrollbar",
 							fieldPresentation: "embedded",
 							visibleWhen: {
 								path: "general.type",
@@ -1534,10 +1582,59 @@ export default {
 					label: __( "In the grid", 'modula-best-grid-gallery' ),
 					items: [
 						{
+							type: "field",
+							groupedPath: "video.showVideoIcon",
+							fieldPresentation: "embedded",
+							visibleWhen: {
+								path: "general.type",
+								eq: "video"
+							}
+						},
+						{
+							type: "field",
+							groupedPath: "video.videoIconColor",
+							fieldPresentation: "embedded",
+							visibleWhen: {
+								path: "general.type",
+								eq: "video"
+							}
+						},
+						{
+							type: "field",
+							groupedPath: "video.playIconSize",
+							fieldPresentation: "embedded",
+							visibleWhen: {
+								path: "general.type",
+								eq: "video"
+							}
+						},
+						{
+							type: "field",
+							groupedPath: "video.videoIconIcon",
+							fieldPresentation: "embedded",
+							visibleWhen: {
+								path: "general.type",
+								eq: "video"
+							}
+						},
+						{
+							type: "field",
+							groupedPath: "video.customVideoIcon",
+							fieldPresentation: "embedded",
+							visibleWhen: {
+								path: "general.type",
+								eq: "video"
+							}
+						},
+						{
 							type: "drill",
-							label: __( "Play badge", 'modula-best-grid-gallery' ),
+							label: __( "Play icon", 'modula-best-grid-gallery' ),
 							icon: "image",
-							summaryKind: "playBadge",
+							summaryKind: "playIcon",
+							visibleWhen: {
+								path: "general.type",
+								neq: "video"
+							},
 							groupedPaths: [
 								"video.showVideoIcon",
 								"video.videoIconIcon",
@@ -1552,6 +1649,10 @@ export default {
 							label: __( "Hover preview", 'modula-best-grid-gallery' ),
 							icon: "search",
 							summaryKind: "hoverPreview",
+							visibleWhen: {
+								path: "general.type",
+								neq: "video"
+							},
 							groupedPaths: [
 								"video.previewVideo",
 								"video.autoplayThumbnail",

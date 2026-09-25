@@ -15,7 +15,7 @@ return array(
 		'interaction' => 'Configure downloads, social sharing, and visitor comments.',
 		'protection'  => 'Watermark, password protection, licensing, and image guardian.',
 		'advanced'    => 'EXIF, performance, integrations and technical options.',
-		'video'       => 'Video playback, play badges, and in-gallery preview settings.',
+		'video'       => 'Video playback, play icons, and in-gallery preview settings.',
 	),
 	'categoryNavHelp'    => array(
 		'layout'      => 'Structure and image sizing',
@@ -28,7 +28,7 @@ return array(
 	),
 	'sectionIntros'      => array(
 		'layout::Gallery type'           => 'Pick the overall layout for this gallery. The options below change depending on what you select here.',
-		'layout::Gallery layout'         => 'Columns, spacing, image sizes, and layout-specific options for grid-style galleries.',
+		'layout::Gallery layout'         => 'Columns, spacing, image sizes, and layout-specific options for grid-style galleries. When Gallery type is **Video**, Max height sits here next to width.',
 		'layout::Slider'                 => 'Carousel settings when Gallery type is Slider.',
 		'layout::Story'                  => 'Options for the fullscreen Story layout (similar to social media stories).',
 		'layout::Pagination'             => 'Split large galleries into pages, or load more images as visitors scroll.',
@@ -61,7 +61,7 @@ return array(
 		'advanced::Performance'          => 'Lazy loading and image compression for faster pages.',
 		'advanced::Image proofing'       => 'Let clients select and approve images privately.',
 		'video::Playlist position'       => 'Where the video list appears relative to the main player.',
-		'video::Play badge'              => 'The mark that tells a visitor a tile is a video, not a photo.',
+		'video::Play icon'               => 'The mark that tells a visitor a tile is a video, not a photo. On non-Video galleries the full play-icon set lives in this drill. On Video galleries show, colour, size, icon, and custom image sit flat on the hub.',
 		'video::Hover preview'           => 'A short silent clip that plays in the tile while the pointer is on it.',
 	),
 	'sectionVisibility'  => array(
@@ -72,10 +72,12 @@ return array(
 		'lightbox'               => 'Hidden when Gallery type is **Slider**, **Story**, or **Video**.',
 		'filters'                => 'Hidden for Slider, Story, Video, BnB, and Parallax masonry galleries.',
 		'video'                  => 'Shown for galleries that can include videos (hidden for **Story** and **Slider**).',
+		'video::Play icon'       => 'Hidden when Gallery type is **Video** (those controls sit flat on the Video hub). On other types: full play-icon set (show, icon, image, colour, size).',
 	),
 	'fieldDescriptions'  => array(
 		'general.type'                        => 'Chooses the overall layout style — masonry grid, uniform tiles, slider, story, video player, and more.',
 		'general.width'                       => 'How wide the gallery is on the page. Common values are 100% (full width of the content area) or a fixed width such as 1200px.',
+		'general.alignment'                   => 'Where the gallery sits when it is narrower than the content area: Left, Center, or Right. Gutenberg or shortcode alignment overrides this when set.',
 		'general.height'                      => 'Packery canvas height for creative-gallery (and polaroid when Uniform size is off): desktop, tablet, and mobile. Values of 0 fall back to 800px. Not used when polaroid Uniform size is on.',
 		'general.randomFactor'                => 'Adds variety to tile sizes in Creative gallery. Higher values mean more uneven splits; 0 keeps a strict half-and-half look.',
 		'general.shuffle'                     => 'Shows images in a random order every time someone loads the page.',
@@ -109,6 +111,7 @@ return array(
 		'responsive.treatAsTabletUnder'       => 'Screens narrower than this width (in pixels) use tablet layout. A typical tablet breakpoint is about 1024.',
 		'responsive.treatAsPhoneUnder'        => 'Screens narrower than this width (in pixels) use phone layout. A typical phone breakpoint is about 600.',
 		'story.infinite'                      => 'After the last story, playback continues from the first — like Instagram stories.',
+		'video.maxHeight'                     => 'Caps player and playlist height together. Prefer vh for viewport fit, or px for a fixed cap. With playlist below, the player shrinks so thumbs stay visible. Edited under Layout → Gallery layout when Gallery type is **Video** (not on the Video hub).',
 		'pagination.maxImagesCount'           => 'Maximum images per page on desktop. Use 0 for no limit (defaults to 12 when Pagination is on).',
 		'pagination.maxImagesCountMobile'     => 'Maximum images per page on mobile. Use 0 to match desktop (defaults to 12 when Pagination is on).',
 		'pagination.enableInfiniteScroll'     => 'Loads the next page automatically when the visitor scrolls down. Not available for creative-gallery, or for polaroid when Uniform size is off (fixed packery height).',
@@ -162,8 +165,13 @@ return array(
 		'filters.filterPositioning::right'            => 'Filter bar along the right side.',
 		'filters.filterPositioning::top_bottom'       => 'Duplicate filter bars above and below.',
 		'filters.filterPositioning::left_right'       => 'Duplicate filter bars on left and right.',
+		'video.showPlaylistScrollbar'               => 'When off, the playlist scrollbar stays hidden and visitors can drag the thumb strip to scroll. When on, the native scrollbar is shown and drag is off.',
 	),
 	'toggleOnOff'        => array(
+		'video.showPlaylistScrollbar' => array(
+			'on'  => 'The native playlist scrollbar is visible; drag-to-scroll is off.',
+			'off' => 'The scrollbar is hidden; visitors can drag the thumb strip to scroll.',
+		),
 		'story.infinite'              => array(
 			'on'  => 'After the last image, the story starts again from the beginning.',
 			'off' => 'Playback stops after the last image.',

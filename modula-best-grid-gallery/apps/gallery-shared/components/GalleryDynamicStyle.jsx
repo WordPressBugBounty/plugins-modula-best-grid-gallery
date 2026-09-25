@@ -31,6 +31,8 @@ import { isSettingsEditorPreview } from '../utils/displayContext';
 import { buildFilterBarDynamicCss } from '../utils/buildFilterBarDynamicCss';
 import { buildPaginationDynamicCss } from '../utils/buildPaginationDynamicCss';
 import { resolveGalleryWidthCss } from '../utils/resolveGalleryWidthCss';
+import { resolveGalleryAlignmentCss } from '../utils/resolveGalleryAlignmentCss';
+import { resolveVideoMaxHeightCss } from '../utils/resolveVideoMaxHeightCss';
 import { clampMasonryGalleryWidth } from '../utils/clampMasonryGalleryWidth';
 
 function safeNumber(value) {
@@ -509,13 +511,21 @@ export default function GalleryDynamicStyle() {
 			config.type
 		)
 	);
-	if (widthValue) {
-		const isPercent = widthValue.includes('%');
-		if (isPercent) {
-			css += `${root}{width:${widthValue};}`;
-		} else {
-			css += `${root}{width:${widthValue};max-width:100%;}`;
+	const alignmentCss = resolveGalleryAlignmentCss(config.alignment, {
+		blockAlign: metadata.blockAlign,
+	});
+	if (widthValue || alignmentCss) {
+		const isPercent = widthValue && widthValue.includes('%');
+		let rootDecls = '';
+		if (widthValue) {
+			rootDecls += isPercent
+				? `width:${widthValue};`
+				: `width:${widthValue};max-width:100%;`;
 		}
+		if (alignmentCss) {
+			rootDecls += alignmentCss;
+		}
+		css += `${root}{${rootDecls}}`;
 	}
 
 	const skipLoadingEffects = isGalleryTypeWithoutLoadingEffects(config.type);
@@ -660,6 +670,10 @@ export default function GalleryDynamicStyle() {
 		css += `${root} .modula-video-tile-preview.is-active ~ .modula-video-icon,${root} .modula-video-tile-preview.is-autoplay ~ .modula-video-icon{opacity:0;}`;
 
 		if (config.type === 'video') {
+			const videoMaxHeight = resolveVideoMaxHeightCss(
+				config.video?.maxHeight ?? groupedVideo.maxHeight
+			);
+			css += `${root}{--modula-video-max-height:${videoMaxHeight};}`;
 			/*
 			 * Style frame chrome for Video layout: main player + every playlist
 			 * thumb (not only `.current-item`). Classic Pro only framed the active

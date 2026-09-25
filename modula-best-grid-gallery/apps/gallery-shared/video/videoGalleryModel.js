@@ -453,6 +453,7 @@ export function normalizeVideoGalleryItem(item, galleryConfig = {}) {
 			item,
 			videoSettings.autoplayThumbnail
 		),
+		loopVideos: !!videoSettings.loopVideos,
 		title: String(item.video_title ?? item.title ?? '').trim(),
 	};
 }

@@ -776,6 +776,8 @@ export function sliderSettingsToCarousel(settings, opts = {}) {
 		thumbsStripStyle,
 		thumbsEqualSlots,
 		thumbsPaged,
+		thumbnailSize: slider.syncingNavSize || 'auto',
+		thumbnailCustomKey: `${parseInt(slider.syncingNavImageDimensions?.width, 10) || 0}x${parseInt(slider.syncingNavImageDimensions?.height, 10) || 0}:${toBool(slider.syncingNavImageCrop) ? 1 : 0}`,
 		arrowsInside: arrowsInsideOn,
 		arrowsEnabled: arrowsOn,
 	};

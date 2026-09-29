@@ -16,7 +16,7 @@ import {
 } from '@wordpress/element';
 import { useSelector, shallowEqual } from 'react-redux';
 import { GalleryPreviewEagerLayoutsContext } from '../context/GalleryPreviewEagerLayoutsContext';
-import { getLayoutLoader } from '../layouts';
+import { getLayoutLoader, resolveGalleryLayoutType } from '../layouts';
 import GalleryDynamicStyle from './GalleryDynamicStyle';
 import { useModulaGalleryLightbox } from '../lightbox/lightboxOpenFacade';
 import { useModulaGalleryDeeplink } from '../lightbox/useModulaGalleryDeeplink';
@@ -100,10 +100,7 @@ export default function Gallery() {
 	const hideVisitorChrome = shouldHideVisitorChrome(metadata);
 
 	const rawType = config?.type || DEFAULT_GALLERY_TYPE;
-	const layoutType =
-		rawType === 'grid' && config?.grid_type === 'automatic'
-			? 'justified-grid'
-			: rawType;
+	const layoutType = resolveGalleryLayoutType(config);
 	const skipFilters = isGalleryTypeWithoutFilters(rawType);
 	const skipPagination = isGalleryTypeWithoutPagination(rawType);
 	const showPagination =
@@ -196,7 +193,7 @@ export default function Gallery() {
 				<LazyGalleryDownloadAllButton placement="below" />
 			</Suspense>
 			{!hideVisitorChrome && (
-				<Suspense fallback={<GalleryChunkLoadingFallback />}>
+				<Suspense fallback={null}>
 					<LazyGalleryLicensingBox />
 				</Suspense>
 			)}

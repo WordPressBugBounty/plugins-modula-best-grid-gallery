@@ -1900,6 +1900,10 @@ html body .modula .modula-slider.modula-slider--fixed-height {
 			width: 100%;
 		}
 
+		.modula-item-picture-stack:not(.modula-item-picture-stack--fill-parent) {
+			aspect-ratio: var(--modula-image-aspect-ratio, auto);
+		}
+
 		.modula-item-picture:not(.modula-item-picture--focal-crop),
 		.modula-item-picture:not(.modula-item-picture--focal-crop) img {
 			display: block;

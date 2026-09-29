@@ -99,6 +99,22 @@ function prepareSocials(itemData, config, options = {}) {
 			});
 		}
 	});
+	/*
+	 * Compatible Pro Download: modula_shortcode_item_data adds download.download_button
+	 * + download.image_url. Prefer that payload over inventing a second URL scheme.
+	 */
+	const download = itemData.download;
+	const downloadUrl =
+		download && typeof download.image_url === 'string'
+			? download.image_url.trim()
+			: '';
+	if (isGalleryItemFlagOn(download?.download_button) && downloadUrl) {
+		socials.push({
+			type: 'download',
+			label: 'Download image',
+			url: downloadUrl,
+		});
+	}
 	return socials;
 }
 
@@ -122,6 +138,7 @@ function prepareSocials(itemData, config, options = {}) {
  * @property {boolean}                                               [hideDescription]
  * @property {boolean}                                               [hideSocials]
  * @property {boolean|number}                                        [lazyLoad]
+ * @property {{ download_button?: boolean|number|string, image_url?: string }} [download] Pro Download per-image payload
  * @property {string[]}                                              [itemClasses]
  * @property {Object[]}                                              [itemAttributes]
  * @property {string[]}                                              [linkClasses]

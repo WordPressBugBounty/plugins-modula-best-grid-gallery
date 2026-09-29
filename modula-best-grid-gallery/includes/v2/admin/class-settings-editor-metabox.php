@@ -366,18 +366,16 @@ class Settings_Editor_Metabox {
 			}
 		}
 
-		$gallery_preview_css_rel = 'assets/css/front/modula-gallery-bootstrap.modula-gallery.css';
-		$gallery_preview_css     = MODULA_PATH . $gallery_preview_css_rel;
-		if ( ! file_exists( $gallery_preview_css ) ) {
-			$gallery_preview_css_rel = 'assets/css/front/modula-gallery.css';
-			$gallery_preview_css     = MODULA_PATH . $gallery_preview_css_rel;
+		$gallery_preview_css_url = \Modula\V2\Modern_Gallery::bootstrap_stylesheet_url();
+		if ( '' === $gallery_preview_css_url && file_exists( $gallery_loader_css ) ) {
+			$gallery_preview_css_url = add_query_arg( 'ver', (string) filemtime( $gallery_loader_css ), MODULA_URL . $gallery_loader_css_rel );
 		}
-		if ( file_exists( $gallery_preview_css ) ) {
+		if ( '' !== $gallery_preview_css_url ) {
 			wp_enqueue_style(
 				'modula-gallery-preview-front',
-				MODULA_URL . $gallery_preview_css_rel,
+				$gallery_preview_css_url,
 				array( 'modula-gallery-preview-loader' ),
-				(string) filemtime( $gallery_preview_css )
+				null
 			);
 			if ( class_exists( '\Modula\V2\Modern_Gallery' ) ) {
 				\Modula\V2\Modern_Gallery::attach_gallery_chrome_inline_style( 'modula-gallery-preview-front' );

@@ -1,13 +1,16 @@
 import {
 	getDeeplinkGalleryIdFromHash,
 	MODERN_VISITOR_ROOT_PENDING_SELECTOR,
-} from 'gallery-shared/runtime';
+} from 'gallery-shared/loader';
 import {
 	BOOTSTRAP_FORCE_GRACE_MS,
 	BOOTSTRAP_STALL_MS,
 	resolveBootstrapStallAction,
 } from './bootstrapStall';
 import './loader.scss';
+import { waitForGalleryLoad } from './waitForGalleryLoad';
+import { loadGalleryStylesheet } from './loadGalleryStylesheet';
+import { loadReactDependencies } from './loadReactDependencies';
 
 const ROOT_MARGIN = '200px 0px';
 
@@ -21,6 +24,7 @@ if (
 
 /** @type {Promise<import('./bootstrap').default>|null} */
 let bootstrapPromise = null;
+let bootstrapApi = null;
 
 /** @type {WeakMap<HTMLElement, IntersectionObserver>} */
 const galleryObservers = new WeakMap();
@@ -28,7 +32,14 @@ const galleryObservers = new WeakMap();
 /** @type {WeakSet<HTMLElement>} */
 const destroyedGalleries = new WeakSet();
 
-/** @type {WeakMap<HTMLElement, { scheduledAt: number, forceMountAttempted: boolean, timerId: number }>} */
+/**
+ * Active attempts stay addressable by ID even while their element is detached.
+ * Entries are released on completion, timeout or destruction.
+ * @type {Map<HTMLElement, { promise: Promise<void>, controller: AbortController }>}
+ */
+const pendingLoads = new Map();
+
+/** @type {WeakMap<HTMLElement, { loadRequestedAt: number, forceMountAttempted: boolean, timerId: number }>} */
 const stallWatchdogs = new WeakMap();
 
 /**
@@ -146,6 +157,12 @@ function clearStallWatchdog(element) {
 	stallWatchdogs.delete(element);
 }
 
+function cancelPendingLoad(element) {
+	const attempt = pendingLoads.get(element);
+	pendingLoads.delete(element);
+	attempt?.controller.abort();
+}
+
 /**
  * @param {HTMLElement} element
  * @param {number} delayMs
@@ -175,7 +192,7 @@ async function onStallTick(element) {
 
 	const action = resolveBootstrapStallAction({
 		now: Date.now(),
-		scheduledAt: state.scheduledAt,
+		loadRequestedAt: state.loadRequestedAt,
 		initialized: element.classList.contains('modula-gallery-initialized'),
 		pending: element.classList.contains(
 			'modula-gallery--bootstrap-pending'
@@ -189,7 +206,7 @@ async function onStallTick(element) {
 	}
 
 	if (action === 'wait') {
-		const elapsed = Date.now() - state.scheduledAt;
+		const elapsed = Date.now() - state.loadRequestedAt;
 		const nextIn = state.forceMountAttempted
 			? Math.max(
 					250,
@@ -205,13 +222,15 @@ async function onStallTick(element) {
 		console.warn(
 			'Modula: gallery still Loading after stall — forcing bootstrap mount'
 		);
-		await mountWhenVisible(element, { fromStall: true });
 		scheduleStallCheck(element, BOOTSTRAP_FORCE_GRACE_MS);
+		void mountWhenVisible(element, { fromStall: true });
 		return;
 	}
 
 	if (action === 'show-error') {
 		clearStallWatchdog(element);
+		cancelPendingLoad(element);
+		element.removeAttribute('data-modula-visible');
 		console.error(
 			'Modula: gallery bootstrap stalled with no successful mount'
 		);
@@ -227,7 +246,7 @@ async function onStallTick(element) {
 function armStallWatchdog(element) {
 	clearStallWatchdog(element);
 	stallWatchdogs.set(element, {
-		scheduledAt: Date.now(),
+		loadRequestedAt: Date.now(),
 		forceMountAttempted: false,
 		timerId: 0,
 	});
@@ -237,19 +256,20 @@ function armStallWatchdog(element) {
 /**
  * @returns {Promise<import('./bootstrap').default>}
  */
-function loadBootstrap() {
+function loadBootstrap(signal) {
 	if (!bootstrapPromise) {
-		bootstrapPromise = import(
-			/* webpackChunkName: "modula-gallery-bootstrap" */ './bootstrap'
-		)
-			.then((mod) => {
+		bootstrapPromise = Promise.all([
+			loadGalleryStylesheet(window.modulaGallery?.bootstrapStylesheet),
+			loadReactDependencies().then(
+				() =>
+					import(
+						/* webpackChunkName: "modula-gallery-bootstrap" */ './bootstrap'
+					)
+			),
+		])
+			.then(([, mod]) => {
 				const api = mod.default ?? mod;
-				if (typeof window !== 'undefined') {
-					window.ModulaGallery = api;
-					window.ModulaGalleryInit = api.initAllGalleries;
-					window.ModulaGalleryDestroy = api.destroyGallery;
-					window.ModulaGalleryGetInstance = api.getGalleryInstance;
-				}
+				bootstrapApi = api;
 				return api;
 			})
 			.catch((err) => {
@@ -257,21 +277,54 @@ function loadBootstrap() {
 				throw err;
 			});
 	}
-	return bootstrapPromise;
+	return waitForGalleryLoad(bootstrapPromise, signal);
 }
 
 /**
  * @param {HTMLElement} element
  * @param {{ fromStall?: boolean }} [options]
  */
-async function mountWhenVisible(element, options = {}) {
-	if (destroyedGalleries.has(element)) {
-		return;
+function mountWhenVisible(element, options = {}) {
+	if (
+		destroyedGalleries.has(element) ||
+		element.classList.contains('modula-gallery-initialized')
+	) {
+		return Promise.resolve();
+	}
+	const pending = pendingLoads.get(element);
+	if (pending) {
+		return pending.promise;
+	}
+	const attempt = { promise: null, controller: new AbortController() };
+	pendingLoads.set(element, attempt);
+	galleryObservers.get(element)?.disconnect();
+	galleryObservers.delete(element);
+	showPendingState(element);
+	if (!options.fromStall) {
+		armStallWatchdog(element);
 	}
 	markVisible(element);
+	attempt.promise = performMount(element, attempt);
+	return attempt.promise;
+}
+
+async function performMount(element, attempt) {
 	try {
-		const api = await loadBootstrap();
-		await api.initGalleries();
+		const { signal } = attempt.controller;
+		const api = await loadBootstrap(signal);
+		if (
+			pendingLoads.get(element) !== attempt ||
+			destroyedGalleries.has(element)
+		) {
+			return;
+		}
+		await api.initGalleries({ element, signal });
+		if (
+			pendingLoads.get(element) !== attempt ||
+			destroyedGalleries.has(element)
+		) {
+			return;
+		}
 		if (
 			!element.classList.contains('modula-gallery-initialized') &&
 			!element._modulaRoot
@@ -280,14 +333,21 @@ async function mountWhenVisible(element, options = {}) {
 		}
 		clearStallWatchdog(element);
 	} catch (err) {
-		console.error('Modula: gallery bootstrap failed', err);
-		if (options.fromStall) {
+		if (
+			pendingLoads.get(element) !== attempt ||
+			destroyedGalleries.has(element)
+		) {
 			return;
 		}
+		console.error('Modula: gallery bootstrap failed', err);
 		clearStallWatchdog(element);
 		showBootstrapError(element, loadingFailedMessage(), {
 			withRetry: true,
 		});
+	} finally {
+		if (pendingLoads.get(element) === attempt) {
+			pendingLoads.delete(element);
+		}
 	}
 }
 
@@ -331,7 +391,10 @@ function observeGallery(element, onVisible) {
 	const observer = new IntersectionObserver(
 		(entries) => {
 			for (const entry of entries) {
-				if (!entry.isIntersecting) {
+				if (
+					!entry.isIntersecting ||
+					!isElementInViewport(entry.target)
+				) {
 					continue;
 				}
 				observer.unobserve(entry.target);
@@ -381,8 +444,10 @@ function scheduleGallery(element) {
 		return;
 	}
 	showPendingState(element);
-	armStallWatchdog(element);
-	if (shouldEagerMountForDeeplink(element)) {
+	if (
+		element.dataset.modulaLazyLoad === '0' ||
+		shouldEagerMountForDeeplink(element)
+	) {
 		void mountWhenVisible(element);
 		return;
 	}
@@ -397,6 +462,10 @@ function onGalleryDestroyed(event) {
 		return;
 	}
 	destroyedGalleries.add(el);
+	cancelPendingLoad(el);
+	el.classList.remove('modula-gallery--bootstrap-pending');
+	el.removeAttribute('data-modula-visible');
+	el.querySelector('.modula-gallery__bootstrap-loading')?.remove();
 	clearStallWatchdog(el);
 	const observer = galleryObservers.get(el);
 	if (observer) {
@@ -407,6 +476,52 @@ function onGalleryDestroyed(event) {
 
 document.addEventListener('modula:gallery:destroyed', onGalleryDestroyed);
 
+// Keep the public lifecycle available even when every gallery is still dormant.
+function initGalleries({ forceAll = false } = {}) {
+	const selector = forceAll
+		? MODERN_VISITOR_ROOT_PENDING_SELECTOR
+		: `${MODERN_VISITOR_ROOT_PENDING_SELECTOR}[data-modula-visible="1"]`;
+	return Promise.all(
+		Array.from(document.querySelectorAll(selector), (element) =>
+			mountWhenVisible(element)
+		)
+	);
+}
+
+function destroyGallery(identifier) {
+	const element =
+		typeof identifier === 'string'
+			? document.getElementById(identifier) ||
+				Array.from(pendingLoads.keys()).find(
+					(pending) => pending.id === identifier
+				)
+			: identifier;
+	if (bootstrapApi) {
+		bootstrapApi.destroyGallery(element || identifier);
+		return;
+	}
+	if (element instanceof HTMLElement) {
+		document.dispatchEvent(
+			new CustomEvent('modula:gallery:destroyed', {
+				detail: { element },
+				bubbles: true,
+			})
+		);
+	}
+}
+
+const api = {
+	initGalleries,
+	initAllGalleries: () => initGalleries({ forceAll: true }),
+	destroyGallery,
+	getGalleryInstance: (identifier) =>
+		bootstrapApi?.getGalleryInstance(identifier) ?? null,
+};
+window.ModulaGallery = api;
+window.ModulaGalleryInit = api.initAllGalleries;
+window.ModulaGalleryDestroy = api.destroyGallery;
+window.ModulaGalleryGetInstance = api.getGalleryInstance;
+
 function scanGalleries() {
 	document
 		.querySelectorAll(MODERN_VISITOR_ROOT_PENDING_SELECTOR)
@@ -416,6 +531,16 @@ function scanGalleries() {
 function onReady() {
 	scanGalleries();
 }
+
+window.addEventListener('hashchange', () => {
+	document
+		.querySelectorAll(MODERN_VISITOR_ROOT_PENDING_SELECTOR)
+		.forEach((element) => {
+			if (shouldEagerMountForDeeplink(element)) {
+				void mountWhenVisible(element);
+			}
+		});
+});
 
 if (document.readyState === 'loading') {
 	document.addEventListener('DOMContentLoaded', onReady);

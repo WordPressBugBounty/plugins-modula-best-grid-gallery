@@ -11,12 +11,13 @@ export { createGalleryStore } from './store';
 export * from './utils/data-loader';
 export * from './utils/preloadState';
 export { settingsToConfig } from './utils/settingsToConfig';
-export { getLayoutLoader } from './layouts';
+export { getLayoutLoader, resolveGalleryLayoutType } from './layouts';
 export * from './utils/fetchGalleryBootstrap';
 export * from './utils/galleryBootstrapContext';
 export {
 	closeModulaLightbox,
 	isModulaLightboxActiveForGalleryElement,
-} from './lightbox/lightboxOpenFacade.session';
+	cancelModulaGalleryLightboxOpen,
+} from './lightbox/lightboxOpenFacade';
 export * from './lightbox/modulaDeeplinkFromHash';
 export * from './utils/visitorRootClassification';

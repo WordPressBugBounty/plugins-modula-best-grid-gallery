@@ -86,9 +86,13 @@
 
 /* Pro Comments: Fancybox v6 sidebar grid + full-height panel (not a floating bar). */
 .fancybox__container.has-modula-comments {
-	--sidebar-width: min(400px, 38vw);
 	--modula-comments-panel-padding-x: 24px;
 	--modula-comments-panel-padding-y: 20px;
+
+	/* Comments CSS can arrive last; the modern host owns the media/sidebar split. */
+	&.modula-fancybox-container {
+		--sidebar-width: min(400px, 38vw);
+	}
 
 	.fancybox__carousel {
 		min-height: 0;
@@ -263,32 +267,43 @@
 			right: 0 !important;
 		}
 	}
+}
 
-	&.has-thumbs-sidebar {
-		.fancybox__sidebar[data-modula-thumbs-sidebar] {
-			position: absolute;
-			top: 45px;
-			bottom: 0;
-			width: 115px;
-			z-index: 20;
-			overflow: hidden;
-		}
+/*
+ * Left/right thumbnail strip — visitor parity with classic fancybox.css and
+ * editor lightbox preview. Applies with or without the comments panel.
+ */
+.modula-best-grid-gallery .fancybox__container.has-thumbs-sidebar,
+.modula-fancybox-container.has-thumbs-sidebar {
+	.fancybox__sidebar[data-modula-thumbs-sidebar] {
+		position: absolute;
+		top: 45px;
+		bottom: 0;
+		width: 115px;
+		z-index: 20;
+		overflow: hidden;
+	}
 
-		.fancybox__sidebar[data-modula-thumbs-sidebar='left'] {
-			left: 10px;
-		}
+	.fancybox__sidebar[data-modula-thumbs-sidebar='left'] {
+		left: 10px;
+	}
 
-		.fancybox__sidebar[data-modula-thumbs-sidebar='right'] {
-			right: calc(var(--sidebar-container-width, 0px) + 10px);
-		}
+	.fancybox__sidebar[data-modula-thumbs-sidebar='right'] {
+		right: calc(var(--sidebar-container-width, 0px) + 10px);
+	}
 
-		.fancybox__sidebar[data-modula-thumbs-sidebar] .fancybox__thumbs,
-		.fancybox__sidebar[data-modula-thumbs-sidebar] .f-thumbs {
-			position: absolute;
-			inset: 0;
-			width: 100%;
-			height: 100%;
-		}
+	.fancybox__sidebar[data-modula-thumbs-sidebar] .fancybox__thumbs,
+	.fancybox__sidebar[data-modula-thumbs-sidebar] .f-thumbs {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		max-height: none !important;
+	}
+
+	.f-button.is-arrow.is-prev,
+	.f-button.is-arrow.is-next {
+		--f-arrow-pos: 8rem;
 	}
 }
 

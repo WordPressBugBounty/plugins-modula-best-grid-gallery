@@ -17,6 +17,10 @@ import SliderItem from '../components/SliderItem';
 import { galleryItemRowKey } from '../utils/galleryItemIdentity';
 import { resolveSliderNavigationStep } from '../utils/sliderSettingsToCarousel';
 import {
+	bindSliderNavigationImages,
+	sliderNavigationThumbTemplate,
+} from '../utils/sliderNavigationImages';
+import {
 	applyReducedMotionToCarouselOptions,
 	shouldSuppressGalleryMotion,
 } from '../utils/reducedMotion';
@@ -155,7 +159,22 @@ export default function SliderLayout() {
 			plugins.Thumbs = Thumbs;
 		}
 
-		const mainInstance = Carousel(mainEl, carouselOptions, plugins).init();
+		const options = useThumbsPlugin
+			? {
+					...carouselOptions,
+					Thumbs: {
+						...carouselOptions.Thumbs,
+						thumbTpl: sliderNavigationThumbTemplate,
+					},
+				}
+			: carouselOptions;
+		const mainInstance = Carousel(mainEl, options, plugins);
+		const unbindNavigationImages = bindSliderNavigationImages(
+			mainInstance,
+			items,
+			config
+		);
+		mainInstance.init();
 
 		/** Bind once per instance so refresh can re-wrap without chaining patches. */
 		const nativeNext = mainInstance.next.bind(mainInstance);
@@ -301,6 +320,7 @@ export default function SliderLayout() {
 		}
 
 		return () => {
+			unbindNavigationImages();
 			if (embeddedResizeRaf) {
 				cancelAnimationFrame(embeddedResizeRaf);
 			}
@@ -316,6 +336,7 @@ export default function SliderLayout() {
 		carouselOptions,
 		config?.previewViewport,
 		config?.sliderCarousel?.adaptiveHeight,
+		config,
 		suppressMotion,
 	]);
 

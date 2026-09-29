@@ -40,12 +40,27 @@ class Modula_Item_Data_Processor {
 		$item_data = $this->process_image_sizes( $item_data, $image, $settings );
 		// Custom-grid span must exist before srcset/sizes so eager sizes can use it.
 		$item_data = $this->process_custom_grid( $item_data, $image, $settings );
-		$item_data = $this->process_srcset_sizes( $item_data, $image, $settings );
+		if ( ! isset( $settings['modula_display_context'] ) ) {
+			$item_data = $this->process_srcset_sizes( $item_data, $image, $settings );
+		}
 		$item_data = $this->process_lightbox_and_links( $item_data, $image, $settings );
 		$item_data = $this->process_hover_effects( $item_data, $settings );
 		$item_data = $this->process_grid_settings( $item_data, $image, $settings );
 
 		return $item_data;
+	}
+
+	/** Beta candidates follow layout sizing hooks and precede delivery/protection hooks. */
+	public static function prepare_beta_responsive_images( $item_data, $image, $settings ) {
+		if ( ! isset( $settings['modula_display_context'] ) || empty( $item_data ) ) {
+			return $item_data;
+		}
+		// Beta uses native lazy loading, including in its no-JavaScript fallback.
+		if ( empty( $item_data['img_attributes']['src'] ) && ! empty( $item_data['img_attributes']['data-src'] ) ) {
+			$item_data['img_attributes']['src'] = $item_data['img_attributes']['data-src'];
+		}
+		$processor = new self();
+		return $processor->process_srcset_sizes( $item_data, $image, $settings );
 	}
 
 	/**
@@ -264,7 +279,10 @@ class Modula_Item_Data_Processor {
 		// Handle full-size images
 		$original_image = false;
 		if ( 'full' === $grid_sizes ) {
-			$original_image = $this->get_full_image_url( $image['id'], $image );
+			// Beta tiles show the current attachment edit; original/full links stay separate.
+			$original_image = isset( $settings['modula_display_context'] )
+				? $sizes['url']
+				: $this->get_full_image_url( $image['id'], $image );
 		}
 
 		// Resize image
@@ -311,7 +329,8 @@ class Modula_Item_Data_Processor {
 
 		$gallery_type      = $settings['type'] ?? 'creative-gallery';
 		$allowed_galleries = array( 'creative-gallery', 'custom-grid', 'grid', 'justified-grid', 'parallax-masonry', 'uniform-grid', 'fit-grid', 'polaroid' );
-		if ( ! in_array( $gallery_type, $allowed_galleries, true ) ) {
+		// Beta's former HTML pass covered every image layout, including BnB and Slider.
+		if ( ! isset( $settings['modula_display_context'] ) && ! in_array( $gallery_type, $allowed_galleries, true ) ) {
 			return $item_data;
 		}
 
@@ -351,8 +370,13 @@ class Modula_Item_Data_Processor {
 			$size_array = array( (int) round( $img_w * min( $img_h, $max_edge ) / $img_h ), min( $img_h, $max_edge ) );
 		}
 
-		$srcset = apply_filters( 'modula_template_image_srcset', array(), (object) $item_data, $image_meta );
-		if ( empty( $srcset ) && function_exists( 'wp_calculate_image_srcset' ) ) {
+		$srcset    = apply_filters( 'modula_template_image_srcset', array(), (object) $item_data, $image_meta );
+		$beta_crop = isset( $settings['modula_display_context'] )
+			&& ! empty( $image_meta['width'] ) && ! empty( $image_meta['height'] )
+			&& ! wp_image_matches_ratio( $image_meta['width'], $image_meta['height'], $img_w, $img_h );
+		if ( $beta_crop && ! empty( $item_data['img_attributes']['src'] ) ) {
+			$srcset = $this->get_beta_crop_srcset( $item_data, $image_meta, $settings );
+		} elseif ( empty( $srcset ) && function_exists( 'wp_calculate_image_srcset' ) ) {
 			$srcset = wp_calculate_image_srcset( $size_array, $full_image, $image_meta, $attachment_id );
 		}
 		if ( $srcset && is_string( $srcset ) ) {
@@ -376,6 +400,81 @@ class Modula_Item_Data_Processor {
 		}
 
 		return $item_data;
+	}
+
+	/**
+	 * Fill cropped main-image size gaps without mixing unrelated crop origins.
+	 * Registered crops use their declared alignment; Modula crops retain their encoded alignment.
+	 * Unknown/filtered crops retain their selected file because a ratio alone is unsafe.
+	 */
+	private function get_beta_crop_srcset( $item_data, $image_meta, $settings ) {
+		$src    = $item_data['img_attributes']['src'];
+		$width  = (int) $item_data['img_attributes']['width'];
+		$height = (int) $item_data['img_attributes']['height'];
+		$srcset = array( $src . ' ' . $width . 'w' );
+		$file   = wp_basename( wp_parse_url( $src, PHP_URL_PATH ) );
+		$stem   = pathinfo( wp_basename( wp_parse_url( $item_data['image_full'], PHP_URL_PATH ) ), PATHINFO_FILENAME );
+		$slider = 'slider' === ( $settings['type'] ?? '' );
+		$size   = $settings[ $slider ? 'slider_image_size' : 'grid_image_size' ] ?? '';
+		$align  = 'c';
+
+		if ( 'custom' === $size ) {
+			$crop = $slider ? ! empty( $settings['slider_image_crop'] ) : $this->should_crop_image( $settings );
+			if ( ! $crop || ! preg_match( '/^' . preg_quote( $stem, '/' ) . '-' . $width . 'x' . $height . '_([ctlrb]+)\.[^.]+$/', $file, $match ) ) {
+				return implode( ', ', $srcset );
+			}
+			$align = $match[1];
+		} else {
+			$registered = wp_get_registered_image_subsizes();
+			$crop       = $registered[ $size ]['crop'] ?? false;
+			$selected   = $image_meta['sizes'][ $size ] ?? array();
+			if ( ! $crop || $file !== ( $selected['file'] ?? '' ) ) {
+				return implode( ', ', $srcset );
+			}
+			// Thumbnail-only edits have their own source token. Do not reconstruct that
+			// independent composition from the unchanged full attachment (or stale edits).
+			if ( $stem !== preg_replace( '/-\d+x\d+$/', '', pathinfo( $file, PATHINFO_FILENAME ) ) ) {
+				return implode( ', ', $srcset );
+			}
+			$dimensions = image_resize_dimensions(
+				$image_meta['width'], $image_meta['height'],
+				$registered[ $size ]['width'], $registered[ $size ]['height'], $crop
+			);
+			if ( ! $dimensions || $width !== $dimensions[4] || $height !== $dimensions[5] ) {
+				return implode( ', ', $srcset );
+			}
+			if ( is_array( $crop ) ) {
+				$horizontal = array( 'left' => 'l', 'center' => '', 'right' => 'r' );
+				$vertical   = array( 'top' => 't', 'center' => '', 'bottom' => 'b' );
+				$align      = ( $vertical[ $crop[1] ] ?? '' ) . ( $horizontal[ $crop[0] ] ?? '' );
+				$align      = $align ?: 'c';
+			}
+		}
+
+		// Cap at the available crop pixels: never enlarge a small source. These main
+		// tile steps cover the demonstrated mobile DPR-2 gap and wider desktop slots.
+		$limit = min( 1600, (int) $image_meta['width'], (int) floor( $image_meta['height'] * $width / $height ) );
+		$steps = array_unique( array_map(
+			function ( $step ) use ( $limit ) {
+				return min( $step, $limit );
+			},
+			array( 320, 640, 960, 1280, 1600 )
+		) );
+		$resizer = new Modula_Image();
+		foreach ( $steps as $candidate_width ) {
+			if ( $candidate_width <= $width ) {
+				continue;
+			}
+			// These extra Beta candidates follow the site's native encoding policy.
+			// Forcing quality 100 here inflates origin delivery when SpeedUp redirects.
+			$resized = $resizer->resize_image(
+				$item_data['image_full'], $candidate_width, (int) round( $candidate_width * $height / $width ), true, $align, null
+			);
+			if ( ! is_wp_error( $resized ) && ! empty( $resized['resized_url'] ) ) {
+				$srcset[] = $resized['resized_url'] . ' ' . $candidate_width . 'w';
+			}
+		}
+		return implode( ', ', $srcset );
 	}
 
 	/**

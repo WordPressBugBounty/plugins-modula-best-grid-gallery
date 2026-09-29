@@ -22,7 +22,7 @@ const DOWNLOAD_ALL_BUTTON_TPL =
 	'</svg></a>';
 
 const COMMENTS_TOGGLE_BUTTON_TPL =
-	'<button class="modula-fancybox-button f-button" id="modula-comments-toggle" title="Comments"><span class="dashicons dashicons-admin-comments"></span></button>';
+	'<button class="modula-fancybox-button f-button" id="modula-comments-toggle" title="Comments"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H3l2.5-4A8.5 8.5 0 1 1 21 11.5Z"/></svg></button>';
 
 const ELEVATE_ZOOM_BUTTON_TPL =
 	'<button title="Enable zoom" class="modula-fancybox-elevatezoom-button f-button"><svg tabindex="-1" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="7.5"></circle><path d="m21 21-4.35-4.35M11 8v6M8 11h6"></path></svg></button>';
@@ -48,7 +48,7 @@ const V6_MAIN_TPL =
 
 const V6_SIDEBAR_MAIN_TPL = (position) =>
 	'<dialog class="fancybox__dialog">\n' +
-	`  <div class="fancybox__container has-sidebar" tabindex="0" aria-label="{{MODAL}}">\n` +
+	`  <div class="fancybox__container has-sidebar has-thumbs-sidebar" tabindex="0" aria-label="{{MODAL}}">\n` +
 	'    <div class="fancybox__backdrop"></div>\n' +
 	'    <div class="fancybox__carousel"></div>\n' +
 	`    <div class="fancybox__sidebar ${position}" data-modula-thumbs-sidebar="${position}"></div>\n` +
@@ -586,9 +586,16 @@ function applySidebarThumbsCarouselConfig(carousel, thumbsPosition) {
  * @param {string} thumbsPosition
  */
 function applyBottomModernThumbsCarouselConfig(carousel, thumbsPosition) {
+	// Narrow / mobile paths fall through here while the saved setting may still
+	// be left/right — never keep a sidebar position on the modern bottom strip.
+	const position = isModulaLightboxSidebarThumbsPosition({
+		Thumbs: { position: thumbsPosition },
+	})
+		? 'bottom'
+		: thumbsPosition || 'bottom';
 	carousel.Thumbs = {
 		...(typeof carousel.Thumbs === 'object' ? carousel.Thumbs : {}),
-		position: thumbsPosition,
+		position,
 		type: 'modern',
 	};
 	delete carousel.Thumbs.parentEl;
@@ -646,12 +653,15 @@ export function finalizeLightboxV6Runtime(v6Opts, context = {}) {
 	const commentsEnabled =
 		next.galleryComments && typeof next.galleryComments === 'object';
 	const thumbsConfigured = carousel.Thumbs !== false;
+	// Match compact-toolbar detection (UA + ≤768px): sidebar strips overlap
+	// media/nav on narrow viewports when Left/Right stays active.
 	const useSidebarThumbs =
 		thumbsConfigured &&
 		isModulaLightboxSidebarThumbsPosition({
 			Thumbs: { position: thumbsPosition },
 		}) &&
-		!context.isMobile;
+		!context.isMobile &&
+		!compactToolbar;
 
 	if (commentsEnabled) {
 		next.mainTpl = V6_COMMENTS_MAIN_TPL(

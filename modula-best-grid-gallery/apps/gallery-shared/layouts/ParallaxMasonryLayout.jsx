@@ -13,7 +13,6 @@ import {
 	useCallback,
 } from '@wordpress/element';
 import { useSelector, shallowEqual } from 'react-redux';
-import { useContainerWidth } from '../hooks/useContainerWidth';
 import { useParallaxColumnCount } from '../hooks/useParallaxColumnCount';
 import { isParallaxOverlayOn } from '../utils/settingsToConfig';
 import {
@@ -29,7 +28,6 @@ export default function ParallaxMasonryLayout() {
 	const items = useSelector((s) => s.items.items, shallowEqual);
 	const config = useSelector((s) => s.gallery.config);
 	const metadata = useSelector((s) => s.gallery.metadata);
-	const { containerRef, containerWidth } = useContainerWidth(0);
 
 	const [sizes, setSizes] = useState({ viewH: 0, contentH: 0 });
 	const containerNodeRef = useRef(null);
@@ -94,10 +92,9 @@ export default function ParallaxMasonryLayout() {
 		[motionPresetId, columnCount]
 	);
 
-	const columnWidth =
-		containerWidth > 0
-			? (containerWidth - (columnCount - 1) * gutter) / columnCount
-			: 0;
+	// Resolve against the container on the first paint, including when a hidden
+	// gallery is revealed, instead of painting zero-width columns before measuring.
+	const columnWidth = `calc((100% - ${(columnCount - 1) * gutter}px) / ${columnCount})`;
 
 	const columns = useMemo(() => {
 		const list = Array.isArray(items) ? items : [];
@@ -158,10 +155,7 @@ export default function ParallaxMasonryLayout() {
 
 	return (
 		<div
-			ref={(el) => {
-				containerRef(el);
-				containerNodeRef.current = el;
-			}}
+			ref={containerNodeRef}
 			className={
 				'modula-items modula-parallax-masonry' +
 				(parallaxOverlayEnabled
@@ -170,7 +164,7 @@ export default function ParallaxMasonryLayout() {
 			}
 			style={{
 				'--modula-parallax-gutter': `${gutter}px`,
-				'--modula-parallax-column-width': `${columnWidth}px`,
+				'--modula-parallax-column-width': columnWidth,
 				'--modula-parallax-fade-color': parallaxOverlayFadeColor,
 			}}
 		>

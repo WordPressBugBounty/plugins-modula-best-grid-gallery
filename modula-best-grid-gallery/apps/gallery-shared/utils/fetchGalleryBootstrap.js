@@ -6,10 +6,11 @@
  * @param {Object} [options]          Options.
  * @param {string} [options.align]    Shortcode align attribute.
  * @param {string} [options.restRoot] Override REST root (default: wpApiSettings.root or /wp-json/).
+ * @param {AbortSignal} [options.signal] Cancel a destroyed or timed-out visitor load.
  * @return {Promise<Object>} Gallery data object.
  */
 export async function fetchGalleryBootstrap(galleryId, options = {}) {
-	const { align = '', restRoot } = options;
+	const { align = '', restRoot, signal } = options;
 	let root =
 		restRoot ||
 		(typeof window !== 'undefined' && window.wpApiSettings?.root) ||
@@ -20,7 +21,7 @@ export async function fetchGalleryBootstrap(galleryId, options = {}) {
 			? `?align=${encodeURIComponent(String(align).trim())}`
 			: '';
 	const url = `${root}modula/v2/gallery/${galleryId}/bootstrap${q}`;
-	const res = await fetch(url, { credentials: 'same-origin' });
+	const res = await fetch(url, { credentials: 'same-origin', signal });
 	if (!res.ok) {
 		let message = res.statusText;
 		try {

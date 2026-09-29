@@ -12,13 +12,23 @@ import { resolveModulaLightboxCompactToolbar } from './modulaLightboxCompactTool
  * @returns {boolean}
  */
 export function resolveModulaLightboxIsMobile(context = {}) {
-	return (
-		context.isMobile ??
-		(context.previewViewport === 'mobile' ||
-			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-				typeof navigator !== 'undefined' ? navigator.userAgent : ''
-			))
-	);
+	if (typeof context.isMobile === 'boolean') {
+		return context.isMobile;
+	}
+	if (context.previewViewport === 'mobile') {
+		return true;
+	}
+	if (
+		/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+			typeof navigator !== 'undefined' ? navigator.userAgent : ''
+		)
+	) {
+		return true;
+	}
+	if (typeof window !== 'undefined') {
+		return window.matchMedia('(max-width: 768px)').matches;
+	}
+	return false;
 }
 
 /**

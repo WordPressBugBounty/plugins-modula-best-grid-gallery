@@ -7,11 +7,10 @@
 import { MODULA_SOCIAL_ICON_BY_TYPE } from './ModulaSocialIcons';
 
 /**
- * @param {Object} props
+ * @param {Object}        props
  * @param {string|number} props.itemId
  * @param {Array<{ type: string, label: string, url?: string }>} props.socials
- * @param {number} [props.iconSize]
- * @param {string} [props.className] Extra class on each anchor (unused; type class wins).
+ * @param {number}        [props.iconSize]
  */
 export default function GalleryItemSocialLinks({
 	itemId,
@@ -24,20 +23,31 @@ export default function GalleryItemSocialLinks({
 
 	return socials.map((social, idx) => {
 		const Icon = MODULA_SOCIAL_ICON_BY_TYPE[social.type];
+		const isDownload = social.type === 'download';
+		const isEmail = social.type === 'email';
+		const className = isDownload
+			? 'modula-download-button'
+			: `modula-icon-${social.type}`;
+		let target;
+		if (isDownload) {
+			target = '_self';
+		} else if (!isEmail) {
+			target = '_blank';
+		}
 		return (
 			<a
 				key={`${itemId}-social-${idx}`}
-				className={`modula-icon-${social.type}`}
+				className={className}
 				aria-label={social.label}
+				title={isDownload ? social.label : undefined}
 				href={social.url || '#'}
-				target={social.type === 'email' ? undefined : '_blank'}
-				rel={
-					social.type === 'email' ? undefined : 'noopener noreferrer'
-				}
+				target={target}
+				rel={isDownload || isEmail ? undefined : 'noopener noreferrer'}
+				{...(isDownload ? { download: '' } : {})}
 				onClick={(event) => {
 					/* Keep the full-tile lightbox link from swallowing the share action. */
 					event.stopPropagation();
-					if (social.type === 'email') {
+					if (isDownload || isEmail) {
 						return;
 					}
 					if (social.url && social.url !== '#') {

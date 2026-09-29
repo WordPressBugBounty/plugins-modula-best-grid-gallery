@@ -64,6 +64,8 @@ class Adapter {
 		'imgClasses',
 		'imgAttributes',
 		'srcset',
+		'sliderThumbnail',
+		'sliderThumbnailChoices',
 		'sizes',
 		'lazyLoad',
 		'hideTitle',

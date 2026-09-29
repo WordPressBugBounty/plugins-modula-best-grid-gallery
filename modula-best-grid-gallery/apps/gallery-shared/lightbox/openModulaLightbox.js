@@ -384,6 +384,24 @@ function sanitizeSlides(links) {
 		if (link.thumb && !link.thumbSrc) {
 			link.thumbSrc = link.thumb;
 		}
+		// Guardian distinguishes an image fetch from an explicit browser download.
+		// Keep its signed URL and access checks; only mark the download request.
+		if (!link.downloadSrc && typeof link.src === 'string') {
+			try {
+				const url = new URL(link.src, window.location.href);
+				if (
+					url.origin === window.location.origin &&
+					/\/modula-image\/\d+\/?$/.test(url.pathname) &&
+					url.searchParams.has('key') &&
+					url.searchParams.has('t')
+				) {
+					url.searchParams.set('dl', '1');
+					link.downloadSrc = url.href;
+				}
+			} catch {
+				// Other slide sources retain Fancybox's normal download behavior.
+			}
+		}
 		return link;
 	});
 }
@@ -571,6 +589,7 @@ function buildEventHandlers(v6Opts, context, userOn = {}, modulaSlides = []) {
  * @param {string} [context.previewBackgroundColor]
  * @param {string} [context.shareButtonsJson]
  * @param {boolean} [context.openedViaKeyboard] When false, skip Fancybox placeFocusBack (avoids stuck hover :focus-within).
+ * @param {HTMLElement} [context.triggerEl] Original activation target, retained across loading and retry.
  * @param {HTMLElement} [context.galleryHostEl] Gallery host for hover-state refresh on close.
  * @param {HTMLElement} [context.clickedTileEl] Tile that opened the lightbox.
  * @param {Object} [context.settings] Grouped settings — when set, remap wins over lightboxOpts.
@@ -618,6 +637,9 @@ export function openModulaLightbox(links, lightboxOpts, index, context = {}) {
 	// leaves the hover effect stuck until the user clicks elsewhere.
 	if (!context.editorPreview && context.openedViaKeyboard === false) {
 		v6Opts.placeFocusBack = false;
+	}
+	if (!context.editorPreview && context.triggerEl instanceof HTMLElement) {
+		v6Opts.triggerEl = context.triggerEl;
 	}
 
 	if (v6Opts.Hash && v6Opts.Hash !== false) {

@@ -13,8 +13,9 @@ const AUTO_CLEAR_MS = 5000;
 /**
  * @param {HTMLElement|null|undefined} hostEl Gallery React host or root gallery element.
  * @param {unknown}                    err    Caught error.
+ * @param {() => void}                 [retry] Repeat the failed action.
  */
-export function reportLightboxFailure(hostEl, err) {
+export function reportLightboxFailure(hostEl, err, retry) {
 	// eslint-disable-next-line no-console
 	console.error('Modula: lightbox failed to open', err);
 
@@ -46,6 +47,16 @@ export function reportLightboxFailure(hostEl, err) {
 		'modula-best-grid-gallery'
 	);
 	galleryRoot.classList.add('modula-gallery--lightbox-error');
+	if (retry) {
+		const button = document.createElement('button');
+		button.type = 'button';
+		button.className = 'modula-gallery__error-boundary-retry';
+		button.textContent = __('Retry lightbox', 'modula-best-grid-gallery');
+		button.addEventListener('click', retry);
+		notice.appendChild(document.createElement('br'));
+		notice.appendChild(button);
+		return;
+	}
 
 	const timer = window.setTimeout(() => {
 		clearLightboxFailureNotice(galleryRoot);

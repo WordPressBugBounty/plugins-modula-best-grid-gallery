@@ -414,6 +414,7 @@ class Modula_Shortcode_Modern {
 				'modulaGallery',
 				array(
 					'publicPath' => trailingslashit( MODULA_URL . 'assets/' ),
+					'bootstrapStylesheet' => \Modula\V2\Modern_Gallery::bootstrap_stylesheet_url(),
 					'strings'    => array(
 						'loadingGallery' => esc_html__( 'Loading gallery…', 'modula-best-grid-gallery' ),
 						'loadingFailed'  => esc_html__( 'Could not load gallery.', 'modula-best-grid-gallery' ),

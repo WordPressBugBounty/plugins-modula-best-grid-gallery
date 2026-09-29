@@ -87,7 +87,29 @@ function parseScriptDataResult(scriptTag) {
 			return { ok: false, reason: 'empty' };
 		}
 
-		return { ok: true, data: JSON.parse(textContent) };
+		const data = JSON.parse(textContent);
+		// Inline Beta delivery shares identical presentation fields. Restore the
+		// established item contract here; REST and older cached HTML stay valid.
+		if (data.itemDefaults && Array.isArray(data.items)) {
+			const defaults = data.itemDefaults;
+			for (const item of data.items) {
+				for (const field of ['itemClasses', 'linkClasses']) {
+					if (
+						!Object.prototype.hasOwnProperty.call(item, field) &&
+						field in defaults
+					) {
+						item[field] = defaults[field];
+					}
+				}
+				for (const field of ['itemAttributes', 'linkAttributes']) {
+					if (defaults[field]) {
+						item[field] = { ...defaults[field], ...item[field] };
+					}
+				}
+			}
+			delete data.itemDefaults;
+		}
+		return { ok: true, data };
 	} catch (error) {
 		console.error(
 			'Modula: Failed to parse gallery data from script tag',

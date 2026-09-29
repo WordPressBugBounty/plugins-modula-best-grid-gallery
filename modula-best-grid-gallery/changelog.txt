@@ -1,3 +1,16 @@
+= 3.0.11 - 29.09.2026 =
+Changed: Beta galleries use a smaller initial loader and load gallery rendering, lightbox sessions, and comments when needed.
+Changed: Beta galleries reuse compatible React dependencies and send less repeated presentation data in their initial payload.
+Fixed: Hidden and offscreen Beta galleries no longer initialize just because a recovery timer expires; attempted loads retain useful retry behavior.
+Fixed: Beta bootstrap styles load once, with consistent versioned assets and cache invalidation.
+Fixed: Beta Slider navigation uses appropriately sized thumbnails and avoids redundant legacy navigation image requests.
+Fixed: Beta responsive images keep SpeedUp sources, edited images, and selected crops consistent, including sharp mobile delivery without premature fallback requests.
+Fixed: Beta Parallax galleries reserve their initial layout and image geometry to reduce visible shifts while loading.
+Fixed: Modern lightbox downloads preserve signed Image Guardian download behavior with Compatible Pro.
+Fixed: Beta lightbox thumbnail strip shows a normal strip of small thumbs again (Below and Left), including on phones where Left falls back to a bottom strip instead of pushing the image off-screen.
+Fixed: With Compatible Pro Download enabled, Beta galleries show the per-image download control on tiles and in the collapsible share menu again.
+Info: Read more about Modula 3.0 Beta: https://wp-modula.com/modula-3-0-beta/
+
 = 3.0.10 - 25.09.2026 =
 Added: Beta gallery Alignment next to Width (Left / Center / Right; Center by default), including on block themes with constrained content.
 Added: Beta Video max-height cap (default 100vh; vh or px) in Layout under Width & alignment — caps the player + playlist composition.

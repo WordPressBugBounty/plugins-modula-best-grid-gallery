@@ -336,6 +336,7 @@ class Modula_Frontend_Adapter {
 
 		$converted_item = self::with_react_video_fields( $converted_item, $image, $item_data );
 		$converted_item = self::with_exif_fields( $converted_item, $image );
+		$converted_item = self::with_download_fields( $converted_item, $item_data );
 
 		/**
 		 * Filter: modula_frontend_adapter_item
@@ -489,6 +490,7 @@ class Modula_Frontend_Adapter {
 		}
 
 		$converted_item = self::with_exif_fields( $converted_item, $image );
+		$converted_item = self::with_download_fields( $converted_item, $item_data );
 
 		return apply_filters( 'modula_frontend_adapter_item', $converted_item, $image, $item_data, $settings );
 	}
@@ -1364,13 +1366,40 @@ class Modula_Frontend_Adapter {
 	}
 
 	/**
-	 * Add video fields for React story / embeds when the gallery row has a Modula Video URL (e.g. Pro).
+	 * Pass Compatible Pro Download per-image payload through to React bootstrap items.
+	 *
+	 * Pro's `modula_shortcode_item_data` sets `download.download_button` + `download.image_url`.
+	 * Beta tile socials consume that shape; without this copy the React visitor never sees it.
 	 *
 	 * @param array $converted_item Frontend JSON item.
-	 * @param array $image          Raw gallery image row.
 	 * @param array $item_data      Item payload after `modula_shortcode_item_data`.
 	 * @return array
 	 */
+	private static function with_download_fields( $converted_item, $item_data ) {
+		if ( ! is_array( $converted_item ) || ! is_array( $item_data ) ) {
+			return $converted_item;
+		}
+		if ( ! isset( $item_data['download'] ) || ! is_array( $item_data['download'] ) ) {
+			return $converted_item;
+		}
+
+		$download = $item_data['download'];
+		$out      = array();
+		if ( array_key_exists( 'download_button', $download ) ) {
+			$out['download_button'] = is_scalar( $download['download_button'] )
+				? $download['download_button']
+				: 0;
+		}
+		if ( isset( $download['image_url'] ) && is_scalar( $download['image_url'] ) ) {
+			$out['image_url'] = (string) $download['image_url'];
+		}
+		if ( ! empty( $out ) ) {
+			$converted_item['download'] = $out;
+		}
+
+		return $converted_item;
+	}
+
 	/**
 	 * Copy per-image EXIF fields for settings-editor modal / REST patch parity.
 	 *
@@ -1401,9 +1430,11 @@ class Modula_Frontend_Adapter {
 	}
 
 	/**
-	 * @param array $converted_item
-	 * @param array $image
-	 * @param array $item_data
+	 * Add video fields for React story / embeds when the gallery row has a Modula Video URL (e.g. Pro).
+	 *
+	 * @param array $converted_item Frontend JSON item.
+	 * @param array $image          Raw gallery image row.
+	 * @param array $item_data      Item payload after `modula_shortcode_item_data`.
 	 * @return array
 	 */
 	private static function with_react_video_fields( $converted_item, $image, $item_data ) {

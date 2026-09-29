@@ -315,6 +315,7 @@ final class Modern_Gallery {
 			array(
 				'publicPath'   => trailingslashit( MODULA_URL . 'assets/' ),
 				'assetVersion' => $version,
+				'bootstrapStylesheet' => self::bootstrap_stylesheet_url(),
 				'strings'      => array(
 					'loadingGallery' => esc_html__( 'Loading gallery…', 'modula-best-grid-gallery' ),
 					'loadingFailed'  => esc_html__( 'Could not load gallery.', 'modula-best-grid-gallery' ),
@@ -371,11 +372,34 @@ final class Modern_Gallery {
 	}
 
 	/**
+	 * One build-sensitive URL for WordPress, preload, and the visitor's CSS import.
+	 */
+	public static function bootstrap_stylesheet_url(): string {
+		static $url = null;
+		if ( null !== $url ) {
+			return $url;
+		}
+
+		$css_file = self::bootstrap_stylesheet_path();
+		if ( '' === $css_file || ! file_exists( $css_file ) ) {
+			$url = '';
+			return $url;
+		}
+
+		$url = add_query_arg(
+			'ver',
+			hash_file( 'sha256', $css_file ),
+			MODULA_URL . 'assets/css/front/' . basename( $css_file )
+		);
+		return $url;
+	}
+
+	/**
 	 * Enqueue the async bootstrap layout stylesheet in <head> so it is not raced by JS on slow links.
 	 */
 	public static function enqueue_bootstrap_stylesheet(): void {
-		$css_file = self::bootstrap_stylesheet_path();
-		if ( '' === $css_file || ! file_exists( $css_file ) ) {
+		$css_url = self::bootstrap_stylesheet_url();
+		if ( '' === $css_url ) {
 			return;
 		}
 
@@ -386,14 +410,14 @@ final class Modern_Gallery {
 
 		wp_enqueue_style(
 			$handle,
-			MODULA_URL . 'assets/css/front/' . basename( $css_file ),
+			$css_url,
 			array( 'modula-gallery' ),
-			MODULA_LITE_VERSION
+			null
 		);
 	}
 
 	/**
-	 * Hint the browser to fetch the bootstrap CSS chunk early (still loaded by JS import).
+	 * Hint the browser to fetch the same versioned stylesheet used by the runtime.
 	 */
 	public static function preload_bootstrap_stylesheet(): void {
 		static $hooked = false;
@@ -402,12 +426,11 @@ final class Modern_Gallery {
 		}
 		$hooked = true;
 
-		$css_file = self::bootstrap_stylesheet_path();
-		if ( '' === $css_file || ! file_exists( $css_file ) ) {
+		$css_url = self::bootstrap_stylesheet_url();
+		if ( '' === $css_url ) {
 			return;
 		}
 
-		$css_url = MODULA_URL . 'assets/css/front/' . basename( $css_file );
 		add_action(
 			'wp_head',
 			static function () use ( $css_url ): void {

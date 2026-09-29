@@ -6,6 +6,11 @@
 
 /** @type {Promise<typeof import('./openModulaLightbox')>|null} */
 let modulePromise = null;
+let loadedModule = null;
+
+export function getLoadedModulaLightboxModule() {
+	return loadedModule;
+}
 
 /**
  * @returns {Promise<typeof import('./openModulaLightbox')>}
@@ -13,9 +18,21 @@ let modulePromise = null;
 export function loadModulaLightboxModule() {
 	if (!modulePromise) {
 		modulePromise = Promise.all([
-			import('./modulaLightboxStyles'),
-			import('./openModulaLightbox'),
-		]).then(([, mod]) => mod);
+			import(
+				/* webpackChunkName: "modula-lightbox-styles" */ './modulaLightboxStyles'
+			),
+			import(
+				/* webpackChunkName: "modula-lightbox-session" */ './openModulaLightbox'
+			),
+		])
+			.then(([, mod]) => {
+				loadedModule = mod;
+				return mod;
+			})
+			.catch((error) => {
+				modulePromise = null;
+				throw error;
+			});
 	}
 	return modulePromise;
 }

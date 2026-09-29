@@ -53,5 +53,6 @@ export function listLazyLayoutTypes() {
 }
 
 export { GALLERY_LAYOUT_TYPES };
+export { resolveGalleryLayoutType } from './layoutTypes';
 
 export default getLayoutLoader;

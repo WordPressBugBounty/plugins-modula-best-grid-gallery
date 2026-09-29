@@ -9,13 +9,16 @@ import {
 	GalleryErrorBoundary,
 	buildPreloadedState,
 	closeModulaLightbox,
+	cancelModulaGalleryLightboxOpen,
 	createGalleryStore,
 	fetchGalleryBootstrap,
 	getBootstrapMode,
+	getLayoutLoader,
 	isModulaLightboxActiveForGalleryElement,
 	MODERN_VISITOR_ROOT_PENDING_SELECTOR,
 	parseGalleryPostId,
 	resolveGalleryDataFromDom,
+	resolveGalleryLayoutType,
 } from 'gallery-shared/runtime';
 import './index.scss';
 import { __ } from '@wordpress/i18n';
@@ -26,14 +29,18 @@ import {
 	revealGalleryChrome,
 	waitForGalleryChromeStyles,
 } from './galleryShellVisibility';
+import { waitForGalleryLoad } from './waitForGalleryLoad';
 
 const galleryRoots = new Map();
 
 /** @type {WeakSet<HTMLElement>} */
 const mountingElements = new WeakSet();
 
-/** @type {Promise<void>} */
-let initGalleriesChain = Promise.resolve();
+/** @type {WeakSet<HTMLElement>} */
+const destroyedElements = new WeakSet();
+
+/** @type {WeakMap<HTMLElement, Promise<void>>} */
+const loadingElements = new WeakMap();
 
 /**
  * @param {boolean} [forceAll] When true, mount every pending gallery (manual init).
@@ -74,13 +81,24 @@ function showGalleryBootstrapError(element, message) {
  * @param {string} align
  * @return {Promise<Object>}
  */
-async function fetchGalleryBootstrapWithRetry(postId, align) {
-	const opts = { align: align || undefined };
+async function fetchGalleryBootstrapWithRetry(postId, align, signal) {
+	const opts = { align: align || undefined, signal };
 	try {
 		return await fetchGalleryBootstrap(postId, opts);
 	} catch (_firstErr) {
-		await new Promise((resolve) => {
-			window.setTimeout(resolve, 500);
+		if (signal?.aborted) {
+			throw _firstErr;
+		}
+		await new Promise((resolve, reject) => {
+			const onAbort = () => {
+				window.clearTimeout(timer);
+				reject(signal.reason);
+			};
+			const timer = window.setTimeout(() => {
+				signal?.removeEventListener('abort', onAbort);
+				resolve();
+			}, 500);
+			signal?.addEventListener('abort', onAbort, { once: true });
 		});
 		return fetchGalleryBootstrap(postId, opts);
 	}
@@ -98,6 +116,9 @@ function syncBodyGalleryClass() {
 }
 
 function revealGalleryInstance(element, store, galleryData) {
+	if (element._modulaStore !== store || !element.isConnected) {
+		return;
+	}
 	clearGalleryShellInlineHide(element);
 	element.classList.add('modula-gallery-initialized');
 	clearPendingChrome(element);
@@ -105,8 +126,14 @@ function revealGalleryInstance(element, store, galleryData) {
 	syncBodyGalleryClass();
 
 	waitForGalleryChromeStyles().then(() => {
+		if (element._modulaStore !== store || !element.isConnected) {
+			return;
+		}
 		revealGalleryChrome(element);
 		requestAnimationFrame(() => {
+			if (element._modulaStore !== store || !element.isConnected) {
+				return;
+			}
 			document.dispatchEvent(
 				new CustomEvent('modula:gallery:mounted', {
 					detail: {
@@ -151,14 +178,25 @@ function isGalleryMountCommitted(element) {
 	);
 }
 
-function mountGalleryInstance(element, galleryData) {
-	if (isGalleryMountCommitted(element)) {
+async function mountGalleryInstance(element, galleryData, signal) {
+	const preloadedState = buildPreloadedState(galleryData, element);
+	await waitForGalleryLoad(
+		getLayoutLoader(
+			resolveGalleryLayoutType(preloadedState.gallery.config)
+		)(),
+		signal
+	);
+	if (
+		signal?.aborted ||
+		destroyedElements.has(element) ||
+		!element.isConnected ||
+		isGalleryMountCommitted(element)
+	) {
 		return;
 	}
 	mountingElements.add(element);
 
 	try {
-		const preloadedState = buildPreloadedState(galleryData, element);
 		const store = createGalleryStore(preloadedState);
 		const root = createRoot(element);
 		root.render(
@@ -175,7 +213,7 @@ function mountGalleryInstance(element, galleryData) {
 		const instanceKey =
 			element.id ||
 			`modula-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-		galleryRoots.set(instanceKey, { root, store });
+		galleryRoots.set(instanceKey, { root, store, element });
 		element.dataset.modulaInstanceId = instanceKey;
 		element._modulaRoot = root;
 		element._modulaStore = store;
@@ -195,122 +233,144 @@ function mountGalleryInstance(element, galleryData) {
 }
 
 /**
- * @param {{ forceAll?: boolean }} [options]
+ * @param {HTMLElement} element
+ * @param {{ signal?: AbortSignal }} [options]
  */
-async function initGalleriesInner(options = {}) {
-	const forceAll = options.forceAll === true;
-	const elements = document.querySelectorAll(
-		pendingGallerySelector(forceAll)
-	);
+async function initGallery(element, { signal } = {}) {
+	if (
+		signal?.aborted ||
+		destroyedElements.has(element) ||
+		!element.isConnected ||
+		isGalleryMountCommitted(element)
+	) {
+		return;
+	}
 
-	for (const element of elements) {
-		if (isGalleryMountCommitted(element)) {
-			continue;
+	const mode = getBootstrapMode(element);
+	let galleryData;
+
+	if (mode === 'rest') {
+		const postId = parseGalleryPostId(element);
+		if (!postId) {
+			console.warn(
+				'Modula: data-modula-bootstrap="rest" needs id="modula-{id}" or numeric data-gallery-id.'
+			);
+			return;
 		}
 
-		const mode = getBootstrapMode(element);
-		let galleryData;
+		clearGalleryShellInlineHide(element);
+		element.classList.add('modula-gallery--bootstrap-pending');
+		const loading = document.createElement('div');
+		loading.className = 'modula-gallery__bootstrap-loading';
+		loading.setAttribute('role', 'status');
+		loading.textContent = __(
+			'Loading gallery…',
+			'modula-best-grid-gallery'
+		);
+		element.appendChild(loading);
 
-		if (mode === 'rest') {
-			const postId = parseGalleryPostId(element);
-			if (!postId) {
-				console.warn(
-					'Modula: data-modula-bootstrap="rest" needs id="modula-{id}" or numeric data-gallery-id.'
-				);
-				continue;
+		try {
+			const align =
+				element.getAttribute('data-modula-align') ||
+				(typeof window !== 'undefined'
+					? window.modulaGallery?.align
+					: '') ||
+				'';
+			galleryData = await fetchGalleryBootstrapWithRetry(
+				postId,
+				align,
+				signal
+			);
+		} catch (err) {
+			if (
+				signal?.aborted ||
+				destroyedElements.has(element) ||
+				!element.isConnected
+			) {
+				return;
 			}
-
-			clearGalleryShellInlineHide(element);
-			element.classList.add('modula-gallery--bootstrap-pending');
-			const loading = document.createElement('div');
-			loading.className = 'modula-gallery__bootstrap-loading';
-			loading.setAttribute('role', 'status');
+			console.error('Modula: bootstrap fetch failed', err);
+			mountingElements.delete(element);
 			loading.textContent = __(
-				'Loading gallery…',
+				'Could not load gallery.',
 				'modula-best-grid-gallery'
 			);
-			element.appendChild(loading);
-
-			try {
-				const align =
-					element.getAttribute('data-modula-align') ||
-					(typeof window !== 'undefined'
-						? window.modulaGallery?.align
-						: '') ||
-					'';
-				galleryData = await fetchGalleryBootstrapWithRetry(
-					postId,
-					align
-				);
-			} catch (err) {
-				console.error('Modula: bootstrap fetch failed', err);
-				mountingElements.delete(element);
-				loading.textContent = __(
-					'Could not load gallery.',
-					'modula-best-grid-gallery'
-				);
-				element.classList.remove('modula-gallery--bootstrap-pending');
-				continue;
-			}
-
-			clearPendingChrome(element);
-		} else {
-			const resolved = resolveGalleryDataFromDom(element);
-			if (resolved.status === 'parse_error') {
-				showGalleryBootstrapError(
-					element,
-					__(
-						'Could not load gallery data.',
-						'modula-best-grid-gallery'
-					)
-				);
-				continue;
-			}
-			if (resolved.status === 'missing') {
-				showGalleryBootstrapError(
-					element,
-					__(
-						'Could not load gallery data.',
-						'modula-best-grid-gallery'
-					)
-				);
-				continue;
-			}
-			galleryData = resolved.data;
+			element.classList.remove('modula-gallery--bootstrap-pending');
+			return;
 		}
 
-		mountGalleryInstance(element, galleryData);
+		if (
+			signal?.aborted ||
+			destroyedElements.has(element) ||
+			!element.isConnected
+		) {
+			return;
+		}
+	} else {
+		const resolved = resolveGalleryDataFromDom(element);
+		if (resolved.status === 'parse_error') {
+			showGalleryBootstrapError(
+				element,
+				__('Could not load gallery data.', 'modula-best-grid-gallery')
+			);
+			return;
+		}
+		if (resolved.status === 'missing') {
+			showGalleryBootstrapError(
+				element,
+				__('Could not load gallery data.', 'modula-best-grid-gallery')
+			);
+			return;
+		}
+		galleryData = resolved.data;
 	}
+
+	await mountGalleryInstance(element, galleryData, signal);
 }
 
 /**
- * Serialize gallery mounts so concurrent visibility callbacks cannot call
- * `createRoot()` twice on the same container before init completes.
+ * Deduplicate each gallery's load without blocking other galleries behind it.
  *
- * @param {{ forceAll?: boolean }} [options]
- * @returns {Promise<void>}
+ * @param {{ forceAll?: boolean, element?: HTMLElement, signal?: AbortSignal }} [options]
+ * @returns {Promise<void[]>}
  */
 function initGalleries(options = {}) {
-	const run = initGalleriesChain.then(() => initGalleriesInner(options));
-	// Keep the serial chain alive after a failure, but let callers observe the error.
-	initGalleriesChain = run.catch((err) => {
-		console.error('Modula: gallery init failed', err);
-	});
-	return run;
+	const elements = options.element
+		? [options.element]
+		: Array.from(
+				document.querySelectorAll(
+					pendingGallerySelector(options.forceAll)
+				)
+			);
+	return Promise.all(
+		elements.map((element) => {
+			const existing = loadingElements.get(element);
+			if (existing) {
+				return existing;
+			}
+			const load = initGallery(element, options).finally(() => {
+				if (loadingElements.get(element) === load) {
+					loadingElements.delete(element);
+				}
+			});
+			loadingElements.set(element, load);
+			return load;
+		})
+	);
 }
 
 function destroyGallery(identifier) {
-	let galleryId = null;
-	let targetEl = null;
-	if (typeof identifier === 'string') {
-		galleryId = identifier;
-	} else if (identifier instanceof HTMLElement) {
-		targetEl = identifier;
-		galleryId = identifier.dataset?.modulaInstanceId || null;
-	}
-	if (!galleryId) {
+	const targetEl =
+		typeof identifier === 'string'
+			? galleryRoots.get(identifier)?.element ||
+				document.getElementById(identifier)
+			: identifier;
+	if (!(targetEl instanceof HTMLElement)) {
 		return;
 	}
+	const galleryId = targetEl.dataset?.modulaInstanceId || targetEl.id;
+	destroyedElements.add(targetEl);
+	cancelModulaGalleryLightboxOpen(targetEl);
 
 	if (targetEl && isModulaLightboxActiveForGalleryElement(targetEl)) {
 		closeModulaLightbox();
@@ -356,7 +416,7 @@ function initAllGalleries() {
 }
 
 const api = {
-	initGalleries: () => initGalleries({ forceAll: false }),
+	initGalleries,
 	initAllGalleries,
 	destroyGallery,
 	getGalleryInstance,

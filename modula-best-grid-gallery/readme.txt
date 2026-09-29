@@ -4,7 +4,7 @@ Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPres
 Requires at least: 5.3
 Tested up to: 7.1
 Requires PHP: 5.6
-Stable tag: 3.0.10
+Stable tag: 3.0.11
 
 License: GNU General Public License v3.0 or later  
 
@@ -326,6 +326,19 @@ The simplest way to install is to click on 'Plugins' then 'Add' and type 'Modula
 
 == Changelog ==
 
+= 3.0.11 - 29.09.2026 =
+Changed: Beta galleries use a smaller initial loader and load gallery rendering, lightbox sessions, and comments when needed.
+Changed: Beta galleries reuse compatible React dependencies and send less repeated presentation data in their initial payload.
+Fixed: Hidden and offscreen Beta galleries no longer initialize just because a recovery timer expires; attempted loads retain useful retry behavior.
+Fixed: Beta bootstrap styles load once, with consistent versioned assets and cache invalidation.
+Fixed: Beta Slider navigation uses appropriately sized thumbnails and avoids redundant legacy navigation image requests.
+Fixed: Beta responsive images keep SpeedUp sources, edited images, and selected crops consistent, including sharp mobile delivery without premature fallback requests.
+Fixed: Beta Parallax galleries reserve their initial layout and image geometry to reduce visible shifts while loading.
+Fixed: Modern lightbox downloads preserve signed Image Guardian download behavior with Compatible Pro.
+Fixed: Beta lightbox thumbnail strip shows a normal strip of small thumbs again (Below and Left), including on phones where Left falls back to a bottom strip instead of pushing the image off-screen.
+Fixed: With Compatible Pro Download enabled, Beta galleries show the per-image download control on tiles and in the collapsible share menu again.
+Info: Read more about Modula 3.0 Beta: https://wp-modula.com/modula-3-0-beta/
+
 = 3.0.8 - 21.09.2026 =
 Changed: Zoom on hover is a Lite Interact control for gallery-tile soft scale (Hover card treatment); new galleries default it off. Modula ZOOM (lightbox magnify) and its upsell live under Lightbox → Lightbox zoom.
 Fixed: Classic galleries again emit legacy hover `effect-*` classes when CPT defaults fill in a Hover Effect Builder; Under Image captions return below the image on columns layouts.
@@ -556,4 +569,3 @@ Fixed: Security issues.
 
 = 2.13.6 - 20.01.2026 =
 Fixed: Gutenberg block editor was throwing an error due to circular references.
-

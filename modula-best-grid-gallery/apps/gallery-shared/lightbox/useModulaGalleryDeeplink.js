@@ -9,8 +9,10 @@ import {
 	resolveDeeplinkStartIndex,
 	resolveGalleryIdFromRoot,
 } from './modulaDeeplinkFromHash';
-import { openModulaGalleryLightboxAtRoot } from './lightboxOpenFacade';
-import { resolveModulaLightboxSlides } from './modulaGalleryLightbox';
+import {
+	cancelModulaGalleryLightboxOpen,
+	openModulaGalleryLightboxAtRoot,
+} from './lightboxOpenFacade';
 import { galleryUsesFancyboxLightbox } from '../utils/resolveGalleryItemLink';
 
 /**
@@ -95,22 +97,15 @@ async function openGalleryFromDeeplinkHash(
 		return false;
 	}
 
-	const sourceItems = await resolveDeeplinkSourceItems(items, resolveItems);
-	const slides = resolveModulaLightboxSlides({
-		items: sourceItems,
-		settings,
-		config,
+	return openModulaGalleryLightboxAtRoot(
 		rootEl,
-	});
-	const startIndex = resolveDeeplinkStartIndex(matched.imageRef, slides);
-	if (startIndex < 0) {
-		return false;
-	}
-
-	return openModulaGalleryLightboxAtRoot(rootEl, config, startIndex, {
-		items: sourceItems,
-		settings,
-	});
+		config,
+		(slides) => resolveDeeplinkStartIndex(matched.imageRef, slides),
+		{
+			resolveItems: () => resolveDeeplinkSourceItems(items, resolveItems),
+			settings,
+		}
+	);
 }
 
 /**
@@ -130,7 +125,6 @@ export function useModulaGalleryDeeplink(hostRef, config, options = {}) {
 	const settingsRef = useRef(options.settings);
 	const resolveItemsRef = useRef(options.resolveItems);
 	const configRef = useRef(config);
-	const openingRef = useRef(false);
 
 	itemsRef.current = options.items;
 	settingsRef.current = options.settings;
@@ -138,7 +132,10 @@ export function useModulaGalleryDeeplink(hostRef, config, options = {}) {
 	configRef.current = config;
 
 	useEffect(() => {
-		if (!enabled || !galleryUsesFancyboxLightbox(configRef.current?.lightbox)) {
+		if (
+			!enabled ||
+			!galleryUsesFancyboxLightbox(configRef.current?.lightbox)
+		) {
 			return undefined;
 		}
 
@@ -148,11 +145,12 @@ export function useModulaGalleryDeeplink(hostRef, config, options = {}) {
 			return undefined;
 		}
 
+		let opening = false;
 		const tryOpen = async (hash = window.location.hash) => {
-			if (openingRef.current) {
+			if (opening) {
 				return;
 			}
-			openingRef.current = true;
+			opening = true;
 			try {
 				await openGalleryFromDeeplinkHash(
 					rootEl,
@@ -163,7 +161,7 @@ export function useModulaGalleryDeeplink(hostRef, config, options = {}) {
 					hash
 				);
 			} finally {
-				openingRef.current = false;
+				opening = false;
 			}
 		};
 
@@ -180,6 +178,7 @@ export function useModulaGalleryDeeplink(hostRef, config, options = {}) {
 		return () => {
 			cancelAnimationFrame(frame);
 			window.removeEventListener('hashchange', onHashChange);
+			cancelModulaGalleryLightboxOpen(rootEl);
 		};
 	}, [
 		enabled,

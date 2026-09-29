@@ -20,10 +20,9 @@ function parseSmallestSrcsetUrl(srcset) {
 	if (!srcset || typeof srcset !== 'string') {
 		return '';
 	}
-	const parts = srcset
-		.split(',')
-		.map((part) => part.trim())
-		.filter(Boolean);
+	// Commas are legal inside transformation URLs. Consume each URL together
+	// with its descriptor before treating a comma as a candidate separator.
+	const parts = srcset.match(/\S+\s+\d+(?:\.\d+)?[wx](?=\s*(?:,|$))/g) || [];
 	/** @type {{ url: string, width: number }|null} */
 	let smallest = null;
 	for (const part of parts) {
@@ -65,11 +64,10 @@ export function resolveGalleryItemPlaceholderSrc(itemData, primarySrc = '') {
 	const main = normalizeUrl(
 		primarySrc || itemData?.src || itemData?.url || itemData?.full || ''
 	);
-	const smallestSrcset = parseSmallestSrcsetUrl(itemData?.srcset || '');
-
 	if (thumb && thumb !== main) {
 		return thumb;
 	}
+	const smallestSrcset = parseSmallestSrcsetUrl(itemData?.srcset || '');
 	if (smallestSrcset && smallestSrcset !== main) {
 		return smallestSrcset;
 	}

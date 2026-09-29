@@ -15,11 +15,20 @@ const config = {
 		extensions: ['.jsx', '.js', '.json'],
 		alias: {
 			'gallery-shared': path.resolve(__dirname, 'apps/gallery-shared'),
+			'modula-private-react': require.resolve('react'),
+			'modula-private-react-dom': require.resolve('react-dom'),
 		},
+	},
+	// Only the visitor build selects a runtime; wp-admin keeps WP's extraction.
+	externalsType: 'window',
+	externals: {
+		react: ['ModulaGalleryReact', 'React'],
+		'react-dom': ['ModulaGalleryReact', 'ReactDOM'],
+		'react-dom/client': ['ModulaGalleryReact', 'ReactDOM'],
 	},
 	output: {
 		filename: 'js/front/[name].js',
-		chunkFilename: 'js/front/[id].modula-gallery.js',
+		chunkFilename: 'js/front/[id].[contenthash:8].modula-gallery.js',
 		path: path.resolve(__dirname, 'assets'),
 		publicPath: 'auto',
 		chunkLoadingGlobal: 'webpackChunkModulaGallery',
@@ -63,7 +72,38 @@ const config = {
 				},
 			},
 			{
+				// Fancybox vendor sheet: prefix under the lightbox CSS host with
+				// :root → host and document-level html/body left unscoped.
+				test: /[/\\]lightbox[/\\]_fancybox-v6-vendor-scoped\.scss$/,
+				use: [
+					MiniCssExtractPlugin.loader,
+					'css-loader',
+					{
+						loader: 'postcss-loader',
+						options: {
+							postcssOptions: {
+								plugins: [
+									require('./apps/gallery-shared/lightbox/prefixFancyboxVendorCss.js')
+										.createFancyboxVendorPrefixPlugin(),
+								],
+							},
+						},
+					},
+					{
+						loader: 'sass-loader',
+						options: {
+							sassOptions: {
+								outputStyle: isProduction
+									? 'compressed'
+									: 'expanded',
+							},
+						},
+					},
+				],
+			},
+			{
 				test: /\.(scss|css)$/,
+				exclude: /[/\\]lightbox[/\\]_fancybox-v6-vendor-scoped\.scss$/,
 				use: [
 					MiniCssExtractPlugin.loader,
 					'css-loader',
@@ -99,8 +139,20 @@ const config = {
 			// Entry loader must run synchronously — only split async imports (bootstrap/layouts).
 			chunks: 'async',
 			cacheGroups: {
+				standaloneReact: {
+					test: /[\\/]node_modules[\\/]react[\\/](index\.js|cjs[\\/]react\.(production|development))/,
+					name: 'modula-react',
+					priority: 40,
+					enforce: true,
+				},
+				standaloneReactDOM: {
+					test: /[\\/]node_modules[\\/](react-dom|scheduler)[\\/]/,
+					name: 'modula-react-dom',
+					priority: 40,
+					enforce: true,
+				},
 				vendor: {
-					test: /[\\/]node_modules[\\/](react|react-dom|react-redux|@reduxjs[\\/]toolkit|reselect|immer|use-sync-external-store|redux)[\\/]/,
+					test: /[\\/]node_modules[\\/](react-redux|@reduxjs[\\/]toolkit|reselect|immer|use-sync-external-store|redux)[\\/]/,
 					name: 'vendor',
 					chunks: 'async',
 					priority: 20,

@@ -13,7 +13,7 @@ export const BOOTSTRAP_FORCE_GRACE_MS = 4000;
 /**
  * @param {{
  *   now: number,
- *   scheduledAt: number,
+ *   loadRequestedAt: number|null,
  *   initialized: boolean,
  *   pending: boolean,
  *   forceMountAttempted: boolean,
@@ -25,7 +25,7 @@ export const BOOTSTRAP_FORCE_GRACE_MS = 4000;
 export function resolveBootstrapStallAction(state) {
 	const {
 		now,
-		scheduledAt,
+		loadRequestedAt,
 		initialized,
 		pending,
 		forceMountAttempted,
@@ -33,11 +33,16 @@ export function resolveBootstrapStallAction(state) {
 		forceGraceMs = BOOTSTRAP_FORCE_GRACE_MS,
 	} = state;
 
-	if (initialized || !pending) {
+	if (
+		initialized ||
+		!pending ||
+		loadRequestedAt === null ||
+		loadRequestedAt === undefined
+	) {
 		return 'none';
 	}
 
-	const elapsed = now - scheduledAt;
+	const elapsed = now - loadRequestedAt;
 	if (elapsed < stallMs) {
 		return 'wait';
 	}

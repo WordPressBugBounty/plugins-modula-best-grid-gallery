@@ -504,18 +504,23 @@ export function buildImgAttrs({
 	const focalTransitionOff =
 		letterboxContainActive || focalCropActive || focalPointActive;
 	const lazyEnabled = isLazyLoadEnabled(lazyLoad);
+	const inheritedAttrs = mergeReactClassNameProps(
+		normalizeReactDomProps(spreadAttrs(item.imgAttributes)),
+		[
+			...(item.imgClasses || []),
+			...(letterboxContainActive
+				? [MODULA_IMG_LETTERBOX_CONTAIN_CLASS]
+				: []),
+			...(focalCropActive ? [MODULA_IMG_FOCAL_CROP_CLASS] : []),
+			...(focalPointActive ? [MODULA_IMG_FOCAL_POINT_CLASS] : []),
+		]
+	);
+	// React 18 sets attributes in insertion order while the img is detached.
+	// Apply loading before src so lazy pictures do not eagerly fetch the fallback
+	// before joining their source elements and selecting a responsive candidate.
+	delete inheritedAttrs.src;
 	const imgAttrs = {
-		...mergeReactClassNameProps(
-			normalizeReactDomProps(spreadAttrs(item.imgAttributes)),
-			[
-				...(item.imgClasses || []),
-				...(letterboxContainActive
-					? [MODULA_IMG_LETTERBOX_CONTAIN_CLASS]
-					: []),
-				...(focalCropActive ? [MODULA_IMG_FOCAL_CROP_CLASS] : []),
-				...(focalPointActive ? [MODULA_IMG_FOCAL_POINT_CLASS] : []),
-			]
-		),
+		...inheritedAttrs,
 		loading: lazyEnabled ? 'lazy' : 'eager',
 		decoding: 'async',
 		alt: itemData?.alt || item?.title || '',

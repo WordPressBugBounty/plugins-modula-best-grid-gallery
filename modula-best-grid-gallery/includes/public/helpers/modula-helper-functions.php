@@ -1,6 +1,10 @@
 <?php
 
 function modula_generate_image_links( $item_data, $item, $settings ) {
+	// Beta's item processor already selected the current attachment file and crop.
+	if ( isset( $settings['modula_display_context'] ) && ! empty( $item_data['img_attributes']['src'] ) ) {
+		return $item_data;
+	}
 
 	if ( ! apply_filters( 'modula_resize_images', true, $settings, $item_data ) ) {
 		return $item_data;

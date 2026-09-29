@@ -6,8 +6,10 @@
  *
  * @package
  */
-import { loadModulaLightboxModule } from './loadModulaLightboxModule';
-import { reportLightboxFailure } from './reportLightboxFailure';
+import {
+	cancelModulaGalleryLightboxOpen,
+	requestModulaLightboxOpen,
+} from './lightboxSessionLifecycle';
 import { releaseModulaGalleryItemPointerFocus } from './releaseModulaGalleryItemPointerFocus';
 import { buildModulaLightboxSlidesFromItems } from './buildModulaLightboxSlidesFromItems';
 import {
@@ -374,6 +376,13 @@ async function resolveLightboxSourceItems(context = {}) {
 	return context.items;
 }
 
+/**
+ * @param {HTMLElement} rootEl
+ * @param {object} config
+ * @param {number|((slides: Array) => number)} startIndex Resolve a deeplink after its catalog loads; -1 means no match.
+ * @param {object} context
+ * @returns {Promise<boolean>}
+ */
 export async function openModulaGalleryLightboxAtRoot(
 	rootEl,
 	config,
@@ -386,27 +395,37 @@ export async function openModulaGalleryLightboxAtRoot(
 	if (!isModulaLightboxAllowedOnDevice(config)) {
 		return false;
 	}
-	const items = await resolveLightboxSourceItems(context);
-	const slides = resolveModulaLightboxSlides({
-		items,
-		settings: context.settings,
-		config,
-		rootEl,
+	return requestModulaLightboxOpen(rootEl, async () => {
+		const items = await resolveLightboxSourceItems(context);
+		const slides = resolveModulaLightboxSlides({
+			items,
+			settings: context.settings,
+			config,
+			rootEl,
+		});
+		if (slides.length === 0) {
+			return null;
+		}
+		const requestedIndex =
+			typeof startIndex === 'function' ? startIndex(slides) : startIndex;
+		if (typeof startIndex === 'function' && requestedIndex < 0) {
+			return null;
+		}
+		const index = Math.min(Math.max(0, requestedIndex), slides.length - 1);
+		return [
+			slides,
+			config.lightboxOpts || {},
+			index,
+			{
+				settings: context.settings,
+				galleryId: config.galleryId,
+				galleryComments: config.galleryComments,
+				shareButtonsJson: resolveModulaShareButtonsJson(config),
+				openedViaKeyboard: Boolean(context.openedViaKeyboard),
+				galleryHostEl: rootEl,
+			},
+		];
 	});
-	if (slides.length === 0) {
-		return false;
-	}
-	const index = Math.min(Math.max(0, startIndex), slides.length - 1);
-	const { openModulaLightbox } = await loadModulaLightboxModule();
-	openModulaLightbox(slides, config.lightboxOpts || {}, index, {
-		settings: context.settings,
-		galleryId: config.galleryId,
-		galleryComments: config.galleryComments,
-		shareButtonsJson: resolveModulaShareButtonsJson(config),
-		openedViaKeyboard: Boolean(context.openedViaKeyboard),
-		galleryHostEl: rootEl,
-	});
-	return true;
 }
 
 /**
@@ -430,47 +449,57 @@ export async function openModulaGalleryLightboxFromClick({
 	resolveItems,
 	openedViaKeyboard = false,
 }) {
-	if (!rootEl || !clickedLink || !galleryUsesFancyboxLightbox(config?.lightbox)) {
+	if (
+		!rootEl ||
+		!clickedLink ||
+		!galleryUsesFancyboxLightbox(config?.lightbox)
+	) {
 		return false;
 	}
 	if (!isModulaLightboxAllowedOnDevice(config)) {
 		return false;
 	}
 
-	const sourceItems = await resolveLightboxSourceItems({
-		items,
-		resolveItems,
-	});
-	const slides = resolveModulaLightboxSlides({
-		items: sourceItems,
-		settings,
-		config,
-		rootEl,
-	});
-	if (slides.length === 0) {
-		return false;
-	}
+	return requestModulaLightboxOpen(rootEl, async () => {
+		const sourceItems = await resolveLightboxSourceItems({
+			items,
+			resolveItems,
+		});
+		const slides = resolveModulaLightboxSlides({
+			items: sourceItems,
+			settings,
+			config,
+			rootEl,
+		});
+		if (slides.length === 0) {
+			return null;
+		}
 
-	const index = resolveLightboxStartIndex(clickedLink, slides, rootEl);
-	const clickedTileEl =
-		clickedLink.closest('.modula-item.modula-hover-v2') ||
-		clickedLink.closest('.modula-item');
+		const index = resolveLightboxStartIndex(clickedLink, slides, rootEl);
+		const clickedTileEl =
+			clickedLink.closest('.modula-item.modula-hover-v2') ||
+			clickedLink.closest('.modula-item');
 
-	if (!openedViaKeyboard) {
-		releaseModulaGalleryItemPointerFocus(clickedLink);
-	}
+		if (!openedViaKeyboard) {
+			releaseModulaGalleryItemPointerFocus(clickedLink);
+		}
 
-	const { openModulaLightbox } = await loadModulaLightboxModule();
-	openModulaLightbox(slides, config.lightboxOpts || {}, index, {
-		settings,
-		galleryId: config.galleryId,
-		galleryComments: config.galleryComments,
-		shareButtonsJson: resolveModulaShareButtonsJson(config),
-		openedViaKeyboard,
-		galleryHostEl: rootEl,
-		clickedTileEl,
+		return [
+			slides,
+			config.lightboxOpts || {},
+			index,
+			{
+				settings,
+				galleryId: config.galleryId,
+				galleryComments: config.galleryComments,
+				shareButtonsJson: resolveModulaShareButtonsJson(config),
+				openedViaKeyboard,
+				triggerEl: clickedLink,
+				galleryHostEl: rootEl,
+				clickedTileEl,
+			},
+		];
 	});
-	return true;
 }
 
 /**
@@ -618,9 +647,7 @@ export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 		if (!link) {
 			return;
 		}
-		if (
-			!galleryUsesFancyboxLightbox(resolveContext().config?.lightbox)
-		) {
+		if (!galleryUsesFancyboxLightbox(resolveContext().config?.lightbox)) {
 			return;
 		}
 		event.preventDefault();
@@ -632,7 +659,10 @@ export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 	 */
 	function onActivate(event, options = {}) {
 		const target = event.target;
-		if (target instanceof Element && target.closest('.modula-selection-handle')) {
+		if (
+			target instanceof Element &&
+			target.closest('.modula-selection-handle')
+		) {
 			return;
 		}
 		const link = resolveModulaLightboxClickLink(event, hostEl);
@@ -652,7 +682,6 @@ export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 		}
 
 		const context = resolveContext();
-		const galleryRoot = hostEl.closest('.modula.modula-gallery');
 		if (options.fromTouchEnd) {
 			suppressClickUntil =
 				(typeof performance !== 'undefined'
@@ -667,8 +696,6 @@ export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 			settings: context.settings,
 			resolveItems: context.resolveItems,
 			openedViaKeyboard,
-		}).catch((err) => {
-			reportLightboxFailure(galleryRoot || hostEl, err);
 		});
 	}
 
@@ -703,16 +730,17 @@ export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 			return;
 		}
 		const target = event.target;
-		if (target instanceof Element && target.closest('.modula-selection-handle')) {
+		if (
+			target instanceof Element &&
+			target.closest('.modula-selection-handle')
+		) {
 			return;
 		}
 		const link = resolveModulaLightboxClickLink(event, hostEl);
 		if (!link) {
 			return;
 		}
-		if (
-			!galleryUsesFancyboxLightbox(resolveContext().config?.lightbox)
-		) {
+		if (!galleryUsesFancyboxLightbox(resolveContext().config?.lightbox)) {
 			return;
 		}
 
@@ -747,6 +775,7 @@ export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 	hostEl.addEventListener('touchend', onTouchEnd, { passive: false });
 	hostEl.addEventListener('keydown', onKeyDown);
 	return () => {
+		cancelModulaGalleryLightboxOpen(hostEl);
 		clearPendingDoubleOpen();
 		hostEl.removeEventListener('mousedown', onMouseDown);
 		hostEl.removeEventListener('click', onClick);

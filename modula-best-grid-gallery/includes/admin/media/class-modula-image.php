@@ -178,6 +178,11 @@ class Modula_Image {
 		if ( $crop ) {
 			$suffix .= ( $align ) ? "_{$align}" : '_c';
 		}
+		// Native WordPress encoding must not reuse an existing quality-100 file.
+		// Keep the legacy cache and its callers unchanged.
+		if ( null === $quality ) {
+			$suffix .= '_wp';
+		}
 
 		// Get the destination file name
 		$dest_file_name = "{$dir}/{$name}-{$suffix}.{$ext}";
@@ -212,6 +217,7 @@ class Modula_Image {
 	 * @param int $height      The height for cropping the image.
 	 * @param bool $crop       Whether or not to crop the image (default yes).
 	 * @param string $align    The crop position alignment.
+	 * @param int|null $quality Encoding quality; null uses the site's WordPress defaults and filters.
 	 * @param bool $retina     Whether or not to make a retina copy of image.
 	 * @param array $data      Array of gallery data (optional).
 	 * @param bool $force_overwrite      Forces an overwrite even if the thumbnail already exists (useful for applying watermarks)
@@ -289,7 +295,9 @@ class Modula_Image {
 			}
 
 			// Set the image editor quality.
-			$editor->set_quality( $quality );
+			if ( null !== $quality ) {
+				$editor->set_quality( $quality );
+			}
 
 			// If cropping, process cropping.
 			if ( $crop ) {
@@ -334,6 +342,10 @@ class Modula_Image {
 			} else {
 				// Just resize the image.
 				$editor->resize( $dest_width, $dest_height );
+			}
+			if ( null === $quality ) {
+				// Native quality filters receive the output dimensions, as in WP resizing.
+				$editor->set_quality();
 			}
 
 			// Save the image.

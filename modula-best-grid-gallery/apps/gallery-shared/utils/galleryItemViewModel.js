@@ -381,6 +381,17 @@ export function getGalleryItemViewModel(itemData, config, options = {}) {
 		...(style || {}),
 	};
 	if (
+		galleryType === 'parallax-masonry' &&
+		!pictureAbsoluteFill &&
+		Number(imgAttrs?.width) > 0 &&
+		Number(imgAttrs?.height) > 0
+	) {
+		// The lazy picture can be absent on the first paint. Reserve its rendered
+		// aspect before observing visibility, without starting an image request.
+		mergedStyle['--modula-image-aspect-ratio'] =
+			`${Number(imgAttrs.width)} / ${Number(imgAttrs.height)}`;
+	}
+	if (
 		pictureAbsoluteFill &&
 		!useLegacy &&
 		!fillSlot &&

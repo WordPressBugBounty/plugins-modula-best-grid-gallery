@@ -31,6 +31,7 @@ class Shortcode {
 	 */
 	public function __construct( $register_shortcode = true ) {
 		$this->item_processor = new \Modula_Item_Data_Processor();
+		add_filter( 'modula_shortcode_item_data', array( '\Modula_Item_Data_Processor', 'prepare_beta_responsive_images' ), 95, 3 );
 
 		if ( ! $register_shortcode ) {
 			return;
@@ -769,6 +770,7 @@ class Shortcode {
 	 * @return array<int, mixed>
 	 */
 	private function build_converted_items_list( $gallery_id, array $flat, array $rows_to_convert, array $full_images, $context = 'public' ) {
+		$flat['modula_display_context'] = $context;
 		$skip_image_guardian = is_string( $context ) && 'settings_editor' === $context;
 		$items               = array();
 
@@ -890,6 +892,12 @@ class Shortcode {
 	 * @return array<string, mixed>
 	 */
 	private function append_cache_bust_to_bootstrap_item( array $item, $bust ) {
+		if ( ! empty( $item['sliderThumbnail'] ) && is_array( $item['sliderThumbnail'] ) ) {
+			$item['sliderThumbnail'] = $this->append_cache_bust_to_bootstrap_item( $item['sliderThumbnail'], $bust );
+		}
+		foreach ( ( $item['sliderThumbnailChoices'] ?? array() ) as $size => $thumbnail ) {
+			$item['sliderThumbnailChoices'][ $size ] = $this->append_cache_bust_to_bootstrap_item( $thumbnail, $bust );
+		}
 		$url_keys = array( 'src', 'url', 'thumbnail', 'image_full' );
 		foreach ( $url_keys as $key ) {
 			if ( ! empty( $item[ $key ] ) && is_string( $item[ $key ] ) ) {
@@ -945,21 +953,14 @@ class Shortcode {
 			return $srcset;
 		}
 
-		$parts = array_map( 'trim', explode( ',', $srcset ) );
-		$out   = array();
-		foreach ( $parts as $part ) {
-			if ( '' === $part ) {
-				continue;
-			}
-			if ( preg_match( '/^(\S+)(\s+.*)?$/', $part, $matches ) ) {
-				$url   = $this->append_modula_cache_bust_query_arg( $matches[1], $bust );
-				$out[] = $url . ( isset( $matches[2] ) ? $matches[2] : '' );
-				continue;
-			}
-			$out[] = $part;
-		}
-
-		return implode( ', ', $out );
+		// CDN transformation URLs contain commas; only a descriptor ends a candidate.
+		return preg_replace_callback(
+			'/(\S+)(\s+\d+(?:\.\d+)?[wx])(?=\s*(?:,|$))/',
+			function ( $candidate ) use ( $bust ) {
+				return $this->append_modula_cache_bust_query_arg( $candidate[1], $bust ) . $candidate[2];
+			},
+			$srcset
+		);
 	}
 
 	/**
@@ -1347,18 +1348,74 @@ class Shortcode {
 		return null;
 	}
 
+	/**
+	 * Factor identical tile presentation out of the inline Beta payload only.
+	 * REST, extension filters and no-JavaScript markup keep complete items.
+	 * The DOM data loader restores the item shape before runtime preparation.
+	 *
+	 * @param array $data Complete gallery bootstrap.
+	 * @return array Compact inline bootstrap.
+	 */
+	private function compact_inline_items( array $data ): array {
+		$items = $data['items'] ?? array();
+		if ( ! is_array( $items ) || count( $items ) < 2 || isset( $data['itemDefaults'] ) ) {
+			return $data;
+		}
+		$defaults = array();
+		foreach ( array( 'itemClasses', 'linkClasses', 'itemAttributes', 'linkAttributes' ) as $field ) {
+			$first = reset( $items );
+			if ( ! is_array( $first ) || ! isset( $first[ $field ] ) || ! is_array( $first[ $field ] ) ) {
+				continue;
+			}
+			$is_attributes = in_array( $field, array( 'itemAttributes', 'linkAttributes' ), true );
+			$candidates    = $is_attributes ? $first[ $field ] : array( $field => $first[ $field ] );
+			foreach ( $candidates as $key => $value ) {
+				foreach ( $items as $item ) {
+					$container = $is_attributes ? ( $item[ $field ] ?? null ) : $item;
+					if ( ! is_array( $container ) || ! array_key_exists( $key, $container ) || $value !== $container[ $key ] ) {
+						continue 2;
+					}
+				}
+				if ( $is_attributes ) {
+					$defaults[ $field ][ $key ] = $value;
+				} else {
+					$defaults[ $field ] = $value;
+				}
+				foreach ( $items as &$item ) {
+					if ( $is_attributes ) {
+						unset( $item[ $field ][ $key ] );
+					} else {
+						unset( $item[ $field ] );
+					}
+				}
+				unset( $item );
+			}
+		}
+		if ( $defaults ) {
+			$data['itemDefaults'] = $defaults;
+			$data['items']        = $items;
+		}
+		return $data;
+	}
+
 	private function render_output( $gallery_id, $settings, $gallery_data, $images ) {
 		$classes         = $this->get_container_classes(
 			$settings['align'],
 			isset( $settings['flat'] ) && is_array( $settings['flat'] ) ? $settings['flat'] : array(),
 			isset( $settings['grouped'] ) && is_array( $settings['grouped'] ) ? $settings['grouped'] : array()
 		);
-		$hover_dim_style = $this->gallery_hover_dim_style_value( $settings['flat'] );
+		$shell_declarations = $this->gallery_hover_dim_style_value( $settings['flat'] );
+		// Parallax's viewfinder is viewport-height even before its lazy layout mounts.
+		// Reserve that space in the HTML so loading the detector/CSS cannot move
+		// the content below the gallery. Keep other layouts' sizing unchanged.
+		if ( 'parallax-masonry' === ( $settings['grouped']['general']['type'] ?? '' ) ) {
+			$shell_declarations .= ';min-height:max(400px,100vh)';
+		}
 
 		ob_start();
 
 		do_action( 'modula_before_gallery', $settings['flat'] );
-		$shell_style = \Modula\V2\Modern_Gallery::gallery_shell_inline_style( $hover_dim_style );
+		$shell_style = \Modula\V2\Modern_Gallery::gallery_shell_inline_style( $shell_declarations );
 		?>
 		<noscript>
 			<style>
@@ -1372,18 +1429,18 @@ class Shortcode {
 				}
 			</style>
 		</noscript>
-		<div id="modula-<?php echo esc_attr( $gallery_id ); ?>" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" style="<?php echo esc_attr( $shell_style ); ?>">
+		<div id="modula-<?php echo esc_attr( $gallery_id ); ?>" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" style="<?php echo esc_attr( $shell_style ); ?>" data-modula-lazy-load="<?php echo false === ( $settings['grouped']['performance']['lazyLoad'] ?? true ) ? '0' : '1'; ?>">
 			<?php do_action( 'modula_shortcode_before_items', $settings['flat'] ); ?>
 			<div class="modula-items">
 				<?php $this->render_items( $images, $settings['flat'], $gallery_id ); ?>
 			</div>
-			<?php do_action( 'modula_shortcode_after_items', $settings['flat'], null, $images ); ?>
+			<?php do_action( 'modula_shortcode_after_items', $settings['flat'], null, $images, 'beta' ); ?>
 		</div>
 		<script type="application/json" data-modula-gallery-id="modula-<?php echo esc_attr( $gallery_id ); ?>" data-modula-gallery>
 			<?php
 			// HEX_TAG: shortcode-rendered bodies (e.g. KaliForms) may contain literal </script> — without this,
 			// the HTML parser closes this tag early and dumps the rest of the bootstrap JSON as visible page text.
-			echo wp_json_encode( $gallery_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo wp_json_encode( $this->compact_inline_items( $gallery_data ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			?>
 		</script>
 		<?php
@@ -1393,6 +1450,7 @@ class Shortcode {
 	}
 
 	private function render_items( $images, $settings, $gallery_id ) {
+		$settings['modula_display_context'] = 'public';
 		foreach ( $images as $image ) {
 			if ( is_array( $image ) && \Modula\V2\Images\Adapter::is_embedded_gallery_item( $image ) ) {
 				echo $this->render_embedded_item_markup( $image, $settings ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -1678,32 +1736,8 @@ class Shortcode {
 	}
 
 	private function render_item_image( $data ) {
-		$img_attrs = $this->build_image_attributes( $data );
-
-		if ( $this->is_srcset_disabled() ) {
-			return $this->build_image_tag( $img_attrs, $data );
-		}
-
-		$attachment_id = $this->get_attachment_id( $data );
-		$image_meta    = $this->get_image_metadata( $attachment_id, $data, $img_attrs );
-
-		$image_src = $this->get_image_source( $img_attrs, $data );
-		if ( ! $image_src || empty( $image_meta['sizes'] ) ) {
-			return $this->build_image_tag( $img_attrs, $data );
-		}
-
-		if ( $this->is_image_edited( $image_meta, $image_src ) ) {
-			return $this->build_image_tag( $img_attrs, $data );
-		}
-
-		$size_array = $this->get_image_dimensions( $img_attrs, $image_src, $image_meta, $attachment_id );
-		if ( ! $size_array ) {
-			return $this->build_image_tag( $img_attrs, $data );
-		}
-
-		$img_attrs = $this->add_responsive_attributes( $img_attrs, $size_array, $image_src, $image_meta, $attachment_id, $data );
-
-		return $this->build_image_tag( $img_attrs, $data );
+		// HTML and bootstrap use the attributes finalized by the same item filters.
+		return $this->build_image_tag( $this->build_image_attributes( $data ), $data );
 	}
 
 	private function build_image_attributes( $data ) {
@@ -1711,126 +1745,6 @@ class Shortcode {
 
 		if ( ! empty( $data->img_classes ) ) {
 			$img_attrs['class'] = implode( ' ', $data->img_classes );
-		}
-
-		return $img_attrs;
-	}
-
-	private function is_srcset_disabled() {
-		$troubleshoot_opt = get_option( 'modula_troubleshooting_option', array() );
-		$disable_srcset   = isset( $troubleshoot_opt['disable_srcset'] ) ? boolval( $troubleshoot_opt['disable_srcset'] ) : false;
-
-		return true === apply_filters( 'modula_troubleshooting_disable_srcset', $disable_srcset );
-	}
-
-	private function get_attachment_id( $data ) {
-		return isset( $data->link_attributes['data-image-id'] ) ? (int) $data->link_attributes['data-image-id'] : 0;
-	}
-
-	private function get_image_metadata( $attachment_id, $data, $img_attrs ) {
-		$image_meta = array();
-
-		if ( $attachment_id ) {
-			$image_meta = wp_get_attachment_metadata( $attachment_id );
-		}
-
-		if ( $this->should_add_custom_size( $data, $image_meta, $img_attrs ) ) {
-			$mime_type                     = $this->get_mime_type( $image_meta, $data );
-			$image_meta['sizes']['custom'] = array(
-				'file'      => $data->image_info['name'] . '-' . $data->image_info['suffix'] . '.' . $data->image_info['ext'],
-				'width'     => $img_attrs['width'],
-				'height'    => $img_attrs['height'],
-				'mime-type' => $mime_type,
-			);
-		}
-
-		return $image_meta;
-	}
-
-	private function should_add_custom_size( $data, $image_meta, $img_attrs ) {
-		return ! empty( $data->image_info ) &&
-			! empty( $image_meta ) &&
-			isset( $image_meta['width'], $image_meta['height'], $img_attrs['width'], $img_attrs['height'] ) &&
-			$image_meta['width'] !== $img_attrs['width'] &&
-			$image_meta['height'] !== $img_attrs['height'];
-	}
-
-	private function get_mime_type( $image_meta, $data ) {
-		if ( isset( $image_meta['sizes']['thumbnail']['mime-type'] ) ) {
-			return $image_meta['sizes']['thumbnail']['mime-type'];
-		}
-
-		if ( function_exists( 'mime_content_type' ) && isset( $data->image_info['file_path'] ) ) {
-			return mime_content_type( $data->image_info['file_path'] );
-		}
-
-		return '';
-	}
-
-	private function get_image_source( $img_attrs, $data ) {
-		$image_src = $img_attrs['src'] ?? $img_attrs['data-src'] ?? '';
-
-		if ( ! $image_src && isset( $data->image_full ) ) {
-			$image_src = $data->image_full;
-		}
-
-		list($image_src) = explode( '?', $image_src );
-
-		return $image_src;
-	}
-
-	private function is_image_edited( $image_meta, $image_src ) {
-		if ( ! isset( $image_meta['file'] ) ) {
-			return false;
-		}
-
-		if ( ! preg_match( '/-e[0-9]{13}/', $image_meta['file'], $img_edit_hash ) ) {
-			return false;
-		}
-
-		return strpos( wp_basename( $image_src ), $img_edit_hash[0] ) === false;
-	}
-
-	private function get_image_dimensions( $img_attrs, $image_src, $image_meta, $attachment_id ) {
-		$width  = isset( $img_attrs['width'] ) ? (int) $img_attrs['width'] : 0;
-		$height = isset( $img_attrs['height'] ) ? (int) $img_attrs['height'] : 0;
-
-		if ( $width && $height ) {
-			return array( $width, $height );
-		}
-
-		return wp_image_src_get_dimensions( $image_src, $image_meta, $attachment_id );
-	}
-
-	private function add_responsive_attributes( $img_attrs, $size_array, $image_src, $image_meta, $attachment_id, $data ) {
-		$srcset = apply_filters( 'modula_template_image_srcset', array(), $data, $image_meta );
-
-		if ( empty( $srcset ) ) {
-			$full_image = $data->image_full ?? $image_src;
-			$srcset     = wp_calculate_image_srcset( $size_array, $full_image, $image_meta, $attachment_id );
-		}
-
-		if ( $srcset ) {
-			$img_attrs['srcset'] = $srcset;
-
-			$sizes = modula_resolve_image_sizes_attr(
-				array(
-					'settings'      => ( isset( $data->settings ) && is_array( $data->settings ) )
-						? $data->settings
-						: array(
-							'type' => isset( $data->gallery_type ) ? $data->gallery_type : '',
-						),
-					'size_array'    => $size_array,
-					'image_src'     => $image_src,
-					'image_meta'    => $image_meta,
-					'attachment_id' => $attachment_id,
-					'lazy'          => ! empty( $data->lazyLoad ),
-					'data'          => $data,
-				)
-			);
-			if ( $sizes && is_string( $sizes ) ) {
-				$img_attrs['sizes'] = $sizes;
-			}
 		}
 
 		return $img_attrs;

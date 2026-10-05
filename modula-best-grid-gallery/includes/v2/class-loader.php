@@ -39,6 +39,9 @@ class Loader {
 		// When modula-settings / modula-images are saved, also save modula_settings_v2 and modula_images_v2.
 		Meta_Sync::init();
 
+		// Optional native automation surface; normal Modula boot has no API dependency.
+		Abilities\Integration::init();
+
 		// Admin: optional React settings shell (metabox + scripts); remove with v2 admin cleanup if abandoned.
 		Admin\Gallery_Takeover_Admin::init();
 		Admin\Settings_Editor_Metabox::init();

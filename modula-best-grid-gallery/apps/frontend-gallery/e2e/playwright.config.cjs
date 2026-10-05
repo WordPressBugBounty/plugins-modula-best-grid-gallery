@@ -14,7 +14,9 @@ module.exports = defineConfig({
 	fullyParallel: false,
 	retries: 0,
 	timeout: 90000,
-	globalTimeout: 600000,
+	// The complete Pro matrix includes over 100 serial editor/visitor and delayed-load
+	// checks. Keep individual deadlines strict while allowing the matrix to finish.
+	globalTimeout: 1200000,
 	expect: { timeout: 15000 },
 	outputDir: path.join(
 		process.env.MODULA_E2E_RUN_DIR,

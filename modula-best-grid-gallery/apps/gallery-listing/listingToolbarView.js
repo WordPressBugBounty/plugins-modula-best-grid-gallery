@@ -10,9 +10,10 @@ export const LISTING_STATUS_ALL = 'all';
 /** Default SHOW filter: Published. */
 export const LISTING_STATUS_DEFAULT = 'publish';
 
-/** @type {readonly ['publish', 'draft', 'private', 'trash']} */
+/** @type {readonly ['publish', 'future', 'draft', 'private', 'trash']} */
 export const LISTING_STATUS_FILTER_VALUES = [
 	'publish',
+	'future',
 	'draft',
 	'private',
 	'trash',
@@ -242,6 +243,8 @@ export function shouldShowListingSearchSummary(view) {
  */
 export function getListingStatusTriggerLabel(statusValue) {
 	switch (statusValue) {
+		case 'future':
+			return 'Scheduled';
 		case 'draft':
 			return 'Drafts';
 		case 'private':

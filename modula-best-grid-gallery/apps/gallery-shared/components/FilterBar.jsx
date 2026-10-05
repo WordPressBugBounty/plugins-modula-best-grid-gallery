@@ -15,6 +15,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { useSelector } from 'react-redux';
+import { __ } from '@wordpress/i18n';
 import { useGalleryActions } from '../hooks/useGalleryActions';
 import { useFilterBarIsPhone } from '../hooks/useFilterBarIsPhone';
 import {
@@ -138,14 +139,6 @@ export default function FilterBar() {
 		[originalItems, catalogUsageCounts, catalogFilterableCount]
 	);
 
-	const defaultActive = useMemo(() => {
-		const raw =
-			filtersSettings.defaultActiveFilter ||
-			config.defaultActiveFilter ||
-			'All';
-		return typeof raw === 'string' ? raw.trim() : 'All';
-	}, [filtersSettings.defaultActiveFilter, config.defaultActiveFilter]);
-
 	const isFilterActive = useCallback(
 		(key, value) =>
 			activeFilters.some(
@@ -157,7 +150,6 @@ export default function FilterBar() {
 
 	const isAllActive = isFilterBarAllCurrent({
 		activeFilters,
-		defaultActive,
 	});
 
 	const handleFilterClick = useCallback(
@@ -202,10 +194,9 @@ export default function FilterBar() {
 			resolveFilterSelectValue({
 				options: selectOptions,
 				activeFilters,
-				defaultActive,
 				hideAllFilter,
 			}),
-		[selectOptions, activeFilters, defaultActive, hideAllFilter]
+		[selectOptions, activeFilters, hideAllFilter]
 	);
 
 	const handleSelectChange = useCallback(
@@ -248,6 +239,9 @@ export default function FilterBar() {
 		: '';
 
 	if (useDropdown) {
+		// Hidden All still needs an honest label when no named filter is applied.
+		const hasUnfilteredPlaceholder =
+			hideAllFilter && activeFilters.length === 0;
 		return (
 			<div
 				className={`${containerClass} filters--dropdown`}
@@ -256,10 +250,15 @@ export default function FilterBar() {
 			>
 				<select
 					className="filters__select"
-					value={selectValue}
+					value={hasUnfilteredPlaceholder ? '' : selectValue}
 					onChange={handleSelectChange}
 					aria-label="Gallery filters"
 				>
+					{hasUnfilteredPlaceholder && (
+						<option value="" disabled>
+							{__('Select a filter', 'modula-best-grid-gallery')}
+						</option>
+					)}
 					{selectOptions.map((opt) => (
 						<option key={opt.value} value={opt.value}>
 							{opt.label}
@@ -304,7 +303,6 @@ export default function FilterBar() {
 		const selected = isFilterBarEntryCurrent({
 			entry,
 			activeFilters,
-			defaultActive,
 			isApplied: isFilterActive(entry.key, entry.value),
 		});
 		const countKey = String(entry.value || entry.label || '');

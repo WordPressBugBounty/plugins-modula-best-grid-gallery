@@ -51,7 +51,10 @@ import {
 	galleryUsesFancyboxLightbox,
 	resolveGalleryItemLink,
 } from './resolveGalleryItemLink';
-import { getItemVideoUrl } from '../video/videoGalleryModel';
+import {
+	getItemVideoUrl,
+	resolveItemLightboxVideoFlags,
+} from '../video/videoGalleryModel';
 
 /**
  * @typedef {Object} GalleryItemViewModelOptions
@@ -327,8 +330,18 @@ export function getGalleryItemViewModel(itemData, config, options = {}) {
 	const tileVideoUrl = getItemVideoUrl(itemData);
 	if (tileVideoUrl && linkResolution.showLink) {
 		linkAttrs['data-video-url'] = tileVideoUrl;
+		const videoFlags = resolveItemLightboxVideoFlags(
+			itemData,
+			config?.video && typeof config.video === 'object'
+				? config.video
+				: {}
+		);
+		linkAttrs['data-loop'] = videoFlags.loop ? '1' : '0';
+		linkAttrs['data-autolight'] = videoFlags.autoplay ? '1' : '0';
 	} else {
 		delete linkAttrs['data-video-url'];
+		delete linkAttrs['data-loop'];
+		delete linkAttrs['data-autolight'];
 	}
 
 	const linkHref =

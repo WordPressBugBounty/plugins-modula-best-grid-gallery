@@ -205,17 +205,26 @@ export default function GalleryListingApp() {
 					item,
 					saved,
 					failed: false,
-					message: excluded
-						? __(
-								'Changes saved. This item no longer matches the status filter.',
-								'modula-best-grid-gallery'
-							)
-						: present
-							? __('Changes saved.', 'modula-best-grid-gallery')
-							: __(
-									'Changes saved. This item is not visible in the current listing view.',
+					message:
+						item.type === 'gallery' && saved?.status === 'future'
+							? __(
+									'Changes saved. This gallery is scheduled and will not be public until its publication date. Choose Scheduled in the status filter to find it.',
 									'modula-best-grid-gallery'
-								),
+								)
+							: excluded
+								? __(
+										'Changes saved. This item no longer matches the status filter.',
+										'modula-best-grid-gallery'
+									)
+								: present
+									? __(
+											'Changes saved.',
+											'modula-best-grid-gallery'
+										)
+									: __(
+											'Changes saved. This item is not visible in the current listing view.',
+											'modula-best-grid-gallery'
+										),
 				});
 			} catch (refreshError) {
 				setSaveResult({

@@ -50,6 +50,7 @@ export function deriveGalleryConfig(groupedSettings, extras = {}) {
 			galleryId,
 			legacyJsConfig: extras.legacyJsConfig || {},
 			galleryComments: extras.galleryComments,
+			zoomExtensionActive: extras.zoomExtensionActive,
 			previewViewport,
 			imageSizeDimensions:
 				extras.imageSizeDimensions &&
@@ -112,6 +113,7 @@ export function galleryConfigExtrasFromPreloadData(data, galleryId) {
 		galleryId: galleryId || null,
 		legacyJsConfig: data?.legacyJsConfig || {},
 		galleryComments: metadata.galleryComments,
+		zoomExtensionActive: metadata.zoomExtensionActive,
 		previewViewport: data?.previewViewport,
 		imageSizeDimensions:
 			metadata.imageSizeDimensions &&

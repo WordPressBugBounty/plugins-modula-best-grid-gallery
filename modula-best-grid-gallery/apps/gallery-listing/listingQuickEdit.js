@@ -1,7 +1,7 @@
 /**
  * Quick edit (listing) — eligibility and row identity.
  *
- * Modal editor for title / status / slug. Opening is via
+ * Modal editor for title / status / slug and gallery publication date. Opening is via
  * listing row hover actions (Quick Edit); not the ⋮ menu.
  */
 

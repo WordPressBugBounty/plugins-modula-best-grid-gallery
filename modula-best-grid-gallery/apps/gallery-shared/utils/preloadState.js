@@ -21,6 +21,7 @@ import {
 } from './deriveGalleryConfig';
 import {
 	clientPaginationTotals,
+	filterItems,
 	getPageSlice,
 	isAppendPaginationMode,
 } from '../store/clientLogic';
@@ -30,7 +31,11 @@ import {
 	paginationFromGroupedSettings,
 } from './paginationFromSettings';
 import { isSettingsEditorPreview } from './displayContext';
-import { buildFilteringFromSettings } from './filterBarModel';
+import {
+	buildFilteringFromSettings,
+	filterEntryMatchesDefaultActive,
+	normalizeFilterBarEntry,
+} from './filterBarModel';
 
 /**
  * Build fetchFunction for server-side pagination/filter (REST modula/v2/gallery/{id}/items).
@@ -208,25 +213,56 @@ export function buildPreloadedState(data, element) {
 				: null,
 	};
 
-	// Initial display items: client pagination slices the first page only.
-	let items = [...rawItems];
+	// Resolve the saved default once; controls subsequently reflect applied state.
+	const layoutType = config.type || DEFAULT_GALLERY_TYPE;
+	const skipFilters = isGalleryTypeWithoutFilters(layoutType);
+	let filteredItems = null;
+	if (!isSettingsEditorPreviewContext && filtering.enabled && !skipFilters) {
+		const defaultEntry = filtering.availableFilters
+			.map(normalizeFilterBarEntry)
+			.find((entry) =>
+				filterEntryMatchesDefaultActive(
+					entry,
+					settings.filters?.defaultActiveFilter
+				)
+			);
+		if (defaultEntry) {
+			filtering.activeFilters = [
+				{ key: defaultEntry.key, value: defaultEntry.value },
+			];
+			if (filtering.type === 'client') {
+				filteredItems = filterItems(
+					rawItems,
+					defaultEntry.key,
+					defaultEntry.value
+				);
+			}
+		}
+	}
+
+	// Filter the full client catalog before slicing the first page.
+	const initialItems = filteredItems || rawItems;
+	let items = [...initialItems];
+	if (filteredItems) {
+		pagination.totalItems = filteredItems.length;
+	}
 	if (pagination.enabled && pagination.type === 'client') {
 		if (pagination.mode === 'page') {
 			items = getPageSlice(
-				rawItems,
+				initialItems,
 				pagination.currentPage,
 				pagination.perPage
 			);
 			const totals = clientPaginationTotals(
-				rawItems.length,
+				initialItems.length,
 				pagination.perPage
 			);
 			pagination.totalItems = totals.totalItems;
 			pagination.totalPages = totals.totalPages;
 		} else if (isAppendPaginationMode(pagination.mode)) {
-			items = getPageSlice(rawItems, 1, pagination.perPage);
+			items = getPageSlice(initialItems, 1, pagination.perPage);
 			const totals = clientPaginationTotals(
-				rawItems.length,
+				initialItems.length,
 				pagination.perPage
 			);
 			pagination.totalItems = totals.totalItems;
@@ -239,8 +275,6 @@ export function buildPreloadedState(data, element) {
 		pagination.hasMore = pagination.currentPage < pagination.totalPages;
 	}
 
-	const layoutType = config.type || DEFAULT_GALLERY_TYPE;
-	const skipFilters = isGalleryTypeWithoutFilters(layoutType);
 	const skipPagination = isGalleryTypeWithoutPagination(layoutType);
 
 	if (skipFilters) {
@@ -294,7 +328,7 @@ export function buildPreloadedState(data, element) {
 			originalItems: isSettingsEditorPreviewContext
 				? asGalleryItemList(rawItems)
 				: [...rawItems],
-			filteredItems: null,
+			filteredItems,
 		},
 		pagination,
 		filtering,

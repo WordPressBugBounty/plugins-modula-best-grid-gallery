@@ -224,6 +224,25 @@ class Modula_Image {
 	 * @return WP_Error|string Return WP_Error on error, URL of resized image on success.
 	 */
 	public function resize_image( $url, $width = null, $height = null, $crop = false, $align = 'c', $quality = 100, $retina = false, $data = array(), $force_overwrite = false ) {
+		$args = func_get_args();
+		if ( class_exists( '\WPChill\Folders\Mutation_Lock' ) ) {
+			global $wpdb;
+			$upload_dir = wp_upload_dir();
+			$relative = str_replace( $upload_dir['baseurl'] . '/', '', $url );
+			$attachment_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_wp_attached_file' AND meta_value = %s", $relative ) );
+			if ( $attachment_id ) {
+				return \WPChill\Folders\Mutation_Lock::run( 'attachment:' . $attachment_id, function () use ( $args, $attachment_id ) {
+					// A replacement may have completed while this visitor waited.
+					clean_post_cache( $attachment_id );
+					return $this->resize_image_locked( ...$args );
+				} );
+			}
+		}
+		return $this->resize_image_locked( ...$args );
+	}
+
+	/** Generate crop bytes and their metadata within the shared attachment lock. */
+	private function resize_image_locked( $url, $width = null, $height = null, $crop = false, $align = 'c', $quality = 100, $retina = false, $data = array(), $force_overwrite = false ) {
 
 		global $wpdb;
 		$upload_dir = wp_upload_dir();

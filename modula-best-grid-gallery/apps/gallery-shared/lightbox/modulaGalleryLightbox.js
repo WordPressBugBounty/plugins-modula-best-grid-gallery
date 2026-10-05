@@ -23,6 +23,7 @@ import {
 	resolveGalleryItemImageIdFromDom,
 } from '../utils/resolveGalleryItemImageId';
 import {
+	buildModulaLightboxVideoPlaybackFields,
 	formatVideoPlaybackUrl,
 	isProbableModulaVideoPlaybackUrl,
 	resolveItemLightboxVideoFlags,
@@ -173,6 +174,16 @@ function resolveLightboxStartIndex(clickedLink, slides, rootEl) {
 		return 0;
 	}
 
+	// Video item identities are not numeric attachment IDs. Layout columns can
+	// reorder DOM nodes, so match the catalog identity before falling back.
+	const itemId = clickedLink.getAttribute('data-image-id');
+	if (itemId) {
+		const byItemId = slides.findIndex((slide) => slide.item_id === itemId);
+		if (byItemId >= 0) {
+			return byItemId;
+		}
+	}
+
 	const imageId = normalizeGalleryItemImageId(
 		clickedLink.getAttribute('data-image-id')
 	);
@@ -296,8 +307,22 @@ export function buildModulaLightboxSlideFromItemElement(itemEl, config) {
 		'';
 	const videoSettings =
 		config?.video && typeof config.video === 'object' ? config.video : {};
+	const itemVideoFlags = isVideo
+		? {
+				loop_video:
+					link.getAttribute('data-loop') ||
+					link.dataset?.loop ||
+					itemEl.getAttribute('data-loop') ||
+					'inherit',
+				autoplay_lightbox:
+					link.getAttribute('data-autolight') ||
+					link.dataset?.autolight ||
+					itemEl.getAttribute('data-autolight') ||
+					'inherit',
+			}
+		: {};
 	const flags = isVideo
-		? resolveItemLightboxVideoFlags({}, videoSettings)
+		? resolveItemLightboxVideoFlags(itemVideoFlags, videoSettings)
 		: { autoplay: false, loop: false };
 	const playbackSrc = isVideo
 		? formatVideoPlaybackUrl(videoUrl, {
@@ -310,24 +335,42 @@ export function buildModulaLightboxSlideFromItemElement(itemEl, config) {
 		return null;
 	}
 	const poster = isVideo ? thumb || full || '' : thumb;
+	const videoPlayback = isVideo
+		? buildModulaLightboxVideoPlaybackFields(flags, videoUrl)
+		: null;
 	return {
 		src: playbackSrc,
+		item_id: link.getAttribute('data-image-id') || '',
 		image_id: imageIdStr,
 		/*
 		 * Fancybox Video plugin: slide.autoplay ?? Carousel.Video.autoplay.
 		 * Always set explicitly on video slides so item overrides win.
 		 */
-		...(isVideo ? { autoplay: flags.autoplay } : {}),
+		...(videoPlayback
+			? {
+					autoplay: videoPlayback.autoplay,
+					modulaVideoLoop: videoPlayback.modulaVideoLoop,
+					...(videoPlayback.youtube
+						? { youtube: videoPlayback.youtube }
+						: {}),
+					...(videoPlayback.vimeo
+						? { vimeo: videoPlayback.vimeo }
+						: {}),
+					...(videoPlayback.html5videoTpl
+						? { html5videoTpl: videoPlayback.html5videoTpl }
+						: {}),
+				}
+			: {}),
 		opts: {
 			caption,
 			alt: img.getAttribute('alt') || '',
 			thumb: poster || playbackSrc,
 			...(poster && isVideo ? { poster } : {}),
 			image_id: imageIdStr,
-			...(isVideo
+			...(videoPlayback
 				? {
-						modulaVideoAutoplay: flags.autoplay ? 1 : 0,
-						modulaVideoLoop: flags.loop ? 1 : 0,
+						modulaVideoAutoplay: videoPlayback.modulaVideoAutoplay,
+						modulaVideoLoop: videoPlayback.modulaVideoLoop,
 					}
 				: {}),
 			...(itemUrl

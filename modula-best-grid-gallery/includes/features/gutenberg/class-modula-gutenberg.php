@@ -28,8 +28,7 @@ class Modula_Gutenberg {
 		add_action( 'wp_ajax_modula_get_gallery', array( $this, 'get_gallery' ) );
 		add_action( 'wp_ajax_modula_get_jsconfig', array( $this, 'get_jsconfig' ) );
 		add_action( 'wp_ajax_modula_check_hover_effect', array( $this, 'check_hover_effect' ) );
-		// Filter the gallery data for the REST API. Used for the Gutenberg editor, to remove the
-		// image data-width and data-height attributes.
+		// Enrich REST gallery payloads for the block editor (src, video type, grid spans).
 		add_filter( 'rest_prepare_modula-gallery', array( $this, 'rest_api_filter_data' ), 15, 3 );
 	}
 
@@ -345,10 +344,24 @@ class Modula_Gutenberg {
 					}
 				}
 
-				$data['modulaImages'][ $key ]['data-width']  = $image['video_width'];
-				$data['modulaImages'][ $key ]['data-height'] = $image['video_height'];
-				$data['modulaImages'][ $key ]['width']       = $image['video_width'];
-				$data['modulaImages'][ $key ]['height']      = $image['video_height'];
+				/*
+				 * Custom-grid width/height are cell spans. video_width/video_height are
+				 * pixels for aspect ratio — never copy pixels onto the span fields.
+				 */
+				$image   = function_exists( 'modula_repair_video_custom_grid_spans' )
+					? modula_repair_video_custom_grid_spans( $image )
+					: $image;
+				$grid_w  = isset( $image['width'] ) ? $image['width'] : 2;
+				$grid_h  = isset( $image['height'] ) ? $image['height'] : 2;
+				$video_w = isset( $image['video_width'] ) ? $image['video_width'] : 1920;
+				$video_h = isset( $image['video_height'] ) ? $image['video_height'] : 1080;
+
+				$data['modulaImages'][ $key ]['img_width']   = $video_w;
+				$data['modulaImages'][ $key ]['img_height']  = $video_h;
+				$data['modulaImages'][ $key ]['width']       = $grid_w;
+				$data['modulaImages'][ $key ]['height']      = $grid_h;
+				$data['modulaImages'][ $key ]['data-width']  = $grid_w;
+				$data['modulaImages'][ $key ]['data-height'] = $grid_h;
 			}
 		}
 		// Set the new data

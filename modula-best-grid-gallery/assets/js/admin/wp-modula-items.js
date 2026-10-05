@@ -131,6 +131,12 @@ wp.Modula = 'undefined' === typeof (wp.Modula) ? {} : wp.Modula;
                 currentWidth = columns;
             }
 
+            // Guard against video pixel metadata leaking into cell spans (e.g. height=1080).
+            if (parseInt(currentHeight, 10) > 48) {
+                this.set('height', 2);
+                currentHeight = 2;
+            }
+
             if ('custom-grid' == modula.Settings.get('type')) {
 
                 // We will calculate item width and height based on new gutter and columns
@@ -256,6 +262,15 @@ wp.Modula = 'undefined' === typeof (wp.Modula) ? {} : wp.Modula;
                     width, height;
 
                 view.model.set('resize', true);
+
+                if (parseInt(currentWidth, 10) > parseInt(columns, 10)) {
+                    this.model.set('width', columns);
+                    currentWidth = columns;
+                }
+                if (parseInt(currentHeight, 10) > 48) {
+                    this.model.set('height', 2);
+                    currentHeight = 2;
+                }
 
                 width = (size * currentWidth) + ((currentWidth - 1) * gutter);
                 height = (size * currentHeight) + ((currentHeight - 1) * gutter);

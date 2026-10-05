@@ -71,3 +71,8 @@ function modula_init_wpchill_folders() {
 }
 
 modula_bootstrap_wpchill_folders();
+
+// The portable service asks its host about gallery, bound-source and album uses.
+add_filter( 'wpchill_folders_cloud_delete_allowed', static function ( $allowed, $id ) {
+	return $allowed && \Modula\V2\Abilities\Folders_Dependency::available( 'usage' ) && ! \Modula\V2\Abilities\Attachment_Lifecycle::used( (int) $id );
+}, 10, 2 );

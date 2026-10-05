@@ -200,8 +200,13 @@ class Modula_Rest_Api {
 			 * @param string $option Option name.
 			 */
 			$value = apply_filters( 'modula_settings_api_pre_update_' . $option, $value, $option );
+			if ( is_wp_error( $value ) ) { return $value; }
 
-			update_option( $option, $value );
+			// Diagnostics already persisted through its serialized service in the pre-update hook.
+			// A second write here could overwrite a newer command after that lock is released.
+			if ( Modula_Debug_Log::OPTION_KEY !== $option ) {
+				update_option( $option, $value );
+			}
 
 			do_action( 'modula_settings_api_update_' . $option, $value );
 

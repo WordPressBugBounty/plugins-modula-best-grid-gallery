@@ -94,6 +94,9 @@ export function buildVideoTemplateRow(snap, videoUrl, templateId) {
 		full: thumb,
 		title,
 		description,
+		// Custom-grid cell spans (not video pixels from the snap).
+		width: 2,
+		height: 2,
 		video_width: snap?.width || 1920,
 		video_height: snap?.height || 1080,
 		autoplay_thumbnail: 'inherit',

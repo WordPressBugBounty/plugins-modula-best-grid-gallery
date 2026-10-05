@@ -956,7 +956,7 @@ class Gallery_Upload_Controller {
 				array( 'status' => 400 )
 			);
 		}
-		$result = \Modula\V2\Meta_Sync::persist_merged_gallery_items( $gallery_id, $params['items'] );
+		$result = \Modula\V2\Meta_Sync::persist_merged_gallery_items( $gallery_id, $params['items'], true );
 		if ( is_wp_error( $result ) ) {
 			\Modula_Debug_Log::log_failure(
 				\Modula_Debug_Log::CHANNEL_GALLERY_PERSIST,

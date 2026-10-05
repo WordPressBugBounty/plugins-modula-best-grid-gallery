@@ -44,6 +44,7 @@ import {
 } from './modulaLightboxImageProtection';
 import { releaseModulaGalleryItemPointerFocusFromContext } from './releaseModulaGalleryItemPointerFocus';
 import { resolveModulaLightboxFancyboxOpts } from '../utils/lightboxSettingsToFancyboxOpts';
+import { readModulaVideoSlideLoop } from '../video/videoGalleryModel';
 
 export { applyModulaLightboxPreviewPatch } from './lightboxPreviewLivePatch';
 export { wireModulaLightboxShareToolbarClick } from './prepareModulaLightboxV6';
@@ -189,12 +190,12 @@ function applyModulaVideoSlideAttrs(fancybox) {
 		}
 		const opts =
 			slide?.opts && typeof slide.opts === 'object' ? slide.opts : {};
-		if (opts.modulaVideoLoop === 1 || opts.modulaVideoLoop === true) {
-			videoEl.loop = true;
-		}
+		videoEl.loop = readModulaVideoSlideLoop(slide);
 		if (
 			opts.modulaVideoAutoplay === 1 ||
-			opts.modulaVideoAutoplay === true
+			opts.modulaVideoAutoplay === true ||
+			slide?.modulaVideoAutoplay === 1 ||
+			slide?.modulaVideoAutoplay === true
 		) {
 			videoEl.autoplay = true;
 			videoEl.muted = false;

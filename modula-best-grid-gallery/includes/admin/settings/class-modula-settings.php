@@ -117,16 +117,19 @@ class Modula_Settings {
 	 * Drive Modula Debug Log enable/disable from Diagnostics Save (sets TTL via the service).
 	 *
 	 * @param mixed $value Posted option value.
-	 * @return array Persisted debug log state.
+	 * @return array|WP_Error Persisted debug log state or an unconfirmed command.
 	 */
 	public function sync_debug_log_option( $value ) {
 		$log     = Modula_Debug_Log::get_instance();
 		$enabled = is_array( $value ) ? ! empty( $value['enabled'] ) : ! empty( $value );
 
 		if ( $enabled ) {
-			$log->enable();
+			$confirmed = $log->enable();
 		} else {
-			$log->disable();
+			$confirmed = $log->disable();
+		}
+		if ( ! $confirmed ) {
+			return new WP_Error( 'modula_debug_log_unconfirmed', __( 'Modula Debug Log is busy or unavailable. Inspect its status before retrying.', 'modula-best-grid-gallery' ), array( 'status' => 503 ) );
 		}
 
 		$stored = get_option( Modula_Debug_Log::OPTION_KEY, array() );

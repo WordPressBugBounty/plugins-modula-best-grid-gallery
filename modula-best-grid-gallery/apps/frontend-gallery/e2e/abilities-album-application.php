@@ -1,0 +1,58 @@
+<?php
+/** Apply the existing album preset replacement through native recoverable requests. */
+$application_preset = $abilities['modula/create-album-preset']->execute( array( 'request_id' => $prefix . '-apply-source', 'title' => 'Album application source', 'status' => 'publish', 'sorting' => 'manual', 'settings' => array( 'layout' => array( 'gutter' => 41 ) ) ) );
+modula_album_assert( 'succeeded' === $application_preset['status'], 'Create application source.' );
+$pid = $application_preset['preset']['id'];
+$album_read = $abilities['modula/read-album']->execute( array( 'id' => $protected ) );
+$apply = array( 'request_id' => $prefix . '-apply-one', 'id' => $protected, 'revision' => $album_read['album']['revision'], 'preset_id' => $pid, 'preset_revision' => $application_preset['preset']['revision'] );
+$before_members = rest_do_request( '/modula/v2/album/' . $protected . '/members' )->get_data();
+$application = $abilities['modula/apply-album-preset']->execute( $apply );
+modula_album_assert( 'succeeded' === $application['status'], 'Album preset application succeeds: ' . wp_json_encode( $application ) );
+modula_album_assert( 41 === $abilities['modula/read-album']->execute( array( 'id' => $protected ) )['album']['settings']['layout']['gutter'] && get_post( $protected )->post_password === $catalog['albums']['betaProtected']['password'] && $before_members === rest_do_request( '/modula/v2/album/' . $protected . '/members' )->get_data(), 'Application changes layout while preserving protection and members.' );
+modula_album_assert( $application === $abilities['modula/apply-album-preset']->execute( $apply ), 'Application replay does not repeat replacement.' );
+$apply_stale = $apply; $apply_stale['request_id'] .= '-stale';
+modula_album_assert( 'conflict' === $abilities['modula/apply-album-preset']->execute( $apply_stale )['status'], 'Stale target conflicts.' );
+$a = $make_album( 'apply-first' ); $b = $make_album( 'apply-second' );
+$batch = array( 'request_id' => $prefix . '-apply-batch', 'preset_id' => $pid, 'preset_revision' => $application_preset['preset']['revision'], 'targets' => array( array( 'id' => $a, 'revision' => $abilities['modula/read-album']->execute( array( 'id' => $a ) )['album']['revision'] ), array( 'id' => $b, 'revision' => $abilities['modula/read-album']->execute( array( 'id' => $b ) )['album']['revision'] ) ) );
+$interrupt = static function ( $request, $index ) use ( $batch ) { if ( $request === $batch['request_id'] && 0 === $index ) { throw new RuntimeException( 'Controlled album preset interruption after committed target.' ); } };
+add_action( 'modula_abilities_batch_target_finished', $interrupt, 10, 2 );
+$partial = $abilities['modula/apply-album-presets']->execute( $batch );
+remove_action( 'modula_abilities_batch_target_finished', $interrupt );
+modula_album_assert( array( 'succeeded', 'pending' ) === array_column( $partial['targets'] ?? array(), 'status' ), 'Interrupted batch retains completed and pending target: ' . wp_json_encode( $partial ) );
+// A human changes the completed target and the source before resumption.
+$human = new WP_REST_Request( 'PATCH', '/modula/v2/album/' . $a . '/settings' ); $human->set_header( 'Content-Type', 'application/json' ); $human->set_body( wp_json_encode( array( 'layout' => array( 'gutter' => 19 ) ) ) );
+modula_album_assert( 200 === rest_do_request( $human )->get_status(), 'Real editor settings write succeeds between batch attempts.' );
+$source_change = $abilities['modula/update-album-preset']->execute( array( 'request_id' => $prefix . '-changed-source', 'id' => $pid, 'revision' => $application_preset['preset']['revision'], 'title' => 'Changed source' ) );
+modula_album_assert( 'succeeded' === $source_change['status'], 'Source changed between target commits.' );
+$resumed = $abilities['modula/apply-album-presets']->execute( $batch );
+modula_album_assert( array( 'succeeded', 'conflict' ) === array_column( $resumed['targets'], 'status' ), 'Resume skips success and refuses changed source for pending target.' );
+modula_album_assert( 19 === $abilities['modula/read-album']->execute( array( 'id' => $a ) )['album']['settings']['layout']['gutter'], 'Resume preserves later human edit to completed target.' );
+$retry = $batch; $retry['request_id'] .= '-retry'; $retry['preset_revision'] = $source_change['preset']['revision']; $retry['targets'] = array( $batch['targets'][1], array( 'id' => $classic, 'revision' => str_repeat( '0', 64 ) ) );
+$retried = $abilities['modula/apply-album-presets']->execute( $retry );
+modula_album_assert( array( 'succeeded', 'rejected' ) === array_column( $retried['targets'], 'status' ), 'Deliberate retry only pending target plus invalid classic reports individual outcomes.' );
+$deny_source = static function ( $caps, $cap, $user, $args ) use ( $pid ) { return 'edit_post' === $cap && (int) ( $args[0] ?? 0 ) === $pid ? array( 'do_not_allow' ) : $caps; };
+add_filter( 'map_meta_cap', $deny_source, 10, 4 );
+$redacted = $abilities['modula/recover-request']->execute( array( 'request_id' => $apply['request_id'] ) );
+modula_album_assert( 'forbidden' === $redacted['status'] && ! isset( $redacted['album'] ), 'Application recovery requires current preset access.' );
+remove_filter( 'map_meta_cap', $deny_source );
+// Keep an existing classic member and independent hierarchy through replacement.
+$classic_member = array( 'id' => $classic, 'itemType' => 'modula-album', 'width' => 2, 'height' => 1 );
+update_post_meta( $b, 'modula_album_members_v2', wp_json_encode( array( 'members' => array( $classic_member ) ) ) );
+update_post_meta( $b, 'modula-album-galleries', array( $classic_member ) );
+$classic_state = get_post( $classic )->to_array();
+$classic_members_before = $abilities['modula/read-album-members']->execute( array( 'id' => $b ) )['members'];
+$classic_apply = array( 'request_id' => $prefix . '-apply-classic-ref', 'id' => $b, 'revision' => $abilities['modula/read-album']->execute( array( 'id' => $b ) )['album']['revision'], 'preset_id' => $pid, 'preset_revision' => $source_change['preset']['revision'] );
+modula_album_assert( 'succeeded' === $abilities['modula/apply-album-preset']->execute( $classic_apply )['status'] && $classic_state === get_post( $classic )->to_array() && $classic_members_before === $abilities['modula/read-album-members']->execute( array( 'id' => $b ) )['members'], 'Preset preserves classic reference without editing/reparenting it.' );
+$active_extensions = get_option( 'modula_pro_active_extensions', array() );
+$deny_defaults = static function () use ( $active_extensions ) { return array_diff( $active_extensions, array( 'modula-defaults' ) ); };
+add_filter( 'pre_option_modula_pro_active_extensions', $deny_defaults );
+modula_album_assert( 'forbidden' === $abilities['modula/recover-request']->execute( array( 'request_id' => $apply['request_id'] ) )['status'], 'Disabled Defaults prevents protected result recovery.' );
+remove_filter( 'pre_option_modula_pro_active_extensions', $deny_defaults );
+$slider_preset = $abilities['modula/create-album-preset']->execute( array( 'request_id' => $prefix . '-slider-preset', 'title' => 'Slider source', 'status' => 'draft', 'sorting' => 'manual', 'settings' => array( 'general' => array( 'albumType' => 'slider' ) ) ) );
+modula_album_assert( 'succeeded' === $slider_preset['status'], 'Create enabled slider preset.' );
+$deny_slider = static function () use ( $active_extensions ) { return array_diff( $active_extensions, array( 'modula-slider' ) ); };
+add_filter( 'pre_option_modula_pro_active_extensions', $deny_slider );
+$blocked_input = array( 'request_id' => $prefix . '-blocked-slider-apply', 'id' => $b, 'revision' => $abilities['modula/read-album']->execute( array( 'id' => $b ) )['album']['revision'], 'preset_id' => $slider_preset['preset']['id'], 'preset_revision' => $slider_preset['preset']['revision'] );
+$blocked = $abilities['modula/apply-album-preset']->execute( $blocked_input );
+remove_filter( 'pre_option_modula_pro_active_extensions', $deny_slider );
+modula_album_assert( 'rejected' === $blocked['status'] && 41 === $abilities['modula/read-album']->execute( array( 'id' => $b ) )['album']['settings']['layout']['gutter'], 'Unavailable source value refuses entire target without downgrade.' );

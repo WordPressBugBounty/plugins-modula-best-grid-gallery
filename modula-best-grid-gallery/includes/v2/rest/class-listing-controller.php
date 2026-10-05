@@ -1158,11 +1158,11 @@ class Listing_Controller {
 	/**
 	 * Row counts per status for the listing status filter menu.
 	 *
-	 * @return array{publish: int, draft: int, private: int, trash: int}
+	 * @return array{publish: int, draft: int, private: int, trash: int, future: int}
 	 */
 	private static function get_listing_status_counts() {
 		$cached = get_transient( 'modula_v2_listing_status_counts' );
-		if ( is_array( $cached ) && isset( $cached['publish'] ) && ! isset( $cached['everything'] ) ) {
+		if ( is_array( $cached ) && isset( $cached['publish'], $cached['future'] ) && ! isset( $cached['everything'] ) ) {
 			return $cached;
 		}
 
@@ -1176,11 +1176,12 @@ class Listing_Controller {
 			'draft'   => 0,
 			'private' => 0,
 			'trash'   => 0,
+			'future'  => 0,
 		);
 
 		foreach ( $post_types as $post_type ) {
 			$post_counts = wp_count_posts( $post_type );
-			foreach ( array( 'publish', 'draft', 'private', 'trash' ) as $status ) {
+			foreach ( array( 'publish', 'draft', 'private', 'trash', 'future' ) as $status ) {
 				if ( isset( $post_counts->$status ) ) {
 					$counts[ $status ] += (int) $post_counts->$status;
 				}
@@ -1315,7 +1316,7 @@ class Listing_Controller {
 		$layout_label = self::get_layout_label( $id );
 		$author       = self::get_author_payload( (int) $post->post_author );
 		$status       = $post->post_status;
-		if ( ! in_array( $status, array( 'publish', 'draft', 'private', 'trash' ), true ) ) {
+		if ( ! in_array( $status, array( 'publish', 'draft', 'private', 'trash', 'future' ), true ) ) {
 			$status = 'draft';
 		}
 
@@ -1359,6 +1360,8 @@ class Listing_Controller {
 				'rows' => $shortcode_rows,
 			),
 			'updatedAt'                => gmdate( 'c', strtotime( $post->post_modified_gmt . ' UTC' ) ),
+			'date'                     => str_replace( ' ', 'T', $post->post_date ),
+			'timezone'                 => wp_timezone_string(),
 			'createdAt'                => gmdate( 'c', strtotime( $post->post_date_gmt . ' UTC' ) ),
 			'author'                   => $author,
 			'editUrl'                  => get_edit_post_link( $id, 'raw' ) ? get_edit_post_link( $id, 'raw' ) : '',
@@ -1381,7 +1384,7 @@ class Listing_Controller {
 		$layout_label = self::get_album_layout_label( $id );
 		$author       = self::get_author_payload( (int) $post->post_author );
 		$status       = $post->post_status;
-		if ( ! in_array( $status, array( 'publish', 'draft', 'private', 'trash' ), true ) ) {
+		if ( ! in_array( $status, array( 'publish', 'draft', 'private', 'trash', 'future' ), true ) ) {
 			$status = 'draft';
 		}
 

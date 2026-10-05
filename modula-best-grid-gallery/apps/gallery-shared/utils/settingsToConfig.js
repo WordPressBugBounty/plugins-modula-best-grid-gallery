@@ -424,6 +424,7 @@ export function settingsToConfig(settings, opts = {}) {
 		lightboxOpts: lightboxSettingsToFancyboxOpts(settings, {
 			galleryId: opts.galleryId,
 			galleryComments: opts.galleryComments,
+			zoomExtensionActive: opts.zoomExtensionActive,
 		}),
 		enableSocial: !!social.enableSocial,
 		enableTwitter: !!social.enableTwitter,

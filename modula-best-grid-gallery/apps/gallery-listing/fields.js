@@ -13,6 +13,7 @@ import { StackedThumbnails } from './StackedThumbnails';
 
 const STATUS_LABELS = {
 	publish: __('Published', 'modula-best-grid-gallery'),
+	future: __('Scheduled', 'modula-best-grid-gallery'),
 	draft: __('Draft', 'modula-best-grid-gallery'),
 	private: __('Private', 'modula-best-grid-gallery'),
 	trash: __('Trash', 'modula-best-grid-gallery'),
@@ -105,7 +106,10 @@ export function getListingFields({
 
 				return (
 					<div className="modula-gallery-listing__primary-media">
-						<ListingRowActionsMenu item={item} {...rowActionHandlers} />
+						<ListingRowActionsMenu
+							item={item}
+							{...rowActionHandlers}
+						/>
 						{previewable ? (
 							<ListingRowPreviewTrigger
 								item={item}
@@ -209,6 +213,10 @@ export function getListingFields({
 				{
 					value: 'publish',
 					label: STATUS_LABELS.publish,
+				},
+				{
+					value: 'future',
+					label: STATUS_LABELS.future,
 				},
 				{
 					value: 'draft',

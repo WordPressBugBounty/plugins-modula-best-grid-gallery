@@ -4,7 +4,8 @@
  *
  * Empty / placeholder-only gallery `filters` must not wipe a non-empty stored
  * list unless the save explicitly clears it. Already-wiped galleries can be
- * repaired by collecting unique per-image filter tags.
+ * repaired by collecting unique per-image filter tags. Intentional dismiss/clear
+ * must strip matching per-image tags so repair cannot refill those names.
  *
  * @package Modula
  */
@@ -42,6 +43,122 @@ function modula_gallery_filter_list_is_placeholder_only( $list ) {
  */
 function modula_gallery_filter_list_decode_tag( $tag ) {
 	return str_replace( '&#44;', ',', (string) $tag );
+}
+
+/**
+ * Encode a comma inside a filter tag for per-image storage (`,` → `&#44;`).
+ *
+ * @param string $tag Decoded tag.
+ * @return string
+ */
+function modula_gallery_filter_list_encode_tag( $tag ) {
+	return str_replace( ',', '&#44;', (string) $tag );
+}
+
+/**
+ * Join decoded filter tags into a per-image filters string.
+ *
+ * @param string[] $tags Decoded tag tokens.
+ * @return string
+ */
+function modula_gallery_filter_list_format_image_filters( array $tags ) {
+	$parts = array();
+	foreach ( $tags as $tag ) {
+		$tag = trim( (string) $tag );
+		if ( '' === $tag ) {
+			continue;
+		}
+		$parts[] = modula_gallery_filter_list_encode_tag( $tag );
+	}
+	return implode( ',', $parts );
+}
+
+/**
+ * Names present in $existing but absent from $resolved (first-seen order).
+ *
+ * @param mixed $existing Prior gallery filter list.
+ * @param mixed $resolved Gallery filter list after save resolve.
+ * @return string[]
+ */
+function modula_gallery_filter_list_removed_names( $existing, $resolved ) {
+	$after = array_fill_keys( modula_gallery_filter_list_normalize( $resolved ), true );
+	$out   = array();
+	foreach ( modula_gallery_filter_list_normalize( $existing ) as $name ) {
+		if ( isset( $after[ $name ] ) ) {
+			continue;
+		}
+		$out[] = $name;
+	}
+	return $out;
+}
+
+/**
+ * Remove named filter tags from gallery item rows.
+ *
+ * Embedded / non-array rows are left unchanged. Matching uses decoded tags
+ * (Pro `&#44;` commas). Kept tags are re-encoded when written back.
+ *
+ * @param mixed    $images        Gallery items (modula-images / merged rows).
+ * @param string[] $removed_names Filter names to strip.
+ * @return array{images: array, changed: bool}
+ */
+function modula_gallery_filter_list_strip_names_from_images( $images, $removed_names ) {
+	if ( ! is_array( $images ) ) {
+		return array(
+			'images'  => array(),
+			'changed' => false,
+		);
+	}
+
+	$removed = array();
+	foreach ( (array) $removed_names as $name ) {
+		$name = trim( modula_gallery_filter_list_decode_tag( (string) $name ) );
+		if ( '' === $name ) {
+			continue;
+		}
+		$removed[ $name ] = true;
+	}
+
+	if ( empty( $removed ) ) {
+		return array(
+			'images'  => $images,
+			'changed' => false,
+		);
+	}
+
+	$changed = false;
+	$out     = array();
+
+	foreach ( $images as $row ) {
+		if ( ! is_array( $row ) || ! array_key_exists( 'filters', $row ) ) {
+			$out[] = $row;
+			continue;
+		}
+
+		$tags = modula_gallery_filter_list_parse_image_filters( $row['filters'] );
+		$kept = array();
+		foreach ( $tags as $tag ) {
+			if ( isset( $removed[ $tag ] ) ) {
+				continue;
+			}
+			$kept[] = $tag;
+		}
+
+		if ( count( $kept ) === count( $tags ) ) {
+			$out[] = $row;
+			continue;
+		}
+
+		$changed         = true;
+		$next            = $row;
+		$next['filters'] = modula_gallery_filter_list_format_image_filters( $kept );
+		$out[]           = $next;
+	}
+
+	return array(
+		'images'  => $out,
+		'changed' => $changed,
+	);
 }
 
 /**
@@ -124,6 +241,36 @@ function modula_gallery_filter_list_from_images( $images ) {
 	}
 
 	return $out;
+}
+
+/**
+ * Map classic Filters POST into resolve args for gallery filter list save.
+ *
+ * Classic clear-all removes every `filters[]` input, so the `filters` key is
+ * absent. The Filters field posts `filters_submitted` while that UI is present;
+ * submitted + missing `filters` means intentional empty list. Missing both keeps
+ * wipe protection (do not treat as clear).
+ *
+ * @param mixed $raw_settings       Raw `modula-settings` POST (pre-sanitize).
+ * @param mixed $sanitized_filters  Sanitized filters value when `filters` was in POST.
+ * @return array{key_present: bool, incoming: mixed}
+ */
+function modula_classic_gallery_filter_list_save_args( $raw_settings, $sanitized_filters = null ) {
+	$raw = is_array( $raw_settings ) ? $raw_settings : array();
+	$submitted       = ! empty( $raw['filters_submitted'] );
+	$has_filters_key = array_key_exists( 'filters', $raw );
+
+	if ( $submitted && ! $has_filters_key ) {
+		return array(
+			'key_present' => true,
+			'incoming'    => array(),
+		);
+	}
+
+	return array(
+		'key_present' => $has_filters_key,
+		'incoming'    => $has_filters_key ? $sanitized_filters : null,
+	);
 }
 
 /**

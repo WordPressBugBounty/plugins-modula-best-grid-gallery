@@ -1,3 +1,13 @@
+= 3.0.12 - 05.10.2026 =
+Fixed: Videos in Custom Grid galleries keep a normal tile size instead of stretching to the video’s pixel dimensions.
+Fixed: Clearing all gallery filters saves correctly and the empty list no longer comes back after refresh.
+Fixed: Gallery publication date can be edited again from the editor.
+Fixed: Lightbox zoom Off is respected on the visitor gallery.
+Fixed: Beta lightbox videos honor the loop setting for the whole gallery and for individual items.
+Fixed: Filter controls show correctly when a Beta gallery mixes images and videos.
+Fixed: Titles, captions, and ALT text from Modula AI stay on your website images after they are applied.
+Info: Read more about Modula 3.0 Beta: https://wp-modula.com/modula-3-0-beta/
+
 = 3.0.11 - 29.09.2026 =
 Changed: Beta galleries use a smaller initial loader and load gallery rendering, lightbox sessions, and comments when needed.
 Changed: Beta galleries reuse compatible React dependencies and send less repeated presentation data in their initial payload.

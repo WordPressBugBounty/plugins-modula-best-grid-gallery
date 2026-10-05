@@ -275,21 +275,25 @@ if (process.env.MODULA_E2E_MODE === 'pro') {
 							`layout-${profile.name}-${condition}`
 						);
 						if (condition === 'cold') {
+							// Randomized offsets can temporarily clamp one column at
+							// zero. Observe the whole layout, not just its first column.
 							const transforms = new Set(
 								data.frames
 									.filter((frame) => frame.items.length)
-									.map(
-										(frame) =>
-											frame.items[0].columnTransform
+									.map((frame) =>
+										frame.items
+											.map((item) => item.columnTransform)
+											.join('|')
 									)
 							);
-							if (profile.motion === 'reduce')
+							if (profile.motion === 'reduce') {
 								expect(transforms.size).toBeLessThanOrEqual(2);
-							else
+							} else {
 								expect(
 									transforms.size,
 									'normal Parallax motion must remain active'
 								).toBeGreaterThan(2);
+							}
 						}
 						if (condition === 'warm') {
 							await lightboxJourney(publicPage);

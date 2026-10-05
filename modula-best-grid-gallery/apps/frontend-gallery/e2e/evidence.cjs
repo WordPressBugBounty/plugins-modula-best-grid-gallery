@@ -7,6 +7,32 @@ const assets = JSON.parse(
 	fs.readFileSync(path.join(process.env.MODULA_E2E_RUN_DIR, 'assets.json'))
 );
 
+async function captureResponse(response, pathname) {
+	const request = response.request();
+	await response.finished();
+	const captured = {
+		timing: request.timing(),
+		sizes: await request.sizes(),
+	};
+	for (const plugin of ['lite', 'pro']) {
+		const prefix = `/wp-content/plugins/${path.posix.dirname(assets.plugins[plugin])}/`;
+		if (
+			!pathname.startsWith(prefix) ||
+			!/\.(js|css)$/.test(pathname) ||
+			!response.ok()
+		) {
+			continue;
+		}
+		const file = pathname.slice(prefix.length);
+		captured.sha256 = crypto
+			.createHash('sha256')
+			.update(await response.body())
+			.digest('hex');
+		captured.matchesBuild = captured.sha256 === assets[plugin][file];
+	}
+	return captured;
+}
+
 const test = base.extend({
 	evidence: [
 		async ({ context, browser }, use, testInfo) => {
@@ -64,29 +90,28 @@ const test = base.extend({
 					records.push(record);
 					pending.push(
 						(async () => {
+							let deadline;
 							try {
-								await response.finished();
-								record.timing = request.timing();
-								record.sizes = await request.sizes();
-								for (const plugin of ['lite', 'pro']) {
-									const prefix = `/wp-content/plugins/${path.posix.dirname(assets.plugins[plugin])}/`;
-									if (
-										!pathname.startsWith(prefix) ||
-										!/\.(js|css)$/.test(pathname) ||
-										!response.ok()
-									) {
-										continue;
-									}
-									const file = pathname.slice(prefix.length);
-									record.sha256 = crypto
-										.createHash('sha256')
-										.update(await response.body())
-										.digest('hex');
-									record.matchesBuild =
-										record.sha256 === assets[plugin][file];
-									if (!record.matchesBuild) {
-										mismatches.push(`${plugin}/${file}`);
-									}
+								// A replaced iframe can leave finished() pending indefinitely.
+								// Bound all capture steps without allowing late results to
+								// turn an unverifiable plugin asset into a passing record.
+								const captured = await Promise.race([
+									captureResponse(response, pathname),
+									new Promise((_, reject) => {
+										deadline = setTimeout(
+											() =>
+												reject(
+													new Error(
+														'Response evidence did not settle within 15000ms'
+													)
+												),
+											15000
+										);
+									}),
+								]);
+								Object.assign(record, captured);
+								if (captured.matchesBuild === false) {
+									mismatches.push(pathname);
 								}
 							} catch (error) {
 								record.captureError = error.message;
@@ -95,15 +120,22 @@ const test = base.extend({
 										`Could not verify ${pathname}: ${error.message}`
 									);
 								}
+							} finally {
+								clearTimeout(deadline);
 							}
 						})()
 					);
 				});
 			};
+			const flush = async () => {
+				await Promise.all(pending);
+				return records;
+			};
 			observe(context);
 			await use({
+				flush,
 				async withBootstrapStylesheetBuild(css, check) {
-					await Promise.all(pending);
+					await flush();
 					const file =
 						'assets/css/front/modula-gallery-bootstrap.modula-gallery.css';
 					const location = path.join(
@@ -128,7 +160,7 @@ const test = base.extend({
 						});
 						await check();
 					} finally {
-						await Promise.all(pending);
+						await flush();
 						fs.writeFileSync(location, original);
 						assets.lite[file] = originalHash;
 					}
@@ -149,7 +181,7 @@ const test = base.extend({
 					return visitor;
 				},
 				async closeVisitor(visitor) {
-					await Promise.all(pending);
+					await flush();
 					await visitor.close();
 				},
 				async capture(page, name) {
@@ -159,7 +191,7 @@ const test = base.extend({
 					});
 				},
 			});
-			await Promise.all(pending);
+			await flush();
 			await testInfo.attach('console-network-and-assets', {
 				body: JSON.stringify(records, null, 2),
 				contentType: 'application/json',

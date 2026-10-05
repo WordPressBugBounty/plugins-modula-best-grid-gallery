@@ -37,6 +37,8 @@ async function openListing(
 			title: 'City lights',
 			status: 'publish',
 			slug: 'city-lights',
+			date: '2001-07-15T14:35:27',
+			timezone: 'Europe/Bucharest',
 			isBeta: true,
 			canEdit: true,
 			canDelete: true,
@@ -748,4 +750,84 @@ test('03: refresh failure retries only the read and page movement is not blamed 
 	).toBeVisible();
 	await expect(page.getByRole('searchbox')).toBeFocused();
 	expect(writes).toBe(1);
+});
+
+test('publication date uses site time, survives errors and supports discard without album expansion', async ({
+	page,
+}) => {
+	let attempts = 0;
+	const writes = [];
+	await openListing(page, {
+		save: async (route, changes) => {
+			writes.push(changes);
+			if (++attempts === 1) {
+				await route.fulfill({
+					status: 500,
+					json: { message: 'Date save failed' },
+				});
+				return true;
+			}
+		},
+	});
+	const open = async () => {
+		await page
+			.getByRole('link', { name: 'City lights', exact: true })
+			.focus();
+		await page
+			.getByRole('button', { name: 'Quick Edit', exact: true })
+			.first()
+			.click();
+		return page.getByRole('dialog', { name: 'Quick edit', exact: true });
+	};
+	let dialog = await open();
+	await expect(
+		dialog.getByLabel('Publication date', { exact: true })
+	).toHaveValue('2001-07-15T14:35:27');
+	await expect(
+		dialog.getByText(/Site timezone: Europe\/Bucharest/)
+	).toBeVisible();
+	await dialog
+		.getByLabel('Publication date', { exact: true })
+		.fill('1942-08-17T13:24:37');
+	await dialog
+		.getByRole('button', { name: 'Save changes', exact: true })
+		.click();
+	await expect(dialog.getByRole('alert')).toHaveText('Date save failed');
+	await expect(
+		dialog.getByLabel('Publication date', { exact: true })
+	).toHaveValue('1942-08-17T13:24:37');
+	await dialog
+		.getByRole('button', { name: 'Save changes', exact: true })
+		.click();
+	await expect(dialog).toHaveCount(0);
+	expect(writes).toEqual([
+		{ date: '1942-08-17T13:24:37' },
+		{ date: '1942-08-17T13:24:37' },
+	]);
+	dialog = await open();
+	await expect(
+		dialog.getByLabel('Publication date', { exact: true })
+	).toHaveValue('1942-08-17T13:24:37');
+	await dialog
+		.getByLabel('Publication date', { exact: true })
+		.fill('2050-01-01T12:00');
+	await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+	await dialog
+		.getByRole('button', { name: 'Discard changes', exact: true })
+		.click();
+	dialog = await open();
+	await expect(
+		dialog.getByLabel('Publication date', { exact: true })
+	).toHaveValue('1942-08-17T13:24:37');
+	await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+	await page
+		.getByRole('link', { name: 'Summer collection', exact: true })
+		.focus();
+	await page
+		.getByRole('button', { name: 'Quick Edit', exact: true })
+		.nth(1)
+		.click();
+	await expect(
+		page.getByLabel('Publication date', { exact: true })
+	).toHaveCount(0);
 });

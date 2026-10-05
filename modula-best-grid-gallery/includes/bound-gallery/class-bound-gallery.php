@@ -616,6 +616,33 @@ final class Bound_Gallery {
 	}
 
 	/**
+	 * Inspect known usage without repairs, ingestion or remote requests.
+	 * Remote membership uses the known provider map; it does not certify live bytes.
+	 */
+	public static function references_attachment( int $gallery_id, int $attachment_id, array $stored_rows ): bool {
+		$bound = self::is_bound( $gallery_id );
+		foreach ( $stored_rows as $row ) {
+			if ( ! is_array( $row ) || ( $bound && ! self::is_gallery_local_row( $row ) ) ) { continue; }
+			foreach ( array( 'id', 'blockBackgroundImageId', 'afterAttachmentId' ) as $key ) {
+				if ( is_numeric( $row[$key] ?? null ) && (int) $row[$key] === $attachment_id ) { return true; }
+			}
+		}
+		if ( ! $bound || in_array( $attachment_id, self::get_exclusions( $gallery_id ), true ) ) { return false; }
+		if ( self::is_media_folder_bound( $gallery_id ) ) {
+			return in_array( $attachment_id, self::direct_attachment_ids( (int) get_post_meta( $gallery_id, self::META_TARGET_ID, true ) ), true );
+		}
+		if ( self::is_remote_prefix_bound( $gallery_id ) ) {
+			$target = self::parse_remote_prefix_target( (string) get_post_meta( $gallery_id, self::META_TARGET_ID, true ) );
+			$map = Source_Groups_Controller::provider_maps()->find_by_attachment( $attachment_id );
+			if ( ! $map || $map['connection_id'] !== $target['connection_id'] ) { return false; }
+			$prefix = '/' === $target['prefix'] ? '' : trim( $target['prefix'], '/' ) . '/';
+			$key = (string) $map['key'];
+			return 0 === strpos( $key, $prefix ) && false === strpos( substr( $key, strlen( $prefix ) ), '/' ) && strlen( $key ) > strlen( $prefix );
+		}
+		return false;
+	}
+
+	/**
 	 * Stored `modula-images` after bound-catalog derive (writes and canonical indexes).
 	 *
 	 * @param int $gallery_id Gallery post ID.

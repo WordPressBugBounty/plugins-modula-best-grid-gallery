@@ -324,25 +324,6 @@ class Settings_Controller {
 	public static function update_settings( $request ) {
 		$id = (int) $request['id'];
 
-		$title            = '';
-		$incoming_preview = $request->get_json_params();
-		if ( is_array( $incoming_preview ) && isset( $incoming_preview['postTitle'] ) && is_string( $incoming_preview['postTitle'] ) ) {
-			$title = $incoming_preview['postTitle'];
-		}
-
-		$prepared = \Modula\V2\Gallery_Post::ensure_persistable( $id, $title );
-		if ( is_wp_error( $prepared ) ) {
-			self::log_gallery_persist_failure(
-				$id,
-				$prepared->get_error_code(),
-				'gallery settings promote/prepare failed'
-			);
-			return $prepared;
-		}
-		$id = $prepared;
-
-		\Modula\V2\Meta_Sync::ensure_settings_v2_from_flat( $id );
-
 		$raw = $request->get_body();
 		if ( '' === trim( (string) $raw ) ) {
 			self::log_gallery_persist_failure( $id, 'rest_empty_request', 'gallery settings save rejected: empty body' );
@@ -367,53 +348,34 @@ class Settings_Controller {
 			$incoming = $decoded;
 		}
 
-		foreach ( $incoming as $group => $keys ) {
-			if ( ! is_string( $group ) || '' === $group ) {
-				self::log_gallery_persist_failure( $id, 'rest_invalid_param', 'gallery settings save rejected: invalid group name' );
-				return new \WP_Error(
-					'rest_invalid_param',
-					__( 'Each top-level key must be a non-empty settings group name (string).', 'modula-best-grid-gallery' ),
-					array( 'status' => 400 )
-				);
-			}
-			if ( null !== $keys && ! is_array( $keys ) ) {
-				self::log_gallery_persist_failure( $id, 'rest_invalid_param', 'gallery settings save rejected: invalid group shape' );
-				return new \WP_Error(
-					'rest_invalid_param',
-					sprintf(
-						/* translators: %s: settings group name */
-						__( 'Group "%s" must be a JSON object of settings.', 'modula-best-grid-gallery' ),
-						$group
-					),
-					array( 'status' => 400 )
-				);
-			}
+		$valid = \Modula\V2\Settings\Writer::validate_patch( $incoming );
+		if ( is_wp_error( $valid ) ) {
+			self::log_gallery_persist_failure( $id, $valid->get_error_code(), 'gallery settings save rejected: invalid grouped patch' );
+			return $valid;
 		}
 
-		$existing  = \Modula\V2\Meta_Sync::get_settings_v2( $id );
-		$merged    = self::merge_grouped_settings( $existing, $incoming );
-		$sanitized = \Modula\V2\Settings\Sanitizer::sanitize_grouped( $merged );
-		$sanitized = self::protect_gallery_filter_list_on_save( $existing, $incoming, $sanitized );
+		$title            = '';
+		$incoming_preview = $request->get_json_params();
+		if ( is_array( $incoming_preview ) && isset( $incoming_preview['postTitle'] ) && is_string( $incoming_preview['postTitle'] ) ) {
+			$title = $incoming_preview['postTitle'];
+		}
 
-		$json = wp_json_encode( $sanitized, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
-		update_post_meta( $id, \Modula\V2\Meta_Sync::SETTINGS_V2_META_KEY, wp_slash( false !== $json ? $json : '{}' ) );
+		$prepared = \Modula\V2\Gallery_Post::ensure_persistable( $id, $title );
+		if ( is_wp_error( $prepared ) ) {
+			self::log_gallery_persist_failure(
+				$id,
+				$prepared->get_error_code(),
+				'gallery settings promote/prepare failed'
+			);
+			return $prepared;
+		}
+		$id = $prepared;
 
-		$flat = \Modula\V2\Settings\Adapter::to_flat( $sanitized );
-		update_post_meta( $id, 'modula-settings', $flat );
-
-		/**
-		 * Fires after gallery settings are saved via the v2 REST settings editor.
-		 *
-		 * Use this to sync WordPress post fields (e.g. post_password) that are not
-		 * stored only in modula-settings / modula_settings_v2.
-		 *
-		 * @since 3.0.0
-		 *
-		 * @param int                                 $id        Gallery post ID.
-		 * @param array<string, array<string, mixed>> $sanitized Grouped v2 settings.
-		 * @param array<string, mixed>                $flat      Flat modula-settings.
-		 */
-		do_action( 'modula_gallery_settings_v2_updated', $id, $sanitized, $flat );
+		$sanitized = \Modula\V2\Settings\Writer::patch( $id, $incoming );
+		if ( is_wp_error( $sanitized ) ) {
+			self::log_gallery_persist_failure( $id, $sanitized->get_error_code(), 'gallery settings save failed' );
+			return $sanitized;
+		}
 
 		$response = array_merge(
 			$sanitized,
@@ -421,77 +383,6 @@ class Settings_Controller {
 		);
 
 		return new \WP_REST_Response( $response, 200 );
-	}
-
-	/**
-	 * Merge incoming grouped PATCH into existing grouped settings (per-group shallow key merge).
-	 *
-	 * @param array<string, array<string, mixed>> $base     Existing grouped settings.
-	 * @param array<string, array<string, mixed>> $incoming Incoming grouped overrides.
-	 * @return array<string, array<string, mixed>>
-	 */
-	private static function merge_grouped_settings( array $base, array $incoming ) {
-		foreach ( $incoming as $group => $keys ) {
-			if ( ! is_string( $group ) || ! is_array( $keys ) ) {
-				continue;
-			}
-			if ( ! isset( $base[ $group ] ) || ! is_array( $base[ $group ] ) ) {
-				$base[ $group ] = array();
-			}
-			$base[ $group ] = array_merge( $base[ $group ], $keys );
-		}
-		return $base;
-	}
-
-	/**
-	 * Keep a non-empty gallery filter list when sanitize fills schema placeholder defaults.
-	 *
-	 * @param array<string, array<string, mixed>> $existing  Grouped settings before merge.
-	 * @param array<string, array<string, mixed>> $incoming  Raw PATCH body.
-	 * @param array<string, array<string, mixed>> $sanitized Sanitized merged settings.
-	 * @return array<string, array<string, mixed>>
-	 */
-	private static function protect_gallery_filter_list_on_save( array $existing, array $incoming, array $sanitized ) {
-		if ( ! function_exists( 'modula_resolve_gallery_filter_list_save' ) ) {
-			return $sanitized;
-		}
-
-		$key_present = isset( $incoming['filters'] ) && is_array( $incoming['filters'] )
-			&& array_key_exists( 'filters', $incoming['filters'] );
-
-		$existing_list = ( isset( $existing['filters'] ) && is_array( $existing['filters'] )
-			&& array_key_exists( 'filters', $existing['filters'] ) )
-			? $existing['filters']['filters']
-			: array( '' );
-
-		/*
-		 * Use the client payload when the key was present. Schema sanitize fills
-		 * default `['']` for empty arrays, which would block intentional clear.
-		 */
-		$incoming_list = $key_present ? $incoming['filters']['filters'] : null;
-
-		if ( ! isset( $sanitized['filters'] ) || ! is_array( $sanitized['filters'] ) ) {
-			$sanitized['filters'] = array();
-		}
-
-		$resolved = modula_resolve_gallery_filter_list_save(
-			$incoming_list,
-			$existing_list,
-			$key_present
-		);
-
-		if ( is_array( $resolved ) ) {
-			$resolved = array_map(
-				static function ( $entry ) {
-					return sanitize_text_field( (string) $entry );
-				},
-				$resolved
-			);
-		}
-
-		$sanitized['filters']['filters'] = $resolved;
-
-		return $sanitized;
 	}
 
 	/**

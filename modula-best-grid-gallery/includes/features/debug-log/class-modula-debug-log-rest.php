@@ -44,13 +44,13 @@ class Modula_Debug_Log_Rest {
 
 		switch ( $action ) {
 			case 'enable':
-				$log->enable();
+				$confirmed = $log->enable();
 				break;
 			case 'disable':
-				$log->disable();
+				$confirmed = $log->disable();
 				break;
 			case 'clear':
-				$log->clear();
+				$confirmed = $log->clear();
 				break;
 			default:
 				return new WP_Error(
@@ -58,6 +58,10 @@ class Modula_Debug_Log_Rest {
 					__( 'Unknown Modula Debug Log action.', 'modula-best-grid-gallery' ),
 					array( 'status' => 400 )
 				);
+		}
+
+		if ( ! $confirmed ) {
+			return new WP_Error( 'modula_debug_log_unconfirmed', __( 'Modula Debug Log is busy or unavailable. Inspect its status before retrying.', 'modula-best-grid-gallery' ), array( 'status' => 503 ) );
 		}
 
 		return new WP_REST_Response(

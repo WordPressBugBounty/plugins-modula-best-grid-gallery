@@ -1,10 +1,11 @@
 /**
- * Listing row post document — title, status, and slug via CPT REST.
+ * Listing row post document — title, status, slug and optional gallery publication date via CPT REST.
  *
  * Shared write path for Quick edit (listing) and editor status/permalink surfaces.
  */
 
 import apiFetch from '@wordpress/api-fetch';
+import { __ } from '@wordpress/i18n';
 import { listingRowRestPath } from './listingRowRestPath';
 
 /** @type {readonly ['publish', 'draft', 'private']} */
@@ -40,6 +41,7 @@ export function isAllowedListingRowPostDocumentStatus(status) {
  * @property {string} title
  * @property {string} status
  * @property {string} slug
+ * @property {string} [date]
  * @property {string} permalinkPrefix
  * @property {string} permalinkSuffix
  * @property {string} viewUrl
@@ -50,6 +52,8 @@ export function isAllowedListingRowPostDocumentStatus(status) {
  * Seed Quick edit / editor controls from a listing row payload.
  *
  * @param {{
+ *   type?: string,
+ *   date?: string,
  *   title?: string,
  *   status?: string,
  *   slug?: string,
@@ -62,6 +66,9 @@ export function isAllowedListingRowPostDocumentStatus(status) {
  */
 export function listingRowToPostDocumentSeed(row) {
 	return {
+		...(row?.type === 'gallery' && typeof row?.date === 'string'
+			? { date: row.date }
+			: {}),
 		title: typeof row?.title === 'string' ? row.title : '',
 		status: typeof row?.status === 'string' ? row.status : '',
 		slug: typeof row?.slug === 'string' ? row.slug : '',
@@ -75,8 +82,8 @@ export function listingRowToPostDocumentSeed(row) {
 }
 
 /**
- * @param {{ title: string, status?: string, slug: string }} document
- * @return {{ title: string, status?: string, slug: string }}
+ * @param {{ title?: string, status?: string, slug?: string, date?: string }} document
+ * @return {{ title?: string, status?: string, slug?: string, date?: string }}
  */
 export function buildListingRowPostDocumentPayload(document) {
 	const title = typeof document?.title === 'string' ? document.title : '';
@@ -94,9 +101,18 @@ export function buildListingRowPostDocumentPayload(document) {
 		);
 	}
 
+	const hasDate = Object.prototype.hasOwnProperty.call(document, 'date');
+	const date = hasDate
+		? normalizeListingPublicationDate(document.date)
+		: undefined;
 	return {
-		title,
-		slug,
+		...(Object.prototype.hasOwnProperty.call(document, 'title')
+			? { title }
+			: {}),
+		...(Object.prototype.hasOwnProperty.call(document, 'slug')
+			? { slug }
+			: {}),
+		...(hasDate ? { date } : {}),
 		...(Object.prototype.hasOwnProperty.call(document, 'status')
 			? { status }
 			: {}),
@@ -107,7 +123,7 @@ export function buildListingRowPostDocumentPayload(document) {
  * Persist a listing row’s post document via WordPress CPT REST.
  *
  * @param {{ type?: string, id?: number }} item
- * @param {{ title: string, status?: string, slug: string }} document
+ * @param {{ title?: string, status?: string, slug?: string, date?: string }} document
  * @return {Promise<unknown>}
  */
 export async function putListingRowPostDocument(item, document) {
@@ -117,4 +133,28 @@ export async function putListingRowPostDocument(item, document) {
 		method: 'PUT',
 		data,
 	});
+}
+
+/** Validate a site-local wall time without converting through the browser timezone. */
+export function normalizeListingPublicationDate(value) {
+	const match =
+		typeof value === 'string' &&
+		value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/);
+	if (match) {
+		const normalized = `${value.slice(0, 16)}:${match[6] || '00'}`;
+		const date = new Date(`${normalized}Z`);
+		if (
+			Number(match[1]) >= 1000 &&
+			Number.isFinite(date.getTime()) &&
+			date.toISOString().slice(0, 19) === normalized
+		) {
+			return normalized;
+		}
+	}
+	throw new Error(
+		__(
+			'Enter a valid publication date and time.',
+			'modula-best-grid-gallery'
+		)
+	);
 }

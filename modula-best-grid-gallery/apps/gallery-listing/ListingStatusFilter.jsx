@@ -25,6 +25,7 @@ import {
 /**
  * @typedef {Object} ListingStatusCounts
  * @property {number} publish
+ * @property {number} future
  * @property {number} draft
  * @property {number} private
  * @property {number} trash
@@ -51,6 +52,7 @@ export function ListingStatusFilter({
 	const triggerLabel = useMemo(() => {
 		const key = getListingStatusTriggerLabel(statusValue);
 		const labels = {
+			Scheduled: __('Scheduled', 'modula-best-grid-gallery'),
 			Published: __('Published', 'modula-best-grid-gallery'),
 			Drafts: __('Drafts', 'modula-best-grid-gallery'),
 			Private: __('Private', 'modula-best-grid-gallery'),
@@ -63,6 +65,7 @@ export function ListingStatusFilter({
 		/** @type {Record<string, string>} */
 		const labels = {
 			publish: __('Published', 'modula-best-grid-gallery'),
+			future: __('Scheduled', 'modula-best-grid-gallery'),
 			draft: __('Drafts', 'modula-best-grid-gallery'),
 			private: __('Private', 'modula-best-grid-gallery'),
 			trash: __('In the trash', 'modula-best-grid-gallery'),

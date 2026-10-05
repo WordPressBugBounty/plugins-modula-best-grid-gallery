@@ -521,6 +521,10 @@ class Shortcode {
 		$types_without_chrome = $this->get_types_without_filter_pagination_chrome();
 		$skips_chrome         = in_array( $type, $types_without_chrome, true );
 
+		if ( $editor_preview ) {
+			$filtering_cfg['activeFilters'] = array();
+		}
+
 		if ( ! $editor_preview && $skips_chrome ) {
 			$filtering_cfg['enabled']       = false;
 			$filtering_cfg['type']          = 'client';
@@ -540,7 +544,10 @@ class Shortcode {
 			? false
 			: \Modula\V2\Modern_Gallery::is_pagination_mode_enabled( $flat );
 		if ( $effective_catalog && $pagination_mode_on && is_array( $images ) ) {
-			$images_for_items = $this->slice_images_for_first_page( $images, $pagination_cfg['perPage'] ?? 12 );
+			// Use the same catalog matcher as later REST filter actions, before paging.
+			$images_for_items = \Modula\V2\Images\Catalog_Service::apply_filters_to_rows( $images, $filtering_cfg['activeFilters'] );
+			$pagination_cfg   = $this->build_pagination_config( $grouped, $flat, count( $images_for_items ), true );
+			$images_for_items = $this->slice_images_for_first_page( $images_for_items, $pagination_cfg['perPage'] ?? 12 );
 		}
 
 		$items = $this->build_converted_items_list( $gallery_id, $flat, $images_for_items, $images, $context );
@@ -552,6 +559,7 @@ class Shortcode {
 			'outputSchema'         => \Modula\V2\Modern_Gallery::OUTPUT_SCHEMA_VERSION,
 			'catalogPaged'         => $effective_catalog,
 			'imageSizeDimensions'  => \Modula_Helper::get_image_sizes( false ),
+			'zoomExtensionActive'  => $this->is_zoom_extension_active(),
 			'blockAlign'           => is_string( $settings['align'] ?? null ) ? (string) $settings['align'] : '',
 		);
 		if ( ! $editor_preview && null !== $shuffle_seed && (int) $shuffle_seed > 0 ) {
@@ -1083,6 +1091,19 @@ class Shortcode {
 	}
 
 	/**
+	 * Whether the visible lightbox zoom master is available to this gallery.
+	 *
+	 * @return bool
+	 */
+	private function is_zoom_extension_active() {
+		if ( ! modula_is_compatible_pro() || ! class_exists( 'Modula_Extensions_Base' ) ) {
+			return false;
+		}
+		$extensions = \Modula_Extensions_Base::get_instance();
+		return method_exists( $extensions, 'extension_enabled' ) && $extensions->extension_enabled( 'modula-zoom' );
+	}
+
+	/**
 	 * Pagination block for JSON bootstrap (client vs server).
 	 *
 	 * @param array<string, mixed> $grouped         Grouped v2 settings.
@@ -1248,12 +1269,22 @@ class Shortcode {
 		// bootstrap embeds the full list (or filter apply uses `all`), so prefer client when off.
 		$type = ( $enabled && $server_catalog && $pagination_mode_on ) ? 'server' : 'client';
 
+		$active  = array();
+		$default = isset( $fg['defaultActiveFilter'] ) && is_string( $fg['defaultActiveFilter'] ) ? trim( $fg['defaultActiveFilter'] ) : '';
+		if ( $enabled && '' !== $default && 0 !== strcasecmp( $default, 'All' ) ) {
+			foreach ( $available as $entry ) {
+				if ( 0 === strcasecmp( $entry['value'], $default ) ) {
+					$active[] = array( 'key' => $entry['key'], 'value' => $entry['value'] );
+					break;
+				}
+			}
+		}
 		$stats = \Modula\V2\Images\Catalog_Service::build_filter_usage_stats( $images );
 
 		return array(
 			'enabled'              => $enabled,
 			'type'                 => $type,
-			'activeFilters'        => array(),
+			'activeFilters'        => $active,
 			'availableFilters'     => $available,
 			'usageCounts'          => $stats['usageCounts'],
 			'filterableImageCount' => $stats['filterableImageCount'],

@@ -224,7 +224,11 @@ function buildCarouselToolbarFromFlat(flat, editorPreview = false) {
 	const elevateZoomActive = flat.enable_zoom === 1;
 
 	if (toolbarEnabled) {
-		if (!elevateZoomActive && flat.lightbox_zoom === 1) {
+		if (
+			flat.lightbox_zoom_enabled !== false &&
+			!elevateZoomActive &&
+			flat.lightbox_zoom === 1
+		) {
 			right.push('toggleFull');
 		}
 		if (flat.lightbox_share === 1) {
@@ -359,6 +363,18 @@ export function buildLightboxV6OptsFromFlat(flat, opts = {}) {
 			 */
 			Panzoom: {
 				wheelAction: false,
+				// Keep Zoomable's image rendering, but disable every native gesture
+				// when the visible zoom master is Off. Numeric 1 means natural
+				// size in Panzoom; 'base' caps the image at its fitted size.
+				...(flat.lightbox_zoom_enabled === false
+					? {
+							maxScale: 'base',
+							gestures: false,
+							clickAction: false,
+							singleClickAction: false,
+							dblClickAction: false,
+						}
+					: {}),
 				/*
 				 * When “close on click” is on, do not steal the click for ToggleFull zoom —
 				 * openModulaLightbox closes on Carousel.click instead.

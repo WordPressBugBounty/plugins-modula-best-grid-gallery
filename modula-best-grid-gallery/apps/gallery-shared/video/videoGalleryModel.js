@@ -403,6 +403,65 @@ export function resolveItemLightboxVideoFlags(item, videoSettings = {}) {
 }
 
 /**
+ * Fancybox may keep custom fields on slide.opts or flatten them onto the slide.
+ *
+ * @param {Object|null|undefined} slide
+ * @return {boolean}
+ */
+export function readModulaVideoSlideLoop(slide) {
+	if (!slide || typeof slide !== 'object') {
+		return false;
+	}
+	const opts =
+		slide.opts && typeof slide.opts === 'object' ? slide.opts : {};
+	const raw = opts.modulaVideoLoop ?? slide.modulaVideoLoop;
+	return raw === 1 || raw === true || raw === '1';
+}
+
+/**
+ * Fancybox v6 Video plugin fields for loop (HTML5 tpl + YT/Vimeo query merge).
+ *
+ * @param {{ autoplay: boolean, loop: boolean }} flags
+ * @param {string} playbackUrl Original or formatted playback URL.
+ * @return {{
+ *   autoplay: boolean,
+ *   modulaVideoLoop: 0|1,
+ *   modulaVideoAutoplay: 0|1,
+ *   youtube?: { loop: string, playlist: string },
+ *   vimeo?: { loop: string },
+ *   html5videoTpl?: string,
+ * }}
+ */
+export function buildModulaLightboxVideoPlaybackFields(flags, playbackUrl) {
+	const loopOn = !!flags.loop;
+	const autoplayOn = !!flags.autoplay;
+	/** @type {ReturnType<typeof buildModulaLightboxVideoPlaybackFields>} */
+	const fields = {
+		autoplay: autoplayOn,
+		modulaVideoLoop: loopOn ? 1 : 0,
+		modulaVideoAutoplay: autoplayOn ? 1 : 0,
+	};
+	if (!loopOn) {
+		return fields;
+	}
+	const kind = classifyVideoKind(playbackUrl);
+	if (kind === 'youtube') {
+		const id = extractYouTubeVideoId(playbackUrl);
+		if (id) {
+			fields.youtube = { loop: '1', playlist: id };
+		}
+	} else if (kind === 'vimeo') {
+		fields.vimeo = { loop: '1' };
+	} else {
+		fields.html5videoTpl =
+			'<video class="f-html5video" playsinline controls controlsList="nodownload" loop poster="{{poster}}">' +
+			'<source src="{{src}}" type="{{format}}" />' +
+			"Sorry, your browser doesn't support embedded videos.</video>";
+	}
+	return fields;
+}
+
+/**
  * @param {Object}  item
  * @param {boolean} galleryAutoplay
  * @return {boolean}

@@ -192,6 +192,24 @@ class Meta_Sync {
 		self::stamp_theme_inherit_controls_create_default( $post_id );
 	}
 
+	/** Targets whose canonical grouped/items state is already owned by a domain write. */
+	private static $canonical_writes = array();
+
+	/** Keep flat compatibility writes and metadata saves from rebuilding canonical state. */
+	public static function with_canonical_gallery_write( int $id, callable $write ) {
+		$previous = self::$canonical_writes[ $id ] ?? false;
+		self::$canonical_writes[ $id ] = true;
+		try {
+			return $write();
+		} finally {
+			if ( $previous ) {
+				self::$canonical_writes[ $id ] = true;
+			} else {
+				unset( self::$canonical_writes[ $id ] );
+			}
+		}
+	}
+
 	/**
 	 * On gallery save (after meta boxes). Sync both v2 metas from current modula-settings and modula-images.
 	 * This runs every time the gallery is saved, so v2 stays in sync even when WordPress skips updated_post_meta (unchanged value).
@@ -200,6 +218,9 @@ class Meta_Sync {
 	 * @param WP_Post $post    Post object.
 	 */
 	public static function on_save_gallery( $post_id, $post ) {
+		if ( ! empty( self::$canonical_writes[ $post_id ] ) ) {
+			return;
+		}
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return;
 		}
@@ -225,6 +246,9 @@ class Meta_Sync {
 	 * @param mixed  $meta_value Meta value that was just saved.
 	 */
 	public static function on_updated_post_meta( $meta_id, $post_id, $meta_key, $meta_value ) {
+		if ( ! empty( self::$canonical_writes[ $post_id ] ) ) {
+			return;
+		}
 		if ( self::$internal_filter_list_repair ) {
 			return;
 		}
@@ -281,6 +305,18 @@ class Meta_Sync {
 		$grouped   = Settings\Adapter::to_grouped( $flat, $options );
 		$sanitized = Settings\Sanitizer::sanitize_grouped( $grouped );
 
+		/*
+		 * Schema sanitize maps empty filter arrays to default `['']`. Preserve an
+		 * intentional empty list from flat so repair-on-read stays placeholder-only
+		 * without inventing a blank chip after clear.
+		 */
+		if ( array_key_exists( 'filters', $flat ) && is_array( $flat['filters'] ) && array() === $flat['filters'] ) {
+			if ( ! isset( $sanitized['filters'] ) || ! is_array( $sanitized['filters'] ) ) {
+				$sanitized['filters'] = array();
+			}
+			$sanitized['filters']['filters'] = array();
+		}
+
 		$json = wp_json_encode( $sanitized, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
 		self::update_json_post_meta( $post_id, self::SETTINGS_V2_META_KEY, false !== $json ? $json : '{}' );
 	}
@@ -305,11 +341,15 @@ class Meta_Sync {
 	 * Persist a full merged item list (images + v2-only embedded rows): updates modula-images (images only)
 	 * and modula_images_v2 in one shot. Used by the settings editor / REST.
 	 *
-	 * @param int                              $post_id Gallery post ID.
-	 * @param array<int, array<string, mixed>> $items   Mixed rows (order = display order).
+	 * The caller authorizes the gallery write. Attachment text is a separate shared
+	 * effect; existing editor callers retain it by default and may opt out explicitly.
+	 *
+	 * @param int                              $post_id              Gallery post ID.
+	 * @param array<int, array<string, mixed>> $items                Mixed rows (order = display order).
+	 * @param bool                             $sync_attachment_text Write shared attachment text (editor default).
 	 * @return true|\WP_Error
 	 */
-	public static function persist_merged_gallery_items( $post_id, array $items ) {
+	public static function persist_merged_gallery_items( $post_id, array $items, $sync_attachment_text = true ) {
 		$post_id = absint( $post_id );
 		if ( ! $post_id || 'modula-gallery' !== get_post_type( $post_id ) ) {
 			return new \WP_Error( 'modula_invalid_gallery', __( 'Invalid gallery.', 'modula-best-grid-gallery' ), array( 'status' => 400 ) );
@@ -326,13 +366,20 @@ class Meta_Sync {
 			\Modula\Bound_Gallery\Bound_Gallery::exclude_omitted_source_attachments( $post_id, $previous, $items );
 		}
 
-		$items = self::sync_merged_items_attachment_text_fields( $items, $post_id );
-		if ( is_wp_error( $items ) ) {
-			return $items;
+		if ( $sync_attachment_text ) {
+			$items = self::sync_merged_items_attachment_text_fields( $items, $post_id );
+			if ( is_wp_error( $items ) ) {
+				return $items;
+			}
 		}
 
 		$normalized = Images\Adapter::normalize_mixed_items_for_v2_storage( $items );
-		$v1_rows    = Images\Adapter::extract_v1_image_rows_from_mixed( $normalized );
+		return self::persist_prepared_gallery_items( $post_id, $normalized );
+	}
+
+	/** Persist an already prepared full catalog, preserving untouched rows and attachment text. */
+	public static function persist_prepared_gallery_items( int $post_id, array $normalized ) {
+		$v1_rows = Images\Adapter::extract_v1_image_rows_from_mixed( $normalized );
 
 		if ( class_exists( 'Modula_Gallery_Upload', false ) ) {
 			$upload = \Modula_Gallery_Upload::get_instance();
@@ -741,20 +788,16 @@ class Meta_Sync {
 	/**
 	 * Get settings v2 as array. Decodes JSON; supports legacy serialized meta.
 	 *
-	 * @param int $post_id Gallery post ID.
+	 * @param int  $post_id Gallery post ID.
+	 * @param bool $repair  Allow persisted filter-list repair (legacy/editor default).
 	 * @return array<string, array<string, mixed>>
 	 */
-	public static function get_settings_v2( $post_id ) {
-		self::maybe_repair_gallery_filter_list( $post_id );
-
-		$raw = get_post_meta( $post_id, self::SETTINGS_V2_META_KEY, true );
-		if ( is_string( $raw ) ) {
-			$decoded = json_decode( $raw, true );
-			$out     = is_array( $decoded ) ? $decoded : array();
-		} else {
-			$out = is_array( $raw ) ? $raw : array();
+	public static function get_settings_v2( $post_id, $repair = true ) {
+		if ( $repair ) {
+			self::maybe_repair_gallery_filter_list( $post_id );
 		}
-		return self::normalize_settings_v2_read( $out );
+
+		return self::normalize_settings_v2_read( self::read_settings_v2_raw( $post_id ) );
 	}
 
 	/**
@@ -784,6 +827,10 @@ class Meta_Sync {
 		$stored = array_key_exists( 'filters', $flat ) ? $flat['filters'] : array( '' );
 
 		$images = get_post_meta( $post_id, 'modula-images', true );
+		$explicit_revision = get_post_meta( $post_id, '_modula_filter_list_image_revision', true );
+		if ( is_string( $explicit_revision ) && hash_equals( $explicit_revision, hash( 'sha256', wp_json_encode( $images ) ) ) ) {
+			return false;
+		}
 		$result = modula_maybe_repair_gallery_filter_list(
 			$stored,
 			is_array( $images ) ? $images : array()
@@ -809,6 +856,54 @@ class Meta_Sync {
 		} finally {
 			self::$internal_filter_list_repair = false;
 		}
+
+		return true;
+	}
+
+	/**
+	 * Strip dismissed gallery filter names from persisted gallery items.
+	 *
+	 * Used when an intentional filter-list save removes names so read-time
+	 * repair cannot refill them from leftover per-image tags.
+	 *
+	 * @param int      $post_id       Gallery post ID.
+	 * @param string[] $removed_names Filter names removed from the gallery list.
+	 * @return bool True when items were updated.
+	 */
+	public static function strip_gallery_filter_names_from_images( $post_id, array $removed_names ) {
+		if ( ! function_exists( 'modula_gallery_filter_list_strip_names_from_images' ) ) {
+			return false;
+		}
+
+		$post_id = absint( $post_id );
+		if ( ! $post_id || empty( $removed_names ) ) {
+			return false;
+		}
+
+		/*
+		 * Mutate flat modula-images directly. Do not round-trip through
+		 * persist_merged_gallery_items / sanitize_modula_images_list — that
+		 * whitelist omits `filters` on Lite (Pro adds it via filter), which
+		 * would drop tags instead of stripping only the dismissed names.
+		 */
+		$images = get_post_meta( $post_id, 'modula-images', true );
+		if ( ! is_array( $images ) || empty( $images ) ) {
+			return false;
+		}
+
+		$result = modula_gallery_filter_list_strip_names_from_images( $images, $removed_names );
+		if ( empty( $result['changed'] ) || ! is_array( $result['images'] ) ) {
+			return false;
+		}
+
+		self::$internal_modula_images_write = true;
+		try {
+			update_post_meta( $post_id, 'modula-images', $result['images'] );
+		} finally {
+			self::$internal_modula_images_write = false;
+		}
+
+		self::sync_modula_images_v2_from_list( $post_id, $result['images'] );
 
 		return true;
 	}

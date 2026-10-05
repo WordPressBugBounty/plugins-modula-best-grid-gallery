@@ -172,6 +172,11 @@ class Beta_Gallery_Admin {
 		}
 
 		\Modula\V2\Beta_Settings::mark_as_beta_album( (int) $new_id );
+		// Seed grouped settings from the duplicated classic flat using legacy defaults.
+		// Never apply new-album creation defaults on a Try copy.
+		if ( class_exists( '\Modula_Pro\Extensions\Albums\V2\Meta_Sync', false ) ) {
+			\Modula_Pro\Extensions\Albums\V2\Meta_Sync::ensure_settings_v2_from_flat( (int) $new_id );
+		}
 
 		return (int) $new_id;
 	}
@@ -328,6 +333,11 @@ class Beta_Gallery_Admin {
 		}
 
 		\Modula\V2\Beta_Settings::mark_as_beta_album( $post_id );
+		// Convert only flipped the Beta flag historically; seed v2 from flat with
+		// effective legacy defaults so open does not restyle sparse classic albums.
+		if ( class_exists( '\Modula_Pro\Extensions\Albums\V2\Meta_Sync', false ) ) {
+			\Modula_Pro\Extensions\Albums\V2\Meta_Sync::ensure_settings_v2_from_flat( $post_id );
+		}
 
 		return (int) $post_id;
 	}
@@ -377,6 +387,9 @@ class Beta_Gallery_Admin {
 		if ( 'modula-album' === $type ) {
 			if ( 'beta' === $choice ) {
 				\Modula\V2\Beta_Settings::mark_as_beta_album( $post_id );
+				if ( class_exists( '\Modula_Pro\Extensions\Albums\V2\Meta_Sync', false ) ) {
+					\Modula_Pro\Extensions\Albums\V2\Meta_Sync::apply_new_beta_album_create_defaults( $post_id );
+				}
 			}
 		} elseif ( 'modula-gallery' === $type ) {
 			if ( 'beta' === $choice ) {
@@ -444,6 +457,9 @@ class Beta_Gallery_Admin {
 
 		if ( $is_album ) {
 			\Modula\V2\Beta_Settings::mark_as_beta_album( $post_id );
+			if ( class_exists( '\Modula_Pro\Extensions\Albums\V2\Meta_Sync', false ) ) {
+				\Modula_Pro\Extensions\Albums\V2\Meta_Sync::apply_new_beta_album_create_defaults( $post_id );
+			}
 			return;
 		}
 

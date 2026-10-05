@@ -146,6 +146,10 @@ final class Beta_Settings {
 	/**
 	 * Whether this post is a Beta album (Albums editor takeover; classic visitor shortcode).
 	 *
+	 * Stored `_modula_beta` is the per-album opt-in. While `modula_album_takeover_ui`
+	 * is true, every album is a Beta album so the edit screen does not wait on that
+	 * meta or on the editor-choice prompt.
+	 *
 	 * @param int $post_id Album post ID.
 	 * @return bool
 	 */
@@ -157,8 +161,29 @@ final class Beta_Settings {
 		if ( 'modula-album' !== get_post_type( $post_id ) ) {
 			return false;
 		}
+		if ( self::is_album_takeover_forced() ) {
+			return true;
+		}
 
 		return '1' === (string) get_post_meta( $post_id, self::META_KEY, true );
+	}
+
+	/**
+	 * Site-wide force-on for the Albums editor. Default false.
+	 *
+	 * Re-entrancy guard: callers of this filter must not re-enter `is_beta_album()`.
+	 *
+	 * @return bool
+	 */
+	private static function is_album_takeover_forced() {
+		static $resolving = false;
+		if ( $resolving ) {
+			return false;
+		}
+		$resolving = true;
+		$forced    = (bool) apply_filters( 'modula_album_takeover_ui', false );
+		$resolving = false;
+		return $forced;
 	}
 
 	/**

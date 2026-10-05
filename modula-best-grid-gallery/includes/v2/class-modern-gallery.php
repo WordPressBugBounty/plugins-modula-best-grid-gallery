@@ -194,21 +194,21 @@ final class Modern_Gallery {
 	 */
 	public static function gallery_shell_critical_inline_css(): string {
 		$hidden
-			= '.modula.modula-gallery:not(.modula-gallery-initialized) .modula-items,'
-			. '.modula.modula-gallery:not(.modula-gallery-initialized) .filters,'
-			. '.modula.modula-gallery:not(.modula-gallery-initialized) .modula-pagination,'
-			. '.modula.modula-gallery:not(.modula-gallery-initialized) a.post-edit-link'
+			= '.modula.modula-gallery.modula-gallery-modern:not(.modula-gallery-initialized) .modula-items,'
+			. '.modula.modula-gallery.modula-gallery-modern:not(.modula-gallery-initialized) .filters,'
+			. '.modula.modula-gallery.modula-gallery-modern:not(.modula-gallery-initialized) .modula-pagination,'
+			. '.modula.modula-gallery.modula-gallery-modern:not(.modula-gallery-initialized) a.post-edit-link'
 			. '{visibility:hidden;position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;pointer-events:none}';
 
 		$pending
-			= '.modula.modula-gallery.modula-gallery--bootstrap-pending{opacity:1!important;visibility:visible!important;min-height:120px;position:relative}';
+			= '.modula.modula-gallery.modula-gallery-modern.modula-gallery--bootstrap-pending{opacity:1!important;visibility:visible!important;min-height:120px;position:relative}';
 
 		$initialized
-			= '.modula.modula-gallery.modula-gallery-initialized{opacity:1!important;visibility:visible!important}';
+			= '.modula.modula-gallery.modula-gallery-modern.modula-gallery-initialized{opacity:1!important;visibility:visible!important}';
 
 		$chrome_pending
-			= '.modula.modula-gallery.modula-gallery-initialized:not(.modula-gallery-chrome-ready) .filters,'
-			. '.modula.modula-gallery.modula-gallery-initialized:not(.modula-gallery-chrome-ready) .modula-pagination'
+			= '.modula.modula-gallery.modula-gallery-modern.modula-gallery-initialized:not(.modula-gallery-chrome-ready) .filters,'
+			. '.modula.modula-gallery.modula-gallery-modern.modula-gallery-initialized:not(.modula-gallery-chrome-ready) .modula-pagination'
 			. '{visibility:hidden!important}';
 
 		return $hidden . $pending . $initialized . $chrome_pending;

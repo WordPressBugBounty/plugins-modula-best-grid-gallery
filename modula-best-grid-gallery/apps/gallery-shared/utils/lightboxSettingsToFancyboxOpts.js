@@ -155,6 +155,12 @@ function groupedLightboxToFlatKeys(settings) {
 		'loop-videos': isLightboxToggleOn(video.loopVideos) ? 1 : 0,
 	};
 
+	// The visible master is optional when the ZOOM extension is unavailable.
+	// Do not turn an omitted master into an explicit visitor zoom prohibition.
+	if (Object.prototype.hasOwnProperty.call(zoom, 'enableZoom')) {
+		flat.lightbox_zoom_enabled = isLightboxToggleOn(zoom.enableZoom);
+	}
+
 	const mzoom = zoomSettingsToMzoomOpts(zoom);
 	if (mzoom) {
 		flat.enable_zoom = 1;
@@ -174,12 +180,18 @@ function groupedLightboxToFlatKeys(settings) {
  * @param {number} [opts.galleryId]
  * @param {'desktop'|'tablet'|'mobile'} [opts.previewViewport]
  * @param {boolean} [opts.editorPreview]
+ * @param {boolean} [opts.zoomExtensionActive] Runtime availability of the visible zoom master.
  * @param {Object} [opts.galleryComments] Pro Comments runtime payload from bootstrap metadata.
  * @returns {Object} Fancybox v6 options (runtime layout applied in prepareModulaLightboxV6).
  */
 export function lightboxSettingsToFancyboxOpts(settings, opts = {}) {
 	const flat = groupedLightboxToFlatKeys(settings || {});
 	flat.gallery_id = opts.galleryId;
+	if (opts.zoomExtensionActive === false) {
+		delete flat.lightbox_zoom_enabled;
+		flat.enable_zoom = 0;
+		delete flat.mzoom;
+	}
 	if (opts.galleryComments && typeof opts.galleryComments === 'object') {
 		flat.galleryComments = opts.galleryComments;
 	}
@@ -188,6 +200,7 @@ export function lightboxSettingsToFancyboxOpts(settings, opts = {}) {
 		editorPreview: opts.editorPreview,
 	});
 
+	options.modulaZoomExtensionActive = opts.zoomExtensionActive;
 	return options;
 }
 
@@ -208,7 +221,11 @@ export function lightboxSettingsToFancyboxOpts(settings, opts = {}) {
  */
 export function resolveModulaLightboxFancyboxOpts(args = {}) {
 	const settings = args.settings;
-	if (settings !== null && settings !== undefined && typeof settings === 'object') {
+	if (
+		settings !== null &&
+		settings !== undefined &&
+		typeof settings === 'object'
+	) {
 		const fromOpts =
 			args.lightboxOpts &&
 			typeof args.lightboxOpts === 'object' &&
@@ -221,6 +238,7 @@ export function resolveModulaLightboxFancyboxOpts(args = {}) {
 			previewViewport: args.previewViewport,
 			editorPreview: args.editorPreview,
 			galleryComments: args.galleryComments || fromOpts,
+			zoomExtensionActive: args.lightboxOpts?.modulaZoomExtensionActive,
 		});
 	}
 	const lightboxOpts = args.lightboxOpts;

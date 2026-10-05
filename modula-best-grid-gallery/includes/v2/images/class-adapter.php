@@ -715,6 +715,9 @@ class Adapter {
 				}
 			}
 		}
+		if ( function_exists( 'modula_repair_video_custom_grid_spans' ) ) {
+			$out = modula_repair_video_custom_grid_spans( $out );
+		}
 		return $out;
 	}
 }

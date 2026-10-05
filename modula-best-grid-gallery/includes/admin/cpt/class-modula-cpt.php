@@ -206,7 +206,14 @@ class Modula_CPT {
 	}
 
 	public function get_gallery_settings( $post_arr ) {
-		return get_post_meta( $post_arr['id'], 'modula-settings', true );
+		$settings = get_post_meta( $post_arr['id'], 'modula-settings', true );
+
+		// Published galleries are REST-readable, but their access credentials are not public.
+		if ( is_array( $settings ) && ! current_user_can( 'edit_post', $post_arr['id'] ) ) {
+			unset( $settings['password'], $settings['password_protect_username'] );
+		}
+
+		return $settings;
 	}
 
 	public function get_gallery_images( $post_arr ) {
@@ -844,26 +851,45 @@ class Modula_CPT {
 	 * @return array<string, mixed>
 	 */
 	private function ensure_gallery_filter_list_on_classic_save( $post_id, $settings, array $modula_settings ) {
-		if ( ! function_exists( 'modula_resolve_gallery_filter_list_save' ) ) {
+		if ( ! function_exists( 'modula_resolve_gallery_filter_list_save' )
+			|| ! function_exists( 'modula_classic_gallery_filter_list_save_args' ) ) {
 			return $modula_settings;
 		}
 
 		$prev = get_post_meta( $post_id, 'modula-settings', true );
 		$prev = is_array( $prev ) ? $prev : array();
 
+		$raw_has_filters = is_array( $settings ) && array_key_exists( 'filters', $settings );
+		$raw_submitted   = is_array( $settings ) && ! empty( $settings['filters_submitted'] );
+
 		if ( ! array_key_exists( 'filters', $modula_settings )
-			&& ! ( is_array( $settings ) && array_key_exists( 'filters', $settings ) )
+			&& ! $raw_has_filters
+			&& ! $raw_submitted
 			&& ! array_key_exists( 'filters', $prev ) ) {
 			return $modula_settings;
 		}
 
-		$existing    = array_key_exists( 'filters', $prev ) ? $prev['filters'] : array( '' );
-		$key_present = is_array( $settings ) && array_key_exists( 'filters', $settings );
-		$incoming    = $key_present && array_key_exists( 'filters', $modula_settings )
+		$existing          = array_key_exists( 'filters', $prev ) ? $prev['filters'] : array( '' );
+		$sanitized_filters = array_key_exists( 'filters', $modula_settings )
 			? $modula_settings['filters']
 			: null;
+		$args              = modula_classic_gallery_filter_list_save_args( $settings, $sanitized_filters );
 
-		$modula_settings['filters'] = modula_resolve_gallery_filter_list_save( $incoming, $existing, $key_present );
+		$resolved                   = modula_resolve_gallery_filter_list_save(
+			$args['incoming'],
+			$existing,
+			$args['key_present']
+		);
+		$modula_settings['filters'] = $resolved;
+
+		if ( $args['key_present']
+			&& function_exists( 'modula_gallery_filter_list_removed_names' )
+			&& class_exists( '\Modula\V2\Meta_Sync' ) ) {
+			$removed = modula_gallery_filter_list_removed_names( $existing, $resolved );
+			if ( ! empty( $removed ) ) {
+				\Modula\V2\Meta_Sync::strip_gallery_filter_names_from_images( $post_id, $removed );
+			}
+		}
 
 		return $modula_settings;
 	}
@@ -1063,6 +1089,10 @@ class Modula_CPT {
 			} else {
 				$new_image[ $attribute ] = '';
 			}
+		}
+
+		if ( function_exists( 'modula_repair_video_custom_grid_spans' ) ) {
+			$new_image = modula_repair_video_custom_grid_spans( $new_image );
 		}
 
 		return $new_image;

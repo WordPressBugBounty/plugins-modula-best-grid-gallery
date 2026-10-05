@@ -121,10 +121,28 @@ class Modula_Debug_Log {
 	}
 
 	/**
-	 * Whether logging currently accepts writes.
+	 * Serialize existing admin commands, log writers and revision-protected abilities.
 	 *
-	 * @return bool
+	 * @param callable $callback Work performed under the site Diagnostics lock.
+	 * @return mixed
 	 */
+	public function with_lock( callable $callback ) {
+		global $wpdb;
+		$name = 'modula_debug_' . substr( hash( 'sha256', DB_NAME . ':' . $wpdb->options ), 0, 40 );
+		// MySQL named locks are recursive only on newer servers; keep nesting in this instance.
+		if ( $this->lock_depth > 0 ) { return $callback(); }
+		if ( '1' !== (string) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 2)', $name ) ) ) {
+			throw new RuntimeException( 'Diagnostics is busy.' );
+		}
+		++$this->lock_depth;
+		wp_cache_delete( self::OPTION_KEY, 'options' );
+		wp_cache_delete( 'alloptions', 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
+		try { return $callback(); }
+		finally { --$this->lock_depth; $wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $name ) ); }
+	}
+	private $lock_depth = 0;
+
 	public function is_active() {
 		$state = $this->get_state();
 		if ( empty( $state['enabled'] ) ) {
@@ -140,9 +158,15 @@ class Modula_Debug_Log {
 	/**
 	 * Enable logging for TTL_DAYS from now.
 	 *
-	 * @return void
+	 * @return bool Whether the command completed.
 	 */
 	public function enable() {
+		try {
+			$this->with_lock( function () { $this->enable_locked(); } );
+			return true;
+		} catch ( Throwable $error ) { return false; }
+	}
+	private function enable_locked() {
 		$now = $this->now();
 		$this->save_state(
 			array(
@@ -150,15 +174,21 @@ class Modula_Debug_Log {
 				'expires_at' => $now + ( self::TTL_DAYS * DAY_IN_SECONDS ),
 			)
 		);
-		$this->ensure_storage();
+		if ( '' === $this->ensure_storage() ) { throw new RuntimeException( 'Log storage unavailable.' ); }
 	}
 
 	/**
 	 * Disable logging; keep existing file.
 	 *
-	 * @return void
+	 * @return bool Whether the command completed.
 	 */
 	public function disable() {
+		try {
+			$this->with_lock( function () { $this->disable_locked(); } );
+			return true;
+		} catch ( Throwable $error ) { return false; }
+	}
+	private function disable_locked() {
 		$state               = $this->get_state();
 		$state['enabled']    = false;
 		$state['expires_at'] = isset( $state['expires_at'] ) ? (int) $state['expires_at'] : 0;
@@ -175,6 +205,10 @@ class Modula_Debug_Log {
 	 * @return void
 	 */
 	public function write( $level, $channel, $message, $context = array() ) {
+		if ( ! $this->is_active() ) { return; }
+		try { $this->with_lock( function () use ( $level, $channel, $message, $context ) { return $this->write_locked( $level, $channel, $message, $context ); } ); } catch ( Throwable $error ) { /* Logging must never break the caller. */ }
+	}
+	private function write_locked( $level, $channel, $message, $context = array() ) {
 		if ( ! $this->is_active() ) {
 			return;
 		}
@@ -218,6 +252,7 @@ class Modula_Debug_Log {
 	public function get_status() {
 		$state   = $this->get_state();
 		$path    = $this->get_log_path();
+		if ( '' !== $path ) { clearstatcache( true, $path ); }
 		$has     = ( '' !== $path && is_file( $path ) );
 		$size    = $has ? (int) filesize( $path ) : 0;
 		$expires = isset( $state['expires_at'] ) ? (int) $state['expires_at'] : 0;
@@ -236,12 +271,13 @@ class Modula_Debug_Log {
 	 *
 	 * @return array{body:string,filename:string,filesize:int}|null
 	 */
-	public function get_download_payload() {
+	public function get_download_payload( $max_bytes = null ) {
 		$path = $this->get_log_path();
 		if ( '' === $path || ! is_file( $path ) ) {
 			return null;
 		}
-		$body = file_get_contents( $path );
+		$body = null === $max_bytes ? file_get_contents( $path ) : file_get_contents( $path, false, null, 0, $max_bytes + 1 );
+		if ( null !== $max_bytes && is_string( $body ) && strlen( $body ) > $max_bytes ) { throw new RuntimeException( 'Log size limit exceeded.' ); }
 		if ( false === $body ) {
 			return null;
 		}
@@ -255,15 +291,21 @@ class Modula_Debug_Log {
 	/**
 	 * Clear the log file without re-enabling.
 	 *
-	 * @return void
+	 * @return bool Whether the command completed.
 	 */
 	public function clear() {
+		try {
+			$this->with_lock( function () { $this->clear_locked(); } );
+			return true;
+		} catch ( Throwable $error ) { return false; }
+	}
+	private function clear_locked() {
 		$path = $this->get_log_path();
 		if ( '' === $path || ! is_file( $path ) ) {
 			return;
 		}
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_unlink -- CLI-safe clear.
-		@unlink( $path );
+		if ( ! @unlink( $path ) ) { throw new RuntimeException( 'Log clear unconfirmed.' ); }
 	}
 
 	/**
@@ -301,7 +343,7 @@ class Modula_Debug_Log {
 	 * @return string
 	 */
 	private function get_log_path() {
-		$uploads = wp_upload_dir();
+		$uploads = wp_upload_dir( null, false );
 		if ( ! empty( $uploads['error'] ) || empty( $uploads['basedir'] ) ) {
 			return '';
 		}
@@ -314,7 +356,7 @@ class Modula_Debug_Log {
 	 * @return string
 	 */
 	private function get_dir_path() {
-		$uploads = wp_upload_dir();
+		$uploads = wp_upload_dir( null, false );
 		if ( ! empty( $uploads['error'] ) || empty( $uploads['basedir'] ) ) {
 			return '';
 		}
@@ -335,6 +377,7 @@ class Modula_Debug_Log {
 			return '';
 		}
 		$this->write_protection_files( $dir );
+		if ( ! is_file( $dir . '/index.php' ) || ! is_file( $dir . '/.htaccess' ) ) { return ''; }
 		return $this->get_log_path();
 	}
 

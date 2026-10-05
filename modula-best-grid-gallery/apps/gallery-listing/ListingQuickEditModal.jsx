@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Button, Modal } from '@wordpress/components';
 import { Icon, close, external, lock } from '@wordpress/icons';
 import {
@@ -47,7 +47,10 @@ export function ListingQuickEditModal({ item, onSave, onCancel }) {
 	useEffect(() => {
 		(confirmDiscard ? keepEditingRef : titleRef).current?.focus();
 	}, [confirmDiscard]);
-	const dirty = ['title', 'status', 'slug'].some(
+	const canChangeDate = item.type === 'gallery';
+	const dateChanged =
+		canChangeDate && (form.date || '') !== (seed.date || '');
+	const dirty = ['title', 'status', 'slug', 'date'].some(
 		(field) => form[field] !== seed[field]
 	);
 	const thumbnail = getListingThumbnailUrls(item, 1)[0];
@@ -81,9 +84,12 @@ export function ListingQuickEditModal({ item, onSave, onCancel }) {
 		setErrorMessage('');
 		try {
 			await onSave({
-				title: form.title,
-				...(canChangeStatus ? { status: form.status } : {}),
-				slug: form.slug,
+				...(form.title !== seed.title ? { title: form.title } : {}),
+				...(canChangeStatus && form.status !== seed.status
+					? { status: form.status }
+					: {}),
+				...(form.slug !== seed.slug ? { slug: form.slug } : {}),
+				...(dateChanged ? { date: form.date || '' } : {}),
 			});
 		} catch (error) {
 			setErrorMessage(
@@ -233,12 +239,19 @@ export function ListingQuickEditModal({ item, onSave, onCancel }) {
 							) : (
 								<input
 									id={`${id}-status`}
-									value={seed.status}
+									value={
+										seed.status === 'future'
+											? __(
+													'Scheduled',
+													'modula-best-grid-gallery'
+												)
+											: seed.status
+									}
 									readOnly
 									aria-describedby={`${id}-status-hint`}
 								/>
 							)}
-							{!canChangeStatus ? (
+							{!canChangeStatus && seed.status !== 'future' ? (
 								<span
 									id={`${id}-status-hint`}
 									className="modula-listing-quick-edit__hint"
@@ -256,6 +269,55 @@ export function ListingQuickEditModal({ item, onSave, onCancel }) {
 								</span>
 							) : null}
 						</div>
+						{canChangeDate ? (
+							<div className="modula-listing-quick-edit__field">
+								<label htmlFor={`${id}-date`}>
+									{__(
+										'Publication date',
+										'modula-best-grid-gallery'
+									)}
+								</label>
+								<input
+									id={`${id}-date`}
+									type="datetime-local"
+									step="1"
+									min="1000-01-01T00:00"
+									max="9999-12-31T23:59:59"
+									value={form.date || ''}
+									disabled={isSaving}
+									required={dateChanged}
+									aria-describedby={`${id}-date-hint`}
+									onChange={(event) =>
+										setForm({
+											...form,
+											date: event.target.value,
+										})
+									}
+								/>
+								<p
+									id={`${id}-date-hint`}
+									className="modula-listing-quick-edit__hint"
+								>
+									{sprintf(
+										/* translators: %s: WordPress site timezone. */
+										__(
+											'Site timezone: %s. WordPress schedules published galleries with a future date; they will not be public until that date.',
+											'modula-best-grid-gallery'
+										),
+										item.timezone || 'UTC'
+									)}
+								</p>
+								{seed.status === 'future' ? (
+									<p className="modula-listing-quick-edit__hint">
+										{__(
+											'This gallery is scheduled. Moving the date into the past publishes it immediately.',
+											'modula-best-grid-gallery'
+										)}
+									</p>
+								) : null}
+							</div>
+						) : null}
+
 						<div className="modula-listing-quick-edit__field">
 							<label htmlFor={`${id}-slug`}>
 								{__('URL slug', 'modula-best-grid-gallery')}

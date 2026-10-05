@@ -4,7 +4,7 @@ Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPres
 Requires at least: 5.3
 Tested up to: 7.1
 Requires PHP: 5.6
-Stable tag: 3.0.11
+Stable tag: 3.0.12
 
 License: GNU General Public License v3.0 or later  
 
@@ -325,6 +325,16 @@ The simplest way to install is to click on 'Plugins' then 'Add' and type 'Modula
 4. Mobile Responsive Image Galleries - Galleries automatically adapt to smartphone and tablet screen sizes
 
 == Changelog ==
+
+= 3.0.12 - 05.10.2026 =
+Fixed: Videos in Custom Grid galleries keep a normal tile size instead of stretching to the video’s pixel dimensions.
+Fixed: Clearing all gallery filters saves correctly and the empty list no longer comes back after refresh.
+Fixed: Gallery publication date can be edited again from the editor.
+Fixed: Lightbox zoom Off is respected on the visitor gallery.
+Fixed: Beta lightbox videos honor the loop setting for the whole gallery and for individual items.
+Fixed: Filter controls show correctly when a Beta gallery mixes images and videos.
+Fixed: Titles, captions, and ALT text from Modula AI stay on your website images after they are applied.
+Info: Read more about Modula 3.0 Beta: https://wp-modula.com/modula-3-0-beta/
 
 = 3.0.11 - 29.09.2026 =
 Changed: Beta galleries use a smaller initial loader and load gallery rendering, lightbox sessions, and comments when needed.

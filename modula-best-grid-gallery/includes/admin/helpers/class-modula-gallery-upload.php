@@ -327,13 +327,13 @@ class Modula_Gallery_Upload {
 	 * @param int $gallery_id Gallery post ID.
 	 * @return string
 	 */
-	private function get_gallery_layout_type_string( $gallery_id ) {
+	private function get_gallery_layout_type_string( $gallery_id, $repair_settings = true ) {
 		$gallery_id = absint( $gallery_id );
 		if ( ! $gallery_id ) {
 			return '';
 		}
 		if ( class_exists( '\Modula\V2\Meta_Sync', false ) ) {
-			$v2 = \Modula\V2\Meta_Sync::get_settings_v2( $gallery_id );
+			$v2 = \Modula\V2\Meta_Sync::get_settings_v2( $gallery_id, $repair_settings );
 			if ( is_array( $v2 ) && isset( $v2['general']['type'] ) && is_string( $v2['general']['type'] ) ) {
 				return $v2['general']['type'];
 			}
@@ -351,13 +351,13 @@ class Modula_Gallery_Upload {
 	 * @param int $gallery_id Gallery post ID.
 	 * @return int
 	 */
-	private function get_gallery_grid_column_count( $gallery_id ) {
+	private function get_gallery_grid_column_count( $gallery_id, $repair_settings = true ) {
 		$gallery_id = absint( $gallery_id );
 		if ( ! $gallery_id ) {
 			return 12;
 		}
 		if ( class_exists( '\Modula\V2\Meta_Sync', false ) ) {
-			$v2 = \Modula\V2\Meta_Sync::get_settings_v2( $gallery_id );
+			$v2 = \Modula\V2\Meta_Sync::get_settings_v2( $gallery_id, $repair_settings );
 			if ( is_array( $v2 ) && isset( $v2['layout']['gridType'] ) ) {
 				$c = absint( $v2['layout']['gridType'] );
 				if ( $c >= 1 && $c <= 12 ) {
@@ -472,15 +472,15 @@ class Modula_Gallery_Upload {
 	 * @param int $image_id   Attachment ID.
 	 * @return int[] { width, height }.
 	 */
-	private function get_default_tile_spans_for_new_image( $gallery_id, $image_id ) {
-		if ( 'custom-grid' !== $this->get_gallery_layout_type_string( $gallery_id ) ) {
+	private function get_default_tile_spans_for_new_image( $gallery_id, $image_id, $repair_settings = true ) {
+		if ( 'custom-grid' !== $this->get_gallery_layout_type_string( $gallery_id, $repair_settings ) ) {
 			return array( 2, 2 );
 		}
 		$meta = wp_get_attachment_metadata( $image_id );
 		if ( ! is_array( $meta ) || empty( $meta['width'] ) || empty( $meta['height'] ) ) {
 			return array( 3, 3 );
 		}
-		$columns     = $this->get_gallery_grid_column_count( $gallery_id );
+		$columns     = $this->get_gallery_grid_column_count( $gallery_id, $repair_settings );
 		list($w, $h) = $this->custom_grid_tile_spans_from_pixel_ratio(
 			(int) $meta['width'],
 			(int) $meta['height'],
@@ -615,6 +615,14 @@ class Modula_Gallery_Upload {
 				array( 'status' => 400 )
 			);
 		}
+		return $this->build_attachment_image_row( $gallery_id, $image_id );
+	}
+
+	/**
+	 * Build a row without controller authorization. The caller owns permissions.
+	 * Automation passes repair_settings=false to avoid implicit settings repairs.
+	 */
+	public function build_attachment_image_row( $gallery_id, $image_id, $repair_settings = true ) {
 		$attachment = get_post( $image_id );
 		if ( ! $attachment ) {
 			return new \WP_Error(
@@ -623,7 +631,7 @@ class Modula_Gallery_Upload {
 				array( 'status' => 400 )
 			);
 		}
-		list($def_w, $def_h) = $this->get_default_tile_spans_for_new_image( $gallery_id, $image_id );
+		list($def_w, $def_h) = $this->get_default_tile_spans_for_new_image( $gallery_id, $image_id, $repair_settings );
 		$image               = array(
 			'id'          => $image_id,
 			'alt'         => sanitize_text_field( get_post_meta( $image_id, '_wp_attachment_image_alt', true ) ),
@@ -972,10 +980,11 @@ class Modula_Gallery_Upload {
 	/**
 	 * Folder import browse root (staging subdirectory under uploads by default; filter-overridable).
 	 *
+	 * @param bool $create Whether the default staging directory may be created.
 	 * @return string
 	 */
-	public function get_folder_import_browse_root() {
-		$uploads = wp_upload_dir();
+	public function get_folder_import_browse_root( $create = true ) {
+		$uploads = wp_upload_dir( null, $create );
 		$basedir = isset( $uploads['basedir'] ) ? (string) $uploads['basedir'] : '';
 		$default = Modula_Folder_Import_Path::default_browse_root( $basedir );
 		/**
@@ -984,7 +993,7 @@ class Modula_Gallery_Upload {
 		 * @param string $default Staging path under `wp_upload_dir()['basedir']`.
 		 */
 		$root = (string) apply_filters( 'modula_gallery_upload_default_dir', $default );
-		if ( '' !== $default && wp_normalize_path( untrailingslashit( $root ) ) === wp_normalize_path( untrailingslashit( $default ) ) ) {
+		if ( $create && '' !== $default && wp_normalize_path( untrailingslashit( $root ) ) === wp_normalize_path( untrailingslashit( $default ) ) ) {
 			wp_mkdir_p( $default );
 		}
 		return $root;
@@ -1877,8 +1886,8 @@ class Modula_Gallery_Upload {
 	 * @param string $real_path Absolute path already confirmed under uploads.
 	 * @return int|string|null
 	 */
-	private function resolve_folder_import_attachment( $real_path ) {
-		$uploads = wp_upload_dir();
+	public function resolve_folder_import_attachment( $real_path ) {
+		$uploads = wp_upload_dir( null, false );
 		$base    = isset( $uploads['basedir'] ) ? realpath( $uploads['basedir'] ) : false;
 		if ( false === $base ) {
 			return 'ambiguous';

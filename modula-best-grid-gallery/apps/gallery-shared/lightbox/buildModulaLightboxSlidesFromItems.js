@@ -20,6 +20,7 @@ import {
 } from '../utils/lightboxCaptionExtra';
 import { resolveGalleryItemImageIdFromRow } from '../utils/resolveGalleryItemImageId';
 import {
+	buildModulaLightboxVideoPlaybackFields,
 	formatVideoPlaybackUrl,
 	getItemVideoUrl,
 	isVideoGalleryItem,
@@ -159,6 +160,9 @@ export function buildModulaLightboxSlidesFromItems(
 		const poster = isVideo
 			? row?.thumb || row?.src || ''
 			: row?.thumb || row?.src || '';
+		const videoPlayback = isVideo
+			? buildModulaLightboxVideoPlaybackFields(flags, videoUrl)
+			: null;
 
 		if (!playbackSrc) {
 			continue;
@@ -166,22 +170,40 @@ export function buildModulaLightboxSlidesFromItems(
 
 		slides.push({
 			src: playbackSrc,
+			item_id: String(sourceRow.id ?? ''),
 			image_id: imageIdStr,
 			/*
 			 * Fancybox Video plugin: slide.autoplay ?? Carousel.Video.autoplay.
 			 * Always set explicitly on video slides so item overrides win.
+			 * Top-level modulaVideoLoop / youtube / vimeo / html5videoTpl survive
+			 * Fancybox flatten; opts keep the same flags for our post-open hook.
 			 */
-			...(isVideo ? { autoplay: flags.autoplay } : {}),
+			...(videoPlayback
+				? {
+						autoplay: videoPlayback.autoplay,
+						modulaVideoLoop: videoPlayback.modulaVideoLoop,
+						...(videoPlayback.youtube
+							? { youtube: videoPlayback.youtube }
+							: {}),
+						...(videoPlayback.vimeo
+							? { vimeo: videoPlayback.vimeo }
+							: {}),
+						...(videoPlayback.html5videoTpl
+							? { html5videoTpl: videoPlayback.html5videoTpl }
+							: {}),
+					}
+				: {}),
 			opts: {
 				caption,
 				alt: row?.alt || row?.title || '',
 				thumb: poster || playbackSrc,
 				...(poster && isVideo ? { poster } : {}),
 				image_id: imageIdStr,
-				...(isVideo
+				...(videoPlayback
 					? {
-							modulaVideoAutoplay: flags.autoplay ? 1 : 0,
-							modulaVideoLoop: flags.loop ? 1 : 0,
+							modulaVideoAutoplay:
+								videoPlayback.modulaVideoAutoplay,
+							modulaVideoLoop: videoPlayback.modulaVideoLoop,
 						}
 					: {}),
 				...(itemUrl

@@ -9,13 +9,13 @@ import { bindModulaGalleryLightbox } from './modulaGalleryLightbox';
 import { galleryUsesFancyboxLightbox } from '../utils/resolveGalleryItemLink';
 
 /**
- * @param {object} config Gallery config from store.
- * @param {object} [options]
- * @param {boolean} [options.enabled]
- * @param {unknown[]} [options.items] Display items from Redux (filtered or full).
- * @param {object} [options.settings] Grouped gallery settings.
+ * @param {Object}                             config                 Gallery config from store.
+ * @param {Object}                             [options]
+ * @param {boolean}                            [options.enabled]
+ * @param {unknown[]}                          [options.items]        Display items from Redux (filtered or full).
+ * @param {Object}                             [options.settings]     Grouped gallery settings.
  * @param {() => Promise<unknown[]>|unknown[]} [options.resolveItems] Async lightbox catalog resolver.
- * @returns {import('react').RefObject<HTMLDivElement|null>}
+ * @return {import('react').RefObject<HTMLDivElement|null>}
  */
 export function useModulaGalleryLightbox(config, options = {}) {
 	const hostRef = useRef(null);
@@ -30,7 +30,10 @@ export function useModulaGalleryLightbox(config, options = {}) {
 	const enabled = options.enabled !== false;
 
 	useEffect(() => {
-		if (!enabled || !galleryUsesFancyboxLightbox(configRef.current?.lightbox)) {
+		if (
+			!enabled ||
+			!galleryUsesFancyboxLightbox(configRef.current?.lightbox)
+		) {
 			return undefined;
 		}
 		const host = hostRef.current;

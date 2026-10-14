@@ -2,9 +2,9 @@
  * Cancel one gallery's wait without cancelling a shared chunk download.
  *
  * @template T
- * @param {Promise<T>} promise
+ * @param {Promise<T>}  promise
  * @param {AbortSignal} [signal]
- * @returns {Promise<T>}
+ * @return {Promise<T>}
  */
 export function waitForGalleryLoad(promise, signal) {
 	if (!signal) {

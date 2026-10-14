@@ -35,7 +35,7 @@ function looksLikeGridSpan(width, height) {
 
 /**
  * @param {Object|null|undefined} itemData
- * @param {Object|null|undefined} config    Gallery config (`config.type`).
+ * @param {Object|null|undefined} config   Gallery config (`config.type`).
  * @return {{ width: number|undefined, height: number|undefined }}
  */
 export function resolveGalleryItemIntrinsicDimensions(itemData, config) {

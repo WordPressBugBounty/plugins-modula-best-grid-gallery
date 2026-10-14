@@ -24,7 +24,7 @@ function resolveCssColorValue(value) {
 }
 
 /**
- * @param {string} rootSelector Gallery root selector (e.g. `#modula-123`).
+ * @param {string} rootSelector       Gallery root selector (e.g. `#modula-123`).
  * @param {Object} paginationSettings Grouped `settings.pagination`.
  * @return {string} CSS rules or empty string.
  */

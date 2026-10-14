@@ -8,7 +8,7 @@
 
 /**
  * @param {string} [slug]
- * @returns {string}
+ * @return {string}
  */
 export function normalizeDeeplinkPrefix(slug) {
 	if (!slug) {
@@ -23,7 +23,7 @@ export function normalizeDeeplinkPrefix(slug) {
 
 /**
  * @param {string} [hash] location.hash or raw hash without leading #.
- * @returns {ModulaDeeplinkHashParts|null}
+ * @return {ModulaDeeplinkHashParts|null}
  */
 export function parseModulaDeeplinkHash(hash) {
 	const raw = String(hash || '')
@@ -53,7 +53,7 @@ export function parseModulaDeeplinkHash(hash) {
  * Gallery id from a modern shortcode root (`#modula-123` or `data-gallery-id`).
  *
  * @param {HTMLElement} rootEl
- * @returns {string}
+ * @return {string}
  */
 export function resolveGalleryIdFromRoot(rootEl) {
 	if (!(rootEl instanceof HTMLElement)) {
@@ -72,9 +72,9 @@ export function resolveGalleryIdFromRoot(rootEl) {
 }
 
 /**
- * @param {object} [settings] Grouped gallery settings.
- * @param {object} [config] Flat gallery config.
- * @returns {{ enabled: boolean, prefix: string }}
+ * @param {Object} [settings] Grouped gallery settings.
+ * @param {Object} [config]   Flat gallery config.
+ * @return {{ enabled: boolean, prefix: string }}
  */
 export function resolveDeeplinkSettings(settings = {}, config = {}) {
 	const deeplink = settings?.deeplink || {};
@@ -101,9 +101,9 @@ export function resolveDeeplinkSettings(settings = {}, config = {}) {
 /**
  * Resolve 0-based slide index from hash imageRef (1-based index, or attachment id fallback).
  *
- * @param {string} imageRef
+ * @param {string}                                                                   imageRef
  * @param {Array<{ opts?: { image_id?: string|number }, image_id?: string|number }>} slides
- * @returns {number} startIndex or -1 when unresolved
+ * @return {number} startIndex or -1 when unresolved
  */
 export function resolveDeeplinkStartIndex(imageRef, slides) {
 	const list = Array.isArray(slides) ? slides : [];
@@ -132,10 +132,10 @@ export function resolveDeeplinkStartIndex(imageRef, slides) {
  * Whether the current URL hash targets this gallery root.
  *
  * @param {HTMLElement} rootEl
- * @param {object} [settings]
- * @param {object} [config]
- * @param {string} [hash]
- * @returns {ModulaDeeplinkHashParts|null}
+ * @param {Object}      [settings]
+ * @param {Object}      [config]
+ * @param {string}      [hash]
+ * @return {ModulaDeeplinkHashParts|null}
  */
 export function matchDeeplinkHashForGallery(
 	rootEl,
@@ -165,7 +165,7 @@ export function matchDeeplinkHashForGallery(
  * Gallery id from a deeplink hash, if any (for eager loader).
  *
  * @param {string} [hash]
- * @returns {string}
+ * @return {string}
  */
 export function getDeeplinkGalleryIdFromHash(hash) {
 	const parsed = parseModulaDeeplinkHash(hash);

@@ -4,19 +4,20 @@
 import { __ } from '@wordpress/i18n';
 import { Spinner, Notice } from '@wordpress/components';
 import { useMemo, useLayoutEffect } from '@wordpress/element';
-import { DESKTOP_EDITOR_MEDIA_QUERY } from './constants/desktopEditorViewport';
+import {
+	DesktopOnlyNotice,
+	SettingsEditorAppearanceProvider,
+	SettingsEditorErrorBoundary,
+	useSettingsEditorAppearance,
+} from 'editor-shell';
+import { DESKTOP_EDITOR_MEDIA_QUERY } from 'editor-shell/logic';
 import { useGallerySettingsV2Query } from './query/useGallerySettingsV2Query';
 import { useModulaSettingsEditorConfig } from './hooks/useModulaSettingsEditorConfig';
 import { useMatchMedia } from './hooks/useMatchMedia';
 import { resolveGalleryAdminPostId } from './utils/resolveGalleryAdminPostId';
 import { syncGalleryAdminEditUrl } from './utils/syncGalleryAdminEditUrl';
+import { getGalleryListUrl } from './utils/galleryAdminUrls';
 import GallerySettingsEditorLoaded from './components/shell/GallerySettingsEditorLoaded';
-import DesktopOnlyNotice from './components/shell/DesktopOnlyNotice';
-import SettingsEditorErrorBoundary from './components/shell/SettingsEditorErrorBoundary';
-import {
-	SettingsEditorAppearanceProvider,
-	useSettingsEditorAppearance,
-} from './context/SettingsEditorAppearanceContext';
 
 export default function SettingsEditorApp() {
 	return (
@@ -50,10 +51,16 @@ function SettingsEditorAppInner() {
 	if (isTakeover && !isDesktopEditor) {
 		return (
 			<div
-				className="modula-settings-editor__app"
+				className="modula-settings-editor__app modula-takeover__app"
 				data-appearance={appearance}
 			>
-				<DesktopOnlyNotice />
+				<DesktopOnlyNotice
+					backUrl={getGalleryListUrl(config)}
+					message={__(
+						'The gallery editor is a desktop experience. Open this page on a computer to continue.',
+						'modula-best-grid-gallery'
+					)}
+				/>
 			</div>
 		);
 	}
@@ -74,7 +81,7 @@ function SettingsEditorAppInner() {
 
 	return (
 		<div
-			className="modula-settings-editor__app"
+			className="modula-settings-editor__app modula-takeover__app"
 			data-appearance={appearance}
 		>
 			<SettingsEditorErrorBoundary>

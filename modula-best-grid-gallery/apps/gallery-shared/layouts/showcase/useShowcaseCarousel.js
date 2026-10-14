@@ -8,13 +8,13 @@
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 
 /**
- * @param {object} opts
- * @param {number} opts.itemCount
+ * @param {Object}  opts
+ * @param {number}  opts.itemCount
  * @param {boolean} [opts.autoplay]
- * @param {number} [opts.autoplayInterval]
+ * @param {number}  [opts.autoplayInterval]
  * @param {boolean} [opts.enabled]
  * @param {boolean} [opts.infinite]
- * @returns {{
+ * @return {{
  *   activeIndex: number,
  *   trackIndex: number,
  *   setActiveIndex: (i: number) => void,

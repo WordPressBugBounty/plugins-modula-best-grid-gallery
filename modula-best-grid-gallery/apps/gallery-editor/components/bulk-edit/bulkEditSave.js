@@ -1,9 +1,7 @@
 /**
  * Persist bulk-edit drafts via v2 REST (no Backbone).
  */
-import {
-	asGalleryItemList,
-} from 'gallery-shared/preview';
+import { asGalleryItemList } from 'gallery-shared/preview';
 import { saveMergedGalleryItems } from '../../api/galleryUploadApi';
 import {
 	isEmbeddedGalleryItemRow,
@@ -40,7 +38,7 @@ function bulkEditDraftFieldDiffers(row, field, draftVal) {
  * True when any draft field still differs from the live preview store row.
  *
  * @param {Record<string, Record<string, unknown>>} localChanges keyed by row id string
- * @param {import('@reduxjs/toolkit').Store|null} [store]
+ * @param {import('@reduxjs/toolkit').Store|null}   [store]
  * @return {boolean}
  */
 export function bulkEditHasDraftChanges(localChanges, store = null) {
@@ -85,7 +83,7 @@ export function bulkEditHasDraftChanges(localChanges, store = null) {
 }
 
 /**
- * @param {Object} row
+ * @param {Object}                                  row
  * @param {Record<string, Record<string, unknown>>} localChanges
  * @return {boolean}
  */
@@ -125,9 +123,9 @@ function normalizeDraftFields(changes) {
 }
 
 /**
- * @param {import('@reduxjs/toolkit').Store} store
+ * @param {import('@reduxjs/toolkit').Store}        store
  * @param {Record<string, Record<string, unknown>>} localChanges
- * @param {Set<string>} [excludeRowIds]
+ * @param {Set<string>}                             [excludeRowIds]
  * @return {Object[]}
  */
 export function buildBulkEditMergedPayload(
@@ -167,7 +165,7 @@ export function buildBulkEditMergedPayload(
 /**
  * Collect unique filter tokens from rows + drafts for gallery-level filter list.
  *
- * @param {Object[]} items
+ * @param {Object[]}                                items
  * @param {Record<string, Record<string, unknown>>} localChanges
  * @return {string[]}
  */
@@ -189,7 +187,7 @@ export function collectNewFilterTagsFromDraft(items, localChanges) {
 
 /**
  * @param {import('@tanstack/react-form').ReactFormExtendedApi} form
- * @param {string[]} newTags
+ * @param {string[]}                                            newTags
  */
 export function mergeTagsIntoGalleryFilterSettings(form, newTags) {
 	if (!newTags.length) {

@@ -1,6 +1,6 @@
-@use 'mixins' as *;
+@use '../../../editor-shell/styles/mixins' as *;
 @use '../variables' as *;
-@use '../shared/range-control-layout' as range-layout;
+@use '../../../editor-shell/styles/range-control-layout' as range-layout;
 
 // Dark-only WP component overrides (light uses _sidebar-settings-light.scss).
 .modula-settings-editor__app[data-appearance='dark'] {

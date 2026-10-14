@@ -62,13 +62,13 @@
 }
 
 /* New images: column layout + full-width segment inside narrow aux panel */
-.modula-gallery-takeover__reorder-setup-block .modula-gallery-takeover__preview-insert {
+.modula-gallery-takeover__reorder-setup-block .modula-takeover__preview-insert {
 	flex-direction: column;
 	align-items: stretch;
 	gap: $mod-space-8;
 }
 
-.modula-gallery-takeover__reorder-setup-block .modula-gallery-takeover__preview-insert-label {
+.modula-gallery-takeover__reorder-setup-block .modula-takeover__preview-insert-label {
 	color: var(--mod-se-ink, var(--mod-se-aux-ink, #{$mod-takeover-text-strong}));
 	font-size: 13px;
 	font-weight: 600;
@@ -76,13 +76,13 @@
 	text-transform: none;
 }
 
-.modula-gallery-takeover__reorder-setup-block .modula-gallery-takeover__preview-segment {
+.modula-gallery-takeover__reorder-setup-block .modula-takeover__preview-segment {
 	width: 100%;
 	box-sizing: border-box;
 	display: flex;
 }
 
-.modula-gallery-takeover__reorder-setup-block .modula-gallery-takeover__preview-segment-btn {
+.modula-gallery-takeover__reorder-setup-block .modula-takeover__preview-segment-btn {
 	flex: 1;
 	justify-content: center;
 	text-align: center;

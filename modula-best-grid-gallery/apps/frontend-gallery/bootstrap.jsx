@@ -44,7 +44,7 @@ const loadingElements = new WeakMap();
 
 /**
  * @param {boolean} [forceAll] When true, mount every pending gallery (manual init).
- * @returns {string}
+ * @return {string}
  */
 function pendingGallerySelector(forceAll = false) {
 	if (forceAll) {
@@ -79,6 +79,7 @@ function showGalleryBootstrapError(element, message) {
 /**
  * @param {number} postId
  * @param {string} align
+ * @param          signal
  * @return {Promise<Object>}
  */
 async function fetchGalleryBootstrapWithRetry(postId, align, signal) {
@@ -233,7 +234,7 @@ async function mountGalleryInstance(element, galleryData, signal) {
 }
 
 /**
- * @param {HTMLElement} element
+ * @param {HTMLElement}              element
  * @param {{ signal?: AbortSignal }} [options]
  */
 async function initGallery(element, { signal } = {}) {
@@ -332,7 +333,7 @@ async function initGallery(element, { signal } = {}) {
  * Deduplicate each gallery's load without blocking other galleries behind it.
  *
  * @param {{ forceAll?: boolean, element?: HTMLElement, signal?: AbortSignal }} [options]
- * @returns {Promise<void[]>}
+ * @return {Promise<void[]>}
  */
 function initGalleries(options = {}) {
 	const elements = options.element

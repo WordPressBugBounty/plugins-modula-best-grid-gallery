@@ -1,15 +1,19 @@
 // Full-screen CPT takeover shell (preview critical eager; feature CSS lazy with JS chunks).
 @use 'metabox/filter-names';
+@use '../../editor-shell/styles/layout';
 @use 'takeover/shell';
-@use 'takeover/topbar';
+@use '../../editor-shell/styles/topbar';
+@use 'takeover/bound-badge';
+@use '../../editor-shell/styles/workspace';
 @use 'takeover/workspace-sidebar';
 @use 'takeover/sidebar-settings-layout';
 @use 'takeover/sidebar-settings-light';
 @use 'takeover/sidebar-settings-dark';
-@use 'takeover/sidebar-v2';
+@use '../../editor-shell/styles/sidebar';
 @use 'takeover/settings-panel';
+@use '../../editor-shell/styles/settings-panel-chrome';
 @use 'takeover/gallery-item-edit-panel';
 @use 'takeover/gallery-reorder-sidebar';
 @use 'takeover/preview-critical';
-@use 'takeover/desktop-only';
-@use 'takeover/responsive';
+@use '../../editor-shell/styles/desktop-only';
+@use '../../editor-shell/styles/responsive';

@@ -15,7 +15,8 @@ import { useGalleryReorderSidebar } from './GalleryReorderSidebarContext';
 
 /** @typedef {'edit'|'focus'} GalleryItemEditView */
 
-/** @type {import('react').Context<{
+/**
+ * @type {import('react').Context<{
  *   storeIndex: number | null,
  *   view: GalleryItemEditView,
  *   open: (storeIndex: number) => void,
@@ -23,7 +24,7 @@ import { useGalleryReorderSidebar } from './GalleryReorderSidebarContext';
  *   closeFocus: () => void,
  *   close: () => void,
  *   isOpen: boolean,
- * } | null>} */
+  } | null>} */
 export const GalleryItemEditSidebarContext = createContext(null);
 
 /**

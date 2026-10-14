@@ -12,6 +12,7 @@ const lazyByType = {
 	'creative-gallery': () => import('./CreativeGalleryLayout'),
 	'justified-grid': () => import('./JustifiedGridLayout'),
 	'custom-grid': () => import('./CustomGridLayout'),
+	freeform: () => import('./FreeformLayout'),
 	grid: () => import('./MasonryLayout'),
 	slider: () => import('./SliderLayout'),
 	story: () => import('./StoryLayout'),

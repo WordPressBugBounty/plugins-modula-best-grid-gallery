@@ -11,19 +11,19 @@ import { DEFAULT_CONTENT_BLOCK_BACKGROUND } from '../../utils/contentBlockContra
 
 /**
  * @typedef {Object} TemplateSlotDef
- * @property {string} id
- * @property {TemplateSlotRole} role
- * @property {number|null} [imageOrder] Index among image rows (0-based).
- * @property {string} [embeddedId] Fixed id for content_block rows.
+ * @property {string}                                                                                                                                                 id
+ * @property {TemplateSlotRole}                                                                                                                                       role
+ * @property {number|null}                                                                                                                                            [imageOrder] Index among image rows (0-based).
+ * @property {string}                                                                                                                                                 [embeddedId] Fixed id for content_block rows.
  * @property {{ title?: string, description?: string, blockBodyHtml?: string, blockFontPreset?: string, blockPaddingPreset?: string, blockBackgroundColor?: string }} [seed]
  */
 
 /**
  * @typedef {Object} TemplateDefinition
- * @property {string} slug
- * @property {string} label
- * @property {TemplateTier} tier
- * @property {number} imageSlotCount
+ * @property {string}            slug
+ * @property {string}            label
+ * @property {TemplateTier}      tier
+ * @property {number}            imageSlotCount
  * @property {TemplateSlotDef[]} slots
  */
 
@@ -237,7 +237,7 @@ export function isTemplateOwnedEmbeddedId(id) {
  * Template-preset content slots cannot be removed while gallery type is
  * `template` (the layout would re-seed them). User-added content blocks stay removable.
  *
- * @param {unknown} row
+ * @param {unknown}               row
  * @param {string|undefined|null} galleryType
  * @return {boolean}
  */
@@ -254,7 +254,7 @@ export function isTemplateProtectedEmbeddedRow(row, galleryType) {
 
 /**
  * @param {string|undefined|null} slug
- * @returns {TemplateDefinition|null}
+ * @return {TemplateDefinition|null}
  */
 export function getTemplateDefinition(slug) {
 	const key = String(slug || '').trim();
@@ -263,7 +263,7 @@ export function getTemplateDefinition(slug) {
 
 /**
  * @param {string|undefined|null} slug
- * @returns {number}
+ * @return {number}
  */
 export function getTemplateImageSlotCount(slug) {
 	return getTemplateDefinition(slug)?.imageSlotCount ?? 0;
@@ -271,7 +271,7 @@ export function getTemplateImageSlotCount(slug) {
 
 /**
  * @param {unknown[]} items
- * @returns {unknown[]}
+ * @return {unknown[]}
  */
 export function filterTemplateImageRows(items) {
 	if (!Array.isArray(items)) {
@@ -294,8 +294,8 @@ export function filterTemplateImageRows(items) {
 
 /**
  * @param {unknown[]} items
- * @param {string} slug
- * @returns {{ slotted: Record<string, unknown|null>, overflowCount: number, imageCount: number }}
+ * @param {string}    slug
+ * @return {{ slotted: Record<string, unknown|null>, overflowCount: number, imageCount: number }}
  */
 export function mapTemplateItems(items, slug) {
 	const def = getTemplateDefinition(slug);
@@ -341,7 +341,7 @@ export function mapTemplateItems(items, slug) {
  * “Add content block” / `buildNewContentBlockRow` — v2 embedded contract).
  *
  * @param {string} slug
- * @returns {Object[]}
+ * @return {Object[]}
  */
 export function buildTemplateContentBlockSeeds(slug) {
 	const def = getTemplateDefinition(slug);

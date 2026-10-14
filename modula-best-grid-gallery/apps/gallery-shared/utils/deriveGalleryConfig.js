@@ -5,10 +5,11 @@
  */
 
 import { settingsToConfig } from './settingsToConfig';
+import { resolveGalleryLayoutType } from '../layouts/layoutTypes';
 
 /**
  * @param {unknown} settings
- * @return {boolean}
+ * @return {boolean} Whether a grouped document exists.
  */
 function hasGroupedSettings(settings) {
 	return Boolean(
@@ -20,7 +21,7 @@ function hasGroupedSettings(settings) {
 
 /**
  * @param {unknown} previewViewport
- * @return {'desktop'|'tablet'|'mobile'|undefined}
+ * @return {'desktop'|'tablet'|'mobile'|undefined} Supported device override.
  */
 function normalizePreviewViewportExtra(previewViewport) {
 	if (
@@ -46,7 +47,15 @@ export function deriveGalleryConfig(groupedSettings, extras = {}) {
 	let config;
 
 	if (hasGroupedSettings(groupedSettings)) {
-		config = settingsToConfig(groupedSettings, {
+		const runtimeType = resolveGalleryLayoutType({
+			type: groupedSettings.general?.type,
+			freeformAvailable: extras.freeformAvailable,
+		});
+		const runtimeSettings = {
+			...groupedSettings,
+			general: { ...groupedSettings.general, type: runtimeType },
+		};
+		config = settingsToConfig(runtimeSettings, {
 			galleryId,
 			legacyJsConfig: extras.legacyJsConfig || {},
 			galleryComments: extras.galleryComments,
@@ -78,6 +87,9 @@ export function deriveGalleryConfig(groupedSettings, extras = {}) {
 	if (extras.imageLicensingExtensionActive !== undefined) {
 		config.imageLicensingExtensionActive =
 			extras.imageLicensingExtensionActive;
+	}
+	if (typeof extras.freeformAvailable === 'boolean') {
+		config.freeformAvailable = extras.freeformAvailable;
 	}
 	if (extras.licensingGlobal && typeof extras.licensingGlobal === 'object') {
 		config.licensingGlobal = extras.licensingGlobal;
@@ -114,6 +126,7 @@ export function galleryConfigExtrasFromPreloadData(data, galleryId) {
 		legacyJsConfig: data?.legacyJsConfig || {},
 		galleryComments: metadata.galleryComments,
 		zoomExtensionActive: metadata.zoomExtensionActive,
+		freeformAvailable: metadata.freeformAvailable,
 		previewViewport: data?.previewViewport,
 		imageSizeDimensions:
 			metadata.imageSizeDimensions &&

@@ -32,11 +32,12 @@ import { uniformGridCellAspectRatioFromConfig } from '../utils/uniformGridTileAs
 
 /**
  * @param {Object} props
- * @param {Object} props.itemData - Bootstrap item (itemKind content_block|shortcode).
- * @param {Object} [props.config] - Flat gallery config.
- * @param {Object} [props.style]  - Layout slot style.
+ * @param {Object} props.itemData     - Bootstrap item (itemKind content_block|shortcode).
+ * @param {Object} [props.config]     - Flat gallery config.
+ * @param {Object} [props.style]      - Layout slot style.
+ * @param          props.catalogIndex
  */
-function EmbeddedGalleryItem({ itemData, config, style = null }) {
+function EmbeddedGalleryItem({ itemData, config, style = null, catalogIndex }) {
 	const isSettingsEditorPreview = useSelector(
 		(s) =>
 			s.gallery.metadata?.displayContext === 'settings-editor-preview' ||
@@ -255,7 +256,10 @@ function EmbeddedGalleryItem({ itemData, config, style = null }) {
 			{isSettingsEditorPreview ? (
 				<div className="modula-item-preview-admin-mount">
 					<div className="modula-item-preview-admin-mount__inner">
-						<GalleryPreviewAdminToolbarSlot itemData={itemData} />
+						<GalleryPreviewAdminToolbarSlot
+							itemData={itemData}
+							catalogIndex={catalogIndex}
+						/>
 					</div>
 				</div>
 			) : null}

@@ -19,10 +19,7 @@ export default function SelectCatalogAuxiliaryPanel({
 	optionImages,
 	disabledByLiteSchema,
 	onClosePanel,
-	sectionTitle = __(
-		'Select license type',
-		'modula-best-grid-gallery'
-	),
+	sectionTitle = __('Select license type', 'modula-best-grid-gallery'),
 }) {
 	return (
 		<div
@@ -56,7 +53,9 @@ export default function SelectCatalogAuxiliaryPanel({
 									const thumbSrc =
 										typeof rawImg === 'string' &&
 										rawImg !== ''
-											? resolveModulaPluginAssetUrl(rawImg)
+											? resolveModulaPluginAssetUrl(
+													rawImg
+												)
 											: '';
 									const isSel =
 										String(fieldApi.state.value ?? '') ===

@@ -10,7 +10,7 @@ import { useEffect } from '@wordpress/element';
 
 /**
  * @param {HTMLElement} element
- * @returns {boolean}
+ * @return {boolean}
  */
 function isGalleryRootInViewport(element) {
 	const rect = element.getBoundingClientRect();
@@ -26,7 +26,7 @@ function isGalleryRootInViewport(element) {
 
 /**
  * @param {import('react').RefObject<HTMLElement|null>} hostRef
- * @param {boolean} enabled
+ * @param {boolean}                                     enabled
  */
 export function useGalleryInView(hostRef, enabled) {
 	useEffect(() => {

@@ -14,13 +14,14 @@ import { useGallerySettingsFormBundle } from '../form/GallerySettingsFormContext
 import { usePreviewReduxStoreItems } from '../hooks/usePreviewReduxStoreItems';
 import { useGalleryPreviewTileSelection } from './GalleryPreviewTileSelectionContext';
 
-/** @type {import('react').Context<{
+/**
+ * @type {import('react').Context<{
  *   active: boolean,
  *   selectedIds: number[],
  *   isSelected: (id: number) => boolean,
  *   toggle: (id: number) => void,
  *   clear: () => void,
- * } | null>} */
+  } | null>} */
 export const WatermarkPreviewSelectionContext = createContext(null);
 
 /**

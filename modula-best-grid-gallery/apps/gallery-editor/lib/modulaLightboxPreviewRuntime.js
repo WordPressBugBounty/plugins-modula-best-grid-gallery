@@ -13,9 +13,9 @@ import { getModulaSettingsEditorConfig } from '../config/modulaSettingsEditorCon
 
 /**
  * @param {Array<{ src?: string, caption?: string, thumb?: string, opts?: object }>} links
- * @param {object} lightboxOpts
- * @param {number} index
- * @returns {unknown}
+ * @param {Object}                                                                   lightboxOpts
+ * @param {number}                                                                   index
+ * @return {unknown}
  */
 export function openModulaLightboxPreview(links, lightboxOpts, index) {
 	const shareButtons = getModulaSettingsEditorConfig().lightboxShareButtons;
@@ -44,7 +44,7 @@ export function getModulaLightboxPreviewInstance() {
 /**
  * Current carousel page before close/reopen (editor preview only).
  *
- * @returns {number}
+ * @return {number}
  */
 export function getModulaLightboxPreviewSlideIndex() {
 	const instance = getSharedLightboxPreviewInstance();
@@ -53,11 +53,12 @@ export function getModulaLightboxPreviewSlideIndex() {
 }
 
 /**
- * @param {object} args
- * @param {object} args.lightboxOpts
- * @param {string} [args.previewBackgroundColor]
+ * @param {Object}                      args
+ * @param {Object}                      args.lightboxOpts
+ * @param {string}                      [args.previewBackgroundColor]
  * @param {'desktop'|'tablet'|'mobile'} [args.previewViewport]
- * @returns {boolean}
+ * @param                               args.slideCount
+ * @return {boolean}
  */
 export function applyModulaLightboxPreviewPatch({
 	lightboxOpts,

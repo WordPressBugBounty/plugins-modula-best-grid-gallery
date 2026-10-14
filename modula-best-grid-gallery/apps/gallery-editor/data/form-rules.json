@@ -521,6 +521,7 @@
 					"parallax-masonry",
 					"creative-gallery",
 					"custom-grid",
+					"freeform",
 					"polaroid"
 				]
 			}
@@ -1165,6 +1166,10 @@
 					{
 						"path": "general.type",
 						"neq": "template"
+					},
+					{
+						"path": "general.type",
+						"neq": "freeform"
 					}
 				]
 			}

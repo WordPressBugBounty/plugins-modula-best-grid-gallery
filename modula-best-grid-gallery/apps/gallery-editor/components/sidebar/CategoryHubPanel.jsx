@@ -16,16 +16,19 @@ import { shouldRenderHubSection } from '../../logic/hubSectionVisibility';
 import { getSimpleLinkLightboxSidebarFootnote } from '../lightbox-preview/SimpleLinkLightboxPreviewNotice';
 import ZoomOnHoverHubToggle from './ZoomOnHoverHubToggle';
 
-/** @param {Object} section Hub section from editorNavigation. @param {Record<string, Record<string, unknown>>} values Grouped form values. @returns {boolean} */
+/**
+ * @param {Object} section Hub section from editorNavigation. @param {Record<string, Record<string, unknown>>} values Grouped form values. @returns {boolean}
+ * @param          values
+ */
 function isHubSectionVisible(section, values) {
 	return shouldRenderHubSection(section, values);
 }
 
 /**
- * @param {object} section
- * @param {function(string): string} groupLabel
+ * @param {Object}                                  section
+ * @param {function(string): string}                groupLabel
  * @param {Record<string, Record<string, unknown>>} values
- * @param {string} reactKey
+ * @param {string}                                  reactKey
  * @return {import('react').ReactNode}
  */
 function renderHubSectionWithValues(section, groupLabel, values, reactKey) {
@@ -197,10 +200,10 @@ function renderHubSectionWithValues(section, groupLabel, values, reactKey) {
 }
 
 /**
- * @param {object[]} sections
- * @param {function(string): string} groupLabel
+ * @param {object[]}                                sections
+ * @param {function(string): string}                groupLabel
  * @param {Record<string, Record<string, unknown>>} values
- * @param {string} keyPrefix
+ * @param {string}                                  keyPrefix
  * @return {import('react').ReactNode[]}
  */
 function renderHubSectionsList(sections, groupLabel, values, keyPrefix) {
@@ -221,7 +224,7 @@ function renderHubSectionsList(sections, groupLabel, values, keyPrefix) {
 
 /**
  * @param {Object} props
- * @param {object} props.category Entry from `SETTINGS_EDITOR_CATEGORIES` with `hubSections`.
+ * @param {Object} props.category Entry from `SETTINGS_EDITOR_CATEGORIES` with `hubSections`.
  */
 export default function CategoryHubPanel({ category }) {
 	const config = useModulaSettingsEditorConfig();

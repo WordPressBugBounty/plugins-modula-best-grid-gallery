@@ -225,6 +225,7 @@ const {
 
 /**
  * Inspector controls
+ * @param props
  */
 const Inspector = props => {
   const {
@@ -561,7 +562,7 @@ const ModulaGalleryImage = props => {
         height: img.img_height,
         src: img.src
       });
-    } else if (img.video_template == '1' && 'undefined' != typeof img.video_thumbnail && '' != img.video_thumbnail) {
+    } else if (img.video_template == '1' && 'undefined' !== typeof img.video_thumbnail && '' != img.video_thumbnail) {
       // Return image thumbnail of video
       return /*#__PURE__*/React.createElement("img", {
         className: "modula-image pic",
@@ -2392,6 +2393,6 @@ class ModulaGutenberg {
     });
   }
 }
-let modulaGutenberg = new ModulaGutenberg();
+const modulaGutenberg = new ModulaGutenberg();
 /******/ })()
 ;

@@ -68,7 +68,7 @@ export function listExtensionImportEntries() {
 }
 
 /**
- * @param {ExtensionImportRegistryEntry} entry
+ * @param {ExtensionImportRegistryEntry}                                                                            entry
  * @param {{ isPro?: boolean, extensionEntitlements?: Record<string, { available?: boolean, enabled?: boolean }> }} editor
  * @return {boolean}
  */

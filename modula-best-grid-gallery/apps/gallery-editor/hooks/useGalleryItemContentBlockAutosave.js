@@ -7,6 +7,7 @@ import {
 } from 'gallery-shared/preview';
 import { useCallback, useEffect, useRef } from '@wordpress/element';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTakeoverSaveStatus } from 'editor-shell';
 import { saveMergedGalleryItems } from '../api/galleryUploadApi';
 import { syncPreviewCoreToStoreAndBootstrap } from '../utils/previewItemsCommit';
 import {
@@ -16,7 +17,6 @@ import {
 } from '../utils/embeddedGalleryItems';
 import { contentBlockStateToSaveFields } from '../utils/contentBlockEditState';
 import { isContentBlockEditDirty } from '../utils/galleryItemEditDirtyState';
-import { useTakeoverSaveStatus } from '../context/TakeoverSaveStatusContext';
 import { getGalleryPreviewReduxStore } from '../utils/previewReduxStoreRef';
 import { getGalleryBootstrapQueryKey } from '../query/useGalleryBootstrapQuery';
 
@@ -145,7 +145,7 @@ export function useGalleryItemContentBlockAutosave({
 					galleryId,
 					latest
 				);
-			});
+			}, `item-content:${galleryId}:${eidNorm}`);
 
 			baselineItemRef.current = mergeContentBlockSaveFieldsIntoRow(
 				row,

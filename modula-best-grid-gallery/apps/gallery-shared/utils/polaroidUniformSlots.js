@@ -9,9 +9,9 @@ export const POLAROID_UNIFORM_PORTRAIT_HW = 4 / 3;
 
 /**
  * @param {number} containerWidth - Inner width in px
- * @param {number} itemCount       - Number of items
- * @param {number} gutter          - Gap in px
- * @param {number} [fixedColumns]  - 0 or undefined = auto from width; 1–12 = prints per row
+ * @param {number} itemCount      - Number of items
+ * @param {number} gutter         - Gap in px
+ * @param {number} [fixedColumns] - 0 or undefined = auto from width; 1–12 = prints per row
  * @return {Array<{ top: number, left: number, width: number, height: number, area: number, position: number }>}
  */
 export function generateUniformPortraitPolaroidTiles(

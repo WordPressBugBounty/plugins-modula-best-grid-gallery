@@ -5,12 +5,12 @@ import { isListingApplyPresetEligible } from './listingApplyPreset';
 
 /**
  * @typedef {Object} ListingRowActionDef
- * @property {ListingRowActionId} id
- * @property {(item: Object) => string} getLabel
- * @property {(item: Object) => string} [getDescription]
+ * @property {ListingRowActionId}                                                                                     id
+ * @property {(item: Object) => string}                                                                               getLabel
+ * @property {(item: Object) => string}                                                                               [getDescription]
  * @property {(item: Object, options?: { canUseApplyPreset?: boolean, albumTakeoverAvailable?: boolean }) => boolean} isEligible
- * @property {boolean} [isDestructive]
- * @property {boolean} [showProBadge]
+ * @property {boolean}                                                                                                [isDestructive]
+ * @property {boolean}                                                                                                [showProBadge]
  */
 
 /** @type {Record<ListingRowActionId, ListingRowActionDef>} */
@@ -44,7 +44,10 @@ export const LISTING_ROW_ACTION_DEFS = {
 						'modula-best-grid-gallery'
 					),
 		isEligible: (item, options = {}) => {
-			if (item.type === 'album' && options.albumTakeoverAvailable !== true) {
+			if (
+				item.type === 'album' &&
+				options.albumTakeoverAvailable !== true
+			) {
 				return false;
 			}
 			return (
@@ -63,7 +66,10 @@ export const LISTING_ROW_ACTION_DEFS = {
 				? __('Same album and shortcode', 'modula-best-grid-gallery')
 				: __('Same gallery and shortcode', 'modula-best-grid-gallery'),
 		isEligible: (item, options = {}) => {
-			if (item.type === 'album' && options.albumTakeoverAvailable !== true) {
+			if (
+				item.type === 'album' &&
+				options.albumTakeoverAvailable !== true
+			) {
 				return false;
 			}
 			return (
@@ -76,7 +82,8 @@ export const LISTING_ROW_ACTION_DEFS = {
 	},
 	'restore-classic-editor': {
 		id: 'restore-classic-editor',
-		getLabel: () => __('Restore classic editor', 'modula-best-grid-gallery'),
+		getLabel: () =>
+			__('Restore classic editor', 'modula-best-grid-gallery'),
 		getDescription: () =>
 			__(
 				'Restore classic settings from the Convert backup',
@@ -166,8 +173,8 @@ const LIVE_ROW_MENU_GROUPS = [
 const TRASH_ROW_MENU_GROUPS = [['restore', 'delete-permanently']];
 
 /**
- * @param {ListingRowActionId[][]} groups
- * @param {Object} item
+ * @param {ListingRowActionId[][]}                                                                        groups
+ * @param {Object}                                                                                        item
  * @param {{ canUseStandalone?: boolean, canUseApplyPreset?: boolean, albumTakeoverAvailable?: boolean }} [options]
  * @return {ListingRowActionDef[][]}
  */
@@ -182,7 +189,7 @@ function filterMenuGroups(groups, item, options = {}) {
 }
 
 /**
- * @param {ListingRowActionDef} action
+ * @param {ListingRowActionDef}            action
  * @param {{ canUseStandalone?: boolean }} [options]
  * @return {ListingRowActionDef}
  */
@@ -199,7 +206,7 @@ function decorateListingRowAction(action, options) {
 /**
  * Menu groups for a listing row (dividers between groups).
  *
- * @param {Object} item
+ * @param {Object}                                                                                        item
  * @param {{ canUseStandalone?: boolean, canUseApplyPreset?: boolean, albumTakeoverAvailable?: boolean }} [options]
  * @return {ListingRowActionDef[][]}
  */
@@ -214,8 +221,8 @@ export function getListingRowMenuGroups(item, options = {}) {
 }
 
 /**
- * @param {ListingRowActionId} actionId
- * @param {Object} item
+ * @param {ListingRowActionId}              actionId
+ * @param {Object}                          item
  * @param {{ canUseApplyPreset?: boolean }} [options]
  * @return {boolean}
  */
@@ -226,7 +233,7 @@ export function isListingRowActionEligible(actionId, item, options = {}) {
 
 /**
  * @param {ListingRowActionId} actionId
- * @param {Object} item
+ * @param {Object}             item
  * @return {string}
  */
 export function getListingRowActionLabel(actionId, item) {

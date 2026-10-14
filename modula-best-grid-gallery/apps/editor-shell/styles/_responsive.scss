@@ -1,0 +1,20 @@
+@use 'variables' as *;
+
+@media (max-width: 782px) {
+	.modula-takeover__workspace {
+		flex-direction: column;
+	}
+
+	.modula-takeover__sidebar {
+		flex: 0 0 auto;
+		width: 100%;
+		max-width: none;
+		border-right: none;
+		border-bottom: 1px solid #2c3338;
+		max-height: min(45vh, 320px);
+	}
+
+	.modula-takeover__sidebar-body {
+		min-height: 120px;
+	}
+}

@@ -68,7 +68,10 @@ export default function BnbLayout() {
 		.join(' ');
 
 	return (
-		<div ref={measureContainer ? containerRef : undefined} className={rootClass}>
+		<div
+			ref={measureContainer ? containerRef : undefined}
+			className={rootClass}
+		>
 			{(hero || featuredFour.length > 0) && (
 				<div className="modula-bnb-featured">
 					{hero && (

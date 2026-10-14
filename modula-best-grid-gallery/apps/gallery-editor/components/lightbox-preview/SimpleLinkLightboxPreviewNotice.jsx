@@ -15,7 +15,7 @@ const SIMPLE_LINK_LIGHTBOX_MODES = new Set([
 
 /**
  * @param {unknown} mode
- * @returns {string}
+ * @return {string}
  */
 export function normalizeLightboxClickMode(mode) {
 	return coerceLightboxClickMode(String(mode ?? 'fancybox').trim());
@@ -23,7 +23,7 @@ export function normalizeLightboxClickMode(mode) {
 
 /**
  * @param {unknown} mode
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isSimpleLinkLightboxMode(mode) {
 	return SIMPLE_LINK_LIGHTBOX_MODES.has(normalizeLightboxClickMode(mode));
@@ -31,7 +31,7 @@ export function isSimpleLinkLightboxMode(mode) {
 
 /**
  * @param {string} mode
- * @returns {string}
+ * @return {string}
  */
 export function getSimpleLinkLightboxNoticeText(mode) {
 	switch (mode) {
@@ -60,7 +60,7 @@ export function getSimpleLinkLightboxNoticeText(mode) {
  * Sidebar footnote when Image click behavior is a simple-link mode.
  *
  * @param {unknown} lightboxMode
- * @returns {string}
+ * @return {string}
  */
 export function getSimpleLinkLightboxSidebarFootnote(lightboxMode) {
 	const mode = normalizeLightboxClickMode(lightboxMode);

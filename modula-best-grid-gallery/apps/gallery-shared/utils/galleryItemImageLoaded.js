@@ -10,7 +10,7 @@ const IMAGE_TILE_SELECTOR = '.modula-item:not(.modula-item--embedded)';
  * Only the full-resolution tile image should trigger loading-effect CSS — not LQIP placeholders.
  *
  * @param {HTMLImageElement|null|undefined} imgEl
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isGalleryTileMainImage(imgEl) {
 	if (!(imgEl instanceof HTMLImageElement)) {

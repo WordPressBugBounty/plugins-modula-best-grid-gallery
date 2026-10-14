@@ -26,12 +26,12 @@ export function resolvePlaylistScrollbarChrome(config) {
  * Map pointer movement from drag start into overflow scroll offsets.
  * Natural drag: content follows the pointer (scroll decreases as delta grows).
  *
- * @param {Object} args
+ * @param {Object}  args
  * @param {'x'|'y'} args.axis
- * @param {number} args.startScrollLeft
- * @param {number} args.startScrollTop
- * @param {number} args.deltaX clientX - startX
- * @param {number} args.deltaY clientY - startY
+ * @param {number}  args.startScrollLeft
+ * @param {number}  args.startScrollTop
+ * @param {number}  args.deltaX          clientX - startX
+ * @param {number}  args.deltaY          clientY - startY
  * @return {{ scrollLeft: number, scrollTop: number }}
  */
 export function applyPlaylistPointerDrag({

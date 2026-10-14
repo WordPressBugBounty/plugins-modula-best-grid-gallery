@@ -8,7 +8,7 @@ import { isNil } from '../../../logic/isNil';
 
 /**
  * @param {Record<string, unknown>|undefined} optionImages
- * @param {string} key
+ * @param {string}                            key
  * @return {string}
  */
 function thumbForOption(optionImages, key) {

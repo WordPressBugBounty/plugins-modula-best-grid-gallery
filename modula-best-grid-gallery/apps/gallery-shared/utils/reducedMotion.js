@@ -34,7 +34,7 @@ export function prefersReducedMotion() {
 }
 
 /**
- * @param {Object|null|undefined} config
+ * @param {Object|null|undefined}                      config
  * @param {{ displayContext?: string }|null|undefined} metadata
  * @return {boolean}
  */
@@ -61,9 +61,7 @@ export function shouldSuppressGalleryMotionFromHost(hostEl) {
 			(hostEl.closest('.modula.modula-gallery') ||
 				hostEl.closest('.modula-gallery-modern'))) ||
 		hostEl;
-	return Boolean(
-		root?.classList?.contains('modula-respect-reduced-motion')
-	);
+	return Boolean(root?.classList?.contains('modula-respect-reduced-motion'));
 }
 
 /**

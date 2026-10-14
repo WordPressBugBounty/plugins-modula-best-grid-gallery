@@ -23,8 +23,8 @@ import { appendQuery, withV3Utm } from 'gallery-shared/utils/withV3Utm';
 const OVERLAY_SLOT_IDS = ['title', 'caption', 'social'];
 
 /**
- * @param {Object} props
- * @param {boolean} [props.showCanvasChrome] Build/Preview tabs (needs live preview card).
+ * @param {Object}          props
+ * @param {boolean}         [props.showCanvasChrome] Build/Preview tabs (needs live preview card).
  * @param {'customizeOnly'} [props.mode]
  */
 export default function HoverEffectBuilderAuxiliaryPanel({

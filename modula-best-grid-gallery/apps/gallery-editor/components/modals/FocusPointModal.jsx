@@ -20,12 +20,12 @@ import { crop as cropIcon } from '@wordpress/icons';
 import Cropper from 'react-easy-crop';
 import { useSelector, useStore } from 'react-redux';
 import { Button as SharedButton } from 'shared-ui';
+import { SettingsPanelHeader, useTakeoverSaveStatus } from 'editor-shell';
 import GalleryModal from '../gallery-modal/GalleryModal';
-import SettingsPanelHeader from '../sidebar/settings-panel/SettingsPanelHeader';
-import { useTakeoverSaveStatus } from '../../context/TakeoverSaveStatusContext';
 import { useFocusPointMutations } from '../../hooks/useFocusPointMutations';
 import { FOCUS_MATCH_LAYOUT_SESSION_KEY } from '../../utils/getFocusModalCropHints';
 import { getCustomGridItemFocusAspect } from '../../utils/getCustomGridItemFocusAspect';
+import { getFreeformItemFocusAspect } from '../../utils/getFreeformItemFocusAspect';
 import FocusPointLetterboxPreview from './FocusPointLetterboxPreview';
 import FocusPointLetterboxApplyConfirmModal from './FocusPointLetterboxApplyConfirmModal';
 import { countOtherLetterboxEligibleImages } from '../../utils/applyLetterboxFitToGalleryImages';
@@ -36,6 +36,9 @@ import {
 	resolveInitialCroppedAreaPercentages,
 } from '../../utils/focusPointCrop';
 
+/** Cell-span layouts whose tiles can show the whole photo instead of a crop. */
+const LETTERBOX_TILE_TYPES = new Set(['custom-grid', 'freeform']);
+
 /**
  * @param {Object}                                                                                                              props
  * @param {boolean}                                                                                                             props.isOpen
@@ -45,7 +48,7 @@ import {
  * @param {import('@tanstack/react-query').QueryClient}                                                                         props.queryClient
  * @param {import('@tanstack/react-query').QueryKey}                                                                            props.bootstrapQueryKey
  * @param {{ suggestedAspect: number|null, canLockToLayout: boolean, layoutHint: string|null, showMatchLayoutToggle: boolean }} [props.focusCropHints]
- * @param {boolean}                                                                                                             [props.embedded] When true, render in Image sidebar instead of GalleryModal.
+ * @param {boolean}                                                                                                             [props.embedded]        When true, render in Image sidebar instead of GalleryModal.
  */
 export default function FocusPointModal({
 	isOpen,
@@ -95,44 +98,48 @@ export default function FocusPointModal({
 		showMatchLayoutToggle,
 		showLetterboxToggle,
 	} = useMemo(() => {
-		if (galleryType === 'custom-grid' && item) {
-			const cg = getCustomGridItemFocusAspect(item);
-			if (cg) {
-				return {
-					suggestedAspect: cg.ratio,
-					canLockToLayout: true,
-					layoutHint: cg.label,
-					showMatchLayoutToggle: true,
-					showLetterboxToggle: true,
-				};
+		let tile = null;
+		if (item) {
+			switch (galleryType) {
+				case 'custom-grid':
+					tile = getCustomGridItemFocusAspect(item);
+					break;
+				case 'freeform':
+					tile = getFreeformItemFocusAspect({
+						items: reduxItems,
+						storeIndex,
+						placements: galleryConfig?.freeformPlacements,
+					});
+					break;
+				case 'creative-gallery':
+					tile = getCreativeGalleryItemFocusAspect({
+						item,
+						items: reduxItems,
+						config: galleryConfig,
+						galleryId: galleryId || reduxGalleryId,
+						settings: gallerySettings,
+						metadata: galleryMetadata,
+					});
+					break;
 			}
 		}
-		if (galleryType === 'creative-gallery' && item) {
-			const cg = getCreativeGalleryItemFocusAspect({
-				item,
-				items: reduxItems,
-				config: galleryConfig,
-				galleryId: galleryId || reduxGalleryId,
-				settings: gallerySettings,
-				metadata: galleryMetadata,
-			});
-			if (cg) {
-				return {
-					suggestedAspect: cg.ratio,
-					canLockToLayout: true,
-					layoutHint: cg.label,
-					showMatchLayoutToggle: true,
-					showLetterboxToggle: false,
-				};
-			}
+		if (!tile) {
+			return {
+				...focusCropHints,
+				showLetterboxToggle: false,
+			};
 		}
 		return {
-			...focusCropHints,
-			showLetterboxToggle: false,
+			suggestedAspect: tile.ratio,
+			canLockToLayout: true,
+			layoutHint: tile.label,
+			showMatchLayoutToggle: true,
+			showLetterboxToggle: LETTERBOX_TILE_TYPES.has(galleryType),
 		};
 	}, [
 		galleryType,
 		item,
+		storeIndex,
 		focusCropHints,
 		reduxItems,
 		galleryConfig,

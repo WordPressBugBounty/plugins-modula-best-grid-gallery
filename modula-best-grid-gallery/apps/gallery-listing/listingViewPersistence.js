@@ -49,7 +49,7 @@ export function pickPersistedView(view) {
  * Merge stored preferences into a fresh session view (no search/filters).
  *
  * @param {Partial<ListingView>|null|undefined} persisted
- * @param {ListingView} [base]
+ * @param {ListingView}                         [base]
  * @return {ListingView}
  */
 /**

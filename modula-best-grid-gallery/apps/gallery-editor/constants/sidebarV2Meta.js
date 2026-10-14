@@ -26,7 +26,7 @@ function findCategoryByName(name) {
 /**
  * Walk hubSections (including nested submenu items).
  *
- * @param {object[]} sections
+ * @param {object[]}                     sections
  * @param {(section: object) => boolean} pred
  * @return {object|null}
  */
@@ -57,7 +57,7 @@ function findHubSection(sections, pred) {
 
 /**
  * @param {object|null} field
- * @returns {string}
+ * @return {string}
  */
 export function resolveHubV2FieldLabel(field) {
 	if (!field) {
@@ -70,10 +70,10 @@ export function resolveHubV2FieldLabel(field) {
 }
 
 /**
- * @param {object} section
+ * @param {Object}      section
  * @param {object|null} [field]
- * @param {string} [drillLabel]
- * @returns {string}
+ * @param {string}      [drillLabel]
+ * @return {string}
  */
 export function getSidebarV2HubRowHelp(section, field = null, drillLabel = '') {
 	if (
@@ -117,8 +117,8 @@ export function getSidebarV2HubRowHelp(section, field = null, drillLabel = '') {
  * does not duplicate the hub helper line.
  *
  * @param {object|null} field
- * @param {string} helper
- * @returns {string}
+ * @param {string}      helper
+ * @return {string}
  */
 export function getSidebarV2HubRowFootnote(field, helper = '') {
 	if (!field || typeof field.editorDescription !== 'string') {
@@ -147,7 +147,7 @@ export function getSidebarV2HubRowFootnote(field, helper = '') {
 /**
  * @param {string} categoryName
  * @param {string} [fallbackDescription]
- * @returns {string}
+ * @return {string}
  */
 export function getSidebarV2CategoryNavHelp(
 	categoryName,
@@ -170,7 +170,7 @@ export function getSidebarV2CategoryNavHelp(
 /**
  * @param {string} categoryName
  * @param {string} [fallbackDescription]
- * @returns {string}
+ * @return {string}
  */
 export function getSidebarV2CategoryPanelDesc(
 	categoryName,
@@ -197,7 +197,7 @@ export function getSidebarV2CategoryPanelDesc(
 /**
  * Nested drill panel description — prefers `hubHelp` stamped on the drill in structure JS.
  *
- * @param {string} drillTitle Frame title / nav drill label.
+ * @param {string} drillTitle         Frame title / nav drill label.
  * @param {string} [hubHelpFromFrame] Optional help carried on the sidebar stack frame.
  * @return {string}
  */

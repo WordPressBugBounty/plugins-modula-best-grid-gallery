@@ -1,9 +1,7 @@
 /**
  * Helpers for bulk-edit rows and filter token parsing.
  */
-import {
-	asGalleryItemList,
-} from 'gallery-shared/preview';
+import { asGalleryItemList } from 'gallery-shared/preview';
 import { isEmbeddedGalleryItemRow } from '../../utils/embeddedGalleryItems';
 import { captionToPlainString } from '../../utils/captionToPlainString';
 import { resolveProGateLock } from '../../logic/proGateLock';
@@ -60,7 +58,7 @@ export function filterBulkEditableImageRows(items) {
  * Restrict bulk-edit rows to preview-selected store indices.
  * Empty / missing indices means show every bulk-editable image.
  *
- * @param {Object[]} rows Rows from `buildBulkEditRowsWithIndices`.
+ * @param {Object[]}                rows         Rows from `buildBulkEditRowsWithIndices`.
  * @param {number[]|null|undefined} storeIndices Snapshot of selected store indices.
  * @return {Object[]}
  */
@@ -132,7 +130,7 @@ export function galleryFilterSuggestions(filtersArr) {
 /**
  * HTML caption for bulk-edit WYSIWYG (draft wins; keep markup from gallery row).
  *
- * @param {Object} row
+ * @param {Object}                                  row
  * @param {(row: Object, field: string) => unknown} getRowField
  * @return {string}
  */

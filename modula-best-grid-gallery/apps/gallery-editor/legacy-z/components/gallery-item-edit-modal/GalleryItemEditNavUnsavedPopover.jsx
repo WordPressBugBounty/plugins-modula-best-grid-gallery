@@ -27,12 +27,12 @@ function menuPositionFromAnchor(rect) {
 }
 
 /**
- * @param {Object}                       props
- * @param {HTMLElement|null}             props.anchorEl Button that opened the prompt.
- * @param {() => void}                   props.onClose
- * @param {() => void | Promise<void>}   props.onSaveAndContinue
- * @param {() => void}                   props.onContinueWithoutSaving
- * @param {boolean}                      props.busy
+ * @param {Object}                     props
+ * @param {HTMLElement|null}           props.anchorEl                Button that opened the prompt.
+ * @param {() => void}                 props.onClose
+ * @param {() => void | Promise<void>} props.onSaveAndContinue
+ * @param {() => void}                 props.onContinueWithoutSaving
+ * @param {boolean}                    props.busy
  */
 export default function GalleryItemEditNavUnsavedPopover({
 	anchorEl,

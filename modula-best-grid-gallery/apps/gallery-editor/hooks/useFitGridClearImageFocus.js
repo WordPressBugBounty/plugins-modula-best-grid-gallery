@@ -5,13 +5,11 @@
  * @package
  */
 
-import {
-	asGalleryItemList,
-	getLayoutPolicy,
-} from 'gallery-shared/preview';
+import { asGalleryItemList, getLayoutPolicy } from 'gallery-shared/preview';
 import { useEffect, useRef } from '@wordpress/element';
 import { clearAllGalleryImageFocus } from '../utils/clearAllGalleryImageFocus';
 import { itemHasImageFocusData } from '../utils/itemHasImageFocus';
+import { GALLERY_SAVE_OWNERS } from '../constants/gallerySaveOwners';
 
 /**
  * @param {{
@@ -48,9 +46,7 @@ export function useFitGridClearImageFocus({
 		const items = storeRef.current.getState()?.items?.items;
 		const hasFocus =
 			Array.isArray(items) &&
-			asGalleryItemList(items).some((row) =>
-				itemHasImageFocusData(row)
-			);
+			asGalleryItemList(items).some((row) => itemHasImageFocusData(row));
 
 		if (!hasFocus || clearingRef.current) {
 			return;
@@ -66,7 +62,10 @@ export function useFitGridClearImageFocus({
 		(async () => {
 			try {
 				if (typeof runPersistTask === 'function') {
-					await runPersistTask(clearTask);
+					await runPersistTask(
+						clearTask,
+						GALLERY_SAVE_OWNERS.clearFocus
+					);
 				} else {
 					await clearTask();
 				}

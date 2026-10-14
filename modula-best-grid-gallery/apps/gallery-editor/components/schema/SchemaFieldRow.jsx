@@ -35,12 +35,12 @@ import { isEditorDisabledWhen } from '../../logic/fieldVisibility';
 import HoverEffectPresetRow from '../hover-effect-builder/HoverEffectPresetRow';
 
 /**
- * @param {Object}             props
- * @param {string}             props.groupKey
- * @param {Object}             props.field
- * @param {boolean}            props.disabled
- * @param {'default'|'inline'|'controlOnly'|'stacked'} [props.variant] inline = cell inside a composite row; controlOnly = control without label (device tabs); stacked = label above control
- * @param {boolean}            [props.hierarchicalIndent] Child field under a collapsible group
+ * @param {Object}                                     props
+ * @param {string}                                     props.groupKey
+ * @param {Object}                                     props.field
+ * @param {boolean}                                    props.disabled
+ * @param {'default'|'inline'|'controlOnly'|'stacked'} [props.variant]            inline = cell inside a composite row; controlOnly = control without label (device tabs); stacked = label above control
+ * @param {boolean}                                    [props.hierarchicalIndent] Child field under a collapsible group
  */
 export default function SchemaFieldRow({
 	groupKey,

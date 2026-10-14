@@ -8,6 +8,16 @@ use Modula\V2\Meta_Sync;
 defined( 'ABSPATH' ) || exit;
 
 final class Creation {
+	public const OPERATION = 'modula/create-gallery';
+
+	public static function abilities(): array {
+		return array(
+			self::OPERATION => array(
+				'execute' => array( self::class, 'execute' ),
+			),
+		);
+	}
+
 	public static function can_create( string $status ): bool {
 		$type = get_post_type_object( 'modula-gallery' );
 		return Integration::can_discover() && $type && current_user_can( $type->cap->create_posts ) && current_user_can( 'upload_files' ) && ( 'publish' !== $status || current_user_can( $type->cap->publish_posts ) );

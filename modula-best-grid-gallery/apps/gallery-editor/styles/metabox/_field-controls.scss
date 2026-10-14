@@ -1,5 +1,5 @@
 @use '../variables' as *;
-@use '../shared/range-control-layout' as range-layout;
+@use '../../../editor-shell/styles/range-control-layout' as range-layout;
 
 .modula-settings-editor__field-control-col--span-all {
 	grid-column: 1 / -1;
@@ -754,12 +754,6 @@ button.modula-settings-editor__field-path-tip {
 .modula-settings-editor__segmented-enum-track {
 	display: flex;
 	width: 100%;
-}
-
-.modula-settings-editor__segmented-enum-track .modula-gallery-takeover__preview-segment-btn {
-	flex: 1 1 0;
-	min-width: 0;
-	text-align: center;
 }
 
 .modula-settings-editor__segmented-enum-hint {

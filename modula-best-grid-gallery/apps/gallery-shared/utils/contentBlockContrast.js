@@ -84,7 +84,7 @@ function contrastRatioFromLuminance(a, b) {
 /**
  * @param {{ r: number, g: number, b: number }} from
  * @param {{ r: number, g: number, b: number }} to
- * @param {number} amount 0..1
+ * @param {number}                              amount 0..1
  * @return {{ r: number, g: number, b: number }}
  */
 function mixRgb(from, to, amount) {

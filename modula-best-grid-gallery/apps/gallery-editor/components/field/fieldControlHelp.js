@@ -19,11 +19,7 @@ function trimHelpString(value) {
  * @return {string}
  */
 function normalizeHelpCopy(value) {
-	return value
-		.trim()
-		.replace(/\.+$/, '')
-		.replace(/\s+/g, ' ')
-		.toLowerCase();
+	return value.trim().replace(/\.+$/, '').replace(/\s+/g, ' ').toLowerCase();
 }
 
 /**

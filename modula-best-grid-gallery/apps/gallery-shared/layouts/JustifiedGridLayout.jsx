@@ -44,16 +44,17 @@ function isLayoutDebugMode() {
 }
 
 /**
- * @param {Object}   props
- * @param {Array}    props.chunk
- * @param {number}   props.containerWidth
- * @param {Object}   props.config
- * @param {boolean}  props.layoutDebug
- * @param {number}   props.gutter
- * @param {number}   props.marginPerTile
- * @param {number}   props.rowHeight
- * @param {string}   props.lastRowAlignment
- * @param {string}   props.debugKeyPrefix
+ * @param {Object}  props
+ * @param {Array}   props.chunk
+ * @param {number}  props.containerWidth
+ * @param {Object}  props.config
+ * @param {boolean} props.layoutDebug
+ * @param {number}  props.gutter
+ * @param {number}  props.marginPerTile
+ * @param {number}  props.rowHeight
+ * @param {string}  props.lastRowAlignment
+ * @param {string}  props.debugKeyPrefix
+ * @param           props.captionBelowImage
  */
 function JustifiedGridChunk({
 	chunk,

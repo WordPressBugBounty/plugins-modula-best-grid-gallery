@@ -13,19 +13,38 @@ final class Folders_Dependency {
 
 	/** MCP discovery has no per-operation permission filter; omit unavailable tools. */
 	public static function operation_available( string $name ): bool {
-		if ( isset( Transfers::callbacks()[ $name ] ) ) { return self::available( 'usage' ) && method_exists( '\WPChill\Folders\Storage\Folder_Transfer_State', 'retained' ); }
-		if ( isset( Bound::callbacks()[ $name ] ) ) { return self::available(); }
-		if ( isset( Storage::callbacks()[ $name ] ) ) { return self::available( 'usage' ); }
-		if ( isset( Replacement::callbacks()[ $name ] ) ) { return self::available(); }
-		if ( isset( Collections::callbacks()[ $name ] ) ) {
-			return self::available( 'collections' ) && ( false !== strpos( $name, 'favorite' ) || \WPChill\Folders\Plugin::instance()->config()->folders() );
+		$check = Integration::operation( $name )['mcp_public'] ?? null;
+		if ( ! is_callable( $check ) ) {
+			return true;
 		}
-		if ( isset( Attachment_Lifecycle::callbacks()[ $name ] ) || 'modula/read-attachment-usage' === $name ) {
-			return self::available( 'usage' );
+		return (bool) call_user_func( $check, $name );
+	}
+
+	public static function mcp_folders(): bool {
+		return self::available();
+	}
+
+	public static function mcp_usage(): bool {
+		return self::available( 'usage' );
+	}
+
+	public static function mcp_transfers(): bool {
+		return true;
+	}
+
+	public static function mcp_collections( string $name ): bool {
+		if ( false !== strpos( $name, 'favorite' ) ) {
+			return self::available( 'collections' );
 		}
-		if ( Batch::MEDIA === $name || isset( Media_Folders::callbacks()[ $name ] ) || isset( Attachment_Image::callbacks()[ $name ] ) || isset( Attachments::callbacks()[ $name ] ) ) {
-			return self::available();
-		}
+		return true;
+	}
+
+	public static function mcp_storage(): bool {
+		return true;
+	}
+
+	/** Keep bound-gallery tools listed so Lite can explain a closed host gate. */
+	public static function mcp_bound(): bool {
 		return true;
 	}
 
@@ -35,12 +54,12 @@ final class Folders_Dependency {
 			return false;
 		}
 		$classes = array( 'Rest\\Status_Controller', 'Rest\\Folders_Controller', 'Rest\\Memberships_Controller', 'Memberships\\Wpdb_Membership_Repository', 'Storage\\Folder_Transfer_State' );
-		$tables = array( 'folders', 'folder_memberships' );
+		$tables  = array( 'folders', 'folder_memberships' );
 		if ( 'collections' === $family ) {
 			$classes = array_merge( $classes, array( 'Rest\\Collections_Controller', 'Rest\\Favorites_Controller', 'Folders\\Folder_Color' ) );
-			$tables = array_merge( $tables, array( 'collections', 'collection_labels', 'favorites' ) );
+			$tables  = array_merge( $tables, array( 'collections', 'collection_labels', 'favorites' ) );
 		} elseif ( 'usage' === $family ) {
-			$classes = array_merge( $classes, array( 'Usage\\Usage_Service', 'Storage\\Option_Provider_Map_Repository' ) );
+			$classes  = array_merge( $classes, array( 'Usage\\Usage_Service', 'Storage\\Option_Provider_Map_Repository' ) );
 			$tables[] = 'attachment_usage';
 		}
 		foreach ( $classes as $class ) {

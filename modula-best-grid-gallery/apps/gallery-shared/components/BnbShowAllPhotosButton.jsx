@@ -97,9 +97,9 @@ function BnbGridIcon() {
 }
 
 /**
- * @param {object} props
+ * @param {Object} props
  * @param {number} props.moreCount Hidden image count (beyond the five featured tiles).
- * @param {object} props.config Gallery config from the store.
+ * @param {Object} props.config    Gallery config from the store.
  */
 export default function BnbShowAllPhotosButton({ moreCount, config }) {
 	const items = useSelector(

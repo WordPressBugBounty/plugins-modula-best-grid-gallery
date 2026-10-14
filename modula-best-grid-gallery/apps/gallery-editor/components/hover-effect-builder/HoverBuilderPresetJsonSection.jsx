@@ -4,11 +4,11 @@ import { Button } from 'shared-ui';
 import HoverBuilderPresetJsonModal from './HoverBuilderPresetJsonModal';
 
 /**
- * @param {Object} props
- * @param {any} props.form
+ * @param {Object}              props
+ * @param {any}                 props.form
  * @param {Record<string, any>} props.currentBuilder
- * @param {string} props.currentHoverColor
- * @param {number} props.currentHoverOpacity
+ * @param {string}              props.currentHoverColor
+ * @param {number}              props.currentHoverOpacity
  */
 export default function HoverBuilderPresetJsonSection({
 	form,

@@ -30,7 +30,7 @@ export function registerProCoreEditor(entry) {
 }
 
 /**
- * @returns {ProCoreEditorRegistration|null}
+ * @return {ProCoreEditorRegistration|null}
  */
 export function getProCoreEditorRegistration() {
 	return registration;

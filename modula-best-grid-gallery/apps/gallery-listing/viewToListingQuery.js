@@ -6,16 +6,16 @@
 
 /**
  * @typedef {Object} ListingView
- * @property {string} [type]
- * @property {string} [search]
- * @property {number} [page]
- * @property {number} [perPage]
+ * @property {string}                                     [type]
+ * @property {string}                                     [search]
+ * @property {number}                                     [page]
+ * @property {number}                                     [perPage]
  * @property {{ field: string, direction: 'asc'|'desc' }} [sort]
- * @property {ListingFilter[]} [filters]
- * @property {string[]} [fields]
- * @property {string} [titleField]
- * @property {string} [mediaField]
- * @property {Record<string, unknown>} [layout]
+ * @property {ListingFilter[]}                            [filters]
+ * @property {string[]}                                   [fields]
+ * @property {string}                                     [titleField]
+ * @property {string}                                     [mediaField]
+ * @property {Record<string, unknown>}                    [layout]
  */
 
 /**
@@ -92,7 +92,7 @@ function statusFromFilters(filters) {
 
 /**
  * @param {ListingFilter[]} filters
- * @param {string} field
+ * @param {string}          field
  * @return {boolean|undefined}
  */
 function isActiveOnlyShowFilter(filters, field) {

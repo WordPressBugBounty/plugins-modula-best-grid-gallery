@@ -103,10 +103,22 @@ icons.twitter = (
 		width="512px"
 		height="512px"
 		clipRule="evenodd"
-		baseProfile="basic">
-		<polygon fill="currentColor" points="437.333,64 105.245,448 66.867,448 393.955,64" />
-		<polygon fill="#1da1f2" fillRule="evenodd" points="332.571,448 83.804,74.667 178.804,74.667 427.571,448" clipRule="evenodd" />
-		<path fill="#fff" d="M168.104,96l219.628,320h-43.733L121.371,96H168.104 M184.723,64H61.538l263.542,384h121.185L184.723,64L184.723,64z" />
+		baseProfile="basic"
+	>
+		<polygon
+			fill="currentColor"
+			points="437.333,64 105.245,448 66.867,448 393.955,64"
+		/>
+		<polygon
+			fill="#1da1f2"
+			fillRule="evenodd"
+			points="332.571,448 83.804,74.667 178.804,74.667 427.571,448"
+			clipRule="evenodd"
+		/>
+		<path
+			fill="#fff"
+			d="M168.104,96l219.628,320h-43.733L121.371,96H168.104 M184.723,64H61.538l263.542,384h121.185L184.723,64L184.723,64z"
+		/>
 	</svg>
 );
 

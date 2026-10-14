@@ -20,7 +20,7 @@ export function isListingApplyPresetEntitled(config) {
 /**
  * Whether Apply preset (listing) applies to this row.
  *
- * @param {Object|null|undefined}                                       item    Listing row.
+ * @param {Object|null|undefined}                          item      Listing row.
  * @param {{ canUseApplyPreset?: boolean }|null|undefined} [options] Entitlement options.
  * @return {boolean}
  */

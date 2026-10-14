@@ -39,9 +39,7 @@ export default function ShowcaseLayout() {
 	const showcase = config?.showcase || {};
 	const list = useMemo(() => {
 		const raw = Array.isArray(items) ? items : [];
-		return raw.filter(
-			(row) => row && !isEmbeddedGalleryItemRow(row)
-		);
+		return raw.filter((row) => row && !isEmbeddedGalleryItemRow(row));
 	}, [items]);
 
 	/** @type {[Record<string, number>, Function]} */

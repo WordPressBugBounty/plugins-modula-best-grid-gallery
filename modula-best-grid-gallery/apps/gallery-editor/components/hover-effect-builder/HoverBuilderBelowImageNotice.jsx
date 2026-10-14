@@ -20,11 +20,11 @@ function readDismissedFromSession() {
 }
 
 /**
- * @param {Object} props
- * @param {Object|null|undefined} props.captions Grouped captions settings.
+ * @param {Object}                props
+ * @param {Object|null|undefined} props.captions    Grouped captions settings.
  * @param {string|null|undefined} props.galleryType Gallery layout type.
- * @param {string} [props.className]
- * @param {boolean} [props.compact] Shorter copy for the narrow aux column.
+ * @param {string}                [props.className]
+ * @param {boolean}               [props.compact]   Shorter copy for the narrow aux column.
  */
 export default function HoverBuilderBelowImageNotice({
 	captions,

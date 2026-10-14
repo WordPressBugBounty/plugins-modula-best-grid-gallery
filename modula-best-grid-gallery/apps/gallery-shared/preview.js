@@ -16,6 +16,18 @@ export * from './context/GalleryPreviewEagerLayoutsContext';
 export * from './context/GalleryPreviewAdminActionsContext';
 export * from './context/GalleryPreviewCustomGridScaleContext';
 export * from './layouts/eagerLayouts';
+export {
+	default as FreeformLayout,
+	FreeformSurface,
+} from './layouts/FreeformLayout';
+export {
+	constrainFreeformPlacement,
+	changeFreeformStacking,
+	freeformOccurrenceIds,
+	resolveFreeformComposition,
+} from './utils/freeformGeometry';
+export { default as InteractionGridGuide } from './components/InteractionGridGuide';
+export { getCustomGridEditorDragCancelSelector } from './utils/customGridEditorDrag';
 export * from './layouts/template/templateDefinitions';
 export {
 	DEFAULT_GALLERY_TYPE,

@@ -9,10 +9,10 @@ import { buildCustomGridLayoutKeys } from './customGridLayout';
 import { applyCoreItemsToPreviewStore } from './applyCoreItemsToPreviewStore';
 
 /**
- * @param {import('@reduxjs/toolkit').Store} store
- * @param {number} sectionIndex
+ * @param {import('@reduxjs/toolkit').Store}                                         store
+ * @param {number}                                                                   sectionIndex
  * @param {ReadonlyArray<{ i: string, x: number, y: number, w: number, h: number }>} layout
- * @param {Array<Array<Object>>} chunks
+ * @param {Array<Array<Object>>}                                                     chunks
  */
 export function applyCustomGridLayoutSectionToStore(
 	store,

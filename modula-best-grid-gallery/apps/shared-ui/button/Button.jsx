@@ -10,19 +10,19 @@ import {
  */
 
 /**
- * @param {Object}        props
- * @param {ButtonVariant} [props.variant='ghost']
- * @param {boolean}       [props.mini]
- * @param {boolean}       [props.disabled]
- * @param {string}        [props.href] When set, renders an `<a>` (ignored when disabled).
- * @param {import('react').ReactNode} [props.confirm] When set, first click arms the button and
- *   shows this label; second click fires `onClick`. Ignored when `href` is set.
- * @param {string}        [props.className]
+ * @param {Object}                    props
+ * @param {ButtonVariant}             [props.variant='ghost']
+ * @param {boolean}                   [props.mini]
+ * @param {boolean}                   [props.disabled]
+ * @param {string}                    [props.href]            When set, renders an `<a>` (ignored when disabled).
+ * @param {import('react').ReactNode} [props.confirm]         When set, first click arms the button and
+ *                                                            shows this label; second click fires `onClick`. Ignored when `href` is set.
+ * @param {string}                    [props.className]
  * @param {'button'|'submit'|'reset'} [props.type]
  * @param {import('react').ReactNode} props.children
- * @param {Function}      [props.onClick]
- * @param {Function}      [props.onBlur]
- * @param {Function}      [props.onKeyDown]
+ * @param {Function}                  [props.onClick]
+ * @param {Function}                  [props.onBlur]
+ * @param {Function}                  [props.onKeyDown]
  */
 export const Button = forwardRef(function Button(
 	{

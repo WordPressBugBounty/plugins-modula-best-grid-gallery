@@ -4,7 +4,7 @@ import { getGalleryDefaultsEditorRegistration } from '../platform/galleryDefault
 /**
  * Subscribe to Pro runtime registration of gallery defaults UI slots.
  *
- * @returns {import('../platform/galleryDefaultsRegistry').GalleryDefaultsEditorRegistration|null}
+ * @return {import('../platform/galleryDefaultsRegistry').GalleryDefaultsEditorRegistration|null}
  */
 export function useGalleryDefaultsRegistration() {
 	const [registration, setRegistration] = useState(() =>

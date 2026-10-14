@@ -8,7 +8,7 @@
  */
 export function isModulaSettingsCommandPaletteKeyScope(target) {
 	const scopeSelector =
-		'.modula-gallery-takeover__shell, .modula-settings-editor__shell, .modula-cmd-palette, .modula-content-block-edit-modal';
+		'.modula-takeover__shell, .modula-settings-editor__shell, .modula-cmd-palette, .modula-content-block-edit-modal';
 	const targetEl =
 		target instanceof Element
 			? target

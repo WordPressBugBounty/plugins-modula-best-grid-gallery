@@ -322,7 +322,9 @@ export default function SettingsForm({ config, locked, badge }) {
 											field={field}
 											fieldState={fieldState}
 											handleChange={handleChange}
-											disabled={field.disabled || fieldLocked}
+											disabled={
+												field.disabled || fieldLocked
+											}
 										/>
 									)}
 								</form.Field>

@@ -17,7 +17,7 @@ export function getModulaSettingsEditorConfig() {
  * Patch localized bootstrap config (single write path for runtime updates).
  *
  * @param {Record<string, unknown>} partial
- * @returns {Record<string, unknown>}
+ * @return {Record<string, unknown>}
  */
 export function patchModulaSettingsEditorConfig(partial) {
 	if (typeof window === 'undefined') {

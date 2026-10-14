@@ -30,7 +30,7 @@ export function registerInstagramEditor(entry) {
 }
 
 /**
- * @returns {InstagramEditorRegistration|null}
+ * @return {InstagramEditorRegistration|null}
  */
 export function getInstagramEditorRegistration() {
 	return registration;
@@ -56,7 +56,7 @@ export function setInstagramConnectionState(state) {
 }
 
 /**
- * @returns {'unknown' | 'connected' | 'disconnected'}
+ * @return {'unknown' | 'connected' | 'disconnected'}
  */
 export function getInstagramConnectionState() {
 	return connectionState;

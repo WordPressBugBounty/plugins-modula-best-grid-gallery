@@ -4,16 +4,16 @@ import { ResetToDefaultButton } from '../dirty-mark/ResetToDefaultButton';
 /**
  * Settings list row: label · value · end (chevron XOR switch).
  *
- * @param {Object} props
+ * @param {Object}                    props
  * @param {import('react').ReactNode} props.label
  * @param {import('react').ReactNode} [props.value]
  * @param {import('react').ReactNode} [props.end]
- * @param {Function} [props.onActivate] Makes the row a button (drill)
- * @param {boolean} [props.disabled]
- * @param {boolean} [props.dirty] Shows accent dirty circle
- * @param {Function} [props.onReset] Reset to schema default (shown when dirty)
- * @param {string} [props.className]
- * @param {string} [props.help]
+ * @param {Function}                  [props.onActivate] Makes the row a button (drill)
+ * @param {boolean}                   [props.disabled]
+ * @param {boolean}                   [props.dirty]      Shows accent dirty circle
+ * @param {Function}                  [props.onReset]    Reset to schema default (shown when dirty)
+ * @param {string}                    [props.className]
+ * @param {string}                    [props.help]
  */
 export function SettingsRow({
 	label,

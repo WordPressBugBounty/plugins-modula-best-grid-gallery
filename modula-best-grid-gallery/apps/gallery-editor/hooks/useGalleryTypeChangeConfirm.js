@@ -4,23 +4,19 @@ import {
 } from 'gallery-shared/preview';
 import { useCallback, useRef, useState } from '@wordpress/element';
 import { useQueryClient } from '@tanstack/react-query';
-import {
-	cloneGroupedSettings,
-	serializeGroupedForServerRef,
-} from '../form/useGallerySettingsForm';
-import { normalizeGroupedDefaults } from '../logic/groupedSettingsNormalize';
+import { useTakeoverSaveStatus } from 'editor-shell';
+import { cloneGroupedSettings } from '../form/useGallerySettingsForm';
 import { useGallerySettingsFormBundle } from '../form/GallerySettingsFormContext';
-import { useTakeoverSaveStatus } from '../context/TakeoverSaveStatusContext';
 import { buildPatchPayload } from '../logic/buildPatchPayload';
 import { collectPatchValidationErrors } from '../logic/collectPatchValidationErrors';
 import { getGalleryBootstrapQueryKey } from '../query/useGalleryBootstrapQuery';
 import { clearAllGalleryImageFocus } from '../utils/clearAllGalleryImageFocus';
 import { itemHasImageFocusData } from '../utils/itemHasImageFocus';
 import { getGalleryPreviewReduxStore } from '../utils/previewReduxStoreRef';
-import { stripRestPostMeta } from '../utils/applyRestPostStatus';
 import { getModulaSettingsEditorConfig } from '../config/modulaSettingsEditorConfig';
 import { applyGalleryTypeSideEffects } from '../logic/applyGalleryTypeSideEffects';
 import { dropGalleryEditorLayoutStepsIfNeeded } from '../utils/galleryEditorLayoutHistoryHygiene';
+import { GALLERY_SAVE_OWNERS } from '../constants/gallerySaveOwners';
 
 /**
  * Modal + PATCH flow when changing `general.type` while slide/image focus data exists.
@@ -33,11 +29,12 @@ export function useGalleryTypeChangeConfirm(groupedPath) {
 		form,
 		patchMutation,
 		baselineRef,
-		lastServerSerializedRef,
+		acknowledgeSettingsSave,
+		getPendingSettingsPatch,
 		setClientError,
 		undoRedo,
 	} = useGallerySettingsFormBundle();
-	const { runPersistTask } = useTakeoverSaveStatus();
+	const { runPersistTask, setDirty } = useTakeoverSaveStatus();
 	const queryClient = useQueryClient();
 
 	const isGalleryTypeField = groupedPath === 'general.type';
@@ -104,26 +101,13 @@ export function useGalleryTypeChangeConfirm(groupedPath) {
 					}
 					setClientError('');
 					const serverData = await patchMutation.mutateAsync(patch);
-					const normalized = cloneGroupedSettings(
-						stripRestPostMeta(serverData)
+					acknowledgeSettingsSave(v, serverData);
+					setDirty(
+						GALLERY_SAVE_OWNERS.settings,
+						Object.keys(getPendingSettingsPatch()).length > 0
 					);
-					normalizeGroupedDefaults(normalized);
-					baselineRef.current = normalized;
-					lastServerSerializedRef.current =
-						serializeGroupedForServerRef(normalized);
-					const snapshot = cloneGroupedSettings(v);
-					const current = form.state.values;
-					const snapshotMatch =
-						JSON.stringify(snapshot) === JSON.stringify(current);
-					if (snapshotMatch) {
-						form.reset(normalized);
-						undoRedo.adoptCheckpointFromForm();
-					}
-					// If user changed form while this async confirm+save flow was
-					// in-flight, keep live state untouched. Resetting with a captured
-					// `current` snapshot can race with undo/redo and restore stale type.
 				}
-			});
+			}, 'settings');
 			await queryClient.refetchQueries({
 				queryKey: getGalleryBootstrapQueryKey(gid),
 			});
@@ -149,7 +133,9 @@ export function useGalleryTypeChangeConfirm(groupedPath) {
 		form,
 		patchMutation,
 		baselineRef,
-		lastServerSerializedRef,
+		acknowledgeSettingsSave,
+		getPendingSettingsPatch,
+		setDirty,
 		setClientError,
 		undoRedo,
 	]);

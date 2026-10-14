@@ -31,7 +31,7 @@ export function isStandaloneEntitled(editor) {
  *   standaloneUpsellUrl?: string,
  *   extensionsAdminUrl?: string,
  * }} editor
- * @param {string} viewUrl
+ * @param {string}                                                                              viewUrl
  * @return {{ type: 'permalink'|'upsell', url: string }}
  */
 export function getViewOnSiteClickTarget(editor, viewUrl) {

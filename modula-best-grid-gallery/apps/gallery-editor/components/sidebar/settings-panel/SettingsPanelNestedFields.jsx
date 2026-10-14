@@ -20,7 +20,7 @@ import { useModulaSettingsEditorConfig } from '../../../hooks/useModulaSettingsE
 import SettingsPanelSection from './SettingsPanelSection';
 
 /**
- * @param {Object} props
+ * @param {Object}                                                                        props
  * @param {{ title?: string, groupedPaths?: string[], nestedUpsellGroupedPath?: string }} props.frame
  */
 export default function SettingsPanelNestedFields({ frame }) {

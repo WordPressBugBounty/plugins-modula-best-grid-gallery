@@ -4,7 +4,13 @@
  * @package
  */
 
-import { useCallback, useEffect, useId, useRef, useState } from '@wordpress/element';
+import {
+	useCallback,
+	useEffect,
+	useId,
+	useRef,
+	useState,
+} from '@wordpress/element';
 
 const CLOSE_EVENT = 'modula-expandable-socials-close';
 

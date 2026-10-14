@@ -463,10 +463,11 @@ class Gallery_Upload_Controller {
 	 */
 	private static function get_modula_images_list( $gallery_id ) {
 		if ( class_exists( '\Modula\Bound_Gallery\Bound_Gallery', false ) ) {
-			return \Modula\Bound_Gallery\Bound_Gallery::get_image_rows( $gallery_id );
+			$rows = \Modula\Bound_Gallery\Bound_Gallery::get_image_rows( $gallery_id );
+			return \Modula\V2\Freeform_Catalog::project_identities( (int) $gallery_id, $rows );
 		}
 		$raw = get_post_meta( $gallery_id, 'modula-images', true );
-		return is_array( $raw ) ? $raw : array();
+		return \Modula\V2\Freeform_Catalog::project_identities( (int) $gallery_id, is_array( $raw ) ? $raw : array() );
 	}
 
 	/**

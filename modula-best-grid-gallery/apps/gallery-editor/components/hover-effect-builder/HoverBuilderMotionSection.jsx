@@ -74,11 +74,11 @@ function motionSectionHeading(target) {
 }
 
 /**
- * @param {Object} props
- * @param {any} props.form
+ * @param {Object}                            props
+ * @param {any}                               props.form
  * @param {'card'|'title'|'caption'|'social'} props.selectedTarget
- * @param {string} props.selectedTargetLabel
- * @param {string[]} props.linkedOverlaySlots
+ * @param {string}                            props.selectedTargetLabel
+ * @param {string[]}                          props.linkedOverlaySlots
  */
 export default function HoverBuilderMotionSection({
 	form,

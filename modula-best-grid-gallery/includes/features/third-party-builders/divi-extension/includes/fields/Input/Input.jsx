@@ -10,7 +10,7 @@ class Input extends Component {
 	/**
 	 * Handle input value change.
 	 *
-	 * @param {object} event
+	 * @param {Object} event
 	 */
 	_onChange = (event) => {
 		this.props._onChange(this.props.name, event.target.value);

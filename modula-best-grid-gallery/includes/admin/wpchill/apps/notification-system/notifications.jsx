@@ -10,21 +10,21 @@ export function Notifications() {
 	const { state, dispatch } = useWpchillState();
 	const { closedBubble, showContainer } = state;
 
-	useEffect( () => {
-		if ( ! isLoading && data ) {
-			const allNotifications = Object.values( data ).flat();
-			dispatch( setVisibleNotifications( allNotifications ) );
+	useEffect(() => {
+		if (!isLoading && data) {
+			const allNotifications = Object.values(data).flat();
+			dispatch(setVisibleNotifications(allNotifications));
 		}
-	}, [ data, isLoading, dispatch ] );
+	}, [data, isLoading, dispatch]);
 
-	if ( 0 === state.visibleNotifications.length || closedBubble ) {
+	if (0 === state.visibleNotifications.length || closedBubble) {
 		return null;
 	}
 
 	return (
 		<>
 			<NotificationIcon />
-			{ showContainer && <NotificationsContainer /> }
+			{showContainer && <NotificationsContainer />}
 		</>
 	);
 }

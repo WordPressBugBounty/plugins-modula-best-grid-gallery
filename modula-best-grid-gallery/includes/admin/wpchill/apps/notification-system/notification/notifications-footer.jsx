@@ -7,13 +7,13 @@ export function NotificationsFooter() {
 	const { dispatch } = useWpchillState();
 	const mutation = useNotificationsDismiss();
 	const closePanel = () => {
-		dispatch( setClosedBubble( true ) );
+		dispatch(setClosedBubble(true));
 		mutation.mutate();
 	};
 
 	return (
-		<Button className="dismiss_all_notifications" onClick={ closePanel }>
-			{ __( ' Dismiss All Notifications', 'modula-best-grid-gallery' ) }
+		<Button className="dismiss_all_notifications" onClick={closePanel}>
+			{__('Dismiss All Notifications', 'modula-best-grid-gallery')}
 		</Button>
 	);
 }

@@ -50,14 +50,16 @@ export default function CredentialsGroup({
 				{oauth?.status &&
 					statusText !== null &&
 					statusText !== undefined && (
-					<span
-						className={`${styles.status} ${
-							connected ? styles.connected : styles.disconnected
-						}`}
-					>
-						{statusText}
-					</span>
-				)}
+						<span
+							className={`${styles.status} ${
+								connected
+									? styles.connected
+									: styles.disconnected
+							}`}
+						>
+							{statusText}
+						</span>
+					)}
 			</div>
 
 			{oauth && (

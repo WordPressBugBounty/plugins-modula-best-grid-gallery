@@ -14,4 +14,3 @@ export const BULK_EDIT_DESCRIPTION_TINYMCE = {
 	toolbar1:
 		'bold italic underline strikethrough | bullist numlist | link unlink',
 };
-

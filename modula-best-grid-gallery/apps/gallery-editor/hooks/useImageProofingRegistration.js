@@ -4,7 +4,7 @@ import { getImageProofingEditorRegistration } from '../platform/imageProofingReg
 /**
  * Subscribe to Pro runtime registration of image-proofing UI slots.
  *
- * @returns {import('../platform/imageProofingRegistry').ImageProofingEditorRegistration|null}
+ * @return {import('../platform/imageProofingRegistry').ImageProofingEditorRegistration|null}
  */
 export function useImageProofingRegistration() {
 	const [registration, setRegistration] = useState(() =>

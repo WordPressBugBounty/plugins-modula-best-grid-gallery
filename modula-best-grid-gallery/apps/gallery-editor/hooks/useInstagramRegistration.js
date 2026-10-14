@@ -5,7 +5,7 @@ import { useEffect, useState } from '@wordpress/element';
 import { getInstagramEditorRegistration } from '../platform/instagramRegistry';
 
 /**
- * @returns {import('../platform/instagramRegistry').InstagramEditorRegistration|null}
+ * @return {import('../platform/instagramRegistry').InstagramEditorRegistration|null}
  */
 export function useInstagramRegistration() {
 	const [registration, setRegistration] = useState(() =>

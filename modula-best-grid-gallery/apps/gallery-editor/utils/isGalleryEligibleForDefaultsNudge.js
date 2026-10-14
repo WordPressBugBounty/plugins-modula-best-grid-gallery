@@ -8,7 +8,7 @@
  *   hasPresets?: boolean,
  *   dismissed?: boolean,
  * }} params
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isGalleryEligibleForDefaultsNudge({
 	galleryId = 0,
@@ -28,7 +28,7 @@ const NUDGE_DISMISS_KEY = 'modula_defaults_nudge_dismissed';
 
 /**
  * @param {number} galleryId
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isDefaultsNudgeDismissedForGallery(galleryId) {
 	if (typeof window === 'undefined' || galleryId <= 0) {

@@ -72,8 +72,15 @@ export function Actions() {
 	if (0 === state?.imagesWithoutAlt) {
 		return (
 			<div className="modula-ai-actions">
-				<Button icon={ <SparkleIcon /> } variant="secondary" onClick={optimizeAll}>
-					{__('Regenerate with Modula AI', 'modula-best-grid-gallery')}
+				<Button
+					icon={<SparkleIcon />}
+					variant="secondary"
+					onClick={optimizeAll}
+				>
+					{__(
+						'Regenerate with Modula AI',
+						'modula-best-grid-gallery'
+					)}
 				</Button>
 			</div>
 		);

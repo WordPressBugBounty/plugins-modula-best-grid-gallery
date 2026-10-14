@@ -3,7 +3,7 @@
  * (see `_gallery-modal.scss` — media frame z-index is below our ~1M shell).
  */
 
-export const WP_MEDIA_FRAME_BODY_CLASS = 'modula-wp-media-frame-open';
+import { WP_MEDIA_FRAME_BODY_CLASS } from 'editor-shell';
 
 let wpMediaFrameOpenCount = 0;
 

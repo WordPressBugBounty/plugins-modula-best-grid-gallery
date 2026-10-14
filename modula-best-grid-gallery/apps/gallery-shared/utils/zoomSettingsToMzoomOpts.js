@@ -6,7 +6,7 @@
 
 /**
  * @param {*} value
- * @returns {boolean}
+ * @return {boolean}
  */
 function truthy(value) {
 	if (value === true || value === 1 || value === '1') {
@@ -38,7 +38,7 @@ const WINDOW_SIZE = {
  * Legacy stored `basic`; elevateZoom expects `window`.
  *
  * @param {string|undefined|null} type
- * @returns {'window'|'inner'|'lens'|string}
+ * @return {'window'|'inner'|'lens'|string}
  */
 export function normalizeZoomType(type) {
 	if (!type || typeof type !== 'string' || type === 'basic') {
@@ -49,7 +49,7 @@ export function normalizeZoomType(type) {
 
 /**
  * @param {string|undefined|null} position
- * @returns {number}
+ * @return {number}
  */
 export function zoomWindowPosition(position) {
 	if (typeof position === 'string' && WINDOW_POSITION[position]) {
@@ -60,7 +60,7 @@ export function zoomWindowPosition(position) {
 
 /**
  * @param {string|undefined|null} size
- * @returns {number}
+ * @return {number}
  */
 export function zoomWindowSize(size) {
 	if (typeof size === 'string' && WINDOW_SIZE[size]) {
@@ -71,7 +71,7 @@ export function zoomWindowSize(size) {
 
 /**
  * @param {object|null|undefined} zoom Grouped `settings.zoom`.
- * @returns {object|null} elevateZoom options or null when disabled.
+ * @return {object|null} elevateZoom options or null when disabled.
  */
 export function zoomSettingsToMzoomOpts(zoom) {
 	if (!zoom || typeof zoom !== 'object' || !truthy(zoom.enableZoom)) {

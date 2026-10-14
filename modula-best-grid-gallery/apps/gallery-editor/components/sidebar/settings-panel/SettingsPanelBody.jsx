@@ -3,6 +3,7 @@
  */
 import { useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { SettingsPanelExitRow } from 'editor-shell';
 import { useGallerySettingsFormBundle } from '../../../form/GallerySettingsFormContext';
 import { GROUP_LABELS } from '../../../constants/editorStructure';
 import { useModulaSettingsEditorConfig } from '../../../hooks/useModulaSettingsEditorConfig';
@@ -13,7 +14,6 @@ import { getGroupedPathsForHubDrillSection } from '../../../utils/getGroupedPath
 import { shouldRenderHubSection } from '../../../logic/hubSectionVisibility';
 import SettingsPanelSection from './SettingsPanelSection';
 import SettingsPanelDrillRow from './SettingsPanelDrillRow';
-import SettingsPanelExitRow from './SettingsPanelExitRow';
 import SettingsPanelEmbeddedField from './SettingsPanelEmbeddedField';
 import SettingsPanelToggleRow from './SettingsPanelToggleRow';
 import SettingsPanelColorRow from './SettingsPanelColorRow';
@@ -25,7 +25,7 @@ import SchemaFieldRow from '../../schema/SchemaFieldRow';
 import ZoomOnHoverHubToggle from '../ZoomOnHoverHubToggle';
 
 /**
- * @param {Object} section
+ * @param {Object}                                  section
  * @param {Record<string, Record<string, unknown>>} values
  * @return {boolean}
  */
@@ -34,9 +34,9 @@ function isHubSectionVisible(section, values) {
 }
 
 /**
- * @param {object} item
+ * @param {Object}                                  item
  * @param {Record<string, Record<string, unknown>>} values
- * @param {string} reactKey
+ * @param {string}                                  reactKey
  * @return {import('react').ReactNode}
  */
 function renderHubFieldItem(item, values, reactKey) {
@@ -157,8 +157,8 @@ function renderHubFieldItem(item, values, reactKey) {
 }
 
 /**
- * @param {Object}   props
- * @param {object}   props.category
+ * @param {Object}                 props
+ * @param {Object}                 props.category
  * @param {(name: string) => void} props.onExitCategory
  */
 export default function SettingsPanelBody({ category, onExitCategory }) {
@@ -284,9 +284,7 @@ export default function SettingsPanelBody({ category, onExitCategory }) {
 								}
 
 								if (item.type === 'drill') {
-									if (
-										!shouldRenderHubSection(item, values)
-									) {
+									if (!shouldRenderHubSection(item, values)) {
 										return null;
 									}
 									const paths =

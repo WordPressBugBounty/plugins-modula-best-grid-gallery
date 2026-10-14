@@ -81,14 +81,14 @@ function equalCellGridClasses(variant) {
 }
 
 /**
- * @param {Object}   props
- * @param {Object[]} props.items
- * @param {Object}   props.config
- * @param {Object}   props.classes
- * @param {Object}   props.cellAspectStyle
- * @param {number}   props.cellAspectRatio
+ * @param {Object}      props
+ * @param {Object[]}    props.items
+ * @param {Object}      props.config
+ * @param {Object}      props.classes
+ * @param {Object}      props.cellAspectStyle
+ * @param {number}      props.cellAspectRatio
  * @param {number|null} props.cellMinHeightPx
- * @param {boolean}  props.captionBelowImage
+ * @param {boolean}     props.captionBelowImage
  */
 function EqualCellGridCells({
 	items,

@@ -10,11 +10,11 @@ import GalleryItemSocialLinks from './GalleryItemSocialLinks';
 import { useExpandableSocials } from '../../hooks/useExpandableSocials';
 
 /**
- * @param {Object} props
- * @param {string|number} props.itemId
+ * @param {Object}                                               props
+ * @param {string|number}                                        props.itemId
  * @param {Array<{ type: string, label: string, url?: string }>} props.socials
- * @param {boolean} props.desktopCollapsed - Adds modula-social-desktop-collapsed.
- * @param {number} [props.iconSize]
+ * @param {boolean}                                              props.desktopCollapsed - Adds modula-social-desktop-collapsed.
+ * @param {number}                                               [props.iconSize]
  */
 export default function GalleryItemExpandableSocials({
 	itemId,
@@ -49,10 +49,7 @@ export default function GalleryItemExpandableSocials({
 				role="button"
 				tabIndex={0}
 				aria-expanded={open}
-				aria-label={__(
-					'Click to share',
-					'modula-best-grid-gallery'
-				)}
+				aria-label={__('Click to share', 'modula-best-grid-gallery')}
 			>
 				<a
 					className="modula-icon-share"

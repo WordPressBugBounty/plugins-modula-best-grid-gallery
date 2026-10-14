@@ -30,9 +30,9 @@ import { Select } from 'shared-ui';
 import { usePreviewReduxStoreItems } from '../../../hooks/usePreviewReduxStoreItems';
 
 /**
- * @param {string} label
+ * @param {string}                label
  * @param {number|null|undefined} count
- * @param {boolean} showCount
+ * @param {boolean}               showCount
  */
 function FilterPreviewLabel({ label, count, showCount }) {
 	if (!showCount || count === undefined || count === null) {
@@ -49,8 +49,10 @@ function FilterPreviewLabel({ label, count, showCount }) {
 }
 
 /**
- * @param {Object} groupedSettings
+ * @param                               groupedSettings.groupedSettings
+ * @param {Object}                      groupedSettings
  * @param {'desktop'|'tablet'|'mobile'} previewViewport
+ * @param                               groupedSettings.previewViewport
  */
 export default function FiltersPreviewBar({
 	groupedSettings,

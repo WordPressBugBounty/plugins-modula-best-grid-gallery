@@ -30,6 +30,7 @@ import { selectGalleryDynamicStyleInputs } from '../store/selectors/galleryShell
 import { isSettingsEditorPreview } from '../utils/displayContext';
 import { buildFilterBarDynamicCss } from '../utils/buildFilterBarDynamicCss';
 import { buildPaginationDynamicCss } from '../utils/buildPaginationDynamicCss';
+import { buildTileFrameCss } from '../utils/buildTileFrameCss';
 import { resolveGalleryWidthCss } from '../utils/resolveGalleryWidthCss';
 import { resolveGalleryAlignmentCss } from '../utils/resolveGalleryAlignmentCss';
 import { resolveVideoMaxHeightCss } from '../utils/resolveVideoMaxHeightCss';
@@ -295,6 +296,8 @@ export default function GalleryDynamicStyle() {
 		css += `${root} .modula-item.modula-caption-below-image{display:flex;flex-direction:column;min-width:0;overflow:visible;}`;
 		css += `${root} .modula-item.modula-caption-below-image .modula-item-image-area>.modula-item-hover-media{position:relative;display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden;transform-origin:center center;z-index:0;}`;
 		css += `${root} .modula-item.modula-caption-below-image .modula-item-image-area>.modula-item-hover-media:has(.modula-item-picture-stack--fill-parent){position:absolute;inset:0;}`;
+		// Mirrors _caption-below-image.scss: shell above the lightbox link so inline share icons get hits.
+		css += `${root} .modula-item.modula-caption-below-image .modula-item-image-area>.modula-item-link~.modula-item-hover-media{z-index:6;pointer-events:none;}`;
 		css += `${root} .modula-item.modula-caption-below-image.modula-caption-below-image--fixed-tile{height:100%;min-height:0;}`;
 		css += `${root} .modula-item.modula-caption-below-image .modula-item-image-area{position:relative;width:100%;overflow:hidden;}`;
 		css += `${root} .modula-item.modula-caption-below-image.modula-caption-below-image--fixed-tile .modula-item-image-area:not(.modula-uniform-grid__media){flex:1 1 0;min-height:0;}`;
@@ -384,82 +387,17 @@ export default function GalleryDynamicStyle() {
 		safeString(groupedStyle.shadowColor) ||
 		safeString(config.shadowColor) ||
 		'#000000';
-	/*
-	 * Story/slider slides are carousel pages; global tile border/shadow/radius is for grid tiles.
-	 * Without this guard, `#modula-N .modula-item` (ID specificity) overrides slide chrome.
-	 * Story also zeros these in settingsToConfig so Uniform → Story cannot leak frame chrome.
-	 * Slider Style frame is applied separately onto the image card / media shell below.
-	 */
-	const carouselSlideGuard =
-		galleryType === 'story' || galleryType === 'slider'
-			? ':not(.f-carousel__slide)'
-			: '';
-	const tileFrameSelectors = [
-		`${root} .modula-item${carouselSlideGuard}`,
-		`${root} .modula-justified-tile`,
-		`${root} .modula-bnb-hero`,
-		`${root} .modula-bnb-featured-cell`,
-		`${root} .modula-bnb-grid-cell`,
-		`${root} .modula-template__slot`,
-	].join(',');
-	const nestedTileFrameResetSelectors = [
-		`${root} .modula-item-tiled > .modula-item`,
-		`${root} .modula-justified-tile > .modula-item`,
-		`${root} .modula-bnb-hero > .modula-item`,
-		`${root} .modula-bnb-featured-cell > .modula-item`,
-		`${root} .modula-bnb-grid-cell > .modula-item`,
-	].join(',');
-
 	const borderRadiusPx = Math.round(Math.max(0, borderRadius));
 	const borderSizePx = Math.round(Math.max(0, borderSize));
 
-	// Templates define their own rounding in `_template.scss`; override it from Style->borderRadius
-	// (including the zero case) so preview matches what the editor controls.
-	if (galleryType === 'template') {
-		css += `${root} .modula-template__slot{border-radius:${borderRadiusPx}px;}`;
-	}
-	if (borderSizePx > 0) {
-		css += `${tileFrameSelectors}{border:${borderSizePx}px solid ${borderColor};box-sizing:border-box;}`;
-	}
-	if (borderRadiusPx > 0) {
-		css += `${tileFrameSelectors}{border-radius:${borderRadiusPx}px;}`;
-	}
-	if (shadowSize > 0 && galleryType !== 'polaroid') {
-		css += `${tileFrameSelectors}{box-shadow:${shadowColor} 0 0 ${Math.round(
-			shadowSize
-		)}px;}`;
-		/*
-		 * BnB frame chrome lives on the cell; overflow:visible keeps box-shadow
-		 * from being clipped. Image clipping is handled on nested items below.
-		 */
-		css += `${root} .modula-bnb-hero,${root} .modula-bnb-featured-cell,${root} .modula-bnb-grid-cell{overflow:visible;}`;
-	}
-	if (
-		borderSizePx > 0 ||
-		borderRadiusPx > 0 ||
-		(shadowSize > 0 && galleryType !== 'polaroid')
-	) {
-		css += `${nestedTileFrameResetSelectors}{border:none;box-shadow:none;border-radius:0;}`;
-	}
-	/*
-	 * BnB: cell stays overflow:visible for shadow, so clip media/overlays on
-	 * nested content with the inner radius (outer radius minus border width).
-	 */
-	if (borderRadiusPx > 0) {
-		const bnbInnerRadiusPx = Math.max(0, borderRadiusPx - borderSizePx);
-		const bnbClipSelectors = [
-			`${root} .modula-bnb-hero > .modula-item`,
-			`${root} .modula-bnb-featured-cell > .modula-item`,
-			`${root} .modula-bnb-grid-cell > .modula-item`,
-			`${root} .modula-bnb-lightbox-only-overlay`,
-			`${root} .modula-bnb-featured-cell--has-more::after`,
-		].join(',');
-		css += `${bnbClipSelectors}{border-radius:${bnbInnerRadiusPx}px;overflow:hidden;}`;
-	}
-	/* Polaroid: frame shadow/border live on `.modula-polaroid-frame`, not the slot shell. */
-	if (galleryType === 'polaroid') {
-		css += `${root} .modula-polaroid-slot{box-shadow:none !important;border:none !important;border-radius:0 !important;}`;
-	}
+	css += buildTileFrameCss(root, {
+		galleryType,
+		borderSizePx,
+		borderRadiusPx,
+		shadowSize,
+		borderColor,
+		shadowColor,
+	});
 
 	/*
 	 * Slider card chrome: Style corner radius (and optional border/shadow) on the image.
@@ -666,6 +604,8 @@ export default function GalleryDynamicStyle() {
 		}
 
 		css += `${root} .modula-video-tile-preview{position:absolute;inset:0;z-index:1;pointer-events:auto;}`;
+		// The hover-media shell sits above a lightbox link; the full-tile preview must not take its clicks.
+		css += `${root} .modula-item-link ~ .modula-item-hover-media .modula-video-tile-preview{pointer-events:none;}`;
 		css += `${root} .modula-video-tile-preview__media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border:0;}`;
 		css += `${root} .modula-video-tile-preview.is-active ~ .modula-video-icon,${root} .modula-video-tile-preview.is-autoplay ~ .modula-video-icon{opacity:0;}`;
 

@@ -15,7 +15,7 @@ import {
 } from '../utils/resolvePreviewViewport';
 
 /**
- * @param {Object|null|undefined} config Gallery flat config.
+ * @param {Object|null|undefined}                           config Gallery flat config.
  * @param {{ layout?: 'masonry'|'custom-grid'|'parallax' }} [opts]
  * @return {number}
  */
@@ -27,6 +27,7 @@ export function resolveResponsiveColumnsForConfig(config, opts = {}) {
 
 /**
  * @param {Object|null|undefined} config
+ * @param                         opts
  * @return {number}
  */
 export function resolveResponsiveGutter(config, opts = {}) {
@@ -36,7 +37,7 @@ export function resolveResponsiveGutter(config, opts = {}) {
 }
 
 /**
- * @param {Object|null|undefined} config
+ * @param {Object|null|undefined}                           config
  * @param {{ layout?: 'masonry'|'custom-grid'|'parallax' }} [opts]
  * @return {number}
  */
@@ -86,7 +87,7 @@ export function useResponsiveColumns(config, opts = {}) {
 }
 
 /**
- * @param {Object|null|undefined} config
+ * @param {Object|null|undefined}                           config
  * @param {{ layout?: 'masonry'|'custom-grid'|'parallax' }} [opts]
  * @return {number}
  */

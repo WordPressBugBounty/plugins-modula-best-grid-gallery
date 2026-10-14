@@ -10,8 +10,12 @@ import { isNil } from '../../../logic/isNil';
  * @param {boolean}  ctx.disabled
  */
 export function renderDimensionsKind({ control, value, onChange, disabled }) {
-	const fieldMin = Number.isFinite(control.fieldMin) ? control.fieldMin : null;
-	const fieldMax = Number.isFinite(control.fieldMax) ? control.fieldMax : null;
+	const fieldMin = Number.isFinite(control.fieldMin)
+		? control.fieldMin
+		: null;
+	const fieldMax = Number.isFinite(control.fieldMax)
+		? control.fieldMax
+		: null;
 	const fields = Array.isArray(control.fields)
 		? control.fields
 		: ['width', 'height'];
@@ -57,7 +61,10 @@ export function renderDimensionsKind({ control, value, onChange, disabled }) {
 								}
 								const parsed = parseInt(v, 10);
 								const n = Number.isFinite(parsed)
-									? Math.min(fieldMax, Math.max(fieldMin, parsed))
+									? Math.min(
+											fieldMax,
+											Math.max(fieldMin, parsed)
+										)
 									: fieldMin;
 								onChange({ ...obj, [dk]: n });
 								return;

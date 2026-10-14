@@ -9,13 +9,13 @@ import { listingRowToFields } from './listingRowToFields';
 const SHORTCODE_COMPACT_WIDTH_PX = 144;
 
 /**
- * @param {Object} props
- * @param {string} props.code
- * @param {string} props.id
- * @param {string|null} props.copiedId
+ * @param {Object}                             props
+ * @param {string}                             props.code
+ * @param {string}                             props.id
+ * @param {string|null}                        props.copiedId
  * @param {(code: string, id: string) => void} props.onCopy
- * @param {string} [props.ariaLabel]
- * @param {string} [props.className]
+ * @param {string}                             [props.ariaLabel]
+ * @param {string}                             [props.className]
  */
 function CopyShortcodeButton({
 	code,
@@ -52,7 +52,7 @@ function CopyShortcodeButton({
 /**
  * Shortcode cell: primary code + copy icon; extras in a Popover when present.
  *
- * @param {Object} props
+ * @param {Object}                                    props
  * @param {import('./listingRowToFields').ListingRow} props.item
  */
 export function ShortcodeCell({ item }) {

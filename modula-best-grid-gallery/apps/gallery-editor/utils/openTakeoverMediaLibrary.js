@@ -98,7 +98,7 @@ export function openTakeoverMediaLibrary({
 				ids,
 				upload_position: pos,
 			});
-		})
+		}, 'gallery-add-images')
 			.then(() => {
 				onSuccess?.();
 			})

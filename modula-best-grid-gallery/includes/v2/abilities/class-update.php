@@ -7,20 +7,44 @@ use Modula\V2\Settings\Writer;
 defined( 'ABSPATH' ) || exit;
 final class Update {
 	public const OPERATION = 'modula/update-gallery';
+	public static function abilities(): array {
+		return array(
+			self::OPERATION => array(
+				'execute' => array( self::class, 'execute' ),
+			),
+		);
+	}
 	public static function can_update( int $id, string $status = '' ): bool {
 		$type = get_post_type_object( 'modula-gallery' );
 		return Integration::can_discover() && Integration::can_read_post( $id ) && $type && ( 'publish' !== $status && 'private' !== $status || current_user_can( $type->cap->publish_posts ) );
 	}
 	private static function operation( array $input ): string {
-		if ( isset( $input['video_changes'] ) ) { return Video::UPDATE; }
 		return isset( $input['item_changes'] ) ? Embedded::OPERATION : ( isset( $input['changes'] ) ? Composition::OPERATION : self::OPERATION );
 	}
 	private static function outcome( array $input, string $status, string $code = '', string $message = '' ): array {
 		return Requests::outcome( $input['request_id'], $status, $code, $message, self::operation( $input ) );
 	}
+	/** Fresh feature admission. A locked requested change rejects the whole target patch. */
+	private static function locked_outcome( array $input, array $settings ): array {
+		$blockers = Settings_Contract::blockers( $settings );
+		if ( ! $blockers ) {
+			return array();
+		}
+		$out             = self::outcome( $input, 'rejected', 'feature_unavailable', 'A requested gallery setting is locked by its current feature requirement. No metadata or settings from this target were saved.' );
+		$out['blockers'] = $blockers;
+		return $out;
+	}
+	/** Authorization failures remain distinct from malformed composition. */
+	private static function settings_failure( array $input, \WP_Error $error ): array {
+		if ( 'current_permission_denied' === $error->get_error_code() ) {
+			return self::outcome( $input, 'forbidden', 'current_permission_denied', $error->get_error_message() );
+		}
+		return self::outcome( $input, 'rejected', 'invalid_settings', $error->get_error_message() );
+	}
+
 	public static function execute( array $input ): array {
 		$operation = self::operation( $input );
-		$existing = Requests::existing( $input, $operation );
+		$existing  = Requests::existing( $input, $operation );
 		if ( null !== $existing ) {
 			return $existing;
 		}
@@ -34,7 +58,7 @@ final class Update {
 		if ( get_post_meta( $id, '_modula_bind_target_type', true ) ) {
 			return self::outcome( $input, 'rejected', 'unsupported_bound_target', 'Bound gallery mutations require the source-aware bound operations in their own delivery stage.' );
 		}
-		if ( empty( $input['metadata'] ) && empty( $input['settings'] ) && empty( $input['changes'] ) && empty( $input['item_changes'] ) && empty( $input['video_changes'] ) ) {
+		if ( empty( $input['metadata'] ) && empty( $input['settings'] ) && empty( $input['changes'] ) && empty( $input['item_changes'] ) ) {
 			return self::outcome( $input, 'rejected', 'empty_patch', 'Provide metadata or settings to change.' );
 		}
 		if ( isset( $input['metadata']['title'] ) && '' === trim( sanitize_text_field( $input['metadata']['title'] ) ) ) {
@@ -42,14 +66,14 @@ final class Update {
 		}
 		$settings = $input['settings'] ?? array();
 		if ( $settings ) {
-			$schema = Settings_Contract::schema();
-			$valid = rest_validate_value_from_schema( $settings, $schema, 'settings' );
+			$schema = Settings_Contract::recognized();
+			$valid  = rest_validate_value_from_schema( $settings, $schema, 'settings' );
 			if ( is_wp_error( $valid ) || ! Settings_Contract::strict_types( $settings, $schema ) ) {
-				return self::outcome( $input, 'rejected', 'invalid_settings', 'A requested setting is invalid, unavailable or has the wrong JSON type.' );
+				return self::outcome( $input, 'rejected', 'invalid_settings', 'A requested setting is invalid or has the wrong JSON type.' );
 			}
 			$valid = Writer::validate_strict_patch( $id, $settings );
 			if ( is_wp_error( $valid ) ) {
-				return self::outcome( $input, 'rejected', 'invalid_settings', $valid->get_error_message() );
+				return self::settings_failure( $input, $valid );
 			}
 		}
 		if ( isset( $input['item_changes'] ) && ! Creation::can_use_attachments( Embedded::referenced_attachment_ids( $input['item_changes'] ) ) ) {
@@ -63,7 +87,7 @@ final class Update {
 		try {
 			Revision::begin();
 			$transaction = true;
-			$current = Revision::state( $id, true );
+			$current     = Revision::state( $id, true );
 			Revision::clear_cache();
 			if ( ! hash_equals( $current, $input['revision'] ) ) {
 				Revision::end( false );
@@ -73,42 +97,67 @@ final class Update {
 			if ( ! self::can_update( $id, $input['metadata']['status'] ?? '' ) || ! Beta_Settings::is_beta_gallery( $id ) ) {
 				throw new \RuntimeException( 'Access changed.' );
 			}
-			if ( isset( $input['changes'] ) || isset( $input['item_changes'] ) || isset( $input['video_changes'] ) ) {
-				$composition = isset( $input['video_changes'] ) ? Video::class : ( isset( $input['item_changes'] ) ? Embedded::class : Composition::class );
-				$changes = $input['video_changes'] ?? $input['item_changes'] ?? $input['changes'];
-				$attachments = Video::class === $composition ? Video::referenced_attachment_ids( $changes, $id ) : $composition::referenced_attachment_ids( $changes );
-				if ( $attachments ) { Revision::lock_attachments( $attachments ); }
+			// Validate again under the revision lock; a stale catalog must never be authored.
+			$valid = Writer::validate_strict_patch( $id, $settings );
+			if ( is_wp_error( $valid ) ) {
+				Revision::end( false );
+				$transaction = false;
+				return Requests::finish( $input['request_id'], self::settings_failure( $input, $valid ) );
+			}
+			if ( $settings ) {
+				$blocked = self::locked_outcome( $input, $settings );
+				if ( $blocked ) {
+					Revision::end( false );
+					$transaction = false;
+					return Requests::finish( $input['request_id'], $blocked );
+				}
+			}
+			$settings = Settings_Contract::prepare( $id, $settings );
+			if ( is_wp_error( $settings ) ) {
+				Revision::end( false );
+				$transaction = false;
+				return Requests::finish( $input['request_id'], self::outcome( $input, 'rejected', $settings->get_error_code(), $settings->get_error_message() ) );
+			}
+			if ( isset( $input['changes'] ) || isset( $input['item_changes'] ) ) {
+				$composition = isset( $input['item_changes'] ) ? Embedded::class : Composition::class;
+				$changes     = $input['item_changes'] ?? $input['changes'];
+				$attachments = $composition::referenced_attachment_ids( $changes );
+				if ( $attachments ) {
+					Revision::lock_attachments( $attachments ); }
 				$items = $composition::prepare( $id, $changes );
 				if ( is_wp_error( $items ) ) {
 					Revision::end( false );
 					$transaction = false;
 					return Requests::finish( $input['request_id'], self::outcome( $input, 'rejected', $items->get_error_code(), $items->get_error_message() ) );
 				}
-				Meta_Sync::persist_prepared_gallery_items( $id, $items );
-				Revision::clear_cache();
-				if ( Meta_Sync::get_images_v2( $id ) !== $items ) {
+				if ( ! Composition::persist( $id, $items ) ) {
 					throw new \RuntimeException( 'Composition differs from requested values.' );
 				}
 			}
-			Meta_Sync::with_canonical_gallery_write( $id, static function () use ( $id, $settings, $input ) {
-				if ( $settings ) {
-					$saved = Writer::patch( $id, $settings, true );
-					if ( is_wp_error( $saved ) ) {
-						throw new \RuntimeException( 'Settings not confirmed.' );
-					}
-				}
-				if ( ! empty( $input['metadata'] ) ) {
-					$post = array( 'ID' => $id );
-					foreach ( array( 'title' => 'post_title', 'status' => 'post_status' ) as $key => $field ) {
-						if ( isset( $input['metadata'][ $key ] ) ) {
-							$post[ $field ] = 'title' === $key ? sanitize_text_field( $input['metadata'][ $key ] ) : $input['metadata'][ $key ];
+			Meta_Sync::with_canonical_gallery_write(
+				$id,
+				static function () use ( $id, $settings, $input ) {
+					if ( $settings ) {
+						$saved = Writer::patch( $id, $settings, true );
+						if ( is_wp_error( $saved ) ) {
+							throw new \RuntimeException( 'Settings not confirmed.' );
 						}
 					}
-					if ( is_wp_error( wp_update_post( wp_slash( $post ), true ) ) ) {
-						throw new \RuntimeException( 'Metadata not confirmed.' );
+					if ( ! empty( $input['metadata'] ) ) {
+						$post = array( 'ID' => $id );
+						foreach ( array(
+							'title'  => 'post_title',
+							'status' => 'post_status',
+						) as $key => $field ) {
+							if ( isset( $input['metadata'][ $key ] ) ) {
+								$post[ $field ] = 'title' === $key ? sanitize_text_field( $input['metadata'][ $key ] ) : $input['metadata'][ $key ];
+							}
+						}
+						if ( is_wp_error( wp_update_post( wp_slash( $post ), true ) ) ) {
+							throw new \RuntimeException( 'Metadata not confirmed.' );
+						}
 					}
 				}
-			}
 			);
 			global $wpdb;
 			if ( $wpdb->last_error ) {
@@ -124,21 +173,23 @@ final class Update {
 				}
 			}
 			$post = get_post( $id );
-			foreach ( array( 'title' => 'post_title', 'status' => 'post_status' ) as $key => $field ) {
+			foreach ( array(
+				'title'  => 'post_title',
+				'status' => 'post_status',
+			) as $key => $field ) {
 				if ( isset( $input['metadata'][ $key ] ) && $post->$field !== ( 'title' === $key ? sanitize_text_field( $input['metadata'][ $key ] ) : $input['metadata'][ $key ] ) ) {
 					throw new \RuntimeException( 'Metadata differs from requested values.' );
 				}
 			}
-			$out = self::outcome( $input, 'succeeded' );
-			$out['gallery'] = Integration::gallery( get_post( $id ) );
+			$out                        = self::outcome( $input, 'succeeded' );
+			$out['gallery']             = Integration::gallery( get_post( $id ) );
 			$out['gallery']['revision'] = Revision::state( $id );
 			// Store confirmation inside the same DB transaction as the gallery patch.
 			$out = Requests::finish( $input['request_id'], $out );
 			Revision::end( true );
 			$transaction = false;
 			return $out;
-		}
-		catch ( \Throwable $error ) {
+		} catch ( \Throwable $error ) {
 			if ( $transaction ) {
 				Revision::end( false );
 			}

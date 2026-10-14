@@ -7,7 +7,7 @@ import { Fancybox } from '@fancyapps/ui/dist/fancybox/fancybox.js';
 
 /**
  * @param {string} string
- * @returns {string}
+ * @return {string}
  */
 function escapeHtml(string) {
 	const entityMap = {
@@ -25,9 +25,9 @@ function escapeHtml(string) {
 }
 
 /**
- * @param {string} template
+ * @param {string}                  template
  * @param {Record<string, unknown>} data
- * @returns {string}
+ * @return {string}
  */
 function applyTemplate(template, data) {
 	return template.replace(/\{([^}]+)\}/g, (match, keyPath) => {

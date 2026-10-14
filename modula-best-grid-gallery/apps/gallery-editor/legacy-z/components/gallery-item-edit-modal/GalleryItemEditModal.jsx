@@ -21,12 +21,12 @@ import GalleryModal from '../gallery-modal/GalleryModal';
 import '../../styles/takeover/preview/_content-block-edit.scss';
 import { __ } from '@wordpress/i18n';
 import { useMutation } from '@tanstack/react-query';
+import { useTakeoverSaveStatus } from 'editor-shell';
 import { useSelector, useStore } from 'react-redux';
 import GalleryItemEditModalHeader from './GalleryItemEditModalHeader';
 import GalleryItemEditNavUnsavedPopover from './GalleryItemEditNavUnsavedPopover';
 import ImageMetadataModalFooter from '../image-metadata-modal/ImageMetadataModalFooter';
 import ContentBlockEditContent from './ContentBlockEditContent';
-import { useTakeoverSaveStatus } from '../../context/TakeoverSaveStatusContext';
 import { usePreviewItemPersist } from '../../context/PreviewItemPersistContext';
 import {
 	galleryPatchImageByIndex,
@@ -294,7 +294,7 @@ export default function GalleryItemEditModal({
 						previewCoreItemsToSaveMergedPayload(reanchored)
 					);
 					commitPreviewCatalog(store, reanchored);
-				});
+				}, `item-content:${galleryId}:${eidNorm}`);
 				return null;
 			}
 
@@ -315,15 +315,14 @@ export default function GalleryItemEditModal({
 			if (displayCoreIndex < 0 || restRowIndex < 0) {
 				throw new Error('invalid_indices');
 			}
+			const metadataOwner = `item-metadata:${galleryId}:${item.freeformId || `${attachmentId}:${restRowIndex}`}`;
 			await runPersistTask(async () => {
 				const res = await galleryPatchImageByIndex(
 					galleryId,
 					restRowIndex,
 					fields
 				);
-				const core = asGalleryItemList(
-					store.getState().items.items
-				);
+				const core = asGalleryItemList(store.getState().items.items);
 				const prevItem = core[displayCoreIndex];
 				if (!prevItem) {
 					return;
@@ -347,7 +346,7 @@ export default function GalleryItemEditModal({
 					galleryId,
 					core
 				);
-			});
+			}, metadataOwner);
 			return {
 				savedImageValues: collectImageMetadataEditValues(
 					form,
@@ -363,9 +362,7 @@ export default function GalleryItemEditModal({
 						queryKey: getWpMediaAttachmentQueryKey(attachmentId),
 					});
 				}
-				const core = asGalleryItemList(
-					store.getState().items.items
-				);
+				const core = asGalleryItemList(store.getState().items.items);
 				patchBootstrapQueryItems(queryClient, galleryId, core);
 				// Video bootstrap rows are server-processed (poster vs .mp4 src); refetch
 				// so preview matches persisted meta without waiting for window focus.

@@ -43,7 +43,7 @@ const pendingLoads = new Map();
 const stallWatchdogs = new WeakMap();
 
 /**
- * @returns {string}
+ * @return {string}
  */
 function loadingMessage() {
 	if (
@@ -75,7 +75,7 @@ function showPendingState(element) {
 }
 
 /**
- * @returns {string}
+ * @return {string}
  */
 function loadingFailedMessage() {
 	if (
@@ -88,7 +88,7 @@ function loadingFailedMessage() {
 }
 
 /**
- * @returns {string}
+ * @return {string}
  */
 function tryAgainLabel() {
 	if (
@@ -102,6 +102,9 @@ function tryAgainLabel() {
 
 /**
  * @param {HTMLElement} element
+ * @param               message
+ * @param               root0
+ * @param               root0.withRetry
  */
 function showBootstrapError(element, message, { withRetry = false } = {}) {
 	element.classList.add('modula-gallery--bootstrap-pending');
@@ -165,7 +168,7 @@ function cancelPendingLoad(element) {
 
 /**
  * @param {HTMLElement} element
- * @param {number} delayMs
+ * @param {number}      delayMs
  */
 function scheduleStallCheck(element, delayMs) {
 	const state = stallWatchdogs.get(element);
@@ -254,7 +257,8 @@ function armStallWatchdog(element) {
 }
 
 /**
- * @returns {Promise<import('./bootstrap').default>}
+ * @param  signal
+ * @return {Promise<import('./bootstrap').default>}
  */
 function loadBootstrap(signal) {
 	if (!bootstrapPromise) {
@@ -281,7 +285,7 @@ function loadBootstrap(signal) {
 }
 
 /**
- * @param {HTMLElement} element
+ * @param {HTMLElement}             element
  * @param {{ fromStall?: boolean }} [options]
  */
 function mountWhenVisible(element, options = {}) {
@@ -353,7 +357,7 @@ async function performMount(element, attempt) {
 
 /**
  * @param {HTMLElement} element
- * @returns {boolean}
+ * @return {boolean}
  */
 function isElementInViewport(element) {
 	const rect = element.getBoundingClientRect();
@@ -370,7 +374,7 @@ function isElementInViewport(element) {
 
 /**
  * @param {HTMLElement} element
- * @param {() => void} onVisible
+ * @param {() => void}  onVisible
  */
 function observeGallery(element, onVisible) {
 	if (destroyedGalleries.has(element)) {
@@ -412,7 +416,7 @@ function observeGallery(element, onVisible) {
 
 /**
  * @param {HTMLElement} element
- * @returns {boolean}
+ * @return {boolean}
  */
 function shouldEagerMountForDeeplink(element) {
 	if (typeof window === 'undefined') {

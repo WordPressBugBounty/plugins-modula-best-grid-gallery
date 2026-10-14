@@ -5,7 +5,7 @@
  * HoverEffectBuilderProvider lives on GalleryTakeoverShell (aux + nested share it).
  */
 import { useCallback } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { TakeoverSidebar } from 'editor-shell';
 import TakeoverSidebarNavV2 from './TakeoverSidebarNavV2';
 import SettingsPanel from './settings-panel/SettingsPanel';
 import { useGalleryItemEditSidebar } from '../../context/GalleryItemEditSidebarContext';
@@ -42,28 +42,20 @@ export default function GallerySidebarRail({
 	);
 
 	return (
-		<aside
-			className="modula-gallery-takeover__sidebar modula-gallery-takeover__sidebar--v2"
-			aria-label={__('Settings', 'modula-best-grid-gallery')}
+		<TakeoverSidebar
+			rail={
+				<TakeoverSidebarNavV2
+					activeCategory={activeCategory}
+					onActiveCategoryChange={selectCategory}
+					onSelect={selectCategory}
+					docsUrl={docsUrl}
+				/>
+			}
 		>
-			<div className="modula-gallery-takeover__sidebar-body modula-gallery-takeover__sidebar-body--v2">
-				<div className="modula-gallery-takeover__sidebar-v2-columns">
-					<div className="modula-gallery-takeover__sidebar-v2-nav-column">
-						<TakeoverSidebarNavV2
-							activeCategory={activeCategory}
-							onActiveCategoryChange={selectCategory}
-							onSelect={selectCategory}
-							docsUrl={docsUrl}
-						/>
-					</div>
-					<div className="modula-gallery-takeover__sidebar-v2-settings-column">
-						<SettingsPanel
-							activeCategory={activeCategory}
-							setActiveCategory={selectCategory}
-						/>
-					</div>
-				</div>
-			</div>
-		</aside>
+			<SettingsPanel
+				activeCategory={activeCategory}
+				setActiveCategory={selectCategory}
+			/>
+		</TakeoverSidebar>
 	);
 }

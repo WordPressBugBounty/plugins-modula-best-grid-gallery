@@ -2,9 +2,7 @@
  * Gallery filter names as chips (count + dismiss) with add affordance.
  */
 
-import {
-	asGalleryItemList,
-} from 'gallery-shared/preview';
+import { asGalleryItemList } from 'gallery-shared/preview';
 import { __, sprintf } from '@wordpress/i18n';
 import { useMemo, useState } from '@wordpress/element';
 import { Button, Chip, TextInput } from 'shared-ui';

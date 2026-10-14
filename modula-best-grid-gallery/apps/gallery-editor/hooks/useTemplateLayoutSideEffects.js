@@ -8,9 +8,7 @@
  * @package
  */
 
-import {
-	asGalleryItemList,
-} from 'gallery-shared/preview';
+import { asGalleryItemList } from 'gallery-shared/preview';
 import { useEffect, useRef } from '@wordpress/element';
 import { useQueryClient } from '@tanstack/react-query';
 import {

@@ -5,9 +5,9 @@
 import { AuxiliaryPanelHead } from 'shared-ui';
 
 /**
- * @param {Object} props
- * @param {string} props.title
- * @param {string} [props.description]
+ * @param {Object}     props
+ * @param {string}     props.title
+ * @param {string}     [props.description]
  * @param {() => void} props.onClose
  */
 export default function AuxiliaryPanelHeadWithClose({

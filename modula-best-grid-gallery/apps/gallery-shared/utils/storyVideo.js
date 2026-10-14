@@ -127,7 +127,7 @@ function ensureAbsoluteUrl(raw) {
 /**
  * iframe src with autoplay params (muted where required for autoplay policies).
  *
- * @param {string} videoSrc
+ * @param {string}            videoSrc
  * @param {'youtube'|'vimeo'} kind
  * @return {string}
  */

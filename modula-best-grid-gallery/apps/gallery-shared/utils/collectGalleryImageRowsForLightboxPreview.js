@@ -9,7 +9,7 @@ import { isProbableModulaVideoPlaybackUrl } from '../video/videoGalleryModel';
 
 /**
  * @param {*} value
- * @returns {string}
+ * @return {string}
  */
 function captionToPlainString(value) {
 	if (value === null || value === undefined) {
@@ -37,7 +37,7 @@ function captionToPlainString(value) {
 
 /**
  * @param {unknown} value
- * @returns {string} Non-video URL or empty.
+ * @return {string} Non-video URL or empty.
  */
 function asPosterUrl(value) {
 	const url = typeof value === 'string' ? value.trim() : '';
@@ -49,16 +49,16 @@ function asPosterUrl(value) {
 
 /**
  * @typedef {Object} LightboxPreviewImageRow
- * @property {string} src Full-size image URL.
- * @property {string} thumb Thumbnail URL for Fancybox strip.
- * @property {string} alt Image alt text.
- * @property {string} title Plain title.
+ * @property {string} src         Full-size image URL.
+ * @property {string} thumb       Thumbnail URL for Fancybox strip.
+ * @property {string} alt         Image alt text.
+ * @property {string} title       Plain title.
  * @property {string} description Plain caption/description.
  */
 
 /**
  * @param {unknown} row
- * @returns {LightboxPreviewImageRow|null}
+ * @return {LightboxPreviewImageRow|null}
  */
 export function galleryRowToLightboxImageRow(row) {
 	if (!row || typeof row !== 'object') {
@@ -117,7 +117,7 @@ export function galleryRowToLightboxImageRow(row) {
 
 /**
  * @param {unknown[]} items Bootstrap gallery rows.
- * @returns {LightboxPreviewImageRow[]}
+ * @return {LightboxPreviewImageRow[]}
  */
 export function collectGalleryImageRowsForLightboxPreview(items) {
 	if (!Array.isArray(items)) {

@@ -42,8 +42,8 @@ function refreshCarouselSlideMetrics(api) {
 /**
  * Animate track position when pages are merged (no Thumbs Sync to keep in sync).
  *
- * @param {*}      api       - Fancyapps Carousel instance.
- * @param {number} targetPos - Track position k.
+ * @param {*}                     api       - Fancyapps Carousel instance.
+ * @param {number}                targetPos - Track position k.
  * @param {{ instant?: boolean }} [opts]
  */
 function tweenCarouselToPosition(api, targetPos, opts = {}) {

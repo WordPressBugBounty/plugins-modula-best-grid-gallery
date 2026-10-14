@@ -1,17 +1,7 @@
 @use "../../variables" as *;
 
-.modula-gallery-takeover__preview-wrap {
-	flex: 1;
-	min-height: 0;
-	/* Flush with sidebar + top of workspace (aligned with sidebar chrome row) */
-	padding: 0;
-	box-sizing: border-box;
-	display: flex;
-	flex-direction: column;
-}
-
 /* Desktop artboard max-width (style kit). Tablet/mobile modifiers override below. */
-.modula-gallery-takeover__preview-wrap:not(.modula-gallery-takeover__preview-wrap--tablet):not(.modula-gallery-takeover__preview-wrap--mobile) {
+.modula-takeover__preview-wrap:not(.modula-takeover__preview-wrap--tablet):not(.modula-takeover__preview-wrap--mobile) {
 	.modula-gallery-takeover__live-preview-body {
 		max-width: 960px;
 		width: 100%;
@@ -22,7 +12,7 @@
 }
 
 /* Tablet/mobile: only the rendered gallery column shrinks — not app topbar or preview chrome */
-.modula-gallery-takeover__preview-wrap--tablet {
+.modula-takeover__preview-wrap--tablet {
 	align-items: stretch;
 
 	.modula-gallery-takeover__live-preview-body {
@@ -50,7 +40,7 @@
 	}
 }
 
-.modula-gallery-takeover__preview-wrap--mobile {
+.modula-takeover__preview-wrap--mobile {
 	align-items: stretch;
 
 	.modula-gallery-takeover__live-preview-body {
@@ -194,39 +184,6 @@
 .modula-gallery-takeover__live-preview-dropzone-notice {
 	flex-shrink: 0;
 	margin: 0;
-}
-
-.modula-gallery-takeover__live-preview-empty-state {
-	flex: 1;
-	min-height: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: $mod-space-6 0;
-	box-sizing: border-box;
-}
-
-.modula-gallery-takeover__live-preview-empty-state--video {
-	flex-direction: column;
-	gap: $mod-space-4;
-	text-align: center;
-	max-width: 28rem;
-	margin-inline: auto;
-	padding-inline: $mod-space-6;
-}
-
-.modula-gallery-takeover__live-preview-empty-state__message {
-	margin: 0;
-	font-size: 1rem;
-	font-weight: 500;
-	color: var(--mod-se-preview-ink, #{$mod-takeover-text-strong});
-}
-
-.modula-gallery-takeover__live-preview-empty-state__hint {
-	margin: 0;
-	font-size: 0.875rem;
-	opacity: 0.75;
-	color: var(--mod-se-preview-ink-muted, #{$mod-takeover-text-muted});
 }
 
 /*

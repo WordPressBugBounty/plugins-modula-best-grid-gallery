@@ -22,10 +22,7 @@ export function isZoomOnHoverEnabled(cardTreatment) {
  * @param {boolean} enabled       Desired toggle state.
  * @return {string} Next card treatment to write.
  */
-export function nextCardTreatmentForZoomOnHoverToggle(
-	cardTreatment,
-	enabled
-) {
+export function nextCardTreatmentForZoomOnHoverToggle(cardTreatment, enabled) {
 	if (enabled) {
 		return 'zoom';
 	}

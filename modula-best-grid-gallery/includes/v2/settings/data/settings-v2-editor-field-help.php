@@ -9,8 +9,8 @@
  */
 
 return array(
-	'layout.gutter'                          => 'Space between images on desktop, in pixels.',
-	'layout.mobileGutter'                    => 'Space between images on phones, in pixels.',
+	'layout.gutter'                          => 'Space between images on desktop, in pixels. In Freeform it spaces the placement grid; overlapping images are not separated.',
+	'layout.mobileGutter'                    => 'Space between images on phones, in pixels. Freeform stacks images vertically with this space between them.',
 	'layout.tabletGutter'                    => 'Space between images on tablets, in pixels.',
 	'lightbox.downloadAllButton'             => 'Shows a control that lets visitors download every image in the gallery from the lightbox (when download is enabled).',
 	'lightbox.enableFullscreen'              => 'Allows true full-screen mode in supported browsers so the lightbox uses the entire display.',

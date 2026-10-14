@@ -5,7 +5,7 @@ import { listingRowRestPath } from '../listingRowRestPath';
 
 /**
  * @param {'trash'|'restore'|'delete'} action
- * @param {Object} item
+ * @param {Object}                     item
  * @return {Promise<unknown>}
  */
 function mutateListingRow(action, item) {

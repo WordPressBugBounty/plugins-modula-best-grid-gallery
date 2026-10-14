@@ -21,16 +21,16 @@ import {
  *
  * Domain-agnostic: pass resolved `imageUrl` on each option (caller resolves assets).
  *
- * @param {Object}             props
+ * @param {Object}              props
  * @param {ImageSelectOption[]} props.options
- * @param {string}             [props.value]
- * @param {Function}           [props.onChange] Receives string value
- * @param {boolean}            [props.disabled]
- * @param {string}             [props.help]
- * @param {string}             [props.className]
- * @param {string}             [props.id]
- * @param {string}             [props.listLabel] aria-label for the listbox
- * @param {string}             [props.placeholder] Label when value is empty / unknown
+ * @param {string}              [props.value]
+ * @param {Function}            [props.onChange]    Receives string value
+ * @param {boolean}             [props.disabled]
+ * @param {string}              [props.help]
+ * @param {string}              [props.className]
+ * @param {string}              [props.id]
+ * @param {string}              [props.listLabel]   aria-label for the listbox
+ * @param {string}              [props.placeholder] Label when value is empty / unknown
  */
 export const ImageSelect = forwardRef(function ImageSelect(
 	{

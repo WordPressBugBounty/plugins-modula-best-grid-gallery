@@ -8,13 +8,15 @@
  *   Style hub is available (corner radius / border / shadow apply to carousel slides). Loading effects and Hover effects hubs stay hidden.
  *   Layout grid fields stay hidden for slider where rules say so — empty group cards are not rendered.
  * - **video**: **Video** category for Video type and mixed image galleries (hidden for story/slider). Video type shows playlist + play icon + autoplay thumbnail; mixed types show lightbox autoplay/loop, play icon, and hover preview.
- * - **slider / story / parallax-masonry / bnb / video**: Pagination hub item and fields hidden; visitor pagination chrome off.
+ * - **slider / story / showcase / template / freeform / parallax-masonry / bnb / video**: Pagination hub item and fields hidden;
+ *   visitor pagination chrome off (`GALLERY_TYPES_WITHOUT_PAGINATION`).
  * - **creative-gallery**: Infinite scroll hidden (fixed packery height); numbered pages / load more only.
  * - **creative-gallery / bnb / story**: Responsive hub hidden (fixed featured / packery / fullscreen story).
  * - **slider**: Responsive hub shows tablet/mobile slides-to-show/scroll (nested under enableResponsive); column fields stay hidden.
  * - **polaroid**: Infinite scroll hidden when Uniform size is off (packery / fixed height); allowed when Uniform size is on.
  * - **polaroid**: Responsive hub only when Uniform size is on; `general.height` only when Uniform size is off.
- * - **slider / story / parallax-masonry / bnb / video**: Filters category hidden; gallery filter list cleared on type change.
+ * - **slider / story / showcase / template / freeform / parallax-masonry / bnb / video**: Filters category hidden;
+ *   gallery filter list cleared on type change (`GALLERY_TYPES_WITHOUT_FILTERS`).
  * - **slider / story / video**: Lightbox category hidden; tile lightbox is forced off at
  *   runtime (`settingsToConfig` / `isGalleryTypeWithoutLightbox`) without clearing the saved
  *   `lightbox.lightbox` value, so returning to Masonry/Creative keeps the previous click mode.

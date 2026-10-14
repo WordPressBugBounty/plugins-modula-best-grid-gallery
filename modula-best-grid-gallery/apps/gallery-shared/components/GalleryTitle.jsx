@@ -6,15 +6,7 @@
 
 import { useSelector } from 'react-redux';
 
-const GALLERY_TITLE_TAGS = new Set([
-	'p',
-	'h1',
-	'h2',
-	'h3',
-	'h4',
-	'h5',
-	'h6',
-]);
+const GALLERY_TITLE_TAGS = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
 
 /**
  * @return {import('react').JSX.Element|null}

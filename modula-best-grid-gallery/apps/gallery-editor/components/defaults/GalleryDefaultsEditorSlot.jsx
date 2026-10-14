@@ -2,6 +2,7 @@
  * Renders a Pro-registered gallery defaults slot with lite form/editor context injected.
  */
 import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useTakeoverSaveStatus } from 'editor-shell';
 import { useGalleryDefaultsRegistration } from '../../hooks/useGalleryDefaultsRegistration';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
@@ -15,7 +16,6 @@ import {
 	hasGalleryDefaultsPresets,
 	isGalleryDefaultsEntitled,
 } from '../../logic/galleryDefaultsGate';
-import { useTakeoverSaveStatus } from '../../context/TakeoverSaveStatusContext';
 import { useCommitAppliedGalleryDefaultsSettings } from '../../utils/commitAppliedGalleryDefaultsSettings';
 
 /**

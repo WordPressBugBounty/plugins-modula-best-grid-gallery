@@ -3,13 +3,14 @@
  */
 
 /**
- * @param {Object}             props
- * @param {SegmentedOption[]}  props.options
- * @param {string}             props.value
- * @param {Function}           props.onChange Receives option value string
- * @param {boolean}            [props.disabled]
- * @param {string}             [props.className]
- * @param {string}             [props['aria-label']]
+ * @param {Object}            props
+ * @param {SegmentedOption[]} props.options
+ * @param {string}            props.value
+ * @param {Function}          props.onChange        Receives option value string
+ * @param {boolean}           [props.disabled]
+ * @param {string}            [props.className]
+ * @param {string}            [props['aria-label']]
+ * @param                     props.'aria-label'
  */
 export function Segmented({
 	options = [],

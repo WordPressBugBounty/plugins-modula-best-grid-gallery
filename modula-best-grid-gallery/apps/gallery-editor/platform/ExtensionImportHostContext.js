@@ -1,13 +1,14 @@
 import { createContext, useContext } from '@wordpress/element';
 
-/** @typedef {{
+/**
+ * @typedef {{
  *   galleryId: number,
  *   uploadPosition: 'start' | 'end',
  *   invalidateBootstrap: () => void,
  *   runPersistTask: (task: () => void | Promise<void>) => Promise<unknown>,
  *   form: import('@tanstack/react-form').ReactFormExtendedApi,
  *   config: Record<string, unknown>,
- * }} ExtensionImportHostValue */
+  }} ExtensionImportHostValue */
 
 /** @type {import('react').Context<ExtensionImportHostValue | null>} */
 const ExtensionImportHostContext = createContext(null);

@@ -1,16 +1,13 @@
 /**
- * Top-level category list for sidebar layout V2 — fixed icon + short label rail.
+ * Gallery category rail: visible gallery categories, icons and short labels for the shared rail.
  */
 
-import { useLayoutEffect, useMemo } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
-import { Icon } from '@wordpress/icons';
+import { useMemo } from '@wordpress/element';
+import { SidebarRailNav, getSidebarRailNavLabel } from 'editor-shell';
 import { SETTINGS_EDITOR_CATEGORIES } from '../../constants/editorStructure';
 import { TAKEOVER_CATEGORY_ICONS } from '../../constants/takeoverCategoryIcons';
 import { getVisibleCategories } from '../../logic/categoryVisibility';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
-import { getSidebarRailNavLabel } from '../../constants/sidebarRailLabels';
-import SidebarRailFooter from './SidebarRailFooter';
 
 /**
  * @param {Object}                 props
@@ -68,71 +65,15 @@ function TakeoverSidebarNavV2Inner({
 		[values]
 	);
 
-	useLayoutEffect(() => {
-		if (visible.length === 0) {
-			return;
-		}
-		if (!visible.some((c) => c.name === activeCategory)) {
-			onActiveCategoryChange(visible[0].name);
-		}
-	}, [visible, activeCategory, onActiveCategoryChange]);
-
 	return (
-		<div className="modula-gallery-takeover__sidebar-v2-nav-wrap">
-			<nav
-				className="modula-gallery-takeover__sidebar-v2-nav"
-				aria-label={__('Settings sections', 'modula-best-grid-gallery')}
-			>
-				<ul className="modula-gallery-takeover__sidebar-v2-list">
-					{visible.map((cat) => {
-						const isActive = cat.name === activeCategory;
-						const categoryIcon = TAKEOVER_CATEGORY_ICONS[cat.name];
-						const accessibleName = sprintf(
-							/* translators: %s: settings section title. */
-							__('Open %s settings', 'modula-best-grid-gallery'),
-							cat.title
-						);
-						return (
-							<li
-								key={cat.name}
-								className={`modula-gallery-takeover__sidebar-v2-item${
-									isActive ? ' is-active' : ''
-								}`}
-							>
-								<button
-									type="button"
-									className="modula-gallery-takeover__sidebar-v2-nav-btn"
-									onClick={() => onSelect(cat.name)}
-									aria-current={
-										isActive ? 'true' : undefined
-									}
-									aria-label={accessibleName}
-								>
-									<span
-										className="modula-gallery-takeover__sidebar-v2-nav-icon-wrap"
-										aria-hidden="true"
-									>
-										{categoryIcon ? (
-											<Icon
-												icon={categoryIcon}
-												size={20}
-												className="modula-gallery-takeover__sidebar-v2-nav-icon"
-											/>
-										) : null}
-									</span>
-									<span
-										className="modula-gallery-takeover__sidebar-v2-nav-title"
-										aria-hidden="true"
-									>
-										{getSidebarRailNavLabel(cat)}
-									</span>
-								</button>
-							</li>
-						);
-					})}
-				</ul>
-			</nav>
-			<SidebarRailFooter docsUrl={docsUrl} />
-		</div>
+		<SidebarRailNav
+			categories={visible}
+			activeCategory={activeCategory}
+			onActiveCategoryChange={onActiveCategoryChange}
+			onSelect={onSelect}
+			icons={TAKEOVER_CATEGORY_ICONS}
+			getRailLabel={getSidebarRailNavLabel}
+			docsUrl={docsUrl}
+		/>
 	);
 }

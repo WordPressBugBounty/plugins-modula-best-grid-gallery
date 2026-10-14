@@ -11,8 +11,10 @@ use Modula\V2\Beta_Settings;
 
 defined( 'ABSPATH' ) || exit;
 final class Attachment_Lifecycle {
+	public const TRASH  = 'modula/trash-attachment';
+	public const DELETE = 'modula/delete-attachment';
 	public static function operations(): array {
-		return array( 'modula/trash-attachment', 'modula/restore-attachment', 'modula/delete-attachment' ); }
+		return array( self::TRASH, 'modula/restore-attachment', self::DELETE ); }
 	public static function available( string $operation ): bool {
 		return Media_Folders::can_manage() && Folders_Dependency::available( 'usage' ) && ( 'modula/delete-attachment' === $operation || ( defined( 'MEDIA_TRASH' ) && MEDIA_TRASH && EMPTY_TRASH_DAYS ) );
 	}
@@ -23,6 +25,21 @@ final class Attachment_Lifecycle {
 				return self::execute( $input, $name );
 			}; }
 		return $out;
+	}
+	public static function abilities(): array {
+		return Operation_Table::from_callbacks(
+			self::callbacks(),
+			array(
+				'permission' => array( Media_Folders::class, 'can_manage_usage' ),
+				'available'  => array( self::class, 'available' ),
+				'dependency' => 'folders',
+				'mcp_public' => array( Folders_Dependency::class, 'mcp_usage' ),
+			),
+			array(
+				self::TRASH  => array( 'destructive' => true ),
+				self::DELETE => array( 'destructive' => true ),
+			)
+		);
 	}
 	public static function definitions(): array {
 		$out = array();

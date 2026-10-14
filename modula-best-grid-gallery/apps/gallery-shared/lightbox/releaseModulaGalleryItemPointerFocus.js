@@ -18,7 +18,7 @@ export function releaseModulaGalleryItemPointerFocus(link) {
 
 /**
  * @param {HTMLElement|null|undefined} host Gallery React root (often `display: contents`).
- * @returns {HTMLElement|null}
+ * @return {HTMLElement|null}
  */
 function resolveModulaGalleryHoverResetRoot(host) {
 	if (!(host instanceof HTMLElement)) {
@@ -53,11 +53,11 @@ export function refreshModulaGalleryTileHoverState(host) {
 }
 
 /**
- * @param {object} [context]
- * @param {boolean} [context.editorPreview]
- * @param {boolean} [context.openedViaKeyboard]
- * @param {HTMLElement} [context.galleryHostEl] Gallery host for hover-state refresh on close.
- * @param {HTMLElement} [context.clickedTileEl] Tile that opened the lightbox.
+ * @param {Object}      [context]
+ * @param {boolean}     [context.editorPreview]
+ * @param {boolean}     [context.openedViaKeyboard]
+ * @param {HTMLElement} [context.galleryHostEl]     Gallery host for hover-state refresh on close.
+ * @param {HTMLElement} [context.clickedTileEl]     Tile that opened the lightbox.
  */
 export function releaseModulaGalleryItemPointerFocusFromContext(context = {}) {
 	if (!context.openedViaKeyboard && !context.editorPreview) {

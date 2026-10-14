@@ -20,10 +20,10 @@ import { isListingRowActionEligible } from './listingRowActions';
 
 /**
  * @typedef {Object} ListingRowHoverActionDef
- * @property {ListingRowHoverActionId}   id              Action id.
- * @property {string}                    label           Visible hover link label.
- * @property {boolean}                   [isDestructive] Whether the action is destructive.
- * @property {(item: Object, options?: { canUseBulkEditor?: boolean }) => boolean} isEligible Whether the action applies to the row.
+ * @property {ListingRowHoverActionId}                                             id              Action id.
+ * @property {string}                                                              label           Visible hover link label.
+ * @property {boolean}                                                             [isDestructive] Whether the action is destructive.
+ * @property {(item: Object, options?: { canUseBulkEditor?: boolean }) => boolean} isEligible      Whether the action applies to the row.
  */
 
 /** @type {ListingRowHoverActionDef[]} */
@@ -81,8 +81,8 @@ const TRASH_ROW_HOVER_ACTIONS = [
  * Bulk Editor (listing) only when entitled (galleries only; never albums).
  * Duplicate uses the same eligibility as listing row actions; hover label is the short verb.
  *
- * @param {Object|null|undefined}                                    item Listing row.
- * @param {{ canUseBulkEditor?: boolean }}                  [options]
+ * @param {Object|null|undefined}          item      Listing row.
+ * @param {{ canUseBulkEditor?: boolean }} [options]
  * @return {ListingRowHoverAction[]} Eligible hover actions in display order.
  */
 export function getListingRowHoverActions(item, options = {}) {
@@ -91,7 +91,9 @@ export function getListingRowHoverActions(item, options = {}) {
 	}
 
 	const defs =
-		item.status === 'trash' ? TRASH_ROW_HOVER_ACTIONS : LIVE_ROW_HOVER_ACTIONS;
+		item.status === 'trash'
+			? TRASH_ROW_HOVER_ACTIONS
+			: LIVE_ROW_HOVER_ACTIONS;
 
 	return defs
 		.filter((action) => action.isEligible(item, options))

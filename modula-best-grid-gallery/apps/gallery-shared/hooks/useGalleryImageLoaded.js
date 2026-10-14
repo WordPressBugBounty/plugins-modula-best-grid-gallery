@@ -16,7 +16,7 @@ const IMAGE_TILE_IMG_SELECTOR =
 
 /**
  * @param {import('react').RefObject<HTMLElement|null>} hostRef
- * @param {boolean} enabled
+ * @param {boolean}                                     enabled
  */
 export function useGalleryImageLoaded(hostRef, enabled) {
 	useEffect(() => {

@@ -6,7 +6,13 @@ import ModulaItemsExtraComponent from './ModulaItemsExtraComponent';
 
 export const ModulaGallery = (props) => {
 	const { images, jsConfig, id } = props.attributes;
-	const { settings, checkHoverEffect, modulaRun, modulaCarouselRun, galleryElRef } = props;
+	const {
+		settings,
+		checkHoverEffect,
+		modulaRun,
+		modulaCarouselRun,
+		galleryElRef,
+	} = props;
 	const galleryRef = useRef(null);
 
 	useEffect(() => {

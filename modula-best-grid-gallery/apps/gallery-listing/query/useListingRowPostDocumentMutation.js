@@ -7,6 +7,8 @@ import {
 /**
  * Save a listing row’s post document (title / status / slug) via CPT REST.
  * Invalidates the listing query so refreshed rows show the new values.
+ * @param root0
+ * @param root0.refreshListing
  */
 export function useListingRowPostDocumentMutation({
 	refreshListing = true,

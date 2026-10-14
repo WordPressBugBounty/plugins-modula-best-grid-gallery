@@ -40,7 +40,9 @@ export function getGalleryListingConfig() {
 		listUrl: typeof raw.listUrl === 'string' ? raw.listUrl : '',
 		logoUrl: typeof raw.logoUrl === 'string' ? raw.logoUrl : '',
 		newGalleryUrl:
-			typeof raw.newGalleryUrl === 'string' ? raw.newGalleryUrl : postNewUrl,
+			typeof raw.newGalleryUrl === 'string'
+				? raw.newGalleryUrl
+				: postNewUrl,
 		postNewUrl,
 		editorChoiceQueryArg:
 			typeof raw.editorChoiceQueryArg === 'string'
@@ -51,7 +53,9 @@ export function getGalleryListingConfig() {
 				? raw.createGalleryNonce
 				: '',
 		createAlbumNonce:
-			typeof raw.createAlbumNonce === 'string' ? raw.createAlbumNonce : '',
+			typeof raw.createAlbumNonce === 'string'
+				? raw.createAlbumNonce
+				: '',
 		editorChoiceHeroUrl:
 			typeof raw.editorChoiceHeroUrl === 'string'
 				? raw.editorChoiceHeroUrl
@@ -68,8 +72,7 @@ export function getGalleryListingConfig() {
 			typeof raw.extensionEntitlements === 'object'
 				? raw.extensionEntitlements
 				: {},
-		upgradeUrl:
-			typeof raw.upgradeUrl === 'string' ? raw.upgradeUrl : '',
+		upgradeUrl: typeof raw.upgradeUrl === 'string' ? raw.upgradeUrl : '',
 		standaloneUpsellUrl:
 			typeof raw.standaloneUpsellUrl === 'string'
 				? raw.standaloneUpsellUrl

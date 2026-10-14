@@ -4,9 +4,9 @@ import { forwardRef } from '@wordpress/element';
  * Middle-column auxiliary panel shell (surface + flex column).
  * Host apps put domain content as children (reorder, hover builder, …).
  *
- * @param {Object} props
- * @param {string} [props.className]
- * @param {string} [props['aria-label']]
+ * @param {Object}                    props
+ * @param {string}                    [props.className]
+ * @param {string}                    [props['aria-label']]
  * @param {import('react').ReactNode} props.children
  */
 export const AuxiliaryPanel = forwardRef(function AuxiliaryPanel(

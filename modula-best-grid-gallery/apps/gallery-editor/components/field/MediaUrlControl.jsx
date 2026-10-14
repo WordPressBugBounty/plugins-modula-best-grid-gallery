@@ -8,12 +8,12 @@ import { isNil } from '../../logic/isNil';
 import { openWpMediaUrlPicker } from '../../utils/openWpMediaUrlPicker';
 
 /**
- * @param {Object}   props
- * @param {*}        props.value
- * @param {Function} props.onChange
- * @param {boolean}  props.disabled
+ * @param {Object}           props
+ * @param {*}                props.value
+ * @param {Function}         props.onChange
+ * @param {boolean}          props.disabled
  * @param {string|undefined} props.help
- * @param {Object}   props.control
+ * @param {Object}           props.control
  */
 export default function MediaUrlControl({
 	value,

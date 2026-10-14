@@ -10,11 +10,11 @@ import { buildImageMetadataPreviewChips } from '../../utils/imageMetadataPreview
 import { bindWpMediaFrameStacking } from '../../utils/wpMediaFrameStacking';
 
 /**
- * @param {Object}   props
- * @param {*}        props.value
- * @param {Function} props.onChange
- * @param {boolean}  props.disabled
- * @param {Object}   props.control
+ * @param {Object}              props
+ * @param {*}                   props.value
+ * @param {Function}            props.onChange
+ * @param {boolean}             props.disabled
+ * @param {Object}              props.control
  * @param {'default'|'summary'} [props.variant] summary = MetaSummary + ActionRow (Image edit “This file”).
  */
 export default function MediaAttachmentControl({

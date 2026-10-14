@@ -1,15 +1,14 @@
-import {
-	asGalleryItemList,
-} from 'gallery-shared/preview';
+import { asGalleryItemList } from 'gallery-shared/preview';
 import { useCallback, useEffect, useMemo, useRef } from '@wordpress/element';
 import { useQueryClient } from '@tanstack/react-query';
-import { useTakeoverSaveStatus } from '../../context/TakeoverSaveStatusContext';
+import { useTakeoverSaveStatus } from 'editor-shell';
 import { getGalleryBootstrapQueryKey } from '../../query/useGalleryBootstrapQuery';
 import { saveMergedGalleryItems } from '../../api/galleryUploadApi';
 import { previewCoreItemsToSaveMergedPayload } from '../../utils/embeddedGalleryItems';
 import { previewItemsLayoutFingerprint } from '../../utils/previewItemsLayoutFingerprint';
 import { patchBootstrapQueryItems } from '../../utils/patchBootstrapQueryItems';
 import { PREVIEW_PERSIST_MIN_INTERVAL_MS } from './previewPersistConstants';
+import { GALLERY_SAVE_OWNERS } from '../../constants/gallerySaveOwners';
 
 /**
  * Coordinates debounced preview item saves with bootstrap cache invalidation.
@@ -25,7 +24,7 @@ export function usePreviewPersistCoordinator({
 	storeRef,
 	preservePreviewItemsRef,
 }) {
-	const { runPersistTask, setPreviewItemsDirty } = useTakeoverSaveStatus();
+	const { runPersistTask, setDirty } = useTakeoverSaveStatus();
 	const queryClient = useQueryClient();
 
 	const persistPreviewDebounceRef = useRef(null);
@@ -70,13 +69,13 @@ export function usePreviewPersistCoordinator({
 	}, [galleryId, queryClient, storeRef]);
 
 	const runPersistTaskWithDeferredRefresh = useCallback(
-		async (task) => {
+		async (task, owner) => {
 			return runPersistTask(async () => {
 				const result = await task();
 				// Patch while persist is still in-flight so hydration cannot merge stale bootstrap.
 				patchBootstrapItemsFromStore();
 				return result;
-			});
+			}, owner);
 		},
 		[runPersistTask, patchBootstrapItemsFromStore]
 	);
@@ -86,24 +85,22 @@ export function usePreviewPersistCoordinator({
 			const st = storeRef.current;
 			if (!st) {
 				previewPersistDirtyRef.current = false;
-				setPreviewItemsDirty(false);
+				setDirty(GALLERY_SAVE_OWNERS.previewItems, false);
 				return false;
 			}
-			const currentCore = asGalleryItemList(
-				st.getState().items.items
-			);
+			const currentCore = asGalleryItemList(st.getState().items.items);
 			const currentFingerprint =
 				previewItemsLayoutFingerprint(currentCore);
 			if (currentFingerprint === savedFingerprint) {
 				previewPersistDirtyRef.current = false;
-				setPreviewItemsDirty(false);
+				setDirty(GALLERY_SAVE_OWNERS.previewItems, false);
 				return true;
 			}
 			previewPersistDirtyRef.current = true;
-			setPreviewItemsDirty(true);
+			setDirty(GALLERY_SAVE_OWNERS.previewItems, true);
 			return false;
 		},
-		[setPreviewItemsDirty, storeRef]
+		[setDirty, storeRef]
 	);
 
 	const persistPreviewCoreNow = useCallback(
@@ -114,7 +111,7 @@ export function usePreviewPersistCoordinator({
 					galleryId,
 					previewCoreItemsToSaveMergedPayload(core)
 				);
-			});
+			}, GALLERY_SAVE_OWNERS.previewItems);
 			patchBootstrapQueryItems(queryClient, galleryId, core);
 			const matched =
 				clearPreviewPersistDirtyIfStoreMatches(savedFingerprint);
@@ -161,7 +158,7 @@ export function usePreviewPersistCoordinator({
 				}
 			} catch (e) {
 				previewPersistDirtyRef.current = true;
-				setPreviewItemsDirty(true);
+				setDirty(GALLERY_SAVE_OWNERS.previewItems, true);
 			} finally {
 				previewPersistLastAtRef.current = Date.now();
 				previewPersistInFlightRef.current = false;
@@ -173,11 +170,11 @@ export function usePreviewPersistCoordinator({
 		})();
 		persistInFlightPromiseRef.current = flushPromise;
 		void flushPromise;
-	}, [galleryId, persistPreviewCoreNow, setPreviewItemsDirty, storeRef]);
+	}, [galleryId, persistPreviewCoreNow, setDirty, storeRef]);
 
 	const markPreviewPersistDirty = useCallback(() => {
 		previewPersistDirtyRef.current = true;
-		setPreviewItemsDirty(true);
+		setDirty(GALLERY_SAVE_OWNERS.previewItems, true);
 		if (persistPreviewDebounceRef.current) {
 			window.clearTimeout(persistPreviewDebounceRef.current);
 		}
@@ -185,7 +182,7 @@ export function usePreviewPersistCoordinator({
 			persistPreviewDebounceRef.current = null;
 			flushScheduledPreviewPersist();
 		}, PREVIEW_PERSIST_MIN_INTERVAL_MS);
-	}, [flushScheduledPreviewPersist, setPreviewItemsDirty]);
+	}, [flushScheduledPreviewPersist, setDirty]);
 
 	const persistPreviewItemsNow = useCallback(async () => {
 		const st = storeRef.current;
@@ -215,7 +212,7 @@ export function usePreviewPersistCoordinator({
 				}
 			} catch (e) {
 				previewPersistDirtyRef.current = true;
-				setPreviewItemsDirty(true);
+				setDirty(GALLERY_SAVE_OWNERS.previewItems, true);
 				throw e;
 			} finally {
 				previewPersistLastAtRef.current = Date.now();
@@ -232,7 +229,7 @@ export function usePreviewPersistCoordinator({
 		galleryId,
 		persistPreviewCoreNow,
 		flushScheduledPreviewPersist,
-		setPreviewItemsDirty,
+		setDirty,
 		storeRef,
 	]);
 
@@ -250,8 +247,8 @@ export function usePreviewPersistCoordinator({
 			persistPreviewDebounceRef.current = null;
 		}
 		previewPersistDirtyRef.current = false;
-		setPreviewItemsDirty(false);
-	}, [setPreviewItemsDirty]);
+		setDirty(GALLERY_SAVE_OWNERS.previewItems, false);
+	}, [setDirty]);
 
 	return {
 		queryClient,

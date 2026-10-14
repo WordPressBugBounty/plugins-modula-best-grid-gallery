@@ -19,6 +19,13 @@ final class Modern_Gallery {
 	public const OUTPUT_SCHEMA_VERSION = 2;
 
 	/**
+	 * Gallery types whose visitor layout renders the full catalog with no filter bar or pagination.
+	 * Must match GALLERY_TYPES_WITHOUT_FILTERS / GALLERY_TYPES_WITHOUT_PAGINATION in
+	 * apps/gallery-shared/constants/galleryLayoutDefaults.js (pinned by tests/test-modern-gallery-chrome-types.php).
+	 */
+	public const TYPES_WITHOUT_FILTER_PAGINATION_CHROME = array( 'slider', 'story', 'showcase', 'template', 'freeform', 'parallax-masonry', 'bnb', 'video' );
+
+	/**
 	 * Whether this gallery is a Beta gallery (visitor gallery / chunked storage).
 	 *
 	 * @param int $post_id Gallery post ID.
@@ -131,6 +138,15 @@ final class Modern_Gallery {
 	}
 
 	/**
+	 * Whether the gallery type renders without filter/pagination chrome on the public frontend.
+	 *
+	 * @param string $type Gallery type slug.
+	 */
+	public static function is_type_without_filter_pagination_chrome( string $type ): bool {
+		return in_array( trim( $type ), self::TYPES_WITHOUT_FILTER_PAGINATION_CHROME, true );
+	}
+
+	/**
 	 * Let Pro / extensions skip slicing the grid to maxImagesCount when modern catalog handles pages.
 	 *
 	 * @param bool  $skip      Incoming (unused).
@@ -144,6 +160,10 @@ final class Modern_Gallery {
 		$post_id = self::gallery_post_id_from_flat( $settings );
 		if ( ! $post_id || ! self::is_modern_stack_enabled( $post_id ) ) {
 			return (bool) $skip;
+		}
+		// These layouts expect the full catalog; a max-images slice would drop items with no pages to reach them.
+		if ( self::is_type_without_filter_pagination_chrome( (string) ( $settings['type'] ?? '' ) ) ) {
+			return true;
 		}
 		if ( ! self::is_pagination_mode_enabled( $settings ) ) {
 			return true;

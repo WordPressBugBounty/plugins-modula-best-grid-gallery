@@ -1,6 +1,4 @@
-import {
-	modulaImagesRowIndexForPreviewWrite,
-} from 'gallery-shared/preview';
+import { modulaImagesRowIndexForPreviewWrite } from 'gallery-shared/preview';
 import { useCallback, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
@@ -45,26 +43,26 @@ function SparkleIcon() {
 }
 
 /**
- * @param {Object}              props
- * @param {Object}              props.row
- * @param {number}              props.storeIndex
- * @param {boolean}             props.selected
- * @param {boolean}             props.isModified
- * @param {(v: boolean) => void} props.onToggleSelected
- * @param {boolean}             props.showFiltersColumn
- * @param {string[]}            props.filterSuggestions
- * @param {boolean}             props.aiConfigured
- * @param {boolean}             [props.unavailableOnLocalhost]
+ * @param {Object}                                                           props
+ * @param {Object}                                                           props.row
+ * @param {number}                                                           props.storeIndex
+ * @param {boolean}                                                          props.selected
+ * @param {boolean}                                                          props.isModified
+ * @param {(v: boolean) => void}                                             props.onToggleSelected
+ * @param {boolean}                                                          props.showFiltersColumn
+ * @param {string[]}                                                         props.filterSuggestions
+ * @param {boolean}                                                          props.aiConfigured
+ * @param {boolean}                                                          [props.unavailableOnLocalhost]
  * @param {(rowOrId: Object|string, patch: Record<string, unknown>) => void} props.patchRow
- * @param {(row: Object, field: string) => unknown} props.getRowField
- * @param {number}              props.galleryId
- * @param {import('@reduxjs/toolkit').Store} props.previewStore
- * @param {() => Promise<void>} props.runPersistTask
- * @param {(msg: string) => void} props.onNotice
- * @param {(rowOrId: Object|string) => void} props.onRowSaved
- * @param {boolean}             props.isDescriptionExpanded
- * @param {() => void}          props.onExpandDescription
- * @param {() => void}          props.onCollapseDescription
+ * @param {(row: Object, field: string) => unknown}                          props.getRowField
+ * @param {number}                                                           props.galleryId
+ * @param {import('@reduxjs/toolkit').Store}                                 props.previewStore
+ * @param {() => Promise<void>}                                              props.runPersistTask
+ * @param {(msg: string) => void}                                            props.onNotice
+ * @param {(rowOrId: Object|string) => void}                                 props.onRowSaved
+ * @param {boolean}                                                          props.isDescriptionExpanded
+ * @param {() => void}                                                       props.onExpandDescription
+ * @param {() => void}                                                       props.onCollapseDescription
  */
 export default function BulkEditRow({
 	row,
@@ -172,7 +170,7 @@ export default function BulkEditRow({
 		await runPersistTask(async () => {
 			await galleryRemoveImageByIndex(galleryId, restRowIndex);
 			removePreviewItemAtStoreIndex(previewStore, storeIndex);
-		});
+		}, `item-remove:${galleryId}:${rowKey}`);
 		onNotice(__('Image removed.', 'modula-best-grid-gallery'), 'success');
 		onRowSaved(rowKey);
 	}, [

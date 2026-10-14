@@ -34,7 +34,7 @@ export function registerImageProofingEditor(entry) {
 }
 
 /**
- * @returns {ImageProofingEditorRegistration|null}
+ * @return {ImageProofingEditorRegistration|null}
  */
 export function getImageProofingEditorRegistration() {
 	return registration;

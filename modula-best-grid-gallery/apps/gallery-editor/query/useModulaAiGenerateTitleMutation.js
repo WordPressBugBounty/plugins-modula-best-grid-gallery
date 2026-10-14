@@ -2,10 +2,13 @@ import { useMutation } from '@tanstack/react-query';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
- * @param {number} attachmentId
+ * @param {number}               attachmentId
  * @param {'generate'|'refresh'} [action]
  */
-export function modulaAiGenerateTitleRequest(attachmentId, action = 'generate') {
+export function modulaAiGenerateTitleRequest(
+	attachmentId,
+	action = 'generate'
+) {
 	return apiFetch({
 		path: '/modula-ai-image-descriptor/v1/generate-alt-text/',
 		method: 'POST',

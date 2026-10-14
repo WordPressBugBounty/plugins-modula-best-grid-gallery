@@ -8,8 +8,8 @@ export const actionTypes = {
 	SET_STARTED: 'SET_STARTED',
 };
 
-export const reducer = ( state, action ) => {
-	switch ( action.type ) {
+export const reducer = (state, action) => {
+	switch (action.type) {
 		case actionTypes.UPDATE_TOTAL_IMAGES:
 			return {
 				...state,

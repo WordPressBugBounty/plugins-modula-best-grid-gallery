@@ -128,6 +128,11 @@ export function usePreviewItemAdminActions({
 			}
 			const itemsSnap = st.getState().items.items;
 			const row = itemsSnap[storeIndex];
+			const occurrenceId =
+				row?.freeformId ||
+				row?.embeddedId ||
+				`${row?.id}:${storeIndex}`;
+			const removeOwner = `item-remove:${galleryId}:${occurrenceId}`;
 			if (row && isEmbeddedGalleryItemRow(row)) {
 				if (isTemplateProtectedEmbeddedRow(row, galleryType)) {
 					return;
@@ -147,7 +152,7 @@ export function usePreviewItemAdminActions({
 							galleryId,
 							previewCoreItemsToSaveMergedPayload(core)
 						);
-					});
+					}, removeOwner);
 					commitPreviewCatalog(st, core);
 					if (wasEditingThis) {
 						itemEditSidebar.close();
@@ -176,7 +181,7 @@ export function usePreviewItemAdminActions({
 					await galleryRemoveImageByIndex(galleryId, restRowIndex);
 					// Update Redux before deferred bootstrap patch (runPersistTaskWithDeferredRefresh).
 					removePreviewItemAtStoreIndex(st, storeIndex);
-				});
+				}, removeOwner);
 				if (wasEditingThis) {
 					if (nextStoreIndex !== null) {
 						itemEditSidebar.open(nextStoreIndex);
@@ -305,6 +310,7 @@ export function usePreviewItemAdminActions({
 					}
 					let didReplace = false;
 					try {
+						const replaceOwner = `item-replace:${galleryId}:${indices.join(',')}`;
 						await runPreviewItemMutation(async () => {
 							for (let i = 0; i < toReplace.length; i++) {
 								const storeIndex = indices[i];
@@ -356,7 +362,7 @@ export function usePreviewItemAdminActions({
 									didReplace = true;
 								}
 							}
-						});
+						}, replaceOwner);
 					} catch (e) {
 						// eslint-disable-next-line no-console
 						console.error(e);
@@ -459,7 +465,7 @@ export function usePreviewItemAdminActions({
 					galleryId,
 					previewCoreItemsToSaveMergedPayload(reanchored)
 				);
-			});
+			}, `item-content:${galleryId}:${eidNorm}`);
 			commitPreviewCatalog(st, reanchored);
 			setContentBlockEdit(null);
 		},

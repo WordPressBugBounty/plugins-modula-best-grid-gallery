@@ -27,7 +27,7 @@ export function registerPaginationEditor(entry) {
 }
 
 /**
- * @returns {PaginationEditorRegistration|null}
+ * @return {PaginationEditorRegistration|null}
  */
 export function getPaginationEditorRegistration() {
 	return registration;

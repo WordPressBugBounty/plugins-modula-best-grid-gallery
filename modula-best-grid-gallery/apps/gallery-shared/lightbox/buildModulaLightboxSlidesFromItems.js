@@ -33,8 +33,8 @@ import {
 
 /**
  * @param {unknown} row
- * @param {object} [config]
- * @returns {string}
+ * @param {Object}  [config]
+ * @return {string}
  */
 function resolveLicensingCaptionForRow(row, config) {
 	if (
@@ -58,8 +58,8 @@ function resolveLicensingCaptionForRow(row, config) {
 
 /**
  * @param {unknown} row
- * @param {object} [config]
- * @returns {boolean}
+ * @param {Object}  [config]
+ * @return {boolean}
  */
 function isLightboxSlideRow(row, config) {
 	if (!row || typeof row !== 'object') {
@@ -92,10 +92,10 @@ function isLightboxSlideRow(row, config) {
 }
 
 /**
- * @param {unknown[]} items Gallery rows from the store.
- * @param {object} [groupedSettings]
- * @param {object} [config] Flat gallery config (licensing, lightbox mode, video).
- * @returns {Array<{ src: string, image_id?: string, opts: object }>}
+ * @param {unknown[]} items             Gallery rows from the store.
+ * @param {Object}    [groupedSettings]
+ * @param {Object}    [config]          Flat gallery config (licensing, lightbox mode, video).
+ * @return {Array<{ src: string, image_id?: string, opts: object }>}
  */
 export function buildModulaLightboxSlidesFromItems(
 	items,
@@ -111,7 +111,7 @@ export function buildModulaLightboxSlidesFromItems(
 	/** @type {Array<{ src: string, image_id?: string, opts: object }>} */
 	const slides = [];
 
-	for (const sourceRow of items) {
+	for (const [catalogIndex, sourceRow] of items.entries()) {
 		if (!isLightboxSlideRow(sourceRow, config)) {
 			continue;
 		}
@@ -170,6 +170,7 @@ export function buildModulaLightboxSlidesFromItems(
 
 		slides.push({
 			src: playbackSrc,
+			catalog_index: catalogIndex,
 			item_id: String(sourceRow.id ?? ''),
 			image_id: imageIdStr,
 			/*

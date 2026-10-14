@@ -17,7 +17,7 @@ import GalleryItemExpandableSocials from '../../components/social/GalleryItemExp
 
 /**
  * @param {unknown} styleValue
- * @returns {Record<string, string>}
+ * @return {Record<string, string>}
  */
 function parseInlineStyle(styleValue) {
 	if (!styleValue) {
@@ -50,17 +50,17 @@ function parseInlineStyle(styleValue) {
 }
 
 /**
- * @param {object} props
- * @param {string} props.itemKey
- * @param {object} props.itemData
- * @param {object} props.config
- * @param {number} props.width
- * @param {number} props.height
- * @param {number} [props.marginX]
- * @param {boolean} props.isActive
- * @param {boolean} props.lazy
+ * @param {Object}                               props
+ * @param {string}                               props.itemKey
+ * @param {Object}                               props.itemData
+ * @param {Object}                               props.config
+ * @param {number}                               props.width
+ * @param {number}                               props.height
+ * @param {number}                               [props.marginX]
+ * @param {boolean}                              props.isActive
+ * @param {boolean}                              props.lazy
  * @param {(key: string, ratio: number) => void} [props.onAspectRatio]
- * @param {() => void} [props.onSelect]
+ * @param {() => void}                           [props.onSelect]
  */
 function ShowcaseSlide({
 	itemKey,

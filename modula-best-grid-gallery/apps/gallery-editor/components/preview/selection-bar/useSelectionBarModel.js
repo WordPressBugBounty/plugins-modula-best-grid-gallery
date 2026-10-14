@@ -1,14 +1,12 @@
 /**
  * Selection-bar data: selected rows, filter tri-state, bulk filter persist.
  */
-import {
-	asGalleryItemList,
-} from 'gallery-shared/preview';
+import { asGalleryItemList } from 'gallery-shared/preview';
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
+import { useTakeoverSaveStatus } from 'editor-shell';
 import { useGallerySettingsFormBundle } from '../../../form/GallerySettingsFormContext';
 import { useGalleryPreviewTileSelection } from '../../../context/GalleryPreviewTileSelectionContext';
 import { usePreviewReduxStoreItems } from '../../../hooks/usePreviewReduxStoreItems';
-import { useTakeoverSaveStatus } from '../../../context/TakeoverSaveStatusContext';
 import { getGalleryPreviewReduxStore } from '../../../utils/previewReduxStoreRef';
 import { saveMergedGalleryItems } from '../../../api/galleryUploadApi';
 import { commitPreviewCatalog } from '../../../utils/previewItemsCommit';
@@ -199,7 +197,7 @@ export function useSelectionBarModel({
 					await saveMergedGalleryItems(galleryId, payload);
 					mergeTagsIntoGalleryFilterSettings(form, newTags);
 					commitPreviewCatalog(store, payload);
-				});
+				}, 'gallery-item-filters');
 			} finally {
 				setFilterBusy(false);
 			}

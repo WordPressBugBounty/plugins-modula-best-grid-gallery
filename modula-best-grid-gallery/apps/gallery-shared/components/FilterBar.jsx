@@ -36,9 +36,9 @@ import {
 } from '../utils/filterImageUsageCounts';
 
 /**
- * @param {string} label
+ * @param {string}                label
  * @param {number|null|undefined} count
- * @param {boolean} showCount
+ * @param {boolean}               showCount
  */
 function FilterBarLabel({ label, count, showCount }) {
 	if (!showCount || count === undefined || count === null) {

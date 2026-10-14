@@ -58,15 +58,15 @@ import {
 
 /**
  * @typedef {Object} GalleryItemViewModelOptions
- * @property {Object|null} [style]           - Optional inline styles for outer wrapper.
- * @property {string}      [extraClassName]  - Extra class names for the tile.
- * @property {number}      [slotWidth]       - Tile width for legacy placement / sizes.
- * @property {number}      [slotHeight]      - Tile height for legacy placement.
- * @property {boolean}     [fillSlot]        - When true, image covers the slot.
- * @property {boolean}     [renderLinks]   - Output tile link overlay on the public frontend.
- * @property {boolean}     [forceLinkNewTab] - Force target=_blank on simple links (visitor hosts may set).
+ * @property {Object|null} [style]                    - Optional inline styles for outer wrapper.
+ * @property {string}      [extraClassName]           - Extra class names for the tile.
+ * @property {number}      [slotWidth]                - Tile width for legacy placement / sizes.
+ * @property {number}      [slotHeight]               - Tile height for legacy placement.
+ * @property {boolean}     [fillSlot]                 - When true, image covers the slot.
+ * @property {boolean}     [renderLinks]              - Output tile link overlay on the public frontend.
+ * @property {boolean}     [forceLinkNewTab]          - Force target=_blank on simple links (visitor hosts may set).
  * @property {boolean}     [stripHoverBuilderClasses] - Remove hover-builder runtime classes from tile.
- * @property {number}      [deeplinkIndex] - 0-based index among lightbox slides for social deeplink URLs.
+ * @property {number}      [deeplinkIndex]            - 0-based index among lightbox slides for social deeplink URLs.
  */
 
 /**

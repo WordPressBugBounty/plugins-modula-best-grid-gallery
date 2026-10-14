@@ -20,6 +20,7 @@ export const GALLERY_TYPES_WITHOUT_FILTERS = new Set([
 	'story',
 	'showcase',
 	'template',
+	'freeform',
 	'parallax-masonry',
 	'bnb',
 	'video',
@@ -35,6 +36,7 @@ export const GALLERY_TYPES_WITHOUT_PAGINATION = new Set([
 	'story',
 	'showcase',
 	'template',
+	'freeform',
 	'parallax-masonry',
 	'bnb',
 	'video',
@@ -49,7 +51,7 @@ export const GALLERY_TYPES_WITHOUT_FILTER_PAGINATION =
 
 /**
  * @param {string|undefined|null} type
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isGalleryTypeWithoutFilters(type) {
 	return GALLERY_TYPES_WITHOUT_FILTERS.has(String(type || '').trim());
@@ -57,7 +59,7 @@ export function isGalleryTypeWithoutFilters(type) {
 
 /**
  * @param {string|undefined|null} type
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isGalleryTypeWithoutPagination(type) {
 	return GALLERY_TYPES_WITHOUT_PAGINATION.has(String(type || '').trim());
@@ -65,7 +67,7 @@ export function isGalleryTypeWithoutPagination(type) {
 
 /**
  * @param {string|undefined|null} type
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isGalleryTypeWithoutFilterPagination(type) {
 	return isGalleryTypeWithoutPagination(type);
@@ -84,7 +86,7 @@ export const GALLERY_TYPES_WITHOUT_LIGHTBOX = new Set([
 
 /**
  * @param {string|undefined|null} type
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isGalleryTypeWithoutLightbox(type) {
 	return GALLERY_TYPES_WITHOUT_LIGHTBOX.has(String(type || '').trim());
@@ -101,12 +103,13 @@ export const GALLERY_TYPES_WITHOUT_LOADING_EFFECTS = new Set([
 	'slider',
 	'showcase',
 	'template',
+	'freeform',
 	'video',
 ]);
 
 /**
  * @param {string|undefined|null} type
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isGalleryTypeWithoutLoadingEffects(type) {
 	return GALLERY_TYPES_WITHOUT_LOADING_EFFECTS.has(String(type || '').trim());
@@ -117,14 +120,11 @@ export function isGalleryTypeWithoutLoadingEffects(type) {
  *
  * @type {ReadonlySet<string>}
  */
-export const GALLERY_TYPES_WITHOUT_HOVER_EFFECTS = new Set([
-	'story',
-	'slider',
-]);
+export const GALLERY_TYPES_WITHOUT_HOVER_EFFECTS = new Set(['story', 'slider']);
 
 /**
  * @param {string|undefined|null} type
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isGalleryTypeWithoutHoverEffects(type) {
 	return GALLERY_TYPES_WITHOUT_HOVER_EFFECTS.has(String(type || '').trim());
@@ -139,7 +139,7 @@ export const GALLERY_TYPES_WITHOUT_IMAGE_GUARDIAN = new Set(['video']);
 
 /**
  * @param {string|undefined|null} type
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isGalleryTypeWithoutImageGuardian(type) {
 	return GALLERY_TYPES_WITHOUT_IMAGE_GUARDIAN.has(String(type || '').trim());
@@ -161,7 +161,7 @@ export const GALLERY_TYPES_WITH_ITEM_DIMENSIONS = new Set([
 
 /**
  * @param {string|undefined|null} type
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isGalleryTypeWithItemDimensions(type) {
 	return GALLERY_TYPES_WITH_ITEM_DIMENSIONS.has(String(type || '').trim());

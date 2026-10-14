@@ -32,7 +32,7 @@ const IMPORTABLE_BUILDER_KEYS = new Set([
 
 /**
  * @param {unknown} value
- * @returns {Record<string, any>|null}
+ * @return {Record<string, any>|null}
  */
 function asObject(value) {
 	if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -43,7 +43,7 @@ function asObject(value) {
 
 /**
  * @param {Record<string, any>} raw
- * @returns {{ builderPatch: Record<string, any>, hoverPatch: Record<string, any> }}
+ * @return {{ builderPatch: Record<string, any>, hoverPatch: Record<string, any> }}
  */
 function normalizeImportPayload(raw) {
 	const root = asObject(raw) || {};
@@ -74,7 +74,7 @@ function normalizeImportPayload(raw) {
 /**
  * @param {Record<string, any>} currentBuilder
  * @param {Record<string, any>} builderPatch
- * @returns {Record<string, any>}
+ * @return {Record<string, any>}
  */
 function mergeBuilderPatch(currentBuilder, builderPatch) {
 	const next = { ...currentBuilder, ...builderPatch };
@@ -111,12 +111,12 @@ function mergeBuilderPatch(currentBuilder, builderPatch) {
 }
 
 /**
- * @param {Object} props
- * @param {boolean} props.isOpen
- * @param {() => void} props.onClose
- * @param {Record<string, any>} props.currentBuilder
- * @param {string} props.currentHoverColor
- * @param {number} props.currentHoverOpacity
+ * @param {Object}                                                                      props
+ * @param {boolean}                                                                     props.isOpen
+ * @param {() => void}                                                                  props.onClose
+ * @param {Record<string, any>}                                                         props.currentBuilder
+ * @param {string}                                                                      props.currentHoverColor
+ * @param {number}                                                                      props.currentHoverOpacity
  * @param {(nextBuilder: Record<string, any>, hoverPatch: Record<string, any>) => void} props.onApply
  */
 export default function HoverBuilderPresetJsonModal({

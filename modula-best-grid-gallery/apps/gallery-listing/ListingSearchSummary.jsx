@@ -41,7 +41,7 @@ export function ListingSearchSummary({ view, total, onChangeView }) {
 						&ldquo;{query}&rdquo;
 					</strong>
 					{__(
-						' · gallery titles and IDs.',
+						'· gallery titles and IDs.',
 						'modula-best-grid-gallery'
 					)}
 				</p>

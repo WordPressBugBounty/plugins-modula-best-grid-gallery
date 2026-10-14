@@ -30,7 +30,7 @@ export function registerGalleryDefaultsEditor(entry) {
 }
 
 /**
- * @returns {GalleryDefaultsEditorRegistration|null}
+ * @return {GalleryDefaultsEditorRegistration|null}
  */
 export function getGalleryDefaultsEditorRegistration() {
 	return registration;

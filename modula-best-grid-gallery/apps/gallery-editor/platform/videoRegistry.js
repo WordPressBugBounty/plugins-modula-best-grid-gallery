@@ -25,7 +25,7 @@ export function registerVideoEditor(entry) {
 }
 
 /**
- * @returns {VideoEditorRegistration|null}
+ * @return {VideoEditorRegistration|null}
  */
 export function getVideoEditorRegistration() {
 	return registration;

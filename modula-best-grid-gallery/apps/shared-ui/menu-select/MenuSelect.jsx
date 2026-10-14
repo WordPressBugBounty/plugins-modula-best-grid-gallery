@@ -27,7 +27,7 @@ import {
  */
 
 /**
- * @param {MenuSelectOption[]} options
+ * @param {MenuSelectOption[]}          options
  * @param {MenuSelectGroup[]|undefined} groups
  * @return {MenuSelectGroup[]}
  */
@@ -48,7 +48,7 @@ function resolveGroups(options, groups) {
 
 /**
  * @param {MenuSelectGroup[]} groups
- * @param {string} currentKey
+ * @param {string}            currentKey
  * @return {MenuSelectOption|null}
  */
 function findSelectedOption(groups, currentKey) {
@@ -68,18 +68,18 @@ function findSelectedOption(groups, currentKey) {
  *
  * Search is intentionally not built in; pass `menuHeader` later for a search field.
  *
- * @param {Object} props
- * @param {MenuSelectOption[]} [props.options] Flat list (ignored when `groups` is set)
- * @param {MenuSelectGroup[]} [props.groups] Grouped options with optional section labels
- * @param {string} [props.value]
- * @param {Function} [props.onChange] Receives string value
- * @param {boolean} [props.disabled]
- * @param {string} [props.help]
- * @param {string} [props.className]
- * @param {string} [props.id]
- * @param {string} [props.listLabel] aria-label for the menu
- * @param {string} [props.placeholder] Label when value is empty / unknown
- * @param {import('react').ReactNode} [props.menuHeader] Optional content above the option list
+ * @param {Object}                    props
+ * @param {MenuSelectOption[]}        [props.options]     Flat list (ignored when `groups` is set)
+ * @param {MenuSelectGroup[]}         [props.groups]      Grouped options with optional section labels
+ * @param {string}                    [props.value]
+ * @param {Function}                  [props.onChange]    Receives string value
+ * @param {boolean}                   [props.disabled]
+ * @param {string}                    [props.help]
+ * @param {string}                    [props.className]
+ * @param {string}                    [props.id]
+ * @param {string}                    [props.listLabel]   aria-label for the menu
+ * @param {string}                    [props.placeholder] Label when value is empty / unknown
+ * @param {import('react').ReactNode} [props.menuHeader]  Optional content above the option list
  */
 export const MenuSelect = forwardRef(function MenuSelect(
 	{

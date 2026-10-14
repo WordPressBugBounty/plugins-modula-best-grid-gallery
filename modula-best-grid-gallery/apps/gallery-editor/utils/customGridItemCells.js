@@ -69,7 +69,7 @@ export function snapshotCustomGridItemCells(catalog) {
 /**
  * Best-effort merge: missing gallery item ids are skipped.
  *
- * @param {unknown} catalog Preview catalog (gallery items).
+ * @param {unknown}                                           catalog Preview catalog (gallery items).
  * @param {Record<string, CustomGridItemCell>|null|undefined} slice
  * @return {Object[]} Catalog with matching cells replaced; original rows are not mutated.
  */
@@ -92,6 +92,11 @@ export function mergeCustomGridItemCells(catalog, slice) {
 		if (!cell || typeof cell !== 'object') {
 			return { ...row };
 		}
-		return { ...row, ...readCell(cell) };
+		const restored = { ...row };
+		// A checkpoint also records absence: the first drag creates explicit origins.
+		for (const field of CELL_KEYS) {
+			delete restored[field];
+		}
+		return { ...restored, ...readCell(cell) };
 	});
 }

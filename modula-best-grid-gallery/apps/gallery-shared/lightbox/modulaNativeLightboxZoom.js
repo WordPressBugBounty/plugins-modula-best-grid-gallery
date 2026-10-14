@@ -14,7 +14,7 @@ const ELEVATE_POSITION_TO_CORNER = {
 
 /**
  * @param {*} value
- * @returns {boolean}
+ * @return {boolean}
  */
 function truthy(value) {
 	if (value === true || value === 1 || value === '1') {
@@ -28,7 +28,7 @@ function truthy(value) {
 
 /**
  * @param {unknown} fancybox
- * @returns {object|null}
+ * @return {object|null}
  */
 function resolveMzoomFromFancybox(fancybox) {
 	if (!fancybox || typeof fancybox !== 'object') {
@@ -52,8 +52,8 @@ function resolveMzoomFromFancybox(fancybox) {
 }
 
 /**
- * @param {object} mzoom Legacy ezPlus-shaped options from settings / PHP.
- * @returns {object|null}
+ * @param {Object} mzoom Legacy ezPlus-shaped options from settings / PHP.
+ * @return {object|null}
  */
 export function normalizeMzoomToNativeOpts(mzoom) {
 	if (!mzoom || typeof mzoom !== 'object') {
@@ -99,7 +99,7 @@ export function normalizeMzoomToNativeOpts(mzoom) {
 
 /**
  * @param {HTMLElement} container
- * @returns {HTMLImageElement|null}
+ * @return {HTMLImageElement|null}
  */
 function resolveDomLightboxImage(container) {
 	const img = container.querySelector(
@@ -109,9 +109,9 @@ function resolveDomLightboxImage(container) {
 }
 
 /**
- * @param {unknown} fancybox
+ * @param {unknown}     fancybox
  * @param {HTMLElement} container
- * @returns {{ image: HTMLImageElement, slide: object|null, panzoom: object|null }|null}
+ * @return {{ image: HTMLImageElement, slide: object|null, panzoom: object|null }|null}
  */
 function resolveSlideContext(fancybox, container) {
 	const slide =
@@ -148,8 +148,8 @@ function resolveSlideContext(fancybox, container) {
 
 class ModulaNativeZoomSession {
 	/**
-	 * @param {object} fancybox
-	 * @param {object} opts
+	 * @param {Object} fancybox
+	 * @param {Object} opts
 	 */
 	constructor(fancybox, opts) {
 		this.fancybox = fancybox;
@@ -172,7 +172,7 @@ class ModulaNativeZoomSession {
 	}
 
 	/**
-	 * @returns {HTMLElement|null}
+	 * @return {HTMLElement|null}
 	 */
 	getContainer() {
 		const container =
@@ -343,14 +343,14 @@ class ModulaNativeZoomSession {
 
 	/**
 	 * @param {MouseEvent} event
-	 * @param {number} ratioX
-	 * @param {number} ratioY
+	 * @param {number}     ratioX
+	 * @param {number}     ratioY
 	 */
 	/**
 	 * @param {MouseEvent} event
-	 * @param {number} ratioX
-	 * @param {number} ratioY
-	 * @param {DOMRect} rect
+	 * @param {number}     ratioX
+	 * @param {number}     ratioY
+	 * @param {DOMRect}    rect
 	 */
 	applyInnerZoom(event, ratioX, ratioY, rect) {
 		const container = this.getContainer();
@@ -394,11 +394,11 @@ class ModulaNativeZoomSession {
 	}
 
 	/**
-	 * @param {number} offsetX
-	 * @param {number} offsetY
+	 * @param {number}  offsetX
+	 * @param {number}  offsetY
 	 * @param {DOMRect} rect
-	 * @param {number} ratioX
-	 * @param {number} ratioY
+	 * @param {number}  ratioX
+	 * @param {number}  ratioY
 	 */
 	applyLensZoom(offsetX, offsetY, rect, ratioX, ratioY) {
 		const container = this.getContainer();
@@ -430,8 +430,8 @@ class ModulaNativeZoomSession {
 
 	/**
 	 * @param {DOMRect} rect
-	 * @param {number} ratioX
-	 * @param {number} ratioY
+	 * @param {number}  ratioX
+	 * @param {number}  ratioY
 	 */
 	applyWindowZoom(rect, ratioX, ratioY) {
 		const container = this.getContainer();
@@ -469,7 +469,7 @@ class ModulaNativeZoomSession {
 
 	/**
 	 * @param {HTMLElement} container
-	 * @returns {HTMLElement}
+	 * @return {HTMLElement}
 	 */
 	ensureInnerOverlayEl(container) {
 		if (this.innerOverlayEl) {
@@ -484,7 +484,7 @@ class ModulaNativeZoomSession {
 
 	/**
 	 * @param {HTMLElement} container
-	 * @returns {HTMLElement}
+	 * @return {HTMLElement}
 	 */
 	ensureLensEl(container) {
 		if (this.lensEl) {
@@ -499,7 +499,7 @@ class ModulaNativeZoomSession {
 
 	/**
 	 * @param {HTMLElement} container
-	 * @returns {HTMLElement}
+	 * @return {HTMLElement}
 	 */
 	ensureWindowEl(container) {
 		if (this.windowEl) {
@@ -514,7 +514,7 @@ class ModulaNativeZoomSession {
 
 	/**
 	 * @param {HTMLElement} container
-	 * @returns {HTMLElement}
+	 * @return {HTMLElement}
 	 */
 	ensureTintEl(container) {
 		if (this.tintEl) {
@@ -597,20 +597,20 @@ class ModulaNativeZoomSession {
 /**
  * @param {number} client
  * @param {number} containerOrigin
- * @returns {number}
+ * @return {number}
  */
 function eventClientToContainer(client, containerOrigin) {
 	return client - containerOrigin;
 }
 
 /**
- * @param {HTMLElement} target
+ * @param {HTMLElement}      target
  * @param {HTMLImageElement} image
- * @param {number} scale
- * @param {number} ratioX
- * @param {number} ratioY
- * @param {number} viewWidth
- * @param {number} viewHeight
+ * @param {number}           scale
+ * @param {number}           ratioX
+ * @param {number}           ratioY
+ * @param {number}           viewWidth
+ * @param {number}           viewHeight
  */
 function applyBackgroundZoom(
 	target,

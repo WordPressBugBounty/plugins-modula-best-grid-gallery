@@ -60,10 +60,10 @@ const SOCIAL_PREVIEW_DEFS = [
 
 /**
  * @param {unknown} value
- * @param {number} fallback
- * @param {number} min
- * @param {number} max
- * @returns {number}
+ * @param {number}  fallback
+ * @param {number}  min
+ * @param {number}  max
+ * @return {number}
  */
 function normalizeNumericSetting(value, fallback, min, max) {
 	const n = Number(value);

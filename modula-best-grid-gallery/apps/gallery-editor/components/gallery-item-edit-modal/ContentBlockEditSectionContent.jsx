@@ -30,7 +30,7 @@ import {
 } from '../../utils/contentBlockEditState';
 
 /**
- * @param {boolean} hideSectionChrome
+ * @param {boolean}                   hideSectionChrome
  * @param {import('react').ReactNode} children
  */
 function SectionFieldsShell({ hideSectionChrome, children }) {
@@ -49,7 +49,7 @@ function SectionFieldsShell({ hideSectionChrome, children }) {
  * @param {string}   props.sectionName
  * @param {Object}   props.state
  * @param {Function} props.setState
- * @param {string}   props.editorInstanceKey Stable key for WpClassicCaptionEditor.
+ * @param {string}   props.editorInstanceKey   Stable key for WpClassicCaptionEditor.
  * @param {boolean}  props.disabled
  * @param {boolean}  props.hasWpEditor
  * @param {boolean}  [props.hideSectionChrome] When true (settings sidebar), skip modal section header.

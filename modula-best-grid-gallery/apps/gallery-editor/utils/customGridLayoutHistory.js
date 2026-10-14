@@ -41,7 +41,7 @@ export function describeCustomGridLockStep(locked) {
  * @param {{
  *   commitLayoutStep: (args: { label: string, layout: Record<string, unknown> }) => void,
  * }} history
- * @param {{ kind?: 'drag'|'resize'|string|null, catalog: unknown }} args
+ * @param {{ kind?: 'drag'|'resize'|string|null, catalog: unknown }}                              args
  * @return {Record<string, unknown>} Committed slice.
  */
 export function commitCustomGridLayoutHistoryStep(history, args) {
@@ -89,7 +89,7 @@ export function commitCustomGridLockHistoryStep(history, args) {
 /**
  * Best-effort merge of a layout history slice onto the current preview catalog.
  *
- * @param {unknown} catalog
+ * @param {unknown}                                catalog
  * @param {Record<string, unknown>|null|undefined} layoutSlice
  * @return {Object[]}
  */

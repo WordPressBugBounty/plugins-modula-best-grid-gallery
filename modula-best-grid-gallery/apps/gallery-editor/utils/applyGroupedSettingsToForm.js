@@ -4,8 +4,8 @@
  * `form.reset(next)` alone can leave mounted Fields (e.g. layout.gridType Select)
  * on a stale nested value; follow with per-key `setFieldValue` so undo/redo sticks.
  *
- * @param {{ reset: Function, setFieldValue: Function }} form
- * @param {Record<string, Record<string, unknown>>} doc
+ * @param {{ reset: Function, setFieldValue: Function }}                                            form
+ * @param {Record<string, Record<string, unknown>>}                                                 doc
  * @param {(v: Record<string, Record<string, unknown>>) => Record<string, Record<string, unknown>>} cloneGroupedSettings
  * @return {Record<string, Record<string, unknown>>}
  */

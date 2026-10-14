@@ -3,23 +3,122 @@
 namespace Modula\V2\Abilities;
 
 use Modula\V2\Beta_Settings;
+use Modula\V2\Freeform_Catalog;
 use Modula\V2\Meta_Sync;
 use Modula\V2\Images\Adapter;
 
 defined( 'ABSPATH' ) || exit;
 
 final class Integration {
+	public const DISCOVER       = 'modula/discover';
+	public const LIST_GALLERIES = 'modula/list-galleries';
+	public const READ_GALLERY   = 'modula/read-gallery';
+
 	public static function init(): void {
-		if ( ! Pro_Dependency::activates() ) {
-			return;
-		}
 		if ( ! function_exists( 'wp_register_ability' ) || ! function_exists( 'wp_register_ability_category' ) || ! function_exists( 'wp_get_ability' ) ) {
 			return;
 		}
 		Attachment_Image::init();
+		Galleries::boot();
+		Intake::boot();
+		Media::boot();
+		Album_Explanation::boot();
+		Preset_Explanation::boot();
+		Intake_Explanation::boot();
+		Collection_Explanation::boot();
+		Storage_Explanation::boot();
+		Transfer_Explanation::boot();
+		Bound_Explanation::boot();
+		Video_Explanation::boot();
+		Instagram_Explanation::boot();
+		Watermark_Explanation::boot();
+		Proofing_Explanation::boot();
+		Site_Settings::boot();
+		Input_Context::boot();
+		Site_Explanation::boot();
 		add_action( 'modula_abilities_cleanup', array( Requests::class, 'cleanup' ) );
 		add_action( 'wp_abilities_api_categories_init', array( __CLASS__, 'register_category' ) );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_abilities' ) );
+	}
+
+	public static function abilities(): array {
+		return array(
+			self::DISCOVER       => array(
+				'execute' => array( self::class, 'discover' ),
+			),
+			self::LIST_GALLERIES => array(
+				'execute' => array( self::class, 'list_galleries' ),
+			),
+			self::READ_GALLERY   => array(
+				'execute'    => array( self::class, 'read_gallery' ),
+				'permission' => array( self::class, 'can_read_gallery' ),
+			),
+		);
+	}
+
+	/** @return array<int,class-string> */
+	private static function owners(): array {
+		return array(
+			self::class,
+			Batch::class,
+			Embedded::class,
+			Composition::class,
+			Update::class,
+			Creation::class,
+			Requests::class,
+			Lifecycle::class,
+			Proofing_Email::class,
+			Proofing_Selections::class,
+			Proofing::class,
+			Proofing_Clients::class,
+			Instagram::class,
+			Watermark::class,
+			Video::class,
+			Transfers::class,
+			Bound::class,
+			Storage::class,
+			Replacement::class,
+			Diagnostics::class,
+			Intake::class,
+			Site_Settings::class,
+			Attachment_Lifecycle::class,
+			Collections::class,
+			Attachment_Image::class,
+			Attachments::class,
+			Media_Folders::class,
+			Album_Lifecycle::class,
+			Album_Members::class,
+			Albums::class,
+			Presets::class,
+			Album_Presets::class,
+		);
+	}
+
+	/**
+	 * @return array<string,array{execute:callable,permission:?callable,gates:array<int,callable>,destructive:bool,outcome:bool}>
+	 */
+	private static function table(): array {
+		static $table = null;
+		if ( is_array( $table ) ) {
+			return $table;
+		}
+		$table = Operation_Table::collect( self::owners() );
+		return $table;
+	}
+
+	/**
+	 * @return array<string,mixed>
+	 */
+	public static function operation( string $name ): array {
+		return self::table()[ $name ] ?? array();
+	}
+
+	public static function callback_map(): array {
+		$callbacks = array();
+		foreach ( self::table() as $name => $row ) {
+			$callbacks[ $name ] = $row['execute'];
+		}
+		return $callbacks;
 	}
 
 	public static function register_category(): void {
@@ -33,73 +132,20 @@ final class Integration {
 	}
 
 	public static function register_abilities(): void {
-		$callbacks = array(
-			Batch::MEDIA             => array( Batch::class, 'media' ),
-			Batch::OPERATION         => array( Batch::class, 'execute' ),
-			Embedded::OPERATION      => array( Embedded::class, 'execute' ),
-			Composition::OPERATION   => array( Composition::class, 'execute' ),
-			'modula/update-gallery'  => array( Update::class, 'execute' ),
-			'modula/create-gallery'  => array( Creation::class, 'execute' ),
-			'modula/recover-request' => array( Requests::class, 'recover' ),
-			'modula/discover'        => 'discover',
-			'modula/list-galleries'  => 'list_galleries',
-			'modula/read-gallery'    => 'read_gallery',
-		);
-		$callbacks = array_merge( $callbacks, Proofing_Email::callbacks(), Proofing_Selections::callbacks(), Proofing::callbacks(), Proofing_Clients::callbacks(), Instagram::callbacks(), Watermark::callbacks(), Video::callbacks(), Transfers::callbacks(), Bound::callbacks(), Storage::callbacks(), Replacement::callbacks(), Diagnostics::callbacks(), Intake::callbacks(), Site_Settings::callbacks(), Attachment_Lifecycle::callbacks(), Collections::callbacks(), Attachment_Image::callbacks(), Attachments::callbacks(), Media_Folders::callbacks(), Album_Lifecycle::callbacks(), Album_Members::callbacks(), Albums::callbacks(), Presets::callbacks(), Album_Presets::callbacks() );
-		foreach ( Lifecycle::operations() as $name ) {
-			$callbacks[ $name ] = array( Lifecycle::class, explode( '-', substr( $name, 7 ) )[0] ); }
+		$callbacks = Providers::callbacks();
+		$table     = self::table();
 		foreach ( Contract::definitions() as $name => $definition ) {
-			$definition['category']         = 'modula';
-			$definition['execute_callback'] = ( is_array( $callbacks[ $name ] ) || $callbacks[ $name ] instanceof \Closure ) ? $callbacks[ $name ] : array( __CLASS__, $callbacks[ $name ] );
-			$readonly                       = ! Contract::is_mutation( $name );
-			if ( ! $readonly || 'modula/recover-request' === $name ) {
+			if ( ! isset( $callbacks[ $name ] ) ) {
+				continue;
+			}
+			$row                               = isset( $table[ $name ] ) ? $table[ $name ] : array();
+			$readonly                          = ! Contract::is_mutation( $name );
+			$definition['category']            = 'modula';
+			$definition['execute_callback']    = $callbacks[ $name ];
+			$definition['permission_callback'] = isset( $row['permission'] ) ? $row['permission'] : array( self::class, 'can_discover' );
+			if ( ! $readonly || ! empty( $row['outcome'] ) || Catalog::requires_compatible_pro( $name ) ) {
 				$definition['ability_class'] = Outcome_Ability::class;
 			}
-			$definition['permission_callback'] = array( __CLASS__, 'modula/read-gallery' === $name ? 'can_read_gallery' : 'can_discover' );
-			if ( isset( Attachment_Image::callbacks()[ $name ] ) || isset( Attachments::callbacks()[ $name ] ) || isset( Media_Folders::callbacks()[ $name ] ) ) {
-				$definition['permission_callback'] = array( Media_Folders::class, 'can_manage' ); }
-			if ( Batch::MEDIA === $name || isset( Attachment_Lifecycle::callbacks()[ $name ] ) ) {
-				$definition['permission_callback'] = array( Media_Folders::class, 'can_manage' ); }
-			if ( isset( Collections::callbacks()[ $name ] ) ) {
-				$definition['permission_callback'] = static function () use ( $name ) {
-					return Collections::available( $name );
-				}; }
-			if ( 'modula/read-attachment-usage' === $name ) {
-				$definition['permission_callback'] = static function () {
-					return Media_Folders::can_manage() && Folders_Dependency::available( 'usage' );
-				}; }
-			if ( isset( Attachment_Lifecycle::callbacks()[ $name ] ) ) {
-				$definition['permission_callback'] = static function () use ( $name ) {
-					return Media_Folders::can_manage() && Folders_Dependency::available( 'usage' );
-				}; }
-			if ( isset( Intake::callbacks()[ $name ] ) ) {
-				$definition['permission_callback'] = array( Intake::class, 'can_upload' ); }
-			if ( in_array( $name, array( Server_Import::BROWSE, Server_Import::IMPORT ), true ) ) {
-				$definition['permission_callback'] = array( Server_Import::class, 'can_import' ); }
-			if ( isset( Site_Settings::callbacks()[ $name ] ) ) {
-				$definition['permission_callback'] = array( Site_Settings::class, Site_Settings::EXTENSION === $name ? 'can_extend' : 'can_manage' ); }
-			if ( isset( Diagnostics::callbacks()[ $name ] ) ) {
-				$definition['permission_callback'] = array( Diagnostics::class, 'can_manage' ); }
-			if ( isset( Transfers::callbacks()[ $name ] ) ) {
-				$definition['permission_callback'] = array( Transfers::class, 'available' ); }
-			if ( isset( Bound::callbacks()[ $name ] ) ) {
-				$definition['permission_callback'] = array( Bound::class, 'available' ); }
-			if ( isset( Storage::callbacks()[ $name ] ) ) {
-				$definition['permission_callback'] = array( Storage::class, 'available' ); }
-			if ( ( isset( Proofing::callbacks()[ $name ] ) || isset( Proofing_Email::callbacks()[ $name ] ) || isset( Proofing_Selections::callbacks()[ $name ] ) ) ) {
-				$definition['permission_callback'] = array( Proofing::class, 'available' ); }
-			if ( isset( Proofing_Clients::callbacks()[ $name ] ) ) {
-				$definition['permission_callback'] = array( Proofing_Clients::class, 'can_manage' ); }
-			if ( isset( Watermark::callbacks()[ $name ] ) ) {
-				$definition['permission_callback'] = array( Watermark::class, 'available' ); }
-			if ( isset( Instagram::callbacks()[ $name ] ) ) {
-				$definition['permission_callback'] = array( Instagram::class, 'available' ); }
-			if ( isset( Video::callbacks()[ $name ] ) ) {
-				$definition['permission_callback'] = array( Video::class, 'available' ); }
-			if ( isset( Replacement::callbacks()[ $name ] ) ) {
-				$definition['permission_callback'] = array( Replacement::class, 'available' ); }
-			if ( 'modula/recover-request' === $name ) {
-				$definition['permission_callback'] = array( __CLASS__, 'can_recover' ); }
 			$definition['meta'] = array(
 				'mcp'          => array(
 					'public' => Folders_Dependency::operation_available( $name ),
@@ -107,7 +153,7 @@ final class Integration {
 				),
 				'annotations'  => array(
 					'readonly'    => $readonly,
-					'destructive' => in_array( $name, array( Proofing_Selections::DELETE, Proofing::DELETE, Watermark::APPLY, Watermark::REMOVE, Transfers::START, Transfers::LIBRARY, Transfers::CANCEL, Storage::UNINGEST, Storage::DELETE, Replacement::WRITE, Diagnostics::CLEAR, Server_Import::IMPORT, Batch::MEDIA, 'modula/delete-attachment', 'modula/trash-attachment', 'modula/delete-collection', 'modula/delete-media-folder', 'modula/trash-album', 'modula/delete-album', 'modula/trash-gallery', 'modula/delete-gallery', 'modula/delete-gallery-preset', 'modula/delete-album-preset' ), true ),
+					'destructive' => ! empty( $row['destructive'] ),
 					'idempotent'  => true,
 				),
 				'show_in_rest' => true,
@@ -117,24 +163,32 @@ final class Integration {
 	}
 
 	public static function can_recover(): bool {
-		return Proofing_Clients::can_manage() || self::can_discover() || Media_Folders::can_manage() || Site_Settings::can_manage() || Intake::can_upload(); }
+		return Proofing_Clients::can_manage() || self::can_discover() || Media_Folders::can_manage() || Site_Settings::can_manage() || Intake::can_upload();
+	}
+
 	/** Dynamic CPT primitive follows Roles customizations instead of assuming a role name. */
 	public static function can_discover( $input = array() ): bool {
 		if ( ! get_current_user_id() ) {
-			return false; }
+			return false;
+		}
 		if ( Site_Settings::can_manage() ) {
-			return true; }
+			return true;
+		}
 		$types = array( 'modula-gallery' );
 		if ( Albums::available() ) {
-			$types[] = 'modula-album'; }
+			$types[] = 'modula-album';
+		}
 		if ( Album_Presets::available() ) {
-			$types[] = 'defaults-albums'; }
+			$types[] = 'defaults-albums';
+		}
 		if ( Presets::available() ) {
-			$types[] = 'modula-defaults'; }
+			$types[] = 'modula-defaults';
+		}
 		foreach ( $types as $name ) {
 			$type = get_post_type_object( $name );
 			if ( $type && current_user_can( $type->cap->edit_posts ) ) {
-				return true; }
+				return true;
+			}
 		}
 		return false;
 	}
@@ -175,19 +229,22 @@ final class Integration {
 		);
 	}
 
-	/** Pure inspection of the Compatible Pro seam; no editor bootstrap or license checks. */
+	/** Pure inspection of stored feature state; no editor bootstrap or license checks. */
 	private static function features(): array {
-		$compatible = function_exists( 'modula_is_compatible_pro' ) && modula_is_compatible_pro();
-		$extensions = Pro_Dependency::extensions();
-		$status     = Pro_Dependency::license_status();
-		return array(
-			'lite_version'   => defined( 'MODULA_LITE_VERSION' ) ? (string) MODULA_LITE_VERSION : '',
-			'pro_version'    => defined( 'MODULA_PRO_VERSION' ) ? (string) MODULA_PRO_VERSION : '',
-			'compatible_pro' => $compatible,
-			'license_status' => $status,
-			'license_source' => 'stored',
-			'extensions'     => empty( $extensions ) ? new \stdClass() : $extensions,
-		);
+		return Feature_Snapshot::inspect();
+	}
+
+	public static function currently_executable( string $name ): bool {
+		$row = self::operation( $name );
+		if ( ! $row || ! Providers::executable( $name ) || ! wp_get_ability( $name ) || Availability::blockers( $name ) ) {
+			return false;
+		}
+		foreach ( $row['gates'] ?? array() as $gate ) {
+			if ( ! $gate( $name ) ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public static function discover( array $input ) {
@@ -196,35 +253,30 @@ final class Integration {
 		}
 		$operations = array();
 		foreach ( Contract::definitions() as $name => $definition ) {
-			$ability      = wp_get_ability( $name );
+			$executable   = self::currently_executable( $name );
 			$operations[] = array(
 				'name'          => $name,
-				'status'        => $ability && ( ! ( isset( Proofing::callbacks()[ $name ] ) || isset( Proofing_Email::callbacks()[ $name ] ) || isset( Proofing_Selections::callbacks()[ $name ] ) ) || Proofing::available() ) && ( ! isset( Proofing_Clients::callbacks()[ $name ] ) || Proofing_Clients::can_manage() ) && ( ! isset( Instagram::callbacks()[ $name ] ) || Instagram::available() ) && ( ! isset( Watermark::callbacks()[ $name ] ) || Watermark::available() ) && ( ! isset( Video::callbacks()[ $name ] ) || Video::available() ) && ( ! isset( Transfers::callbacks()[ $name ] ) || Transfers::available() ) && ( ! isset( Bound::callbacks()[ $name ] ) || Bound::available() ) && ( ! isset( Storage::callbacks()[ $name ] ) || Storage::available() ) && ( ! isset( Replacement::callbacks()[ $name ] ) || Replacement::available() ) && ( ! isset( Diagnostics::callbacks()[ $name ] ) || Diagnostics::can_manage() ) && ( ! in_array( $name, array( Server_Import::BROWSE, Server_Import::IMPORT ), true ) || Server_Import::can_import() ) && ( ! isset( Intake::callbacks()[ $name ] ) || Intake::can_upload() ) && ( ! isset( Site_Settings::callbacks()[ $name ] ) || ( Site_Settings::EXTENSION === $name ? Site_Settings::can_extend() : Site_Settings::can_manage() ) ) && ( 'modula/read-attachment-usage' !== $name || Folders_Dependency::available( 'usage' ) ) && ( Batch::MEDIA !== $name || Media_Folders::can_manage() ) && ( ! isset( Attachment_Lifecycle::callbacks()[ $name ] ) || Attachment_Lifecycle::available( $name ) ) && ( ! isset( Collections::callbacks()[ $name ] ) || Collections::available( $name ) ) && ( ! isset( Attachment_Image::callbacks()[ $name ] ) && ! isset( Media_Folders::callbacks()[ $name ] ) && ! isset( Attachments::callbacks()[ $name ] ) || Media_Folders::can_manage() ) && ( ! isset( Album_Lifecycle::callbacks()[ $name ] ) || Albums::available() ) && ( ! isset( Album_Members::callbacks()[ $name ] ) || Albums::available() ) && ( ! isset( Album_Presets::callbacks()[ $name ] ) || Album_Presets::available() ) && ( ! isset( Albums::callbacks()[ $name ] ) || Albums::available() ) && ( ! isset( Presets::callbacks()[ $name ] ) || Presets::available() ) ? 'available' : 'unavailable',
+				'status'        => $executable ? 'available' : 'unavailable',
 				'description'   => $definition['description'],
 				'readonly'      => ! Contract::is_mutation( $name ),
 				'input_schema'  => $definition['input_schema'],
 				'output_schema' => $definition['output_schema'],
-			);
+			) + Catalog::describe( $name, $executable );
 		}
-		// Semantic families deliberately have no registered or promised future ability name.
-		foreach ( array( 'gallery-mutations', 'album-members-and-lifecycle', 'media-organization', 'storage', 'proofing', 'ai', 'site-administration' ) as $family ) {
-			$operations[] = array(
-				'name'        => $family,
-				'status'      => 'planned',
-				'description' => 'Planned operation family; no executable ability is registered.',
-				'readonly'    => false,
-			);
-		}
-		$operations[] = array(
+		// Classic editing stays excluded. It is not a registered ability and not a placeholder family.
+		$operations[]                = array(
 			'name'        => 'classic-mutations',
 			'status'      => 'unavailable',
 			'description' => 'Classic editing and automatic conversion are outside this integration.',
 			'readonly'    => false,
 		);
-		$page         = self::page( $input, count( $operations ) );
+		$page                        = self::page( $input, count( $operations ) );
+		$page['capability_protocol'] = Providers::PROTOCOL;
 		return $page + array(
-			'operations' => array_slice( $operations, ( $page['page'] - 1 ) * $page['per_page'], $page['per_page'] ),
-			'features'   => self::features(),
+			'operations'       => array_slice( $operations, ( $page['page'] - 1 ) * $page['per_page'], $page['per_page'] ),
+			'features'         => self::features(),
+			'inventory'        => Catalog::inventory(),
+			'gallery_settings' => Settings_Contract::projection(),
 		);
 	}
 
@@ -283,28 +335,12 @@ final class Integration {
 		$revision = Revision::state( $id );
 		$items    = array();
 		$schema   = Contract::item_schema();
-		foreach ( Meta_Sync::get_images_v2( $id ) as $row ) {
-			if ( ! is_array( $row ) ) {
-				continue;
+		$catalog  = array_filter( Meta_Sync::get_images_v2( $id ), 'is_array' );
+		foreach ( Freeform_Catalog::identify( $catalog ) as $row ) {
+			$item = self::project_item( $row, $schema );
+			if ( null !== $item ) {
+				$items[] = $item;
 			}
-			$kind = Adapter::get_item_kind( $row );
-			if ( 'image' === $kind && ! Adapter::is_video_template_row( $row ) ) {
-				$attachment_id = isset( $row['id'] ) ? absint( $row['id'] ) : 0;
-				if ( ! $attachment_id || 'attachment' !== get_post_type( $attachment_id ) || ! current_user_can( 'edit_post', $attachment_id ) ) {
-					continue;
-				}
-				$row['id'] = $attachment_id;
-			}
-			$row['itemKind'] = $kind;
-			foreach ( array( 'blockBackgroundImageId', 'afterAttachmentId' ) as $reference ) {
-				if ( ! empty( $row[ $reference ] ) && ( 'attachment' !== get_post_type( (int) $row[ $reference ] ) || ! current_user_can( 'edit_post', (int) $row[ $reference ] ) ) ) {
-					unset( $row[ $reference ] );
-				}
-			}
-			if ( ! isset( $row['id'] ) || ( ! is_int( $row['id'] ) && ! is_string( $row['id'] ) ) ) {
-				continue;
-			}
-			$items[] = Contract::project( $row, $schema );
 		}
 		$gallery             = self::gallery( get_post( $id ) );
 		$gallery['settings'] = Contract::project( Meta_Sync::get_settings_v2( $id, false ), Contract::settings_schema() );
@@ -317,5 +353,32 @@ final class Integration {
 			'gallery' => $gallery,
 			'items'   => array_slice( $items, ( $page['page'] - 1 ) * $page['per_page'], $page['per_page'] ),
 		);
+	}
+
+	/**
+	 * @param array<string,mixed> $row
+	 * @param array<string,mixed> $schema
+	 * @return array<string,mixed>|null
+	 */
+	private static function project_item( array $row, array $schema ) {
+		$kind = Adapter::get_item_kind( $row );
+		if ( 'image' === $kind && ! Adapter::is_video_template_row( $row ) ) {
+			$attachment_id = isset( $row['id'] ) ? absint( $row['id'] ) : 0;
+			if ( ! $attachment_id || 'attachment' !== get_post_type( $attachment_id ) || ! current_user_can( 'edit_post', $attachment_id ) ) {
+				return null;
+			}
+			$row['id'] = $attachment_id;
+		}
+		$row['itemKind'] = $kind;
+		foreach ( array( 'blockBackgroundImageId', 'afterAttachmentId' ) as $reference ) {
+			$reference_id = isset( $row[ $reference ] ) ? (int) $row[ $reference ] : 0;
+			if ( $reference_id && ( 'attachment' !== get_post_type( $reference_id ) || ! current_user_can( 'edit_post', $reference_id ) ) ) {
+				unset( $row[ $reference ] );
+			}
+		}
+		if ( ! isset( $row['id'] ) || ( ! is_int( $row['id'] ) && ! is_string( $row['id'] ) ) ) {
+			return null;
+		}
+		return Contract::project( $row, $schema );
 	}
 }

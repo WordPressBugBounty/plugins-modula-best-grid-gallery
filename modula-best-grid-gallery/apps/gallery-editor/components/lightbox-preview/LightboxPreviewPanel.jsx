@@ -246,8 +246,8 @@ export default function LightboxPreviewPanel({
 /**
  * JSON-safe lightbox opts for change detection (strip functions).
  *
- * @param {object} opts
- * @returns {string}
+ * @param {Object} opts
+ * @return {string}
  */
 function softSignatureFromOpts(opts) {
 	return JSON.stringify(opts, (_key, value) =>

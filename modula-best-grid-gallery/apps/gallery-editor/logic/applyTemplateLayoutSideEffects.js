@@ -18,6 +18,7 @@ import {
 } from '../utils/embeddedGalleryItems';
 import { saveMergedGalleryItems } from '../api/galleryUploadApi';
 import { syncPreviewCoreToStoreAndBootstrap } from '../utils/previewItemsCommit';
+import { GALLERY_SAVE_OWNERS } from '../constants/gallerySaveOwners';
 
 /**
  * @param {string} slug
@@ -40,7 +41,7 @@ function templateContentSlots(slug) {
 
 /**
  * @param {Object[]} coreItems
- * @param {string} slug
+ * @param {string}   slug
  * @return {boolean}
  */
 export function templateLayoutNeedsContentSeed(coreItems, slug) {
@@ -60,7 +61,7 @@ export function templateLayoutNeedsContentSeed(coreItems, slug) {
  * True when missing required seeds OR leftover template blocks from another layout.
  *
  * @param {Object[]} coreItems
- * @param {string} slug
+ * @param {string}   slug
  * @return {boolean}
  */
 export function templateLayoutNeedsReconcile(coreItems, slug) {
@@ -94,7 +95,7 @@ export function templateLayoutNeedsReconcile(coreItems, slug) {
  * (same row shape as Add → content block).
  *
  * @param {Object[]} coreItems
- * @param {string} slug
+ * @param {string}   slug
  * @return {Object[]}
  */
 export function mergeTemplateContentBlocksForLayout(coreItems, slug) {
@@ -157,10 +158,10 @@ export function mergeTemplateContentBlocksForLayout(coreItems, slug) {
 }
 
 /**
- * @param {import('@reduxjs/toolkit').Store} store
- * @param {number} galleryId
- * @param {string} slug
- * @param {(fn: () => void | Promise<void>) => Promise<void>} [runPersistTask]
+ * @param {import('@reduxjs/toolkit').Store}                           store
+ * @param {number}                                                     galleryId
+ * @param {string}                                                     slug
+ * @param {(fn: () => void | Promise<void>) => Promise<void>}          [runPersistTask]
  * @param {import('@tanstack/react-query').QueryClient|null|undefined} [queryClient]
  * @return {Promise<boolean>} True when items were changed.
  */
@@ -214,7 +215,7 @@ export async function seedTemplateContentBlocksForLayout(
 	};
 
 	if (typeof runPersistTask === 'function') {
-		await runPersistTask(persist);
+		await runPersistTask(persist, GALLERY_SAVE_OWNERS.template);
 	} else {
 		await persist();
 	}

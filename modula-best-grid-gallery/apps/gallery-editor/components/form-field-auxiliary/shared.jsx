@@ -2,7 +2,7 @@ import { __ } from '@wordpress/i18n';
 
 /**
  * @param {Record<string, string>|undefined|null} optionLabels
- * @param {unknown} opt
+ * @param {unknown}                               opt
  */
 export function getSelectOptionLabel(optionLabels, opt) {
 	const key = String(opt);
@@ -19,7 +19,7 @@ export function getSelectOptionLabel(optionLabels, opt) {
 
 /**
  * @param {unknown} raw
- * @returns {Record<string, string>|null}
+ * @return {Record<string, string>|null}
  */
 export function normalizeOptionImages(raw) {
 	if (raw && typeof raw === 'object') {

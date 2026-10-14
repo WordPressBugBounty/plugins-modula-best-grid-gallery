@@ -37,17 +37,26 @@ export default function GalleryLicensingBox() {
 	return (
 		<div className="modula-creative-commons-wrap">
 			{imageUrl ? (
-				<a rel="license" href={licenseUrl} target="_blank">
+				<a rel="license noreferrer" href={licenseUrl} target="_blank">
 					<img
-						alt={name || __('Creative Commons License', 'modula-best-grid-gallery')}
+						alt={
+							name ||
+							__(
+								'Creative Commons License',
+								'modula-best-grid-gallery'
+							)
+						}
 						style={{ borderWidth: 0 }}
 						src={imageUrl}
 					/>
 				</a>
 			) : null}
 			<span>
-				{__('This work is licensed under a', 'modula-best-grid-gallery')}{' '}
-				<a rel="license" href={licenseUrl} target="_blank">
+				{__(
+					'This work is licensed under a',
+					'modula-best-grid-gallery'
+				)}{' '}
+				<a rel="license noreferrer" href={licenseUrl} target="_blank">
 					{name}
 				</a>
 			</span>

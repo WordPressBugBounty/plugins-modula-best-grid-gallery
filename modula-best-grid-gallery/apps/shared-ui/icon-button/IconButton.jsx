@@ -1,12 +1,12 @@
 import { forwardRef } from '@wordpress/element';
 
 /**
- * @param {Object}   props
- * @param {string}   [props.label] Accessible label (required for icon-only)
- * @param {boolean}  [props.disabled]
- * @param {string}   [props.className]
+ * @param {Object}                    props
+ * @param {string}                    [props.label]     Accessible label (required for icon-only)
+ * @param {boolean}                   [props.disabled]
+ * @param {string}                    [props.className]
  * @param {import('react').ReactNode} props.children
- * @param {Function} [props.onClick]
+ * @param {Function}                  [props.onClick]
  */
 export const IconButton = forwardRef(function IconButton(
 	{

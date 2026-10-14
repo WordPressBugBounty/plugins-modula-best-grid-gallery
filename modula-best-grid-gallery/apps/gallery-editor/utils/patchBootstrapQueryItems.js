@@ -3,9 +3,7 @@
  *
  * @package
  */
-import {
-	applyVideoPosterFieldsToPreviewItem,
-} from 'gallery-shared/preview';
+import { applyVideoPosterFieldsToPreviewItem } from 'gallery-shared/preview';
 import { getGalleryBootstrapQueryKey } from '../query/useGalleryBootstrapQuery';
 import { cloneBootstrapItemsForPreviewStore } from './takeoverLivePreviewBootstrap';
 
@@ -13,7 +11,7 @@ import { cloneBootstrapItemsForPreviewStore } from './takeoverLivePreviewBootstr
  * @param {import('@tanstack/react-query').QueryClient} queryClient
  * @param {number}                                      galleryId
  * @param {unknown[]}                                   items
- * @param {Record<string, unknown>}                   [metadataPatch]
+ * @param {Record<string, unknown>}                     [metadataPatch]
  */
 export function patchBootstrapQueryItems(
 	queryClient,

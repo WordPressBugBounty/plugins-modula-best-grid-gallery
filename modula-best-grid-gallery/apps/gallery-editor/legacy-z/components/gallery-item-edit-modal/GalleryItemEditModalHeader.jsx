@@ -14,16 +14,16 @@ import {
 import GalleryModalHeader from '../gallery-modal/GalleryModalHeader';
 
 /**
- * @param {Object}                  props
- * @param {'image'|'content-block'} props.itemKind
- * @param {boolean}                 [props.isVideoItem] Video gallery row or tile with video URL.
- * @param {string}                  props.metaPrimary Filename or "Content block".
- * @param {string|number}           [props.metaId]    Attachment or embedded id.
- * @param {boolean}                 props.hasPrev
- * @param {boolean}                 props.hasNext
+ * @param {Object}                          props
+ * @param {'image'|'content-block'}         props.itemKind
+ * @param {boolean}                         [props.isVideoItem]     Video gallery row or tile with video URL.
+ * @param {string}                          props.metaPrimary       Filename or "Content block".
+ * @param {string|number}                   [props.metaId]          Attachment or embedded id.
+ * @param {boolean}                         props.hasPrev
+ * @param {boolean}                         props.hasNext
  * @param {(anchorEl: HTMLElement) => void} props.onRequestPrevious
  * @param {(anchorEl: HTMLElement) => void} props.onRequestNext
- * @param {() => void}              props.onClose
+ * @param {() => void}                      props.onClose
  */
 export default function GalleryItemEditModalHeader({
 	itemKind,

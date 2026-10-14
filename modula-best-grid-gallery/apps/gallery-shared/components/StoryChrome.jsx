@@ -7,11 +7,11 @@
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
- * @param {Object} props
- * @param {number} props.total
- * @param {number} props.activeIndex
- * @param {() => void} props.onPrev
- * @param {() => void} props.onNext
+ * @param {Object}                  props
+ * @param {number}                  props.total
+ * @param {number}                  props.activeIndex
+ * @param {() => void}              props.onPrev
+ * @param {() => void}              props.onNext
  * @param {(index: number) => void} [props.onGoTo]
  */
 export default function StoryChrome({

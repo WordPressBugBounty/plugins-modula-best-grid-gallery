@@ -68,10 +68,10 @@ export function countFilterableGalleryImages(items) {
  * Resolve visitor filter-bar counts from a full-catalog bootstrap map when present,
  * otherwise from the provided item list (page slice or full client catalog).
  *
- * @param {Object} args
- * @param {unknown} [args.items]
+ * @param {Object}                                                    args
+ * @param {unknown}                                                   [args.items]
  * @param {Map<string, number>|Record<string, number>|null|undefined} [args.catalogUsageCounts]
- * @param {number|null|undefined} [args.catalogFilterableCount]
+ * @param {number|null|undefined}                                     [args.catalogFilterableCount]
  * @return {{ filterCounts: Map<string, number>, allCount: number }}
  */
 export function resolveFilterBarUsageCounts({
@@ -129,9 +129,9 @@ export function formatFilterCountToken(count) {
 /**
  * Append a parenthesized usage count to a filter label for native `<option>` text.
  *
- * @param {string}              label
+ * @param {string}                label
  * @param {number|undefined|null} count
- * @param {boolean}             showCount
+ * @param {boolean}               showCount
  * @return {string}
  */
 export function formatFilterLabelWithCount(label, count, showCount) {

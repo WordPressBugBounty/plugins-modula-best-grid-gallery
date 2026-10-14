@@ -11,7 +11,7 @@ export const HOVER_SLOT_RIGHT_ANCHOR_MIN_X = 51;
 
 /**
  * @param {number} x
- * @returns {'left' | 'center' | 'right'}
+ * @return {'left' | 'center' | 'right'}
  */
 export function getSlotAnchorSide(x) {
 	const n = Math.round(Number(x));
@@ -25,9 +25,9 @@ export function getSlotAnchorSide(x) {
 }
 
 /**
- * @param {number} x
+ * @param {number}                      x
  * @param {'left' | 'center' | 'right'} side
- * @returns {number}
+ * @return {number}
  */
 export function clampSlotXForAnchorSide(x, side) {
 	if (side === 'center') {
@@ -48,7 +48,7 @@ export function clampSlotXForAnchorSide(x, side) {
  * Left: grow right; center: grow from middle; right: grow left.
  *
  * @param {number} x
- * @returns {'0%' | '-50%' | '-100%'}
+ * @return {'0%' | '-50%' | '-100%'}
  */
 export function getSlotAnchorPercent(x) {
 	const side = getSlotAnchorSide(x);
@@ -62,7 +62,7 @@ export function getSlotAnchorPercent(x) {
  * Max width (% of tile) available from anchor point.
  *
  * @param {number} x
- * @returns {number}
+ * @return {number}
  */
 export function getSlotMaxWidthPercent(x) {
 	const side = getSlotAnchorSide(x);
@@ -80,7 +80,7 @@ export function getSlotMaxWidthPercent(x) {
 
 /**
  * @param {number} x
- * @returns {'left' | 'center' | 'right'}
+ * @return {'left' | 'center' | 'right'}
  */
 export function getSlotTextAlign(x) {
 	return getSlotAnchorSide(x);
@@ -90,7 +90,7 @@ export function getSlotTextAlign(x) {
  * CSS custom properties for hover v2 free-slot railguards.
  *
  * @param {Record<string, { x: number, y: number }>} positions
- * @returns {Record<string, string>}
+ * @return {Record<string, string>}
  */
 export function buildHoverSlotRailStyleVars(positions) {
 	/** @type {Record<string, string>} */

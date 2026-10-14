@@ -20,9 +20,9 @@ import {
 } from '../utils/compactCaptionTile';
 
 /**
- * @param {boolean} enabled
+ * @param {boolean}                                               enabled
  * @param {{ width?: number, height?: number, minSize?: number }} [slotHint]
- * @return {{ measureRef: function, isCompact: boolean }}
+ * @return {{measureRef: Function, isCompact: boolean}}
  */
 export function useCompactCaptionTile(enabled, slotHint = {}) {
 	const hintWidth = Number(slotHint?.width) > 0 ? Number(slotHint.width) : 0;
@@ -153,8 +153,8 @@ export function useCoarsePointer() {
  * Prefer {@link useComposedCallbackRefs} in components — a fresh callback ref every
  * render re-runs commitAttachRef and can nest setState (Maximum update depth).
  *
- * @param {...(function|Object|null|undefined)} refs
- * @return {function|undefined}
+ * @param {...(Function | Object | null | undefined)} refs
+ * @return {Function | undefined}
  */
 export function composeCallbackRefs(...refs) {
 	const useful = refs.filter(Boolean);
@@ -177,8 +177,8 @@ export function composeCallbackRefs(...refs) {
  * Unlike {@link composeCallbackRefs}, identity is stable across renders so React
  * does not re-run commitAttachRef (which nested setState loops in BnB fillSlot).
  *
- * @param {...(function|Object|null|undefined)} refs
- * @return {function|undefined}
+ * @param {...(Function | Object | null | undefined)} refs
+ * @return {Function | undefined}
  */
 export function useComposedCallbackRefs(...refs) {
 	const refsRef = useRef(refs);

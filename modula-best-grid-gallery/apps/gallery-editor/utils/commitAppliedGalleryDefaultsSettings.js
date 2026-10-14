@@ -16,14 +16,14 @@ import {
 } from '../query/useGalleryBootstrapQuery';
 
 /**
- * @param {Object}                                                                    args
- * @param {Record<string, Record<string, unknown>>|null|undefined}                    args.settings
- * @param {Object}                                                                    args.form
- * @param {import('react').MutableRefObject<Record<string, Record<string, unknown>>>} args.baselineRef
- * @param {import('react').MutableRefObject<string>}                                  args.lastServerSerializedRef
+ * @param {Object}                                                                                  args
+ * @param {Record<string, Record<string, unknown>>|null|undefined}                                  args.settings
+ * @param {Object}                                                                                  args.form
+ * @param {import('react').MutableRefObject<Record<string, Record<string, unknown>>>}               args.baselineRef
+ * @param {import('react').MutableRefObject<string>}                                                args.lastServerSerializedRef
  * @param {{ syncCheckpointFromForm?: (values?: Record<string, Record<string, unknown>>) => void }} args.undoRedo
- * @param {import('@tanstack/react-query').QueryClient}                               args.queryClient
- * @param {number}                                                                    args.galleryId
+ * @param {import('@tanstack/react-query').QueryClient}                                             args.queryClient
+ * @param {number}                                                                                  args.galleryId
  */
 export function commitAppliedGalleryDefaultsSettings({
 	settings,

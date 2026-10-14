@@ -2,16 +2,11 @@
  * Debounced PATCH for v2 settings in takeover (optimistic form state + server sync).
  */
 import { useEffect, useMemo, useRef } from '@wordpress/element';
+import { useTakeoverSaveStatus } from 'editor-shell';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
-import {
-	cloneGroupedSettings,
-	serializeGroupedForServerRef,
-} from '../../form/useGallerySettingsForm';
-import { normalizeGroupedDefaults } from '../../logic/groupedSettingsNormalize';
-import { useTakeoverSaveStatus } from '../../context/TakeoverSaveStatusContext';
-import { buildPatchPayload } from '../../logic/buildPatchPayload';
+import { cloneGroupedSettings } from '../../form/useGallerySettingsForm';
 import { collectPatchValidationErrors } from '../../logic/collectPatchValidationErrors';
-import { stripRestPostMeta } from '../../utils/applyRestPostStatus';
+import { GALLERY_SAVE_OWNERS } from '../../constants/gallerySaveOwners';
 
 const DEBOUNCE_MS = 700;
 
@@ -23,14 +18,12 @@ const DEBOUNCE_MS = 700;
  */
 function TakeoverSettingsAutosaveInner({ values }) {
 	const {
-		form,
 		patchMutation,
 		setClientError,
-		baselineRef,
-		lastServerSerializedRef,
-		undoRedo,
+		acknowledgeSettingsSave,
+		getPendingSettingsPatch,
 	} = useGallerySettingsFormBundle();
-	const { runPersistTask } = useTakeoverSaveStatus();
+	const { runPersistTask, setDirty } = useTakeoverSaveStatus();
 	const timerRef = useRef(null);
 	const valuesRef = useRef(values);
 	const savingRef = useRef(false);
@@ -45,6 +38,10 @@ function TakeoverSettingsAutosaveInner({ values }) {
 	}, [values]);
 
 	useEffect(() => {
+		setDirty(
+			GALLERY_SAVE_OWNERS.settings,
+			Object.keys(getPendingSettingsPatch()).length > 0
+		);
 		if (timerRef.current) {
 			clearTimeout(timerRef.current);
 			timerRef.current = null;
@@ -52,8 +49,9 @@ function TakeoverSettingsAutosaveInner({ values }) {
 
 		async function flush() {
 			const v = cloneGroupedSettings(valuesRef.current);
-			const patch = buildPatchPayload(v, baselineRef.current);
+			const patch = getPendingSettingsPatch(v);
 			if (Object.keys(patch).length === 0) {
+				setDirty(GALLERY_SAVE_OWNERS.settings, false);
 				pendingRef.current = false;
 				return;
 			}
@@ -71,20 +69,16 @@ function TakeoverSettingsAutosaveInner({ values }) {
 				await runPersistTask(async () => {
 					const serverData =
 						await patchMutationRef.current.mutateAsync(patch);
-					const normalized = cloneGroupedSettings(
-						stripRestPostMeta(serverData)
+					acknowledgeSettingsSave(snapshot, serverData);
+					setDirty(
+						GALLERY_SAVE_OWNERS.settings,
+						Object.keys(getPendingSettingsPatch()).length > 0
 					);
-					normalizeGroupedDefaults(normalized);
-					baselineRef.current = normalized;
-					lastServerSerializedRef.current =
-						serializeGroupedForServerRef(normalized);
-					const current = form.state.values;
-					if (JSON.stringify(snapshot) === JSON.stringify(current)) {
-						form.reset(normalized);
-						undoRedo.adoptCheckpointFromForm();
-					}
 					return serverData;
-				});
+				}, 'settings');
+			} catch (error) {
+				// The shared indicator retains the failure; a later completed edit retries the current document.
+				setClientError(String(error?.message ?? error));
 			} finally {
 				savingRef.current = false;
 				if (pendingRef.current) {
@@ -112,12 +106,11 @@ function TakeoverSettingsAutosaveInner({ values }) {
 		};
 	}, [
 		valuesSig,
-		form,
-		baselineRef,
-		lastServerSerializedRef,
+		acknowledgeSettingsSave,
+		getPendingSettingsPatch,
 		runPersistTask,
 		setClientError,
-		undoRedo,
+		setDirty,
 	]);
 
 	return null;

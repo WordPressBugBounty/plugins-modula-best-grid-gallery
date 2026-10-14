@@ -15,9 +15,9 @@ const STORY_CAPTION_ALLOWED_ATTRS = {
 };
 
 /**
- * @param {Object}  props
- * @param {string}  props.html       Caption HTML from WP / modula-images.
- * @param {string}  [props.className]
+ * @param {Object} props
+ * @param {string} props.html        Caption HTML from WP / modula-images.
+ * @param {string} [props.className]
  */
 export default function StoryCaptionRichText({ html, className = '' }) {
 	const content = String(html || '').trim();

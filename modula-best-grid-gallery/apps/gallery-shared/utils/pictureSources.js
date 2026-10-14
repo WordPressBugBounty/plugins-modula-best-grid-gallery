@@ -2,7 +2,7 @@
  * Build <picture> sources from item data.
  * Uses itemData.pictureSources if present, otherwise a single source from srcset + inferred type.
  *
- * @param {Object} itemData     - Raw item data (src, thumbnail, url, srcset, pictureSources)
+ * @param {Object}   itemData    - Raw item data (src, thumbnail, url, srcset, pictureSources)
  * @param {Function} getMimeType - getMimeTypeFromUrl or equivalent
  * @return {{ type: string, srcset: string }[]}
  */

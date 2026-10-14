@@ -203,6 +203,7 @@ class Field_Registry {
 		'showcase_autoplay_interval' => array( 'group' => 'showcase', 'key' => 'autoplayInterval' ),
 		'showcase_click_behavior' => array( 'group' => 'showcase', 'key' => 'clickBehavior' ),
 		'showcase_mobile_simplify' => array( 'group' => 'showcase', 'key' => 'mobileSimplify' ),
+		'freeform_placements' => array( 'group' => 'freeform', 'key' => 'placements' ),
 		'template_section_layout' => array( 'group' => 'template', 'key' => 'sectionLayout' ),
 		'template_layout' => array( 'group' => 'template', 'key' => 'templateLayout' ),
 		'slider_slidesToShow' => array( 'group' => 'slider', 'key' => 'slidesToShow' ),

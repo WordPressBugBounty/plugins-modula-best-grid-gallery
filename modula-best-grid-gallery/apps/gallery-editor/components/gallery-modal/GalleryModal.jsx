@@ -4,9 +4,8 @@
  */
 import { createPortal } from 'react-dom';
 import { useRef } from '@wordpress/element';
+import { useSettingsEditorAppearance, useModalEscapeKey } from 'editor-shell';
 import '../../styles/takeover/preview/_gallery-modal.scss';
-import { useModalEscapeKey } from '../../hooks/useModalEscapeKey';
-import { useSettingsEditorAppearance } from '../../context/SettingsEditorAppearanceContext';
 import GalleryModalHeader from './GalleryModalHeader';
 import GalleryModalBody from './GalleryModalBody';
 import GalleryModalFooter from './GalleryModalFooter';
@@ -20,28 +19,28 @@ const SIZE_CLASS = {
 };
 
 /**
- * @param {Object}                    props
- * @param {boolean}                   props.isOpen
- * @param {() => void}                props.onClose
- * @param {'small'|'medium'|'large'|'xlarge'} [props.size='large']
- * @param {string}                    [props.title]
- * @param {string}                    [props.subtitle]
- * @param {import('@wordpress/icons').Icon} [props.icon]
- * @param {import('react').ReactNode}       [props.iconElement]
- * @param {string}                    [props.titleId]
- * @param {import('react').ReactNode} [props.header]
- * @param {import('react').ReactNode} [props.headerActions]
- * @param {import('react').ReactNode} [props.footer]
- * @param {import('react').ReactNode} [props.footerLeft]
- * @param {import('react').ReactNode} [props.footerRight]
- * @param {import('react').ReactNode} props.children
- * @param {string}                    [props.className]
- * @param {string}                    [props.panelClassName]
- * @param {string}                    [props.bodyClassName]
- * @param {'auto'|'hidden'}           [props.bodyOverflow='auto']
- * @param {boolean}                   [props.closeOnBackdropClick=true]
- * @param {boolean}                   [props.closeOnEscape=true]
- * @param {boolean}                   [props.showClose=true]
+ * @param {Object}                                         props
+ * @param {boolean}                                        props.isOpen
+ * @param {() => void}                                     props.onClose
+ * @param {'small'|'medium'|'large'|'xlarge'}              [props.size='large']
+ * @param {string}                                         [props.title]
+ * @param {string}                                         [props.subtitle]
+ * @param {import('@wordpress/icons').Icon}                [props.icon]
+ * @param {import('react').ReactNode}                      [props.iconElement]
+ * @param {string}                                         [props.titleId]
+ * @param {import('react').ReactNode}                      [props.header]
+ * @param {import('react').ReactNode}                      [props.headerActions]
+ * @param {import('react').ReactNode}                      [props.footer]
+ * @param {import('react').ReactNode}                      [props.footerLeft]
+ * @param {import('react').ReactNode}                      [props.footerRight]
+ * @param {import('react').ReactNode}                      props.children
+ * @param {string}                                         [props.className]
+ * @param {string}                                         [props.panelClassName]
+ * @param {string}                                         [props.bodyClassName]
+ * @param {'auto'|'hidden'}                                [props.bodyOverflow='auto']
+ * @param {boolean}                                        [props.closeOnBackdropClick=true]
+ * @param {boolean}                                        [props.closeOnEscape=true]
+ * @param {boolean}                                        [props.showClose=true]
  * @param {import('react').RefObject<HTMLDivElement|null>} [props.panelRef]
  */
 export default function GalleryModal({

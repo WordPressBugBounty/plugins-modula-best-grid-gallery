@@ -9,7 +9,7 @@ import { isThemeInheritControlsOn } from './themeInheritControls';
 /**
  * Explicit enable* Off wins; missing flag keeps legacy numeric behaviour.
  *
- * @param {Record<string, unknown>} loading
+ * @param {Record<string, unknown>}                    loading
  * @param {'enableScale'|'enableRotate'|'enableSlide'} key
  * @return {boolean}
  */

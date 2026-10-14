@@ -2,7 +2,7 @@
  * Normalize Video gallery max-height from settings to a safe CSS length.
  * Only `vh` and `px` are accepted (bare numbers → px). Default `100vh`.
  *
- * @param {unknown} raw - video.maxHeight (string or number).
+ * @param {unknown}               raw    - video.maxHeight (string or number).
  * @param {{ fallback?: string }} [opts]
  * @return {string} CSS max-height value.
  */

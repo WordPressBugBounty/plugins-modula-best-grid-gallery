@@ -54,6 +54,10 @@ export default {
 									{
 										path: "general.type",
 										neq: "template"
+									},
+									{
+										path: "general.type",
+										neq: "freeform"
 									}
 								]
 							},
@@ -102,6 +106,25 @@ export default {
 							groupedPaths: [
 								"general.width",
 								"general.alignment"
+							]
+						},
+						{
+							type: "drill",
+							label: __( "Gallery layout", 'modula-best-grid-gallery' ),
+							icon: "layout",
+							visibleWhen: {
+								path: "general.type",
+								eq: "freeform"
+							},
+							groupedPaths: [
+								"general.width",
+								"general.alignment",
+								"layout.gutter",
+								"layout.tabletGutter",
+								"layout.mobileGutter",
+								"layout.gridImageSize",
+								"layout.gridImageDimensions",
+								"layout.gridImageCrop"
 							]
 						},
 						{
@@ -210,6 +233,10 @@ export default {
 									},
 									{
 										path: "general.type",
+										neq: "freeform"
+									},
+									{
+										path: "general.type",
 										neq: "parallax-masonry"
 									},
 									{
@@ -265,6 +292,10 @@ export default {
 									{
 										path: "general.type",
 										neq: "template"
+									},
+									{
+										path: "general.type",
+										neq: "freeform"
 									},
 									{
 										path: "general.type",
@@ -429,6 +460,10 @@ export default {
 										neq: "template"
 									},
 									{
+										path: "general.type",
+										neq: "freeform"
+									},
+									{
 										any: [
 											{
 												path: "general.type",
@@ -498,6 +533,10 @@ export default {
 									{
 										path: "general.type",
 										neq: "template"
+									},
+									{
+										path: "general.type",
+										neq: "freeform"
 									}
 								]
 							}
@@ -800,11 +839,15 @@ export default {
 					},
 					{
 						path: "general.type",
-						neq: "parallax-masonry"
+						neq: "template"
 					},
 					{
 						path: "general.type",
-						neq: "bnb"
+						neq: "freeform"
+					},
+					{
+						path: "general.type",
+						neq: "parallax-masonry"
 					},
 					{
 						path: "general.type",
@@ -812,7 +855,7 @@ export default {
 					},
 					{
 						path: "general.type",
-						neq: "template"
+						neq: "bnb"
 					}
 				]
 			},

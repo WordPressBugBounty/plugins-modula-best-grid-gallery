@@ -7,7 +7,7 @@
 import { normalizeDeeplinkPrefix } from '../lightbox/modulaDeeplinkFromHash';
 
 /**
- * @param {Object} options
+ * @param {Object}        options
  * @param {string|number} options.itemId
  * @param {string|number} options.galleryId
  * @param {string}        [options.imageUrl]
@@ -16,7 +16,7 @@ import { normalizeDeeplinkPrefix } from '../lightbox/modulaDeeplinkFromHash';
  * @param {string}        [options.emailMessage]
  * @param {boolean}       [options.deeplinkEnabled]
  * @param {string}        [options.deeplinkPrefix]
- * @param {number}        [options.deeplinkIndex] 0-based index among shareable gallery images
+ * @param {number}        [options.deeplinkIndex]   0-based index among shareable gallery images
  * @return {string}
  */
 export function buildModulaSharePageUrl(options = {}) {
@@ -84,7 +84,7 @@ export function buildModulaSharePageUrl(options = {}) {
 
 /**
  * @param {'facebook'|'twitter'|'whatsapp'|'pinterest'|'linkedin'|'email'} type
- * @param {Object} options
+ * @param {Object}                                                         options
  * @return {string}
  */
 export function getSocialShareUrl(type, options = {}) {

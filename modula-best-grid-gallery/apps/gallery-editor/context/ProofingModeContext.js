@@ -19,8 +19,8 @@ import { getImageProofingEditorRegistration } from '../platform/imageProofingReg
 const ProofingModeContext = createContext(null);
 
 /**
- * @param {Object}      props
- * @param {number}      props.galleryId
+ * @param {Object}                    props
+ * @param {number}                    props.galleryId
  * @param {import('react').ReactNode} props.children
  */
 export function ProofingModeProvider({ galleryId, children }) {

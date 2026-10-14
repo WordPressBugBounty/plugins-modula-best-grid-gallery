@@ -1,16 +1,12 @@
 /**
- * Redesign shell — rail + settings panel + optional auxiliary column (hover builder, etc.).
- *
- * Full takeover shell with live preview is preserved under `legacy/GalleryTakeoverShell.full.jsx`
- * (quarantine — delete the whole `legacy/` folder when no longer needed).
+ * Gallery editor takeover — gallery content for the shared takeover layout:
+ * top bar, rail + settings panel, canvas toolbar, live preview, status bar.
  */
 import { useEffect, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
-import { AuxiliaryPanel } from 'shared-ui';
+import { TakeoverLayout, useTakeoverSaveStatus } from 'editor-shell';
 import { SETTINGS_EDITOR_CATEGORIES } from '../../constants/editorStructure';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 import { getTakeoverStateFromLocationHash } from '../../logic/settingsEditorHash';
-import { useTakeoverSaveStatus } from '../../context/TakeoverSaveStatusContext';
 import { useTakeoverAuxiliaryPanel } from '../../context/TakeoverAuxiliaryPanelContext';
 import { useTakeoverSidebarStack } from '../../context/TakeoverSidebarStackContext';
 import { HoverEffectBuilderProvider } from '../../context/HoverEffectBuilderContext';
@@ -74,8 +70,6 @@ export default function GalleryTakeoverShell() {
 		return () => registerPostStatusSync(null);
 	}, [applyPostStatusFromServer, registerPostStatusSync]);
 
-	const showAuxColumn = isAuxiliaryOpen;
-
 	const topFrame = stack[stack.length - 1];
 	const hoverEffectBuilderActive =
 		activeCategory === 'hover' ||
@@ -87,13 +81,6 @@ export default function GalleryTakeoverShell() {
 		activeCategory,
 		stack
 	);
-
-	const previewWrapExtra =
-		previewViewport === 'mobile'
-			? ' modula-gallery-takeover__preview-wrap--mobile'
-			: previewViewport === 'tablet'
-				? ' modula-gallery-takeover__preview-wrap--tablet'
-				: '';
 
 	useTakeoverSidebarStateSync({
 		categories: SETTINGS_EDITOR_CATEGORIES,
@@ -116,130 +103,88 @@ export default function GalleryTakeoverShell() {
 				activeCategory={activeCategory}
 				hoverEffectBuilderActive={hoverEffectBuilderActive}
 			>
-				<div
-					className={`modula-gallery-takeover__shell modula-gallery-takeover__shell--redesign-sidebar${
-						showAuxColumn
-							? ' modula-gallery-takeover__shell--aux-panel-open'
-							: ''
-					}`}
-				>
-					<TakeoverSettingsAutosave />
-					<GalleryTakeoverTopBar
-						galleryId={galleryId}
-						postTitle={liveTitle}
-						onPostTitleChange={setLiveTitle}
-						onPostTitleCommit={commitPostTitle}
-						adminUrl={adminUrl}
-						documentStatus={livePostStatus}
-						documentStatusLabel={livePostStatusLabel}
-						documentStatusChoices={config.postStatusChoices || []}
-						onDocumentStatusChange={handlePostStatusChange}
-						documentStatusBusy={statusBusy}
-						canEditDocumentStatus={Boolean(
-							config.canEditGalleryStatus
-						)}
-					/>
-					<div className="modula-gallery-takeover__workspace">
+				<TakeoverLayout
+					previewViewport={previewViewport}
+					topBar={
+						<GalleryTakeoverTopBar
+							galleryId={galleryId}
+							postTitle={liveTitle}
+							onPostTitleChange={setLiveTitle}
+							onPostTitleCommit={commitPostTitle}
+							adminUrl={adminUrl}
+							documentStatus={livePostStatus}
+							documentStatusLabel={livePostStatusLabel}
+							documentStatusChoices={
+								config.postStatusChoices || []
+							}
+							onDocumentStatusChange={handlePostStatusChange}
+							documentStatusBusy={statusBusy}
+							canEditDocumentStatus={Boolean(
+								config.canEditGalleryStatus
+							)}
+						/>
+					}
+					sidebar={
 						<GallerySidebarRail
 							activeCategory={activeCategory}
 							setActiveCategory={setActiveCategory}
 							docsUrl={docsUrl}
 						/>
-						{/*
-						 * Canvas column: toolbar is secondary chrome under the app topbar
-						 * (not inside the artboard). Stage below holds aux + previewer only.
-						 */}
-						<div className="modula-gallery-takeover__canvas-column">
-							<form.Subscribe
-								selector={(s) =>
-									typeof s.values?.general?.type === 'string'
-										? s.values.general.type
-										: ''
-								}
-							>
-								{(galleryType) => (
-									<>
-										<GalleryPreviewCanvasToolbar
-											galleryId={galleryId}
-											galleryType={galleryType}
-											previewViewport={previewViewport}
-											onPreviewViewportChange={
-												setPreviewViewport
-											}
-											runPreviewItemMutation={
-												runPersistTask
-											}
-										/>
-										<GalleryPreviewSelectionBar
-											galleryId={galleryId}
-											onNavigateCategory={
-												setActiveCategory
-											}
-											runPreviewItemMutation={
-												runPersistTask
-											}
-										/>
-									</>
-								)}
-							</form.Subscribe>
-							<div className="modula-gallery-takeover__redesign-stage">
-								{showAuxColumn ? (
-									<AuxiliaryPanel
-										aria-label={__(
-											'Additional tools',
-											'modula-best-grid-gallery'
-										)}
-									>
-										<TakeoverAuxiliaryPanelHost
-											galleryId={galleryId}
-										/>
-									</AuxiliaryPanel>
-								) : null}
-								<div className="modula-gallery-takeover__preview-column">
-									<main
-										id="modula-gallery-takeover-main"
-										className="modula-gallery-takeover__main"
-										tabIndex={-1}
-										aria-labelledby="modula-takeover-topbar-title"
-									>
-										<div className="modula-gallery-takeover__preview-card">
-											<div
-												className={`modula-gallery-takeover__preview-wrap${previewWrapExtra}`}
-											>
-												<GalleryTakeoverLivePreviewLazy
-													galleryId={galleryId}
-													postTitle={liveTitle}
-													previewViewport={
-														previewViewport
-													}
-													activeCategory={
-														activeCategory
-													}
-													hoverEffectBuilderActive={
-														hoverEffectBuilderActive
-													}
-													lightboxPreviewActive={
-														lightboxPreviewActive
-													}
-													filtersPreviewActive={
-														filtersPreviewActive
-													}
-													paginationPreviewActive={
-														paginationPreviewActive
-													}
-													showChrome={false}
-												/>
-											</div>
-										</div>
-									</main>
-								</div>
-							</div>
-							<GalleryPreviewStatusBar
-								previewViewport={previewViewport}
-							/>
-						</div>
-					</div>
-				</div>
+					}
+					toolbar={
+						<form.Subscribe
+							selector={(s) =>
+								typeof s.values?.general?.type === 'string'
+									? s.values.general.type
+									: ''
+							}
+						>
+							{(galleryType) => (
+								<>
+									<GalleryPreviewCanvasToolbar
+										galleryId={galleryId}
+										galleryType={galleryType}
+										previewViewport={previewViewport}
+										onPreviewViewportChange={
+											setPreviewViewport
+										}
+										runPreviewItemMutation={runPersistTask}
+									/>
+									<GalleryPreviewSelectionBar
+										galleryId={galleryId}
+										onNavigateCategory={setActiveCategory}
+										runPreviewItemMutation={runPersistTask}
+									/>
+								</>
+							)}
+						</form.Subscribe>
+					}
+					auxiliary={
+						isAuxiliaryOpen ? (
+							<TakeoverAuxiliaryPanelHost galleryId={galleryId} />
+						) : null
+					}
+					canvas={
+						<GalleryTakeoverLivePreviewLazy
+							galleryId={galleryId}
+							postTitle={liveTitle}
+							previewViewport={previewViewport}
+							activeCategory={activeCategory}
+							hoverEffectBuilderActive={hoverEffectBuilderActive}
+							lightboxPreviewActive={lightboxPreviewActive}
+							filtersPreviewActive={filtersPreviewActive}
+							paginationPreviewActive={paginationPreviewActive}
+							showChrome={false}
+						/>
+					}
+					statusBar={
+						<GalleryPreviewStatusBar
+							previewViewport={previewViewport}
+						/>
+					}
+				>
+					<TakeoverSettingsAutosave />
+				</TakeoverLayout>
 				<BulkEditModalLazy />
 			</HoverEffectBuilderProvider>
 		</BulkEditProvider>

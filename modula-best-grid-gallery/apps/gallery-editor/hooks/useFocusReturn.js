@@ -10,8 +10,7 @@ export function useFocusReturn() {
 
 	const saveReturnFocus = useCallback(() => {
 		const active = document.activeElement;
-		returnFocusRef.current =
-			active instanceof HTMLElement ? active : null;
+		returnFocusRef.current = active instanceof HTMLElement ? active : null;
 	}, []);
 
 	const restoreReturnFocus = useCallback(() => {

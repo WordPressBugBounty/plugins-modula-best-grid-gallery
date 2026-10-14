@@ -31,7 +31,12 @@ export function isResponsiveSettingsSupportedForGalleryType(type) {
 	if (!type || typeof type !== 'string') {
 		return true;
 	}
-	if (type === 'video' || type === 'creative-gallery' || type === 'bnb') {
+	if (
+		type === 'video' ||
+		type === 'creative-gallery' ||
+		type === 'bnb' ||
+		type === 'freeform'
+	) {
 		return false;
 	}
 	return true;
@@ -41,7 +46,7 @@ export function isResponsiveSettingsSupportedForGalleryType(type) {
  * Whether Infinite scroll is valid for this gallery type / polaroid mode.
  * Fixed-height packery (creative, polaroid with Uniform size off) cannot grow with appends.
  *
- * @param {string|undefined|null} type    `general.type` / config.type
+ * @param {string|undefined|null} type      `general.type` / config.type
  * @param {Object|null|undefined} [context] Grouped settings, flat config, or `{ polaroid: { uniformSize } }`.
  * @return {boolean}
  */

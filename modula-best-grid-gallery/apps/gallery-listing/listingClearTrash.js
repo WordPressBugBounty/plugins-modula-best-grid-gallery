@@ -24,7 +24,7 @@ export function shouldShowClearTrash({
 
 /**
  * @param {import('./viewToListingQuery').ListingView} view
- * @param {{ trash?: number }|null|undefined} statusCounts
+ * @param {{ trash?: number }|null|undefined}          statusCounts
  * @return {boolean}
  */
 export function shouldShowClearTrashForView(view, statusCounts) {

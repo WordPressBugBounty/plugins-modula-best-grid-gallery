@@ -7,7 +7,7 @@ import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * @param {*} val
- * @returns {boolean}
+ * @return {boolean}
  */
 export function licensingTruthy(val) {
 	if (val === true || val === 1 || val === '1') {
@@ -21,7 +21,7 @@ export function licensingTruthy(val) {
 
 /**
  * @param {Object} metadata Gallery bootstrap metadata.
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isImageLicensingExtensionActive(metadata) {
 	return licensingTruthy(metadata?.imageLicensingExtensionActive);
@@ -29,7 +29,7 @@ export function isImageLicensingExtensionActive(metadata) {
 
 /**
  * @param {Object} settings Grouped v2 settings.
- * @returns {string}
+ * @return {string}
  */
 export function getGalleryLicenseKey(settings) {
 	const licensing = settings?.licensing || {};
@@ -44,8 +44,8 @@ export function getGalleryLicenseKey(settings) {
  * Resolve per-image override vs gallery default.
  *
  * @param {Object} settings Grouped settings.
- * @param {Object} [item]    Gallery item row.
- * @returns {string}
+ * @param {Object} [item]   Gallery item row.
+ * @return {string}
  */
 export function resolveEffectiveLicenseKey(settings, item) {
 	const itemKey =
@@ -61,7 +61,7 @@ export function resolveEffectiveLicenseKey(settings, item) {
 /**
  * @param {Object} catalog License catalog from metadata.
  * @param {string} key     License key or CPT id.
- * @returns {Object|null}
+ * @return {Object|null}
  */
 export function getLicenseEntry(catalog, key) {
 	if (!catalog || typeof catalog !== 'object' || !key || key === 'none') {
@@ -77,9 +77,9 @@ export function getLicenseEntry(catalog, key) {
 /**
  * Pro extension gates display toggles; license type can still be read for editor preview.
  *
- * @param {Object} settings  Grouped settings.
- * @param {Object} metadata  Bootstrap metadata.
- * @returns {boolean}
+ * @param {Object} settings Grouped settings.
+ * @param {Object} metadata Bootstrap metadata.
+ * @return {boolean}
  */
 export function shouldShowLicenseBox(settings, metadata) {
 	const type = String(settings?.general?.type || '').trim();
@@ -99,7 +99,7 @@ export function shouldShowLicenseBox(settings, metadata) {
 /**
  * @param {Object} settings Grouped settings.
  * @param {Object} metadata Bootstrap metadata.
- * @returns {boolean}
+ * @return {boolean}
  */
 export function shouldShowLicenseInLightbox(settings, metadata) {
 	if (!licensingTruthy(settings?.licensing?.showOnLightbox)) {
@@ -115,7 +115,7 @@ export function shouldShowLicenseInLightbox(settings, metadata) {
  * HTML caption fragment for Fancybox (matches Pro `caption_license` markup).
  *
  * @param {Object} entry License catalog entry.
- * @returns {string}
+ * @return {string}
  */
 export function buildLicenseCaptionHtml(entry) {
 	if (!entry || typeof entry !== 'object') {
@@ -146,9 +146,9 @@ export function buildLicenseCaptionHtml(entry) {
 }
 
 /**
- * @param {string} caption Base caption HTML/text.
+ * @param {string} caption       Base caption HTML/text.
  * @param {string} licensingHtml Licensing fragment.
- * @returns {string}
+ * @return {string}
  */
 export function mergeLightboxCaptionWithLicensing(caption, licensingHtml) {
 	const base = typeof caption === 'string' ? caption : '';
@@ -167,7 +167,7 @@ export function mergeLightboxCaptionWithLicensing(caption, licensingHtml) {
 
 /**
  * @param {string} value
- * @returns {string}
+ * @return {string}
  */
 function escapeHtmlAttr(value) {
 	return String(value)
@@ -179,7 +179,7 @@ function escapeHtmlAttr(value) {
 
 /**
  * @param {string} value
- * @returns {string}
+ * @return {string}
  */
 function escapeHtml(value) {
 	return String(value)

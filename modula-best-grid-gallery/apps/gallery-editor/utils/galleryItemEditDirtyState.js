@@ -39,8 +39,8 @@ export function snapshotCaptionFromImageMetadataEditor(editorInstanceKey) {
 
 /**
  * @param {import('@tanstack/react-form').ReactFormExtendedApi} form
- * @param {number} storeIndex
- * @param {number} attachmentId
+ * @param {number}                                              storeIndex
+ * @param {number}                                              attachmentId
  * @return {Object}
  */
 export function collectImageMetadataEditValues(form, storeIndex, attachmentId) {
@@ -62,10 +62,10 @@ function imageMetadataValuesSignature(values) {
 }
 
 /**
- * @param {Object|null} item
+ * @param {Object|null}                                         item
  * @param {import('@tanstack/react-form').ReactFormExtendedApi} form
- * @param {number} storeIndex
- * @param {number} attachmentId
+ * @param {number}                                              storeIndex
+ * @param {number}                                              attachmentId
  * @return {boolean}
  */
 export function isImageMetadataEditDirty(item, form, storeIndex, attachmentId) {
@@ -85,7 +85,7 @@ export function isImageMetadataEditDirty(item, form, storeIndex, attachmentId) {
 }
 
 /**
- * @param {Object|null} item
+ * @param {Object|null}            item
  * @param {() => Object|undefined} getSavePayload
  * @return {boolean}
  */

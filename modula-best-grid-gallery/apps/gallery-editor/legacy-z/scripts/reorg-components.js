@@ -102,7 +102,7 @@ function stripExt(filePath) {
 }
 
 /**
- * @returns {{
+ * @return {{
  *   oldToNew: Map<string, string>,
  *   newAbsToOldAbs: Map<string, string>,
  * }}
@@ -127,8 +127,8 @@ function buildPathMaps() {
 /**
  * Resolve import as it was authored (against pre-move location for moved files).
  *
- * @param {string} currentFileAbs
- * @param {string} spec
+ * @param {string}              currentFileAbs
+ * @param {string}              spec
  * @param {Map<string, string>} newAbsToOldAbs
  */
 function resolveAuthoredTarget(currentFileAbs, spec, newAbsToOldAbs) {

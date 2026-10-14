@@ -297,6 +297,66 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 		]
 	);
 
+	/** Preserve pending authored changes before a gesture or derived catalog reconciliation. */
+	const commitPendingSettings = useCallback(() => {
+		clearDebounce();
+		ghostEchoUntilRef.current = 0;
+		const before = cloneGroupedSettings(form.store.state.values);
+		const previous = lastSnapshotRef.current;
+		if (canonicalSerialize(before) !== canonicalSerialize(previous)) {
+			historyRef.current.commitSettingsStep({
+				label: describeSettingsChange(previous, before),
+				settings: before,
+				change: buildSettingsHistoryChange(previous, before),
+			});
+		}
+		return before;
+	}, [form, clearDebounce, cloneGroupedSettings, canonicalSerialize]);
+
+	/** Commit one complete settings gesture, independent of the field debounce. */
+	const commitSettingsStep = useCallback(
+		(label, mutate) => {
+			const before = commitPendingSettings();
+			mutate();
+			const next = cloneGroupedSettings(form.store.state.values);
+			historyRef.current.commitSettingsStep({
+				label,
+				settings: next,
+				change: buildSettingsHistoryChange(before, next),
+			});
+			lastSnapshotRef.current = next;
+			pendingSerializedRef.current = canonicalSerialize(next);
+			bump();
+		},
+		[
+			form,
+			commitPendingSettings,
+			cloneGroupedSettings,
+			canonicalSerialize,
+			bump,
+		]
+	);
+
+	/** Fold derived geometry into the current checkpoint without inventing an authored step. */
+	const reconcileSettingsCheckpoint = useCallback(
+		(mutate) => {
+			commitPendingSettings();
+			mutate();
+			const next = cloneGroupedSettings(form.store.state.values);
+			historyRef.current.adoptCheckpoint({ settings: next });
+			lastSnapshotRef.current = next;
+			pendingSerializedRef.current = canonicalSerialize(next);
+			bump();
+		},
+		[
+			form,
+			commitPendingSettings,
+			cloneGroupedSettings,
+			canonicalSerialize,
+			bump,
+		]
+	);
+
 	/**
 	 * @param {{ label: string, layout: Record<string, unknown> }} args
 	 */
@@ -345,6 +405,8 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 			historyEntries: history.listEntries(),
 			jumpTo,
 			clearHistory,
+			commitSettingsStep,
+			reconcileSettingsCheckpoint,
 			commitLayoutStep,
 			adoptLayoutCheckpoint,
 			dropLayoutSteps,
@@ -358,6 +420,8 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 		stackVersion,
 		jumpTo,
 		clearHistory,
+		commitSettingsStep,
+		reconcileSettingsCheckpoint,
 		commitLayoutStep,
 		adoptLayoutCheckpoint,
 		dropLayoutSteps,

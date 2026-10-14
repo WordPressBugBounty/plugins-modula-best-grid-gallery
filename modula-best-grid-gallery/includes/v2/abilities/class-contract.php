@@ -14,6 +14,13 @@ final class Contract {
 		return array( 'type' => 'object', 'properties' => $properties, 'required' => $required, 'additionalProperties' => false );
 	}
 
+	/** Success payload or a blocked explanation. The two shapes do not overlap. */
+	public static function admitting( array $success ): array {
+		return array(
+			'oneOf' => array( $success, self::outcome_schema() ),
+		);
+	}
+
 	public static function pagination(): array {
 		return array(
 			'page'     => array( 'type' => 'integer', 'minimum' => 1, 'maximum' => 1000000, 'default' => 1 ),
@@ -44,7 +51,7 @@ final class Contract {
 		return in_array( $normalized, array( 'password', 'postpassword', 'apikey', 'secret', 'secretkey', 'accesskey', 'accesskeyid', 'secretaccesskey', 'token', 'accesstoken', 'refreshtoken', 'licensekey', 'credentials', 'authorization' ), true );
 	}
 
-	/** Retain JSON types/structure only; presentation, callbacks and stored defaults stay private. */
+	/** Retain public JSON types, structure and descriptions; callbacks and stored defaults stay private. */
 	private static function safe_definition( array $definition ): ?array {
 		$type = $definition['type'] ?? '';
 		if ( ! in_array( $type, array( 'string', 'integer', 'number', 'boolean', 'object', 'array' ), true ) ) {
@@ -59,6 +66,9 @@ final class Contract {
 				return null;
 			}
 			$out['items'] = $items;
+		}
+		if ( isset( $definition['description'] ) && is_string( $definition['description'] ) ) {
+			$out['description'] = $definition['description'];
 		}
 		return $out;
 	}
@@ -92,6 +102,12 @@ final class Contract {
 		$properties = self::safe_properties( $document['items'] ?? array() );
 		// Stable identities and embedded row fields supplement the image field catalog.
 		$properties['id'] = array( 'type' => array( 'integer', 'string' ) );
+
+		$properties['freeformId'] = array(
+			'type'        => 'string',
+			'description' => 'Gallery-local occurrence identity for Freeform placements, independent of attachment identity and catalog order.',
+		);
+
 		$properties['itemKind'] = array( 'type' => 'string', 'enum' => array( 'image', 'content_block', 'shortcode' ) );
 		foreach ( array( 'embeddedId', 'blockBackgroundColor', 'blockTextColor', 'blockPaddingPreset', 'blockFontPreset', 'blockBackgroundSize', 'blockBackgroundPosition', 'blockBackgroundRepeat', 'blockBodyHtml', 'shortcodeRaw', 'description' ) as $key ) {
 			$properties[ $key ] = array( 'type' => 'string' );
@@ -164,6 +180,35 @@ final class Contract {
 		$gallery['properties']['revision'] = self::revision_schema();
 		$gallery['properties']['public_url'] = array( 'type' => 'string' );
 		$extra = $child ? array( 'id' => array( 'type' => 'integer' ) ) : array( 'targets' => array( 'type' => 'array', 'maxItems' => 25, 'items' => self::outcome_schema( true ) ) );
+		$blocker = self::object(
+			array(
+				'reason'  => array( 'type' => 'string', 'enum' => array( 'needs_pro', 'needs_plan_upgrade', 'needs_enable', 'needs_pro_update', 'needs_service_update', 'dependency_unavailable', 'configuration_required', 'permission_denied', 'unsupported_context' ) ),
+				'feature' => array( 'type' => 'string' ),
+				'path'    => array( 'type' => 'string' ),
+				'value'   => array( 'type' => array( 'string', 'integer', 'boolean' ) ),
+				'remedy'  => self::object(
+					array(
+						'action'      => array( 'type' => 'string' ),
+						'explanation' => array( 'type' => 'string' ),
+						'destination' => array( 'type' => 'string' ),
+					),
+					array( 'action', 'explanation' )
+				),
+			),
+			array( 'reason', 'feature', 'remedy' )
+		);
+		$recommendation = self::object(
+			array(
+				'id'          => array( 'type' => 'string' ),
+				'feature'     => array( 'type' => 'string' ),
+				'message'     => array( 'type' => 'string' ),
+				'relevance'   => array( 'type' => 'string' ),
+				'action'      => array( 'type' => 'string' ),
+				'destination' => array( 'type' => 'string' ),
+				'hint'        => array( 'type' => 'string', 'enum' => array( 'after_result' ) ),
+			),
+			array( 'id', 'feature', 'message', 'hint' )
+		);
 		return self::object( $extra + array(
 			'schema_version' => array( 'type' => 'string', 'enum' => array( self::VERSION ) ),
 			'request_id' => array( 'type' => 'string' ),
@@ -195,10 +240,17 @@ final class Contract {
 			'membership' => self::object( array( 'object_id' => array( 'type' => 'integer' ), 'object_type' => array( 'type' => 'string' ), 'folder_id' => array( 'type' => 'integer' ) ), array( 'object_id', 'object_type', 'folder_id' ) ),
 			'revision' => self::revision_schema(),
 			'deleted_id' => array( 'type' => 'integer' ),
+			'blockers' => array( 'type' => 'array', 'items' => $blocker ),
+			'recommendation' => $recommendation,
 		), array( 'schema_version', 'request_id', 'operation', 'status', 'code', 'message', 'reconciliation' ) );
 	}
 
 	public static function definitions(): array {
+		// Rebuilt on every input check, this catalog held admission past the editor's overlapping save.
+		static $cached = null;
+		if ( is_array( $cached ) ) {
+			return $cached;
+		}
 		$page = self::pagination();
 		$list_input = $page + array(
 			'search' => array( 'type' => 'string', 'maxLength' => 200, 'default' => '' ),
@@ -212,39 +264,54 @@ final class Contract {
 		$operation = self::object( array(
 			'name' => array( 'type' => 'string' ), 'status' => array( 'type' => 'string', 'enum' => array( 'available', 'planned', 'unavailable' ) ),
 			'description' => array( 'type' => 'string' ), 'readonly' => array( 'type' => 'boolean' ),
+			'owner' => array( 'type' => 'string', 'enum' => array( 'lite', 'pro' ) ),
+			'lifecycle' => array( 'type' => 'string', 'enum' => array( 'active', 'retired' ) ),
+			'availability' => array( 'type' => 'string', 'enum' => array( 'executable', 'explanatory', 'planned' ) ),
+			'provider' => array( 'type' => 'string' ),
+			'features' => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
+			'plans' => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
+			'blockers' => array( 'type' => 'array' ),
 			// These are JSON schemas, rather than arbitrary stored object data.
 			'input_schema' => array( 'type' => 'object' ), 'output_schema' => array( 'type' => 'object' ),
 		), array( 'name', 'status', 'description', 'readonly' ) );
-		$feature = self::object( array( 'available' => array( 'type' => 'boolean' ), 'enabled' => array( 'type' => 'boolean' ) ), array( 'available', 'enabled' ) );
+		$feature = self::object( array( 'available' => array( 'type' => 'boolean' ), 'enabled' => array( 'type' => 'boolean' ), 'service_ready' => array( 'type' => 'boolean' ) ), array( 'available', 'enabled' ) );
 		$features = self::object( array(
 			'lite_version' => array( 'type' => 'string' ), 'pro_version' => array( 'type' => 'string' ),
-			'compatible_pro' => array( 'type' => 'boolean' ), 'license_status' => array( 'type' => 'string' ),
+			'compatible_pro' => array( 'type' => 'boolean' ),
+			'pro_state' => array( 'type' => 'string', 'enum' => array( 'absent', 'incompatible', 'compatible' ) ),
+			'service_ready' => array( 'type' => 'boolean' ),
+			'license_status' => array( 'type' => 'string' ),
 			'license_source' => array( 'type' => 'string', 'enum' => array( 'stored' ) ),
 			'extensions' => array( 'type' => 'object', 'additionalProperties' => $feature ),
+			'folders_ready' => array( 'type' => 'boolean' ),
+			'capability_protocol' => array( 'type' => 'integer' ),
+			'plan_map_consistent' => array( 'type' => 'boolean' ),
+			'authorization_scope' => array( 'type' => 'string' ),
 		), array( 'lite_version', 'pro_version', 'compatible_pro', 'license_status', 'license_source', 'extensions' ) );
 		$lifecycle = array();
 		foreach ( Lifecycle::operations() as $name ) {
 			$lifecycle[ $name ] = array( 'label' => str_replace( array( 'modula/', '-' ), array( '', ' ' ), $name ), 'description' => 'Explicit Beta gallery lifecycle with revision protection, 30-day recovery and shared-media preservation. Duplicate and restore require draft/publish intent. Classic or unavailable album dependencies are refused.', 'input_schema' => Lifecycle::schema( $name ), 'output_schema' => self::outcome_schema() );
 		}
-		return array( Batch::MEDIA => array( 'label' => 'Apply recoverable media targets', 'description' => '1–25 unique target IDs, each with operation (collection/member/favorite/local attachment mutation), id, revision and operation fields. Per-target validation and access; successes never repeat. Same revision is not refreshed implicitly between targets: later shared-organization targets may conflict and need reconciliation. No cross-target transaction. Collection creation is excluded; use the single creation operation.', 'input_schema' => Batch::schema(), 'output_schema' => self::outcome_schema() ) ) + Proofing_Email::definitions() + Proofing_Selections::definitions() + Proofing::definitions() + Proofing_Clients::definitions() + Instagram::definitions() + Watermark::definitions() + Video::definitions() + Transfers::definitions() + Bound::definitions() + Storage::definitions() + Replacement::definitions() + Diagnostics::definitions() + Server_Import::definitions() + Intake::definitions() + Site_Settings::definitions() + Attachment_Lifecycle::definitions() + Collections::definitions() + Attachment_Image::definitions() + Attachments::definitions() + Media_Folders::definitions() + Album_Lifecycle::definitions() + Album_Members::definitions() + Album_Presets::definitions() + Presets::definitions() + Albums::definitions() + $lifecycle + array(
+		$cached = array( Batch::MEDIA => array( 'label' => 'Apply recoverable media targets', 'description' => '1–25 unique target IDs, each with operation (collection/member/favorite/local attachment mutation), id, revision and operation fields. Per-target validation and access; successes never repeat. Same revision is not refreshed implicitly between targets: later shared-organization targets may conflict and need reconciliation. No cross-target transaction. Collection creation is excluded; use the single creation operation.', 'input_schema' => Batch::schema(), 'output_schema' => self::outcome_schema() ) ) + Proofing_Email::definitions() + Proofing_Selections::definitions() + Proofing::definitions() + Proofing_Clients::definitions() + Instagram::definitions() + Watermark::definitions() + Video::definitions() + Transfers::definitions() + Bound::definitions() + Storage::definitions() + Replacement::definitions() + Diagnostics::definitions() + Server_Import::definitions() + Intake::definitions() + Site_Settings::definitions() + Attachment_Lifecycle::definitions() + Collections::definitions() + Attachment_Image::definitions() + Attachments::definitions() + Media_Folders::definitions() + Album_Lifecycle::definitions() + Album_Members::definitions() + Album_Presets::definitions() + Presets::definitions() + Albums::definitions() + $lifecycle + array(
 			Batch::OPERATION => array( 'label' => 'Update Beta galleries in a batch', 'description' => 'Update 1–25 distinct targets with individual revisions and outcomes. Resume the identical input to finish pending targets; completed or uncertain targets never execute again. Retry refused targets with current revisions in a new batch identity.', 'input_schema' => Batch::schema(), 'output_schema' => self::outcome_schema() ),
 			Embedded::OPERATION => array( 'label' => 'Patch Beta gallery content items', 'description' => 'Author content blocks and shortcode items and their mixed order in Lite and Compatible Pro. Preserves shared media; requires a revision and recoverable request identity.', 'input_schema' => Embedded::schema(), 'output_schema' => self::outcome_schema() ),
 			Composition::OPERATION => array( 'label' => 'Patch Beta gallery images', 'description' => 'Apply 1–100 ordered image changes against a revision. Preserve omitted and embedded items and shared media text/files. Bound galleries are unsupported. Recover the original outcome for 30 days.', 'input_schema' => Composition::schema(), 'output_schema' => self::outcome_schema() ),
-			'modula/update-gallery' => array( 'label' => 'Update a Beta gallery', 'description' => 'Patch selected metadata and grouped settings against a read revision. Invalid or unavailable fields reject the target. Preserve other settings and items; no attachment text, email, watermark, import or provider effects. Recover identical requests for 30 days.',
-				'input_schema' => self::object( array( 'request_id' => self::request_id_schema(), 'id' => array( 'type' => 'integer', 'minimum' => 1 ), 'revision' => self::revision_schema(), 'metadata' => self::object( array( 'title' => array( 'type' => 'string', 'minLength' => 1, 'maxLength' => 200 ), 'status' => array( 'type' => 'string', 'enum' => array( 'draft', 'publish', 'pending', 'private' ) ) ) ) + array( 'minProperties' => 1 ), 'settings' => Settings_Contract::schema() ), array( 'request_id', 'id', 'revision' ) ),
+			'modula/update-gallery' => array( 'label' => 'Update a Beta gallery', 'description' => 'Patch selected metadata and grouped settings against a read revision. Known locked fields and values return their feature requirement and save nothing on that target. Unknown fields, invalid values and secrets stay invalid. Preserve omitted settings and items; no attachment text, email, watermark, import or provider effects. Recover identical requests for 30 days.',
+				'input_schema' => self::object( array( 'request_id' => self::request_id_schema(), 'id' => array( 'type' => 'integer', 'minimum' => 1 ), 'revision' => self::revision_schema(), 'metadata' => self::object( array( 'title' => array( 'type' => 'string', 'minLength' => 1, 'maxLength' => 200 ), 'status' => array( 'type' => 'string', 'enum' => array( 'draft', 'publish', 'pending', 'private' ) ) ) ) + array( 'minProperties' => 1 ), 'settings' => Settings_Contract::recognized() ), array( 'request_id', 'id', 'revision' ) ),
 				'output_schema' => self::outcome_schema() ),
 			'modula/create-gallery' => array( 'label' => 'Create a Beta gallery', 'description' => 'Create one Beta gallery from 1–100 existing image attachments with explicit draft/publish intent. Recover the same request for 30 days; never retry uncertain effects with a new identity.',
 				'input_schema' => self::object( array( 'request_id' => self::request_id_schema(), 'title' => array( 'type' => 'string', 'minLength' => 1, 'maxLength' => 200 ), 'status' => array( 'type' => 'string', 'enum' => array( 'draft', 'publish' ) ), 'attachment_ids' => array( 'type' => 'array', 'minItems' => 1, 'maxItems' => 100, 'uniqueItems' => true, 'items' => array( 'type' => 'integer', 'minimum' => 1 ) ) ), array( 'request_id', 'title', 'status', 'attachment_ids' ) ),
 				'output_schema' => self::outcome_schema() ),
 			'modula/recover-request' => array( 'label' => 'Recover a Modula request', 'description' => 'Read an actor/site-isolated request outcome with current permissions. Expired and interrupted identities cannot execute anew.',
 				'input_schema' => self::object( array( 'request_id' => self::request_id_schema() ), array( 'request_id' ) ), 'output_schema' => self::outcome_schema() ),
-			'modula/discover' => array( 'label' => 'Discover Modula operations', 'description' => 'Read operation contracts and stored feature availability. Discovery does not authorize a target.',
-				'input_schema' => self::object( $page ) + array( 'default' => array( 'page' => 1, 'per_page' => 20 ) ), 'output_schema' => self::object( self::page_output() + array( 'operations' => array( 'type' => 'array', 'items' => $operation ), 'features' => $features ), array_merge( array_keys( self::page_output() ), array( 'operations', 'features' ) ) ) ),
+			'modula/discover' => array( 'label' => 'Discover Modula operations', 'description' => 'Read operation contracts, the recognized gallery setting vocabulary, the currently usable subset and stored feature availability. Discovery does not authorize a target.',
+				'input_schema' => self::object( $page ) + array( 'default' => array( 'page' => 1, 'per_page' => 20 ) ), 'output_schema' => self::object( self::page_output() + array( 'capability_protocol' => array( 'type' => 'integer' ), 'operations' => array( 'type' => 'array', 'items' => $operation ), 'features' => $features, 'inventory' => array( 'type' => 'array' ), 'gallery_settings' => array( 'type' => 'object', 'properties' => array( 'recognized' => array( 'type' => 'object' ), 'usable' => array( 'type' => 'object' ), 'requirements' => array( 'type' => 'array' ) ), 'required' => array( 'recognized', 'usable', 'requirements' ), 'additionalProperties' => false ) ), array_merge( array_keys( self::page_output() ), array( 'operations', 'features', 'gallery_settings' ) ) ) ),
 			'modula/list-galleries' => array( 'label' => 'List Beta galleries', 'description' => 'List Beta galleries the actor can administer, with access-filtered totals and pagination.',
 				'input_schema' => self::object( $list_input ) + array( 'default' => array( 'page' => 1, 'per_page' => 20 ) ), 'output_schema' => self::object( self::page_output() + array( 'galleries' => array( 'type' => 'array', 'items' => self::gallery_schema() ) ), array_merge( array_keys( self::page_output() ), array( 'galleries' ) ) ) ),
-			'modula/read-gallery' => array( 'label' => 'Read a Beta gallery', 'description' => 'Read safe grouped settings and a page of stored permitted items, without repairs or provider requests.',
+			'modula/read-gallery' => array( 'label' => 'Read a Beta gallery', 'description' => 'Read safe grouped settings, stored Freeform composition and a page of permitted items with stable gallery-local freeformId identities. Stored layout type is independent of visitor fallback; reads never pin identities or initialize placements.',
 				'input_schema' => self::object( $page + array( 'id' => array( 'type' => 'integer', 'minimum' => 1 ) ), array( 'id' ) ),
-				'output_schema' => self::object( self::page_output() + array( 'gallery' => $read_gallery, 'items' => array( 'type' => 'array', 'items' => self::item_schema() ) ), array_merge( array_keys( self::page_output() ), array( 'gallery', 'items' ) ) ) ),
+				'output_schema' => self::object( self::page_output() + array( 'gallery' => $read_gallery, 'items' => array( 'type' => 'array', 'items' => self::item_schema() ), 'request_id' => array( 'type' => 'string' ), 'operation' => array( 'type' => 'string' ), 'code' => array( 'type' => 'string' ), 'message' => array( 'type' => 'string' ), 'blockers' => array( 'type' => 'array' ), 'reconciliation' => array( 'type' => 'string' ) ), array_merge( array_keys( self::page_output() ), array( 'gallery', 'items' ) ) ) ),
 		);
+		return $cached;
 	}
 }

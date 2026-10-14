@@ -12,7 +12,7 @@ import { isGalleryItemHiddenFromLightbox } from './prepareItemData';
 
 /**
  * @param {unknown} itemData
- * @returns {string}
+ * @return {string}
  */
 function normalizeItemLink(itemData) {
 	const raw = itemData?.link;
@@ -21,7 +21,7 @@ function normalizeItemLink(itemData) {
 
 /**
  * @param {unknown} itemData
- * @returns {boolean}
+ * @return {boolean}
  */
 function opensInNewTab(itemData) {
 	const target = itemData?.target;
@@ -30,7 +30,7 @@ function opensInNewTab(itemData) {
 
 /**
  * @param {unknown} itemData
- * @returns {string}
+ * @return {string}
  */
 function readExistingHref(itemData) {
 	const attrs = itemData?.linkAttributes || itemData?.link_attributes;
@@ -45,9 +45,9 @@ function readExistingHref(itemData) {
  * Full-size image URL for Fancybox href (PHP `$item_data['image_full']` parity).
  * Prefer `url` / `full` over display `src` / `thumbnail`. Skip video playback URLs.
  *
- * @param {Object} itemData
+ * @param {Object}                 itemData
  * @param {{ imageFull?: string }} [ctx]
- * @returns {string}
+ * @return {string}
  */
 function resolveFullImageHref(itemData, ctx = {}) {
 	const candidates = [
@@ -78,7 +78,7 @@ function resolveFullImageHref(itemData, ctx = {}) {
  * Legacy `direct` (Direct link to image file) becomes Fancybox.
  *
  * @param {unknown} mode
- * @returns {string}
+ * @return {string}
  */
 export function coerceLightboxClickMode(mode) {
 	const trimmed = typeof mode === 'string' ? mode.trim() : '';
@@ -89,10 +89,10 @@ export function coerceLightboxClickMode(mode) {
 }
 
 /**
- * @param {Object}      itemData
- * @param {Object}      config
+ * @param {Object}                                        itemData
+ * @param {Object}                                        config
  * @param {{ imageFull?: string, forceNewTab?: boolean }} [ctx]
- * @returns {{
+ * @return {{
  *   showLink: boolean,
  *   href: string,
  *   isSimpleLink: boolean,
@@ -208,7 +208,7 @@ export function resolveGalleryItemLink(itemData, config, ctx = {}) {
  * Hybrid `lightbox-prefer-url` is not always-simple (per-item).
  *
  * @param {unknown} lightbox
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isSimpleGalleryLinkMode(lightbox) {
 	const mode = coerceLightboxClickMode(lightbox);
@@ -225,7 +225,7 @@ export function isSimpleGalleryLinkMode(lightbox) {
  * Controls) should be active for this click mode.
  *
  * @param {unknown} lightbox
- * @returns {boolean}
+ * @return {boolean}
  */
 export function galleryUsesFancyboxLightbox(lightbox) {
 	const mode = coerceLightboxClickMode(lightbox);
@@ -240,7 +240,7 @@ export function galleryUsesFancyboxLightbox(lightbox) {
  * Visitor galleries still render those links.
  *
  * @param {boolean} isPreviewContext Settings-editor preview display context.
- * @returns {{ renderLinks: boolean, forceLinkNewTab: boolean }}
+ * @return {{ renderLinks: boolean, forceLinkNewTab: boolean }}
  */
 export function getTileLinkRenderOptions(isPreviewContext) {
 	return {

@@ -8,6 +8,7 @@
 namespace Modula\V2\Settings;
 
 use Modula\V2\Meta_Sync;
+use Modula\V2\Freeform_Catalog;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -51,6 +52,18 @@ class Writer {
 
 	/** Validate that requested values already use canonical sanitizer forms before any effects. */
 	public static function validate_strict_patch( int $id, array $incoming ) {
+		// Preset validation has no target catalog; only gallery patches replace occurrences.
+		if ( $id > 0 && isset( $incoming['freeform']['placements'] ) ) {
+			$schema = Registry::get_schema()['freeform']['placements'];
+			$valid  = Freeform_Catalog::validate_replacement(
+				array_values( array_filter( Meta_Sync::get_images_v2( $id ), 'is_array' ) ),
+				$incoming['freeform']['placements'],
+				$schema['items']['properties']['w']['maximum']
+			);
+			if ( is_wp_error( $valid ) ) {
+				return $valid;
+			}
+		}
 		$existing = json_decode( (string) get_post_meta( $id, Meta_Sync::SETTINGS_V2_META_KEY, true ), true ) ?: array();
 		$sanitized = Sanitizer::sanitize_grouped( self::merge_grouped_settings( $existing, $incoming ) );
 		foreach ( $incoming as $group => $keys ) {
@@ -158,6 +171,13 @@ class Writer {
 			do_action( 'modula_gallery_settings_v2_updated', $id, $sanitized, $flat );
 		}
 
+		if ( ! empty( $incoming['freeform']['placements'] ) ) {
+			$pinned = Meta_Sync::pin_freeform_catalog( $id );
+			if ( is_wp_error( $pinned ) ) {
+				return $pinned;
+			}
+			return Meta_Sync::get_settings_v2( $id, false );
+		}
 		return $sanitized;
 	}
 

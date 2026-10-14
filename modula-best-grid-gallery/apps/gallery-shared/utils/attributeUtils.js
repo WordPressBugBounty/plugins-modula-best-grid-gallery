@@ -60,7 +60,7 @@ export function normalizeReactDomProps(attrs) {
 /**
  * Merge className from normalized PHP attrs with extra class tokens (link_classes / img_classes).
  *
- * @param {Object} attrs - From normalizeReactDomProps(spreadAttrs(...))
+ * @param {Object}          attrs        - From normalizeReactDomProps(spreadAttrs(...))
  * @param {string[]|string} extraClasses - Array of class strings, or single string
  * @return {Object} attrs without duplicate class keys; single className when non-empty
  */

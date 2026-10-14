@@ -9,6 +9,7 @@ import { useProofingGalleryCapabilities } from '../../hooks/useProofingGalleryCa
 import { useGalleryBootstrapQuery } from '../../query/useGalleryBootstrapQuery';
 
 /**
+ * @param  frame
  * @return {boolean}
  */
 export function isProofingNestedFrame(frame) {

@@ -5,7 +5,7 @@ import { getModulaSettingsEditorConfig } from '../config/modulaSettingsEditorCon
 
 /**
  * @param {Record<string, unknown>} [editorConfig]
- * @returns {{ folderImport: boolean, zipImport: boolean }}
+ * @return {{ folderImport: boolean, zipImport: boolean }}
  */
 export function getAddNewEntitlements(editorConfig) {
 	const editor = editorConfig || getModulaSettingsEditorConfig();
@@ -22,8 +22,8 @@ export function getAddNewEntitlements(editorConfig) {
 
 /**
  * @param {{ id?: string, reactFlow?: string, requiresProOnly?: boolean }} row
- * @param {Record<string, unknown>} editor
- * @returns {boolean}
+ * @param {Record<string, unknown>}                                        editor
+ * @return {boolean}
  */
 export function isAddNewProFeatureEntitled(row, editor) {
 	const entitlements = getAddNewEntitlements(editor);

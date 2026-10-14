@@ -7,11 +7,11 @@
 import GalleryItem from '../../components/GalleryItem';
 
 /**
- * @param {Object} props
+ * @param {Object}       props
  * @param {unknown|null} props.itemData
- * @param {Object} props.config
- * @param {string} props.slotId
- * @param {string} [props.className]
+ * @param {Object}       props.config
+ * @param {string}       props.slotId
+ * @param {string}       [props.className]
  */
 export default function TemplateImageSlot({
 	itemData,

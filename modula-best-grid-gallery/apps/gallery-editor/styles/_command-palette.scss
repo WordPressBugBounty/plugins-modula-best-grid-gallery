@@ -1,5 +1,5 @@
 @use 'variables' as *;
-@use 'takeover-theme' as theme;
+@use '../../editor-shell/styles/theme' as theme;
 
 // Portal root carries appearance (not under `.modula-settings-editor__app`).
 .modula-cmd-palette--light {

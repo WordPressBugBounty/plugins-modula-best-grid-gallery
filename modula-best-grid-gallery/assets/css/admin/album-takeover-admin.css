@@ -1,5 +1,8 @@
 /**
  * Modula album edit — full-screen takeover (hides WP admin chrome).
+ *
+ * The pre-React boot shell (mount, spinner, desktop-only notice) is shared with
+ * the gallery editor: see takeover-boot.css.
  */
 
 body.modula-album-takeover {
@@ -44,28 +47,9 @@ body.modula-album-takeover #wpfooter {
 	display: none !important;
 }
 
-body.modula-album-takeover #modula-album-takeover-root.modula-album-takeover__mount {
-	--modula-se-boot-bg: #e9e9e5;
-	--modula-se-boot-ink: #8b8b93;
-	position: fixed;
-	inset: 0;
-	z-index: 100000;
-	display: flex;
-	flex-direction: column;
-	background: var(--modula-se-boot-bg);
-	color: var(--modula-se-boot-ink);
-	overflow: hidden;
-	box-sizing: border-box;
-}
-
-html[data-modula-ae-appearance="dark"]
-	body.modula-album-takeover
-	#modula-album-takeover-root.modula-album-takeover__mount,
-body.modula-album-takeover
-	#modula-album-takeover-root.modula-album-takeover__mount[data-appearance="dark"] {
-	--modula-se-boot-bg: #101114;
-	--modula-se-boot-ink: #74747e;
-	color-scheme: dark;
+/* Tooltips from @wordpress/components must render above this fixed layer (see WP .components-tooltip z-index). */
+body.modula-album-takeover .components-tooltip {
+	z-index: 1000102 !important;
 }
 
 body.modula-album-takeover #post-body,

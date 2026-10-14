@@ -238,9 +238,9 @@ export function getFocalCrop01FromItem(item) {
 /**
  * Resolve initial cropped area percentages from server row or session fallback.
  *
- * @param {boolean}                                       isOpen
- * @param {number}                                        galleryId
- * @param {Object|null|undefined}                         item
+ * @param {boolean}               isOpen
+ * @param {number}                galleryId
+ * @param {Object|null|undefined} item
  */
 export function resolveInitialCroppedAreaPercentages(isOpen, galleryId, item) {
 	if (!isOpen || !item) {

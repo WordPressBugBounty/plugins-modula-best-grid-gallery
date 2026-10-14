@@ -38,9 +38,9 @@ function isVerticalFilterLayout(positioning) {
 }
 
 /**
- * @param {string} root Gallery root selector (e.g. `#modula-123`).
+ * @param {string} root           Gallery root selector (e.g. `#modula-123`).
  * @param {Object} groupedFilters `settings.filters`
- * @param {Object} config Derived flat config.
+ * @param {Object} config         Derived flat config.
  * @return {string}
  */
 export function buildFilterBarDynamicCss(root, groupedFilters, config) {

@@ -7,11 +7,11 @@ import { Button } from 'shared-ui';
 import ImageMetadataAiSparkleIcon from '../image-metadata-modal/ImageMetadataAiSparkleIcon';
 
 /**
- * @param {Object} props
- * @param {boolean} props.busy
+ * @param {Object}     props
+ * @param {boolean}    props.busy
  * @param {() => void} props.onClick
- * @param {string} [props.ariaLabel]
- * @param {boolean} [props.block] Full-width panel CTA (section). Default false = inline.
+ * @param {string}     [props.ariaLabel]
+ * @param {boolean}    [props.block]     Full-width panel CTA (section). Default false = inline.
  */
 export default function GalleryItemAiGenerateButton({
 	busy,

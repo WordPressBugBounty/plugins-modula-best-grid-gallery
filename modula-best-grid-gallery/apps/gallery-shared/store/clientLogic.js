@@ -74,8 +74,8 @@ export function filterItems(items, filterKey, filterValue) {
 /**
  * Slice items for current page (client-side pagination).
  *
- * @param {Array}  items        - Full list
- * @param {number} currentPage  - 1-based page
+ * @param {Array}  items       - Full list
+ * @param {number} currentPage - 1-based page
  * @param {number} perPage     - Items per page
  * @return {Array} Page slice
  */

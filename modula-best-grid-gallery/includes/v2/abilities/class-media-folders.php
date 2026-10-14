@@ -10,11 +10,15 @@ use WPChill\Folders\Memberships\Wpdb_Membership_Repository;
 use WPChill\Folders\Storage\Folder_Transfer_State;
 defined( 'ABSPATH' ) || exit;
 final class Media_Folders {
+	public const DELETE = 'modula/delete-media-folder';
 	public static function can_manage(): bool {
 		return get_current_user_id() && Folders_Dependency::available() && true === Status_Controller::can_view_status();
 	}
+	public static function can_manage_usage(): bool {
+		return self::can_manage() && Folders_Dependency::available( 'usage' );
+	}
 	public static function mutations(): array {
-		return array( 'modula/create-media-folder', 'modula/update-media-folder', 'modula/delete-media-folder', 'modula/assign-media-folder' );
+		return array( 'modula/create-media-folder', 'modula/update-media-folder', self::DELETE, 'modula/assign-media-folder' );
 	}
 	public static function callbacks(): array {
 		$out = array( 'modula/list-media-folders' => array( __CLASS__, 'listing' ) );
@@ -22,6 +26,20 @@ final class Media_Folders {
 			$out[ $name ] = array( __CLASS__, str_replace( array( 'modula/', '-media-folder' ), '', $name ) );
 		}
 		return $out;
+	}
+	public static function abilities(): array {
+		return Operation_Table::from_callbacks(
+			self::callbacks(),
+			array(
+				'permission' => array( self::class, 'can_manage' ),
+				'available'  => array( self::class, 'can_manage' ),
+				'dependency' => 'folders',
+				'mcp_public' => array( Folders_Dependency::class, 'mcp_folders' ),
+			),
+			array(
+				self::DELETE => array( 'destructive' => true ),
+			)
+		);
 	}
 	public static function folder_schema(): array {
 		return Contract::object(

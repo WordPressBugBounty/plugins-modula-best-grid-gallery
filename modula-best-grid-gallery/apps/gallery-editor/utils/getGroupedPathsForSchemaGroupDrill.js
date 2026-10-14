@@ -9,8 +9,8 @@ import { sortEnrichedFields } from '../logic/enrichFormFields';
  * Do not pre-filter by `isFieldVisible` — the nested stack re-evaluates visibility
  * on each render so dependent fields (e.g. gallery title markup) appear when toggles change.
  *
- * @param {string}                                    groupKey
- * @param {Record<string, Record<string, unknown>>}   [_values] Unused; kept for call-site stability.
+ * @param {string}                                  groupKey
+ * @param {Record<string, Record<string, unknown>>} [_values] Unused; kept for call-site stability.
  * @return {string[]}
  */
 export function getGroupedPathsForSchemaGroupDrill(groupKey, _values) {

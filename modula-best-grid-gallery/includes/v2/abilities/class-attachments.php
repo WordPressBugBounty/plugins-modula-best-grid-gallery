@@ -10,12 +10,31 @@ use Modula\V2\Beta_Settings;
 defined( 'ABSPATH' ) || exit;
 final class Attachments {
 	public const UPDATE = 'modula/update-attachment-text';
+	public const USAGE  = 'modula/read-attachment-usage';
 	public static function callbacks(): array {
 		return array(
-			'modula/list-attachments'      => array( __CLASS__, 'listing' ),
-			'modula/read-attachment'       => array( __CLASS__, 'read' ),
-			'modula/read-attachment-usage' => array( __CLASS__, 'usage' ),
-			self::UPDATE                   => array( __CLASS__, 'update' ),
+			'modula/list-attachments' => array( __CLASS__, 'listing' ),
+			'modula/read-attachment'  => array( __CLASS__, 'read' ),
+			self::USAGE               => array( __CLASS__, 'usage' ),
+			self::UPDATE              => array( __CLASS__, 'update' ),
+		);
+	}
+	public static function abilities(): array {
+		return Operation_Table::from_callbacks(
+			self::callbacks(),
+			array(
+				'permission' => array( Media_Folders::class, 'can_manage' ),
+				'available'  => array( Media_Folders::class, 'can_manage' ),
+				'dependency' => 'folders',
+				'mcp_public' => array( Folders_Dependency::class, 'mcp_folders' ),
+			),
+			array(
+				self::USAGE => array(
+					'permission' => array( Media_Folders::class, 'can_manage_usage' ),
+					'available'  => array( Media_Folders::class, 'can_manage_usage' ),
+					'mcp_public' => array( Folders_Dependency::class, 'mcp_usage' ),
+				),
+			)
 		);
 	}
 	public static function can_read( int $id ): bool {

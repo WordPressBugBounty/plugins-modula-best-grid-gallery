@@ -46,7 +46,7 @@ export function getEditableGalleryItemIndices(reduxItems) {
  * After removing `removedStoreIndex`, the store index of the next image (if any).
  * Indices after the removed row shift down by one.
  *
- * @param {Object[]|undefined|null} reduxItems Snapshot before removal.
+ * @param {Object[]|undefined|null} reduxItems        Snapshot before removal.
  * @param {number}                  removedStoreIndex
  * @return {number|null}
  */

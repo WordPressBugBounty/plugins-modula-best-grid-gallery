@@ -51,7 +51,7 @@ if (localized.nonce) {
  * Load shell CSS for the active editor mode before first paint.
  *
  * @param {boolean} takeover
- * @returns {Promise<void>}
+ * @return {Promise<void>}
  */
 async function loadSettingsEditorShellStyles(takeover) {
 	if (takeover) {

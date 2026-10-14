@@ -4,7 +4,7 @@ Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPres
 Requires at least: 5.3
 Tested up to: 7.1
 Requires PHP: 5.6
-Stable tag: 3.0.12
+Stable tag: 3.0.13
 
 License: GNU General Public License v3.0 or later  
 
@@ -325,6 +325,21 @@ The simplest way to install is to click on 'Plugins' then 'Add' and type 'Modula
 4. Mobile Responsive Image Galleries - Galleries automatically adapt to smartphone and tablet screen sizes
 
 == Changelog ==
+
+= 3.0.13 - 14.10.2026 =
+Added: Freeform gallery type: place and stack images freely on the desktop canvas with alignment guides; tablet and mobile layouts are built automatically.
+Added: Custom Grid shows alignment guides while you move and resize tiles, including in the preview.
+Added: AI assistants connected through WordPress Abilities/MCP can create and edit Freeform galleries.
+Changed: Pagination and filters are no longer offered for Freeform galleries, which do not use them.
+Fixed: Image focus on Freeform galleries matches the tile shape shown in the preview.
+Fixed: Freeform and Custom Grid edits are no longer lost during autosave or when a drag is interrupted.
+Fixed: Border, corner radius and shadow from Style now show on Freeform tiles.
+Fixed: Creative Gallery images load at a sharp size that fits their tile.
+Fixed: Inline share icons in captions can be clicked again instead of opening the lightbox.
+Fixed: Showcase galleries keep every image in the strip, and Template galleries keep their slots filled, even when pagination was left on.
+Fixed: Gallery editor no longer shows the empty drop area when the gallery has content blocks or shortcodes.
+Fixed: Editing only the date or title of a gallery keeps its video and other image details.
+Fixed: The username required for Password Protect galleries is no longer included in public gallery settings.
 
 = 3.0.12 - 05.10.2026 =
 Fixed: Videos in Custom Grid galleries keep a normal tile size instead of stretching to the video’s pixel dimensions.

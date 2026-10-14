@@ -36,7 +36,7 @@ const ModulaGalleryImage = (props) => {
 			);
 		} else if (
 			img.video_template == '1' &&
-			'undefined' != typeof img.video_thumbnail &&
+			'undefined' !== typeof img.video_thumbnail &&
 			'' != img.video_thumbnail
 		) {
 			// Return image thumbnail of video

@@ -127,7 +127,12 @@ export function usePreviewUploadDropZones({
 				setUi(IDLE_UPLOAD_UI);
 			}
 		},
-		[dropZoneInteractive, galleryId, runPreviewItemMutation, invalidateBootstrap]
+		[
+			dropZoneInteractive,
+			galleryId,
+			runPreviewItemMutation,
+			invalidateBootstrap,
+		]
 	);
 
 	return {

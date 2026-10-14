@@ -8,7 +8,7 @@ import { zoomSettingsToMzoomOpts } from './zoomSettingsToMzoomOpts';
 
 /**
  * @param {*} value
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isLightboxToggleOn(value) {
 	if (value === true || value === 1 || value === '1') {
@@ -23,9 +23,9 @@ export function isLightboxToggleOn(value) {
 /**
  * Whether lightbox should open for the editor preview viewport (openOn gating).
  *
- * @param {string} openOn
+ * @param {string}                      openOn
  * @param {'desktop'|'tablet'|'mobile'} previewViewport
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isLightboxOpenAllowedOnPreviewViewport(
 	openOn,
@@ -49,7 +49,7 @@ export function isLightboxOpenAllowedOnPreviewViewport(
  *
  * @param {Object} lightbox
  * @param {Object} social
- * @returns {boolean}
+ * @return {boolean}
  */
 function isLightboxToolbarShareOn(lightbox, social) {
 	if (lightbox && Object.prototype.hasOwnProperty.call(lightbox, 'share')) {
@@ -62,7 +62,7 @@ function isLightboxToolbarShareOn(lightbox, social) {
  * Build legacy flat keys from grouped settings (PHP enhancer parity).
  *
  * @param {Object} settings Grouped gallery settings.
- * @returns {Object}
+ * @return {Object}
  */
 function groupedLightboxToFlatKeys(settings) {
 	const lightbox = settings?.lightbox || {};
@@ -175,14 +175,14 @@ function groupedLightboxToFlatKeys(settings) {
 }
 
 /**
- * @param {Object} settings Grouped gallery settings.
- * @param {Object} [opts]
- * @param {number} [opts.galleryId]
+ * @param {Object}                      settings                   Grouped gallery settings.
+ * @param {Object}                      [opts]
+ * @param {number}                      [opts.galleryId]
  * @param {'desktop'|'tablet'|'mobile'} [opts.previewViewport]
- * @param {boolean} [opts.editorPreview]
- * @param {boolean} [opts.zoomExtensionActive] Runtime availability of the visible zoom master.
- * @param {Object} [opts.galleryComments] Pro Comments runtime payload from bootstrap metadata.
- * @returns {Object} Fancybox v6 options (runtime layout applied in prepareModulaLightboxV6).
+ * @param {boolean}                     [opts.editorPreview]
+ * @param {boolean}                     [opts.zoomExtensionActive] Runtime availability of the visible zoom master.
+ * @param {Object}                      [opts.galleryComments]     Pro Comments runtime payload from bootstrap metadata.
+ * @return {Object} Fancybox v6 options (runtime layout applied in prepareModulaLightboxV6).
  */
 export function lightboxSettingsToFancyboxOpts(settings, opts = {}) {
 	const flat = groupedLightboxToFlatKeys(settings || {});
@@ -210,14 +210,14 @@ export function lightboxSettingsToFancyboxOpts(settings, opts = {}) {
  * `settingsToConfig` may still attach lightboxOpts for CSS / toggle helpers.
  * At open, pass settings when available so remap is the source of truth.
  *
- * @param {Object} [args]
- * @param {Object|null|undefined} [args.settings] Grouped gallery settings.
- * @param {Object|null|undefined} [args.lightboxOpts] Pre-built Fancybox v6 opts.
- * @param {number} [args.galleryId]
+ * @param {Object}                      [args]
+ * @param {Object|null|undefined}       [args.settings]        Grouped gallery settings.
+ * @param {Object|null|undefined}       [args.lightboxOpts]    Pre-built Fancybox v6 opts.
+ * @param {number}                      [args.galleryId]
  * @param {'desktop'|'tablet'|'mobile'} [args.previewViewport]
- * @param {boolean} [args.editorPreview]
- * @param {Object} [args.galleryComments]
- * @returns {Object}
+ * @param {boolean}                     [args.editorPreview]
+ * @param {Object}                      [args.galleryComments]
+ * @return {Object}
  */
 export function resolveModulaLightboxFancyboxOpts(args = {}) {
 	const settings = args.settings;
@@ -256,7 +256,7 @@ export function resolveModulaLightboxFancyboxOpts(args = {}) {
  * Resolved lightbox backdrop color for editor preview.
  *
  * @param {Object} settings
- * @returns {string}
+ * @return {string}
  */
 export function lightboxPreviewBackgroundColor(settings) {
 	const lightbox = settings?.lightbox || {};
@@ -273,7 +273,7 @@ export function lightboxPreviewBackgroundColor(settings) {
  * CSS variables for preview-only lightbox chrome (background).
  *
  * @param {Object} settings
- * @returns {Object} style object for preview host.
+ * @return {Object} style object for preview host.
  */
 export function lightboxPreviewDynamicStyles(settings) {
 	const backgroundColor = lightboxPreviewBackgroundColor(settings);
@@ -293,7 +293,7 @@ export function lightboxPreviewDynamicStyles(settings) {
  * Whether prev/next nav should show in preview (CSS parity).
  *
  * @param {Object} settings
- * @returns {boolean}
+ * @return {boolean}
  */
 export function lightboxPreviewShowNavigation(settings) {
 	return isLightboxToggleOn(settings?.lightbox?.showNavigation);
@@ -301,7 +301,7 @@ export function lightboxPreviewShowNavigation(settings) {
 
 /**
  * @param {string} [captionPosition]
- * @returns {{ alignSelf: 'flex-start'|'center'|'flex-end', textAlign: 'left'|'center'|'right' }}
+ * @return {{ alignSelf: 'flex-start'|'center'|'flex-end', textAlign: 'left'|'center'|'right' }}
  */
 export function resolveLightboxCaptionPositionAlignment(captionPosition) {
 	const pos =
@@ -324,7 +324,7 @@ export const MODULA_LIGHTBOX_CAPTION_GUTTER = 'clamp(16px, 4vw, 40px)';
  * CSS custom properties for lightbox caption position (Fancybox v6 `.f-caption`).
  *
  * @param {Object} settings
- * @returns {Record<string, string>}
+ * @return {Record<string, string>}
  */
 export function lightboxCaptionPositionCssVars(settings) {
 	const { alignSelf, textAlign } = resolveLightboxCaptionPositionAlignment(
@@ -341,7 +341,7 @@ export function lightboxCaptionPositionCssVars(settings) {
  * Caption align-self for Fancybox caption (flex).
  *
  * @param {Object} settings
- * @returns {'flex-start'|'center'|'flex-end'}
+ * @return {'flex-start'|'center'|'flex-end'}
  */
 export function lightboxPreviewCaptionAlignSelf(settings) {
 	return resolveLightboxCaptionPositionAlignment(

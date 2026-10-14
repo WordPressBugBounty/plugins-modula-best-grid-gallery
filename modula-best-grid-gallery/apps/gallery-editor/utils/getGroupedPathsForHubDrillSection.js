@@ -12,8 +12,9 @@ import { getGroupedPathsForSchemaGroupDrill } from './getGroupedPathsForSchemaGr
  * `group`-based drills: include every schema path in the group (except
  * `omitFromSchemaGroupDrill`); nested panels filter by `isFieldVisible` on each render.
  *
- * @param {Object}                                  section Hub drill section from `hubSections`
- * @param {Record<string, Record<string, unknown>>} values  Form values
+ * @param {Object}                                  section  Hub drill section from `hubSections`
+ * @param {Record<string, Record<string, unknown>>} values   Form values
+ * @param                                           pathList
  * @return {string[]} Paths in navigation order (explicit list) or visible group fields.
  */
 function collectKnownSchemaPaths(pathList) {

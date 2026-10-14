@@ -8,8 +8,8 @@ import { openModulaShare } from './openModulaShare';
 import { resolveModulaLightboxCompactToolbar } from './modulaLightboxCompactToolbar';
 
 /**
- * @param {object} [context]
- * @returns {boolean}
+ * @param {Object} [context]
+ * @return {boolean}
  */
 export function resolveModulaLightboxIsMobile(context = {}) {
 	if (typeof context.isMobile === 'boolean') {
@@ -32,7 +32,7 @@ export function resolveModulaLightboxIsMobile(context = {}) {
 }
 
 /**
- * @param {object} v6Opts
+ * @param {Object}                        v6Opts
  * @param {{ shareButtonsJson?: string }} runtimeContext
  */
 export function wireModulaLightboxShareToolbarClick(v6Opts, runtimeContext) {
@@ -51,10 +51,10 @@ export function wireModulaLightboxShareToolbarClick(v6Opts, runtimeContext) {
 }
 
 /**
- * @param {object} lightboxOpts Fancybox v6 options from lightboxSettingsToFancyboxOpts.
- * @param {object} [context]
+ * @param {Object}                  lightboxOpts Fancybox v6 options from lightboxSettingsToFancyboxOpts.
+ * @param {Object}                  [context]
  * @param {{ startIndex?: number }} [options]
- * @returns {{
+ * @return {{
  *   lightboxOpts: object,
  *   v6Opts: object,
  *   previewBackgroundColor: string,

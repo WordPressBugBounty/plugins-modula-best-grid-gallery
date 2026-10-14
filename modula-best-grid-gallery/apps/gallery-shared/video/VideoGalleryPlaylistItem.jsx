@@ -12,7 +12,7 @@ import VideoGalleryPreviewAdminMount from './VideoGalleryPreviewAdminMount';
 
 /**
  * @param {Object}   props
- * @param {Object}   props.video - Normalized video item
+ * @param {Object}   props.video    - Normalized video item
  * @param {boolean}  props.isActive
  * @param {Function} props.onSelect
  * @param {Object}   props.config

@@ -34,8 +34,8 @@ export function getSelectableImageStoreIndices(reduxItems) {
  * Inclusive range between two store indices within the selectable image list.
  *
  * @param {number[]} selectable
- * @param {number} fromIdx
- * @param {number} toIdx
+ * @param {number}   fromIdx
+ * @param {number}   toIdx
  * @return {number[]}
  */
 export function getSelectableRangeIndices(selectable, fromIdx, toIdx) {
@@ -49,7 +49,8 @@ export function getSelectableRangeIndices(selectable, fromIdx, toIdx) {
 	return selectable.slice(lo, hi + 1);
 }
 
-/** @type {import('react').Context<{
+/**
+ * @type {import('react').Context<{
  *   selectedStoreIndices: number[],
  *   modeActive: boolean,
  *   hasSelection: boolean,
@@ -65,7 +66,7 @@ export function getSelectableRangeIndices(selectable, fromIdx, toIdx) {
  *   selectAll: () => void,
  *   clear: () => void,
  *   toggleSelectAll: () => void,
- * } | null>} */
+  } | null>} */
 export const GalleryPreviewTileSelectionContext = createContext(null);
 
 /**

@@ -3,7 +3,7 @@
  * Block/shortcode `align*` wins when set to a real WP placement (WordPress theme
  * classes handle placement). Blank / `none` leave gallery alignment in charge.
  *
- * @param {unknown} raw Alignment from general.alignment / config.alignment.
+ * @param {unknown}                  raw    Alignment from general.alignment / config.alignment.
  * @param {{ blockAlign?: unknown }} [opts]
  * @return {string} Margin declarations (no braces), or empty when block align wins.
  */

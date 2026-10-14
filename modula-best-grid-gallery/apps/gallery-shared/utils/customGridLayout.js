@@ -82,8 +82,8 @@ export function getResponsiveForCustomGrid(config) {
 /**
  * Width / height of an item in grid column/row units (for react-grid-layout w, h).
  *
- * @param {Object}                                                              item        - Item with .width and .height (grid units)
- * @param {number}                                                              columns     - Max columns
+ * @param {Object}                                                  item          - Item with .width and .height (grid units)
+ * @param {number}                                                  columns       - Max columns
  * @param {{ minTileW?: number, minTileH?: number }|null|undefined} [minOrConfig] - Optional floor override (default 2×2)
  * @return {{ w: number, h: number }} Item span in grid column and row units.
  */
@@ -186,9 +186,9 @@ export function chunkHasMixedExplicitAndImplicit(chunk) {
 /**
  * Clamp RGL cell spans and position to column bounds and minimum tile size.
  *
- * @param {{ i: string, x: number, y: number, w: number, h: number, static?: boolean }} item         - Layout cell from RGL.
- * @param {number}                                                                      columns      - Column count for the section.
- * @param {{ minTileW?: number, minTileH?: number }|null|undefined}          [minOrConfig] - Optional floor override (default 2×2)
+ * @param {{ i: string, x: number, y: number, w: number, h: number, static?: boolean }} item          - Layout cell from RGL.
+ * @param {number}                                                                      columns       - Column count for the section.
+ * @param {{ minTileW?: number, minTileH?: number }|null|undefined}                     [minOrConfig] - Optional floor override (default 2×2)
  * @return {{ i: string, x: number, y: number, w: number, h: number, minW: number, minH: number, static?: boolean }} Normalized cell including minW/minH for RGL.
  */
 export function finalizeCustomGridRglCell(item, columns, minOrConfig) {
@@ -331,14 +331,14 @@ export function normalizeCustomGridLayoutVerticalOrigin(layout) {
 /**
  * First-fit pack a chunk from item spans (width/height), ignoring saved gridX/gridY.
  *
- * @param {Object[]} chunk
- * @param {string[]} layoutKeys
- * @param {number}   containerWidth
- * @param {number}   columns
- * @param {number}   gutter
- * @param {number}   cellSize
- * @param {number}   rowHeight
- * @param {boolean}  enableResponsive
+ * @param {Object[]}                                                chunk
+ * @param {string[]}                                                layoutKeys
+ * @param {number}                                                  containerWidth
+ * @param {number}                                                  columns
+ * @param {number}                                                  gutter
+ * @param {number}                                                  cellSize
+ * @param {number}                                                  rowHeight
+ * @param {boolean}                                                 enableResponsive
  * @param {{ minTileW?: number, minTileH?: number }|null|undefined} [minOrConfig]
  * @return {Array<{ i: string, x: number, y: number, w: number, h: number, static?: boolean }>}
  */
@@ -592,11 +592,11 @@ export function buildCustomGridPackedTiles(chunk, containerWidth, config) {
  * Get pixel width/height for one item from grid units.
  * Mirrors jQuery createCustomGallery slot logic (data-width, data-height, responsive scaling).
  *
- * @param {Object}  item             - Item with .width and .height (grid units)
- * @param {number}  cellSize         - Cell size in px (from computeCellSize)
- * @param {number}  columns          - Current columns (after responsive)
- * @param {number}  gutter           - Gutter in px
- * @param {boolean} enableResponsive - Whether to scale grid units by columns/12
+ * @param {Object}                                                                                item             - Item with .width and .height (grid units)
+ * @param {number}                                                                                cellSize         - Cell size in px (from computeCellSize)
+ * @param {number}                                                                                columns          - Current columns (after responsive)
+ * @param {number}                                                                                gutter           - Gutter in px
+ * @param {boolean}                                                                               enableResponsive - Whether to scale grid units by columns/12
  * @param {{ minTileW?: number, minTileH?: number, minW?: number, minH?: number }|null|undefined} [minOrConfig]
  * @return {{ width: number, height: number }} Pixel width and height for the tile.
  */

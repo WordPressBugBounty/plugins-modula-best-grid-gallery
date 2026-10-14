@@ -59,7 +59,7 @@ function toHex2(n) {
 }
 
 /**
- * @param {string} hoverColor
+ * @param {string}        hoverColor
  * @param {number|string} hoverOpacity
  * @return {{ tint: string, opacity: string }|null}
  */

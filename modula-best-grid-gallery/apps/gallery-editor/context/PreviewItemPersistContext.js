@@ -8,9 +8,9 @@ const PreviewItemPersistContext = createContext(null);
 
 /**
  * @typedef {Object} PreviewItemPersistApi
- * @property {(task: () => void | Promise<void>) => Promise<void>} runPersistTaskWithDeferredRefresh
- * @property {() => Promise<void>} flushPreviewItemsPersistNow
- * @property {() => void} resetPreviewPersistDirty
+ * @property {(task: () => unknown | Promise<unknown>, owner?: string|symbol) => Promise<unknown>} runPersistTaskWithDeferredRefresh
+ * @property {() => Promise<void>}                                                                 flushPreviewItemsPersistNow
+ * @property {() => void}                                                                          resetPreviewPersistDirty
  */
 
 /**

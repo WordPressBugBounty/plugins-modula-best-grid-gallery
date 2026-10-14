@@ -55,9 +55,23 @@
 		pointer-events: none;
 	}
 
+	/*
+	 * The hover-media shell is a stacking context (z-index 0, zoom transform), so
+	 * the caption inside it painted under the lightbox link and inline share
+	 * clicks opened the lightbox. Lift the whole shell instead (6 = one above the
+	 * link's 5, like overlay content); hits fall through to the link except
+	 * where content re-enables them below.
+	 */
+	.modula-items .modula-item > .modula-item-link ~ .modula-item-hover-media {
+		z-index: 6;
+		pointer-events: none;
+	}
+
 	.modula-items .modula-item>.modula-item-content .modula-social,
 	.modula-items .modula-item>.modula-item-content .modula-social a,
-	.modula-items .modula-item>.modula-item-content a[href] {
+	.modula-items .modula-item>.modula-item-content a[href],
+	.modula-items .modula-item .modula-item-hover-media .modula-item-content .modula-social a,
+	.modula-items .modula-item .modula-item-hover-media .modula-item-content a[href] {
 		pointer-events: auto;
 	}
 

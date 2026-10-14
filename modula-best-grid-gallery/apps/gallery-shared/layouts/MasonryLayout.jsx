@@ -53,7 +53,9 @@ export default function MasonryLayout() {
 				>
 					{chunk.map((item, idx) => (
 						<GalleryItem
-							key={galleryItemRowKey(item, idx)}
+							key={
+								item.freeformId || galleryItemRowKey(item, idx)
+							}
 							itemData={item}
 							config={config}
 						/>
@@ -80,7 +82,10 @@ export default function MasonryLayout() {
 						>
 							{chunk.map((item, idx) => (
 								<GalleryItem
-									key={galleryItemRowKey(item, idx)}
+									key={
+										item.freeformId ||
+										galleryItemRowKey(item, idx)
+									}
 									itemData={item}
 									config={config}
 								/>

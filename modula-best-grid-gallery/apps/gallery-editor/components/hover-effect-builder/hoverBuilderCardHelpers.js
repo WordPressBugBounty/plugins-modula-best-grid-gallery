@@ -5,17 +5,14 @@ import {
 	SLOT_IDS,
 } from './hoverBuilderUtils';
 import { buildHoverSlotRailStyleVars } from './hoverSlotRails';
-import {
-	formatHexColor,
-	parseCssColor,
-} from '../../utils/cssColorValue';
+import { formatHexColor, parseCssColor } from '../../utils/cssColorValue';
 
 /**
  * @param {unknown} value
- * @param {number} fallback
- * @param {number} min
- * @param {number} max
- * @returns {number}
+ * @param {number}  fallback
+ * @param {number}  min
+ * @param {number}  max
+ * @return {number}
  */
 function clampMs(value, fallback, min, max) {
 	const raw = Number(value);
@@ -26,13 +23,13 @@ function clampMs(value, fallback, min, max) {
 }
 
 /**
- * @param {Record<string, any>} builder
- * @param {'title'|'caption'|'social'} slot
+ * @param {Record<string, any>}          builder
+ * @param {'title'|'caption'|'social'}   slot
  * @param {'Duration'|'Delay'|'Stagger'} kind
- * @param {number} fallback
- * @param {number} min
- * @param {number} max
- * @returns {number}
+ * @param {number}                       fallback
+ * @param {number}                       min
+ * @param {number}                       max
+ * @return {number}
  */
 function readSlotTiming(builder, slot, kind, fallback, min, max) {
 	const key = `${slot}Enter${kind}Ms`;
@@ -41,7 +38,7 @@ function readSlotTiming(builder, slot, kind, fallback, min, max) {
 
 /**
  * @param {Record<string, any>} builder
- * @returns {{
+ * @return {{
  *   positions: Record<string, {x:number,y:number}>,
  *   cardTreatment: string,
  *   dimOverlayOn: boolean,
@@ -91,7 +88,7 @@ export function getHoverBuilderCardState(builder) {
  *   captionBelowImage?: boolean,
  *   forceHover?: boolean,
  * }} state
- * @returns {string}
+ * @return {string}
  */
 export function buildHoverBuilderItemClassName(state) {
 	const itemClassParts = [
@@ -151,7 +148,7 @@ export function buildHoverBuilderItemClassName(state) {
 
 /**
  * @param {Record<string, {x:number,y:number}>} positions
- * @returns {Array<'title'|'caption'|'social'>}
+ * @return {Array<'title'|'caption'|'social'>}
  */
 export function getSlotOrderFromPositions(positions) {
 	/** @type {Array<'title'|'caption'|'social'>} */
@@ -176,7 +173,7 @@ export function getSlotOrderFromPositions(positions) {
  *   hoverColor: string,
  *   hoverOpacityPct: number,
  * }} args
- * @returns {Record<string, string>}
+ * @return {Record<string, string>}
  */
 export function buildHoverBuilderItemStyle(args) {
 	const slotOrder = getSlotOrderFromPositions(args.positions);
@@ -297,10 +294,10 @@ export function buildHoverBuilderItemStyle(args) {
 
 /**
  * @param {Record<string, {x:number,y:number}>} currentPos
- * @param {'title'|'caption'|'social'} slot
- * @param {{x:number,y:number}} next
- * @param {string[]} linkedOverlaySlots
- * @returns {Record<string, {x:number,y:number}>}
+ * @param {'title'|'caption'|'social'}          slot
+ * @param {{x:number,y:number}}                 next
+ * @param {string[]}                            linkedOverlaySlots
+ * @return {Record<string, {x:number,y:number}>}
  */
 export function buildCommittedSlotPositions(
 	currentPos,

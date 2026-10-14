@@ -13,7 +13,7 @@ export function getLoadedModulaLightboxModule() {
 }
 
 /**
- * @returns {Promise<typeof import('./openModulaLightbox')>}
+ * @return {Promise<typeof import('./openModulaLightbox')>}
  */
 export function loadModulaLightboxModule() {
 	if (!modulePromise) {

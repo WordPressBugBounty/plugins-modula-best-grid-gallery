@@ -49,14 +49,14 @@ const ACTION_ICONS = {
 };
 
 /**
- * @param {Object} props
- * @param {Object} props.item
+ * @param {Object}                                                      props
+ * @param {Object}                                                      props.item
  * @param {(item: Object) => Promise<{ id: number, editUrl?: string }>} [props.duplicateListingRow]
- * @param {(items: Object[]) => Promise<unknown>} [props.trashListingRows]
- * @param {(items: Object[]) => Promise<unknown>} [props.restoreListingRows]
- * @param {(items: Object[]) => Promise<unknown>} [props.deleteListingRows]
- * @param {(items: Object[]) => Promise<unknown>} [props.applyListingPreset]
- * @param {(item: Object) => void} [props.requestGalleryEdit]
+ * @param {(items: Object[]) => Promise<unknown>}                       [props.trashListingRows]
+ * @param {(items: Object[]) => Promise<unknown>}                       [props.restoreListingRows]
+ * @param {(items: Object[]) => Promise<unknown>}                       [props.deleteListingRows]
+ * @param {(items: Object[]) => Promise<unknown>}                       [props.applyListingPreset]
+ * @param {(item: Object) => void}                                      [props.requestGalleryEdit]
  * @param {(item: Object) => Promise<{ id: number, editUrl?: string }>} [props.tryBetaGallery]
  * @param {(item: Object) => Promise<{ id: number, editUrl?: string }>} [props.convertBetaGallery]
  * @param {(item: Object) => Promise<{ id: number, editUrl?: string }>} [props.restoreClassicEditor]
@@ -169,7 +169,6 @@ export function ListingRowActionsMenu({
 							window.setTimeout(resolve, 0);
 						});
 						await applyListingPreset([item]);
-						return;
 					}
 					break;
 				case 'restore':

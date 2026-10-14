@@ -105,7 +105,7 @@ export function resolveExtensionUpsellBarrier(slugs, editor) {
 /**
  * True when Lite (or Pro without the mapped extension) should hide the control and show upsell only.
  *
- * @param {Record<string, unknown>|null|undefined}                                                                                                schemaObj
+ * @param {Record<string, unknown>|null|undefined}                                                                  schemaObj
  * @param {{ isPro?: boolean, extensionEntitlements?: Record<string, { available?: boolean, enabled?: boolean }> }} editor
  * @return {boolean}
  */
@@ -128,8 +128,8 @@ export function resolveOmitControlInLite(schemaObj, editor) {
  * Nested drill panels pass `nestedUpsellGroupedPath` for a panel-level upsell. Skip rendering
  * that field as a row when the upsell is active so the toggle + upsell are not duplicated.
  *
- * @param {{ groupedPath?: string, schema?: object }} field
- * @param {{ nestedUpsellGroupedPath?: string }}      frame
+ * @param {{ groupedPath?: string, schema?: object }}                                                               field
+ * @param {{ nestedUpsellGroupedPath?: string }}                                                                    frame
  * @param {{ isPro?: boolean, extensionEntitlements?: Record<string, { available?: boolean, enabled?: boolean }> }} editor
  * @return {boolean}
  */
@@ -153,7 +153,10 @@ export function shouldHideFieldForPanelUpsell(field, frame, editor) {
 	const extensionUpsellSlugs = getLightboxUpsellExtensionSlugs(
 		schemaObj.editorLightboxLiteUpsell
 	);
-	const { blocked } = resolveExtensionUpsellBarrier(extensionUpsellSlugs, editor);
+	const { blocked } = resolveExtensionUpsellBarrier(
+		extensionUpsellSlugs,
+		editor
+	);
 	return !editor?.isPro || blocked;
 }
 

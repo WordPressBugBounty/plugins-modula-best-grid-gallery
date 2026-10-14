@@ -17,6 +17,20 @@ final class Replacement {
 			self::READ  => array( self::class, 'read' ),
 			self::WRITE => array( self::class, 'execute' ),
 		); }
+	public static function abilities(): array {
+		return Operation_Table::from_callbacks(
+			self::callbacks(),
+			array(
+				'permission' => array( self::class, 'available' ),
+				'available'  => array( self::class, 'available' ),
+				'dependency' => 'folders',
+				'mcp_public' => array( Folders_Dependency::class, 'mcp_folders' ),
+			),
+			array(
+				self::WRITE => array( 'destructive' => true ),
+			)
+		);
+	}
 	public static function result_schema(): array {
 		return Contract::object(
 			array(

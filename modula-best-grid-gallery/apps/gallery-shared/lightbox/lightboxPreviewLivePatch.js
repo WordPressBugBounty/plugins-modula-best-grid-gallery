@@ -40,7 +40,7 @@ export function getLightboxCarouselToolbarSignature(carouselOpts) {
  * top-level closeButton is left stale (e.g. was "auto"). Modula never uses slide close.
  *
  * @param {import('@fancyapps/ui/dist/fancybox/fancybox.js').FancyboxInstance|null|undefined} instance
- * @param {boolean|false|'auto'} closeButton
+ * @param {boolean|false|'auto'}                                                              closeButton
  */
 function syncFancyboxSlideCloseButton(instance, closeButton) {
 	const fancyboxOptions = instance?.getOptions?.();
@@ -117,9 +117,9 @@ export function attachModulaLightboxPreviewDecorativeToolbar(container) {
  * Settings that change DOM template / slide list and require a full reopen.
  *
  * @param {Array<{ src?: string, caption?: string, thumb?: string, thumbSrc?: string }>} slides
- * @param {object} groupedSettings
- * @param {'desktop'|'tablet'|'mobile'} previewViewport
- * @returns {string}
+ * @param {Object}                                                                       groupedSettings
+ * @param {'desktop'|'tablet'|'mobile'}                                                  previewViewport
+ * @return {string}
  */
 export function getLightboxPreviewStructuralSignature(
 	slides,
@@ -177,7 +177,7 @@ export function getLightboxPreviewStructuralSignature(
 
 /**
  * @param {HTMLElement|null|undefined} container
- * @param {string} backgroundColor
+ * @param {string}                     backgroundColor
  */
 export function applyLightboxPreviewBackgroundColor(
 	container,
@@ -199,14 +199,14 @@ export function applyLightboxPreviewBackgroundColor(
 
 /**
  * @param {import('@fancyapps/ui/dist/fancybox/fancybox.js').FancyboxInstance|null|undefined} instance
- * @param {object} lightboxOpts
- * @param {object} [context]
- * @param {boolean} [context.editorPreview]
- * @param {boolean} [context.isMobile]
- * @param {string} [context.previewBackgroundColor]
- * @param {string} [context.previewViewport]
- * @param {string} [context.shareButtonsJson]
- * @returns {boolean}
+ * @param {Object}                                                                            lightboxOpts
+ * @param {Object}                                                                            [context]
+ * @param {boolean}                                                                           [context.editorPreview]
+ * @param {boolean}                                                                           [context.isMobile]
+ * @param {string}                                                                            [context.previewBackgroundColor]
+ * @param {string}                                                                            [context.previewViewport]
+ * @param {string}                                                                            [context.shareButtonsJson]
+ * @return {boolean}
  */
 export function applyModulaLightboxPreviewPatch(
 	instance,

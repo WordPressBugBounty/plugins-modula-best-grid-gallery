@@ -11,7 +11,7 @@ import { resolveFieldHelpTipText } from '../field/fieldControlHelp';
 
 /**
  * @param {Object} props
- * @param {Object} props.field Form field descriptor
+ * @param {Object} props.field  Form field descriptor
  * @param {string} [props.path] Reserved for debugging; not shown when tip text is missing.
  */
 export default function FieldHelpInfoTip({ field }) {

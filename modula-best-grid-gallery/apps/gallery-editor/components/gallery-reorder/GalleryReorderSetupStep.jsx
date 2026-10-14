@@ -4,8 +4,8 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Notice } from '@wordpress/components';
 import { ActionRow, Button, SectionHeading, StatePill } from 'shared-ui';
+import { SettingsPanelHeader } from 'editor-shell';
 import { gateLockHint } from '../../logic/proGateLock';
-import SettingsPanelHeader from '../sidebar/settings-panel/SettingsPanelHeader';
 import PreviewUploadPositionSegment, {
 	PREVIEW_UPLOAD_POSITION_FIELD,
 } from '../preview/PreviewUploadPositionSegment';

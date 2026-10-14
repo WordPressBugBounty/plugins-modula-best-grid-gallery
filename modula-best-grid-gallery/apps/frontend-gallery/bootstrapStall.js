@@ -20,7 +20,7 @@ export const BOOTSTRAP_FORCE_GRACE_MS = 4000;
  *   stallMs?: number,
  *   forceGraceMs?: number,
  * }} state
- * @returns {BootstrapStallAction}
+ * @return {BootstrapStallAction}
  */
 export function resolveBootstrapStallAction(state) {
 	const {

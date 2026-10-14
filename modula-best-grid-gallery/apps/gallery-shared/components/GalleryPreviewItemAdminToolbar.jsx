@@ -24,9 +24,13 @@ import { isGalleryPreviewVideoItem } from '../video/videoGalleryModel';
 
 /**
  * @param {Object} props
- * @param {Object} props.itemData Raw item passed to GalleryItem / SliderItem.
+ * @param {Object} props.itemData     Raw item passed to GalleryItem / SliderItem.
+ * @param          props.catalogIndex
  */
-export default function GalleryPreviewItemAdminToolbar({ itemData }) {
+export default function GalleryPreviewItemAdminToolbar({
+	itemData,
+	catalogIndex,
+}) {
 	const metadata = useSelector((s) => s.gallery.metadata);
 	const config = useSelector((s) => s.gallery.config);
 	const items = useSelector((s) => s.items.items);
@@ -36,10 +40,17 @@ export default function GalleryPreviewItemAdminToolbar({ itemData }) {
 		metadata?.displayContext === 'settings-editor-preview' ||
 		metadata?.staticStoryLayout === true;
 
-	const storeIndex = findStoreIndexForItemId(
-		items,
-		previewItemRowLookupKey(itemData)
-	);
+	const storeIndex = Number.isInteger(catalogIndex)
+		? catalogIndex
+		: findStoreIndexForItemId(items, previewItemRowLookupKey(itemData));
+
+	if (!isEditorPreviewChrome || !ctx) {
+		return null;
+	}
+
+	if (storeIndex < 0) {
+		return null;
+	}
 
 	const isEmbedded = isEmbeddedGalleryItemRow(itemData);
 	const isContentBlock = isContentBlockGalleryItemRow(itemData);
@@ -50,13 +61,8 @@ export default function GalleryPreviewItemAdminToolbar({ itemData }) {
 		typeof ctx?.toggleGridItemLock === 'function';
 	const gridLocked = showGridLock && isGridItemLocked(itemData);
 
-	if (!isEditorPreviewChrome || !ctx) {
-		return null;
-	}
-
-	if (storeIndex < 0) {
-		return null;
-	}
+	const isFreeformShortcode =
+		config?.type === 'freeform' && isEmbedded && !isContentBlock;
 
 	const attachmentId = Number(itemData?.id);
 	const wmSelectActive =
@@ -101,7 +107,7 @@ export default function GalleryPreviewItemAdminToolbar({ itemData }) {
 	const itemEditSelected =
 		!wmSelectActive &&
 		!tileSelectionActive &&
-		!isEmbedded &&
+		(!isEmbedded || isFreeformShortcode) &&
 		typeof ctx.isItemEditSelected === 'function' &&
 		ctx.isItemEditSelected(storeIndex);
 	const editSelectedClass = itemEditSelected ? ' is-item-edit-selected' : '';
@@ -120,7 +126,7 @@ export default function GalleryPreviewItemAdminToolbar({ itemData }) {
 			ctx.openEditContentBlock(storeIndex);
 			return;
 		}
-		if (!isEmbedded) {
+		if (!isEmbedded || isFreeformShortcode) {
 			ctx.openEditMetadata(storeIndex);
 		}
 	};
@@ -129,7 +135,7 @@ export default function GalleryPreviewItemAdminToolbar({ itemData }) {
 		!wmSelectActive &&
 		(isContentBlock
 			? typeof ctx.openEditContentBlock === 'function'
-			: !isEmbedded);
+			: !isEmbedded || isFreeformShortcode);
 
 	return (
 		<div
@@ -184,15 +190,20 @@ export default function GalleryPreviewItemAdminToolbar({ itemData }) {
 										'Edit content block',
 										'modula-best-grid-gallery'
 									)
-								: isVideoItem
+								: isFreeformShortcode
 									? __(
-											'Select video to edit',
+											'Select shortcode to edit',
 											'modula-best-grid-gallery'
 										)
-									: __(
-											'Select image to edit',
-											'modula-best-grid-gallery'
-										)
+									: isVideoItem
+										? __(
+												'Select video to edit',
+												'modula-best-grid-gallery'
+											)
+										: __(
+												'Select image to edit',
+												'modula-best-grid-gallery'
+											)
 					}
 					onClick={onSelectTile}
 				/>

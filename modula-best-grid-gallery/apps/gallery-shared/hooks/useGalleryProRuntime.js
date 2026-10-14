@@ -24,11 +24,11 @@ function truthy(val) {
 
 /**
  * @param {import('react').RefObject<HTMLElement|null>} hostRef
- * @param {Object} config
- * @param {Object} settings Grouped v2 settings from store.
- * @param {Object} [options]
- * @param {boolean} [options.imageGuardian] Apply Image Guardian (right-click, blur). Off in settings-editor preview.
- * @param {boolean} [options.visitorChrome] Apply deeplink/zoom DOM hooks. Off in settings-editor preview.
+ * @param {Object}                                      config
+ * @param {Object}                                      settings                Grouped v2 settings from store.
+ * @param {Object}                                      [options]
+ * @param {boolean}                                     [options.imageGuardian] Apply Image Guardian (right-click, blur). Off in settings-editor preview.
+ * @param {boolean}                                     [options.visitorChrome] Apply deeplink/zoom DOM hooks. Off in settings-editor preview.
  */
 export function useGalleryProRuntime(hostRef, config, settings, options = {}) {
 	const skipImageGuardian = isGalleryTypeWithoutImageGuardian(config?.type);

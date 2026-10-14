@@ -16,7 +16,7 @@ export default function ExtensionLicenseHeader() {
 		return license?.license_key || inputValue;
 	}, [license?.license_key, inputValue]);
 
-	let displayLicenseKey = inputValue || license?.license_key || '';
+	const displayLicenseKey = inputValue || license?.license_key || '';
 
 	const activateMutation = useLicensingMutation();
 	const deactivateMutation = useLicensingMutation();

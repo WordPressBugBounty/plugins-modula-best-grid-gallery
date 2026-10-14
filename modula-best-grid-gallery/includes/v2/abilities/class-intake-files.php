@@ -1,12 +1,13 @@
 <?php
 /** Bounded validation/staging for explicit byte intake; no remote URLs or server paths. */
 namespace Modula\V2\Abilities;
+
 defined( 'ABSPATH' ) || exit;
 final class Intake_Files {
-	public const MAX_BYTES = 8388608;
+	public const MAX_BYTES    = 8388608;
 	public const MAX_EXPANDED = 33554432;
-	public const MAX_ENTRIES = 100;
-	private $temporary = array();
+	public const MAX_ENTRIES  = 100;
+	private $temporary        = array();
 	public function __construct() {
 		register_shutdown_function( array( $this, 'cleanup' ) );
 	}
@@ -18,24 +19,25 @@ final class Intake_Files {
 		}
 		$this->temporary = array();
 	}
-	private function stage( string $bytes, string $name ): string {
+	public function stage( string $bytes, string $name ): string {
 		$path = wp_tempnam( $name );
 		if ( ! $path ) {
 			throw new \RuntimeException( 'Temporary storage unavailable.' );
 		}
 		$this->temporary[] = $path;
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Exact byte count in owned WordPress temp staging, with no filesystem credential negotiation.
 		if ( strlen( $bytes ) !== file_put_contents( $path, $bytes ) ) {
 			throw new \RuntimeException( 'Temporary write failed.' );
 		}
 		return $path;
 	}
-	private function allowed(): array {
+	public function allowed(): array {
 		if ( ! class_exists( '\Modula_Gallery_Upload' ) ) {
 			require_once MODULA_PATH . 'includes/admin/helpers/class-modula-gallery-upload.php';
 		}
 		return \Modula_Gallery_Upload::get_instance()->define_allowed_mime_types();
 	}
-	private function image( string $bytes, string $name ): array {
+	public function image( string $bytes, string $name ): array {
 		if ( '' === $bytes || strlen( $bytes ) > min( self::MAX_BYTES, wp_max_upload_size() ) ) {
 			throw new \InvalidArgumentException( 'file_size_limit' );
 		}
@@ -50,22 +52,32 @@ final class Intake_Files {
 		if ( ! $dimensions || $dimensions[0] * $dimensions[1] > 40000000 ) {
 			throw new \InvalidArgumentException( 'image_dimensions_limit' );
 		}
-		return array( 'name' => $name, 'tmp_name' => $path, 'type' => $mime, 'size' => strlen( $bytes ), 'error' => 0 );
+		return array(
+			'name'     => $name,
+			'tmp_name' => $path,
+			'type'     => $mime,
+			'size'     => strlen( $bytes ),
+			'error'    => 0,
+		);
 	}
 	/** Copy bounded server bytes into owned staging; never move the original source. */
 	public function prepare_server( string $path, string $name ): array {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 		require_once ABSPATH . 'wp-admin/includes/media.php';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Bounded local source, never a remote URL.
 		$bytes = file_get_contents( $path, false, null, 0, self::MAX_BYTES + 1 );
-		if ( false === $bytes ) { throw new \InvalidArgumentException( 'source_unreadable' ); }
+		if ( false === $bytes ) {
+			throw new \InvalidArgumentException( 'source_unreadable' ); }
 		return $this->image( $bytes, $name );
 	}
-	public function prepare( array $input, bool $archive ): array {
+	public function decode( array $input ): array {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 		require_once ABSPATH . 'wp-admin/includes/media.php';
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Public upload contract carries canonical image bytes.
 		$bytes = base64_decode( $input['content_base64'], true );
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Round-trip rejects noncanonical encoding before media staging.
 		if ( false === $bytes || '' === $bytes || base64_encode( $bytes ) !== $input['content_base64'] ) {
 			throw new \InvalidArgumentException( 'invalid_base64' );
 		}
@@ -76,73 +88,10 @@ final class Intake_Files {
 		if ( '' === $name || $name !== $input['filename'] || false !== strpos( $name, '/' ) || false !== strpos( $name, '\\' ) ) {
 			throw new \InvalidArgumentException( 'invalid_filename' );
 		}
-		if ( ! $archive ) {
-			return array( $this->image( $bytes, $name ) );
-		}
-		if ( 'zip' !== strtolower( pathinfo( $name, PATHINFO_EXTENSION ) ) || ! class_exists( '\ZipArchive' ) ) {
-			throw new \InvalidArgumentException( 'zip_unavailable' );
-		}
-		$path = $this->stage( $bytes, $name );
-		unset( $bytes );
-		$zip = new \ZipArchive();
-		if ( true !== $zip->open( $path, \ZipArchive::CHECKCONS ) ) {
-			throw new \InvalidArgumentException( 'invalid_archive' );
-		}
-		try {
-			if ( $zip->numFiles < 1 || $zip->numFiles > self::MAX_ENTRIES ) {
-				throw new \InvalidArgumentException( 'archive_entries_limit' );
-			}
-			$total = 0;
-			$entries = array();
-			$seen = array();
-			for ( $i = 0; $i < $zip->numFiles; ++$i ) {
-				$stat = $zip->statIndex( $i );
-				if ( ! $stat ) {
-					throw new \InvalidArgumentException( 'invalid_archive' );
-				}
-				$entry = str_replace( '\\', '/', $stat['name'] );
-				if ( preg_match( '~(^/|^[a-zA-Z]:|(^|/)\.\.(/|$)|\x00)~', $entry ) ) {
-					throw new \InvalidArgumentException( 'unsafe_archive_path' );
-				}
-				$opsys = 0;
-				$attributes = 0;
-				if ( $zip->getExternalAttributesIndex( $i, $opsys, $attributes ) && 0120000 === ( ( $attributes >> 16 ) & 0170000 ) ) {
-					throw new \InvalidArgumentException( 'archive_symlink' );
-				}
-				if ( ! empty( $stat['encryption_method'] ) ) {
-					throw new \InvalidArgumentException( 'encrypted_archive' );
-				}
-				if ( '/' === substr( $entry, -1 ) || 0 === strpos( $entry, '__MACOSX/' ) || 0 === strpos( basename( $entry ), '._' ) ) {
-					continue;
-				}
-				$total += $stat['size'];
-				if ( $stat['size'] > self::MAX_BYTES || $total > self::MAX_EXPANDED || $stat['size'] > max( 1, $stat['comp_size'] ) * 100 ) {
-					throw new \InvalidArgumentException( 'archive_size_limit' );
-				}
-				$filename = sanitize_file_name( basename( $entry ) );
-				if ( '' === $filename || isset( $seen[ $filename ] ) || empty( wp_check_filetype( $filename, $this->allowed() )['type'] ) ) {
-					throw new \InvalidArgumentException( 'invalid_archive_entry' );
-				}
-				$seen[ $filename ] = true;
-				$entries[] = array( $i, $filename, $stat['size'] );
-			}
-			if ( ! $entries ) {
-				throw new \InvalidArgumentException( 'empty_archive' );
-			}
-			$files = array();
-			foreach ( $entries as $entry ) {
-				$bytes = $zip->getFromIndex( $entry[0], self::MAX_BYTES + 1 );
-				if ( false === $bytes || strlen( $bytes ) !== $entry[2] ) {
-					throw new \InvalidArgumentException( 'archive_read_failed' );
-				}
-				$files[] = $this->image( $bytes, $entry[1] );
-			}
-			if ( is_multisite() && ! is_upload_space_available() || is_multisite() && $total > get_upload_space_available() ) {
-				throw new \InvalidArgumentException( 'upload_quota_exceeded' );
-			}
-			return $files;
-		} finally {
-			$zip->close();
-		}
+		return array( $bytes, $name );
+	}
+	public function prepare( array $input ): array {
+		list( $bytes, $name ) = $this->decode( $input );
+		return array( $this->image( $bytes, $name ) );
 	}
 }

@@ -21,8 +21,8 @@ import VideoGalleryPlayIcon, {
 
 /**
  * @param {Object}   props
- * @param {Object}   props.video - Normalized video item
- * @param {string}   props.playerId - Unique DOM id for player mount
+ * @param {Object}   props.video             - Normalized video item
+ * @param {string}   props.playerId          - Unique DOM id for player mount
  * @param {Object}   props.config
  * @param {Function} props.onEnded
  * @param {boolean}  props.userHasInteracted
@@ -174,14 +174,11 @@ export default function VideoGalleryMainPlayer({
 								return;
 							}
 							if (!shouldAdvancePlaylistOnVideoEnd(loop)) {
-								if (
-									typeof event.target.seekTo === 'function'
-								) {
+								if (typeof event.target.seekTo === 'function') {
 									event.target.seekTo(0);
 								}
 								if (
-									typeof event.target.playVideo ===
-									'function'
+									typeof event.target.playVideo === 'function'
 								) {
 									event.target.playVideo();
 								}

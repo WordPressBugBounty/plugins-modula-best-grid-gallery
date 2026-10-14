@@ -135,6 +135,11 @@ final class Beta_Settings {
 		if ( ! is_array( $backup ) ) {
 			return false;
 		}
+		// Classic restores its own type/settings, while Beta's gallery-local composition remains dormant.
+		$current = Meta_Sync::get_settings_v2( $post_id, false );
+		if ( isset( $current['freeform']['placements'] ) ) {
+			$backup['freeform_placements'] = $current['freeform']['placements'];
+		}
 
 		update_post_meta( $post_id, 'modula-settings', $backup );
 		delete_post_meta( $post_id, Meta_Sync::SETTINGS_V2_META_KEY );

@@ -36,6 +36,7 @@ return array(
 					11 => 'fit-grid',
 					12 => 'showcase',
 					13 => 'template',
+					14 => 'freeform',
 				),
 				'default'                 => 'grid',
 				'editorLabel'             => 'How the gallery is arranged',
@@ -50,6 +51,7 @@ return array(
 					'slider'           => 'Slider',
 					'showcase'         => 'Showcase',
 					'template'         => 'Template',
+					'freeform'         => 'Freeform',
 					'video'            => 'Video gallery',
 					'bnb'              => 'BnB (hero + grid)',
 					'justified-grid'   => 'Justified grid',
@@ -84,6 +86,7 @@ return array(
 							2 => 'parallax-masonry',
 							3 => 'bnb',
 							4 => 'template',
+							5 => 'freeform',
 						),
 					),
 					array(
@@ -106,6 +109,7 @@ return array(
 						1 => 'parallax-masonry',
 						2 => 'story',
 						3 => 'showcase',
+						4 => 'freeform',
 					),
 					'extensionBased' =>
 					array(
@@ -153,23 +157,23 @@ return array(
 			),
 			'alignment'      =>
 			array(
-				'type'             => 'string',
-				'enum'             =>
+				'type'              => 'string',
+				'enum'              =>
 				array(
 					0 => 'left',
 					1 => 'center',
 					2 => 'right',
 				),
-				'default'          => 'center',
-				'editorLabel'      => 'Alignment',
+				'default'           => 'center',
+				'editorLabel'       => 'Alignment',
 				'editorDescription' => 'Where the gallery sits when it is narrower than the content area. Gutenberg or shortcode alignment overrides this when set.',
-				'enumOptionLabels' =>
+				'enumOptionLabels'  =>
 				array(
 					'left'   => 'Left',
 					'center' => 'Center',
 					'right'  => 'Right',
 				),
-				'editorControl'    =>
+				'editorControl'     =>
 				array(
 					'kind' => 'segmentedEnum',
 				),
@@ -1699,6 +1703,12 @@ return array(
 						),
 						'default' => 'on-hover',
 					),
+					// Builder copy; sibling hover.dimOverlay remains the published overlay flag.
+					'dimOverlay'             =>
+					array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
 					'titleEnter'             =>
 					array(
 						'type'    => 'string',
@@ -3001,6 +3011,55 @@ return array(
 				'editorDescription' => 'On small screens, focus one photo with light peeks and skip the large center scale.',
 			),
 		),
+		'freeform'        =>
+		array(
+			'placements' =>
+			array(
+				// Ability authoring is supplied by Pro; common readers keep the stored composition.
+				'editorOmitControlInLite' => true,
+				'abilityAuthor'           => true,
+				'description'             => 'Stored desktop Freeform composition: id is the gallery-local item freeformId; x/y are grid-cell coordinates, w/h are cell spans, and z is stacking order. Overlap is valid; catalog and lightbox order remain independent. Omitting placements preserves composition; a nonempty list replaces every occurrence, and an empty list resets the deterministic initial layout.',
+				'type'                    => 'array',
+				'default'                 => array(),
+				'items'                   =>
+				array(
+					'type'       => 'object',
+					'properties' =>
+					array(
+						'id' => array(
+							'type'      => 'string',
+							'minLength' => 1,
+							'maxLength' => 200,
+						),
+						'x'  => array(
+							'type'    => 'integer',
+							'minimum' => 0,
+							'maximum' => 100000,
+						),
+						'y'  => array(
+							'type'    => 'integer',
+							'minimum' => 0,
+							'maximum' => 100000,
+						),
+						'w'  => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+							'maximum' => 24,
+						),
+						'h'  => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+							'maximum' => 100000,
+						),
+						'z'  => array(
+							'type'    => 'integer',
+							'minimum' => 0,
+							'maximum' => 100000,
+						),
+					),
+				),
+			),
+		),
 		'template'        =>
 		array(
 			'sectionLayout'  =>
@@ -3599,7 +3658,7 @@ return array(
 		),
 		'video'           =>
 		array(
-			'playlistPosition'     =>
+			'playlistPosition'      =>
 			array(
 				'type'             => 'string',
 				'default'          => 'right',
@@ -3622,40 +3681,40 @@ return array(
 				'editorLabel'       => 'Show playlist scrollbar',
 				'editorDescription' => 'When off, the scrollbar stays hidden and visitors can drag the thumb strip to scroll.',
 			),
-			'maxHeight'            =>
+			'maxHeight'             =>
 			array(
 				'type'              => 'string',
 				'default'           => '100vh',
 				'editorLabel'       => 'Max height',
 				'editorDescription' => 'Caps the height of the player and playlist together. Use vh (viewport height) or px, for example 100vh or 800px. With the playlist below, the player shrinks so the thumbs stay in view.',
 			),
-			'autoplayVideos'       =>
+			'autoplayVideos'        =>
 			array(
 				'type'          => 'boolean',
 				'default'       => false,
 				'editorLabel'   => 'Start playing on open',
 				'editorTooltip' => 'On iOS, autoplay is limited: self-hosted video and muted playback per Apple/Web policy.',
 			),
-			'loopVideos'           =>
+			'loopVideos'            =>
 			array(
 				'type'          => 'boolean',
 				'default'       => false,
 				'editorLabel'   => 'Repeat when it ends',
 				'editorTooltip' => 'Restarts each video from the beginning when it ends.',
 			),
-			'showVideoIcon'        =>
+			'showVideoIcon'         =>
 			array(
 				'type'        => 'boolean',
 				'default'     => true,
 				'editorLabel' => 'Show the play icon',
 			),
-			'useCustomIcon'        =>
+			'useCustomIcon'         =>
 			array(
 				'type'        => 'boolean',
 				'default'     => false,
 				'editorLabel' => 'Use a custom image',
 			),
-			'videoIconIcon'        =>
+			'videoIconIcon'         =>
 			array(
 				'type'             => 'string',
 				'default'          => 'default',
@@ -3695,7 +3754,7 @@ return array(
 					'kind' => 'select',
 				),
 			),
-			'customVideoIcon'      =>
+			'customVideoIcon'       =>
 			array(
 				'type'              => 'integer',
 				'default'           => 0,
@@ -3711,13 +3770,13 @@ return array(
 					'removeButtonLabel'  => 'Remove',
 				),
 			),
-			'videoIconColor'       =>
+			'videoIconColor'        =>
 			array(
 				'type'        => 'string',
 				'default'     => '#FFF',
 				'editorLabel' => 'Colour',
 			),
-			'playIconSize'         =>
+			'playIconSize'          =>
 			array(
 				'type'              => 'array',
 				'items'             =>
@@ -3737,13 +3796,13 @@ return array(
 				'editorLabel'       => 'Size',
 				'editorDescription' => '0 scales the icon with the tile. Anything else pins it to that many pixels.',
 			),
-			'previewVideo'         =>
+			'previewVideo'          =>
 			array(
 				'type'        => 'boolean',
 				'default'     => false,
 				'editorLabel' => 'Preview on hover',
 			),
-			'autoplayThumbnail'    =>
+			'autoplayThumbnail'     =>
 			array(
 				'type'               => 'boolean',
 				'default'            => false,
@@ -3763,7 +3822,7 @@ return array(
 					),
 				),
 			),
-			'previewVideoDuration' =>
+			'previewVideoDuration'  =>
 			array(
 				'type'               => 'integer',
 				'minimum'            => 1,
@@ -3784,7 +3843,7 @@ return array(
 					'eq'   => false,
 				),
 			),
-			'previewVideoOffHint'  =>
+			'previewVideoOffHint'   =>
 			array(
 				'type'                    => 'string',
 				'default'                 => '',

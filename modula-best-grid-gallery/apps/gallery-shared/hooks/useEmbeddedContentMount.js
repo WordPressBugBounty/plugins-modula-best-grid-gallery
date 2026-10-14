@@ -7,9 +7,9 @@
 import { useEffect, useRef } from '@wordpress/element';
 
 /**
- * @param {string}  html             Markup passed to dangerouslySetInnerHTML.
- * @param {Object}  itemData         Bootstrap embedded row.
- * @param {boolean} isEditorPreview  Settings-editor preview — skip mount hooks.
+ * @param {string}  html            Markup passed to dangerouslySetInnerHTML.
+ * @param {Object}  itemData        Bootstrap embedded row.
+ * @param {boolean} isEditorPreview Settings-editor preview — skip mount hooks.
  */
 export function useEmbeddedContentMount(html, itemData, isEditorPreview) {
 	const containerRef = useRef(null);

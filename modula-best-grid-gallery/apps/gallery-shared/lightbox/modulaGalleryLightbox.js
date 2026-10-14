@@ -31,8 +31,8 @@ import {
 import { galleryUsesFancyboxLightbox } from '../utils/resolveGalleryItemLink';
 
 /**
- * @param {object} config
- * @returns {boolean}
+ * @param {Object} config
+ * @return {boolean}
  */
 export function isModulaLightboxAllowedOnDevice(config) {
 	const devices = config?.lightbox_devices || config?.lightboxDevices;
@@ -50,8 +50,8 @@ export function isModulaLightboxAllowedOnDevice(config) {
 }
 
 /**
- * @param {object} [config] Gallery flat config from bootstrap.
- * @returns {string}
+ * @param {Object} [config] Gallery flat config from bootstrap.
+ * @return {string}
  */
 export function resolveModulaShareButtonsJson(config) {
 	if (
@@ -79,7 +79,7 @@ export function resolveModulaShareButtonsJson(config) {
 
 /**
  * @param {HTMLElement} rootEl
- * @returns {HTMLElement[]}
+ * @return {HTMLElement[]}
  */
 export function getModulaLightboxItemElements(rootEl) {
 	if (!rootEl) {
@@ -94,23 +94,68 @@ export function getModulaLightboxItemElements(rootEl) {
 }
 
 /**
+ * Whether the event started on a link or button other than the tile's lightbox link.
+ *
+ * @param {EventTarget|null|undefined} target
+ * @param {HTMLElement}                hostEl
+ * @return {boolean}
+ */
+function isOtherTileControlTarget(target, hostEl) {
+	if (!(target instanceof Element)) {
+		return false;
+	}
+	const control = target.closest('a, button');
+	return (
+		Boolean(control) &&
+		hostEl.contains(control) &&
+		!control.classList.contains('modula-item-link')
+	);
+}
+
+/**
+ * The tile lightbox link under overlay content (caption, share row).
+ *
+ * The overlay paints above the link; hover-builder slots make its text
+ * hit-testable, so those clicks never reach the link itself.
+ *
+ * @param {Element} node
+ * @return {Element|null}
+ */
+function overlayContentTileLink(node) {
+	const tile = node.closest('.modula-item-content')?.closest('.modula-item');
+	return (
+		tile?.querySelector(
+			':scope > .modula-item-link, :scope > .modula-item-image-area > .modula-item-link'
+		) ?? null
+	);
+}
+
+/**
  * Resolve the tile link that should open the lightbox from a pointer/click event.
  * Falls back to elementFromPoint when pointer capture on a parent (Showcase
  * viewport drag) retargets the event away from `.modula-item-link`.
  *
- * @param {Event} event
+ * Clicks on another control in the tile (inline share icons, caption links,
+ * buttons) never resolve: the host listener is native and may run before the
+ * control's React handler stops propagation.
+ *
+ * @param {Event}       event
  * @param {HTMLElement} hostEl
- * @returns {HTMLElement|null}
+ * @return {HTMLElement|null}
  */
 export function resolveModulaLightboxClickLink(event, hostEl) {
 	if (!hostEl) {
+		return null;
+	}
+	if (isOtherTileControlTarget(event?.target, hostEl)) {
 		return null;
 	}
 	const fromTarget = (node) => {
 		if (!node || !(node instanceof Element)) {
 			return null;
 		}
-		const link = node.closest('.modula-item-link');
+		const link =
+			node.closest('.modula-item-link') || overlayContentTileLink(node);
 		if (
 			!link ||
 			link.classList.contains('modula-simple-link') ||
@@ -146,7 +191,7 @@ export function resolveModulaLightboxClickLink(event, hostEl) {
  *   config?: object,
  *   rootEl?: HTMLElement|null,
  * }} args
- * @returns {Array<{ src: string, opts: object }>}
+ * @return {Array<{ src: string, opts: object }>}
  */
 export function resolveModulaLightboxSlides({
 	items,
@@ -164,14 +209,26 @@ export function resolveModulaLightboxSlides({
 }
 
 /**
- * @param {HTMLElement|null|undefined} clickedLink
+ * @param {HTMLElement|null|undefined}                                clickedLink
  * @param {Array<{ src?: string, image_id?: string, opts?: object }>} slides
- * @param {HTMLElement|null|undefined} rootEl
- * @returns {number}
+ * @param {HTMLElement|null|undefined}                                rootEl
+ * @return {number}
  */
-function resolveLightboxStartIndex(clickedLink, slides, rootEl) {
+export function resolveLightboxStartIndex(clickedLink, slides, rootEl) {
 	if (!clickedLink || slides.length === 0) {
 		return 0;
+	}
+
+	// Freeform keeps catalog order while duplicate occurrences move independently.
+	const occurrence = clickedLink.closest('[data-modula-catalog-index]');
+	if (occurrence && rootEl?.contains(occurrence)) {
+		const catalogIndex = Number(occurrence.dataset.modulaCatalogIndex);
+		const byOccurrence = slides.findIndex(
+			(slide) => slide.catalog_index === catalogIndex
+		);
+		if (byOccurrence >= 0) {
+			return byOccurrence;
+		}
 	}
 
 	// Video item identities are not numeric attachment IDs. Layout columns can
@@ -226,8 +283,8 @@ function resolveLightboxStartIndex(clickedLink, slides, rootEl) {
 
 /**
  * @param {HTMLElement} link
- * @param {object} [config]
- * @returns {string}
+ * @param {Object}      [config]
+ * @return {string}
  */
 function resolveLicensingCaptionForLink(link, config) {
 	if (
@@ -252,8 +309,8 @@ function resolveLicensingCaptionForLink(link, config) {
 
 /**
  * @param {HTMLElement} itemEl
- * @param {object} [config]
- * @returns {{ src: string, opts: object }|null}
+ * @param {Object}      [config]
+ * @return {{ src: string, opts: object }|null}
  */
 export function buildModulaLightboxSlideFromItemElement(itemEl, config) {
 	const link = itemEl.querySelector('.modula-item-link');
@@ -387,7 +444,8 @@ export function buildModulaLightboxSlideFromItemElement(itemEl, config) {
 
 /**
  * @param {HTMLElement} rootEl
- * @returns {Array<{ src: string, opts: object }>}
+ * @param               config
+ * @return {Array<{ src: string, opts: object }>}
  */
 export function collectModulaLightboxSlidesFromRoot(rootEl, config) {
 	return getModulaLightboxItemElements(rootEl)
@@ -403,7 +461,7 @@ export function collectModulaLightboxSlidesFromRoot(rootEl, config) {
  *   settings?: object,
  *   resolveItems?: () => Promise<unknown[]>|unknown[],
  * }} context
- * @returns {Promise<unknown[]|undefined>}
+ * @return {Promise<unknown[]|undefined>}
  */
 async function resolveLightboxSourceItems(context = {}) {
 	if (typeof context.resolveItems === 'function') {
@@ -420,11 +478,11 @@ async function resolveLightboxSourceItems(context = {}) {
 }
 
 /**
- * @param {HTMLElement} rootEl
- * @param {object} config
+ * @param {HTMLElement}                        rootEl
+ * @param {Object}                             config
  * @param {number|((slides: Array) => number)} startIndex Resolve a deeplink after its catalog loads; -1 means no match.
- * @param {object} context
- * @returns {Promise<boolean>}
+ * @param {Object}                             context
+ * @return {Promise<boolean>}
  */
 export async function openModulaGalleryLightboxAtRoot(
 	rootEl,
@@ -481,7 +539,7 @@ export async function openModulaGalleryLightboxAtRoot(
  *   resolveItems?: () => Promise<unknown[]>|unknown[],
  *   openedViaKeyboard?: boolean,
  * }} args
- * @returns {Promise<boolean>}
+ * @return {Promise<boolean>}
  */
 export async function openModulaGalleryLightboxFromClick({
 	rootEl,
@@ -546,8 +604,8 @@ export async function openModulaGalleryLightboxFromClick({
 }
 
 /**
- * @param {object} config
- * @returns {boolean}
+ * @param {Object} config
+ * @return {boolean}
  */
 function isDoubleClickToOpenEnabled(config) {
 	const raw = config?.doubleClick ?? config?.mobileDoubleClick;
@@ -558,7 +616,7 @@ function isDoubleClickToOpenEnabled(config) {
  * Touch / coarse-pointer events need a wider double-tap window than OS mouse double-clicks.
  *
  * @param {Event} event
- * @returns {boolean}
+ * @return {boolean}
  */
 function isTouchLikeActivateEvent(event) {
 	if (!event || typeof event !== 'object') {
@@ -577,9 +635,9 @@ function isTouchLikeActivateEvent(event) {
 }
 
 /**
- * @param {HTMLElement} hostEl
+ * @param {HTMLElement}           hostEl
  * @param {object|(() => object)} contextOrGetter Store context or legacy flat config getter.
- * @returns {() => void}
+ * @return {() => void}
  */
 export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 	const resolveContext = () => {
@@ -622,9 +680,9 @@ export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 	}
 
 	/**
-	 * @param {HTMLElement} link
+	 * @param {HTMLElement}         link
 	 * @param {{ touch?: boolean }} [options]
-	 * @returns {boolean} True when this activation should open the lightbox.
+	 * @return {boolean} True when this activation should open the lightbox.
 	 */
 	function consumeDoubleClickGate(link, options = {}) {
 		const config = resolveContext().config;
@@ -654,9 +712,9 @@ export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 	}
 
 	/**
-	 * @param {Event} event
+	 * @param {Event}       event
 	 * @param {HTMLElement} link
-	 * @returns {boolean}
+	 * @return {boolean}
 	 */
 	function shouldOpenFromPointerEvent(event, link) {
 		const config = resolveContext().config;
@@ -697,7 +755,7 @@ export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 	}
 
 	/**
-	 * @param {Event} event
+	 * @param {Event}                                                event
 	 * @param {{ fromTouchEnd?: boolean, skipDoubleGate?: boolean }} [options]
 	 */
 	function onActivate(event, options = {}) {

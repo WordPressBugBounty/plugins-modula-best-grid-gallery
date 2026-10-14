@@ -1,12 +1,16 @@
 // Live preview: always-visible chrome (toolbar, dropzones, hidden file input, aux panel shell).
+@use '../../../editor-shell/styles/canvas-frame';
 @use 'preview/shell';
 @use 'preview/reorder-panel';
 @use 'preview/reorder-setup';
 @use 'preview/live-preview-region';
+@use '../../../editor-shell/styles/empty-state';
 @use 'preview/preview-chrome';
-@use 'preview/canvas-toolbar';
+@use '../../../editor-shell/styles/insert-position-segment';
+@use '../../../editor-shell/styles/add-split';
+@use '../../../editor-shell/styles/canvas-toolbar';
 @use 'preview/selection-bar';
-@use 'preview/status-bar';
+@use '../../../editor-shell/styles/status-bar';
 @use 'preview/live-preview-pagebreak-admin';
 @use 'preview/upload-surface';
 @use 'preview/filters-preview';

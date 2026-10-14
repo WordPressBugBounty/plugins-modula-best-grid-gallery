@@ -27,7 +27,9 @@ export default function GalleryModalFooter({ left, right, className = '' }) {
 				/>
 			</div>
 			{right ? (
-				<div className="modula-gallery-modal__footer-actions">{right}</div>
+				<div className="modula-gallery-modal__footer-actions">
+					{right}
+				</div>
 			) : null}
 		</footer>
 	);

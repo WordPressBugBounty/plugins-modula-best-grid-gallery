@@ -60,8 +60,8 @@ export function listGroupedSettingsDiffs(prev, next) {
 }
 
 /**
- * @param {string} groupId
- * @param {string} key
+ * @param {string}  groupId
+ * @param {string}  key
  * @param {unknown} value
  * @return {string}
  */

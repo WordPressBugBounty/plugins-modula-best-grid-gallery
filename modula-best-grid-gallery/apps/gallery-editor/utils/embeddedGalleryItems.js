@@ -17,7 +17,6 @@ import {
  * @package
  */
 
-
 export { isContentBlockGalleryItemRow, isEmbeddedGalleryItemRow };
 
 function newEmbeddedId() {
@@ -68,7 +67,7 @@ export function anchorAfterLastImageRow(coreItems) {
 /**
  * New empty content block (v2 merge contract).
  *
- * @param {Object[]} coreItems
+ * @param {Object[]}                       coreItems
  * @param {{
  *   position?: 'start'|'end',
  *   embeddedId?: string,
@@ -80,7 +79,7 @@ export function anchorAfterLastImageRow(coreItems) {
  *   blockBackgroundColor?: string,
  *   blockTextColor?: string,
  * }} [opts] `start` → before first image (anchor 0,0); `end` → after last image (default).
- *           Pass `embeddedId` for stable template slot ids.
+ *                                                   Pass `embeddedId` for stable template slot ids.
  * @return {Object} Fresh `content_block` row for the preview/save payload.
  */
 export function buildNewContentBlockRow(coreItems, opts = {}) {

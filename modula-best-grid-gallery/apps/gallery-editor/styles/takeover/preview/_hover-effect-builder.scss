@@ -1,6 +1,6 @@
 @use '../../variables' as *;
-@use '../mixins' as *;
-@use '../../shared/range-control-layout' as range-layout;
+@use '../../../../editor-shell/styles/mixins' as *;
+@use '../../../../editor-shell/styles/range-control-layout' as range-layout;
 @use '../../../../frontend-gallery/hover-v2';
 
 .modula-gallery-takeover__hover-builder-below-image-notice {

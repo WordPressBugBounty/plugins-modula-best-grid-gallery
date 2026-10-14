@@ -20,10 +20,10 @@ const STATUS_OPTIONS = [
 /**
  * One Quick edit session. The app captures the row when the shortcut is invoked.
  *
- * @param {Object} props
- * @param {import('./listingRowToFields').ListingRow} props.item
+ * @param {Object}                                                                           props
+ * @param {import('./listingRowToFields').ListingRow}                                        props.item
  * @param {(document: { title: string, status?: string, slug: string }) => Promise<unknown>} props.onSave
- * @param {() => void} props.onCancel
+ * @param {() => void}                                                                       props.onCancel
  */
 export function ListingQuickEditModal({ item, onSave, onCancel }) {
 	const id = useId();

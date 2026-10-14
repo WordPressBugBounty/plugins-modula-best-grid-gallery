@@ -342,6 +342,9 @@ class Adapter {
 			'afterAttachmentId' => isset( $row['afterAttachmentId'] ) ? absint( $row['afterAttachmentId'] ) : 0,
 			'afterOrdinal'      => isset( $row['afterOrdinal'] ) ? absint( $row['afterOrdinal'] ) : 0,
 		);
+		if ( isset( $row['freeformId'] ) && is_string( $row['freeformId'] ) ) {
+			$out['freeformId'] = sanitize_text_field( $row['freeformId'] );
+		}
 		if ( self::ITEM_KIND_CONTENT_BLOCK === $kind ) {
 			$raw_bg = isset( $row['blockBackgroundColor'] ) ? trim( (string) $row['blockBackgroundColor'] ) : '';
 			if ( '' === $raw_bg || 0 === strcasecmp( $raw_bg, 'transparent' ) ) {

@@ -68,7 +68,7 @@ function parseInlineStyle(styleValue) {
 /**
  * @param {Object} item
  * @param {string} [imgAlt]
- * @returns {string}
+ * @return {string}
  */
 function resolveLightboxLinkLabel(item, imgAlt) {
 	const title = String(item?.title || '').trim();
@@ -151,11 +151,11 @@ function ModulaGalleryItemImage({ imgAttrs }) {
 }
 
 /**
- * @param {Object}                    props
- * @param {Object}                    props.item
- * @param {boolean}                   props.hasTitle
- * @param {boolean}                   props.hasDescription
- * @param {boolean}                   props.hasSocials
+ * @param {Object}  props
+ * @param {Object}  props.item
+ * @param {boolean} props.hasTitle
+ * @param {boolean} props.hasDescription
+ * @param {boolean} props.hasSocials
  */
 export function GalleryItemTextContent({
 	item,
@@ -190,17 +190,19 @@ export function GalleryItemTextContent({
 
 /**
  * @param {Object}                    props
- * @param {Object}                    props.vm                    - Non-null view model from getGalleryItemViewModel.
- * @param {string}                    [props.imageWrapperClass]   - e.g. modula-slider-image-wrapper (slider layout).
- * @param {import('react').ReactNode} [props.beforeImage]         - Markup before &lt;picture&gt; (slider captions top).
- * @param {import('react').ReactNode} [props.afterImage]          - Markup after &lt;picture&gt; (slider captions bottom).
- * @param {string|null}               [props.sliderCaptionPosition] - Slider caption placement slug.
- * @param {import('react').ReactNode} [props.sliderCaptionNode] - &lt;figcaption&gt; for slider image info.
+ * @param {Object}                    props.vm                           - Non-null view model from getGalleryItemViewModel.
+ * @param {string}                    [props.imageWrapperClass]          - e.g. modula-slider-image-wrapper (slider layout).
+ * @param {import('react').ReactNode} [props.beforeImage]                - Markup before &lt;picture&gt; (slider captions top).
+ * @param {import('react').ReactNode} [props.afterImage]                 - Markup after &lt;picture&gt; (slider captions bottom).
+ * @param {string|null}               [props.sliderCaptionPosition]      - Slider caption placement slug.
+ * @param {import('react').ReactNode} [props.sliderCaptionNode]          - &lt;figcaption&gt; for slider image info.
  * @param {string}                    [props.sliderCaptionDescribedById] - `aria-describedby` target on slide image.
- * @param {import('react').ReactNode} [props.previewAdminToolbar] - Settings-editor hover actions above overlays.
- * @param {boolean}                   [props.suppressOverlayText] - Hide overlay title/caption (story/slider own caption chrome).
- * @param {import('react').ReactNode} [props.videoPlayOverlay] - Play icon for mixed-gallery video tiles.
- * @param {import('react').ReactNode} [props.videoPreviewNode] - Hover / autoplay video preview layer.
+ * @param {import('react').ReactNode} [props.previewAdminToolbar]        - Settings-editor hover actions above overlays.
+ * @param {boolean}                   [props.suppressOverlayText]        - Hide overlay title/caption (story/slider own caption chrome).
+ * @param {import('react').ReactNode} [props.videoPlayOverlay]           - Play icon for mixed-gallery video tiles.
+ * @param {import('react').ReactNode} [props.videoPreviewNode]           - Hover / autoplay video preview layer.
+ * @param                             props.slotMeasureRef
+ * @param                             props.eagerImageMount
  */
 export default function GalleryItemMarkup({
 	vm,

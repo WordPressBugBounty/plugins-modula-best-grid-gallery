@@ -11,9 +11,9 @@ import { getInstagramConnectionState } from '../../../platform/instagramRegistry
 import { resolveDrillSummaryParts } from './resolveDrillSummaryParts';
 
 /**
- * @param {Object} props
- * @param {object} props.section Hub drill section
- * @param {Record<string, Record<string, unknown>>} props.values Form values
+ * @param {Object}                                  props
+ * @param {Object}                                  props.section Hub drill section
+ * @param {Record<string, Record<string, unknown>>} props.values  Form values
  */
 export default function DrillValueSummary({ section, values }) {
 	const summaryKind =

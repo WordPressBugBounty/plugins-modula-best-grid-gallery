@@ -10,7 +10,7 @@ import GalleryModal from '../gallery-modal/GalleryModal';
  * @param {Object}     props
  * @param {boolean}    props.isOpen
  * @param {boolean}    props.isBusy
- * @param {number}     props.otherCount Number of other images that would receive letterbox.
+ * @param {number}     props.otherCount      Number of other images that would receive letterbox.
  * @param {() => void} props.onCancel
  * @param {() => void} props.onApplyThisOnly
  * @param {() => void} props.onApplyAll

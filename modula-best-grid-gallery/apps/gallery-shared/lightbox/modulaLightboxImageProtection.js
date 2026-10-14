@@ -12,7 +12,7 @@ import { showModulaProtectionNotice } from '../utils/modulaProtectionNotice';
 
 /**
  * @param {unknown} fancybox
- * @returns {boolean}
+ * @return {boolean}
  */
 function isImagesProtectedEnabled(fancybox) {
 	if (!fancybox || typeof fancybox !== 'object') {
@@ -103,10 +103,7 @@ function resolveProtectionMessage(fancybox) {
 	if (fromOpts) {
 		return fromOpts;
 	}
-	return __(
-		'This content is protected.',
-		'modula-best-grid-gallery'
-	);
+	return __('This content is protected.', 'modula-best-grid-gallery');
 }
 
 /**

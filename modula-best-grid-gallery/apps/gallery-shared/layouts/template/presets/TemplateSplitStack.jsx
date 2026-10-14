@@ -10,9 +10,9 @@
 import TemplateImageSlot from '../TemplateImageSlot';
 
 /**
- * @param {Object} props
+ * @param {Object}                       props
  * @param {Record<string, unknown|null>} props.slotted
- * @param {Object} props.config
+ * @param {Object}                       props.config
  */
 export default function TemplateSplitStack({ slotted, config }) {
 	return (

@@ -1,13 +1,13 @@
 /**
- * @param {Object} props
+ * @param {Object}                    props
  * @param {import('react').ReactNode} props.children
- * @param {string|number} [props.count]
- * @param {boolean} [props.active]
- * @param {Function} [props.onClick]
- * @param {Function} [props.onDismiss] When set, shows a dismiss control.
- * @param {string} [props.dismissLabel]
- * @param {boolean} [props.disabled]
- * @param {string} [props.className]
+ * @param {string|number}             [props.count]
+ * @param {boolean}                   [props.active]
+ * @param {Function}                  [props.onClick]
+ * @param {Function}                  [props.onDismiss]    When set, shows a dismiss control.
+ * @param {string}                    [props.dismissLabel]
+ * @param {boolean}                   [props.disabled]
+ * @param {string}                    [props.className]
  */
 export function Chip({
 	children,

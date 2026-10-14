@@ -47,7 +47,7 @@ export function normalizeSocialEnableFromNetworks(social) {
  *
  * @param {import('@tanstack/react-form').FormApi} form
  * @param {string}                                 groupedPath
- * @param {unknown}                                [value] Current value just written for groupedPath.
+ * @param {unknown}                                [value]     Current value just written for groupedPath.
  */
 export function applySocialEnableSideEffects(form, groupedPath, value) {
 	if (!SOCIAL_NETWORK_GROUPED_PATHS.includes(groupedPath)) {

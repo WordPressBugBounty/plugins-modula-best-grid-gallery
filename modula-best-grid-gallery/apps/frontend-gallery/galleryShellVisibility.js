@@ -21,7 +21,7 @@ export function clearGalleryShellInlineHide(element) {
 /**
  * Wait until filter/pagination chrome CSS is available (external file or inline).
  *
- * @returns {Promise<void>}
+ * @return {Promise<void>}
  */
 export function waitForGalleryChromeStyles() {
 	if (typeof document === 'undefined') {

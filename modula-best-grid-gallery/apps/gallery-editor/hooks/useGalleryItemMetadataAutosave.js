@@ -10,6 +10,7 @@ import {
 } from 'gallery-shared/preview';
 import { useCallback, useEffect, useRef } from '@wordpress/element';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTakeoverSaveStatus } from 'editor-shell';
 import { galleryPatchImageByIndex } from '../api/galleryUploadApi';
 import {
 	mergeModulaRowIntoPreviewItem,
@@ -21,7 +22,6 @@ import { getWpMediaAttachmentQueryKey } from '../query/useWpMediaAttachmentQuery
 import { parseFiltersField } from '../components/bulk-edit/bulkEditUtils';
 import { mergeTagsIntoGalleryFilterSettings } from '../components/bulk-edit/bulkEditSave';
 import { useGallerySettingsFormBundle } from '../form/GallerySettingsFormContext';
-import { useTakeoverSaveStatus } from '../context/TakeoverSaveStatusContext';
 import { resolveProGateLock } from '../logic/proGateLock';
 import { useModulaSettingsEditorConfig } from './useModulaSettingsEditorConfig';
 import {
@@ -160,6 +160,9 @@ export function useGalleryItemMetadataAutosave({
 			if (displayCoreIndex < 0 || restRowIndex < 0) {
 				throw new Error('invalid_indices');
 			}
+			const occurrenceId =
+				item.freeformId || `${attachmentId}:${restRowIndex}`;
+			const persistOwner = `item-metadata:${galleryId}:${occurrenceId}`;
 			await runPersistTask(async () => {
 				const res = await galleryPatchImageByIndex(
 					galleryId,
@@ -197,7 +200,7 @@ export function useGalleryItemMetadataAutosave({
 					galleryId,
 					core
 				);
-			});
+			}, persistOwner);
 			return {
 				savedImageValues: collectImageMetadataEditValues(
 					form,

@@ -4,8 +4,8 @@ import {
 	useRef,
 	useState,
 } from '@wordpress/element';
+import { isAllowedEditorDocumentStatus } from 'editor-shell/logic';
 import { patchModulaGalleryPost } from '../api/wpRestGalleryPostApi';
-import { isAllowedEditorDocumentStatus } from '../utils/editorPostDocument';
 
 /**
  * Manages takeover post title / status state and persistence.
@@ -74,7 +74,7 @@ export function useTakeoverPostMeta({
 			try {
 				await runPersistTask(async () => {
 					await patchModulaGalleryPost(galleryId, { title: trimmed });
-				});
+				}, 'post-title');
 				savedTitleRef.current = trimmed;
 				setLiveTitle(trimmed);
 			} catch {
@@ -100,7 +100,7 @@ export function useTakeoverPostMeta({
 					await patchModulaGalleryPost(galleryId, {
 						status: slug,
 					});
-				});
+				}, 'post-status');
 				setLivePostStatus(slug);
 				setLivePostStatusLabel(label);
 			} catch {

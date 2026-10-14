@@ -60,13 +60,17 @@ export function shouldAdvancePlaylistOnVideoEnd(loopVideos) {
 /**
  * Unmute and play an already-mounted provider in place.
  *
- * @param {Object}          args
- * @param {string}          [args.kind]
- * @param {*}               [args.player]
+ * @param {Object}                       args
+ * @param {string}                       [args.kind]
+ * @param {*}                            [args.player]
  * @param {HTMLVideoElement|Object|null} [args.html5El]
  */
 export function playVideoGalleryPlayer({ kind, player, html5El } = {}) {
-	if (kind === 'youtube' && player && typeof player.playVideo === 'function') {
+	if (
+		kind === 'youtube' &&
+		player &&
+		typeof player.playVideo === 'function'
+	) {
 		if (typeof player.unMute === 'function') {
 			player.unMute();
 		}

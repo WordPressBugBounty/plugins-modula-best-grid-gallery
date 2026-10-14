@@ -72,35 +72,35 @@ export function decodeListingTitle(title) {
 
 /**
  * @typedef {Object} ListingRow
- * @property {number} id
- * @property {'gallery'|'album'} type
- * @property {string} title
- * @property {string} status
- * @property {string} [slug]
- * @property {string} [permalinkPrefix]
- * @property {string} [permalinkSuffix]
- * @property {boolean} isBeta
- * @property {boolean} [hasClassicSettingsBackup]
- * @property {boolean} [classicEditorPreferred]
- * @property {boolean} hasPassword
- * @property {boolean} hasProofing
- * @property {boolean} inAlbum
- * @property {string} thumbnailUrl
- * @property {string[]} [thumbnailUrls]
- * @property {string} layoutLabel
- * @property {ListingRowItems} items
- * @property {string} shortcode
- * @property {{ rows?: ListingShortcodeRow[] }} [shortcodes]
- * @property {string} updatedAt
- * @property {string} [date] Gallery publication wall time in the WordPress site timezone.
- * @property {string} [timezone] WordPress site timezone identifier or UTC offset.
- * @property {string} createdAt
+ * @property {number}                             id
+ * @property {'gallery'|'album'}                  type
+ * @property {string}                             title
+ * @property {string}                             status
+ * @property {string}                             [slug]
+ * @property {string}                             [permalinkPrefix]
+ * @property {string}                             [permalinkSuffix]
+ * @property {boolean}                            isBeta
+ * @property {boolean}                            [hasClassicSettingsBackup]
+ * @property {boolean}                            [classicEditorPreferred]
+ * @property {boolean}                            hasPassword
+ * @property {boolean}                            hasProofing
+ * @property {boolean}                            inAlbum
+ * @property {string}                             thumbnailUrl
+ * @property {string[]}                           [thumbnailUrls]
+ * @property {string}                             layoutLabel
+ * @property {ListingRowItems}                    items
+ * @property {string}                             shortcode
+ * @property {{ rows?: ListingShortcodeRow[] }}   [shortcodes]
+ * @property {string}                             updatedAt
+ * @property {string}                             [date]                     Gallery publication wall time in the WordPress site timezone.
+ * @property {string}                             [timezone]                 WordPress site timezone identifier or UTC offset.
+ * @property {string}                             createdAt
  * @property {{ name: string, initials: string }} author
- * @property {string} editUrl
- * @property {string} viewUrl
- * @property {boolean} [canEdit]
- * @property {boolean} [canDelete]
- * @property {string} [restoreStatus]
+ * @property {string}                             editUrl
+ * @property {string}                             viewUrl
+ * @property {boolean}                            [canEdit]
+ * @property {boolean}                            [canDelete]
+ * @property {string}                             [restoreStatus]
  */
 
 /**
@@ -109,20 +109,20 @@ export function decodeListingTitle(title) {
 
 /**
  * @typedef {Object} ListingRowFields
- * @property {string} title
- * @property {string} shortcode
+ * @property {string}                title
+ * @property {string}                shortcode
  * @property {ListingShortcodeRow[]} shortcodeRows
- * @property {boolean} hasExtraShortcodes
- * @property {ListingBadgeId[]} badges
- * @property {string} itemsPrimary
- * @property {string} itemsSecondary
- * @property {string} status
+ * @property {boolean}               hasExtraShortcodes
+ * @property {ListingBadgeId[]}      badges
+ * @property {string}                itemsPrimary
+ * @property {string}                itemsSecondary
+ * @property {string}                status
  */
 
 /**
  * @param {number} n
- * @param {string} one   msgid singular with %d
- * @param {string} many  msgid plural with %d
+ * @param {string} one  msgid singular with %d
+ * @param {string} many msgid plural with %d
  * @return {string}
  */
 function countLabel(n, one, many) {
@@ -134,7 +134,7 @@ function countLabel(n, one, many) {
 }
 
 /**
- * @param {ListingRowItems} items
+ * @param {ListingRowItems}   items
  * @param {'gallery'|'album'} type
  * @return {{ primary: string, secondary: string }}
  */

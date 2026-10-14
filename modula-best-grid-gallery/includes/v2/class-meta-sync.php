@@ -232,9 +232,42 @@ class Meta_Sync {
 		if ( is_array( $settings ) ) {
 			self::sync_settings_v2( $post_id, $settings );
 		}
-		if ( is_array( $images ) ) {
+		if ( is_array( $images ) && ! self::images_v2_matches_v1( $post_id, $images ) ) {
 			self::sync_images_v2( $post_id, $images );
 		}
+	}
+
+	/**
+	 * Whether the stored v2 rows already derive exactly these modula-images rows.
+	 *
+	 * A post save that left modula-images unchanged (a date-only Quick Edit, a title
+	 * rename) must not rebuild v2 from v1: the v1 attribute allowlist drops v2-only keys.
+	 * Skipping also skips `modula_v2_images_before_save`, which then has nothing new to
+	 * transform. Any mismatch (including read-side repairs) falls back to the rebuild.
+	 *
+	 * @param int                              $post_id Gallery post ID.
+	 * @param array<int, array<string, mixed>> $images  Stored modula-images rows.
+	 * @return bool True when v2 is already in sync with modula-images.
+	 */
+	private static function images_v2_matches_v1( $post_id, array $images ): bool {
+		$stored = self::read_images_v2_catalog( $post_id );
+		// Title/description kses output is slashed; update_post_meta stores it unslashed.
+		return array() !== $stored && wp_unslash( self::project_v1_image_rows( $stored ) ) === $images;
+	}
+
+	/**
+	 * Image rows as a catalog write stores them in modula-images.
+	 *
+	 * @param array<int, array<string, mixed>> $normalized Normalized v2 rows (images + embedded).
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function project_v1_image_rows( array $normalized ): array {
+		$v1_rows = Images\Adapter::extract_v1_image_rows_from_mixed( $normalized );
+		if ( ! class_exists( 'Modula_Gallery_Upload', false ) ) {
+			return $v1_rows;
+		}
+		$upload = \Modula_Gallery_Upload::get_instance();
+		return $upload ? $upload->sanitize_modula_images_list( $v1_rows ) : $v1_rows;
 	}
 
 	/**
@@ -300,6 +333,16 @@ class Meta_Sync {
 	private static function sync_settings_v2( $post_id, $flat, array $options = array() ) {
 		if ( ! is_array( $flat ) ) {
 			$flat = array();
+		}
+		// Classic and older sparse writers do not carry Beta-only geometry.
+		if ( ! array_key_exists( 'freeform_placements', $flat ) ) {
+			$current = self::get_settings_v2( $post_id, false );
+			$flat['freeform_placements'] = $current['freeform']['placements'] ?? get_post_meta( $post_id, Freeform_Catalog::PLACEMENTS_META_KEY, true );
+		}
+		if ( ! empty( $flat['freeform_placements'] ) ) {
+			update_post_meta( $post_id, Freeform_Catalog::PLACEMENTS_META_KEY, wp_slash( $flat['freeform_placements'] ) );
+		} else {
+			delete_post_meta( $post_id, Freeform_Catalog::PLACEMENTS_META_KEY );
 		}
 
 		$grouped   = Settings\Adapter::to_grouped( $flat, $options );
@@ -379,14 +422,11 @@ class Meta_Sync {
 
 	/** Persist an already prepared full catalog, preserving untouched rows and attachment text. */
 	public static function persist_prepared_gallery_items( int $post_id, array $normalized ) {
-		$v1_rows = Images\Adapter::extract_v1_image_rows_from_mixed( $normalized );
-
-		if ( class_exists( 'Modula_Gallery_Upload', false ) ) {
-			$upload = \Modula_Gallery_Upload::get_instance();
-			if ( $upload ) {
-				$v1_rows = $upload->sanitize_modula_images_list( $v1_rows );
-			}
+		$normalized = self::reconcile_freeform_catalog( $post_id, $normalized );
+		if ( is_wp_error( $normalized ) ) {
+			return $normalized;
 		}
+		$v1_rows = self::project_v1_image_rows( $normalized );
 
 		self::$internal_modula_images_write = true;
 		try {
@@ -488,6 +528,11 @@ class Meta_Sync {
 		if ( ! $post_id ) {
 			return;
 		}
+		$normalized = self::reconcile_freeform_catalog( $post_id, $normalized );
+		if ( is_wp_error( $normalized ) ) {
+			// Metadata hooks have no error return channel. Abort rather than report a successful stale catalog.
+			throw new \RuntimeException( $normalized->get_error_message() );
+		}
 		$row_count  = count( $normalized );
 		$chunk_size = (int) apply_filters( 'modula_v2_image_chunk_size', 200, $post_id );
 		$chunk_int  = max( 1, $chunk_size );
@@ -525,6 +570,76 @@ class Meta_Sync {
 		}
 
 		self::persist_embedded_rows_sidecar( $post_id, $normalized );
+	}
+
+	/**
+	 * Pin occurrences when an authored composition is first saved, including derived source rows.
+	 *
+	 * @param int $post_id Gallery ID.
+	 * @return true|\WP_Error Catalog persistence outcome.
+	 */
+	public static function pin_freeform_catalog( int $post_id ) {
+		$rows = self::get_images_v2( $post_id );
+		if ( class_exists( '\Modula\Bound_Gallery\Bound_Gallery' ) ) {
+			$rows = \Modula\Bound_Gallery\Bound_Gallery::apply_derived_catalog( $post_id, $rows );
+		}
+		return self::persist_prepared_gallery_items( $post_id, $rows );
+	}
+
+	/**
+	 * Occurrence identities a catalog write stores for this gallery. Writers that confirm a
+	 * persisted catalog compare it with this projection, not with their unidentified proposal.
+	 * Galleries without a saved composition keep rows unchanged. Nothing is persisted here.
+	 *
+	 * @param int   $post_id Gallery ID.
+	 * @param array $rows    Normalized catalog about to be persisted.
+	 * @return array Catalog as the write will store it.
+	 */
+	public static function identify_freeform_catalog( int $post_id, array $rows ): array {
+		$settings = self::get_settings_v2( $post_id, false );
+		$saved    = $settings['freeform']['placements'] ?? array();
+		if ( ! $saved ) {
+			return $rows;
+		}
+		return Freeform_Catalog::identify( $rows, self::get_images_v2( $post_id ) );
+	}
+
+	/**
+	 * Reconcile only on writes. Rendering and dormant layout reads never change stored geometry.
+	 *
+	 * @param int $post_id Gallery ID.
+	 * @param array $rows Normalized catalog.
+	 * @return array|\WP_Error Identified catalog, or an explicit geometry-persistence failure.
+	 */
+	private static function reconcile_freeform_catalog( int $post_id, array $rows ) {
+		$settings = self::get_settings_v2( $post_id, false );
+		$saved = $settings['freeform']['placements'] ?? array();
+		if ( ! $saved ) {
+			return $rows;
+		}
+		$rows = self::identify_freeform_catalog( $post_id, $rows );
+		$placements = Freeform_Catalog::reconcile( $rows, $saved );
+		if ( $placements === $saved ) {
+			return $rows;
+		}
+		$settings['freeform']['placements'] = $placements;
+		$json = wp_json_encode( $settings, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+		if ( false === $json ) {
+			return new \WP_Error( 'modula_freeform_encode_failed', __( 'Could not encode the gallery composition.', 'modula-best-grid-gallery' ) );
+		}
+		$flat = get_post_meta( $post_id, 'modula-settings', true );
+		$flat = is_array( $flat ) ? $flat : array();
+		$flat['freeform_placements'] = $placements;
+		update_post_meta( $post_id, 'modula-settings', wp_slash( $flat ) );
+		self::update_json_post_meta( $post_id, self::SETTINGS_V2_META_KEY, $json );
+		$stored_flat = get_post_meta( $post_id, 'modula-settings', true );
+		$stored = json_decode( (string) get_post_meta( $post_id, self::SETTINGS_V2_META_KEY, true ), true );
+		$persisted = ( $stored['freeform']['placements'] ?? null ) === $placements
+			&& ( $stored_flat['freeform_placements'] ?? null ) === $placements;
+		if ( ! $persisted ) {
+			return new \WP_Error( 'modula_freeform_save_failed', __( 'Could not persist the gallery composition. Reload the gallery before retrying.', 'modula-best-grid-gallery' ) );
+		}
+		return $rows;
 	}
 
 	/**
@@ -1167,6 +1282,11 @@ class Meta_Sync {
 	 * @return array<int, array>
 	 */
 	public static function get_images_v2( $post_id ) {
+		return Freeform_Catalog::project_identities( (int) $post_id, self::read_images_v2_catalog( $post_id ) );
+	}
+
+	/** Read stored rows before applying optional gallery-local identity projection. */
+	private static function read_images_v2_catalog( $post_id ) {
 		if ( Images\Chunked_Storage::has_manifest( $post_id ) ) {
 			$items = Images\Chunked_Storage::read_all_rows( $post_id );
 			$items = Images\Adapter::strip_catalog_file_urls_from_items( $items );

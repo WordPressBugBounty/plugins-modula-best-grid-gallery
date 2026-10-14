@@ -10,7 +10,7 @@
 
 /**
  * @param {Object|null|undefined} config
- * @param {boolean} isCarouselSlide
+ * @param {boolean}               isCarouselSlide
  * @return {{ rootFlexSizing: Object, contentUsesFlowLayout: boolean }|null}
  */
 export function resolveEmbeddedCarouselSlideLayout(config, isCarouselSlide) {

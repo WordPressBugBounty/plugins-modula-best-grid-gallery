@@ -4,7 +4,7 @@ import { getWatermarkEditorRegistration } from '../platform/watermarkRegistry';
 /**
  * Subscribe to Pro runtime registration of watermark UI.
  *
- * @returns {import('../platform/watermarkRegistry').WatermarkEditorRegistration|null}
+ * @return {import('../platform/watermarkRegistry').WatermarkEditorRegistration|null}
  */
 export function useWatermarkRegistration() {
 	const [registration, setRegistration] = useState(() =>

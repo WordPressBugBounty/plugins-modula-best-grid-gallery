@@ -47,7 +47,7 @@ function matchesFilterBarPhoneMedia() {
  * Phone vs not, for filter-bar mobile modes. Editor preview uses the forced
  * viewport (canvas device), not the admin window width.
  *
- * @param {Object|null|undefined} config
+ * @param {Object|null|undefined}                      config
  * @param {'desktop'|'tablet'|'mobile'|null|undefined} [previewViewport]
  * @return {boolean}
  */
@@ -196,7 +196,7 @@ export function isFilterBarDefaultAll(defaultActive) {
 
 /**
  * @param {{ value?: string, label?: string }|null|undefined} entry
- * @param {unknown} defaultActive
+ * @param {unknown}                                           defaultActive
  * @return {boolean}
  */
 export function filterEntryMatchesDefaultActive(entry, defaultActive) {
@@ -204,8 +204,12 @@ export function filterEntryMatchesDefaultActive(entry, defaultActive) {
 		return false;
 	}
 	const def = String(defaultActive).trim().toLowerCase();
-	const value = String(entry?.value ?? '').trim().toLowerCase();
-	const label = String(entry?.label ?? '').trim().toLowerCase();
+	const value = String(entry?.value ?? '')
+		.trim()
+		.toLowerCase();
+	const label = String(entry?.label ?? '')
+		.trim()
+		.toLowerCase();
 	return value === def || label === def;
 }
 
@@ -281,13 +285,13 @@ export function resolveFilterBarDefaultActiveKey({
 /**
  * Options for a native filter `<select>` (All + each available filter).
  *
- * @param {Object}   args
- * @param {Array}    args.availableFilters
- * @param {boolean}  args.hideAllFilter
- * @param {string}   args.allLabel
- * @param {boolean}  [args.showFilterCount]
+ * @param {Object}                                          args
+ * @param {Array}                                           args.availableFilters
+ * @param {boolean}                                         args.hideAllFilter
+ * @param {string}                                          args.allLabel
+ * @param {boolean}                                         [args.showFilterCount]
  * @param {Map<string, number>|Record<string, number>|null} [args.filterCounts]
- * @param {number}   [args.allCount]
+ * @param {number}                                          [args.allCount]
  * @return {Array<{ value: string, label: string, key?: string, filterValue?: string }>}
  */
 export function buildFilterSelectOptions({
@@ -342,11 +346,11 @@ export function buildFilterSelectOptions({
 /**
  * Resolve the current `<select>` value from active filters / default.
  *
- * @param {Object}   args
- * @param {Array}    args.options           From {@link buildFilterSelectOptions}
- * @param {Array}    args.activeFilters
- * @param {string}   args.defaultActive
- * @param {boolean}  args.hideAllFilter
+ * @param {Object}  args
+ * @param {Array}   args.options       From {@link buildFilterSelectOptions}
+ * @param {Array}   args.activeFilters
+ * @param {string}  args.defaultActive
+ * @param {boolean} args.hideAllFilter
  * @return {string}
  */
 export function resolveFilterSelectValue({

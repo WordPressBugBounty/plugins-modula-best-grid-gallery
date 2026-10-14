@@ -59,23 +59,25 @@ import {
 	serializeGroupedForServerRef,
 } from '../form/useGallerySettingsForm';
 import { normalizeGroupedDefaults } from '../logic/groupedSettingsNormalize';
-import { stripRestPostMeta } from '../utils/applyRestPostStatus';
-import { useTakeoverSaveStatus } from '../context/TakeoverSaveStatusContext';
 import { useWatermarkPreviewSelection } from '../context/WatermarkPreviewSelectionContext';
 import { useQueryClient } from '@tanstack/react-query';
+import {
+	AppearanceToggle,
+	SettingsEditorErrorBoundary,
+	SidebarRailFooter,
+	useTakeoverSaveStatus,
+} from 'editor-shell';
+import { stripRestPostMeta } from 'editor-shell/logic';
 import {
 	getGalleryBootstrapQueryKey,
 	useGalleryBootstrapQuery,
 } from '../query/useGalleryBootstrapQuery';
 
 import GalleryModal from '../components/gallery-modal/GalleryModal';
-import AppearanceToggle from '../components/shell/AppearanceToggle';
 import GalleryTakeoverTopBar from '../components/shell/GalleryTakeoverTopBar';
-import SidebarRailFooter from '../components/sidebar/SidebarRailFooter';
 import SchemaCollapsibleFieldGroup from '../components/schema/SchemaCollapsibleFieldGroup';
 import SchemaCompositeRow from '../components/schema/SchemaCompositeRow';
 import SchemaFieldRow from '../components/schema/SchemaFieldRow';
-import SettingsEditorErrorBoundary from '../components/shell/SettingsEditorErrorBoundary';
 import TakeoverSettingsAutosave from '../components/shell/TakeoverSettingsAutosave';
 import { useGallerySettingsFormBundle } from '../form/GallerySettingsFormContext';
 import { useModulaSettingsEditorConfig } from '../hooks/useModulaSettingsEditorConfig';

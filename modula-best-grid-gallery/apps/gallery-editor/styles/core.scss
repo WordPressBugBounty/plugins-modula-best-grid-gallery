@@ -1,8 +1,8 @@
 // Shared settings-editor styles (metabox + takeover).
-@use 'shared/appearance-vars';
+@use '../../editor-shell/styles/appearance-vars';
 @use 'shared/app-accent-vars';
 @use 'shared/mod-ui-bridge';
-@use 'shared/appearance-menu';
+@use '../../editor-shell/styles/appearance-menu';
 @use '../../shared-ui/styles';
 @use 'hub-list-icons';
 @use 'command-palette';

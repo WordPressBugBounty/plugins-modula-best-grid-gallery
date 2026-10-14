@@ -44,7 +44,7 @@ import { coerceLightboxClickMode } from './resolveGalleryItemLink';
 
 /**
  * @param {unknown} openOn
- * @returns {'both'|'desktop'|'mobile'}
+ * @return {'both'|'desktop'|'mobile'}
  */
 function resolveLightboxDevices(openOn) {
 	const mode =
@@ -61,7 +61,7 @@ function resolveLightboxDevices(openOn) {
  * Legacy Showcase clickBehavior → shared lightbox mode.
  *
  * @param {unknown} clickBehavior
- * @returns {'fancybox'|'no-link'|'external-url'|null}
+ * @return {'fancybox'|'no-link'|'external-url'|null}
  */
 export function mapShowcaseClickBehaviorToLightbox(clickBehavior) {
 	const click = String(clickBehavior || '').trim();
@@ -84,7 +84,7 @@ export function mapShowcaseClickBehaviorToLightbox(clickBehavior) {
  *
  * @param {Object} lightbox
  * @param {Object} showcase
- * @returns {string}
+ * @return {string}
  */
 export function resolveShowcaseLightboxMode(lightbox = {}, showcase = {}) {
 	const shared =
@@ -393,6 +393,7 @@ export function settingsToConfig(settings, opts = {}) {
 		columns,
 		grid_type: gridType,
 		gutter: gutterNum,
+		freeformPlacements: settings.freeform?.placements || [],
 		desktopGutter: gutterNum,
 		tabletGutter: tabletGutterNum,
 		mobileGutter: mobileGutterNum,

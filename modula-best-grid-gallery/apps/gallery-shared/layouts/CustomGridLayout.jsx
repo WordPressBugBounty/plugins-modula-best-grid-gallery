@@ -7,44 +7,18 @@
  * @package
  */
 
-import {
-	Fragment,
-	useCallback,
-	useContext,
-	useLayoutEffect,
-	useMemo,
-	useRef,
-} from '@wordpress/element';
-import { useSelector, useStore } from 'react-redux';
-import GridLayout, { getCompactor, noCompactor } from 'react-grid-layout';
+import { Fragment, useMemo } from '@wordpress/element';
+import { useSelector } from 'react-redux';
 import Masonry from 'react-responsive-masonry';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
 import GalleryItem from '../components/GalleryItem';
 import EditorPreviewPageBreakDivider from '../components/EditorPreviewPageBreakDivider';
 import { useContainerWidth } from '../hooks/useContainerWidth';
 import { isSettingsEditorPreview } from '../utils/displayContext';
-import {
-	buildCustomGridPackedTiles,
-	buildCustomGridRglLayout,
-	chunkHasMixedExplicitAndImplicit,
-	computeCellSize,
-	getItemPixelDimensions,
-	getResponsiveForCustomGrid,
-	isGridItemLocked,
-} from '../utils/customGridLayout';
+import { buildCustomGridPackedTiles } from '../utils/customGridLayout';
 import { galleryItemRowKey } from '../utils/galleryItemIdentity';
 import { usePreviewCatalogChunks } from '../hooks/usePreviewCatalogChunks';
 import { splitCustomGridDisplayChunks } from '../utils/customGridDisplayChunks';
-import { getCustomGridEditorDragCancelSelector } from '../utils/customGridEditorDrag';
-import { applyCustomGridLayoutSectionToStore } from '../utils/applyCustomGridLayoutSectionToStore';
 import { editorPreviewUsesNumberedPageBreakDividers } from '../utils/paginationFromSettings';
-import {
-	consumeCustomGridRepackPending,
-	repackCustomGridPreviewItems,
-} from '../utils/repackCustomGridPreviewItems';
-import { GalleryPreviewAdminActionsContext } from '../context/GalleryPreviewAdminActionsContext';
-import { useGalleryPreviewCustomGridScale } from '../context/GalleryPreviewCustomGridScaleContext';
 import {
 	isCustomGridPreviewLayoutEditable,
 	resolveResponsiveColumnsForWidth,
@@ -66,14 +40,12 @@ function masonryGutterProp(raw) {
 }
 
 /**
- * Vertical compaction: colliding tiles are pushed down during drag/resize, then
- * compacted upward on drop. preventCollision must stay false — when true, RGL
- * reverts the dragged item instead of displacing neighbors (no push).
- */
-const customGridCompactorVertical = getCompactor('vertical');
-
-/**
  * Tablet/mobile: N columns from responsive settings (masonry flow, not custom-grid pack/RGL).
+ * @param root0
+ * @param root0.items
+ * @param root0.config
+ * @param root0.containerRef
+ * @param root0.containerWidth
  */
 function CustomGridColumnFlowLayout({
 	items,
@@ -160,17 +132,6 @@ function CustomGridColumnFlowLayout({
 		</div>
 	);
 }
-
-const CUSTOM_GRID_RESIZE_HANDLES = Object.freeze([
-	'n',
-	's',
-	'e',
-	'w',
-	'ne',
-	'nw',
-	'se',
-	'sw',
-]);
 
 function CustomGridPackerLayout({
 	items,
@@ -287,328 +248,7 @@ function CustomGridPackerLayout({
 	);
 }
 
-function renderCustomGridRglChildren(section, config) {
-	return section.chunk.map((item, i) => {
-		const layoutItem = section.layout[i];
-		if (!item || !layoutItem) {
-			return null;
-		}
-		const dim = getItemPixelDimensions(
-			{
-				...item,
-				width: layoutItem.w,
-				height: layoutItem.h,
-			},
-			section.cellSize,
-			section.columns,
-			section.gutter,
-			section.enableResponsive
-		);
-		const isHorizontal = dim.width > dim.height;
-		const locked = isGridItemLocked(item);
-		return (
-			<div
-				key={layoutItem.i}
-				className={`modula-item modula-item-tiled ${isHorizontal ? 'tile-h' : 'tile-v'}${locked ? ' modula-item--grid-locked' : ''}`}
-				style={{
-					overflow: 'hidden',
-					height: '100%',
-				}}
-			>
-				<GalleryItem
-					itemData={item}
-					config={config}
-					slotWidth={dim.width}
-					slotHeight={dim.height}
-					fillSlot
-					style={{
-						width: '100%',
-						height: '100%',
-					}}
-				/>
-			</div>
-		);
-	});
-}
-
-function CustomGridEditorRglLayout({
-	items,
-	config,
-	containerRef,
-	containerWidth,
-	gridEditable,
-	chunkOptions,
-}) {
-	const store = useStore();
-	const previewAdmin = useContext(GalleryPreviewAdminActionsContext);
-	const { scale: customGridPreviewScale } =
-		useGalleryPreviewCustomGridScale();
-	/**
-	 * While dragging/resizing, buffer RGL layout and do not write Redux
-	 * (mid-drag commits remount tiles and jump the dragged item).
-	 *
-	 * @type {import('react').MutableRefObject<{
-	 *   kind: null|'drag'|'resize',
-	 *   sectionIndex: number|null,
-	 *   layout: object[]|null,
-	 * }>}
-	 */
-	const interactionRef = useRef({
-		kind: null,
-		sectionIndex: null,
-		layout: null,
-	});
-
-	const gridLayoutWidth =
-		containerWidth > 0
-			? Math.max(
-					280,
-					Math.round(
-						containerWidth *
-							(typeof customGridPreviewScale === 'number' &&
-							customGridPreviewScale > 0 &&
-							customGridPreviewScale <= 1
-								? customGridPreviewScale
-								: 1)
-					)
-				)
-			: 0;
-
-	const chunks = useMemo(
-		() => splitCustomGridDisplayChunks(items, chunkOptions),
-		[items, chunkOptions]
-	);
-
-	const commitSectionLayout = useCallback(
-		(sectionIndex, layout, kind) => {
-			if (!gridEditable || !Array.isArray(layout)) {
-				return;
-			}
-			applyCustomGridLayoutSectionToStore(
-				store,
-				sectionIndex,
-				layout,
-				chunks
-			);
-			previewAdmin?.schedulePersistPreviewItems?.();
-			if (kind === 'drag' || kind === 'resize') {
-				previewAdmin?.onCustomGridLayoutCommit?.({ kind });
-			}
-		},
-		[gridEditable, store, chunks, previewAdmin]
-	);
-
-	const handleSectionLayoutChange = useCallback(
-		(sectionIndex, layout) => {
-			if (!gridEditable || !Array.isArray(layout)) {
-				return;
-			}
-			const interaction = interactionRef.current;
-			// Only buffer during drag/resize. Committing on every onLayoutChange
-			// (remount, page move, width change) lets RGL's stale key positions
-			// overwrite a fresh pack and leave gaps / second-row orphans.
-			if (interaction.kind && interaction.sectionIndex === sectionIndex) {
-				interaction.layout = layout;
-			}
-		},
-		[gridEditable]
-	);
-
-	const beginInteraction = useCallback(
-		(kind, sectionIndex) => {
-			if (!gridEditable) {
-				return;
-			}
-			previewAdmin?.onCustomGridLayoutInteractionStart?.({ kind });
-			interactionRef.current = {
-				kind,
-				sectionIndex,
-				layout: null,
-			};
-		},
-		[gridEditable, previewAdmin]
-	);
-
-	const endInteraction = useCallback(
-		(sectionIndex, layout) => {
-			const interaction = interactionRef.current;
-			const kind = interaction.kind;
-			const buffered = interaction.layout;
-			interactionRef.current = {
-				kind: null,
-				sectionIndex: null,
-				layout: null,
-			};
-			if (!gridEditable) {
-				return;
-			}
-			const finalLayout = Array.isArray(layout) ? layout : buffered;
-			if (Array.isArray(finalLayout)) {
-				commitSectionLayout(sectionIndex, finalLayout, kind);
-			}
-		},
-		[gridEditable, commitSectionLayout]
-	);
-
-	const pageSections = useMemo(() => {
-		if (gridLayoutWidth <= 0) {
-			return [];
-		}
-		const { columns, gutter, enableResponsive } =
-			getResponsiveForCustomGrid(config);
-		const cellSize = computeCellSize(gridLayoutWidth, columns, gutter);
-		return chunks.map((chunk, si) => {
-			if (!chunk.length) {
-				return {
-					chunk,
-					layout: [],
-					gridConfig: null,
-					cellSize: 0,
-					columns,
-					gutter,
-					enableResponsive,
-					rglKey: `empty-${si}`,
-				};
-			}
-			const { layout, gridConfig } = buildCustomGridRglLayout(
-				chunk,
-				gridLayoutWidth,
-				config
-			);
-			return {
-				chunk,
-				layout,
-				gridConfig,
-				cellSize,
-				columns,
-				gutter,
-				enableResponsive,
-				/** Remount RGL when page membership changes — stale key positions leave gaps. */
-				rglKey: chunk
-					.map((item, idx) => galleryItemRowKey(item, idx))
-					.join('|'),
-			};
-		});
-	}, [chunks, gridLayoutWidth, config]);
-
-	useLayoutEffect(() => {
-		if (!gridEditable || gridLayoutWidth <= 0) {
-			return;
-		}
-		if (!consumeCustomGridRepackPending()) {
-			return;
-		}
-		const didRepack = repackCustomGridPreviewItems(
-			store,
-			config,
-			gridLayoutWidth
-		);
-		if (didRepack) {
-			previewAdmin?.schedulePersistPreviewItems?.();
-		}
-	}, [gridEditable, gridLayoutWidth, config, store, previewAdmin, chunks]);
-
-	useLayoutEffect(() => {
-		if (!gridEditable || gridLayoutWidth <= 0) {
-			return;
-		}
-		const freshChunks = splitCustomGridDisplayChunks(
-			store.getState()?.items?.items ?? [],
-			chunkOptions
-		);
-		for (let si = 0; si < freshChunks.length; si++) {
-			const chunk = freshChunks[si];
-			if (!chunkHasMixedExplicitAndImplicit(chunk)) {
-				continue;
-			}
-			const { layout } = buildCustomGridRglLayout(
-				chunk,
-				gridLayoutWidth,
-				config
-			);
-			if (!layout?.length) {
-				continue;
-			}
-			applyCustomGridLayoutSectionToStore(store, si, layout, freshChunks);
-		}
-	}, [gridEditable, gridLayoutWidth, items, config, store, chunkOptions]);
-
-	return (
-		<div
-			ref={containerRef}
-			className="modula-items modula-custom-grid modula-custom-grid--editor-pages"
-			style={{
-				display: 'flex',
-				flexDirection: 'column',
-				gap: 0,
-				width: '100%',
-				minHeight: 0,
-			}}
-		>
-			{pageSections.map((section, si) => (
-				<Fragment key={si}>
-					{si > 0 ? <EditorPreviewPageBreakDivider /> : null}
-					<div className="modula-custom-grid__preview-scale-outer">
-						<div
-							className="modula-custom-grid__preview-scale-inner"
-							style={{ width: gridLayoutWidth }}
-						>
-							{section.layout?.length && section.gridConfig ? (
-								<div className="modula-custom-grid__rgl">
-									<GridLayout
-										key={section.rglKey || si}
-										width={gridLayoutWidth}
-										gridConfig={section.gridConfig}
-										layout={section.layout}
-										compactor={
-											gridEditable
-												? customGridCompactorVertical
-												: noCompactor
-										}
-										dragConfig={{
-											enabled: gridEditable,
-											cancel: getCustomGridEditorDragCancelSelector(),
-										}}
-										resizeConfig={{
-											enabled: gridEditable,
-											handles: CUSTOM_GRID_RESIZE_HANDLES,
-										}}
-										onLayoutChange={(nextLayout) =>
-											handleSectionLayoutChange(
-												si,
-												nextLayout
-											)
-										}
-										onDragStart={() =>
-											beginInteraction('drag', si)
-										}
-										onDragStop={(nextLayout) =>
-											endInteraction(si, nextLayout)
-										}
-										onResizeStart={() =>
-											beginInteraction('resize', si)
-										}
-										onResizeStop={(nextLayout) =>
-											endInteraction(si, nextLayout)
-										}
-										autoSize
-									>
-										{renderCustomGridRglChildren(
-											section,
-											config
-										)}
-									</GridLayout>
-								</div>
-							) : null}
-						</div>
-					</div>
-				</Fragment>
-			))}
-		</div>
-	);
-}
-
-export default function CustomGridLayout() {
+export default function CustomGridLayout({ EditorLayout } = {}) {
 	const items = useSelector((state) => state.items.items);
 	const config = useSelector((state) => state.gallery.config);
 	const metadata = useSelector((state) => state.gallery.metadata);
@@ -640,9 +280,9 @@ export default function CustomGridLayout() {
 		);
 	}
 
-	if (isEditorPreview) {
+	if (isEditorPreview && EditorLayout) {
 		return (
-			<CustomGridEditorRglLayout
+			<EditorLayout
 				items={items}
 				config={config}
 				containerRef={containerRef}

@@ -9,6 +9,24 @@
  * @package Modula
  */
 
+// Mirror GALLERY_TYPES_WITHOUT_PAGINATION / GALLERY_TYPES_WITHOUT_FILTERS in
+// apps/gallery-shared/constants/galleryLayoutDefaults.js (visitor runtime).
+$modula_nav_types_without_pagination = array( 'slider', 'story', 'showcase', 'template', 'freeform', 'parallax-masonry', 'video', 'bnb' );
+$modula_nav_types_without_filters    = array( 'slider', 'story', 'showcase', 'template', 'freeform', 'parallax-masonry', 'video', 'bnb' );
+
+// `visibleWhen` has no "not in" operator: one `neq` condition per excluded type.
+$modula_nav_type_neq_conditions = static function ( array $types ) {
+	return array_map(
+		static function ( $type ) {
+			return array(
+				'path' => 'general.type',
+				'neq'  => $type,
+			);
+		},
+		$types
+	);
+};
+
 return array(
 	'categories'  =>
 	array(
@@ -61,6 +79,10 @@ return array(
 										'path' => 'general.type',
 										'neq'  => 'template',
 									),
+									array(
+										'path' => 'general.type',
+										'neq' => 'freeform',
+									),
 								),
 							),
 							'groupedPaths' =>
@@ -111,6 +133,13 @@ return array(
 								0 => 'general.width',
 								1 => 'general.alignment',
 							),
+						),
+						array(
+							'type' => 'drill',
+							'label' => 'Gallery layout',
+							'icon' => 'layout',
+							'visibleWhen' => array( 'path' => 'general.type', 'eq' => 'freeform' ),
+							'groupedPaths' => array( 'general.width', 'general.alignment', 'layout.gutter', 'layout.tabletGutter', 'layout.mobileGutter', 'layout.gridImageSize', 'layout.gridImageDimensions', 'layout.gridImageCrop' ),
 						),
 						array(
 							'type'                => 'drill',
@@ -205,37 +234,7 @@ return array(
 							'groupedPath' => 'pagination.enablePagination',
 							'icon'        => 'queryPagination',
 							'visibleWhen' => array(
-								'all' =>
-								array(
-									array(
-										'path' => 'general.type',
-										'neq'  => 'slider',
-									),
-									array(
-										'path' => 'general.type',
-										'neq'  => 'story',
-									),
-									array(
-										'path' => 'general.type',
-										'neq'  => 'showcase',
-									),
-									array(
-										'path' => 'general.type',
-										'neq'  => 'template',
-									),
-									array(
-										'path' => 'general.type',
-										'neq'  => 'parallax-masonry',
-									),
-									array(
-										'path' => 'general.type',
-										'neq'  => 'video',
-									),
-									array(
-										'path' => 'general.type',
-										'neq'  => 'bnb',
-									),
-								),
+								'all' => $modula_nav_type_neq_conditions( $modula_nav_types_without_pagination ),
 							),
 						),
 						array(
@@ -260,40 +259,14 @@ return array(
 								7 => 'pagination.paginationPosition',
 							),
 							'visibleWhen'  => array(
-								'all' =>
-								array(
+								'all' => array_merge(
 									array(
-										'path'   => 'pagination.enablePagination',
-										'truthy' => true,
+										array(
+											'path'   => 'pagination.enablePagination',
+											'truthy' => true,
+										),
 									),
-									array(
-										'path' => 'general.type',
-										'neq'  => 'slider',
-									),
-									array(
-										'path' => 'general.type',
-										'neq'  => 'story',
-									),
-									array(
-										'path' => 'general.type',
-										'neq'  => 'showcase',
-									),
-									array(
-										'path' => 'general.type',
-										'neq'  => 'template',
-									),
-									array(
-										'path' => 'general.type',
-										'neq'  => 'parallax-masonry',
-									),
-									array(
-										'path' => 'general.type',
-										'neq'  => 'video',
-									),
-									array(
-										'path' => 'general.type',
-										'neq'  => 'bnb',
-									),
+									$modula_nav_type_neq_conditions( $modula_nav_types_without_pagination )
 								),
 							),
 						),
@@ -453,6 +426,10 @@ return array(
 										'neq'  => 'template',
 									),
 									array(
+										'path' => 'general.type',
+										'neq' => 'freeform',
+									),
+									array(
 										'any' =>
 										array(
 											array(
@@ -526,6 +503,10 @@ return array(
 									array(
 										'path' => 'general.type',
 										'neq'  => 'template',
+									),
+									array(
+										'path' => 'general.type',
+										'neq' => 'freeform',
 									),
 								),
 							),
@@ -815,36 +796,7 @@ return array(
 			'name'        => 'filters',
 			'title'       => 'Filters',
 			'visibleWhen' => array(
-				'all' => array(
-					array(
-						'path' => 'general.type',
-						'neq'  => 'slider',
-					),
-					array(
-						'path' => 'general.type',
-						'neq'  => 'story',
-					),
-					array(
-						'path' => 'general.type',
-						'neq'  => 'showcase',
-					),
-					array(
-						'path' => 'general.type',
-						'neq'  => 'parallax-masonry',
-					),
-					array(
-						'path' => 'general.type',
-						'neq'  => 'bnb',
-					),
-					array(
-						'path' => 'general.type',
-						'neq'  => 'video',
-					),
-					array(
-						'path' => 'general.type',
-						'neq'  => 'template',
-					),
-				),
+				'all' => $modula_nav_type_neq_conditions( $modula_nav_types_without_filters ),
 			),
 			'hubSections' =>
 			array(

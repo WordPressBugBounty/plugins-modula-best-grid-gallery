@@ -35,8 +35,8 @@ function resolveGalleryRoot(host) {
 
 /**
  * @param {import('react').RefObject<HTMLElement|null>} hostRef
- * @param {Object} config
- * @param {{ displayContext?: string }|null|undefined} [metadata]
+ * @param {Object}                                      config
+ * @param {{ displayContext?: string }|null|undefined}  [metadata]
  */
 export function useGalleryRootClasses(hostRef, config, metadata) {
 	useEffect(() => {

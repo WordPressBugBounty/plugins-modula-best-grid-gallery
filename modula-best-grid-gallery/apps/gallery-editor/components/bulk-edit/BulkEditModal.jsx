@@ -15,10 +15,10 @@ import {
 	Spinner,
 	__experimentalConfirmDialog as ConfirmDialog,
 } from '@wordpress/components';
+import { useTakeoverSaveStatus } from 'editor-shell';
 import { useBulkEdit } from '../../context/BulkEditContext';
 import { useGalleryPreviewTileSelection } from '../../context/GalleryPreviewTileSelectionContext';
 import { usePreviewReduxStoreItems } from '../../hooks/usePreviewReduxStoreItems';
-import { useTakeoverSaveStatus } from '../../context/TakeoverSaveStatusContext';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
 import { useInvalidateGalleryBootstrap } from '../../hooks/useInvalidateGalleryBootstrap';
 import { useModulaAiDescriptorSettingsQuery } from '../../query/useModulaAiDescriptorSettingsQuery';
@@ -156,7 +156,7 @@ export default function BulkEditModal() {
 					localChanges: draft.localChanges,
 					form,
 				});
-			});
+			}, 'bulk-edit');
 			invalidateBootstrap();
 			draft.resetDraft();
 			addNotice(
@@ -202,7 +202,7 @@ export default function BulkEditModal() {
 					form,
 					excludeAttachmentIds: exclude,
 				});
-			});
+			}, 'bulk-remove');
 			invalidateBootstrap();
 			draft.resetDraft();
 			addNotice(
@@ -211,7 +211,10 @@ export default function BulkEditModal() {
 							'Selected images hidden from this gallery.',
 							'modula-best-grid-gallery'
 						)
-					: __('Selected images deleted.', 'modula-best-grid-gallery'),
+					: __(
+							'Selected images deleted.',
+							'modula-best-grid-gallery'
+						),
 				'success'
 			);
 		} catch (err) {

@@ -4,7 +4,7 @@ import { getPaginationEditorRegistration } from '../platform/paginationRegistry'
 /**
  * Subscribe to Pro runtime registration of pagination preview UI.
  *
- * @returns {import('../platform/paginationRegistry').PaginationEditorRegistration|null}
+ * @return {import('../platform/paginationRegistry').PaginationEditorRegistration|null}
  */
 export function usePaginationRegistration() {
 	const [registration, setRegistration] = useState(() =>

@@ -274,7 +274,7 @@ export async function uploadBrowserImageFilesToGallery(
 			ids,
 			upload_position: pos,
 		});
-	});
+	}, 'gallery-add-images');
 	return { ids };
 }
 

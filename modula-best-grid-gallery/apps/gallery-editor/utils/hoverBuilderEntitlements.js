@@ -5,7 +5,7 @@ import { getModulaSettingsEditorConfig } from '../config/modulaSettingsEditorCon
 
 /**
  * @param {Record<string, unknown>} [editorConfig]
- * @returns {{ freePresetCount: number, customizeTabEnabled: boolean }}
+ * @return {{ freePresetCount: number, customizeTabEnabled: boolean }}
  */
 export function getHoverBuilderEntitlements(editorConfig) {
 	const editor = editorConfig || getModulaSettingsEditorConfig();

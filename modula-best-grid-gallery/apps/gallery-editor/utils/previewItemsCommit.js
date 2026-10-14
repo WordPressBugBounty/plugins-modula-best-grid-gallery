@@ -270,7 +270,7 @@ export function mergeBootstrapItemsPreservingEmbedded(
  * Reorder core preview rows to match attachment ID order (mirrors PHP `build_reordered_rows_from_order`).
  * Rows without a matching ID (embedded blocks, etc.) stay at the end in their relative order.
  *
- * @param {Object[]} coreItems Preview catalog (gallery items).
+ * @param {Object[]} coreItems  Preview catalog (gallery items).
  * @param {number[]} orderedIds Attachment IDs in the target order.
  * @return {Object[]}
  */

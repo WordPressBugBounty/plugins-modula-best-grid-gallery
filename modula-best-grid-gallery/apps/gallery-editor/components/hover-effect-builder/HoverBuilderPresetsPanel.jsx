@@ -59,6 +59,14 @@ export default function HoverBuilderPresetsPanel({ form, isPro }) {
 
 /**
  * @param {Object} props
+ * @param          props.form
+ * @param          props.builder
+ * @param          props.builderField
+ * @param          props.activePresetId
+ * @param          props.isPro
+ * @param          props.freePresetCount
+ * @param          props.listRef
+ * @param          props.didScrollRef
  */
 function HoverBuilderPresetsList({
 	form,

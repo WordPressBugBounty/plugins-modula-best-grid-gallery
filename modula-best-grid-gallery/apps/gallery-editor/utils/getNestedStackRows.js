@@ -10,7 +10,7 @@ import { getModulaSettingsEditorConfig } from '../config/modulaSettingsEditorCon
 import { shouldHideFieldForPanelUpsell } from '../logic/proGateLock';
 
 /**
- * @param {object} row
+ * @param {Object} row
  * @return {boolean}
  */
 function isHeadingDisplayRow(row) {
@@ -54,7 +54,7 @@ function dropOrphanHeadingRows(rows) {
 
 /**
  * @param {{ title?: string, groupedPaths?: string[], nestedUpsellGroupedPath?: string }} frame
- * @param {Object} values Form values
+ * @param {Object}                                                                        values Form values
  * @return {{ rows: object[] }}
  */
 export function getNestedStackRows(frame, values) {

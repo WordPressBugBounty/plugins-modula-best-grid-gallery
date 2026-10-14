@@ -9,7 +9,7 @@
  */
 
 /**
- * @param {unknown} raw           general.width
+ * @param {unknown} raw            general.width
  * @param {unknown} [_galleryType] Unused; kept so existing call sites keep compiling.
  * @return {unknown} Original value, or `100%` when clamped.
  */

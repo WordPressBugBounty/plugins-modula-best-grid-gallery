@@ -1,7 +1,7 @@
 /**
  * Normalize gallery container width from settings to a CSS width value.
  *
- * @param {unknown} raw - general.width (string or legacy number).
+ * @param {unknown}               raw    - general.width (string or legacy number).
  * @param {{ fallback?: string }} [opts]
  * @return {string} CSS width value, or opts.fallback when unset or unsafe.
  */

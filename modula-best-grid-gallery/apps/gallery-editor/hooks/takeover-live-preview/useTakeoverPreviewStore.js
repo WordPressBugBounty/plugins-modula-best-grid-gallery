@@ -1,6 +1,4 @@
-import {
-	asGalleryItemList,
-} from 'gallery-shared/preview';
+import { asGalleryItemList } from 'gallery-shared/preview';
 import { useLayoutEffect, useRef } from '@wordpress/element';
 import { setGalleryPreviewReduxStore } from '../../utils/previewReduxStoreRef';
 import {

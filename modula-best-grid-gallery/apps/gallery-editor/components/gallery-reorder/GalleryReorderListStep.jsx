@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Notice } from '@wordpress/components';
 import { ActionRow, Button } from 'shared-ui';
+import { SettingsPanelHeader } from 'editor-shell';
 import {
 	DndContext,
 	KeyboardSensor,
@@ -17,7 +18,6 @@ import {
 	sortableKeyboardCoordinates,
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import SettingsPanelHeader from '../sidebar/settings-panel/SettingsPanelHeader';
 import GalleryReorderSortableRow from './GalleryReorderSortableRow';
 import { REORDER_DND_MODIFIERS } from './galleryReorderUtils';
 

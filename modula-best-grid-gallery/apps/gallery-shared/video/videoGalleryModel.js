@@ -76,8 +76,8 @@ export function isVideoGalleryItem(item) {
 /**
  * Whether settings-editor preview chrome should use video copy (edit/remove/actions).
  *
- * @param {unknown}                 item
- * @param {string|undefined|null}   galleryType `gallery.config.type` / `general.type`
+ * @param {unknown}               item
+ * @param {string|undefined|null} galleryType `gallery.config.type` / `general.type`
  * @return {boolean}
  */
 export function isGalleryPreviewVideoItem(item, galleryType) {
@@ -219,7 +219,7 @@ const VIDEO_FILE_URL_RE = /\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i;
 /**
  * Poster / tile image URL for a video row (never the playback URL).
  *
- * @param {Object} item
+ * @param {Object}                                           item
  * @param {{ video_thumbnail?: string, video_url?: string }} [overrides]
  * @return {string}
  */
@@ -251,7 +251,7 @@ export function resolveVideoPosterDisplayUrl(item, overrides = {}) {
 /**
  * Sync poster/display URLs on a preview Redux row (thumbnail, src, imgAttributes, …).
  *
- * @param {Object} item
+ * @param {Object}                                           item
  * @param {{ video_thumbnail?: string, video_url?: string }} [overrides]
  * @return {Object}
  */
@@ -304,8 +304,8 @@ export function applyVideoPosterFieldsToPreviewItem(item, overrides = {}) {
 }
 
 /**
- * @param {Object} item
- * @param {boolean} galleryDefault
+ * @param {Object}                                                item
+ * @param {boolean}                                               galleryDefault
  * @param {'autoplay_lightbox'|'loop_video'|'autoplay_thumbnail'} field
  * @return {boolean}
  */
@@ -323,7 +323,7 @@ function resolveItemTriStateFlag(item, galleryDefault, field) {
 /**
  * Append autoplay/loop query params for lightbox / embed playback.
  *
- * @param {string} rawUrl
+ * @param {string}                                                 rawUrl
  * @param {{ autoplay?: boolean, loop?: boolean, mute?: boolean }} [flags]
  * @return {string}
  */
@@ -412,8 +412,7 @@ export function readModulaVideoSlideLoop(slide) {
 	if (!slide || typeof slide !== 'object') {
 		return false;
 	}
-	const opts =
-		slide.opts && typeof slide.opts === 'object' ? slide.opts : {};
+	const opts = slide.opts && typeof slide.opts === 'object' ? slide.opts : {};
 	const raw = opts.modulaVideoLoop ?? slide.modulaVideoLoop;
 	return raw === 1 || raw === true || raw === '1';
 }
@@ -422,7 +421,7 @@ export function readModulaVideoSlideLoop(slide) {
  * Fancybox v6 Video plugin fields for loop (HTML5 tpl + YT/Vimeo query merge).
  *
  * @param {{ autoplay: boolean, loop: boolean }} flags
- * @param {string} playbackUrl Original or formatted playback URL.
+ * @param {string}                               playbackUrl Original or formatted playback URL.
  * @return {{
  *   autoplay: boolean,
  *   modulaVideoLoop: 0|1,
@@ -519,7 +518,7 @@ export function normalizeVideoGalleryItem(item, galleryConfig = {}) {
 
 /**
  * @param {unknown} items
- * @param {Object} galleryConfig
+ * @param {Object}  galleryConfig
  * @return {Object[]}
  */
 export function normalizeVideoGalleryItems(items, galleryConfig = {}) {

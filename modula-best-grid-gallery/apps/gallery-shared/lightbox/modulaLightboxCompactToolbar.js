@@ -50,9 +50,9 @@ const OVERFLOW_ITEM_FALLBACK_LABELS = {
 };
 
 /**
- * @param {string} key
+ * @param {string}      key
  * @param {HTMLElement} control
- * @returns {string}
+ * @return {string}
  */
 function resolveOverflowItemLabel(key, control) {
 	const fromTitle = control.getAttribute('title')?.trim();
@@ -64,7 +64,7 @@ function resolveOverflowItemLabel(key, control) {
 
 /**
  * @param {HTMLElement} control
- * @param {string} label
+ * @param {string}      label
  */
 function appendOverflowItemLabel(control, label) {
 	control.classList.add('modula-lightbox-toolbar-overflow__row');
@@ -75,8 +75,8 @@ function appendOverflowItemLabel(control, label) {
 }
 
 /**
- * @param {object} [context]
- * @returns {boolean}
+ * @param {Object} [context]
+ * @return {boolean}
  */
 export function resolveModulaLightboxCompactToolbar(context = {}) {
 	if (typeof context.compactToolbar === 'boolean') {
@@ -105,8 +105,8 @@ export function resolveModulaLightboxCompactToolbar(context = {}) {
 }
 
 /**
- * @param {object} carousel
- * @returns {{ carousel: object, overflowKeys: string[] }}
+ * @param {Object} carousel
+ * @return {{ carousel: object, overflowKeys: string[] }}
  */
 export function applyCompactCarouselToolbar(carousel) {
 	const toolbar = carousel?.Toolbar;
@@ -153,8 +153,8 @@ export function applyCompactCarouselToolbar(carousel) {
 
 /**
  * @param {import('@fancyapps/ui/dist/fancybox/fancybox.js').FancyboxInstance} fancybox
- * @param {string} key
- * @param {object} itemConfig
+ * @param {string}                                                             key
+ * @param {Object}                                                             itemConfig
  */
 function wireCompactToolbarOverflowItem(fancybox, key, itemConfig) {
 	if (key === 'toggleComments') {
@@ -181,8 +181,8 @@ function wireCompactToolbarOverflowItem(fancybox, key, itemConfig) {
 }
 
 /**
- * @param {import('@fancyapps/ui/dist/fancybox/fancybox.js').FancyboxInstance} fancybox
- * @param {HTMLElement} anchor
+ * @param {import('@fancyapps/ui/dist/fancybox/fancybox.js').FancyboxInstance}                      fancybox
+ * @param {HTMLElement}                                                                             anchor
  * @param {{ overflowKeys?: string[], items?: Record<string, { tpl?: string, click?: Function }> }} config
  */
 function openCompactToolbarOverflowPanel(fancybox, anchor, config) {

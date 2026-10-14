@@ -6,14 +6,15 @@ import { __ } from '@wordpress/i18n';
  *
  * @param {Object}   props
  * @param {boolean}  props.checked
- * @param {Function} props.onChange Receives next boolean
+ * @param {Function} props.onChange             Receives next boolean
  * @param {boolean}  [props.disabled]
- * @param {string}   [props.label] Optional adjacent label (prefer SettingsRow label)
- * @param {boolean}  [props.showStatus] Shows On/Off text beside the track
- * @param {string}   [props.help] Optional help under the control
+ * @param {string}   [props.label]              Optional adjacent label (prefer SettingsRow label)
+ * @param {boolean}  [props.showStatus]         Shows On/Off text beside the track
+ * @param {string}   [props.help]               Optional help under the control
  * @param {string}   [props.className]
  * @param {string}   [props.id]
  * @param {string}   [props['aria-labelledby']]
+ * @param            props.'aria-labelledby'
  */
 export function Switch({
 	checked = false,

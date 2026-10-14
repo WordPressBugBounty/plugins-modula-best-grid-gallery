@@ -31,12 +31,6 @@ export function createTakeoverImportModal({ Workflow, getRemountKey }) {
 			? getRemountKey({ galleryId, ...extra })
 			: String(galleryId);
 
-		return (
-			<Workflow
-				key={remountKey}
-				onClose={onClose}
-				{...extra}
-			/>
-		);
+		return <Workflow key={remountKey} onClose={onClose} {...extra} />;
 	};
 }

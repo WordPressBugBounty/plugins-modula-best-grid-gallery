@@ -87,16 +87,12 @@ function resolvePolaroidContentMinHeight(options = {}) {
 	const title = resolvePolaroidChinTitleSize(options.titleFontSize);
 	const caption = resolvePolaroidChinCaptionSize(options.captionFontSize);
 	return Math.ceil(
-		top +
-			inset +
-			title * LINE_HEIGHT +
-			LINE_GAP +
-			caption * LINE_HEIGHT
+		top + inset + title * LINE_HEIGHT + LINE_GAP + caption * LINE_HEIGHT
 	);
 }
 
 /**
- * @param {number} chinHeight User setting (px).
+ * @param {number}                    chinHeight User setting (px).
  * @param {{
  *   topSpacing?: number,
  *   inset?: number,
@@ -106,10 +102,7 @@ function resolvePolaroidContentMinHeight(options = {}) {
  * @return {number}
  */
 export function resolvePolaroidEffectiveChinHeight(chinHeight, options = {}) {
-	const configured = Math.min(
-		80,
-		Math.max(12, parsePx(chinHeight, 36))
-	);
+	const configured = Math.min(80, Math.max(12, parsePx(chinHeight, 36)));
 	const contentMin = resolvePolaroidContentMinHeight(options);
 	return Math.max(configured, contentMin, POLAROID_CHIN_MIN_HEIGHT);
 }

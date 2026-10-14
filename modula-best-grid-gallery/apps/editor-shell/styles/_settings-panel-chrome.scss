@@ -1,0 +1,164 @@
+@use 'variables' as *;
+
+// Settings panel header (title, eyebrow, Back) and exit rows.
+.modula-settings-panel__header {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	/* Eyebrow→title uses margin on eyebrow; title→desc stays tighter via desc margin. */
+	gap: 0;
+	flex: 0 0 auto;
+	box-sizing: border-box;
+	padding: $mod-space-16 $mod-se-gut $mod-space-16;
+	border-bottom: 1px solid var(--mod-se-line);
+	background: transparent;
+}
+
+.modula-settings-panel__header--nested {
+	/* Mock pane-head: 16 / 20 / 14 — compact back row above left-aligned title. */
+	padding: $mod-space-16 $mod-se-gut $mod-space-12;
+	gap: $mod-space-4;
+}
+
+.modula-settings-panel__back {
+	display: inline-flex;
+	flex-direction: row;
+	align-items: center;
+	gap: $mod-space-2;
+	flex: 0 0 auto;
+	align-self: flex-start;
+	width: auto;
+	max-width: 100%;
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: 0;
+	background: transparent;
+	color: var(--mod-se-ink-3);
+	cursor: pointer;
+	font: inherit;
+	text-align: left;
+
+	&:hover {
+		color: var(--mod-se-ink-2);
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: inset 0 0 0 2px var(--mod-se-accent);
+	}
+}
+
+.modula-settings-panel__back-icon {
+	display: block;
+	flex: 0 0 auto;
+	fill: currentColor;
+}
+
+.modula-settings-panel__back-label {
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	line-height: 1.3;
+	text-transform: uppercase;
+	color: inherit;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.modula-settings-panel__eyebrow {
+	margin: 0 0 $mod-space-4;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	line-height: 1.3;
+	text-transform: uppercase;
+	color: var(--mod-se-ink-3);
+}
+
+.modula-settings-panel__title {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	line-height: 1.25;
+	color: var(--mod-se-ink);
+	text-align: left;
+}
+
+.modula-settings-panel__header--nested .modula-settings-panel__title {
+	/* Nested title sits under the back row, full width left-aligned. */
+	width: 100%;
+}
+
+.modula-settings-panel__desc {
+	/* Tight to title — design keeps ~2px optical gap, not a second rhythm step. */
+	margin: $mod-space-2 0 0;
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.4;
+	color: var(--mod-se-ink-2);
+}
+
+.modula-settings-panel__exit-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: $mod-space-12;
+	box-sizing: border-box;
+	width: 100%;
+	min-height: $mod-space-52;
+	margin: 0;
+	padding: $mod-space-12 $mod-se-gut;
+	border: none;
+	border-bottom: 1px solid var(--mod-se-line-soft);
+	border-radius: 0;
+	background: transparent;
+	color: inherit;
+	text-align: left;
+	font: inherit;
+	cursor: pointer;
+	transition: background var(--mod-se-duration-fast, 0.1s) ease;
+
+	&:hover {
+		background: var(--mod-se-chrome-2);
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: inset 0 0 0 2px var(--mod-se-accent);
+	}
+}
+
+.modula-settings-panel__exit-row-label {
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.4;
+	color: var(--mod-se-ink);
+	min-width: 0;
+}
+
+.modula-settings-panel__exit-row-target {
+	display: inline-flex;
+	align-items: center;
+	gap: $mod-space-4;
+	flex: 0 0 auto;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.45;
+	color: var(--mod-se-accent);
+
+	svg {
+		fill: currentColor;
+	}
+}

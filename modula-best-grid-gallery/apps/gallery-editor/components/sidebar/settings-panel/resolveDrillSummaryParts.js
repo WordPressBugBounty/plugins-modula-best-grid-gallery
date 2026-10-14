@@ -38,7 +38,7 @@ function stringifyValue(value) {
 }
 
 /**
- * @param {object} field Enriched field
+ * @param {Object}  field Enriched field
  * @param {unknown} value
  * @return {string}
  */
@@ -86,7 +86,7 @@ function formatGutterSummary(px) {
 }
 
 /**
- * @param {string} template
+ * @param {string}                           template
  * @param {{ value: string, label: string }} vars
  * @return {string}
  */
@@ -100,7 +100,7 @@ function applyTemplate(template, vars) {
 }
 
 /**
- * @param {object} part
+ * @param {Object}                                  part
  * @param {Record<string, Record<string, unknown>>} values
  * @return {{ kind: 'color', color: string } | { kind: 'text', text: string } | null}
  */
@@ -383,7 +383,7 @@ function formatLightboxToolbarButtonsSummary(values) {
 
 /**
  * @param {Record<string, Record<string, unknown>>} values
- * @param {Object[]} [previewItems]
+ * @param {Object[]}                                [previewItems]
  * @return {Array<{ kind: 'text', text: string }>}
  */
 function formatFiltersListSummary(values, previewItems) {
@@ -1059,8 +1059,8 @@ function formatExportImportSummary() {
 }
 
 /**
- * @param {object} section Hub drill section
- * @param {Record<string, Record<string, unknown>>} values Form values
+ * @param {Object}                                                 section  Hub drill section
+ * @param {Record<string, Record<string, unknown>>}                values   Form values
  * @param {{ previewItems?: Object[], bootstrapItems?: Object[] }} [extras]
  * @return {Array<{ kind: 'color', color: string } | { kind: 'text', text: string }>}
  */

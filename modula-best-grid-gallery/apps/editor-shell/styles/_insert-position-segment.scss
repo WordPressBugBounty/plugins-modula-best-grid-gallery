@@ -1,0 +1,57 @@
+@use 'variables' as *;
+
+// Start/End insert-position segment (InsertPositionSegment).
+.modula-takeover__preview-insert {
+	display: flex;
+	align-items: center;
+	gap: $mod-space-10;
+	min-width: 0;
+}
+
+.modula-takeover__preview-insert-label {
+	font-size: 12px;
+	color: var(--mod-se-preview-ink-muted, #{$mod-takeover-preview-toolbar-insert-ink});
+	white-space: nowrap;
+}
+
+.modula-takeover__preview-segment {
+	display: inline-flex;
+	border-radius: $mod-radius-6;
+	padding: $mod-space-2;
+	background: var(--mod-se-preview-segment-bg, #{$mod-takeover-preview-segment-bg});
+	border: 1px solid var(--mod-se-preview-segment-border, #{$mod-takeover-preview-segment-border});
+}
+
+.modula-takeover__preview-segment-btn {
+	margin: 0;
+	padding: $mod-space-5 $mod-space-12;
+	border: none;
+	border-radius: $mod-radius-4;
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+	background: transparent;
+	color: var(--mod-se-preview-segment-btn-ink, #{$mod-takeover-preview-segment-btn-ink});
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
+
+	&:hover {
+		color: var(--mod-se-preview-segment-btn-ink-active, #{$mod-takeover-preview-segment-btn-ink-active});
+		background: var(--mod-se-preview-segment-hover-bg, #{$mod-takeover-preview-segment-hover-bg});
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: 0 0 0 2px $mod-takeover-focus-ring-neutral;
+	}
+
+	&.is-active {
+		background: var(--mod-se-preview-segment-active-bg, #{$mod-takeover-preview-segment-active-bg});
+		color: var(--mod-se-preview-segment-btn-ink-active, #{$mod-takeover-preview-segment-btn-ink-active});
+		box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--modula-takeover-accent, #{$modula-takeover-accent}) 45%, transparent);
+	}
+}

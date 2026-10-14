@@ -11,8 +11,8 @@ const clearTimers = new WeakMap();
 const AUTO_CLEAR_MS = 5000;
 
 /**
- * @param {HTMLElement|null|undefined} hostEl Gallery React host or root gallery element.
- * @param {unknown}                    err    Caught error.
+ * @param {HTMLElement|null|undefined} hostEl  Gallery React host or root gallery element.
+ * @param {unknown}                    err     Caught error.
  * @param {() => void}                 [retry] Repeat the failed action.
  */
 export function reportLightboxFailure(hostEl, err, retry) {

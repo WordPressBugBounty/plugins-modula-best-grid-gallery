@@ -223,7 +223,7 @@ export const ModulaEdit = (props) => {
 
 	if (id == 0 && 'none' === attributes.galleryType) {
 		return (
-			<div { ...blockProps }>
+			<div {...blockProps}>
 				<div className="modula-block-preview">
 					<div className="modula-block-preview__content">
 						<div className="modula-block-preview__logo" />
@@ -279,7 +279,7 @@ export const ModulaEdit = (props) => {
 
 	if (status === 'loading') {
 		return (
-			<div { ...blockProps }>
+			<div {...blockProps}>
 				<div className="modula-block-preview">
 					<div className="modula-block-preview__content">
 						<div className="modula-block-preview__logo" />
@@ -299,40 +299,40 @@ export const ModulaEdit = (props) => {
 					{...props}
 				/>
 
-				<div { ...blockProps }>
-				<div className="modula-block-preview">
-					<div className="modula-block-preview__content">
-						<div className="modula-block-preview__logo" />
-						{galleries.length > 0 && (
-							<Fragment>
-								<ModulaGallerySearch
-									id={id}
-									key={id}
-									value={id}
-									options={currentSelectize}
-									onIdChange={onIdChange}
-									galleries={galleries}
-								/>
+				<div {...blockProps}>
+					<div className="modula-block-preview">
+						<div className="modula-block-preview__content">
+							<div className="modula-block-preview__logo" />
+							{galleries.length > 0 && (
+								<Fragment>
+									<ModulaGallerySearch
+										id={id}
+										key={id}
+										value={id}
+										options={currentSelectize}
+										onIdChange={onIdChange}
+										galleries={galleries}
+									/>
 
-								{id != 0 && (
-									<Button
-										target="_blank"
-										href={
-											modulaVars.adminURL +
-											'post.php?post=' +
-											id +
-											'&action=edit'
-										}
-										isPrimary
-									>
-										{__('Edit Gallery')}
-									</Button>
-								)}
-							</Fragment>
-						)}
+									{id != 0 && (
+										<Button
+											target="_blank"
+											href={
+												modulaVars.adminURL +
+												'post.php?post=' +
+												id +
+												'&action=edit'
+											}
+											isPrimary
+										>
+											{__('Edit Gallery')}
+										</Button>
+									)}
+								</Fragment>
+							)}
+						</div>
 					</div>
 				</div>
-			</div>
 			</Fragment>
 		);
 	}

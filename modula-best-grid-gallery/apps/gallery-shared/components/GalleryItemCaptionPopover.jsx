@@ -32,8 +32,8 @@ const LONG_PRESS_MS = 480;
 const LONG_PRESS_MOVE_PX = 12;
 
 /**
- * @param {number} clientX
- * @param {number} clientY
+ * @param {number}                            clientX
+ * @param {number}                            clientY
  * @param {{ width: number, height: number }} size
  * @return {{ left: number, top: number }}
  */

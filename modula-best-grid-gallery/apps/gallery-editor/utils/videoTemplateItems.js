@@ -26,7 +26,7 @@ export function isVideoTemplateRow(row) {
 /**
  * Poster / tile image URL for a video row (never the .mp4 playback URL).
  *
- * @param {Object} item
+ * @param {Object}                                           item
  * @param {{ video_thumbnail?: string, video_url?: string }} [overrides] Form or patch values.
  * @return {string}
  */
@@ -37,7 +37,7 @@ export function resolveVideoItemDisplayImageUrl(item, overrides = {}) {
 /**
  * Sync poster/display URLs on a preview Redux row (thumbnail, src, imgAttributes, …).
  *
- * @param {Object} item
+ * @param {Object}                                           item
  * @param {{ video_thumbnail?: string, video_url?: string }} [overrides]
  * @return {Object}
  */
@@ -68,8 +68,8 @@ export function nextVideoTemplateId(coreItems) {
 }
 
 /**
- * @param {Record<string, unknown>} snap   AJAX snap payload (`title`, `thumb`, `width`, …).
- * @param {string}                  videoUrl Persisted video URL.
+ * @param {Record<string, unknown>} snap       AJAX snap payload (`title`, `thumb`, `width`, …).
+ * @param {string}                  videoUrl   Persisted video URL.
  * @param {number}                  templateId Numeric suffix for `video_template_{id}`.
  * @return {Record<string, unknown>} modula-images row.
  */
@@ -111,8 +111,8 @@ export function buildVideoTemplateRow(snap, videoUrl, templateId) {
 }
 
 /**
- * @param {Object[]} coreItems
- * @param {Object[]} newRows
+ * @param {Object[]}      coreItems
+ * @param {Object[]}      newRows
  * @param {'start'|'end'} uploadPosition
  * @return {Object[]}
  */
@@ -129,7 +129,7 @@ export function insertVideoRows(coreItems, newRows, uploadPosition) {
 }
 
 /**
- * @param {Record<string, unknown>[]} snapList Playlist AJAX rows (each with `video_url`).
+ * @param {Record<string, unknown>[]} snapList       Playlist AJAX rows (each with `video_url`).
  * @param {Object[]}                  coreItems
  * @param {'start'|'end'}             uploadPosition
  * @return {Object[]}

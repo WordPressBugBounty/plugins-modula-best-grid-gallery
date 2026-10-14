@@ -100,7 +100,7 @@ export const BOUND_GALLERY_INGEST_ROW_IDS = [
 ];
 
 /**
- * @param {{ id?: string }} row
+ * @param {{ id?: string }}                    row
  * @param {BoundGallerySummary|null|undefined} summary
  * @return {boolean}
  */
@@ -119,7 +119,7 @@ export function isBoundGalleryAddNewRowAllowed(row, summary) {
  * Filter Add New menu rows for a bound gallery (omit ingest paths).
  *
  * @template {{ id?: string }} T
- * @param {T[]} rows
+ * @param {T[]}                                rows
  * @param {BoundGallerySummary|null|undefined} summary
  * @return {T[]}
  */
@@ -134,7 +134,7 @@ export function filterAddNewRowsForBoundGallery(rows, summary) {
  * Source image remove copy on a bound gallery.
  *
  * @param {BoundGallerySummary|null|undefined} summary
- * @param {{ isSourceImage?: boolean }} [opts]
+ * @param {{ isSourceImage?: boolean }}        [opts]
  * @return {{
  *   actionLabel: string,
  *   confirmLabel: string,
@@ -147,7 +147,10 @@ export function getBoundGalleryRemoveCopy(summary, opts = {}) {
 	if (isBoundGallerySummary(summary) && isSource) {
 		return {
 			isHide: true,
-			actionLabel: __('Hide from this gallery', 'modula-best-grid-gallery'),
+			actionLabel: __(
+				'Hide from this gallery',
+				'modula-best-grid-gallery'
+			),
 			confirmLabel: __('Hide', 'modula-best-grid-gallery'),
 			confirmBody: __(
 				'Hide this image from this gallery?',

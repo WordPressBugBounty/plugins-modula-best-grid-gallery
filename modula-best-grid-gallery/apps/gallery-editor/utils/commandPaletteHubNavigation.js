@@ -2,12 +2,15 @@
  * Open the correct hub nested stack frame when jumping to a field from the command palette.
  */
 import { __ } from '@wordpress/i18n';
-import { GROUP_LABELS, SETTINGS_EDITOR_CATEGORIES } from '../constants/editorStructure';
+import {
+	GROUP_LABELS,
+	SETTINGS_EDITOR_CATEGORIES,
+} from '../constants/editorStructure';
 import { categoryHasHubSections } from '../logic/editorCategoryHub';
 import { getGroupedPathsForHubDrillSection } from './getGroupedPathsForHubDrillSection';
 
 /**
- * @param {object} section Hub `drill` section from editor navigation.
+ * @param {Object} section Hub `drill` section from editor navigation.
  * @return {string}
  */
 function resolveHubDrillTitle(section) {
@@ -28,9 +31,9 @@ function resolveHubDrillTitle(section) {
  * Walk hub sections (including nested `submenu` items) and find a drill whose resolved paths
  * include `groupedPath`.
  *
- * @param {object[]|null|undefined} sections
- * @param {string}                  groupedPath
- * @param {Record<string, Record<string, unknown>>} values Form values (grouped).
+ * @param {object[]|null|undefined}                 sections
+ * @param {string}                                  groupedPath
+ * @param {Record<string, Record<string, unknown>>} values      Form values (grouped).
  * @return {import('../context/TakeoverSidebarStackContext').SidebarNestedFrame | null}
  */
 function findFrameInHubSections(sections, groupedPath, values) {
@@ -76,8 +79,8 @@ function findFrameInHubSections(sections, groupedPath, values) {
 }
 
 /**
- * @param {object|null|undefined} category Entry from `SETTINGS_EDITOR_CATEGORIES`.
- * @param {string}                groupedPath
+ * @param {object|null|undefined}                   category    Entry from `SETTINGS_EDITOR_CATEGORIES`.
+ * @param {string}                                  groupedPath
  * @param {Record<string, Record<string, unknown>>} values
  * @return {import('../context/TakeoverSidebarStackContext').SidebarNestedFrame | null}
  */
@@ -104,8 +107,8 @@ export function findHubStackFrameForGroupedPath(category, groupedPath, values) {
  * After switching category, open the hub drill that contains the field (if any).
  * Schedules stack updates on the next macrotask so `CategoryPanelContent`’s `clearStack` effect runs first.
  *
- * @param {object} target Command palette target (`kind`, `categoryName`, `groupedPath`, …).
- * @param {Record<string, Record<string, unknown>>} values Grouped form values.
+ * @param {Object}                                        target Command palette target (`kind`, `categoryName`, `groupedPath`, …).
+ * @param {Record<string, Record<string, unknown>>}       values Grouped form values.
  * @param {{ clearStack: Function, pushFrame: Function }} stack
  * @return {boolean} Whether a nested hub frame was scheduled.
  */

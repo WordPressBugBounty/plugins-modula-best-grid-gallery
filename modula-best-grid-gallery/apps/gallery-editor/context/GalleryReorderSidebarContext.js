@@ -11,11 +11,12 @@ import {
 } from '@wordpress/element';
 import { useTakeoverSidebarStack } from './TakeoverSidebarStackContext';
 
-/** @type {import('react').Context<{
+/**
+ * @type {import('react').Context<{
  *   isOpen: boolean,
  *   open: () => void,
  *   close: () => void,
- * } | null>} */
+  } | null>} */
 export const GalleryReorderSidebarContext = createContext(null);
 
 /**

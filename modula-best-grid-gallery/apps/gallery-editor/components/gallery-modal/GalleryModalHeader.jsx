@@ -6,16 +6,16 @@ import { Button } from '@wordpress/components';
 import { Icon, closeSmall } from '@wordpress/icons';
 
 /**
- * @param {Object}                      props
- * @param {string}                      [props.title]
- * @param {string}                      [props.subtitle]
+ * @param {Object}                          props
+ * @param {string}                          [props.title]
+ * @param {string}                          [props.subtitle]
  * @param {import('@wordpress/icons').Icon} [props.icon]
  * @param {import('react').ReactNode}       [props.iconElement]
- * @param {string}                      [props.titleId]
- * @param {import('react').ReactNode}   [props.headerActions]
- * @param {() => void}                  [props.onClose]
- * @param {boolean}                     [props.showClose=true]
- * @param {string}                      [props.className]
+ * @param {string}                          [props.titleId]
+ * @param {import('react').ReactNode}       [props.headerActions]
+ * @param {() => void}                      [props.onClose]
+ * @param {boolean}                         [props.showClose=true]
+ * @param {string}                          [props.className]
  */
 export default function GalleryModalHeader({
 	title,

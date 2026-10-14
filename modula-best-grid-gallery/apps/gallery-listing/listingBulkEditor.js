@@ -18,7 +18,7 @@ export function isListingBulkEditorEntitled(config) {
 /**
  * Whether Bulk Editor (listing) applies to this row.
  *
- * @param {Object|null|undefined}                                    item Listing row.
+ * @param {Object|null|undefined}                         item      Listing row.
  * @param {{ canUseBulkEditor?: boolean }|null|undefined} [options] Entitlement options.
  * @return {boolean}
  */

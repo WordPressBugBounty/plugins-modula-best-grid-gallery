@@ -48,7 +48,8 @@ class Settings_Controller {
 				'group'  => array(
 					'required'          => false,
 					'type'              => 'string',
-					'sanitize_callback' => 'sanitize_key',
+					// Not sanitize_key(): it lowercases, and group names are camelCase (passwordProtect).
+					'sanitize_callback' => 'sanitize_text_field',
 					'description'       => __( 'Return only this group (e.g. lightbox, general).', 'modula-best-grid-gallery' ),
 				),
 				'groups' => array(
@@ -249,8 +250,9 @@ class Settings_Controller {
 	 * @return array<string, array<string, mixed>>
 	 */
 	public static function redact_settings_for_public( array $data ) {
+		// Pro checks both values server-side; visitors type them, so no public client needs either.
 		if ( isset( $data['passwordProtect'] ) && is_array( $data['passwordProtect'] ) ) {
-			unset( $data['passwordProtect']['password'] );
+			unset( $data['passwordProtect']['password'], $data['passwordProtect']['passwordProtectUsername'] );
 		}
 		return $data;
 	}

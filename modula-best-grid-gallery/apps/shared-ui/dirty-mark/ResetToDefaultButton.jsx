@@ -4,11 +4,11 @@ import { IconButton } from '../icon-button/IconButton';
 /**
  * Clockwise arrow — restore schema default.
  *
- * @param {Object} props
+ * @param {Object}   props
  * @param {Function} [props.onClick]
- * @param {boolean} [props.disabled]
- * @param {string} [props.className]
- * @param {string} [props.label]
+ * @param {boolean}  [props.disabled]
+ * @param {string}   [props.className]
+ * @param {string}   [props.label]
  */
 export function ResetToDefaultButton({
 	onClick,

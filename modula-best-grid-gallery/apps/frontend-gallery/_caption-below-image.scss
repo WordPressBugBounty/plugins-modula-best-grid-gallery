@@ -30,6 +30,12 @@
 	inset: 0;
 }
 
+/* Shell one above the link's z-index 5 so share icons get hits (index.scss). */
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-image-area > .modula-item-link ~ .modula-item-hover-media {
+	z-index: 6;
+	pointer-events: none;
+}
+
 .modula .modula-items .modula-item.modula-caption-below-image .modula-item-image-area {
 	position: relative;
 	width: 100%;
@@ -67,6 +73,17 @@
 	opacity: 1;
 	pointer-events: none;
 	z-index: 2;
+}
+
+/*
+ * The in-image figc only carries the inline share row here. Fill the image so
+ * hover-builder slot positions (percent of the figc) land inside it instead of
+ * collapsing onto the top edge, half clipped and under the lightbox link.
+ * !important: the PHP SSR below-caption rule further down forces
+ * `height: auto !important` on every `.modula-item-content > .figc`.
+ */
+.modula .modula-items .modula-item.modula-caption-below-image .modula-item-image-area .modula-item-content > .figc {
+	height: 100% !important;
 }
 
 .modula .modula-items .modula-item.modula-caption-below-image .modula-item-image-area .modula-item-picture:not(.modula-item-picture--focal-crop) {

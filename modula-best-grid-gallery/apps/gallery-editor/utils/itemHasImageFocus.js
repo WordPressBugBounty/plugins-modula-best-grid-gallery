@@ -13,7 +13,6 @@ import {
  * Otherwise every image looked “dirty” and the gallery-type change modal fired on every attempt.
  */
 
-
 /** How close to 0.5 still counts as “default center” (float + UX). */
 const FOCAL_CENTER = 0.5;
 const FOCAL_CENTER_TOL = 0.02;

@@ -76,7 +76,7 @@ export function countPreviewStatusBarItems(items) {
 }
 
 /**
- * @param {'desktop'|'tablet'|'mobile'} viewport
+ * @param {'desktop'|'tablet'|'mobile'}             viewport
  * @param {Record<string, Record<string, unknown>>} values
  * @return {string}
  */
@@ -97,10 +97,10 @@ function resolveGutterForViewport(viewport, values) {
 }
 
 /**
- * @param {Object} args
- * @param {Object[]} [args.items]
+ * @param {Object}                                  args
+ * @param {Object[]}                                [args.items]
  * @param {Record<string, Record<string, unknown>>} args.values
- * @param {'desktop'|'tablet'|'mobile'} [args.previewViewport]
+ * @param {'desktop'|'tablet'|'mobile'}             [args.previewViewport]
  * @return {string[]}
  */
 export function buildPreviewStatusBarFacts({

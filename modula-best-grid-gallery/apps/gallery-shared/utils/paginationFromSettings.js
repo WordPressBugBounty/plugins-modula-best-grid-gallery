@@ -65,7 +65,7 @@ function shouldUseMobilePerPage(options = {}) {
 }
 
 /**
- * @param {Record<string, unknown>} flat
+ * @param {Record<string, unknown>}                        flat
  * @param {{
  *   previewViewport?: 'desktop'|'tablet'|'mobile',
  *   forceMobile?: boolean,
@@ -133,7 +133,7 @@ export function isPaginationModeEnabledFromFlatLike(flat) {
 /**
  * Same idea as PHP `Modern_Gallery::is_any_pagination_enabled` (includes max-per-page).
  *
- * @param {Record<string, unknown>} flat
+ * @param {Record<string, unknown>}                        flat
  * @param {{
  *   previewViewport?: 'desktop'|'tablet'|'mobile',
  *   forceMobile?: boolean,
@@ -197,7 +197,7 @@ export function editorPreviewUsesNumberedPageBreakDividers(settings) {
  * Step (items per “page”) for settings-editor preview dividers, or null when pagination is off.
  * Applies to numbered pages, load more, and infinite scroll so the editor always shows every image.
  *
- * @param {Object} settings Grouped v2 settings.
+ * @param {Object}                                         settings  Grouped v2 settings.
  * @param {{
  *   previewViewport?: 'desktop'|'tablet'|'mobile',
  *   forceMobile?: boolean,
@@ -242,7 +242,7 @@ export const MAX_PAGINATION_PAGE_LINKS = 20;
 /**
  * Numbered page links shown in pagination chrome (`paginationNumber`).
  *
- * @param {Object} paginationSettings Grouped `settings.pagination`.
+ * @param {Object} paginationSettings                   Grouped `settings.pagination`.
  * @param {number} [fallback=MIN_PAGINATION_PAGE_LINKS] Schema default when unset.
  * @return {number}
  */
@@ -289,7 +289,10 @@ export function buildPaginationLinkItems(currentPage, totalPages, maxLinks) {
 		)
 	);
 
-	/** @param {number} start @param {number} end inclusive, 1-based page numbers */
+	/**
+	 * @param {number} start @param {number} end inclusive, 1-based page numbers
+	 * @param          end
+	 */
 	const range = (start, end) => {
 		const from = Math.max(1, start);
 		const to = Math.min(count, end);
@@ -400,12 +403,12 @@ export function buildPaginationLinkItems(currentPage, totalPages, maxLinks) {
 /**
  * Build pagination slice fields from grouped settings.pagination (and totals from bootstrap).
  *
- * @param {Object}  settings              Grouped v2 settings.
- * @param {Object}  options
- * @param {number}  options.totalItems    Item count for totalPages (full gallery or first page + meta).
- * @param {boolean} options.serverCatalog Same as bootstrap server paging.
+ * @param {Object}                      settings                  Grouped v2 settings.
+ * @param {Object}                      options
+ * @param {number}                      options.totalItems        Item count for totalPages (full gallery or first page + meta).
+ * @param {boolean}                     options.serverCatalog     Same as bootstrap server paging.
  * @param {'desktop'|'tablet'|'mobile'} [options.previewViewport] Settings-editor forced viewport.
- * @param {boolean} [options.forceMobile] Explicit mobile override.
+ * @param {boolean}                     [options.forceMobile]     Explicit mobile override.
  * @return {Object} Partial pagination payload (enabled, mode, type, perPage, currentPage, totalItems, totalPages).
  */
 export function paginationFromGroupedSettings(settings, options = {}) {

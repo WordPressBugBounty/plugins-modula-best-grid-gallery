@@ -10,36 +10,96 @@ defined( 'ABSPATH' ) || exit;
 final class Composition {
 	public const OPERATION = 'modula/update-gallery-images';
 
+	public static function abilities(): array {
+		return array(
+			self::OPERATION => array(
+				'execute' => array( self::class, 'execute' ),
+			),
+		);
+	}
+
 	/** Shared custom-grid contract for image and authored gallery items. */
 	public static function layout_fields(): array {
 		return array(
-			'width' => array( 'type' => 'integer', 'minimum' => 2, 'maximum' => 12 ),
-			'height' => array( 'type' => 'integer', 'minimum' => 2, 'maximum' => 1000 ),
-			'gridX' => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 10 ),
-			'gridY' => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 100000 ),
-			'gridLocked' => array( 'type' => 'integer', 'enum' => array( 0, 1 ) ),
+			'width'      => array(
+				'type'    => 'integer',
+				'minimum' => 2,
+				'maximum' => 12,
+			),
+			'height'     => array(
+				'type'    => 'integer',
+				'minimum' => 2,
+				'maximum' => 1000,
+			),
+			'gridX'      => array(
+				'type'    => 'integer',
+				'minimum' => 0,
+				'maximum' => 10,
+			),
+			'gridY'      => array(
+				'type'    => 'integer',
+				'minimum' => 0,
+				'maximum' => 100000,
+			),
+			'gridLocked' => array(
+				'type' => 'integer',
+				'enum' => array( 0, 1 ),
+			),
 		);
 	}
 
 	public static function schema(): array {
-		$identity = array( 'type' => 'integer', 'minimum' => 1 );
-		$fields = self::layout_fields() + array(
-			'halign' => array( 'type' => 'string', 'enum' => array( 'left', 'center', 'right' ) ),
-			'valign' => array( 'type' => 'string', 'enum' => array( 'top', 'middle', 'bottom' ) ),
-			'tile_image_fit' => array( 'type' => 'string', 'enum' => array( 'cover', 'contain' ) ),
-			'link' => array( 'type' => 'string', 'maxLength' => 2000 ),
-			'target' => array( 'type' => 'integer', 'enum' => array( 0, 1 ) ),
+		$identity = array(
+			'type'    => 'integer',
+			'minimum' => 1,
 		);
-		return Contract::object( array(
-			'request_id' => Contract::request_id_schema(), 'id' => $identity,
-			'revision' => Contract::revision_schema(),
-			'changes' => array( 'type' => 'array', 'minItems' => 1, 'maxItems' => 100,
-				'items' => Contract::object( array(
-					'action' => array( 'type' => 'string', 'enum' => array( 'add', 'update', 'remove', 'move' ) ),
-					'id' => $identity, 'before_id' => $identity,
-					'fields' => Contract::object( $fields ) + array( 'minProperties' => 1 ),
-				), array( 'action', 'id' ) ) ),
-		), array( 'request_id', 'id', 'revision', 'changes' ) );
+		$fields   = self::layout_fields() + array(
+			'halign'         => array(
+				'type' => 'string',
+				'enum' => array( 'left', 'center', 'right' ),
+			),
+			'valign'         => array(
+				'type' => 'string',
+				'enum' => array( 'top', 'middle', 'bottom' ),
+			),
+			'tile_image_fit' => array(
+				'type' => 'string',
+				'enum' => array( 'cover', 'contain' ),
+			),
+			'link'           => array(
+				'type'      => 'string',
+				'maxLength' => 2000,
+			),
+			'target'         => array(
+				'type' => 'integer',
+				'enum' => array( 0, 1 ),
+			),
+		);
+		return Contract::object(
+			array(
+				'request_id' => Contract::request_id_schema(),
+				'id'         => $identity,
+				'revision'   => Contract::revision_schema(),
+				'changes'    => array(
+					'type'     => 'array',
+					'minItems' => 1,
+					'maxItems' => 100,
+					'items'    => Contract::object(
+						array(
+							'action'    => array(
+								'type' => 'string',
+								'enum' => array( 'add', 'update', 'remove', 'move' ),
+							),
+							'id'        => $identity,
+							'before_id' => $identity,
+							'fields'    => Contract::object( $fields ) + array( 'minProperties' => 1 ),
+						),
+						array( 'action', 'id' )
+					),
+				),
+			),
+			array( 'request_id', 'id', 'revision', 'changes' )
+		);
 	}
 
 	/** One reference set for admission/recovery authorization and mutation locks. */
@@ -74,7 +134,7 @@ final class Composition {
 		if ( get_post_meta( $id, '_modula_bind_target_type', true ) ) {
 			return new \WP_Error( 'unsupported_bound_target', 'Bound composition requires the source-aware operations.' );
 		}
-		$items = Meta_Sync::get_images_v2( $id );
+		$items  = Meta_Sync::get_images_v2( $id );
 		$placed = array();
 		if ( ! class_exists( 'Modula_Gallery_Upload', false ) ) {
 			require_once MODULA_PATH . 'includes/admin/helpers/class-modula-gallery-upload.php';
@@ -102,7 +162,8 @@ final class Composition {
 				return self::invalid( 'link must be a safe URL; unsafe or silently rewritten values are rejected.' );
 			}
 			$row = 'add' === $action ? \Modula_Gallery_Upload::get_instance()->build_attachment_image_row( $id, $change['id'], false ) : $items[ $index ];
-			if ( is_wp_error( $row ) ) { return $row; }
+			if ( is_wp_error( $row ) ) {
+				return $row; }
 			$row = array_replace( $row, $fields );
 			if ( 'add' === $action ) {
 				$row = Adapter::normalize_item_row( Adapter::strip_bootstrap_only_row_keys( $row ) );
@@ -114,7 +175,8 @@ final class Composition {
 				$items[ $index ] = $row;
 				continue;
 			}
-			if ( 'move' === $action ) { array_splice( $items, $index, 1 ); }
+			if ( 'move' === $action ) {
+				array_splice( $items, $index, 1 ); }
 			$before = count( $items );
 			if ( isset( $change['before_id'] ) ) {
 				$before = self::index( $items, $change['before_id'] );
@@ -127,22 +189,40 @@ final class Composition {
 		return self::validate_cells( $items, $placed );
 	}
 
+	/**
+	 * Persist a prepared catalog inside the caller's revision transaction and confirm it.
+	 * Confirmation uses the occurrence identities the write stores, not the unidentified proposal.
+	 *
+	 * @param int   $id    Gallery ID, locked by the caller's revision transaction.
+	 * @param array $items Prepared complete catalog.
+	 * @return bool Whether the stored catalog matches the proposal.
+	 */
+	public static function persist( int $id, array $items ): bool {
+		$items     = Meta_Sync::identify_freeform_catalog( $id, $items );
+		$persisted = Meta_Sync::persist_prepared_gallery_items( $id, $items );
+		Revision::clear_cache();
+		return ! is_wp_error( $persisted ) && Meta_Sync::get_images_v2( $id ) === $items;
+	}
+
 	/** Validate changed cells against the complete final mixed catalog. */
 	public static function validate_cells( array $items, array $placed ) {
 		foreach ( $items as $index => $row ) {
-			if ( empty( $placed[ $row['id'] ] ) ) { continue; }
-			$w = (int) ( $row['width'] ?? 2 );
-			$h = (int) ( $row['height'] ?? 2 );
-			$x = $row['gridX'] ?? null;
-			$y = $row['gridY'] ?? null;
+			if ( empty( $placed[ $row['id'] ] ) ) {
+				continue; }
+			$w     = (int) ( $row['width'] ?? 2 );
+			$h     = (int) ( $row['height'] ?? 2 );
+			$x     = $row['gridX'] ?? null;
+			$y     = $row['gridY'] ?? null;
 			$has_x = null !== $x && '' !== $x;
 			$has_y = null !== $y && '' !== $y;
 			if ( $w < 2 || $w > 12 || $h < 2 || $h > 1000 || $has_x !== $has_y || ( $has_x && ( $x < 0 || $y < 0 || $y > 100000 || $x + $w > 12 ) ) ) {
 				return self::invalid( 'Custom-grid cells need 2–12 columns, 2–1000 rows, paired nonnegative origins and x + width <= 12.' );
 			}
-			if ( ! $has_x ) { continue; }
+			if ( ! $has_x ) {
+				continue; }
 			foreach ( $items as $other_index => $other ) {
-				if ( $other_index === $index || ! isset( $other['gridX'], $other['gridY'] ) || '' === $other['gridX'] || '' === $other['gridY'] ) { continue; }
+				if ( $other_index === $index || ! isset( $other['gridX'], $other['gridY'] ) || '' === $other['gridX'] || '' === $other['gridY'] ) {
+					continue; }
 				if ( $x < $other['gridX'] + ( $other['width'] ?? 2 ) && $x + $w > $other['gridX'] && $y < $other['gridY'] + ( $other['height'] ?? 2 ) && $y + $h > $other['gridY'] ) {
 					return self::invalid( 'Changed cells must not overlap another explicitly positioned item.' );
 				}

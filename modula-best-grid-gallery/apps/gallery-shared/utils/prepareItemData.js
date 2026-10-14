@@ -122,31 +122,31 @@ function prepareSocials(itemData, config, options = {}) {
  * Raw item shape from the frontend (shortcode/API).
  *
  * @typedef {Object} RawGalleryItem
- * @property {number}                                                id
- * @property {string}                                                [title]
- * @property {string}                                                [description]
- * @property {string}                                                [alt]
- * @property {string}                                                [src]             - Image src (often empty; fallback: thumbnail, then url)
- * @property {string}                                                [thumbnail]
- * @property {string}                                                [url]             - Full-size image URL (used when src/thumbnail empty)
- * @property {string}                                                [srcset]
- * @property {string}                                                [sizes]
- * @property {{ type?: string, srcset?: string, srcSet?: string }[]} [pictureSources]  - Optional Wix-style sources (e.g. image/webp + image/jpeg with 1x/2x)
- * @property {string}                                                [valign]
- * @property {string}                                                [halign]
- * @property {boolean}                                               [hideTitle]
- * @property {boolean}                                               [hideDescription]
- * @property {boolean}                                               [hideSocials]
- * @property {boolean|number}                                        [lazyLoad]
- * @property {{ download_button?: boolean|number|string, image_url?: string }} [download] Pro Download per-image payload
- * @property {string[]}                                              [itemClasses]
- * @property {Object[]}                                              [itemAttributes]
- * @property {string[]}                                              [linkClasses]
- * @property {Object}                                                [linkAttributes]  - e.g. data-image-id, role, data-thumb
- * @property {string[]}                                              [imgClasses]
- * @property {Object}                                                [imgAttributes]   - e.g. data-valign, data-halign, alt, data-full, title, data-download-filename
- * @property {number}                                                [width]           - For grid/custom-grid/creative-gallery
- * @property {number}                                                [height]
+ * @property {number}                                                          id
+ * @property {string}                                                          [title]
+ * @property {string}                                                          [description]
+ * @property {string}                                                          [alt]
+ * @property {string}                                                          [src]             - Image src (often empty; fallback: thumbnail, then url)
+ * @property {string}                                                          [thumbnail]
+ * @property {string}                                                          [url]             - Full-size image URL (used when src/thumbnail empty)
+ * @property {string}                                                          [srcset]
+ * @property {string}                                                          [sizes]
+ * @property {{ type?: string, srcset?: string, srcSet?: string }[]}           [pictureSources]  - Optional Wix-style sources (e.g. image/webp + image/jpeg with 1x/2x)
+ * @property {string}                                                          [valign]
+ * @property {string}                                                          [halign]
+ * @property {boolean}                                                         [hideTitle]
+ * @property {boolean}                                                         [hideDescription]
+ * @property {boolean}                                                         [hideSocials]
+ * @property {boolean|number}                                                  [lazyLoad]
+ * @property {{ download_button?: boolean|number|string, image_url?: string }} [download]        Pro Download per-image payload
+ * @property {string[]}                                                        [itemClasses]
+ * @property {Object[]}                                                        [itemAttributes]
+ * @property {string[]}                                                        [linkClasses]
+ * @property {Object}                                                          [linkAttributes]  - e.g. data-image-id, role, data-thumb
+ * @property {string[]}                                                        [imgClasses]
+ * @property {Object}                                                          [imgAttributes]   - e.g. data-valign, data-halign, alt, data-full, title, data-download-filename
+ * @property {number}                                                          [width]           - For grid/custom-grid/creative-gallery
+ * @property {number}                                                          [height]
  */
 
 /**
@@ -154,8 +154,8 @@ function prepareSocials(itemData, config, options = {}) {
  * Layouts and Showcase should call `getItemTileViewModel` / `getGalleryItemViewModel`,
  * not this helper.
  *
- * @param {RawGalleryItem} itemData - Raw item from store
- * @param {Object}         config   - Gallery config from store
+ * @param {RawGalleryItem} itemData                - Raw item from store
+ * @param {Object}         config                  - Gallery config from store
  * @param {Object}         [options]
  * @param {number}         [options.deeplinkIndex] 0-based index among lightbox slides
  * @return {Object} Prepared item

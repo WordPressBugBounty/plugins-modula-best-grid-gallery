@@ -10,6 +10,7 @@ const { Button, PanelBody } = wp.components;
 
 /**
  * Inspector controls
+ * @param props
  */
 const Inspector = (props) => {
 	const { attributes, galleries, onIdChange } = props;

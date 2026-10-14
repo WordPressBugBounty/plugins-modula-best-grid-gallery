@@ -2,22 +2,17 @@
  * Command palette: jump to a settings category, group, or field (takeover + metabox).
  * Custom overlay (not WP Modal) — command-palette layout + portal to body.
  */
-import {
-	useCallback,
-	useEffect,
-	useRef,
-} from '@wordpress/element';
+import { useCallback, useEffect, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { useSettingsEditorAppearance, useModalEscapeKey } from 'editor-shell';
 import { createPortal } from 'react-dom';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
-import { useModalEscapeKey } from '../../hooks/useModalEscapeKey';
 import { useSettingsCommandPaletteModel } from '../../hooks/useSettingsCommandPaletteModel';
-import { useSettingsEditorAppearance } from '../../context/SettingsEditorAppearanceContext';
 
 /**
- * @param {Object}                                          props
- * @param {boolean}                                         props.isOpen
- * @param {() => void}                                      props.onClose
+ * @param {Object}                                                     props
+ * @param {boolean}                                                    props.isOpen
+ * @param {() => void}                                                 props.onClose
  * @param {(target: {
  *   kind: 'category'|'group'|'field',
  *   categoryName: string,
@@ -25,7 +20,11 @@ import { useSettingsEditorAppearance } from '../../context/SettingsEditorAppeara
  *   groupedPath?: string
  * }, values: Record<string, Record<string, unknown>>) => void} props.onNavigate
  */
-export default function SettingsCommandPalette({ isOpen, onClose, onNavigate }) {
+export default function SettingsCommandPalette({
+	isOpen,
+	onClose,
+	onNavigate,
+}) {
 	const { form } = useGallerySettingsFormBundle();
 	return (
 		<form.Subscribe selector={(s) => s.values}>
@@ -42,23 +41,18 @@ export default function SettingsCommandPalette({ isOpen, onClose, onNavigate }) 
 }
 
 /**
- * @param {Object}                                          props
- * @param {boolean}                                         props.isOpen
- * @param {() => void}                                      props.onClose
+ * @param {Object}                                                     props
+ * @param {boolean}                                                    props.isOpen
+ * @param {() => void}                                                 props.onClose
  * @param {(target: {
  *   kind: 'category'|'group'|'field',
  *   categoryName: string,
  *   groupKey?: string,
  *   groupedPath?: string
  * }, values: Record<string, Record<string, unknown>>) => void} props.onNavigate
- * @param {Record<string, Record<string, unknown>>}         props.values
+ * @param {Record<string, Record<string, unknown>>}                    props.values
  */
-function SettingsCommandPaletteInner({
-	isOpen,
-	onClose,
-	onNavigate,
-	values,
-}) {
+function SettingsCommandPaletteInner({ isOpen, onClose, onNavigate, values }) {
 	const { appearance } = useSettingsEditorAppearance();
 	const inputRef = useRef(null);
 	const listRef = useRef(null);
@@ -188,8 +182,14 @@ function SettingsCommandPaletteInner({
 					<span id={titleId} className="modula-cmd-palette__title">
 						{__('Search settings', 'modula-best-grid-gallery')}
 					</span>
-					<span className="modula-cmd-palette__hints" aria-hidden="true">
-						{__('↑↓ navigate · ↵ open · esc close', 'modula-best-grid-gallery')}
+					<span
+						className="modula-cmd-palette__hints"
+						aria-hidden="true"
+					>
+						{__(
+							'↑↓ navigate · ↵ open · esc close',
+							'modula-best-grid-gallery'
+						)}
 					</span>
 				</div>
 				<div className="modula-cmd-palette__input-wrap">
@@ -235,14 +235,8 @@ function SettingsCommandPaletteInner({
 					}
 				>
 					{filteredEntries.length === 0 ? (
-						<li
-							className="modula-cmd-palette__empty"
-							role="option"
-						>
-							{__(
-								'No matches.',
-								'modula-best-grid-gallery'
-							)}
+						<li className="modula-cmd-palette__empty" role="option">
+							{__('No matches.', 'modula-best-grid-gallery')}
 						</li>
 					) : (
 						filteredEntries.map((e, i) => (
@@ -271,10 +265,16 @@ function SettingsCommandPaletteInner({
 										? __('Tab', 'modula-best-grid-gallery')
 										: null}
 									{e.kind === 'group'
-										? __('Section', 'modula-best-grid-gallery')
+										? __(
+												'Section',
+												'modula-best-grid-gallery'
+											)
 										: null}
 									{e.kind === 'field'
-										? __('Field', 'modula-best-grid-gallery')
+										? __(
+												'Field',
+												'modula-best-grid-gallery'
+											)
 										: null}
 									{' · '}
 									{e.categoryName}

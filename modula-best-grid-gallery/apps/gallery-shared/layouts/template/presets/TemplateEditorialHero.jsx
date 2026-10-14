@@ -8,9 +8,9 @@ import TemplateImageSlot from '../TemplateImageSlot';
 import TemplateContentSlot from '../TemplateContentSlot';
 
 /**
- * @param {Object} props
+ * @param {Object}                       props
  * @param {Record<string, unknown|null>} props.slotted
- * @param {Object} props.config
+ * @param {Object}                       props.config
  */
 export default function TemplateEditorialHero({ slotted, config }) {
 	return (

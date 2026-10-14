@@ -24,9 +24,7 @@ export function storySettingsToCarousel(settings) {
 		center: false,
 		Dots: false,
 		transition: toBool(story.fade) ? 'fade' : 'slide',
-		infinite: toBool(
-			story.infinite === undefined ? false : story.infinite
-		),
+		infinite: toBool(story.infinite === undefined ? false : story.infinite),
 		slidesPerPage: 1,
 		fill: true,
 		Arrows: false,
@@ -58,10 +56,7 @@ export function storySettingsToCarousel(settings) {
 	if (autoplayOn) {
 		const timeoutMs = Math.max(
 			750,
-			parseInt(
-				story.autoplaySpeed ?? story.autoplayTimeout ?? 5000,
-				10
-			)
+			parseInt(story.autoplaySpeed ?? story.autoplayTimeout ?? 5000, 10)
 		);
 		carouselOptions.Autoplay = {
 			autoStart: true,

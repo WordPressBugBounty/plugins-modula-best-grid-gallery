@@ -3,25 +3,147 @@
 namespace Modula\V2\Abilities;
 
 use WPChill\Folders\Plugin;
-use WPChill\Folders\Rest\Collections_Controller;
 use WPChill\Folders\Rest\Favorites_Controller;
 
 defined( 'ABSPATH' ) || exit;
 final class Collections {
-	public static function available( string $operation ): bool {
-		return Media_Folders::can_manage() && Folders_Dependency::available( 'collections' ) && ( false !== strpos( $operation, 'favorite' ) || Plugin::instance()->config()->folders() );
+	public const LISTING       = 'modula/list-collections';
+	public const MEMBERS       = 'modula/list-collection-members';
+	public const FAVORITES     = 'modula/list-favorites';
+	public const CREATE        = 'modula/create-collection';
+	public const UPDATE        = 'modula/update-collection';
+	public const ADD_MEMBER    = 'modula/add-collection-member';
+	public const REMOVE_MEMBER = 'modula/remove-collection-member';
+	public const STAR          = 'modula/add-favorite';
+	public const UNSTAR        = 'modula/remove-favorite';
+	public const DELETE        = 'modula/delete-collection';
+
+	public static function entitled(): bool {
+		return Folders_Dependency::loaded() && Plugin::instance()->config()->folders();
 	}
+
+	public static function can_invoke( $input = array() ): bool {
+		return Media_Folders::can_manage() || Integration::can_discover();
+	}
+
+	/** Current media rights are independent of commercial availability. */
+	public static function explain_blockers( string $name, array $input ): array {
+		$services_ready = Folders_Dependency::available( 'collections' );
+		$actor_allowed  = Media_Folders::can_manage() || ( ! $services_ready && Integration::can_discover() && current_user_can( 'upload_files' ) );
+		$member         = in_array( $name, array( self::ADD_MEMBER, self::REMOVE_MEMBER ), true );
+		if ( ! $actor_allowed || ( $services_ready && $member && ! Attachments::can_read( (int) ( $input['id'] ?? 0 ) ) ) ) {
+			return array( Availability::blocker( 'permission_denied', 'collections', 'contact_administrator', __( 'Current organizer and attachment permissions are required. An upgrade does not grant access.', 'modula-best-grid-gallery' ) ) );
+		}
+		return Availability::blockers( $name );
+	}
+
+	public static function available( string $operation ): bool {
+		return in_array( $operation, self::names(), true ) && Media_Folders::can_manage() && Folders_Dependency::available( 'collections' ) && ( in_array( $operation, self::free_names(), true ) || self::entitled() );
+	}
+
+	/** @return array<int,string> */
+	public static function names(): array {
+		return array_merge( array( self::LISTING, self::MEMBERS, self::FAVORITES ), self::mutations() );
+	}
+
+	/** @return array<int,string> */
+	public static function premium(): array {
+		return array_values(
+			array_filter(
+				self::names(),
+				static function ( $name ) {
+					return false === strpos( $name, 'favorite' );
+				}
+			)
+		);
+	}
+
+	/** @return array<int,string> */
+	public static function free_names(): array {
+		return array_values(
+			array_filter(
+				self::names(),
+				static function ( $name ) {
+					return false !== strpos( $name, 'favorite' );
+				}
+			)
+		);
+	}
+
+	/**
+	 * Signature contract for the Pro collection executor. Lite checks it without constructing Pro.
+	 *
+	 * @return array<string,array<string,int>>
+	 */
+	public static function executor_methods(): array {
+		return array_fill_keys(
+			self::premium(),
+			array(
+				'run'        => 2,
+				'operations' => 0,
+			)
+		);
+	}
+
+	/** Inspect the executor signature without constructing a service. */
+	public static function executor_ready( string $name ): bool {
+		$methods = self::executor_methods();
+		return isset( $methods[ $name ] ) && Pro_Dependency::methods( '\Modula_Pro\Abilities\Collection_Executor', $methods[ $name ] );
+	}
+
 	public static function mutations(): array {
-		return array( 'modula/create-collection', 'modula/update-collection', 'modula/delete-collection', 'modula/add-collection-member', 'modula/remove-collection-member', 'modula/add-favorite', 'modula/remove-favorite' );
+		return array( self::CREATE, self::UPDATE, self::DELETE, self::ADD_MEMBER, self::REMOVE_MEMBER, self::STAR, self::UNSTAR );
 	}
 	public static function callbacks(): array {
 		$out = array();
-		foreach ( array_merge( array( 'modula/list-collections', 'modula/list-collection-members', 'modula/list-favorites' ), self::mutations() ) as $name ) {
+		foreach ( self::free_names() as $name ) {
 			$out[ $name ] = static function ( $input ) use ( $name ) {
-				return in_array( $name, self::mutations(), true ) ? self::mutate( $input, $name ) : self::listing( $input, $name );
+				if ( in_array( $name, self::mutations(), true ) ) {
+					return self::mutate( $input, $name );
+				}
+				return self::listing( $input, $name );
 			};
 		}
-		return $out;
+		return $out + Collection_Explanation::callbacks_for( self::premium() );
+	}
+	/** Additional host requirements; inspection never initializes services or changes entitlement. */
+	public static function blockers( string $name, array $snapshot ): array {
+		$blockers = array();
+		if ( ! Folders_Dependency::available( 'collections' ) ) {
+			$blockers[] = Availability::blocker( 'dependency_unavailable', 'folders', 'configure_service', __( 'Restore the Folders library or complete its tables before using this operation.', 'modula-best-grid-gallery' ) );
+		}
+		if ( 'compatible' === $snapshot['pro_state'] && Folders_Dependency::loaded() && ! self::entitled() ) {
+			$blockers[] = Availability::blocker( 'configuration_required', 'folders', 'configure_service', __( 'Folders entitlement is required for collections. Favorites and ordinary media folders stay available without that entitlement.', 'modula-best-grid-gallery' ) );
+		}
+		return $blockers;
+	}
+
+	public static function abilities(): array {
+		$by_name = array(
+			self::DELETE => array( 'destructive' => true ),
+		);
+		foreach ( self::premium() as $name ) {
+			$by_name[ $name ] = array_merge(
+				array(
+					'requires_pro'   => true,
+					'blockers'       => array( self::class, 'blockers' ),
+					'executor_ready' => array( self::class, 'executor_ready' ),
+					'permission'     => array( self::class, 'can_invoke' ),
+				),
+				isset( $by_name[ $name ] ) ? $by_name[ $name ] : array()
+			);
+		}
+		return Operation_Table::from_callbacks(
+			self::callbacks(),
+			array(
+				'permission'            => array( self::class, 'available' ),
+				'available'             => array( self::class, 'available' ),
+				'permission_needs_name' => true,
+				'dependency'            => 'folders',
+				'mcp_public'            => array( Folders_Dependency::class, 'mcp_collections' ),
+			),
+			$by_name
+		);
 	}
 	public static function collection_schema(): array {
 		return Contract::object(
@@ -51,7 +173,7 @@ final class Collections {
 		if ( Folders_Dependency::available( 'collections' ) ) {
 			$fields['color']['enum'] = \WPChill\Folders\Folders\Folder_Color::palette();
 		}
-		$out    = array();
+		$out = array();
 		foreach ( array_keys( self::callbacks() ) as $name ) {
 			$write    = in_array( $name, self::mutations(), true );
 			$props    = $write ? array(
@@ -59,20 +181,24 @@ final class Collections {
 				'revision'   => Contract::revision_schema(),
 			) : Contract::pagination();
 			$required = $write ? array_keys( $props ) : array();
-			if ( ! in_array( $name, array( 'modula/list-collections', 'modula/list-favorites', 'modula/create-collection' ), true ) ) {
+			if ( ! in_array( $name, array( self::LISTING, self::FAVORITES, self::CREATE ), true ) ) {
 				$props['id'] = $id;
-				$required[]  = 'id'; }
-			if ( 'modula/create-collection' === $name ) {
+				$required[]  = 'id';
+			}
+			if ( self::CREATE === $name ) {
 				$props     += $fields;
-				$required[] = 'name'; }
-			if ( 'modula/update-collection' === $name ) {
+				$required[] = 'name';
+			}
+			if ( self::UPDATE === $name ) {
 				$props['changes'] = Contract::object( $fields ) + array( 'minProperties' => 1 );
-				$required[]       = 'changes'; }
-			if ( in_array( $name, array( 'modula/add-collection-member', 'modula/remove-collection-member' ), true ) ) {
+				$required[]       = 'changes';
+			}
+			if ( in_array( $name, array( self::ADD_MEMBER, self::REMOVE_MEMBER ), true ) ) {
 				$props['collection_id'] = $id;
-				$required[]             = 'collection_id'; }
-			$key          = 'modula/list-collections' === $name ? 'collections' : 'attachments';
-			$output       = $write ? Contract::outcome_schema() : Contract::object(
+				$required[]             = 'collection_id';
+			}
+			$key  = self::LISTING === $name ? 'collections' : 'attachments';
+			$page = Contract::object(
 				Contract::page_output() + array(
 					'revision' => Contract::revision_schema(),
 					$key       => array(
@@ -82,6 +208,13 @@ final class Collections {
 				),
 				array( 'schema_version', 'revision', $key, 'page', 'per_page', 'total', 'total_pages' )
 			);
+			if ( $write ) {
+				$output = Contract::outcome_schema();
+			} elseif ( in_array( $name, self::premium(), true ) ) {
+				$output = Contract::admitting( $page );
+			} else {
+				$output = $page;
+			}
 			$out[ $name ] = array(
 				'label'         => ucwords( str_replace( '-', ' ', substr( $name, 7 ) ) ),
 				'description'   => 'Existing organizer collections (Folders entitlement required) and site-wide favorites (media permission required). Attachment IDs only; member writes use id as attachment and collection_id as collection. No user_id override. No residence, shared text or file changes. Reads paginate 1–100 accessible objects. Writes require the revision from the corresponding list and an actor-scoped recoverable request_id. Delete removes only labels, authorizing all affected members.',
@@ -91,51 +224,51 @@ final class Collections {
 		}
 		return $out;
 	}
-	private static function summary( array $row ): array {
-		return array_intersect_key( $row, array_flip( array( 'id', 'name', 'color' ) ) ); }
+	/** Legacy entry point retained for free Favorites only. Paid reads are Pro-owned. */
 	public static function listing( array $input, string $operation ) {
-		if ( ! self::available( $operation ) ) {
-			return new \WP_Error( 'modula_forbidden', 'Current organizer permission and feature access are required.' ); }
-		$revision = Revision::collections();
-		if ( 'modula/list-collections' === $operation ) {
-			$result = Media_Folders::page( $input, array_map( array( __CLASS__, 'summary' ), Collections_Controller::service()->list_all() ), 'collections' );
-		} else {
-			if ( 'modula/list-collection-members' === $operation && ! Collections_Controller::service()->find( $input['id'] ) ) {
-				return new \WP_Error( 'modula_not_found', 'Collection not found.' ); }
-			$ids = 'modula/list-favorites' === $operation ? Favorites_Controller::service()->repository()->object_ids( 'attachment' ) : Collections_Controller::service()->object_ids( $input['id'] );
-			$ids = array_values( array_filter( $ids, array( Attachments::class, 'can_read' ) ) );
-			sort( $ids );
-			$result                = Media_Folders::page( $input, $ids, 'attachments' );
-			$result['attachments'] = array_map( array( Attachments::class, 'summary' ), $result['attachments'] );
+		if ( self::FAVORITES !== $operation || ! self::available( $operation ) ) {
+			return new \WP_Error( 'modula_forbidden', 'Current organizer permission and feature access are required.' );
 		}
+		$revision = Revision::collections();
+		$ids      = Favorites_Controller::service()->repository()->object_ids( 'attachment' );
+		$ids      = array_values( array_filter( $ids, array( Attachments::class, 'can_read' ) ) );
+		sort( $ids );
+		$result                = Media_Folders::page( $input, $ids, 'attachments' );
+		$result['attachments'] = array_map( array( Attachments::class, 'summary' ), $result['attachments'] );
 		if ( ! hash_equals( $revision, Revision::collections() ) ) {
-			return new \WP_Error( 'modula_read_conflict', 'Organization changed during inspection. Read again.' ); }
+			return new \WP_Error( 'modula_read_conflict', 'Organization changed during inspection. Read again.' );
+		}
 		return $result + array( 'revision' => $revision );
 	}
+
 	public static function can_recover( array $record ): bool {
-		if ( ! self::available( $record['operation'] ) ) {
-			return false; }
+		if ( ! Media_Folders::can_manage() || ! Folders_Dependency::available( 'collections' ) ) {
+			return false;
+		}
 		foreach ( $record['media_ids'] ?? array() as $id ) {
 			if ( ! Attachments::can_read( $id ) ) {
-				return false; }
+				return false;
+			}
 		}
 		return true;
 	}
+
+	/** Legacy entry point retained for free Favorites only. */
 	public static function mutate( array $input, string $operation ): array {
+		if ( ! in_array( $operation, array( self::STAR, self::UNSTAR ), true ) ) {
+			return Requests::outcome( $input['request_id'], 'rejected', 'unknown_operation', '', $operation );
+		}
 		$existing = Requests::existing( $input, $operation );
 		if ( null !== $existing ) {
-			return $existing; }
-		$out = static function ( $status, $code = '', $message = '' ) use ( $input, $operation ) {
-			return Requests::outcome( $input['request_id'], $status, $code, $message, $operation );
-		};
-		if ( ! self::available( $operation ) ) {
-			return $out( 'forbidden', 'current_permission_denied', 'Current organizer permission and feature access are required.' ); }
-		if ( ( false !== strpos( $operation, 'favorite' ) || false !== strpos( $operation, '-member' ) ) && ! Attachments::can_read( (int) $input['id'] ) ) {
-			return $out( 'forbidden', 'current_permission_denied', 'Current attachment access is required.' );
+			return $existing;
+		}
+		if ( ! self::available( $operation ) || ! Attachments::can_read( $input['id'] ) ) {
+			return Requests::outcome( $input['request_id'], 'forbidden', 'current_permission_denied', 'Current organizer and attachment access are required.', $operation );
 		}
 		$existing = Requests::claim( $input, $operation );
 		if ( null !== $existing ) {
-			return $existing; }
+			return $existing;
+		}
 		$active = false;
 		try {
 			Revision::begin();
@@ -143,90 +276,22 @@ final class Collections {
 			if ( ! hash_equals( Revision::collections( true ), $input['revision'] ) ) {
 				Revision::end( false );
 				$active = false;
-				return Requests::finish( $input['request_id'], $out( 'conflict', 'stale_revision', 'Read current collections/favorites and reconcile before a new request.' ) );
+				return Requests::finish( $input['request_id'], Requests::outcome( $input['request_id'], 'conflict', 'stale_revision', 'Read current collections/favorites and reconcile before a new request.', $operation ) );
 			}
-			$service       = Collections_Controller::service();
-			$favorite      = false !== strpos( $operation, 'favorite' );
-			$member        = false !== strpos( $operation, '-member' );
-			$id            = (int) ( $input['id'] ?? 0 );
-			$collection_id = $member ? $input['collection_id'] : $id;
-			$error         = null;
-			$ids           = $favorite || $member ? array( $id ) : array();
-			if ( 'modula/delete-collection' === $operation ) {
-				global $wpdb;
-				$rows = $wpdb->get_results( $wpdb->prepare( "SELECT object_id,object_type FROM {$wpdb->prefix}wpchill_collection_labels WHERE collection_id = %d", $id ), ARRAY_A );
-				foreach ( $rows as $row ) {
-					if ( 'attachment' !== $row['object_type'] ) {
-						$error = new \WP_Error( 'unsupported_member', 'All affected members must be accessible attachments.' ); }
-					$ids[] = (int) $row['object_id'];
-				}
-			}
-			if ( $ids ) {
-				Revision::lock_attachments( $ids ); }
-			foreach ( $ids as $media_id ) {
-				if ( ! Attachments::can_read( $media_id ) ) {
-					$error = new \WP_Error( 'inaccessible_member', 'All affected members must be accessible attachments.' ); }
-			}
-			if ( ! self::available( $operation ) ) {
-				$error = new \WP_Error( 'current_permission_denied', 'Organizer access changed.' ); }
-			if ( ! $favorite && 'modula/create-collection' !== $operation && ! $service->find( $collection_id ) ) {
-				$error = new \WP_Error( 'collection_not_found', 'Collection not found.' ); }
-			$fields = array_intersect_key( $input['changes'] ?? $input, array_flip( array( 'name', 'color' ) ) );
-			if ( isset( $fields['name'] ) ) {
-				$fields['name'] = sanitize_text_field( $fields['name'] ); }
-			if ( isset( $fields['name'] ) && '' === trim( $fields['name'] ) ) {
-				$error = new \WP_Error( 'invalid_name', 'A visible collection name is required.' ); }
-			Requests::context( $input['request_id'], array( 'media_ids' => $ids ) );
-			$result = $error;
-			if ( ! $error ) {
-				if ( $favorite ) {
-					$method = 'modula/add-favorite' === $operation ? 'star' : 'unstar';
-					$result = Favorites_Controller::service()->$method(
-						array(
-							'object_id'   => $id,
-							'object_type' => 'attachment',
-						)
-					);
-					if ( Favorites_Controller::service()->repository()->is_favorite( $id ) !== ( 'star' === $method ) ) {
-						throw new \RuntimeException( 'Favorite save unconfirmed.' ); }
-				} elseif ( $member ) {
-					$method = 'modula/add-collection-member' === $operation ? 'label' : 'unlabel';
-					$result = $service->$method(
-						array(
-							'collection_id' => $collection_id,
-							'object_id'     => $id,
-							'object_type'   => 'attachment',
-						)
-					);
-					if ( ! is_wp_error( $result ) && in_array( $id, $service->object_ids( $collection_id ), true ) !== ( 'label' === $method ) ) {
-						throw new \RuntimeException( 'Member save unconfirmed.' ); }
-				} elseif ( 'modula/create-collection' === $operation ) {
-					$result = $service->create( $fields );
-				} elseif ( 'modula/update-collection' === $operation ) {
-					$result = $service->update( $id, $fields );
-				} else {
-					$result = $service->delete( $id ); }
-			}
-			if ( is_wp_error( $result ) ) {
+			Revision::lock_attachments( array( $input['id'] ) );
+			if ( ! self::available( $operation ) || ! Attachments::can_read( $input['id'] ) ) {
 				Revision::end( false );
 				$active = false;
-				return Requests::finish( $input['request_id'], $out( 'rejected', $result->get_error_code(), $result->get_error_message() ) );
+				return Requests::finish( $input['request_id'], Requests::outcome( $input['request_id'], 'rejected', 'current_permission_denied', 'Organizer or attachment access changed.', $operation ) );
 			}
-			$response = $out( 'succeeded' );
-			if ( ! $member && ! $favorite ) {
-				if ( 'modula/delete-collection' === $operation ) {
-					if ( $service->find( $id ) ) {
-						throw new \RuntimeException( 'Delete unconfirmed.' ); }
-					$response['deleted_id'] = $id;
-				} else {
-					$saved = $service->find( (int) $result['id'] );
-					foreach ( $fields as $key => $value ) {
-						if ( ! $saved || strtolower( $saved[ $key ] ) !== strtolower( $value ) ) {
-							throw new \RuntimeException( 'Collection save unconfirmed.' ); }
-					}
-					$response['collection'] = self::summary( $saved );
-				}
+			Requests::context( $input['request_id'], array( 'media_ids' => array( $input['id'] ) ) );
+			$saved = self::save_favorite( $input['id'], $operation );
+			if ( is_wp_error( $saved ) ) {
+				Revision::end( false );
+				$active = false;
+				return Requests::finish( $input['request_id'], Requests::outcome( $input['request_id'], 'rejected', $saved->get_error_code(), $saved->get_error_message(), $operation ) );
 			}
+			$response             = Requests::outcome( $input['request_id'], 'succeeded', '', '', $operation );
 			$response['revision'] = Revision::collections();
 			$response             = Requests::finish( $input['request_id'], $response );
 			Revision::end( true );
@@ -234,8 +299,27 @@ final class Collections {
 			return $response;
 		} catch ( \Throwable $error ) {
 			if ( $active ) {
-				Revision::end( false ); }
-			return Requests::finish( $input['request_id'], $out( 'uncertain', 'organization_unconfirmed', 'Recover this identity before further action.' ) );
+				Revision::end( false );
+			}
+			return Requests::finish( $input['request_id'], Requests::outcome( $input['request_id'], 'uncertain', 'organization_unconfirmed', 'Recover this identity before further action.', $operation ) );
 		}
+	}
+
+	/** @return \WP_Error|null */
+	private static function save_favorite( int $id, string $operation ) {
+		$method = self::STAR === $operation ? 'star' : 'unstar';
+		$saved  = Favorites_Controller::service()->$method(
+			array(
+				'object_id'   => $id,
+				'object_type' => 'attachment',
+			)
+		);
+		if ( is_wp_error( $saved ) ) {
+			return $saved;
+		}
+		if ( Favorites_Controller::service()->repository()->is_favorite( $id ) !== ( self::STAR === $operation ) ) {
+			throw new \RuntimeException( 'Favorite save unconfirmed.' );
+		}
+		return null;
 	}
 }

@@ -4,7 +4,7 @@
  * Albums only when Albums editor takeover is available site-wide.
  *
  * @param {import('./listingRowToFields').ListingRow} item
- * @param {{ albumTakeoverAvailable?: boolean }} [options]
+ * @param {{ albumTakeoverAvailable?: boolean }}      [options]
  * @return {boolean}
  */
 export function shouldShowBetaEditorPrompt(item, options = {}) {

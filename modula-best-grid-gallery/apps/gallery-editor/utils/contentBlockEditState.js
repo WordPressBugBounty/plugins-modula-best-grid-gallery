@@ -42,7 +42,7 @@ export const CONTENT_BLOCK_BODY_TINYMCE_OPTIONS = Object.freeze({
  * Always RGBA-capable; when a background image is set and the stored color is
  * opaque, picker alpha mirrors `blockBackgroundOverlayOpacity`.
  *
- * @param {string}  bgColor Hex / rgb / rgba (empty = transparent).
+ * @param {string}  bgColor    Hex / rgb / rgba (empty = transparent).
  * @param {number}  opacityPct
  * @param {boolean} hasImage
  * @return {string} Hex, rgba, or empty.

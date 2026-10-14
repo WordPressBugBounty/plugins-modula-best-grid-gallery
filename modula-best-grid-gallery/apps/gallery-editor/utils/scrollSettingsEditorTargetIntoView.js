@@ -1,11 +1,11 @@
 /**
  * Scroll the takeover (or metabox) settings column to a field or group anchor.
  *
- * @param {object}                     params
+ * @param {Object}                     params
  * @param {'category'|'group'|'field'} params.kind
  * @param {string}                     [params.groupKey]
  * @param {string}                     [params.groupedPath]
- * @param {{ settleMs?: number }}      [options]  Wait for sidebar/tab paint (takeover track transition ~180ms).
+ * @param {{ settleMs?: number }}      [options]            Wait for sidebar/tab paint (takeover track transition ~180ms).
  */
 export function scrollSettingsEditorTargetIntoView(
 	{ kind, groupKey, groupedPath },

@@ -60,6 +60,7 @@ function resolveDeeplinkIndex(items, itemData, config) {
 
 function GalleryItem({
 	itemData,
+	catalogIndex,
 	config,
 	style = null,
 	className: extraClassName = '',
@@ -90,6 +91,7 @@ function GalleryItem({
 	if (isEmbeddedGalleryItemRow(itemData)) {
 		return (
 			<EmbeddedGalleryItem
+				catalogIndex={catalogIndex}
 				itemData={itemData}
 				config={config}
 				style={style}
@@ -134,7 +136,10 @@ function GalleryItem({
 	}
 
 	const previewAdminToolbar = isPreviewContext ? (
-		<GalleryPreviewAdminToolbarSlot itemData={itemData} />
+		<GalleryPreviewAdminToolbarSlot
+			itemData={itemData}
+			catalogIndex={catalogIndex}
+		/>
 	) : null;
 
 	const videoSettings = config?.video || {};

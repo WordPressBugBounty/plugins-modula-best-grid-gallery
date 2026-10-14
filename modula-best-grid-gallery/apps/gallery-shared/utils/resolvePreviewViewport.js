@@ -129,7 +129,7 @@ export function resolveDeviceFromWindowMasonry(config) {
 }
 
 /**
- * @param {Object|null|undefined} config
+ * @param {Object|null|undefined}                           config
  * @param {{ layout?: 'masonry'|'custom-grid'|'parallax' }} [opts]
  * @return {ResponsiveDevice}
  */
@@ -148,7 +148,7 @@ export function resolveResponsiveDevice(config, opts = {}) {
 /**
  * Device from a measured width (gallery container or window), not previewViewport.
  *
- * @param {number} widthPx
+ * @param {number}                                                                widthPx
  * @param {{ layout?: 'masonry'|'custom-grid'|'parallax', config?: Object|null }} [opts]
  * @return {ResponsiveDevice}
  */
@@ -178,8 +178,8 @@ export function resolveResponsiveDeviceFromWidth(widthPx, opts = {}) {
 /**
  * Column count for a measured gallery width (container-aware responsive).
  *
- * @param {Object|null|undefined} config
- * @param {number} widthPx
+ * @param {Object|null|undefined}                           config
+ * @param {number}                                          widthPx
  * @param {{ layout?: 'masonry'|'custom-grid'|'parallax' }} [opts]
  * @return {number}
  */
@@ -211,8 +211,8 @@ export function resolveResponsiveColumnsForWidth(config, widthPx, opts = {}) {
 /**
  * Gutter for a measured gallery width.
  *
- * @param {Object|null|undefined} config
- * @param {number} widthPx
+ * @param {Object|null|undefined}                           config
+ * @param {number}                                          widthPx
  * @param {{ layout?: 'masonry'|'custom-grid'|'parallax' }} [opts]
  * @return {number}
  */
@@ -247,7 +247,7 @@ export function resolveResponsiveGutterForWidth(config, widthPx, opts = {}) {
 }
 
 /**
- * @param {Object|null|undefined} config
+ * @param {Object|null|undefined}                           config
  * @param {{ layout?: 'masonry'|'custom-grid'|'parallax' }} [opts]
  * @return {number}
  */
@@ -371,9 +371,9 @@ export function resolveResponsiveGutterValue(config, opts = {}) {
  * Custom grid on tablet/mobile: N-column flow (masonry) instead of desktop grid pack / RGL.
  * Settings-editor preview follows preview viewport only; visitor still uses measured width.
  *
- * @param {Object|null|undefined} config
+ * @param {Object|null|undefined}       config
  * @param {{ displayContext?: string }} [metadata]
- * @param {number} [containerWidth] Measured gallery width (px); falls back to window.
+ * @param {number}                      [containerWidth] Measured gallery width (px); falls back to window.
  * @return {boolean} True when Custom grid should mount column-flow instead of the packed grid.
  */
 export function shouldCustomGridUseColumnFlow(
@@ -409,7 +409,7 @@ export function shouldCustomGridUseColumnFlow(
 /**
  * Custom-grid RGL editing is allowed only on desktop takeover preview.
  *
- * @param {Object|null|undefined} config
+ * @param {Object|null|undefined}       config
  * @param {{ displayContext?: string }} [metadata]
  * @return {boolean}
  */

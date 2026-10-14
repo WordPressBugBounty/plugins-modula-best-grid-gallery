@@ -345,7 +345,8 @@
 	 * RGL’s default ::after sets right/bottom + dark L-borders; we must reset inset
 	 * and borders on edge handles or the stock glyph stacks with our bar (chevron + pill).
 	 */
-	.modula-custom-grid__rgl {
+	.modula-custom-grid__rgl,
+	.modula-freeform--editor {
 		$mod-rgl-handle-size: 24px;
 		$mod-rgl-line: rgba(255, 255, 255, 0.96);
 		$mod-rgl-line-dim: rgba(255, 255, 255, 0.82);

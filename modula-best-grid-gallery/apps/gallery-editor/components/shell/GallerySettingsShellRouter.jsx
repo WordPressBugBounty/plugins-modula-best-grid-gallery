@@ -4,16 +4,18 @@
  * Proofing TakeoverShell is registered by Pro (never bundled in Lite).
  */
 import { lazy, Suspense } from '@wordpress/element';
+import {
+	SettingsEditorErrorBoundary,
+	SettingsEditorShellFallback,
+	TakeoverSaveStatusProvider,
+} from 'editor-shell';
 import { TakeoverAuxiliaryPanelProvider } from '../../context/TakeoverAuxiliaryPanelContext';
-import { TakeoverSaveStatusProvider } from '../../context/TakeoverSaveStatusContext';
 import { GalleryTypeChangeProvider } from '../../context/GalleryTypeChangeContext';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 import { useProofingMode } from '../../context/ProofingModeContext';
 import { useProofingGalleryCapabilities } from '../../hooks/useProofingGalleryCapabilities';
 import { useImageProofingRegistration } from '../../hooks/useImageProofingRegistration';
 import GalleryDefaultsEditorSlot from '../defaults/GalleryDefaultsEditorSlot';
-import SettingsEditorErrorBoundary from './SettingsEditorErrorBoundary';
-import SettingsEditorShellFallback from './SettingsEditorShellFallback';
 
 const SettingsEditorShell = lazy(() => import('./SettingsEditorShell'));
 const GalleryTakeoverShell = lazy(() => import('./GalleryTakeoverShell'));

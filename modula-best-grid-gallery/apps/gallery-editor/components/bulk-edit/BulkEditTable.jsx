@@ -8,6 +8,18 @@ import { bulkEditRowIsModified } from './bulkEditSave';
 
 /**
  * @param {Object} props
+ * @param          props.rows
+ * @param          props.modifiedCount
+ * @param          props.showFiltersColumn
+ * @param          props.filterSuggestions
+ * @param          props.aiConfigured
+ * @param          props.unavailableOnLocalhost
+ * @param          props.selectedIds
+ * @param          props.draft
+ * @param          props.galleryId
+ * @param          props.previewStore
+ * @param          props.runPersistTask
+ * @param          props.onNotice
  */
 export default function BulkEditTable({
 	rows,

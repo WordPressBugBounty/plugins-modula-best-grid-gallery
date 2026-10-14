@@ -5,9 +5,9 @@
 import { DirtyMark, ResetToDefaultButton } from 'shared-ui';
 
 /**
- * @param {Object} props
- * @param {boolean} props.dirty
- * @param {Function} props.onReset
+ * @param {Object}                    props
+ * @param {boolean}                   props.dirty
+ * @param {Function}                  props.onReset
  * @param {import('react').ReactNode} props.children Label + optional help tip
  */
 export default function SchemaFieldDirtyChrome({ dirty, onReset, children }) {

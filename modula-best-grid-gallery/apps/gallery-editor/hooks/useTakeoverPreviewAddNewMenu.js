@@ -1,6 +1,4 @@
-import {
-	asGalleryItemList,
-} from 'gallery-shared/preview';
+import { asGalleryItemList } from 'gallery-shared/preview';
 import { useMemo } from '@wordpress/element';
 import {
 	buildNewContentBlockRow,
@@ -46,7 +44,6 @@ const PREVIEW_IMPORT_REACT_FLOWS = new Set([
  *   onLibraryAdded?: () => void,
  *   onLibraryError?: (msg: string) => void,
  *   runPersistTask?: (fn: () => void | Promise<void>) => Promise<void>,
- *   closeMenu: () => void,
  *   galleryType?: string,
  * }} args
  */
@@ -59,7 +56,6 @@ export function useTakeoverPreviewAddNewMenu({
 	onLibraryAdded,
 	onLibraryError,
 	runPersistTask,
-	closeMenu,
 	galleryType = '',
 }) {
 	const isVideoGallery = galleryType === 'video';
@@ -126,7 +122,7 @@ export function useTakeoverPreviewAddNewMenu({
 				galleryId,
 				previewCoreItemsToSaveMergedPayload(reanchored)
 			);
-		})
+		}, 'gallery-add-content')
 			.then(() => {
 				commitPreviewCatalog(st, reanchored);
 				onLibraryAdded?.();
@@ -158,7 +154,6 @@ export function useTakeoverPreviewAddNewMenu({
 
 	const handleRowAction = (row) => {
 		if (editor.takeover && isVideoGallery && row.id === 'library') {
-			closeMenu();
 			openVideoLibraryPicker();
 			return;
 		}
@@ -172,7 +167,6 @@ export function useTakeoverPreviewAddNewMenu({
 					row.reactFlow
 				)
 			);
-			closeMenu();
 			return;
 		}
 		if (
@@ -181,24 +175,20 @@ export function useTakeoverPreviewAddNewMenu({
 			galleryId &&
 			typeof onTakeoverOpenUpload === 'function'
 		) {
-			closeMenu();
 			onTakeoverOpenUpload();
 			return;
 		}
 		if (editor.takeover && row.id === 'library' && galleryId) {
-			closeMenu();
 			openImageLibraryPicker();
 			return;
 		}
 		if (editor.takeover && row.reactFlow === 'content-block' && galleryId) {
-			closeMenu();
 			createContentBlock();
 			return;
 		}
 		if (!editor.takeover) {
 			triggerAddNewRow(row);
 		}
-		closeMenu();
 	};
 
 	return {

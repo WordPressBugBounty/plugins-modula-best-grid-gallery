@@ -4,8 +4,8 @@
 import { buildOptionGatesFromProEnhancements } from './generalGalleryType';
 
 /**
- * @param {object} field
- * @return {object}
+ * @param {Object} field
+ * @return {Object}
  */
 export function patchTemplateLayoutField(field) {
 	if (field.groupedPath !== 'template.templateLayout') {

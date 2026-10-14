@@ -48,7 +48,7 @@ function collectResettableDrillFields(groupedPaths) {
 
 /**
  * @param {Object}   props
- * @param {object}   props.section Hub drill section.
+ * @param {Object}   props.section                   Hub drill section.
  * @param {string}   props.label
  * @param {string[]} props.groupedPaths
  * @param {string}   [props.hubHelp]

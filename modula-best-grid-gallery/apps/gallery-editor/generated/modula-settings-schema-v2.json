@@ -22,7 +22,8 @@
                     "story",
                     "fit-grid",
                     "showcase",
-                    "template"
+                    "template",
+                    "freeform"
                 ],
                 "default": "grid"
             },
@@ -639,6 +640,10 @@
                             "always"
                         ],
                         "default": "on-hover"
+                    },
+                    "dimOverlay": {
+                        "type": "boolean",
+                        "default": false
                     },
                     "titleEnter": {
                         "type": "string",
@@ -1354,6 +1359,49 @@
             "mobileSimplify": {
                 "type": "boolean",
                 "default": true
+            }
+        },
+        "freeform": {
+            "placements": {
+                "abilityAuthor": true,
+                "description": "Stored desktop Freeform composition: id is the gallery-local item freeformId; x/y are grid-cell coordinates, w/h are cell spans, and z is stacking order. Overlap is valid; catalog and lightbox order remain independent. Omitting placements preserves composition; a nonempty list replaces every occurrence, and an empty list resets the deterministic initial layout.",
+                "type": "array",
+                "default": [],
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                        },
+                        "x": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                        },
+                        "y": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                        },
+                        "w": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 24
+                        },
+                        "h": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100000
+                        },
+                        "z": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                        }
+                    }
+                }
             }
         },
         "template": {

@@ -6,7 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Button, Flex, FlexBlock, FlexItem } from '@wordpress/components';
 import { displayShortcut } from '@wordpress/keycodes';
 import { search } from '@wordpress/icons';
-import AppearanceToggle from './AppearanceToggle';
+import { AppearanceToggle } from 'editor-shell';
 
 /**
  * @param {Object}        props

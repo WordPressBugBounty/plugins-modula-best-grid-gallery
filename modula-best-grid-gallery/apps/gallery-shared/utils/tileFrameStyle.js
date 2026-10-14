@@ -6,7 +6,7 @@
 
 /**
  * @param {unknown} raw
- * @param {number} fallback
+ * @param {number}  fallback
  * @return {number}
  */
 function toNonNegativeNumber(raw, fallback = 0) {
@@ -19,7 +19,7 @@ function toNonNegativeNumber(raw, fallback = 0) {
 
 /**
  * @param {unknown} raw
- * @param {string} fallback
+ * @param {string}  fallback
  * @return {string}
  */
 function toCssColor(raw, fallback) {

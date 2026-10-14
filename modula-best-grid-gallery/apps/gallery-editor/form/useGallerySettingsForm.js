@@ -1,10 +1,18 @@
-import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from '@wordpress/element';
+import { stripRestPostMeta } from 'editor-shell/logic';
 import { useForm } from '@tanstack/react-form';
 import { usePatchGallerySettingsV2Mutation } from '../query/usePatchGallerySettingsV2Mutation';
 import { buildPatchPayload } from '../logic/buildPatchPayload';
 import { normalizeGroupedDefaults } from '../logic/groupedSettingsNormalize';
 import { collectPatchValidationErrors } from '../logic/collectPatchValidationErrors';
 import { useGallerySettingsUndoRedo } from './useGallerySettingsUndoRedo';
+import { applyGroupedSettingsToForm } from '../utils/applyGroupedSettingsToForm';
 
 export function cloneGroupedSettings(data) {
 	return data ? JSON.parse(JSON.stringify(data)) : {};
@@ -36,6 +44,9 @@ export function useGallerySettingsForm(groupedPayload, galleryId) {
 	const lastServerSerializedRef = useRef('');
 	const patchMutation = usePatchGallerySettingsV2Mutation(galleryId);
 	const [clientError, setClientError] = useState('');
+	const activeGestureRef = useRef(false);
+	const deferredAcknowledgementRef = useRef(null);
+	const applyAcknowledgementRef = useRef(null);
 
 	const form = useForm({
 		defaultValues: initial,
@@ -50,11 +61,77 @@ export function useGallerySettingsForm(groupedPayload, galleryId) {
 				setClientError(clientErrors.join('\n'));
 				return;
 			}
-			await patchMutation.mutateAsync(patch);
+			const snapshot = cloneGroupedSettings(value);
+			const serverData = await patchMutation.mutateAsync(patch);
+			acknowledgeSettingsSave(snapshot, serverData);
 		},
 	});
 
 	const undoRedo = useGallerySettingsUndoRedo(form, cloneGroupedSettings);
+
+	const applyAcknowledgement = useCallback(
+		({ snapshot, normalized }) => {
+			const current = form.store.state.values;
+			const newerEdits = buildPatchPayload(current, snapshot);
+			const next = cloneGroupedSettings(normalized);
+			for (const [group, fields] of Object.entries(newerEdits)) {
+				next[group] = { ...next[group], ...fields };
+			}
+			if (
+				serializeGroupedForServerRef(next) ===
+				serializeGroupedForServerRef(current)
+			) {
+				return;
+			}
+			// Adopt normalization without replacing newer edits or creating an authored history step.
+			undoRedo.reconcileSettingsCheckpoint(() =>
+				applyGroupedSettingsToForm(form, next, cloneGroupedSettings)
+			);
+		},
+		[form, undoRedo]
+	);
+	applyAcknowledgementRef.current = applyAcknowledgement;
+
+	const acknowledgeSettingsSave = useCallback((snapshot, serverData) => {
+		const normalized = cloneGroupedSettings(stripRestPostMeta(serverData));
+		normalizeGroupedDefaults(normalized);
+		baselineRef.current = normalized;
+		lastServerSerializedRef.current =
+			serializeGroupedForServerRef(normalized);
+		const acknowledgement = {
+			snapshot: cloneGroupedSettings(snapshot),
+			normalized,
+		};
+		if (activeGestureRef.current) {
+			// Server validation is acknowledged now; form normalization waits for pointer completion/cancel.
+			deferredAcknowledgementRef.current = acknowledgement;
+			return;
+		}
+		applyAcknowledgementRef.current(acknowledgement);
+	}, []);
+
+	const beginSettingsGesture = useCallback(() => {
+		activeGestureRef.current = true;
+		return () => {
+			activeGestureRef.current = false;
+			const acknowledgement = deferredAcknowledgementRef.current;
+			deferredAcknowledgementRef.current = null;
+			if (acknowledgement) {
+				applyAcknowledgementRef.current(acknowledgement);
+			}
+		};
+	}, []);
+
+	const getPendingSettingsPatch = useCallback(
+		(values = form.store.state.values) => {
+			// Deferred normalization is confirmed work, not another edit to autosave mid-gesture.
+			const comparison =
+				deferredAcknowledgementRef.current?.snapshot ??
+				baselineRef.current;
+			return buildPatchPayload(values, comparison);
+		},
+		[form]
+	);
 
 	const formApiRef = useRef(form);
 	formApiRef.current = form;
@@ -99,5 +176,8 @@ export function useGallerySettingsForm(groupedPayload, galleryId) {
 		baselineRef,
 		lastServerSerializedRef,
 		undoRedo,
+		acknowledgeSettingsSave,
+		beginSettingsGesture,
+		getPendingSettingsPatch,
 	};
 }

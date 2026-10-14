@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import apiFetch from '@wordpress/api-fetch';
+import { stripRestPostMeta } from 'editor-shell/logic';
 import {
 	getGalleryBootstrapQueryKey,
 	normalizeGalleryPostId,
 } from './useGalleryBootstrapQuery';
-import { stripRestPostMeta } from '../utils/applyRestPostStatus';
 
 /**
  * PATCH grouped settings; replaces query cache with sanitized response.
@@ -29,18 +29,15 @@ export function usePatchGallerySettingsV2Mutation(galleryId) {
 			);
 			// Settings-only PATCH must not refetch bootstrap items — that overwrites
 			// optimistic Redux rows (v2 embedded tiles) when modula_images_v2 lags.
-			queryClient.setQueryData(
-				getGalleryBootstrapQueryKey(id),
-				(old) => {
-					if (!old || typeof old !== 'object') {
-						return old;
-					}
-					return {
-						...old,
-						settings: grouped,
-					};
+			queryClient.setQueryData(getGalleryBootstrapQueryKey(id), (old) => {
+				if (!old || typeof old !== 'object') {
+					return old;
 				}
-			);
+				return {
+					...old,
+					settings: grouped,
+				};
+			});
 		},
 	});
 }

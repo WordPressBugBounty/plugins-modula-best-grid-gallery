@@ -1,12 +1,12 @@
 /**
  * Compact attachment summary: thumb + title + meta line in a gray frame.
  *
- * @param {Object} props
- * @param {string} [props.thumbSrc]
- * @param {string} [props.thumbAlt]
+ * @param {Object}                    props
+ * @param {string}                    [props.thumbSrc]
+ * @param {string}                    [props.thumbAlt]
  * @param {import('react').ReactNode} props.title
- * @param {import('react').ReactNode} [props.meta] Secondary line (dims · size · position)
- * @param {string} [props.className]
+ * @param {import('react').ReactNode} [props.meta]      Secondary line (dims · size · position)
+ * @param {string}                    [props.className]
  */
 export function MetaSummary({
 	thumbSrc = '',

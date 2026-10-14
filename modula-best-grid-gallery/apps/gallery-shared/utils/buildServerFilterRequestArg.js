@@ -3,11 +3,11 @@
  * When visitor pagination is off, request the full filtered catalog (`all`),
  * matching the lightbox catalog fetch contract.
  *
- * @param {Object} args
+ * @param {Object}                                  args
  * @param {Array<{ key: string, value?: unknown }>} [args.filters]
- * @param {number} [args.page]
- * @param {number} [args.perPage]
- * @param {boolean} args.paginationEnabled
+ * @param {number}                                  [args.page]
+ * @param {number}                                  [args.perPage]
+ * @param {boolean}                                 args.paginationEnabled
  * @return {{ type: 'filter', page: number, perPage: number, filters: Array, all?: true }}
  */
 export function buildServerFilterRequestArg({

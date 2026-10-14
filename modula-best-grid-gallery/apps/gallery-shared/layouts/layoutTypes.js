@@ -10,20 +10,24 @@ import { DEFAULT_GALLERY_TYPE } from '../constants/galleryLayoutDefaults';
  * Resolve the component type shared by bootstrap loading and rendering.
  *
  * @param {{ type?: string, grid_type?: string }} config
- * @returns {string}
+ * @return {string} Available component type.
  */
 export function resolveGalleryLayoutType(config) {
+	if (config?.type === 'freeform' && config.freeformAvailable === false) {
+		return 'grid';
+	}
 	const type = config?.type || DEFAULT_GALLERY_TYPE;
 	return type === 'grid' && config?.grid_type === 'automatic'
 		? 'justified-grid'
 		: type;
 }
 
-/** @type {readonly string[]} */
+/** @type {Array<string>} */
 export const GALLERY_LAYOUT_TYPES = Object.freeze([
 	'creative-gallery',
 	'justified-grid',
 	'custom-grid',
+	'freeform',
 	'grid',
 	'slider',
 	'story',

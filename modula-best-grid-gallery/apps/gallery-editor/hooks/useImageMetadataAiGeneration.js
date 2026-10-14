@@ -23,7 +23,7 @@ export function imageMetadataAiFormKey(field) {
 
 /**
  * @param {Record<string, unknown>} values
- * @param {ImageMetadataAiField} field
+ * @param {ImageMetadataAiField}    field
  */
 export function isImageMetadataAiFieldEmpty(values, field) {
 	const key = imageMetadataAiFormKey(field);
@@ -49,7 +49,7 @@ function normalizeAiDescriptorResult(data) {
 }
 
 /**
- * @param {ImageMetadataAiField} field
+ * @param {ImageMetadataAiField}                            field
  * @param {{ title: string, alt: string, caption: string }} result
  */
 function aiValueForField(field, result) {
@@ -63,11 +63,11 @@ function aiValueForField(field, result) {
 }
 
 /**
- * @param {Object}                                                          options
- * @param {number}                                                          options.attachmentId
- * @param {boolean}                                                         options.aiConfigured
- * @param {import('@tanstack/react-form').ReactFormExtendedApi<any>}        options.form
- * @param {Record<string, unknown>}                                         [options.editorConfig]
+ * @param {Object}                                                   options
+ * @param {number}                                                   options.attachmentId
+ * @param {boolean}                                                  options.aiConfigured
+ * @param {import('@tanstack/react-form').ReactFormExtendedApi<any>} options.form
+ * @param {Record<string, unknown>}                                  [options.editorConfig]
  */
 export function useImageMetadataAiGeneration({
 	attachmentId,
@@ -76,7 +76,9 @@ export function useImageMetadataAiGeneration({
 	editorConfig,
 }) {
 	const mutation = useModulaAiGenerateAltMutation();
-	const [aiStatus, setAiStatus] = useState(/** @type {'idle'|'success'|'error'} */ ('idle'));
+	const [aiStatus, setAiStatus] = useState(
+		/** @type {'idle'|'success'|'error'} */ ('idle')
+	);
 	const [aiSuggestedFields, setAiSuggestedFields] = useState(
 		/** @type {Set<string>} */ (new Set())
 	);
@@ -132,8 +134,8 @@ export function useImageMetadataAiGeneration({
 				const values = form.state.values;
 
 				if (target === 'all') {
-					const emptyFields = IMAGE_METADATA_AI_FIELDS.filter((field) =>
-						isImageMetadataAiFieldEmpty(values, field)
+					const emptyFields = IMAGE_METADATA_AI_FIELDS.filter(
+						(field) => isImageMetadataAiFieldEmpty(values, field)
 					);
 
 					if (emptyFields.length === 0) {

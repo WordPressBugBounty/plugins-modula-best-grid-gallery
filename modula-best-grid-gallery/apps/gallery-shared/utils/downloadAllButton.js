@@ -6,7 +6,7 @@
 
 /**
  * @param {*} value
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isDownloadToggleOn(value) {
 	if (value === true || value === 1 || value === '1') {
@@ -20,8 +20,8 @@ export function isDownloadToggleOn(value) {
 
 /**
  * @param {number|string|undefined|null} galleryId
- * @param {boolean} [editorPreview]
- * @returns {string}
+ * @param {boolean}                      [editorPreview]
+ * @return {string}
  */
 export function buildDownloadAllUrl(galleryId, editorPreview = false) {
 	if (editorPreview) {
@@ -45,7 +45,7 @@ export function buildDownloadAllUrl(galleryId, editorPreview = false) {
 
 /**
  * @param {Object|null|undefined} settings Grouped v2 settings.
- * @returns {boolean}
+ * @return {boolean}
  */
 export function shouldShowDownloadAllGalleryButton(settings) {
 	const type = String(settings?.general?.type || '').trim();
@@ -61,8 +61,8 @@ export function shouldShowDownloadAllGalleryButton(settings) {
 
 /**
  * @param {string|undefined|null} position
- * @param {'above'|'below'} placement
- * @returns {boolean}
+ * @param {'above'|'below'}       placement
+ * @return {boolean}
  */
 export function shouldRenderDownloadAllAtPlacement(position, placement) {
 	const normalized =
@@ -82,7 +82,7 @@ export function shouldRenderDownloadAllAtPlacement(position, placement) {
 
 /**
  * @param {string|undefined|null} hposition
- * @returns {'left'|'center'|'right'}
+ * @return {'left'|'center'|'right'}
  */
 export function resolveDownloadAllHposition(hposition) {
 	if (

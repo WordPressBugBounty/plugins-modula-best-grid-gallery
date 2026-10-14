@@ -1,9 +1,7 @@
 /**
  * Content block edit sidebar panel — settings-column takeover (aligned with Image edit).
  */
-import {
-	isTemplateProtectedEmbeddedRow,
-} from 'gallery-shared/preview';
+import { isTemplateProtectedEmbeddedRow } from 'gallery-shared/preview';
 import {
 	useCallback,
 	useEffect,
@@ -13,6 +11,7 @@ import {
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { ActionRow, Button } from 'shared-ui';
+import { SettingsPanelHeader } from 'editor-shell';
 import { useGalleryItemEditSidebar } from '../../context/GalleryItemEditSidebarContext';
 import { useGalleryPreviewAdminActionsOptional } from '../../hooks/useGalleryPreviewAdminActionsOptional';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
@@ -28,8 +27,8 @@ import {
 import { snapshotCaptionFromImageMetadataEditor } from '../../utils/galleryItemEditDirtyState';
 import { CONTENT_BLOCK_MODAL_SECTIONS } from '../../constants/contentBlockModalSections';
 import ContentBlockEditSectionContent from '../gallery-item-edit-modal/ContentBlockEditSectionContent';
-import SettingsPanelHeader from '../sidebar/settings-panel/SettingsPanelHeader';
 import SettingsPanelSection from '../sidebar/settings-panel/SettingsPanelSection';
+import FreeformStackingControls from './FreeformStackingControls';
 
 /**
  * @param {Object} props
@@ -154,6 +153,7 @@ export default function GalleryItemContentBlockPanel({ storeIndex }) {
 				onBack={onBack}
 			/>
 			<div className="modula-settings-panel__scroll modula-gallery-item-edit-panel__scroll">
+				<FreeformStackingControls storeIndex={storeIndex} />
 				{CONTENT_BLOCK_MODAL_SECTIONS.map((section) => (
 					<SettingsPanelSection
 						key={section.name}

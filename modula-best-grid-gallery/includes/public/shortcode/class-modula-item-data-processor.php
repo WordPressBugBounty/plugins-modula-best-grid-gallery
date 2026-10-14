@@ -41,7 +41,7 @@ class Modula_Item_Data_Processor {
 		// Custom-grid span must exist before srcset/sizes so eager sizes can use it.
 		$item_data = $this->process_custom_grid( $item_data, $image, $settings );
 		if ( ! isset( $settings['modula_display_context'] ) ) {
-			$item_data = $this->process_srcset_sizes( $item_data, $image, $settings );
+			$item_data = $this->process_srcset_sizes( $item_data, $image, $settings, is_array( $images ) ? count( $images ) : 0 );
 		}
 		$item_data = $this->process_lightbox_and_links( $item_data, $image, $settings );
 		$item_data = $this->process_hover_effects( $item_data, $settings );
@@ -51,7 +51,7 @@ class Modula_Item_Data_Processor {
 	}
 
 	/** Beta candidates follow layout sizing hooks and precede delivery/protection hooks. */
-	public static function prepare_beta_responsive_images( $item_data, $image, $settings ) {
+	public static function prepare_beta_responsive_images( $item_data, $image, $settings, $images = array() ) {
 		if ( ! isset( $settings['modula_display_context'] ) || empty( $item_data ) ) {
 			return $item_data;
 		}
@@ -60,7 +60,7 @@ class Modula_Item_Data_Processor {
 			$item_data['img_attributes']['src'] = $item_data['img_attributes']['data-src'];
 		}
 		$processor = new self();
-		return $processor->process_srcset_sizes( $item_data, $image, $settings );
+		return $processor->process_srcset_sizes( $item_data, $image, $settings, is_array( $images ) ? count( $images ) : 0 );
 	}
 
 	/**
@@ -315,12 +315,13 @@ class Modula_Item_Data_Processor {
 	/**
 	 * Add srcset and sizes to img_attributes for responsive/retina (JSON frontend).
 	 *
-	 * @param array $item_data Item data
-	 * @param array $image     Image data
-	 * @param array $settings  Gallery settings
+	 * @param array $item_data  Item data
+	 * @param array $image      Image data
+	 * @param array $settings   Gallery settings
+	 * @param int   $item_count Images in the gallery; 0 when unknown.
 	 * @return array Modified item data
 	 */
-	private function process_srcset_sizes( $item_data, $image, $settings ) {
+	private function process_srcset_sizes( $item_data, $image, $settings, $item_count = 0 ) {
 		$troubleshoot_opt = get_option( 'modula_troubleshooting_option', array() );
 		$disable_srcset   = isset( $troubleshoot_opt['disable_srcset'] ) ? (bool) $troubleshoot_opt['disable_srcset'] : false;
 		if ( true === apply_filters( 'modula_troubleshooting_disable_srcset', $disable_srcset ) ) {
@@ -391,6 +392,7 @@ class Modula_Item_Data_Processor {
 					'image_meta'    => $image_meta,
 					'attachment_id' => $attachment_id,
 					'lazy'          => ! empty( $item_data['lazyLoad'] ) || ! empty( $settings['lazy_load'] ) || ! empty( $settings['lazyLoad'] ),
+					'item_count'    => $item_count,
 					'data'          => $item_data,
 				)
 			);

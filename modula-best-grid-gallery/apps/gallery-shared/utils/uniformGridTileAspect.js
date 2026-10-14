@@ -17,7 +17,7 @@ const RATIO_PART_MAX = 20;
 
 /**
  * @param {unknown} n
- * @param {number} fallback
+ * @param {number}  fallback
  * @return {number}
  */
 function sanitizeRatioPart(n, fallback) {
@@ -29,8 +29,8 @@ function sanitizeRatioPart(n, fallback) {
 }
 
 /**
- * @param {string|undefined|null} rawAspect   - v2 `layout.uniformGridTileAspect`
- * @param {unknown}                 customDim - v2 `layout.uniformGridTileAspectCustom` { width, height }
+ * @param {string|undefined|null} rawAspect - v2 `layout.uniformGridTileAspect`
+ * @param {unknown}               customDim - v2 `layout.uniformGridTileAspectCustom` { width, height }
  * @return {{ css: string, ratio: number, label: string }}
  */
 export function resolveUniformGridTileAspect(rawAspect, customDim) {
@@ -105,7 +105,7 @@ export function uniformGridCellAspectRatioFromConfig(config) {
  * @param {number} containerWidth
  * @param {number} columnCount
  * @param {number} gapPx
- * @param {number} aspectRatio Width / height (e.g. 1 = square, 0.75 = 3:4 portrait).
+ * @param {number} aspectRatio    Width / height (e.g. 1 = square, 0.75 = 3:4 portrait).
  * @return {number|null}
  */
 export function uniformGridCellMinHeightPx(

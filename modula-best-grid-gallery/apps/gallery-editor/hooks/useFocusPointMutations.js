@@ -59,6 +59,7 @@ export function useFocusPointMutations({
 	letterboxFocalRef,
 	setPersistError,
 }) {
+	const persistOwner = `item-focus:${galleryId}:${item?.freeformId || `${item?.id}:${storeIndex}`}`;
 	const saveMutation = useMutation({
 		mutationFn: async ({ applyToAll = false } = {}) => {
 			setPersistError('');
@@ -163,7 +164,7 @@ export function useFocusPointMutations({
 						excludeItemId: item.id,
 					});
 				}
-			});
+			}, persistOwner);
 		},
 		onSuccess: async () => {
 			setPersistError('');
@@ -231,15 +232,13 @@ export function useFocusPointMutations({
 						)
 					);
 				}
-				const core = asGalleryItemList(
-					store.getState().items.items
-				);
+				const core = asGalleryItemList(store.getState().items.items);
 				core[displayCoreIndex] = mergeModulaRowIntoPreviewItem(
 					core[displayCoreIndex],
 					row
 				);
 				commitPreviewCatalog(store, core);
-			});
+			}, persistOwner);
 		},
 		onSuccess: async () => {
 			setPersistError('');

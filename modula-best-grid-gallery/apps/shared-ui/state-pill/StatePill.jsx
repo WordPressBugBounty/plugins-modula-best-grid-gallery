@@ -1,10 +1,10 @@
 /**
  * 20px semantic state pill (Applied / Not applied). Not a Chip (28px).
  *
- * @param {Object} props
+ * @param {Object}                    props
  * @param {import('react').ReactNode} props.children
- * @param {boolean} [props.active] Accent ground when true; neutral otherwise.
- * @param {string} [props.className]
+ * @param {boolean}                   [props.active]    Accent ground when true; neutral otherwise.
+ * @param {string}                    [props.className]
  */
 export function StatePill({
 	children,

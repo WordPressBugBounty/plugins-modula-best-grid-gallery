@@ -14,7 +14,7 @@ export function normalizeGalleryItemImageId(value) {
 }
 
 /**
- * @param {unknown} itemData Gallery row from store/bootstrap.
+ * @param {unknown} itemData           Gallery row from store/bootstrap.
  * @param {boolean} [isEmbedded=false]
  * @return {number}
  */

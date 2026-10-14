@@ -12,9 +12,9 @@
 import { resolveGalleryItemIntrinsicDimensions } from '../../utils/galleryItemIntrinsicDimensions';
 
 /**
- * @param {unknown} item
+ * @param {unknown}               item
  * @param {object|null|undefined} [config]
- * @returns {{ width: number, height: number }}
+ * @return {{ width: number, height: number }}
  */
 export function getShowcaseItemAspectSize(item, config) {
 	const intrinsic = resolveGalleryItemIntrinsicDimensions(item, config);
@@ -39,9 +39,9 @@ export function getShowcaseItemAspectSize(item, config) {
 }
 
 /**
- * @param {unknown} item
+ * @param {unknown}               item
  * @param {object|null|undefined} [config]
- * @returns {number} width / height
+ * @return {number} width / height
  */
 export function getShowcaseItemAspectRatio(item, config) {
 	const { width, height } = getShowcaseItemAspectSize(item, config);
@@ -53,9 +53,9 @@ export function getShowcaseItemAspectRatio(item, config) {
  * Stable across activeIndex (max over every circular window).
  *
  * @param {number[]} aspectRatios
- * @param {number} windowSize
- * @param {number} centerScale
- * @returns {number}
+ * @param {number}   windowSize
+ * @param {number}   centerScale
+ * @return {number}
  */
 export function maxShowcaseWindowWeightedAspectSum(
 	aspectRatios,
@@ -89,14 +89,14 @@ export function maxShowcaseWindowWeightedAspectSum(
  * Neighbor height so a full window (with scaled center footprint) fits.
  * Stable for a given gallery (does not depend on which slide is active).
  *
- * @param {object} opts
- * @param {number} opts.viewportWidth
- * @param {number} opts.gap
- * @param {number} opts.centerScale
- * @param {boolean} opts.mobile
+ * @param {Object}   opts
+ * @param {number}   opts.viewportWidth
+ * @param {number}   opts.gap
+ * @param {number}   opts.centerScale
+ * @param {boolean}  opts.mobile
  * @param {number[]} opts.aspectRatios
- * @param {number} opts.windowSize
- * @returns {number}
+ * @param {number}   opts.windowSize
+ * @return {number}
  */
 export function resolveShowcaseTrackHeight({
 	viewportWidth,
@@ -138,11 +138,11 @@ export function resolveShowcaseTrackHeight({
  * Layout boxes for every track node. Active enlargement is CSS scale — widths
  * here stay neighbor-sized so translateX does not jump when ARs differ.
  *
- * @param {object} opts
- * @param {number[]} opts.aspectRatios source list ARs
- * @param {number} opts.neighborHeight
- * @param {number} [opts.copies]
- * @returns {{ widths: number[], heights: number[] }}
+ * @param {Object}   opts
+ * @param {number[]} opts.aspectRatios   source list ARs
+ * @param {number}   opts.neighborHeight
+ * @param {number}   [opts.copies]
+ * @return {{ widths: number[], heights: number[] }}
  */
 export function resolveShowcaseTrackBoxes({
 	aspectRatios,
@@ -170,9 +170,9 @@ export function resolveShowcaseTrackBoxes({
  * Horizontal margin on the active slide so CSS scale does not eat the flex gap.
  * Equal to that slide’s own overhang — keeps gutter identical for every AR.
  *
- * @param {number} width neighbor layout width
+ * @param {number} width       neighbor layout width
  * @param {number} centerScale
- * @returns {number}
+ * @return {number}
  */
 export function resolveShowcaseActiveMarginX(width, centerScale) {
 	const w = Math.max(0, Number(width) || 0);
@@ -186,14 +186,14 @@ export function resolveShowcaseActiveMarginX(width, centerScale) {
 /**
  * Translate so trackIndex stays centered (accounts for active scale margins).
  *
- * @param {object} opts
- * @param {number[]} opts.slideWidths
- * @param {number} opts.trackIndex
- * @param {number} opts.viewportWidth
- * @param {number} opts.gap
- * @param {number} [opts.centerScale]
+ * @param {Object}          opts
+ * @param {number[]}        opts.slideWidths
+ * @param {number}          opts.trackIndex
+ * @param {number}          opts.viewportWidth
+ * @param {number}          opts.gap
+ * @param {number}          [opts.centerScale]
  * @param {'center'|'left'} opts.centerBias
- * @returns {number}
+ * @return {number}
  */
 export function computeShowcaseTranslateX({
 	slideWidths,

@@ -15,7 +15,7 @@ const HoverEffectBuilderContext = createContext(null);
 /**
  * @param {Object}                    props
  * @param {import('react').ReactNode} props.children
- * @param {string}                    props.activeCategory Current takeover settings category id (top-level hash).
+ * @param {string}                    props.activeCategory           Current takeover settings category id (top-level hash).
  * @param {boolean}                   props.hoverEffectBuilderActive True when Hover drill is open or legacy `hover` category.
  */
 /**

@@ -22,7 +22,7 @@ export function isListingDestructiveConfirmAction(actionId) {
 
 /**
  * @param {ListingDestructiveConfirmAction} actionId
- * @param {Object} item
+ * @param {Object}                          item
  * @return {string}
  */
 export function getListingDestructiveConfirmMessage(actionId, item) {
@@ -65,7 +65,7 @@ export function getListingDestructiveConfirmMessage(actionId, item) {
 
 /**
  * @param {ListingDestructiveConfirmAction} actionId
- * @param {Object} item
+ * @param {Object}                          item
  * @return {string}
  */
 export function getListingDestructiveConfirmButtonLabel(actionId, item) {

@@ -3,6 +3,7 @@
  * Image edit and Sort & order replace the hub (settings-column takeovers).
  */
 import { useMemo } from '@wordpress/element';
+import { SettingsPanelHeader } from 'editor-shell';
 import { SETTINGS_EDITOR_CATEGORIES } from '../../../constants/editorStructure';
 import {
 	getSidebarV2CategoryPanelDesc,
@@ -13,14 +14,17 @@ import { useGalleryItemEditSidebar } from '../../../context/GalleryItemEditSideb
 import { useGalleryReorderSidebar } from '../../../context/GalleryReorderSidebarContext';
 import { useModulaSettingsEditorConfig } from '../../../hooks/useModulaSettingsEditorConfig';
 import { resolveGalleryAdminPostId } from '../../../utils/resolveGalleryAdminPostId';
-import SettingsPanelHeader from './SettingsPanelHeader';
 import SettingsPanelBody from './SettingsPanelBody';
 import GalleryItemEditPanel from '../../gallery-item-edit-panel/GalleryItemEditPanel';
 import GalleryItemFocusPanel from '../../gallery-item-edit-panel/GalleryItemFocusPanel';
 import GalleryItemContentBlockPanel from '../../gallery-item-edit-panel/GalleryItemContentBlockPanel';
 import GalleryReorderPanel from '../../gallery-reorder/GalleryReorderPanel';
 import { usePreviewReduxStoreItems } from '../../../hooks/usePreviewReduxStoreItems';
-import { isContentBlockGalleryItemRow } from '../../../utils/embeddedGalleryItems';
+import {
+	isContentBlockGalleryItemRow,
+	isEmbeddedGalleryItemRow,
+} from '../../../utils/embeddedGalleryItems';
+import GalleryItemShortcodePanel from '../../gallery-item-edit-panel/GalleryItemShortcodePanel';
 
 /**
  * @param {Object}                 props
@@ -74,6 +78,14 @@ export default function SettingsPanel({ activeCategory, setActiveCategory }) {
 			return (
 				<GalleryItemContentBlockPanel
 					key={`cb-${itemEdit.storeIndex}`}
+					storeIndex={itemEdit.storeIndex}
+				/>
+			);
+		}
+		if (isEmbeddedGalleryItemRow(editItem)) {
+			return (
+				<GalleryItemShortcodePanel
+					key={`shortcode-${itemEdit.storeIndex}`}
 					storeIndex={itemEdit.storeIndex}
 				/>
 			);

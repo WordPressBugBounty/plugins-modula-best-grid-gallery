@@ -50,7 +50,7 @@ export function resolveHoverCursorCssValue({
 }
 
 /**
- * @param {string} root Gallery root selector (e.g. `#modula-123`).
+ * @param {string}                                                                                   root Gallery root selector (e.g. `#modula-123`).
  * @param {{ cursor?: string, customCursorUrl?: string, lightbox?: string, changeCursor?: boolean }} args
  * @return {string}
  */

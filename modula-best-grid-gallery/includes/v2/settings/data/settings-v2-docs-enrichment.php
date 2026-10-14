@@ -139,6 +139,7 @@ return array(
 		'general.type::parallax-masonry'              => 'Masonry with a scrolling parallax effect. Requires Modula Pro.',
 		'general.type::story'                         => 'Fullscreen vertical stories. Requires Modula Pro.',
 		'general.type::showcase'                      => 'Portfolio-style horizontal strip: natural aspect ratios, center photo grows, peeks on both sides. Requires Modula Pro.',
+		'general.type::freeform' => 'Position and resize the whole gallery on a fine grid, with intentional overlap. Requires Modula Pro.',
 		'general.type::template'                      => 'Handcrafted editorial layouts with fixed slots. Choose a preset — no grid tuning required.',
 		'template.templateLayout'                     => 'Pick a polished asymmetric layout. Only the first images that fit the template appear on the front end.',
 		'showcase.visibleCount'                       => 'How many photos roughly fit in the viewport on desktop.',

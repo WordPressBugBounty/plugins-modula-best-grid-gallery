@@ -13,9 +13,13 @@ const LazyGalleryPreviewItemAdminToolbar = lazy(
 
 /**
  * @param {Object} props
- * @param {Object} props.itemData Raw item passed to GalleryItem / SliderItem.
+ * @param {Object} props.itemData     Raw item passed to GalleryItem / SliderItem.
+ * @param          props.catalogIndex
  */
-export default function GalleryPreviewAdminToolbarSlot({ itemData }) {
+export default function GalleryPreviewAdminToolbarSlot({
+	itemData,
+	catalogIndex,
+}) {
 	const isEditorPreviewChrome = useSelector(
 		(s) =>
 			s.gallery.metadata?.displayContext === 'settings-editor-preview' ||
@@ -28,7 +32,10 @@ export default function GalleryPreviewAdminToolbarSlot({ itemData }) {
 
 	return (
 		<Suspense fallback={null}>
-			<LazyGalleryPreviewItemAdminToolbar itemData={itemData} />
+			<LazyGalleryPreviewItemAdminToolbar
+				itemData={itemData}
+				catalogIndex={catalogIndex}
+			/>
 		</Suspense>
 	);
 }

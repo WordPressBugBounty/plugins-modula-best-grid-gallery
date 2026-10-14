@@ -16,13 +16,13 @@ import StoryCaptionRichText from './StoryCaptionRichText';
 import EmbeddedGalleryItem from './EmbeddedGalleryItem';
 
 /**
- * @param {Object} props
- * @param {Object} props.itemData
- * @param {Object} props.config
- * @param {boolean} [props.isActive]
- * @param {boolean} [props.isEditorStack] - Settings-editor: stacked slides, no carousel / no autoplay.
+ * @param {Object}   props
+ * @param {Object}   props.itemData
+ * @param {Object}   props.config
+ * @param {boolean}  [props.isActive]
+ * @param {boolean}  [props.isEditorStack]         - Settings-editor: stacked slides, no carousel / no autoplay.
  * @param {Function} [props.onVideoEnded]
- * @param {number} [props.videoIframeFallbackMs]
+ * @param {number}   [props.videoIframeFallbackMs]
  */
 export default function StoryItem({
 	itemData,

@@ -8,7 +8,7 @@ const stylesheetLoads = new WeakMap();
  * chunk, but the actual href retains the build version used by WordPress.
  *
  * @param {string|undefined} url Versioned bootstrap stylesheet URL.
- * @returns {Promise<void>}
+ * @return {Promise<void>}
  */
 export function loadGalleryStylesheet(url) {
 	if (!url || typeof document === 'undefined') {

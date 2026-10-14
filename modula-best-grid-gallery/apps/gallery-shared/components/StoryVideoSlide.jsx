@@ -12,13 +12,13 @@ import {
 } from '../utils/storyVideo';
 
 /**
- * @param {Object}   props
- * @param {Object}   props.vm - View model (shell classes, link, attrs)
- * @param {Object}   props.itemData
- * @param {boolean}  props.isActive - Current carousel slide
- * @param {Function} [props.onPlaybackEnded] - After HTML5 ended or iframe fallback timeout
- * @param {number}   props.iframeFallbackMs - Max time on iframe slide before auto-advance
- * @param {import('react').ReactNode} [props.children] - e.g. caption
+ * @param {Object}                    props
+ * @param {Object}                    props.vm                    - View model (shell classes, link, attrs)
+ * @param {Object}                    props.itemData
+ * @param {boolean}                   props.isActive              - Current carousel slide
+ * @param {Function}                  [props.onPlaybackEnded]     - After HTML5 ended or iframe fallback timeout
+ * @param {number}                    props.iframeFallbackMs      - Max time on iframe slide before auto-advance
+ * @param {import('react').ReactNode} [props.children]            - e.g. caption
  * @param {import('react').ReactNode} [props.previewAdminToolbar] - Settings-editor hover actions
  */
 export default function StoryVideoSlide({
@@ -50,8 +50,7 @@ export default function StoryVideoSlide({
 	).trim();
 
 	const kind =
-		classifyStoryVideoKind(playbackUrl) ||
-		(playbackUrl ? 'html5' : null);
+		classifyStoryVideoKind(playbackUrl) || (playbackUrl ? 'html5' : null);
 	const poster = imageSrc || itemData.thumbnail || itemData.src || '';
 	const videoRef = useRef(null);
 
@@ -102,9 +101,7 @@ export default function StoryVideoSlide({
 
 	let media = null;
 	if (kind === 'youtube' || kind === 'vimeo') {
-		const src = isActive
-			? buildStoryVideoEmbedUrl(playbackUrl, kind)
-			: '';
+		const src = isActive ? buildStoryVideoEmbedUrl(playbackUrl, kind) : '';
 		media = src ? (
 			<iframe
 				key={`${item.id}-${kind}-active`}

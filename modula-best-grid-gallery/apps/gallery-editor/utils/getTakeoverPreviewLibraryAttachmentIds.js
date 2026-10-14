@@ -2,9 +2,7 @@
  * Attachment IDs for images (and other file rows) currently in the takeover live preview.
  * Used to pre-check items in `wp.media` (“Add from library”) like the legacy metabox.
  */
-import {
-	asGalleryItemList,
-} from 'gallery-shared/preview';
+import { asGalleryItemList } from 'gallery-shared/preview';
 import { isEmbeddedGalleryItemRow } from './embeddedGalleryItems';
 import { getGalleryPreviewReduxStore } from './previewReduxStoreRef';
 

@@ -17,11 +17,11 @@ export {
 } from './videoPlayIconResolve';
 
 /**
- * @param {Object} props
- * @param {string} [props.color]
- * @param {number} [props.size]
- * @param {string} [props.icon] video.videoIconIcon preset key
- * @param {string} [props.customSrc] Custom icon image URL.
+ * @param {Object}        props
+ * @param {string}        [props.color]
+ * @param {number}        [props.size]
+ * @param {string}        [props.icon]         video.videoIconIcon preset key
+ * @param {string}        [props.customSrc]    Custom icon image URL.
  * @param {number|string} [props.attachmentId] Fallback when URL is not enriched yet (editor).
  */
 export default function VideoGalleryPlayIcon({

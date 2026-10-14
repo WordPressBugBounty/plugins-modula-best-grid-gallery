@@ -23,7 +23,9 @@ export function useSlotDimensions(enabled) {
 			return;
 		}
 		setDimensions((prev) =>
-			prev.width === w && prev.height === h ? prev : { width: w, height: h }
+			prev.width === w && prev.height === h
+				? prev
+				: { width: w, height: h }
 		);
 	}, []);
 

@@ -3,10 +3,7 @@
  * Tabs respect category `visibleWhen` (e.g. Video only for video gallery type).
  */
 
-import {
-	useCallback,
-	useState,
-} from '@wordpress/element';
+import { useCallback, useState } from '@wordpress/element';
 import { useTakeoverSidebarStack } from '../../context/TakeoverSidebarStackContext';
 import { __ } from '@wordpress/i18n';
 import { TabPanel } from '@wordpress/components';

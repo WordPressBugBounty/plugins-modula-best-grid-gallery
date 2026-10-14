@@ -7,14 +7,14 @@ import { forwardRef, useId } from '@wordpress/element';
 /**
  * Native select — 34px, token border/surface, caret outside background (WP-safe).
  *
- * @param {Object}          props
- * @param {SelectOption[]}  props.options
- * @param {string}          [props.value]
- * @param {Function}        [props.onChange] Receives string
- * @param {boolean}         [props.disabled]
- * @param {string}          [props.help]
- * @param {string}          [props.className]
- * @param {string}          [props.id]
+ * @param {Object}         props
+ * @param {SelectOption[]} props.options
+ * @param {string}         [props.value]
+ * @param {Function}       [props.onChange]  Receives string
+ * @param {boolean}        [props.disabled]
+ * @param {string}         [props.help]
+ * @param {string}         [props.className]
+ * @param {string}         [props.id]
  */
 export const Select = forwardRef(function Select(
 	{

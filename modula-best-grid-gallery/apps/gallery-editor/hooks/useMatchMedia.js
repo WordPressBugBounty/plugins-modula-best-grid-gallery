@@ -1,7 +1,7 @@
 import { useEffect, useState } from '@wordpress/element';
 
 /**
- * @param {string} query CSS media query, e.g. `(min-width: 1025px)`.
+ * @param {string}  query              CSS media query, e.g. `(min-width: 1025px)`.
  * @param {boolean} [ssrFallback=true] Value when `window.matchMedia` is unavailable.
  * @return {boolean}
  */

@@ -17,7 +17,7 @@ import { galleryUsesFancyboxLightbox } from '../utils/resolveGalleryItemLink';
 
 /**
  * @param {HTMLElement|null} hostEl React host (display:contents) or gallery root.
- * @returns {HTMLElement|null}
+ * @return {HTMLElement|null}
  */
 function resolveGalleryRoot(hostEl) {
 	if (!(hostEl instanceof HTMLElement)) {
@@ -34,9 +34,9 @@ function resolveGalleryRoot(hostEl) {
  * Prefer store items for deeplink slides; retry briefly if the first paint races
  * an empty list (avoids silent DOM-only image slides for video tiles).
  *
- * @param {unknown[]} items
+ * @param {unknown[]}                          items
  * @param {() => Promise<unknown[]>|unknown[]} [resolveItems]
- * @returns {Promise<unknown[]>}
+ * @return {Promise<unknown[]>}
  */
 async function resolveDeeplinkSourceItems(items, resolveItems) {
 	const attempt = async () => {
@@ -73,13 +73,13 @@ async function resolveDeeplinkSourceItems(items, resolveItems) {
 }
 
 /**
- * @param {HTMLElement} rootEl
- * @param {object} config
- * @param {object} settings
- * @param {unknown[]} items
+ * @param {HTMLElement}                        rootEl
+ * @param {Object}                             config
+ * @param {Object}                             settings
+ * @param {unknown[]}                          items
  * @param {() => Promise<unknown[]>|unknown[]} [resolveItems]
- * @param {string} [hash]
- * @returns {Promise<boolean>}
+ * @param {string}                             [hash]
+ * @return {Promise<boolean>}
  */
 async function openGalleryFromDeeplinkHash(
 	rootEl,
@@ -112,12 +112,12 @@ async function openGalleryFromDeeplinkHash(
  * Open lightbox when URL hash matches this gallery (mount + hashchange).
  *
  * @param {import('react').RefObject<HTMLElement|null>} hostRef
- * @param {object} config
- * @param {object} [options]
- * @param {boolean} [options.enabled]
- * @param {unknown[]} [options.items]
- * @param {object} [options.settings]
- * @param {() => Promise<unknown[]>|unknown[]} [options.resolveItems]
+ * @param {Object}                                      config
+ * @param {Object}                                      [options]
+ * @param {boolean}                                     [options.enabled]
+ * @param {unknown[]}                                   [options.items]
+ * @param {Object}                                      [options.settings]
+ * @param {() => Promise<unknown[]>|unknown[]}          [options.resolveItems]
  */
 export function useModulaGalleryDeeplink(hostRef, config, options = {}) {
 	const enabled = options.enabled !== false;

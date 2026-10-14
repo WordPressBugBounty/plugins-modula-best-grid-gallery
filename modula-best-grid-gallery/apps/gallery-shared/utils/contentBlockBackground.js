@@ -61,9 +61,9 @@ export function normalizeBlockBackgroundOverlayOpacity(raw) {
 }
 
 /**
- * @param {unknown} raw
+ * @param {unknown}           raw
  * @param {readonly string[]} allowed
- * @param {string} fallback
+ * @param {string}            fallback
  * @return {string}
  */
 function normalizePreset(raw, allowed, fallback) {
@@ -196,8 +196,8 @@ function relativeLuminance(rgb) {
  * light “paper” underlay so copy stays readable without changing saved colors.
  *
  * @param {Object}  opts
- * @param {string}  [opts.color] Background color (empty/transparent → candidate).
- * @param {string}  [opts.textColor] Resolved foreground (incl. Auto).
+ * @param {string}  [opts.color]              Background color (empty/transparent → candidate).
+ * @param {string}  [opts.textColor]          Resolved foreground (incl. Auto).
  * @param {boolean} [opts.hasBackgroundImage]
  * @return {boolean}
  */
@@ -228,13 +228,13 @@ export function contentBlockNeedsEditorPaperSurface({
 /**
  * Build CSS background style for a content block tile.
  *
- * @param {Object}  opts
- * @param {string}  [opts.color]     Background hex/rgba (empty = transparent).
- * @param {string}  [opts.imageUrl]  Resolved attachment URL (empty = solid color only).
- * @param {number}  [opts.opacity]   Overlay opacity 0–100 when image is set (hex colors).
- * @param {string}  [opts.size]
- * @param {string}  [opts.position]
- * @param {string}  [opts.repeat]
+ * @param {Object} opts
+ * @param {string} [opts.color]    Background hex/rgba (empty = transparent).
+ * @param {string} [opts.imageUrl] Resolved attachment URL (empty = solid color only).
+ * @param {number} [opts.opacity]  Overlay opacity 0–100 when image is set (hex colors).
+ * @param {string} [opts.size]
+ * @param {string} [opts.position]
+ * @param {string} [opts.repeat]
  * @return {Object} React/CSS style object.
  */
 export function buildContentBlockBackgroundStyle({

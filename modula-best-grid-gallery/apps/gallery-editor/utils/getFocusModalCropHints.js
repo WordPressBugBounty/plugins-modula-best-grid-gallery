@@ -1,6 +1,4 @@
-import {
-	resolveUniformGridTileAspect,
-} from 'gallery-shared/preview';
+import { resolveUniformGridTileAspect } from 'gallery-shared/preview';
 
 /**
  * Derive react-easy-crop `aspect` hints from gallery settings (v2 grouped form values).

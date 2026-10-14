@@ -71,7 +71,7 @@ export function resolveGalleryTypeFromSource(source) {
 }
 
 /**
- * @param {Object|null|undefined} source Config, grouped settings, or captions fragment.
+ * @param {Object|null|undefined} source        Config, grouped settings, or captions fragment.
  * @param {string|null|undefined} [galleryType] Optional gallery type when `source` lacks it.
  * @return {boolean} Default on when unset (and the layout supports it).
  */
@@ -110,7 +110,7 @@ export function resolveCompactCaptionMinSizeFromSource(source) {
 }
 
 /**
- * @param {Object|null|undefined} source Config or grouped settings fragment.
+ * @param {Object|null|undefined} source        Config or grouped settings fragment.
  * @param {string|null|undefined} [galleryType] Optional gallery type when `source` lacks it.
  * @return {boolean}
  */
@@ -224,7 +224,7 @@ export function resolveBelowImageTextColor(
 /**
  * Settings-editor preview: follow light/dark chrome when colors are still overlay defaults.
  *
- * @param {string}  [configuredColor]
+ * @param {string}            [configuredColor]
  * @param {'title'|'caption'} kind
  * @return {string}
  */

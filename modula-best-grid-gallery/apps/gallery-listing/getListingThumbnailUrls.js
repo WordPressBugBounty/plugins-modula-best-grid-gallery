@@ -2,7 +2,7 @@
  * Normalize listing row thumbnails for the stacked preview.
  *
  * @param {{ thumbnailUrls?: string[], thumbnailUrl?: string }} item
- * @param {number} [limit=3]
+ * @param {number}                                              [limit=3]
  * @return {string[]}
  */
 export function getListingThumbnailUrls(item, limit = 3) {

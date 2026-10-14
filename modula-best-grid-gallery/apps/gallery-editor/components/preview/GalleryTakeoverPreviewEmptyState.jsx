@@ -1,8 +1,9 @@
 import { __ } from '@wordpress/i18n';
+import { CanvasEmptyState } from 'editor-shell';
 import GalleryTakeoverPreviewUploadDropZone from './GalleryTakeoverPreviewUploadDropZone';
 
 /**
- * Centered empty state shown when the gallery has no image rows yet.
+ * Centered empty state shown when the gallery has nothing to paint yet.
  *
  * @param {{
  *   galleryType?: string,
@@ -23,25 +24,21 @@ export default function GalleryTakeoverPreviewEmptyState({
 }) {
 	if (galleryType === 'video') {
 		return (
-			<div className="modula-gallery-takeover__live-preview-empty-state modula-gallery-takeover__live-preview-empty-state--video">
-				<p className="modula-gallery-takeover__live-preview-empty-state__message">
-					{__(
-						'No videos in this gallery yet.',
-						'modula-best-grid-gallery'
-					)}
-				</p>
-				<p className="modula-gallery-takeover__live-preview-empty-state__hint">
-					{__(
-						'Use Add New → Video to import a clip or playlist.',
-						'modula-best-grid-gallery'
-					)}
-				</p>
-			</div>
+			<CanvasEmptyState
+				message={__(
+					'No videos in this gallery yet.',
+					'modula-best-grid-gallery'
+				)}
+				hint={__(
+					'Use Add New → Video to import a clip or playlist.',
+					'modula-best-grid-gallery'
+				)}
+			/>
 		);
 	}
 
 	return (
-		<div className="modula-gallery-takeover__live-preview-empty-state">
+		<CanvasEmptyState>
 			<GalleryTakeoverPreviewUploadDropZone
 				placement="empty"
 				status={status}
@@ -62,6 +59,6 @@ export default function GalleryTakeoverPreviewEmptyState({
 					'modula-best-grid-gallery'
 				)}
 			/>
-		</div>
+		</CanvasEmptyState>
 	);
 }

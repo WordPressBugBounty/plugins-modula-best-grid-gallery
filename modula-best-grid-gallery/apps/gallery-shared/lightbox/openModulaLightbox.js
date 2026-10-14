@@ -73,7 +73,7 @@ let editorPreviewInstance = null;
 let activeGalleryHostEl = null;
 
 /**
- * @returns {import('@fancyapps/ui/dist/fancybox/fancybox.js').FancyboxInstance|null}
+ * @return {import('@fancyapps/ui/dist/fancybox/fancybox.js').FancyboxInstance|null}
  */
 export function getModulaLightboxPreviewInstance() {
 	if (editorPreviewInstance?.getCarousel?.()) {
@@ -86,7 +86,7 @@ export function getModulaLightboxPreviewInstance() {
  * Whether an open Modula lightbox was triggered from within this gallery root.
  *
  * @param {HTMLElement} galleryElement `.modula.modula-gallery` or descendant host.
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isModulaLightboxActiveForGalleryElement(galleryElement) {
 	if (!activeGalleryHostEl || !(galleryElement instanceof HTMLElement)) {
@@ -121,7 +121,7 @@ function cleanupPauseOnHover(fancybox) {
  * visibility:hidden clone; pointer events hit the viewport child inside it.
  *
  * @param {import('@fancyapps/ui/dist/fancybox/fancybox.js').FancyboxInstance} fancybox
- * @returns {HTMLElement|null}
+ * @return {HTMLElement|null}
  */
 function resolvePauseOnHoverTarget(fancybox) {
 	const container = fancybox.getContainer?.();
@@ -157,8 +157,8 @@ function resolvePauseOnHoverTarget(fancybox) {
 
 /**
  * @param {Node|null|undefined} node
- * @param {HTMLElement|null} imageEl
- * @returns {boolean}
+ * @param {HTMLElement|null}    imageEl
+ * @return {boolean}
  */
 function isNodeInsidePauseOnHoverTarget(node, imageEl) {
 	return (
@@ -341,7 +341,7 @@ function syncPauseOnHoverState(fancybox) {
 
 /**
  * @param {Array<{ src?: string, caption?: string, thumb?: string, opts?: object }>} links
- * @returns {Array<object>}
+ * @return {Array<object>}
  */
 function sanitizeSlides(links) {
 	return links.map((value) => {
@@ -408,10 +408,11 @@ function sanitizeSlides(links) {
 }
 
 /**
- * @param {object} v6Opts
- * @param {object} context
- * @param {object} userOn
- * @returns {object}
+ * @param {Object} v6Opts
+ * @param {Object} context
+ * @param {Object} userOn
+ * @param          modulaSlides
+ * @return {Object}
  */
 function buildEventHandlers(v6Opts, context, userOn = {}, modulaSlides = []) {
 	return {
@@ -582,22 +583,22 @@ function buildEventHandlers(v6Opts, context, userOn = {}, modulaSlides = []) {
 
 /**
  * @param {Array<{ src?: string, caption?: string, thumb?: string, opts?: object }>} links
- * @param {object} lightboxOpts Modula lightbox options.
- * @param {number} index
- * @param {object} [context]
- * @param {boolean} [context.editorPreview]
- * @param {boolean} [context.isMobile]
- * @param {string} [context.previewBackgroundColor]
- * @param {string} [context.shareButtonsJson]
- * @param {boolean} [context.openedViaKeyboard] When false, skip Fancybox placeFocusBack (avoids stuck hover :focus-within).
- * @param {HTMLElement} [context.triggerEl] Original activation target, retained across loading and retry.
- * @param {HTMLElement} [context.galleryHostEl] Gallery host for hover-state refresh on close.
- * @param {HTMLElement} [context.clickedTileEl] Tile that opened the lightbox.
- * @param {Object} [context.settings] Grouped settings — when set, remap wins over lightboxOpts.
- * @param {number} [context.galleryId]
- * @param {Object} [context.galleryComments]
- * @param {'desktop'|'tablet'|'mobile'} [context.previewViewport]
- * @returns {unknown}
+ * @param {Object}                                                                   lightboxOpts                     Modula lightbox options.
+ * @param {number}                                                                   index
+ * @param {Object}                                                                   [context]
+ * @param {boolean}                                                                  [context.editorPreview]
+ * @param {boolean}                                                                  [context.isMobile]
+ * @param {string}                                                                   [context.previewBackgroundColor]
+ * @param {string}                                                                   [context.shareButtonsJson]
+ * @param {boolean}                                                                  [context.openedViaKeyboard]      When false, skip Fancybox placeFocusBack (avoids stuck hover :focus-within).
+ * @param {HTMLElement}                                                              [context.triggerEl]              Original activation target, retained across loading and retry.
+ * @param {HTMLElement}                                                              [context.galleryHostEl]          Gallery host for hover-state refresh on close.
+ * @param {HTMLElement}                                                              [context.clickedTileEl]          Tile that opened the lightbox.
+ * @param {Object}                                                                   [context.settings]               Grouped settings — when set, remap wins over lightboxOpts.
+ * @param {number}                                                                   [context.galleryId]
+ * @param {Object}                                                                   [context.galleryComments]
+ * @param {'desktop'|'tablet'|'mobile'}                                              [context.previewViewport]
+ * @return {unknown}
  */
 export function openModulaLightbox(links, lightboxOpts, index, context = {}) {
 	closeModulaLightbox();

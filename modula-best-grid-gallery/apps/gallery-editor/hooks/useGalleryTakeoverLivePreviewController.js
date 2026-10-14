@@ -72,11 +72,12 @@ export function useGalleryTakeoverLivePreviewController({
 	});
 
 	const runPreviewItemMutation = useCallback(
-		(task) =>
+		(task, owner) =>
 			runCustomGridPreviewItemMutation({
 				isPersistPending: isPreviewItemsPersistPending,
 				flushPersist: flushPreviewItemsPersistNow,
-				runMutation: runPersistTaskWithDeferredRefresh,
+				runMutation: (pendingTask) =>
+					runPersistTaskWithDeferredRefresh(pendingTask, owner),
 				task,
 			}),
 		[

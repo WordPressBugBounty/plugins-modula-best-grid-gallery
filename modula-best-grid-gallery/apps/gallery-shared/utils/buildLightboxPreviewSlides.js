@@ -8,7 +8,7 @@ import { isLightboxToggleOn } from './lightboxSettingsToFancyboxOpts';
 
 /**
  * @param {string} text
- * @returns {string}
+ * @return {string}
  */
 function escapeHtml(text) {
 	return String(text)
@@ -21,8 +21,8 @@ function escapeHtml(text) {
 
 /**
  * @param {{ title?: string, description?: string }} row
- * @param {Object} lightboxSettings
- * @returns {string}
+ * @param {Object}                                   lightboxSettings
+ * @return {string}
  */
 export function buildLightboxPreviewCaption(row, lightboxSettings) {
 	const showTitle = isLightboxToggleOn(lightboxSettings?.showTitle);
@@ -47,8 +47,8 @@ export function buildLightboxPreviewCaption(row, lightboxSettings) {
 
 /**
  * @param {import('./collectGalleryImageRowsForLightboxPreview').LightboxPreviewImageRow[]} rows
- * @param {Object} settings Grouped gallery settings.
- * @returns {Array<{ src: string, opts: { caption?: string, alt?: string, thumb?: string } }>}
+ * @param {Object}                                                                          settings Grouped gallery settings.
+ * @return {Array<{ src: string, opts: { caption?: string, alt?: string, thumb?: string } }>}
  */
 export function buildLightboxPreviewSlides(rows, settings) {
 	const lightbox = settings?.lightbox || {};

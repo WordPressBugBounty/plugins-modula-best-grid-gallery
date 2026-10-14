@@ -758,16 +758,43 @@ function modula_estimate_custom_grid_span_sizes( $settings, $span ) {
 }
 
 /**
+ * Estimate `sizes` for a Creative Gallery tile.
+ *
+ * Creative tiles come from recursively halving the gallery area (with a random
+ * factor), so `columns` is not "images per row". One image fills the gallery.
+ * With more, the first split is horizontal only when the gallery is wider than
+ * its height, which is the desktop case; narrower galleries stack full-width
+ * tiles. A split tile is half the parent ± randomFactor/2 of that half
+ * (jquery-modula getSlot), so the desktop term uses that largest share and
+ * leans towards a slight over-fetch rather than a blurry upscale.
+ *
+ * @param array $settings   Gallery settings.
+ * @param int   $item_count Images in the gallery; 0 when unknown.
+ * @return string
+ */
+function modula_estimate_creative_gallery_sizes( $settings, $item_count ) {
+	if ( 1 === $item_count ) {
+		return '100vw';
+	}
+
+	$random_factor = min( 100, absint( modula_get_setting_value( $settings, 'randomFactor', 'randomFactor', 50 ) ) );
+	$desktop_vw    = (string) round( 50 * ( 1 + $random_factor / 200 ), 2 ) . 'vw';
+
+	return modula_format_responsive_image_sizes( $settings, '100vw', '100vw', $desktop_vw );
+}
+
+/**
  * Estimate a `sizes` attribute from gallery column breakpoints.
  *
  * Used when the image is not lazy-loaded (sizes="auto" only applies with
  * loading="lazy"). Prefer column-based vw over file pixel width — grid tiles
  * are almost never displayed at the source file width.
  *
- * @param array $settings Gallery settings (flat legacy and/or camelCase).
+ * @param array $settings   Gallery settings (flat legacy and/or camelCase).
+ * @param int   $item_count Images in the gallery; 0 when unknown.
  * @return string|false sizes attribute value, or false when not estimable.
  */
-function modula_estimate_gallery_image_sizes( $settings ) {
+function modula_estimate_gallery_image_sizes( $settings, $item_count = 0 ) {
 	if ( ! is_array( $settings ) ) {
 		return false;
 	}
@@ -784,6 +811,10 @@ function modula_estimate_gallery_image_sizes( $settings ) {
 
 	if ( 'template' === $type ) {
 		return '(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw';
+	}
+
+	if ( 'creative-gallery' === $type ) {
+		return modula_estimate_creative_gallery_sizes( $settings, absint( $item_count ) );
 	}
 
 	/*
@@ -861,6 +892,7 @@ function modula_estimate_gallery_image_sizes( $settings ) {
  *     @type array|null    $image_meta    Attachment metadata.
  *     @type int|null      $attachment_id Attachment ID.
  *     @type bool          $lazy          Whether the image uses lazy loading.
+ *     @type int           $item_count    Images in the gallery; 0 or missing when unknown.
  *     @type object|array|null $data      Item data passed to filters.
  * }
  * @return string|false sizes value, or false when unavailable.
@@ -886,7 +918,8 @@ function modula_resolve_image_sizes_attr( $args ) {
 		if ( 'custom-grid' === $type && false !== $span ) {
 			$sizes = modula_estimate_custom_grid_span_sizes( $settings, $span );
 		} else {
-			$sizes = modula_estimate_gallery_image_sizes( $settings );
+			$item_count = isset( $args['item_count'] ) ? $args['item_count'] : 0;
+			$sizes      = modula_estimate_gallery_image_sizes( $settings, $item_count );
 		}
 	}
 
@@ -1027,6 +1060,7 @@ function modula_sources_and_sizes( $data ) {
 					'image_meta'    => $image_meta,
 					'attachment_id' => $attachment_id,
 					'lazy'          => ! empty( $data->lazyLoad ),
+					'item_count'    => isset( $data->gallery_item_count ) ? $data->gallery_item_count : 0,
 					'data'          => $data,
 				)
 			);

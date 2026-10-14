@@ -27,7 +27,7 @@ export function registerWatermarkEditor(entry) {
 }
 
 /**
- * @returns {WatermarkEditorRegistration|null}
+ * @return {WatermarkEditorRegistration|null}
  */
 export function getWatermarkEditorRegistration() {
 	return registration;

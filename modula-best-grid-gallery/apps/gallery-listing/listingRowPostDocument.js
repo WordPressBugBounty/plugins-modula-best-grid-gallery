@@ -38,13 +38,13 @@ export function isAllowedListingRowPostDocumentStatus(status) {
 
 /**
  * @typedef {Object} ListingRowPostDocumentSeed
- * @property {string} title
- * @property {string} status
- * @property {string} slug
- * @property {string} [date]
- * @property {string} permalinkPrefix
- * @property {string} permalinkSuffix
- * @property {string} viewUrl
+ * @property {string}  title
+ * @property {string}  status
+ * @property {string}  slug
+ * @property {string}  [date]
+ * @property {string}  permalinkPrefix
+ * @property {string}  permalinkSuffix
+ * @property {string}  viewUrl
  * @property {boolean} canEdit
  */
 
@@ -122,7 +122,7 @@ export function buildListingRowPostDocumentPayload(document) {
 /**
  * Persist a listing row’s post document via WordPress CPT REST.
  *
- * @param {{ type?: string, id?: number }} item
+ * @param {{ type?: string, id?: number }}                                    item
  * @param {{ title?: string, status?: string, slug?: string, date?: string }} document
  * @return {Promise<unknown>}
  */
@@ -135,7 +135,10 @@ export async function putListingRowPostDocument(item, document) {
 	});
 }
 
-/** Validate a site-local wall time without converting through the browser timezone. */
+/**
+ * Validate a site-local wall time without converting through the browser timezone.
+ * @param value
+ */
 export function normalizeListingPublicationDate(value) {
 	const match =
 		typeof value === 'string' &&

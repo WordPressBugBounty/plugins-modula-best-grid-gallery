@@ -14,13 +14,13 @@ import {
 } from '../utils/itemChromeLegacyCssAliases';
 
 /**
- * @param {Object} props
- * @param {string} [props.position]     Raw or normalized placement slug.
- * @param {string} [props.title]
- * @param {string} [props.description]
- * @param {boolean} [props.hideTitle]
- * @param {boolean} [props.hideDescription]
- * @param {string|number} [props.imageId] Attachment id for `id` / aria wiring.
+ * @param {Object}        props
+ * @param {string}        [props.position]        Raw or normalized placement slug.
+ * @param {string}        [props.title]
+ * @param {string}        [props.description]
+ * @param {boolean}       [props.hideTitle]
+ * @param {boolean}       [props.hideDescription]
+ * @param {string|number} [props.imageId]         Attachment id for `id` / aria wiring.
  */
 export default function SliderSlideCaption({
 	position = 'bot_outside',

@@ -12,7 +12,10 @@ export function isLocalSiteHost(hostname) {
 	if (hostname == null || typeof hostname !== 'string') {
 		return false;
 	}
-	const host = hostname.trim().toLowerCase().replace(/^\[|\]$/g, '');
+	const host = hostname
+		.trim()
+		.toLowerCase()
+		.replace(/^\[|\]$/g, '');
 	if (!host) {
 		return false;
 	}
@@ -67,10 +70,10 @@ export function mapWpLocaleToAiLanguage(locale, languageCodes) {
  * @typedef {'none'|'generate'|'configure'} ModulaAiPrimaryAction
  *
  * @typedef {Object} ModulaAiGenerateUiState
- * @property {boolean}                  showFieldGenerate
- * @property {boolean}                  primaryDisabled
- * @property {ModulaAiPrimaryLabelKey}  primaryLabelKey
- * @property {ModulaAiPrimaryAction}    primaryAction
+ * @property {boolean}                 showFieldGenerate
+ * @property {boolean}                 primaryDisabled
+ * @property {ModulaAiPrimaryLabelKey} primaryLabelKey
+ * @property {ModulaAiPrimaryAction}   primaryAction
  */
 
 /**

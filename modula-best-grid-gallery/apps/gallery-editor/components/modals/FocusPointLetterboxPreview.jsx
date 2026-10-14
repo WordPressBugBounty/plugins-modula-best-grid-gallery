@@ -5,11 +5,11 @@ import { useCallback, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
- * @param {Object}   props
- * @param {string}   props.src
- * @param {number}   props.aspectRatio Tile width / height in grid units.
- * @param {string}   [props.layoutHint] e.g. "3:2"
- * @param {{ x: number, y: number }} props.focal Normalized alignment 0–1.
+ * @param {Object}                                   props
+ * @param {string}                                   props.src
+ * @param {number}                                   props.aspectRatio   Tile width / height in grid units.
+ * @param {string}                                   [props.layoutHint]  e.g. "3:2"
+ * @param {{ x: number, y: number }}                 props.focal         Normalized alignment 0–1.
  * @param {(next: { x: number, y: number }) => void} props.onFocalChange
  */
 export default function FocusPointLetterboxPreview({

@@ -11,12 +11,12 @@ import {
 } from '@wordpress/element';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTakeoverSaveStatus } from 'editor-shell';
 import {
 	galleryApplySortingAndOrder,
 	gallerySetSortingMode,
 	saveMergedGalleryItems,
 } from '../api/galleryUploadApi';
-import { useTakeoverSaveStatus } from '../context/TakeoverSaveStatusContext';
 import { useGalleryReorderSidebar } from '../context/GalleryReorderSidebarContext';
 import { useGalleryItemEditSidebar } from '../context/GalleryItemEditSidebarContext';
 import { useGallerySettingsFormBundle } from '../form/GallerySettingsFormContext';
@@ -67,10 +67,10 @@ function stripStaleModulaRowIndexLocal(rows) {
 /**
  * Optimistic preview + React Query bootstrap cache after reorder/sort.
  *
- * @param {import('@tanstack/react-query').QueryClient} queryClient
- * @param {number}                                      galleryId
+ * @param {import('@tanstack/react-query').QueryClient}        queryClient
+ * @param {number}                                             galleryId
  * @param {{ previewCore: Object[], bootstrapCore: Object[] }} cores
- * @param {string|undefined}                            sortingMode
+ * @param {string|undefined}                                   sortingMode
  */
 function patchOptimisticGalleryItemOrder(
 	queryClient,
@@ -243,7 +243,7 @@ export function useGalleryReorderController({ galleryId }) {
 						await galleryApplySortingAndOrder(galleryId, {
 							sorting: 'manual',
 						});
-					});
+					}, 'gallery-order');
 					queryClient.setQueryData(bootstrapKey, (prev) => {
 						if (!prev || typeof prev !== 'object') {
 							return prev;
@@ -302,7 +302,7 @@ export function useGalleryReorderController({ galleryId }) {
 							)
 						);
 						await gallerySetSortingMode(galleryId, mode);
-					});
+					}, 'gallery-order');
 				}
 			} catch (e) {
 				invalidateBootstrap();
@@ -370,7 +370,7 @@ export function useGalleryReorderController({ galleryId }) {
 					prepared
 				);
 			}
-		}).catch(() => {
+		}, 'gallery-order').catch(() => {
 			invalidateBootstrap();
 		});
 	}, [

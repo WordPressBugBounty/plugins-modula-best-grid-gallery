@@ -69,11 +69,7 @@ export function normalizeLoadingEffectsEnables(loadingEffects) {
  * @param {string}                                 groupedPath
  * @param {unknown}                                value
  */
-export function applyLoadingEffectsEnableSideEffects(
-	form,
-	groupedPath,
-	value
-) {
+export function applyLoadingEffectsEnableSideEffects(form, groupedPath, value) {
 	if (isWpTruthy(value)) {
 		return;
 	}

@@ -134,7 +134,7 @@ export function createGalleryEditorHistory(opts = {}) {
 	}
 
 	/**
-	 * @param {'settings'|'layout'|null} type
+	 * @param {'settings'|'layout'|null}                                                               type
 	 * @param {{ settings: Record<string, Record<string, unknown>>, layout: Record<string, unknown> }} snap
 	 */
 	function restoreResult(type, snap) {

@@ -8,6 +8,9 @@ final class Outcome_Ability extends \WP_Ability {
 	private $output_failed = false;
 
 	public function validate_input( $input = null ) {
+		if ( Contract::is_mutation( $this->get_name() ) && ! Input_Context::types_match( $input, $this->get_input_schema() ) ) {
+			return new \WP_Error( 'ability_invalid_input', 'Input collections must use their declared JSON object or array type.' );
+		}
 		if ( is_array( $input ) && array_key_exists( 'attachment_ids', $input ) ) {
 			if ( ! is_array( $input['attachment_ids'] ) || array_values( $input['attachment_ids'] ) !== $input['attachment_ids'] ) {
 				return new \WP_Error( 'ability_invalid_input', 'input.attachment_ids must be a JSON list of integer identities.' );
@@ -22,13 +25,26 @@ final class Outcome_Ability extends \WP_Ability {
 			return new \WP_Error( 'ability_invalid_input', 'Patch fields require their declared JSON types and current feature availability.' );
 		}
 		if ( in_array( $this->get_name(), array( Batch::OPERATION, Batch::MEDIA, Presets::BATCH, Album_Presets::BATCH ), true ) && is_array( $input['targets'] ?? null ) ) {
-			foreach ( $input['targets'] as $target ) { if ( ! is_int( $target['id'] ?? null ) ) { return new \WP_Error( 'ability_invalid_input', 'Each batch target needs an integer gallery identity.' ); } }
+			foreach ( $input['targets'] as $target ) {
+				if ( ! is_int( $target['id'] ?? null ) ) {
+					return new \WP_Error( 'ability_invalid_input', 'Each batch target needs an integer gallery identity.' ); }
+			}
 		}
 		return parent::validate_input( $input );
 	}
 
+	/** Finalize fresh read explanations before WordPress validates the complete output. */
+	protected function do_execute( $input = null ) {
+		$result = parent::do_execute( $input );
+		// Mutations finalize before retention; recovery and replay preserve stored state.
+		if ( ! is_array( $result ) || Requests::RECOVER === $this->get_name() || Contract::is_mutation( $this->get_name() ) ) {
+			return $result;
+		}
+		return Outcomes::decorate( $result );
+	}
+
 	protected function validate_output( $output ) {
-		$valid = parent::validate_output( $output );
+		$valid               = parent::validate_output( $output );
 		$this->output_failed = is_wp_error( $valid );
 		return $valid;
 	}
@@ -43,7 +59,10 @@ final class Outcome_Ability extends \WP_Ability {
 			}
 			return new \WP_Error( 'modula_execution_interrupted', 'Execution could not be confirmed.' );
 		}
-		if ( ! is_wp_error( $result ) || ! Integration::can_recover() ) {
+		if ( ! is_wp_error( $result ) ) {
+			return $result;
+		}
+		if ( ! Integration::can_recover() ) {
 			return $result;
 		}
 		if ( $this->output_failed && Contract::is_mutation( $this->get_name() ) ) {

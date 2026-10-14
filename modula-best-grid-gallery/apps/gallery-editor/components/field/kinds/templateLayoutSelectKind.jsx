@@ -1,6 +1,4 @@
-import {
-	TEMPLATE_DEFINITIONS,
-} from 'gallery-shared/preview';
+import { TEMPLATE_DEFINITIONS } from 'gallery-shared/preview';
 import { __ } from '@wordpress/i18n';
 import { MenuSelect } from 'shared-ui';
 import { getModulaSettingsEditorConfig } from '../../../config/modulaSettingsEditorConfig';

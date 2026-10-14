@@ -36,7 +36,7 @@ export function isLetterboxApplyEligibleRow(row) {
 }
 
 /**
- * @param {Object[]|null|undefined} items Redux `items.items`
+ * @param {Object[]|null|undefined}      items         Redux `items.items`
  * @param {string|number|null|undefined} currentItemId
  * @return {number}
  */
@@ -172,9 +172,9 @@ export async function applyLetterboxFitToOtherGalleryImages({
 /**
  * Optimistically merge letterbox fields onto every eligible row except optional exclude id.
  *
- * @param {Object[]} core
+ * @param {Object[]}                      core
  * @param {Record<string, string|number>} fields
- * @param {string|number|null|undefined} excludeItemId
+ * @param {string|number|null|undefined}  excludeItemId
  * @return {Object[]}
  */
 export function mergeLetterboxFieldsIntoCoreItems(core, fields, excludeItemId) {

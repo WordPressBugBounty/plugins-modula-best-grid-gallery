@@ -6,15 +6,15 @@ import { ResetToDefaultButton } from '../dirty-mark/ResetToDefaultButton';
  * Stacked field chrome: label above control + optional help.
  * Visual only — host binds value/onChange on the control child.
  *
- * @param {Object} props
+ * @param {Object}                    props
  * @param {import('react').ReactNode} props.label
- * @param {import('react').ReactNode} props.children Control (TextInput, Select, …)
+ * @param {import('react').ReactNode} props.children    Control (TextInput, Select, …)
  * @param {import('react').ReactNode} [props.help]
- * @param {import('react').ReactNode} [props.labelEnd] Optional trailing slot (e.g. AI button)
- * @param {boolean} [props.dirty]
- * @param {Function} [props.onReset]
- * @param {string} [props.htmlFor] When set, associates label with control id
- * @param {string} [props.className]
+ * @param {import('react').ReactNode} [props.labelEnd]  Optional trailing slot (e.g. AI button)
+ * @param {boolean}                   [props.dirty]
+ * @param {Function}                  [props.onReset]
+ * @param {string}                    [props.htmlFor]   When set, associates label with control id
+ * @param {string}                    [props.className]
  */
 export function FieldStack({
 	label,

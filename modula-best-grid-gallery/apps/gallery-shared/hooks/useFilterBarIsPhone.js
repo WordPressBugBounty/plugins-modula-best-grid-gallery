@@ -13,7 +13,7 @@ import {
 import { getForcedPreviewViewport } from '../utils/resolvePreviewViewport';
 
 /**
- * @param {Object|null|undefined} config
+ * @param {Object|null|undefined}                      config
  * @param {'desktop'|'tablet'|'mobile'|null|undefined} [previewViewport]
  * @return {boolean}
  */

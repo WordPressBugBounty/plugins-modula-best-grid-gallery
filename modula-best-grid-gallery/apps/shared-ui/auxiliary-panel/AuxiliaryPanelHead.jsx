@@ -5,12 +5,12 @@ import { IconButton } from '../icon-button/IconButton';
 /**
  * Auxiliary panel header: title, optional description, optional close.
  *
- * @param {Object} props
- * @param {string} props.title
- * @param {string} [props.description]
- * @param {() => void} [props.onClose] When omitted, no close control (category-driven panels).
- * @param {string} [props.className]
- * @param {string} [props.closeLabel]
+ * @param {Object}     props
+ * @param {string}     props.title
+ * @param {string}     [props.description]
+ * @param {() => void} [props.onClose]     When omitted, no close control (category-driven panels).
+ * @param {string}     [props.className]
+ * @param {string}     [props.closeLabel]
  */
 export function AuxiliaryPanelHead({
 	title,

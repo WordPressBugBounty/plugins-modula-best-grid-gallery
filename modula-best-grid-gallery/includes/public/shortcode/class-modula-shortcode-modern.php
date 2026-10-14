@@ -583,6 +583,8 @@ class Modula_Shortcode_Modern {
 	 * @return void
 	 */
 	private function render_items( $images, $settings, $gallery_id ) {
+		$item_count = count( $images );
+
 		foreach ( $images as $image ) {
 			// Validate image
 			if ( ! $this->is_valid_image( $image ) ) {
@@ -600,6 +602,8 @@ class Modula_Shortcode_Modern {
 
 			// Convert array to object for easier access
 			$data = (object) $item_data;
+			// Same key as the legacy template, for the eager `sizes` estimate.
+			$data->gallery_item_count = $item_count;
 
 			// Render item HTML directly
 			echo $this->render_item_html( $data );
@@ -949,6 +953,7 @@ class Modula_Shortcode_Modern {
 					'image_meta'    => $image_meta,
 					'attachment_id' => $attachment_id,
 					'lazy'          => ! empty( $data->lazyLoad ),
+					'item_count'    => isset( $data->gallery_item_count ) ? $data->gallery_item_count : 0,
 					'data'          => $data,
 				)
 			);

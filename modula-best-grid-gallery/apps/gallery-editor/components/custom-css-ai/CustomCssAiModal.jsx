@@ -14,10 +14,10 @@ import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEdit
 import { useGenerateCustomCssMutation } from '../../query/useGenerateCustomCssMutation';
 
 /**
- * @param {Object}   props
- * @param {boolean}  props.isOpen
- * @param {() => void} props.onClose
- * @param {string}   props.currentCss
+ * @param {Object}                    props
+ * @param {boolean}                   props.isOpen
+ * @param {() => void}                props.onClose
+ * @param {string}                    props.currentCss
  * @param {(nextCss: string) => void} props.onApply
  */
 export default function CustomCssAiModal({

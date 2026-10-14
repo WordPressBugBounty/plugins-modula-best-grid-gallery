@@ -2,11 +2,11 @@
  * Fetch full gallery bootstrap payload (GET modula/v2/gallery/{id}/bootstrap).
  * Same shape as shortcode inline JSON for use with buildPreloadedState().
  *
- * @param {number} galleryId          Gallery post ID.
- * @param {Object} [options]          Options.
- * @param {string} [options.align]    Shortcode align attribute.
- * @param {string} [options.restRoot] Override REST root (default: wpApiSettings.root or /wp-json/).
- * @param {AbortSignal} [options.signal] Cancel a destroyed or timed-out visitor load.
+ * @param {number}      galleryId          Gallery post ID.
+ * @param {Object}      [options]          Options.
+ * @param {string}      [options.align]    Shortcode align attribute.
+ * @param {string}      [options.restRoot] Override REST root (default: wpApiSettings.root or /wp-json/).
+ * @param {AbortSignal} [options.signal]   Cancel a destroyed or timed-out visitor load.
  * @return {Promise<Object>} Gallery data object.
  */
 export async function fetchGalleryBootstrap(galleryId, options = {}) {

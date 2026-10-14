@@ -1,0 +1,189 @@
+@use '../variables' as *;
+
+/* Bound gallery badge (editor chrome) */
+.modula-gallery-takeover__bound-badge {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	min-width: 0;
+	flex: 0 1 auto;
+}
+
+.modula-gallery-takeover__bound-badge-trigger {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	max-width: 220px;
+	min-width: 0;
+	padding: 4px 10px;
+	border: 1px solid var(--mod-se-chrome-border, #3c434a);
+	border-radius: 999px;
+	background: var(--mod-se-press-overlay, rgb(255 255 255 / 8%));
+	color: var(--mod-se-chrome-ink-secondary, rgb(255 255 255 / 92%));
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.2;
+	cursor: pointer;
+
+	&:hover {
+		background: var(--mod-se-hover-overlay, rgb(255 255 255 / 12%));
+		color: var(--mod-se-chrome-ink, #fff);
+	}
+}
+
+.modula-gallery-takeover__bound-badge.is-locked .modula-gallery-takeover__bound-badge-trigger {
+	opacity: 0.85;
+}
+
+.modula-gallery-takeover__bound-badge-lock {
+	display: inline-flex;
+}
+
+.modula-gallery-takeover__bound-badge-label {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.modula-gallery-takeover__bound-badge-popover {
+	position: absolute;
+	top: calc(100% + 8px);
+	left: 0;
+	z-index: 100000;
+	width: min(320px, 80vw);
+	padding: 12px;
+	border: 1px solid var(--mod-se-chrome-border, #3c434a);
+	border-radius: 8px;
+	background: var(--mod-se-chrome-bg, #1e1e1e);
+	box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
+	color: var(--mod-se-chrome-ink-secondary, rgb(255 255 255 / 92%));
+}
+
+.modula-gallery-takeover__bound-badge-name {
+	margin: 0 0 4px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--mod-se-chrome-ink, #fff);
+}
+
+.modula-gallery-takeover__bound-badge-type {
+	margin: 0 0 10px;
+	font-size: 11px;
+	opacity: 0.75;
+}
+
+.modula-gallery-takeover__bound-badge-open {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 12px;
+	color: var(--mod-se-chrome-ink, #fff);
+	font-size: 12px;
+	text-decoration: underline;
+
+	&:hover {
+		opacity: 0.9;
+	}
+}
+
+.modula-gallery-takeover__bound-badge-upsell {
+	display: grid;
+	gap: 10px;
+
+	p {
+		margin: 0;
+		font-size: 12px;
+		line-height: 1.4;
+	}
+}
+
+.modula-gallery-takeover__bound-badge-upsell-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 6px 10px;
+	border-radius: 4px;
+	background: #2271b1;
+	color: #fff;
+	font-size: 12px;
+	font-weight: 600;
+	text-decoration: none;
+
+	&:hover {
+		background: #135e96;
+		color: #fff;
+	}
+}
+
+.modula-gallery-takeover__bound-badge-hidden-title {
+	margin: 0 0 8px;
+	padding-top: 8px;
+	border-top: 1px solid var(--mod-se-chrome-border, #3c434a);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	opacity: 0.8;
+}
+
+.modula-gallery-takeover__bound-badge-hidden-empty {
+	margin: 0;
+	font-size: 12px;
+	opacity: 0.7;
+}
+
+.modula-gallery-takeover__bound-badge-hidden-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: grid;
+	gap: 8px;
+	max-height: 220px;
+	overflow: auto;
+}
+
+.modula-gallery-takeover__bound-badge-hidden-row {
+	display: grid;
+	grid-template-columns: 32px minmax(0, 1fr) auto;
+	gap: 8px;
+	align-items: center;
+}
+
+.modula-gallery-takeover__bound-badge-hidden-thumb {
+	width: 32px;
+	height: 32px;
+	border-radius: 4px;
+	object-fit: cover;
+	background: rgb(255 255 255 / 8%);
+
+	&.is-empty {
+		display: block;
+	}
+}
+
+.modula-gallery-takeover__bound-badge-hidden-name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 12px;
+}
+
+.modula-gallery-takeover__bound-badge-restore {
+	padding: 4px 8px;
+	border: 1px solid var(--mod-se-chrome-border, #3c434a);
+	border-radius: 4px;
+	background: transparent;
+	color: var(--mod-se-chrome-ink, #fff);
+	font-size: 11px;
+	font-weight: 600;
+	cursor: pointer;
+
+	&:hover:not(:disabled) {
+		background: var(--mod-se-hover-overlay, rgb(255 255 255 / 10%));
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
+}

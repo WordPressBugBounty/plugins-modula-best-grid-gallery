@@ -63,6 +63,7 @@
 				/* Full gallery settings for sizes/srcset estimate (modula_sources_and_sizes). */
 				'settings'               => $data->settings,
 				'gallery_type'           => $data->settings['type'],
+				'gallery_item_count'     => count( $data->images ),
 				// Video defaults (some extensions expect these properties to exist).
 				'video_template'         => false,
 				'video_type'             => false,

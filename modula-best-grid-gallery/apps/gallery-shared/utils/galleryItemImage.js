@@ -95,9 +95,9 @@ export const MODULA_IMG_FOCAL_POINT_CLASS = 'modula-item-img--focal-point';
 /**
  * Format responsive sizes from three vw terms + config breakpoints.
  *
- * @param {Object} config Flat gallery config.
- * @param {string} mobileVw Mobile term.
- * @param {string} tabletVw Tablet term.
+ * @param {Object} config    Flat gallery config.
+ * @param {string} mobileVw  Mobile term.
+ * @param {string} tabletVw  Tablet term.
  * @param {string} desktopVw Desktop term.
  * @return {string}
  */
@@ -152,7 +152,7 @@ export function parseCustomGridSpanWidth(value) {
  * Estimate sizes for a custom-grid tile from its 12-unit span.
  *
  * @param {Object} config Flat gallery config.
- * @param {number} span Span width 1–12.
+ * @param {number} span   Span width 1–12.
  * @return {string}
  */
 export function estimateCustomGridSpanSizes(config, span) {
@@ -172,7 +172,7 @@ export function estimateCustomGridSpanSizes(config, span) {
  * Estimate a sizes attribute from gallery column breakpoints (eager images).
  * Lazy images should prefer `auto` instead.
  *
- * @param {Object|null|undefined} config Flat gallery config.
+ * @param {Object|null|undefined} config      Flat gallery config.
  * @param {number|null|undefined} [spanWidth] Custom-grid 12-unit span when known.
  * @return {string|undefined} Column-based sizes string when estimable.
  */
@@ -272,7 +272,7 @@ export function estimateGalleryImageSizes(config, spanWidth) {
  * @param {string}                [params.imageSizes] Server-provided sizes string
  * @param {unknown}               [params.lazyLoad]
  * @param {Object|null|undefined} [params.config]
- * @param {number|null|undefined} [params.spanWidth] Custom-grid 12-unit span
+ * @param {number|null|undefined} [params.spanWidth]  Custom-grid 12-unit span
  * @return {string|undefined} Effective `sizes` string when derivable.
  */
 export function getEffectiveSizes({
@@ -335,19 +335,19 @@ export function getPictureSourcesForItem({ itemData }) {
 /**
  * Img style: legacy placement (position + top/left/width/height) or object-fit cover.
  *
- * @param {Object}                        params
- * @param {boolean}                       params.useLegacy
- * @param {number|null|undefined}         params.slotWidth
- * @param {number|null|undefined}         params.slotHeight
- * @param {number|string}                 params.intrinsicWidth
- * @param {number|string}                 params.intrinsicHeight
- * @param {string}                        params.valign
- * @param {string}                        params.halign
- * @param {{ x: number, y: number }|null} [params.focalPoint]
- * @param {{ x: number, y: number, width: number, height: number }|null} [params.focalCrop] 0–1 rect on source (zoom + pan from editor).
- * @param {boolean}                       [params.captionBelowNaturalFlow] Below-image captions without a fixed tile height (masonry, etc.).
- * @param {'cover'|'contain'}             [params.objectFit] Fill mode when not using legacy placement (default cover).
- * @param {string}                        [params.objectPosition] CSS object-position (default center center).
+ * @param {Object}                                                       params
+ * @param {boolean}                                                      params.useLegacy
+ * @param {number|null|undefined}                                        params.slotWidth
+ * @param {number|null|undefined}                                        params.slotHeight
+ * @param {number|string}                                                params.intrinsicWidth
+ * @param {number|string}                                                params.intrinsicHeight
+ * @param {string}                                                       params.valign
+ * @param {string}                                                       params.halign
+ * @param {{ x: number, y: number }|null}                                [params.focalPoint]
+ * @param {{ x: number, y: number, width: number, height: number }|null} [params.focalCrop]               0–1 rect on source (zoom + pan from editor).
+ * @param {boolean}                                                      [params.captionBelowNaturalFlow] Below-image captions without a fixed tile height (masonry, etc.).
+ * @param {'cover'|'contain'}                                            [params.objectFit]               Fill mode when not using legacy placement (default cover).
+ * @param {string}                                                       [params.objectPosition]          CSS object-position (default center center).
  * @return {Object} React inline style for the `<img>`.
  */
 export function getImgStyleForItem({

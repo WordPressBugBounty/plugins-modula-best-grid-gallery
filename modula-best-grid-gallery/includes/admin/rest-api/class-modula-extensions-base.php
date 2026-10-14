@@ -108,6 +108,26 @@ class Modula_Extensions_Base {
 	}
 
 	/**
+	 * Plan membership from the existing Lite commercial authority, without dividers.
+	 *
+	 * @return array<string,string[]>
+	 */
+	public function get_read_only_plan_map() {
+		$out = array();
+		foreach ( $this->plan_map as $plan => $slugs ) {
+			$out[ $plan ] = array_values(
+				array_filter(
+					$slugs,
+					static function ( $slug ) {
+						return is_string( $slug ) && 0 === strpos( $slug, 'modula-' );
+					}
+				)
+			);
+		}
+		return $out;
+	}
+
+	/**
 	 * Get the instance of the class.
 	 */
 	public static function get_instance() {

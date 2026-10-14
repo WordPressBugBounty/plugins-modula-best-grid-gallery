@@ -2,7 +2,7 @@ import { resolveProGateLock } from './proGateLock';
 
 /**
  * @param {{ isPro?: boolean, extensionEntitlements?: Record<string, { available?: boolean, enabled?: boolean }>, galleryDefaults?: { featureEnabled?: boolean } }} editor
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isGalleryDefaultsEntitled(editor) {
 	if (!editor?.isPro) {
@@ -16,7 +16,7 @@ export function isGalleryDefaultsEntitled(editor) {
 
 /**
  * @param {{ galleryDefaults?: { presetCount?: number } }} editor
- * @returns {boolean}
+ * @return {boolean}
  */
 export function hasGalleryDefaultsPresets(editor) {
 	return Number(editor?.galleryDefaults?.presetCount || 0) > 0;

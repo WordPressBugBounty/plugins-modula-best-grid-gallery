@@ -41,7 +41,7 @@ export default function SettingsUndoRedoControls({ variant = 'metabox' }) {
 				<Button
 					type="button"
 					variant="tertiary"
-					className="modula-gallery-takeover__topbar-icon-btn"
+					className="modula-takeover__topbar-icon-btn"
 					icon={undoIcon}
 					label={undoTip}
 					disabled={!canUndo}
@@ -50,7 +50,7 @@ export default function SettingsUndoRedoControls({ variant = 'metabox' }) {
 				<Button
 					type="button"
 					variant="tertiary"
-					className="modula-gallery-takeover__topbar-icon-btn"
+					className="modula-takeover__topbar-icon-btn"
 					icon={redoIcon}
 					label={redoTip}
 					disabled={!canRedo}

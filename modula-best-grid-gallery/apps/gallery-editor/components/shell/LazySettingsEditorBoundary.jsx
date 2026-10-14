@@ -2,7 +2,7 @@
  * Suspense + error boundary wrapper for code-split settings-editor chunks.
  */
 import { Suspense } from '@wordpress/element';
-import SettingsEditorErrorBoundary from './SettingsEditorErrorBoundary';
+import { SettingsEditorErrorBoundary } from 'editor-shell';
 
 /**
  * @param {{

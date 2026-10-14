@@ -1369,6 +1369,7 @@ class Modula_Gallery_Upload {
 				'gridX',
 				'gridY',
 				'gridLocked',
+				'freeformId',
 				'togglelightbox',
 				'hide_title',
 				'focal_x',
@@ -1384,6 +1385,11 @@ class Modula_Gallery_Upload {
 		foreach ( $image_attributes as $attribute ) {
 			if ( isset( $image[ $attribute ] ) ) {
 				switch ( $attribute ) {
+					case 'freeformId':
+						if ( is_string( $image[ $attribute ] ) ) {
+							$new_image[ $attribute ] = sanitize_text_field( $image[ $attribute ] );
+						}
+						break;
 					case 'alt':
 						$new_image[ $attribute ] = sanitize_text_field( $image[ $attribute ] );
 						break;

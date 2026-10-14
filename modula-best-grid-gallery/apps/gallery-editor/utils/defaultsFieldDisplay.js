@@ -7,7 +7,7 @@ import { getEnrichedFieldByGroupedPath } from '../data/formSchema';
 
 /**
  * @param {string} groupId
- * @returns {string}
+ * @return {string}
  */
 export function getDefaultsGroupLabel(groupId) {
 	return GROUP_LABELS[groupId] || groupId;
@@ -16,7 +16,7 @@ export function getDefaultsGroupLabel(groupId) {
 /**
  * @param {string} groupId
  * @param {string} key
- * @returns {string}
+ * @return {string}
  */
 export function getDefaultsFieldLabel(groupId, key) {
 	const hit = getEnrichedFieldByGroupedPath(`${groupId}.${key}`);
@@ -38,7 +38,7 @@ export function getDefaultsFieldLabel(groupId, key) {
 
 /**
  * @param {unknown} value
- * @returns {string}
+ * @return {string}
  */
 function stringifyFallback(value) {
 	if (value === null || value === undefined) {
@@ -71,8 +71,8 @@ function stringifyFallback(value) {
 
 /**
  * @param {object|undefined} field
- * @param {unknown} value
- * @returns {string|undefined}
+ * @param {unknown}          value
+ * @return {string|undefined}
  */
 function labelFromOptionMap(field, value) {
 	if (!field || (typeof value !== 'string' && typeof value !== 'number')) {
@@ -108,10 +108,10 @@ function labelFromOptionMap(field, value) {
 }
 
 /**
- * @param {string} groupId
- * @param {string} key
+ * @param {string}  groupId
+ * @param {string}  key
  * @param {unknown} value
- * @returns {string}
+ * @return {string}
  */
 export function formatDefaultsFieldValue(groupId, key, value) {
 	const hit = getEnrichedFieldByGroupedPath(`${groupId}.${key}`);

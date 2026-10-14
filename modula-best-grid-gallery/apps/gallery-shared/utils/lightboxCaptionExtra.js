@@ -10,7 +10,7 @@
  * still create a padded `.f-caption` and pin the image to the top of the slide).
  *
  * @param {unknown} html
- * @returns {boolean}
+ * @return {boolean}
  */
 export function lightboxCaptionHasVisibleText(html) {
 	const raw = typeof html === 'string' ? html.trim() : '';
@@ -27,7 +27,7 @@ export function lightboxCaptionHasVisibleText(html) {
 
 /**
  * @param {unknown} html
- * @returns {string}
+ * @return {string}
  */
 export function normalizeLightboxCaptionHtml(html) {
 	if (!lightboxCaptionHasVisibleText(html)) {
@@ -37,9 +37,9 @@ export function normalizeLightboxCaptionHtml(html) {
 }
 
 /**
- * @param {string} caption Base caption HTML/text.
+ * @param {string} caption   Base caption HTML/text.
  * @param {string} extraHtml Opaque HTML fragment from an extension.
- * @returns {string}
+ * @return {string}
  */
 export function mergeLightboxCaptionWithExtra(caption, extraHtml) {
 	const base = typeof caption === 'string' ? caption : '';
@@ -55,7 +55,7 @@ export function mergeLightboxCaptionWithExtra(caption, extraHtml) {
 
 /**
  * @param {unknown} row Gallery item / bootstrap row.
- * @returns {string}
+ * @return {string}
  */
 export function resolveCaptionExtraHtmlFromRow(row) {
 	if (!row || typeof row !== 'object') {

@@ -37,7 +37,10 @@ export function useCommandPaletteHotkey({ isOpen, setOpen, isInScope }) {
 
 	useEffect(() => {
 		const onKey = (e) => {
-			if (!(e.metaKey || e.ctrlKey) || String(e.key).toLowerCase() !== 'k') {
+			if (
+				!(e.metaKey || e.ctrlKey) ||
+				String(e.key).toLowerCase() !== 'k'
+			) {
 				return;
 			}
 			if (isOpenRef.current) {

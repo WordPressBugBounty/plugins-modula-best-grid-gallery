@@ -8,7 +8,8 @@
 import { GALLERY_LAYOUT_TYPES } from './layoutTypes';
 import CreativeGalleryLayout from './CreativeGalleryLayout';
 import JustifiedGridLayout from './JustifiedGridLayout';
-import CustomGridLayout from './CustomGridLayout';
+import CustomGridLayout from './CustomGridEditorLayout';
+import FreeformLayout from './FreeformLayout';
 import MasonryLayout from './MasonryLayout';
 import SliderLayout from './SliderLayout';
 import StoryLayout from './StoryLayout';
@@ -27,6 +28,7 @@ const eagerByType = {
 	'creative-gallery': CreativeGalleryLayout,
 	'justified-grid': JustifiedGridLayout,
 	'custom-grid': CustomGridLayout,
+	freeform: FreeformLayout,
 	grid: MasonryLayout,
 	slider: SliderLayout,
 	story: StoryLayout,

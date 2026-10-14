@@ -5,12 +5,7 @@ import { __ } from '@wordpress/i18n';
 export const useApiCall = () => {
 	const queryClient = useQueryClient();
 
-	const doApiCall = async (
-		path,
-		method,
-		data = false,
-		options = {}
-	) => {
+	const doApiCall = async (path, method, data = false, options = {}) => {
 		try {
 			const request = {
 				path,

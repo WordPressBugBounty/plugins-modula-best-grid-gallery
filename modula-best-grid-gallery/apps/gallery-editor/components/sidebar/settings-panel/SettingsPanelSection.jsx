@@ -4,8 +4,8 @@
 import { SectionHeading } from 'shared-ui';
 
 /**
- * @param {Object} props
- * @param {string} props.label
+ * @param {Object}                    props
+ * @param {string}                    props.label
  * @param {import('react').ReactNode} [props.children]
  */
 export default function SettingsPanelSection({ label, children }) {

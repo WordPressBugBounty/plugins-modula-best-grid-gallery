@@ -14,8 +14,8 @@ import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEdit
 import { appendQuery, withV3Utm } from 'gallery-shared/utils/withV3Utm';
 
 /**
- * @param {{ schema?: object, control?: object }} field Field descriptor; upsell config lives on `field.schema`.
- * @param {string} [wrapperClassName] Optional outer class when the blurb renders (skipped when null).
+ * @param {{ schema?: object, control?: object }} field              Field descriptor; upsell config lives on `field.schema`.
+ * @param {string}                                [wrapperClassName] Optional outer class when the blurb renders (skipped when null).
  */
 export default function EditorUpsellBlurb({ field, wrapperClassName = '' }) {
 	const editor = useModulaSettingsEditorConfig();

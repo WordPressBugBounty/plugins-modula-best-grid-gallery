@@ -5,14 +5,14 @@ import { __ } from '@wordpress/i18n';
 /**
  * Shared listing dropdown shell (row actions, toolbar filters).
  *
- * @param {Object} props
- * @param {string} [props.className]
- * @param {string} [props.popoverClassName]
- * @param {'bottom-start'|'bottom-end'} [props.placement]
- * @param {boolean} [props.open] Controlled open state.
- * @param {(nextOpen: boolean) => void} [props.onToggle] Controlled open callback.
+ * @param {Object}                                                                         props
+ * @param {string}                                                                         [props.className]
+ * @param {string}                                                                         [props.popoverClassName]
+ * @param {'bottom-start'|'bottom-end'}                                                    [props.placement]
+ * @param {boolean}                                                                        [props.open]             Controlled open state.
+ * @param {(nextOpen: boolean) => void}                                                    [props.onToggle]         Controlled open callback.
  * @param {(args: { isOpen: boolean, onToggle: () => void }) => import('react').ReactNode} props.renderToggle
- * @param {(args: { onClose: () => void }) => import('react').ReactNode} props.renderContent
+ * @param {(args: { onClose: () => void }) => import('react').ReactNode}                   props.renderContent
  */
 export function ListingDropdown({
 	className = '',
@@ -46,12 +46,12 @@ export function ListingDropdown({
 }
 
 /**
- * @param {Object} props
+ * @param {Object}                              props
  * @param {import('@wordpress/icons').IconType} props.icon
- * @param {string} props.label
- * @param {boolean} props.isOpen
- * @param {() => void} props.onToggle
- * @param {string} [props.className]
+ * @param {string}                              props.label
+ * @param {boolean}                             props.isOpen
+ * @param {() => void}                          props.onToggle
+ * @param {string}                              [props.className]
  */
 export function ListingDropdownToolbarTrigger({
 	icon,
@@ -92,12 +92,12 @@ export function ListingDropdownToolbarTrigger({
 }
 
 /**
- * @param {Object} props
+ * @param {Object}                              props
  * @param {import('@wordpress/icons').IconType} props.icon
- * @param {string} props.label
- * @param {boolean} props.isOpen
- * @param {() => void} props.onToggle
- * @param {string} [props.className]
+ * @param {string}                              props.label
+ * @param {boolean}                             props.isOpen
+ * @param {() => void}                          props.onToggle
+ * @param {string}                              [props.className]
  */
 export function ListingDropdownIconToggle({
 	icon,
@@ -147,11 +147,11 @@ export function ListingDropdownDivider() {
 }
 
 /**
- * @param {Object} props
- * @param {string} props.label
- * @param {boolean} [props.isSelected]
+ * @param {Object}             props
+ * @param {string}             props.label
+ * @param {boolean}            [props.isSelected]
  * @param {number|string|null} [props.count]
- * @param {() => void} props.onSelect
+ * @param {() => void}         props.onSelect
  */
 export function ListingDropdownRadioItem({
 	label,
@@ -201,11 +201,11 @@ export function ListingDropdownRadioItem({
 }
 
 /**
- * @param {Object} props
- * @param {string} props.label
- * @param {boolean} props.checked
+ * @param {Object}                              props
+ * @param {string}                              props.label
+ * @param {boolean}                             props.checked
  * @param {import('@wordpress/icons').IconType} [props.icon]
- * @param {() => void} props.onToggle
+ * @param {() => void}                          props.onToggle
  */
 export function ListingDropdownCheckboxItem({
 	label,
@@ -253,14 +253,14 @@ export function ListingDropdownCheckboxItem({
 }
 
 /**
- * @param {Object} props
+ * @param {Object}                              props
  * @param {import('@wordpress/icons').IconType} [props.icon]
- * @param {string} props.label
- * @param {string} [props.description]
- * @param {boolean} [props.showProBadge]
- * @param {boolean} [props.isDestructive]
- * @param {boolean} [props.disabled]
- * @param {() => void} props.onClick
+ * @param {string}                              props.label
+ * @param {string}                              [props.description]
+ * @param {boolean}                             [props.showProBadge]
+ * @param {boolean}                             [props.isDestructive]
+ * @param {boolean}                             [props.disabled]
+ * @param {() => void}                          props.onClick
  */
 export function ListingDropdownActionItem({
 	icon,

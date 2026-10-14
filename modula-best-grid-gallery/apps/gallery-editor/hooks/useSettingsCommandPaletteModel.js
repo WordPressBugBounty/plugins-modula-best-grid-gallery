@@ -12,8 +12,8 @@ const QUERY_DEBOUNCE_MS = 200;
 /**
  * Debounced search + visibility filtering for the settings command palette.
  *
- * @param {boolean}                                 isOpen       Whether the palette is visible.
- * @param {Record<string, Record<string, unknown>>} values       TanStack grouped form values.
+ * @param {boolean}                                 isOpen Whether the palette is visible.
+ * @param {Record<string, Record<string, unknown>>} values TanStack grouped form values.
  * @return {Object} Palette model: `query`, `setQuery`, `filteredEntries`, `activeIndex`, `setActiveIndex`, `moveActive`.
  */
 export function useSettingsCommandPaletteModel(isOpen, values) {

@@ -1,0 +1,263 @@
+@use 'variables' as *;
+
+/* Add split: primary add action + caret menu of add sources. */
+.modula-takeover__preview-add-split {
+	position: relative;
+	flex-shrink: 0;
+	align-self: center;
+}
+
+/*
+ * One outer border on the wrapper only — two bordered siblings + overflow:hidden
+ * caused beveled/aliased corners in WebKit.
+ */
+.modula-takeover__preview-add-split-inner {
+	display: inline-flex;
+	align-items: stretch;
+	height: $mod-space-32;
+	box-sizing: border-box;
+	border-radius: 0;
+	overflow: hidden;
+	border: 1px solid var(--mod-se-accent, var(--modula-takeover-accent-strong));
+	background: var(--mod-se-accent, var(--modula-takeover-accent));
+	box-shadow: var(--mod-se-shadow-sm, #{$mod-takeover-split-inner-shadow});
+}
+
+.modula-takeover__preview-add-split-main,
+.modula-takeover__preview-add-split-caret {
+	margin: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: $mod-space-4;
+	box-sizing: border-box;
+	min-height: 0;
+	height: 100%;
+	padding: 0 $mod-space-10;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.2;
+	cursor: pointer;
+	border: none;
+	border-radius: 0;
+	background: transparent;
+	color: $mod-takeover-ink-on-dark;
+	-webkit-font-smoothing: antialiased;
+	transition: background 0.15s ease;
+
+	svg {
+		flex-shrink: 0;
+		fill: currentColor;
+		color: inherit;
+	}
+
+	&:hover {
+		background: $mod-takeover-accent-split-hover;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: inset 0 0 0 2px $mod-takeover-dark-focus-inset;
+	}
+}
+
+.modula-takeover__preview-add-split-caret {
+	min-width: 26px;
+	padding-left: $mod-space-4;
+	padding-right: $mod-space-4;
+	box-shadow: inset 1px 0 0 $mod-takeover-dark-divider-strong;
+}
+
+/* Styleguide `.menu` / `.grp2` / `button` — Add images caret flyout. */
+.modula-takeover__preview-add-menu {
+	position: absolute;
+	right: 0;
+	top: calc(100% + #{$mod-space-4});
+	z-index: 50;
+	width: 254px;
+	max-width: min(254px, calc(100vw - #{$mod-space-24}));
+	margin: 0;
+	padding: 7px;
+	list-style: none;
+	box-sizing: border-box;
+	background: var(--mod-se-preview-flyout-bg, var(--mod-se-surface, #{$mod-takeover-preview-flyout-bg}));
+	border: 1px solid var(--mod-se-preview-flyout-border, var(--mod-se-line, #{$mod-takeover-preview-flyout-border}));
+	border-radius: 0;
+	box-shadow:
+		0 1px 2px rgb(0 0 0 / 40%),
+		0 10px 30px -10px rgb(0 0 0 / 60%);
+}
+
+.modula-takeover__preview-add-menu-group {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.modula-takeover__preview-add-menu-group-label {
+	font-size: 10px;
+	font-weight: 650;
+	letter-spacing: 0.11em;
+	line-height: 1.3;
+	text-transform: uppercase;
+	color: var(--mod-se-ink-3, var(--mod-se-preview-ink-muted, #{$mod-takeover-text-muted}));
+	margin: 9px -7px 0;
+	padding: 13px 17px 7px;
+	border-top: 1px solid var(--mod-se-line-soft, #{$mod-takeover-border-light-muted});
+	box-sizing: border-box;
+}
+
+.modula-takeover__preview-add-menu-group:first-child .modula-takeover__preview-add-menu-group-label {
+	margin-top: 0;
+	padding-top: 7px;
+	border-top: 0;
+}
+
+.modula-takeover__preview-add-menu-group-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.modula-takeover__preview-add-menu-item {
+	margin: 0;
+	padding: 0;
+}
+
+.modula-takeover__preview-add-menu-btn {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	width: 100%;
+	margin: 0;
+	padding: 8px 10px;
+	box-sizing: border-box;
+	text-align: left;
+	font: inherit;
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 1.3;
+	cursor: pointer;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	color: var(--mod-se-preview-flyout-ink, var(--mod-se-ink, #{$mod-takeover-preview-flyout-ink}));
+
+	&:hover:not(:disabled) {
+		background: var(--mod-se-preview-flyout-row-hover, #{$mod-takeover-preview-flyout-row-hover});
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--modula-takeover-accent, #{$modula-takeover-accent}) 75%, transparent);
+	}
+
+	&.is-disabled {
+		cursor: not-allowed;
+		color: var(--mod-se-preview-flyout-ink-disabled, #{$mod-takeover-preview-flyout-ink-disabled});
+
+		.modula-takeover__preview-add-menu-icon {
+			opacity: 0.55;
+		}
+	}
+
+	svg {
+		display: block;
+		flex: none;
+		fill: none;
+		stroke: currentColor;
+	}
+}
+
+.modula-takeover__preview-add-menu-icon {
+	flex: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 15px;
+	height: 15px;
+	color: var(--mod-se-ink-3, var(--mod-se-preview-ink-muted, #{$mod-takeover-text-muted}));
+}
+
+/* Label + badge sit inline; badge is no longer pushed to the far edge. */
+.modula-takeover__preview-add-menu-label-wrap {
+	flex: 1;
+	min-width: 0;
+	display: inline-flex;
+	align-items: center;
+	flex-wrap: wrap;
+	column-gap: $mod-space-8;
+	row-gap: $mod-space-4;
+	max-width: 100%;
+}
+
+.modula-takeover__preview-add-menu-label {
+	font-weight: 400;
+	min-width: 0;
+	text-align: left;
+}
+
+.modula-takeover__preview-add-menu-badge {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: $mod-space-3 $mod-space-9;
+	font-size: 10px;
+	font-weight: 600;
+	line-height: 1.25;
+	letter-spacing: 0.02em;
+	text-transform: none;
+	white-space: nowrap;
+	color: var(--mod-se-preview-flyout-ink, #{$mod-takeover-preview-flyout-ink});
+	border-radius: $mod-radius-pill;
+	border: 1px solid transparent;
+	box-shadow: $mod-takeover-preview-flyout-badge-shadow;
+
+	&.is-extension {
+		background: color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 22%,
+			var(--mod-se-preview-flyout-badge-muted-bg, #{$mod-takeover-preview-flyout-badge-muted-bg}));
+		border-color: color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 45%,
+			var(--mod-se-preview-flyout-border, #{$mod-takeover-preview-flyout-border}));
+		color: color-mix(in srgb,
+			var(--modula-takeover-accent, #{$modula-takeover-accent}) 55%,
+			var(--mod-se-preview-ink, #{$mod-takeover-text-strong}));
+	}
+
+	/* Pro-only items (e.g. From Folder / From ZIP on Lite). */
+	&.is-pro {
+		background: color-mix(in srgb,
+			$mod-takeover-pro-badge-bg-mix 22%,
+			var(--mod-se-preview-flyout-badge-muted-bg, #{$mod-takeover-preview-flyout-badge-muted-bg}));
+		border-color: color-mix(in srgb,
+			$mod-takeover-pro-badge-border-mix 40%,
+			var(--mod-se-preview-flyout-border, #{$mod-takeover-preview-flyout-border}));
+		color: color-mix(in srgb, $mod-takeover-pro-badge-bg-mix 75%, var(--mod-se-preview-ink, #{$mod-takeover-text-strong}));
+	}
+
+	/* Subscription / plan does not include the extension. */
+	&.is-plan {
+		background: color-mix(in srgb,
+			$mod-takeover-plan-badge-violet 18%,
+			var(--mod-se-preview-flyout-badge-muted-bg, #{$mod-takeover-preview-flyout-badge-muted-bg}));
+		border-color: color-mix(in srgb,
+			$mod-takeover-plan-badge-lilac 35%,
+			var(--mod-se-preview-flyout-border, #{$mod-takeover-preview-flyout-border}));
+		color: color-mix(in srgb, $mod-takeover-plan-badge-violet 72%, var(--mod-se-preview-ink, #{$mod-takeover-text-strong}));
+	}
+
+	&.is-muted {
+		background: var(--mod-se-preview-flyout-badge-muted-bg, #{$mod-takeover-preview-flyout-badge-muted-bg});
+		border-color: var(--mod-se-preview-flyout-badge-muted-border, #{$mod-takeover-preview-flyout-badge-muted-border});
+		color: var(--mod-se-preview-flyout-badge-muted-ink, #{$mod-takeover-preview-flyout-badge-muted-ink});
+		font-weight: 500;
+	}
+}

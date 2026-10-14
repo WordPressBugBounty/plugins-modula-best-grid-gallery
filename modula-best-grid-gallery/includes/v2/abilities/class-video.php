@@ -1,23 +1,50 @@
 <?php
-/** Explicit provider resolution and local Beta video composition are separate effects. */
+/** Video ability descriptors and retained-source authorization. Pro owns provider and composition effects. */
 namespace Modula\V2\Abilities;
 use Modula\V2\Meta_Sync;
-use Modula\V2\Images\Adapter;
-use Modula_Pro\Extensions\Video\Video as Service;
 defined( 'ABSPATH' ) || exit;
 final class Video {
 	public const RESOLVE = 'modula/resolve-video-source';
 	public const UPDATE  = 'modula/update-gallery-videos';
 	public static function available(): bool {
-		return Settings_Contract::extension( 'modula-video' ) && class_exists( Service::class );
+		return Settings_Contract::extension( 'modula-video' ) && Pro_Dependency::host_executor_ready( self::RESOLVE );
 	}
 	public static function mutations(): array {
 		return array( self::RESOLVE, self::UPDATE );
 	}
+	/** @return array<int,string> */
+	public static function names(): array {
+		return array( self::RESOLVE, self::UPDATE );
+	}
+	/**
+	 * Signature contract for the Pro video executor. Lite checks it without constructing Pro.
+	 *
+	 * @return array<string,array<string,int>>
+	 */
+	public static function executor_methods(): array {
+		return array_fill_keys( self::names(), array( 'run' => 2 ) );
+	}
+	/**
+	 * Inspect only the declared executor signature; feature blockers are assessed separately.
+	 */
+	public static function executor_ready( string $name ): bool {
+		$methods = self::executor_methods();
+		if ( ! isset( $methods[ $name ] ) ) {
+			return false;
+		}
+		return Pro_Dependency::methods( '\Modula_Pro\Extensions\Video\Abilities\Video_Executor', $methods[ $name ] );
+	}
 	public static function callbacks(): array {
-		return array(
-			self::RESOLVE => array( self::class, 'resolve' ),
-			self::UPDATE  => array( Update::class, 'execute' ),
+		return Video_Explanation::callbacks_for( self::names() );
+	}
+	public static function abilities(): array {
+		return Operation_Table::from_callbacks(
+			self::callbacks(),
+			array(
+				'available'      => array( self::class, 'available' ),
+				'executor_ready' => array( self::class, 'executor_ready' ),
+				'features'       => array( 'modula-video' ),
+			)
 		);
 	}
 	public static function result_schema(): array {
@@ -143,16 +170,74 @@ final class Video {
 			),
 		);
 	}
+	/**
+	 * Retained inspection uses current gallery and attachment rights. It does not require Pro or a provider call.
+	 *
+	 * @param array<string,mixed> $record Stored request record.
+	 */
 	public static function can_recover( array $record ): bool {
-		if ( ! self::available() || ! Update::can_update( (int) $record['target'] ) ) {
+		$target = isset( $record['target'] ) ? (int) $record['target'] : 0;
+		if ( ! $target || ! Update::can_update( $target ) ) {
 			return false;
 		}
-		foreach ( $record['attachment_ids'] ?? array() as $id ) {
-			if ( ! Attachments::can_read( (int) $id ) ) {
+		if ( self::UPDATE === ( $record['operation'] ?? '' ) && ! array_key_exists( 'attachment_ids', $record ) ) {
+			return false;
+		}
+		$attachments = $record['attachment_ids'] ?? array();
+		if ( ! is_array( $attachments ) ) {
+			return false;
+		}
+		foreach ( $attachments as $id ) {
+			if ( ! is_numeric( $id ) || ! Attachments::can_read( (int) $id ) ) {
 				return false;
 			}
 		}
 		return true;
+	}
+	/**
+	 * Commercial blockers only after gallery admission. Unauthorized calls do not receive an upgrade remedy.
+	 *
+	 * @param array<string,mixed> $input
+	 * @return array<int,array<string,mixed>>
+	 */
+	public static function explain_blockers( string $name, array $input ): array {
+		if ( ! self::actor_admitted( $name, $input ) ) {
+			return array( self::permission_blocker() );
+		}
+		return Availability::blockers( $name );
+	}
+	/**
+	 * @param array<string,mixed> $input
+	 */
+	private static function actor_admitted( string $name, array $input ): bool {
+		$id = $input['id'] ?? 0;
+		if ( ! is_int( $id ) || ! Update::can_update( $id ) ) {
+			return false;
+		}
+		if ( self::UPDATE !== $name ) {
+			return true;
+		}
+		$changes = $input['video_changes'] ?? null;
+		if ( ! is_array( $changes ) ) {
+			return false;
+		}
+		foreach ( self::referenced_attachment_ids( $changes, $id ) as $attachment ) {
+			if ( ! Attachments::can_read( $attachment ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+	/** @return array{reason:string,feature:string,remedy:array{action:string,explanation:string}} */
+	private static function permission_blocker(): array {
+		return array(
+			'reason'  => 'permission_denied',
+			'feature' => 'modula-video',
+			'remedy'  => array(
+				'action'      => 'contact_administrator',
+				'explanation' => __( 'Current gallery and video attachment permissions are required. An upgrade does not grant this access.', 'modula-best-grid-gallery' ),
+			),
+		);
 	}
 	/** Only canonical supported provider endpoints; never accept a generic URL fetch. */
 	public static function provider_url( string $url, bool $playlist = false ): bool {
@@ -160,97 +245,58 @@ final class Video {
 		if ( ! is_array( $parts ) || 'https' !== ( $parts['scheme'] ?? '' ) || isset( $parts['user'] ) || isset( $parts['pass'] ) || isset( $parts['port'] ) || isset( $parts['fragment'] ) ) {
 			return false;
 		}
-		$host = strtolower( $parts['host'] ?? '' );
-		$path = $parts['path'] ?? '';
-		parse_str( $parts['query'] ?? '', $query );
+		$host = strtolower( (string) ( $parts['host'] ?? '' ) );
+		$path = (string) ( $parts['path'] ?? '' );
+		parse_str( (string) ( $parts['query'] ?? '' ), $query );
 		if ( in_array( $host, array( 'youtube.com', 'www.youtube.com', 'youtu.be' ), true ) ) {
 			if ( $playlist ) {
-				return in_array( $path, array( '/playlist', '/watch' ), true ) && isset( $query['list'] ) && is_string( $query['list'] ) && preg_match( '/^[A-Za-z0-9_-]{1,120}$/D', $query['list'] ) && ! array_diff( array_keys( $query ), array( 'v', 'list' ) );
+				return in_array( $path, array( '/playlist', '/watch' ), true ) && isset( $query['list'] ) && is_string( $query['list'] ) && 1 === preg_match( '/^[A-Za-z0-9_-]{1,120}$/D', $query['list'] ) && ! array_diff( array_keys( $query ), array( 'v', 'list' ) );
 			}
-			return ! array_diff( array_keys( $query ), array( 'v' ) ) && (bool) Service::get_youtube_video_id( $url );
+			return ! array_diff( array_keys( $query ), array( 'v' ) ) && '' !== self::youtube_id( $url );
 		}
-		if ( $playlist && method_exists( Service::class, 'vimeo_collection_path' ) ) {
-			return false !== Service::vimeo_collection_path( $url );
+		if ( $playlist && in_array( $host, array( 'vimeo.com', 'www.vimeo.com' ), true ) ) {
+			return self::vimeo_playlist( $parts );
 		}
-		return in_array( $host, array( 'vimeo.com', 'www.vimeo.com' ), true ) && ! $query && (bool) preg_match( $playlist ? '~^/channels/[A-Za-z0-9_-]+/?$~D' : '~^/[0-9]+/?$~D', $path );
+		return in_array( $host, array( 'vimeo.com', 'www.vimeo.com' ), true ) && ! $query && 1 === preg_match( '~^/[0-9]+/?$~D', $path );
 	}
-	private static function clean_source( array $snap, string $url ): array {
-		return array(
-			'video_url'   => $url,
-			'title'       => sanitize_text_field( (string) ( $snap['title'] ?? '' ) ),
-			'description' => sanitize_textarea_field( (string) ( $snap['description'] ?? '' ) ),
-			'thumb'       => esc_url_raw( (string) ( $snap['thumb'] ?? '' ), array( 'http', 'https' ) ),
-			'width'       => max( 1, (int) ( $snap['width'] ?? 1920 ) ),
-			'height'      => max( 1, (int) ( $snap['height'] ?? 1080 ) ),
-		);
+	/** Same 11-character identity the video service accepts, without loading that service. */
+	private static function youtube_id( string $url ): string {
+		$matched = preg_match( '/(?:youtube\.com|youtu\.be|youtube\-nocookie\.com)\/(?:.*?(?:v=|v\/|u\/|embed\/|shorts\/))?([\w-]{11})/i', $url, $matches );
+		return 1 === $matched && isset( $matches[1] ) ? $matches[1] : '';
 	}
-	public static function resolve( array $input ): array {
-		$existing = Requests::existing( $input, self::RESOLVE );
-		if ( null !== $existing ) {
-			return $existing;
+	/**
+	 * Showcase share links and channel paths. Matches the video service collection rules.
+	 *
+	 * @param array<string,mixed> $parts Parsed URL parts.
+	 */
+	private static function vimeo_playlist( array $parts ): bool {
+		$path = (string) ( $parts['path'] ?? '' );
+		if ( 1 === preg_match( '~^/showcase/([0-9]+)/?$~D', $path ) ) {
+			return self::showcase_query_allowed( $parts );
 		}
-		$out = static function ( $status, $code = '' ) use ( $input ) {
-			return Requests::outcome( $input['request_id'], $status, $code, $code ? 'Inspect retained sources; do not repeat an uncertain provider request.' : '', self::RESOLVE );
-		};
-		if ( ! self::can_recover( array( 'target' => $input['id'] ) ) ) {
-			return $out( 'forbidden', 'current_permission_denied' );
+		return self::vimeo_channel_path( $parts );
+	}
+	/**
+	 * @param array<string,mixed> $parts Parsed URL parts.
+	 */
+	private static function showcase_query_allowed( array $parts ): bool {
+		$query = array();
+		if ( isset( $parts['query'] ) && is_string( $parts['query'] ) && '' !== $parts['query'] ) {
+			$query = explode( '&', $parts['query'] );
 		}
-		if ( ! \Modula\V2\Beta_Settings::is_beta_gallery( $input['id'] ) || 'trash' === get_post_status( $input['id'] ) || get_post_meta( $input['id'], '_modula_bind_target_type', true ) || ! self::provider_url( $input['url'], 'playlist' === $input['kind'] ) ) {
-			return $out( 'rejected', 'unsupported_source_or_target' );
+		foreach ( $query as $param ) {
+			if ( 1 !== preg_match( '#^(fl|fe)=[A-Za-z0-9._~%\-]*$#D', $param ) ) {
+				return false;
+			}
 		}
-		$existing = Requests::claim( $input, self::RESOLVE );
-		if ( null !== $existing ) {
-			return $existing;
-		}
-		$progress = array(
-			'phase'    => 'provider_query',
-			'sources'  => array(),
-			'complete' => false,
-		);
-		$active   = false;
-		try {
-			Requests::context( $input['request_id'], array( 'video' => $progress ) );
-			Revision::begin();
-			$active = true;
-			if ( Revision::state( $input['id'], true ) !== $input['revision'] ) {
-				Revision::end( false );
-				$active = false;
-				return Requests::finish( $input['request_id'], $out( 'conflict', 'stale_revision' ) );
-			}
-			if ( ! self::can_recover( array( 'target' => $input['id'] ) ) || ! \Modula\V2\Beta_Settings::is_beta_gallery( $input['id'] ) || 'trash' === get_post_status( $input['id'] ) || get_post_meta( $input['id'], '_modula_bind_target_type', true ) ) {
-				Revision::end( false );
-				$active = false;
-				return Requests::finish( $input['request_id'], $out( 'forbidden', 'current_permission_denied' ) );
-			}
-			$complete = true;
-			if ( 'playlist' === $input['kind'] ) {
-				$snaps = Service::get_video_playlist_snap( $input['url'], $input['max_sources'] ?? 100, $complete );
-			} else {
-				$snap  = Service::get_video_snap( $input['url'], true );
-				$snaps = is_array( $snap ) ? array( $snap + array( 'video_url' => $input['url'] ) ) : array();
-			}
-			Revision::end( true );
-			$active = false;
-			if ( ! is_array( $snaps ) || isset( $snaps['error'] ) || ! $snaps ) {
-				return Requests::finish( $input['request_id'], $out( 'rejected', 'provider_source_unavailable' ) + array( 'video' => $progress ) );
-			}
-			foreach ( array_slice( $snaps, 0, 100 ) as $snap ) {
-				if ( ! is_array( $snap ) || ! self::provider_url( (string) ( $snap['video_url'] ?? '' ) ) ) {
-					$complete = false;
-					continue;
-				}
-				$progress['sources'][] = self::clean_source( $snap, $snap['video_url'] );
-				Requests::context( $input['request_id'], array( 'video' => $progress ) );
-			}
-			$progress['phase']    = 'resolved';
-			$progress['complete'] = $complete && count( $snaps ) <= 100;
-			return Requests::finish( $input['request_id'], $out( $progress['complete'] ? 'succeeded' : 'partial', $progress['complete'] ? '' : 'provider_incomplete' ) + array( 'video' => $progress ) );
-		} catch ( \Throwable $error ) {
-			if ( $active ) {
-				Revision::end( false );
-			}
-			return Requests::finish( $input['request_id'], $out( 'uncertain', 'provider_unconfirmed' ) + array( 'video' => $progress ) );
-		}
+		return true;
+	}
+	/**
+	 * @param array<string,mixed> $parts Parsed URL parts.
+	 */
+	private static function vimeo_channel_path( array $parts ): bool {
+		$path = (string) ( $parts['path'] ?? '' );
+		return ( ! isset( $parts['query'] ) || '' === $parts['query'] ) && 1 === preg_match( '~^/channels/[A-Za-z0-9_-]+/?$~D', $path );
 	}
 	public static function referenced_attachment_ids( array $changes, int $gallery = 0 ): array {
 		$ids     = array_column( $changes, 'attachment_id' );
@@ -273,127 +319,5 @@ final class Video {
 			}
 		}
 		return array_values( array_unique( array_map( 'intval', $ids ) ) );
-	}
-	private static function index( array $items, $id ): int {
-		$found = array_keys(
-			array_filter(
-				$items,
-				static function ( $row ) use ( $id ) {
-					return (string) ( $row['id'] ?? '' ) === (string) $id;
-				}
-			)
-		);
-		return 1 === count( $found ) ? $found[0] : -1;
-	}
-	public static function prepare( int $id, array $changes ) {
-		if ( ! self::available() ) {
-			return new \WP_Error( 'video_unavailable', 'Active Video extension required.' );
-		}
-		foreach ( self::referenced_attachment_ids( $changes, $id ) as $attachment ) {
-			if ( ! Attachments::can_read( $attachment ) ) {
-				return new \WP_Error( 'video_attachment_forbidden', 'Current source and poster rights required.' );
-			}
-		}
-		$items  = Meta_Sync::get_images_v2( $id );
-		$placed = array();
-		foreach ( $changes as $change ) {
-			$action  = $change['action'];
-			$item_id = $change['item_id'];
-			$index   = self::index( $items, $item_id );
-			if ( ( 'add' === $action && -1 !== $index ) || ( 'add' !== $action && ( $index < 0 || ! Adapter::is_video_template_row( $items[ $index ] ) ) ) ) {
-				return new \WP_Error( 'invalid_video_identity', 'Add needs an absent identity; other actions need one existing video item.' );
-			}
-			$source_fields = isset( $change['attachment_id'] ) || isset( $change['source_request_id'] ) || isset( $change['source_index'] );
-			if ( ( 'add' !== $action && $source_fields ) || ( isset( $change['fields'] ) && ! in_array( $action, array( 'add', 'update' ), true ) ) || ( isset( $change['before_id'] ) && ! in_array( $action, array( 'add', 'move' ), true ) ) || ( 'update' === $action && empty( $change['fields'] ) ) ) {
-				return new \WP_Error( 'invalid_video_change', 'Source is add-only; fields are add/update-only; before_id is add/move-only.' );
-			}
-			if ( 'add' === $action ) {
-				if ( isset( $change['attachment_id'] ) === isset( $change['source_request_id'] ) || ( isset( $change['source_request_id'] ) !== isset( $change['source_index'] ) ) ) {
-					return new \WP_Error( 'invalid_video_source', 'Choose exactly one attachment or retained provider source.' );
-				}
-				if ( isset( $change['attachment_id'] ) ) {
-					$attachment = $change['attachment_id'];
-					if ( ! Attachments::can_read( $attachment ) || 'trash' === get_post_status( $attachment ) || strpos( (string) get_post_mime_type( $attachment ), 'video/' ) !== 0 ) {
-						return new \WP_Error( 'video_attachment_forbidden', 'An accessible existing video attachment is required.' );
-					}
-					$snap = Service::get_video_snap_from_attachment( $attachment );
-					$url  = wp_get_attachment_url( $attachment );
-				} else {
-					$record   = Requests::record( $change['source_request_id'] );
-					$resolved = Requests::recover( array( 'request_id' => $change['source_request_id'] ) );
-					if ( ! $record || self::RESOLVE !== $record['operation'] || $id !== (int) $record['target'] || ! in_array( $resolved['status'], array( 'succeeded', 'partial' ), true ) || ! isset( $resolved['video']['sources'][ $change['source_index'] ] ) ) {
-						return new \WP_Error( 'video_source_unavailable', 'Use a confirmed retained source from this gallery and actor.' );
-					}
-					$snap = $resolved['video']['sources'][ $change['source_index'] ];
-					$url  = $snap['video_url'];
-				}
-				$row = array(
-					'id'                 => $item_id,
-					'video_template'     => '1',
-					'video_url'          => $url,
-					'video_title'        => $snap['title'] ?? '',
-					'video_alt'          => '',
-					'video_description'  => $snap['description'] ?? '',
-					'thumbnail'          => $snap['thumb'] ?? '',
-					'video_thumbnail'    => $snap['thumb'] ?? '',
-					'full'               => $snap['thumb'] ?? '',
-					'title'              => $snap['title'] ?? '',
-					'description'        => $snap['description'] ?? '',
-					'width'              => 2,
-					'height'             => 2,
-					'video_width'        => $snap['width'] ?? 1920,
-					'video_height'       => $snap['height'] ?? 1080,
-					'autoplay_thumbnail' => 'inherit',
-					'autoplay_lightbox'  => 'inherit',
-					'loop_video'         => 'inherit',
-					'halign'             => 'center',
-					'valign'             => 'middle',
-					'link'               => '',
-					'target'             => '',
-					'togglelightbox'     => '',
-				);
-			} else {
-				$row = $items[ $index ];
-			}
-			// Recheck media rights on existing self-hosted rows too; row identities are not media permissions.
-			$local_id = attachment_url_to_postid( $row['video_url'] ?? '' );
-			if ( $local_id && ! Attachments::can_read( $local_id ) ) {
-				return new \WP_Error( 'video_attachment_forbidden', 'Current video attachment rights required.' );
-			}
-			if ( 'remove' === $action ) {
-				array_splice( $items, $index, 1 );
-				continue;
-			}
-			$fields = $change['fields'] ?? array();
-			$row    = array_replace( $row, $fields );
-			foreach ( array(
-				'video_title'       => 'title',
-				'video_description' => 'description',
-			) as $source => $target ) {
-				if ( isset( $fields[ $source ] ) ) {
-					$row[ $target ] = sanitize_textarea_field( $fields[ $source ] );
-					$row[ $source ] = $row[ $target ];
-				}
-			}
-			if ( isset( $fields['video_alt'] ) ) {
-				$row['video_alt'] = sanitize_text_field( $fields['video_alt'] );
-			}
-			if ( array_intersect_key( $fields, Composition::layout_fields() ) ) {
-				$placed[ $item_id ] = true;
-			}
-			if ( 'update' === $action ) {
-				$items[ $index ] = $row;
-				continue;
-			}
-			if ( 'move' === $action ) {
-				array_splice( $items, $index, 1 );
-			}
-			$before = isset( $change['before_id'] ) ? self::index( $items, $change['before_id'] ) : count( $items );
-			if ( $before < 0 ) {
-				return new \WP_Error( 'invalid_video_anchor', 'before_id must identify one existing item.' );
-			}
-			array_splice( $items, $before, 0, array( Adapter::normalize_item_row( Adapter::strip_bootstrap_only_row_keys( $row ) ) ) );
-		}
-		return Composition::validate_cells( $items, $placed );
 	}
 }

@@ -24,8 +24,8 @@ function sanitizeZipPreviewBase(raw) {
 
 /**
  * @param {Array<{ token?: string, label?: string, sample?: string }>} tokens
- * @param {string} pattern
- * @param {Record<string, string>} samples
+ * @param {string}                                                     pattern
+ * @param {Record<string, string>}                                     samples
  * @return {string}
  */
 function resolveZipPreview(tokens, pattern, samples) {

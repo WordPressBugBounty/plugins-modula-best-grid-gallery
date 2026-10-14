@@ -9,8 +9,8 @@ import {
 	useRef,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { useTakeoverSaveStatus } from 'editor-shell';
 import { uploadBrowserImageFilesToGallery } from '../../api/galleryUploadApi';
-import { useTakeoverSaveStatus } from '../../context/TakeoverSaveStatusContext';
 
 /**
  * @typedef {{ openFileDialog: () => void }} TakeoverImageUploaderHandle
@@ -25,7 +25,7 @@ import { useTakeoverSaveStatus } from '../../context/TakeoverSaveStatusContext';
  *   onError: (message: string) => void,
  *   runPersistTask?: (fn: () => void | Promise<void>) => Promise<void>,
  * }} props
- * @param {import('@wordpress/element').Ref<TakeoverImageUploaderHandle>} ref
+ * @param {import('@wordpress/element').Ref<TakeoverImageUploaderHandle>}       ref
  */
 function TakeoverImageUploader(
 	{
@@ -39,7 +39,8 @@ function TakeoverImageUploader(
 	ref
 ) {
 	const inputRef = useRef(null);
-	const { runPersistTask: runPersistTaskFromContext } = useTakeoverSaveStatus();
+	const { runPersistTask: runPersistTaskFromContext } =
+		useTakeoverSaveStatus();
 	const runPersistTask = runPersistTaskProp ?? runPersistTaskFromContext;
 
 	const processFiles = useCallback(

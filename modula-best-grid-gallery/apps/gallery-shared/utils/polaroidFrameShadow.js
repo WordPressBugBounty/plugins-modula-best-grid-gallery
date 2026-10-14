@@ -45,7 +45,7 @@ export function isPolaroidPresetShadowColor(shadowColor) {
 
 /**
  * @param {unknown} shadowColor
- * @param {number} size
+ * @param {number}  size
  * @return {string}
  */
 function polaroidShadowColor(shadowColor, size) {

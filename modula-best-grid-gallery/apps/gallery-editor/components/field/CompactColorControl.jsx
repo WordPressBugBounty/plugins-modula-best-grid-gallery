@@ -36,14 +36,14 @@ function isEmptyColor(value) {
 }
 
 /**
- * @param {Object}        props
- * @param {string}        props.value
- * @param {Function}      props.onChange
- * @param {boolean}       props.disabled
- * @param {boolean}       [props.enableAlpha]  When true, picker allows alpha and saves `rgba(...)`.
- * @param {boolean}       [props.clearable]    Empty value = cleared; chip shows clear label.
- * @param {string}        [props.clearLabel]   Clear button + empty chip label (default: Inherit).
- * @param {'default'|'swatch'} [props.variant]  swatch = chip (square + value), opens picker
+ * @param {Object}             props
+ * @param {string}             props.value
+ * @param {Function}           props.onChange
+ * @param {boolean}            props.disabled
+ * @param {boolean}            [props.enableAlpha] When true, picker allows alpha and saves `rgba(...)`.
+ * @param {boolean}            [props.clearable]   Empty value = cleared; chip shows clear label.
+ * @param {string}             [props.clearLabel]  Clear button + empty chip label (default: Inherit).
+ * @param {'default'|'swatch'} [props.variant]     swatch = chip (square + value), opens picker
  */
 export default function CompactColorControl({
 	value,
@@ -144,7 +144,10 @@ export default function CompactColorControl({
 				empty
 					? sprintf(
 							/* translators: %s: clear / inherit label. */
-							__('Open color picker (%s)', 'modula-best-grid-gallery'),
+							__(
+								'Open color picker (%s)',
+								'modula-best-grid-gallery'
+							),
 							emptyLabel
 						)
 					: __('Open color picker', 'modula-best-grid-gallery')

@@ -13,7 +13,7 @@ import { isLazyLoadEnabled, LAZY_IMAGE_ROOT_MARGIN } from '../utils/lazyLoad';
  * Strip classes that belong on the full image only (legacy `.pic`, wp attachment ids).
  *
  * @param {string} className
- * @returns {string}
+ * @return {string}
  */
 function normalizePlaceholderClassName(className) {
 	return String(className || '')
@@ -29,14 +29,14 @@ function normalizePlaceholderClassName(className) {
 }
 
 /**
- * @param {Object}                            props
- * @param {boolean|number|string|undefined}   props.lazyLoad
- * @param {boolean}                           [props.fillParent]
- * @param {string}                            [props.placeholderSrc]
- * @param {string}                            [props.placeholderClassName]
- * @param {Object}                            [props.placeholderStyle]
- * @param {import('react').ReactNode}         props.children
- * @param {string}                            [props.className]
+ * @param {Object}                          props
+ * @param {boolean|number|string|undefined} props.lazyLoad
+ * @param {boolean}                         [props.fillParent]
+ * @param {string}                          [props.placeholderSrc]
+ * @param {string}                          [props.placeholderClassName]
+ * @param {Object}                          [props.placeholderStyle]
+ * @param {import('react').ReactNode}       props.children
+ * @param {string}                          [props.className]
  */
 export default function LazyPictureGate({
 	lazyLoad,

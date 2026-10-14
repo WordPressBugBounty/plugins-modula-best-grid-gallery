@@ -8,7 +8,7 @@ export const SETTINGS_EDITOR_PREVIEW = 'settings-editor-preview';
 
 /**
  * @param {{ displayContext?: string }|null|undefined} metadata
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isSettingsEditorPreview(metadata) {
 	return metadata?.displayContext === SETTINGS_EDITOR_PREVIEW;
@@ -16,7 +16,7 @@ export function isSettingsEditorPreview(metadata) {
 
 /**
  * @param {{ displayContext?: string }|null|undefined} metadata
- * @returns {boolean}
+ * @return {boolean}
  */
 export function shouldHideVisitorChrome(metadata) {
 	return isSettingsEditorPreview(metadata);
@@ -24,7 +24,7 @@ export function shouldHideVisitorChrome(metadata) {
 
 /**
  * @param {{ displayContext?: string, staticStoryLayout?: boolean }|null|undefined} metadata
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isStaticStoryPreview(metadata) {
 	return (

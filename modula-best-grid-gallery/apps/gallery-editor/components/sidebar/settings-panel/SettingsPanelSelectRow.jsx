@@ -3,6 +3,7 @@
  */
 import { FieldStack, SettingsRow } from 'shared-ui';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTakeoverSaveStatus } from 'editor-shell';
 import { useGallerySettingsFormBundle } from '../../../form/GallerySettingsFormContext';
 import { validateFieldValue } from '../../../logic/validateFieldValue';
 import { useModulaSettingsEditorConfig } from '../../../hooks/useModulaSettingsEditorConfig';
@@ -15,7 +16,6 @@ import {
 } from '../../../logic/settingsFieldDefault';
 import FieldControl from '../../field/FieldControl';
 import { shouldUseMenuSelect } from '../../field/kinds/selectKind';
-import { useTakeoverSaveStatus } from '../../../context/TakeoverSaveStatusContext';
 import { getGalleryPreviewReduxStore } from '../../../utils/previewReduxStoreRef';
 import { seedTemplateContentBlocksForLayout } from '../../../logic/applyTemplateLayoutSideEffects';
 

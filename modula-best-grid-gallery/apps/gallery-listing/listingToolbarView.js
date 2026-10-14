@@ -59,7 +59,7 @@ export function getListingOnlyShowFields({
 /**
  * Drop Only show filters the current site cannot offer (Lite paywalled, or no albums).
  *
- * @param {ListingView} view
+ * @param {ListingView}                              view
  * @param {{ hasAlbums?: boolean, isPro?: boolean }} [options]
  * @return {ListingView}
  */
@@ -121,7 +121,7 @@ export function getListingStatusValue(view) {
 
 /**
  * @param {ListingView} view
- * @param {string} statusValue
+ * @param {string}      statusValue
  * @return {ListingView}
  */
 export function applyListingStatusFilter(view, statusValue) {
@@ -186,7 +186,7 @@ export function getListingSortValue(view) {
 
 /**
  * @param {ListingView} view
- * @param {string} sortValue
+ * @param {string}      sortValue
  * @return {ListingView}
  */
 export function applyListingSort(view, sortValue) {
@@ -260,7 +260,7 @@ export function getListingStatusTriggerLabel(statusValue) {
 
 /**
  * @param {ListingView} view
- * @param {string} field
+ * @param {string}      field
  * @return {boolean}
  */
 export function isListingOnlyShowFilterActive(view, field) {
@@ -279,8 +279,8 @@ export function isListingOnlyShowFilterActive(view, field) {
 
 /**
  * @param {ListingView} view
- * @param {string} field
- * @param {boolean} active
+ * @param {string}      field
+ * @param {boolean}     active
  * @return {ListingView}
  */
 export function setListingOnlyShowFilter(view, field, active) {

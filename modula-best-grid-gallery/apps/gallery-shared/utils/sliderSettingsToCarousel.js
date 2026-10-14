@@ -51,10 +51,10 @@ function parseCenterPaddingPx(raw) {
  * Pro parity (class-enqueue.php): center mode narrows tiles so neighbors peek.
  * Non-center uses equal flex + --f-carousel-gap.
  *
- * @param {number} n
+ * @param {number}  n
  * @param {boolean} centerMode
  * @param {unknown} centerPaddingRaw
- * @param {number} gutterPx
+ * @param {number}  gutterPx
  * @return {string}
  */
 function carouselSlideWidthForRow(n, centerMode, centerPaddingRaw, gutterPx) {
@@ -123,8 +123,8 @@ function normalizeImageSizeDimensionsCatalog(catalog) {
 /**
  * Pixel size for the thumbs strip when nav size is Custom or a registered WP size.
  *
- * @param {string} navSize
- * @param {Object} slider
+ * @param {string}                                            navSize
+ * @param {Object}                                            slider
  * @param {Record<string, { width: number, height: number }>} catalog
  * @return {{ width: number, height: number }|null}
  */
@@ -186,9 +186,9 @@ function resolveNavThumbPixelSize(navSize, slider, catalog) {
  *   sized to N slots so Sync advances by thumb-page
  *   (@see https://fancyapps.com/carousel/plugins/thumbs/).
  *
- * @param {unknown} rawVisible
- * @param {number} gutterPx
- * @param {Object} slider
+ * @param {unknown}                                           rawVisible
+ * @param {number}                                            gutterPx
+ * @param {Object}                                            slider
  * @param {Record<string, { width: number, height: number }>} [imageSizeDimensions]
  * @return {{
  *   type?: 'classic'|'modern',
@@ -332,7 +332,7 @@ export function toBool(v) {
 
 /**
  * @param {unknown} raw
- * @param {number} [fallback=1]
+ * @param {number}  [fallback=1]
  * @return {number}
  */
 function parsePositiveInt(raw, fallback = 1) {
@@ -344,7 +344,7 @@ function parsePositiveInt(raw, fallback = 1) {
  * Fancyapps page size for a row: Thumbs Sync needs 1-slide pages; otherwise
  * multi-tile rows use "auto" so CSS slide width packs the viewport.
  *
- * @param {number} slidesToShow
+ * @param {number}  slidesToShow
  * @param {boolean} useThumbsPlugin
  * @return {1|'auto'}
  */
@@ -356,8 +356,8 @@ function slidesPerPageForRow(slidesToShow, useThumbsPlugin) {
  * Arrow/keyboard step when it must differ from Fancyapps’ native page size.
  * 0 = leave next/prev alone.
  *
- * @param {number} slidesToShow
- * @param {number} slidesToScroll
+ * @param {number}  slidesToShow
+ * @param {number}  slidesToScroll
  * @param {boolean} useThumbsPlugin
  * @return {number}
  */
@@ -369,13 +369,13 @@ function navigationStepForRow(slidesToShow, slidesToScroll, useThumbsPlugin) {
 /**
  * Carousel options that change with visible slide count (desktop / tablet / mobile).
  *
- * @param {object} args
- * @param {number} args.slidesToShow
+ * @param {Object}  args
+ * @param {number}  args.slidesToShow
  * @param {boolean} args.centerModeOn
  * @param {boolean} args.adaptiveHeight
  * @param {boolean} args.useThumbsPlugin
  * @param {unknown} args.centerPadding
- * @param {number} args.gutterPx
+ * @param {number}  args.gutterPx
  * @return {Object}
  */
 function carouselOptionsForSlideRow({
@@ -436,8 +436,8 @@ export function resolveSliderNavViewport(forcedPreview) {
 
 /**
  * @param {{ desktop?: number, tablet?: number, mobile?: number }|null|undefined} steps
- * @param {number} fallback
- * @param {'desktop'|'tablet'|'mobile'|null|undefined} forcedPreview
+ * @param {number}                                                                fallback
+ * @param {'desktop'|'tablet'|'mobile'|null|undefined}                            forcedPreview
  * @return {number}
  */
 export function resolveSliderNavigationStep(steps, fallback, forcedPreview) {
@@ -473,7 +473,7 @@ export function resolveSliderSlideAspectRatio(settings) {
 }
 
 /**
- * @param {Object} settings - Grouped v2 settings.
+ * @param {Object}                                                                     settings - Grouped v2 settings.
  * @param {{
  *   previewViewport?: 'desktop'|'tablet'|'mobile',
  *   imageSizeDimensions?: Record<string, { width?: number, height?: number }>,

@@ -68,7 +68,7 @@ export function stripRemovedImageFiltersFromCoreItems(coreItems, removedNames) {
  * path / empty placeholder). Only strip orphans when the gallery list has
  * at least one real name.
  *
- * @param {Object[]} coreItems Preview catalog (gallery items).
+ * @param {Object[]} coreItems          Preview catalog (gallery items).
  * @param {string[]} galleryFilterNames Active gallery filter labels.
  * @return {{ items: Object[], changed: boolean }}
  */

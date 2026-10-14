@@ -7,8 +7,8 @@ import {
 	GalleryPreviewAdminActionsContext,
 	GalleryPreviewEagerLayoutsContext,
 	isEmbeddedGalleryItemRow,
-	isVideoGalleryItem,
 } from 'gallery-shared/preview';
+import FreeformEditorLayout from './FreeformEditorLayout';
 import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import '../../styles/takeover/preview/_hover-effect-builder.scss';
 import { __, sprintf } from '@wordpress/i18n';
@@ -20,6 +20,7 @@ import { useWatermarkPreviewSelection } from '../../context/WatermarkPreviewSele
 import { useGalleryPreviewTileSelection } from '../../context/GalleryPreviewTileSelectionContext';
 import GalleryTakeoverPreviewChrome from './GalleryTakeoverPreviewChrome';
 import GalleryTakeoverPreviewEmptyState from './GalleryTakeoverPreviewEmptyState';
+import { galleryHasPreviewContent } from './galleryPreviewContent';
 import GalleryTakeoverPreviewUploadDropZone from './GalleryTakeoverPreviewUploadDropZone';
 import { useGalleryTakeoverLivePreviewController } from '../../hooks/useGalleryTakeoverLivePreviewController';
 import { PreviewItemPersistProvider } from '../../context/PreviewItemPersistContext';
@@ -32,6 +33,8 @@ import { usePaginationRegistration } from '../../hooks/usePaginationRegistration
 import { captionToPlainString } from '../../utils/captionToPlainString';
 import { setGalleryPreviewAdminActions } from '../../utils/previewAdminActionsRef';
 import { notifyPreviewAdminActionsListeners } from '../../hooks/useGalleryPreviewAdminActionsOptional';
+
+const EDITOR_LAYOUTS = { ...EAGER_LAYOUTS, freeform: FreeformEditorLayout };
 
 /**
  * @param {{
@@ -210,7 +213,7 @@ function GalleryTakeoverLivePreviewMounted({
 		if (!previewAdminValue) {
 			return previewAdminValue;
 		}
-		let next = previewAdminValue;
+		let next = { ...previewAdminValue, previewViewport };
 		if (watermarkSelection) {
 			next = {
 				...next,
@@ -238,7 +241,7 @@ function GalleryTakeoverLivePreviewMounted({
 			};
 		}
 		return next;
-	}, [previewAdminValue, watermarkSelection, tileSelection]);
+	}, [previewAdminValue, watermarkSelection, tileSelection, previewViewport]);
 
 	useEffect(() => {
 		setGalleryPreviewAdminActions(previewAdminValueWithExtras || null);
@@ -261,12 +264,10 @@ function GalleryTakeoverLivePreviewMounted({
 		isLightboxPreview &&
 		(lightboxClickMode === 'fancybox' ||
 			lightboxClickMode === 'lightbox-prefer-url');
-	const isVideoGallery = galleryType === 'video';
-	const hasGalleryImages = hasGalleryPreviewImageRows(bootstrap?.items);
-	const hasGalleryVideos = hasGalleryPreviewVideoRows(bootstrap?.items);
-	const hasPreviewContent = isVideoGallery
-		? hasGalleryVideos
-		: hasGalleryImages;
+	const hasPreviewContent = galleryHasPreviewContent(
+		bootstrap?.items,
+		galleryType
+	);
 	const hoverSampleRow = pickFirstGalleryRowForHoverPreview(bootstrap?.items);
 
 	return (
@@ -408,7 +409,7 @@ function GalleryTakeoverLivePreviewMounted({
 								>
 									<Provider store={store}>
 										<GalleryPreviewEagerLayoutsContext.Provider
-											value={EAGER_LAYOUTS}
+											value={EDITOR_LAYOUTS}
 										>
 											<div
 												id={`modula-${galleryId}`}
@@ -442,48 +443,10 @@ function GalleryTakeoverLivePreviewMounted({
 }
 
 /**
- * Whether bootstrap rows contain at least one video entry (URL or template row).
- *
- * @param {unknown[]} items
- * @returns {boolean}
- */
-function hasGalleryPreviewVideoRows(items) {
-	if (!Array.isArray(items)) {
-		return false;
-	}
-	return items.some((row) => isVideoGalleryItem(row));
-}
-
-/**
- * Whether bootstrap rows currently contain at least one real image entry.
- *
- * @param {unknown[]} items
- * @returns {boolean}
- */
-function hasGalleryPreviewImageRows(items) {
-	if (!Array.isArray(items)) {
-		return false;
-	}
-	return items.some((row) => {
-		if (!row || typeof row !== 'object') {
-			return false;
-		}
-		if (isEmbeddedGalleryItemRow(row)) {
-			return false;
-		}
-		return Boolean(
-			(typeof row.src === 'string' && row.src) ||
-				(typeof row.thumbnail === 'string' && row.thumbnail) ||
-				(typeof row.url === 'string' && row.url)
-		);
-	});
-}
-
-/**
  * First non-embedded image row for the Hover builder preview tile (same row as image metadata).
  *
  * @param {unknown[]} items Bootstrap gallery rows.
- * @returns {{ src: string, alt: string, title: string, description: string }}
+ * @return {{ src: string, alt: string, title: string, description: string }}
  */
 function pickFirstGalleryRowForHoverPreview(items) {
 	const empty = { src: '', alt: '', title: '', description: '' };

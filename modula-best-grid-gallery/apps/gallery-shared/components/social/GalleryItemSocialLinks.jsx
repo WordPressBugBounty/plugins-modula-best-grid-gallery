@@ -7,10 +7,10 @@
 import { MODULA_SOCIAL_ICON_BY_TYPE } from './ModulaSocialIcons';
 
 /**
- * @param {Object}        props
- * @param {string|number} props.itemId
+ * @param {Object}                                               props
+ * @param {string|number}                                        props.itemId
  * @param {Array<{ type: string, label: string, url?: string }>} props.socials
- * @param {number}        [props.iconSize]
+ * @param {number}                                               [props.iconSize]
  */
 export default function GalleryItemSocialLinks({
 	itemId,

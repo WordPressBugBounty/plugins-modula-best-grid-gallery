@@ -52,9 +52,9 @@ export function isModulaLightboxActiveForGalleryElement(host) {
 }
 
 /**
- * @param {HTMLElement} host
+ * @param {HTMLElement}               host
  * @param {() => Promise<Array|null>} prepare Arguments for the session open.
- * @returns {Promise<boolean>}
+ * @return {Promise<boolean>}
  */
 export function requestModulaLightboxOpen(host, prepare) {
 	if (pendingOpen && !pendingOpen.failed) {

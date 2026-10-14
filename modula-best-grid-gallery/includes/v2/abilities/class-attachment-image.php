@@ -19,6 +19,18 @@ final class Attachment_Image {
 		);
 	}
 
+	public static function abilities(): array {
+		return Operation_Table::from_callbacks(
+			self::callbacks(),
+			array(
+				'permission' => array( Media_Folders::class, 'can_manage' ),
+				'available'  => array( Media_Folders::class, 'can_manage' ),
+				'dependency' => 'folders',
+				'mcp_public' => array( Folders_Dependency::class, 'mcp_folders' ),
+			)
+		);
+	}
+
 	public static function definitions(): array {
 		$id         = array(
 			'id' => array(

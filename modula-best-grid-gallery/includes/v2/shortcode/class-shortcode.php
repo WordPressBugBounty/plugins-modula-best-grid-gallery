@@ -31,7 +31,7 @@ class Shortcode {
 	 */
 	public function __construct( $register_shortcode = true ) {
 		$this->item_processor = new \Modula_Item_Data_Processor();
-		add_filter( 'modula_shortcode_item_data', array( '\Modula_Item_Data_Processor', 'prepare_beta_responsive_images' ), 95, 3 );
+		add_filter( 'modula_shortcode_item_data', array( '\Modula_Item_Data_Processor', 'prepare_beta_responsive_images' ), 95, 4 );
 
 		if ( ! $register_shortcode ) {
 			return;
@@ -518,8 +518,7 @@ class Shortcode {
 			\Modula\V2\Modern_Gallery::is_pagination_mode_enabled( $flat )
 		);
 
-		$types_without_chrome = $this->get_types_without_filter_pagination_chrome();
-		$skips_chrome         = in_array( $type, $types_without_chrome, true );
+		$skips_chrome = \Modula\V2\Modern_Gallery::is_type_without_filter_pagination_chrome( (string) $type );
 
 		if ( $editor_preview ) {
 			$filtering_cfg['activeFilters'] = array();
@@ -560,6 +559,7 @@ class Shortcode {
 			'catalogPaged'         => $effective_catalog,
 			'imageSizeDimensions'  => \Modula_Helper::get_image_sizes( false ),
 			'zoomExtensionActive'  => $this->is_zoom_extension_active(),
+			'freeformAvailable'    => modula_is_compatible_pro(),
 			'blockAlign'           => is_string( $settings['align'] ?? null ) ? (string) $settings['align'] : '',
 		);
 		if ( ! $editor_preview && null !== $shuffle_seed && (int) $shuffle_seed > 0 ) {
@@ -601,15 +601,6 @@ class Shortcode {
 		}
 
 		return $this->apply_editor_preview_bootstrap( $gallery_data, $gallery_id, $type );
-	}
-
-	/**
-	 * Gallery types that disable filter/pagination chrome on the public frontend.
-	 *
-	 * @return array<int, string>
-	 */
-	private function get_types_without_filter_pagination_chrome() {
-		return array( 'slider', 'story', 'parallax-masonry', 'bnb', 'video' );
 	}
 
 	/**
@@ -793,6 +784,9 @@ class Shortcode {
 					continue;
 				}
 				$items[] = $embedded;
+				if ( isset( $image['freeformId'] ) ) {
+					$items[ count( $items ) - 1 ]['freeformId'] = $image['freeformId'];
+				}
 				continue;
 			}
 
@@ -819,6 +813,9 @@ class Shortcode {
 			}
 
 			$items[] = $converted_item;
+			if ( isset( $image['freeformId'] ) ) {
+				$items[ count( $items ) - 1 ]['freeformId'] = $image['freeformId'];
+			}
 		}
 
 		if ( $skip_image_guardian ) {

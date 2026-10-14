@@ -67,7 +67,10 @@ export default function PostPickerField({
 							path: `/wp/v2/posts/${id}?_fields=id,title`,
 						});
 						const title = post?.title?.rendered
-							? String(post.title.rendered).replace(/<[^>]+>/g, '')
+							? String(post.title.rendered).replace(
+									/<[^>]+>/g,
+									''
+								)
 							: `#${id}`;
 						next[id] = title;
 					} catch (err) {

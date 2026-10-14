@@ -10,8 +10,8 @@
 import { resolveGalleryItemImageIdFromLightboxSlide } from '../utils/resolveGalleryItemImageId';
 
 /**
- * @param {string} eventName Fancybox event name (dots become underscores).
- * @param {unknown} fancybox Fancybox instance.
+ * @param {string}  eventName Fancybox event name (dots become underscores).
+ * @param {unknown} fancybox  Fancybox instance.
  * @param {unknown} [payload]
  */
 export function dispatchModulaFancyboxEvent(eventName, fancybox, payload) {
@@ -29,8 +29,8 @@ export function dispatchModulaFancyboxEvent(eventName, fancybox, payload) {
 
 /**
  * @param {import('@fancyapps/ui/dist/fancybox/fancybox.js').FancyboxInstance} fancybox
- * @param {number} index
- * @param {object} opts
+ * @param {number}                                                             index
+ * @param {Object}                                                             opts
  */
 export function dispatchModulaCarouselSelectSlide(fancybox, index, opts) {
 	const carousel = fancybox?.getCarousel?.();
@@ -62,8 +62,8 @@ export function dispatchModulaCarouselSelectSlide(fancybox, index, opts) {
 
 /**
  * @param {Array<unknown>} links
- * @param {object} opts
- * @param {number} index
+ * @param {Object}         opts
+ * @param {number}         index
  */
 export function dispatchModulaFancyboxBeforeOpen(links, opts, index) {
 	document.dispatchEvent(

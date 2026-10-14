@@ -30,7 +30,8 @@ function readEditorAppearanceColors() {
 	}
 	const styles = window.getComputedStyle(app);
 	return {
-		background: styles.getPropertyValue('--mod-se-surface').trim() || '#202126',
+		background:
+			styles.getPropertyValue('--mod-se-surface').trim() || '#202126',
 		color: styles.getPropertyValue('--mod-se-ink').trim() || '#ececef',
 	};
 }
@@ -106,7 +107,7 @@ function blurTinyMceEditor(editor) {
  * TinyMCE API differs by bundled version: WP may ship editors with `mode.set` (v5+) or only `setMode` (v4).
  *
  * @param {{ removed?: boolean, mode?: { set?: (m: string) => void }, setMode?: (m: string) => void } | null | undefined} editor
- * @param {boolean} readOnly
+ * @param {boolean}                                                                                                       readOnly
  */
 function setTinyMceReadOnly(editor, readOnly) {
 	if (!editor || editor.removed) {
@@ -127,20 +128,20 @@ function setTinyMceReadOnly(editor, readOnly) {
 }
 
 /**
- * @param {Object}              props
- * @param {string}              props.editorInstanceKey Stable key per image row (e.g. `${storeIndex}-${attachmentId}`).
- * @param {string}              props.value             HTML caption.
- * @param {(v: string) => void} props.onChange
- * @param {boolean}             props.disabled
- * @param {string}              props.accessibleLabel   Same as visible field label (textarea aria-label).
- * @param {string}              [props.className]       Textarea class (bulk edit uses a compact skin).
- * @param {number}              [props.rows]            Native textarea rows before TinyMCE mounts.
- * @param {Record<string, unknown>} [props.tinymceOptions] Merged into default TinyMCE config.
- * @param {boolean}             [props.preventInitFocus] When true, blur TinyMCE after init and call `onAfterInit` (modal keeps focus on another field).
- * @param {boolean}             [props.autoFocusOnInit]  When true, focus TinyMCE after init (bulk-edit inline description).
- * @param {boolean}             [props.enableCodeView]   When true, enable Quicktags + Visual/Text tabs so authors can inspect/edit HTML source.
- * @param {() => void}          [props.onAfterInit]      Run after init when `preventInitFocus` is set.
- * @param {() => void}          [props.onEscape]         Called when Escape is pressed in the caption field (textarea or TinyMCE).
+ * @param {Object}                  props
+ * @param {string}                  props.editorInstanceKey  Stable key per image row (e.g. `${storeIndex}-${attachmentId}`).
+ * @param {string}                  props.value              HTML caption.
+ * @param {(v: string) => void}     props.onChange
+ * @param {boolean}                 props.disabled
+ * @param {string}                  props.accessibleLabel    Same as visible field label (textarea aria-label).
+ * @param {string}                  [props.className]        Textarea class (bulk edit uses a compact skin).
+ * @param {number}                  [props.rows]             Native textarea rows before TinyMCE mounts.
+ * @param {Record<string, unknown>} [props.tinymceOptions]   Merged into default TinyMCE config.
+ * @param {boolean}                 [props.preventInitFocus] When true, blur TinyMCE after init and call `onAfterInit` (modal keeps focus on another field).
+ * @param {boolean}                 [props.autoFocusOnInit]  When true, focus TinyMCE after init (bulk-edit inline description).
+ * @param {boolean}                 [props.enableCodeView]   When true, enable Quicktags + Visual/Text tabs so authors can inspect/edit HTML source.
+ * @param {() => void}              [props.onAfterInit]      Run after init when `preventInitFocus` is set.
+ * @param {() => void}              [props.onEscape]         Called when Escape is pressed in the caption field (textarea or TinyMCE).
  */
 export default function WpClassicCaptionEditor({
 	editorInstanceKey,
@@ -246,32 +247,32 @@ export default function WpClassicCaptionEditor({
 				auto_focus: false,
 				setup: (editor) => {
 					parentSetup?.(editor);
-						editor.on('init', () => {
-							const html =
-								typeof valueRef.current === 'string'
-									? valueRef.current
-									: '';
-							setEditorContentSilently(editor, html);
-							applyTinyMceAppearanceColors(editor);
-							if (disabledRef.current) {
-								setTinyMceReadOnly(editor, true);
-							}
-							if (autoFocusOnInitRef.current) {
-								scheduleOnNextTick(() => {
-									try {
-										editor.focus();
-									} catch {
-										// Non-fatal when the iframe is not ready yet.
-									}
-									onAfterInitRef.current?.();
-								});
-							} else if (preventInitFocusRef.current) {
-								scheduleOnNextTick(() => {
-									blurTinyMceEditor(editor);
-									onAfterInitRef.current?.();
-								});
-							}
-						});
+					editor.on('init', () => {
+						const html =
+							typeof valueRef.current === 'string'
+								? valueRef.current
+								: '';
+						setEditorContentSilently(editor, html);
+						applyTinyMceAppearanceColors(editor);
+						if (disabledRef.current) {
+							setTinyMceReadOnly(editor, true);
+						}
+						if (autoFocusOnInitRef.current) {
+							scheduleOnNextTick(() => {
+								try {
+									editor.focus();
+								} catch {
+									// Non-fatal when the iframe is not ready yet.
+								}
+								onAfterInitRef.current?.();
+							});
+						} else if (preventInitFocusRef.current) {
+							scheduleOnNextTick(() => {
+								blurTinyMceEditor(editor);
+								onAfterInitRef.current?.();
+							});
+						}
+					});
 					editor.on('change keyup paste input NodeChange', () => {
 						if (suppressChangeRef.current || disabledRef.current) {
 							return;

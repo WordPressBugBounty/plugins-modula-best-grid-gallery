@@ -9,7 +9,7 @@
  * @param {string} prefix
  * @param {string} selector
  * @param {string} prefixedSelector
- * @returns {string}
+ * @return {string}
  */
 function transformFancyboxVendorSelector(prefix, selector, prefixedSelector) {
 	const trimmed = String(selector || '').trim();
@@ -23,7 +23,7 @@ function transformFancyboxVendorSelector(prefix, selector, prefixedSelector) {
 }
 
 /**
- * @returns {import('postcss').AcceptedPlugin}
+ * @return {import('postcss').AcceptedPlugin}
  */
 function createFancyboxVendorPrefixPlugin() {
 	// eslint-disable-next-line @typescript-eslint/no-var-requires -- webpack/CommonJS seam

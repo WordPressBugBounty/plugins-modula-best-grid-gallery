@@ -30,8 +30,8 @@ const ELEVATE_ZOOM_BUTTON_TPL =
 /**
  * Whether Loop slides is on (`loop_lightbox` flat key).
  *
- * @param {object} flat
- * @returns {boolean}
+ * @param {Object} flat
+ * @return {boolean}
  */
 function isLoopLightboxEnabled(flat) {
 	const raw = flat?.loop_lightbox;
@@ -58,9 +58,9 @@ const V6_SIDEBAR_MAIN_TPL = (position) =>
 /**
  * Fancybox v6 main template when Pro Comments sidebar is active.
  *
- * @param {boolean} sidebarHidden Start with comments panel collapsed.
+ * @param {boolean}     sidebarHidden           Start with comments panel collapsed.
  * @param {string|null} [thumbsSidebarPosition] Left/right thumbs strip outside comments grid.
- * @returns {string}
+ * @return {string}
  */
 const V6_COMMENTS_MAIN_TPL = (sidebarHidden, thumbsSidebarPosition = null) => {
 	const thumbsSidebar =
@@ -110,7 +110,7 @@ const DEFAULT_L10N = {
  * Map Modula transitionEffect values to Fancybox v6 Carousel.transition.
  *
  * @param {string|undefined} effect
- * @returns {string|undefined}
+ * @return {string|undefined}
  */
 function mapModulaCarouselTransition(effect) {
 	if (!effect || effect === 'false') {
@@ -125,7 +125,7 @@ function mapModulaCarouselTransition(effect) {
 
 /**
  * @param {boolean} enabled
- * @returns {object}
+ * @return {Object}
  */
 function buildKeyboardMap(enabled) {
 	if (enabled) {
@@ -155,14 +155,14 @@ function buildKeyboardMap(enabled) {
 }
 
 /**
- * @param {object} flat
+ * @param {Object}  flat
  * @param {boolean} editorPreview
- * @returns {boolean}
+ * @return {boolean}
  */
 /**
- * @param {object} flat
+ * @param {Object}  flat
  * @param {boolean} [_editorPreview]
- * @returns {boolean}
+ * @return {boolean}
  */
 function shouldShowDownloadAllToolbarButton(flat, _editorPreview = false) {
 	if (flat.download_all_lightbox_button !== 1) {
@@ -174,7 +174,7 @@ function shouldShowDownloadAllToolbarButton(flat, _editorPreview = false) {
 
 /**
  * @param {*} raw
- * @returns {number}
+ * @return {number}
  */
 function resolveSlideshowAutoplayTimeoutMs(raw) {
 	const n = parseInt(raw, 10);
@@ -188,7 +188,7 @@ function resolveSlideshowAutoplayTimeoutMs(raw) {
  * Close is always the last toolbar icon on the right.
  *
  * @param {string[]} right
- * @returns {string[]}
+ * @return {string[]}
  */
 function pinCloseLast(right) {
 	const withoutClose = right.filter((key) => key !== 'close');
@@ -199,9 +199,9 @@ function pinCloseLast(right) {
 }
 
 /**
- * @param {object} flat
+ * @param {Object}  flat
  * @param {boolean} [editorPreview]
- * @returns {object}
+ * @return {Object}
  */
 function buildCarouselToolbarFromFlat(flat, editorPreview = false) {
 	const toolbarEnabled = flat.lightbox_toolbar === 1;
@@ -306,13 +306,13 @@ function buildCarouselToolbarFromFlat(flat, editorPreview = false) {
 }
 
 /**
- * @param {object} flat Legacy-shaped flat keys from grouped settings.
+ * @param {Object}                                          flat   Legacy-shaped flat keys from grouped settings.
  * @param {{ galleryId?: number, editorPreview?: boolean }} [opts]
- * @returns {object} Fancybox v6 options (layout finalized at open time).
+ * @return {Object} Fancybox v6 options (layout finalized at open time).
  */
 /**
- * @param {object} flat
- * @returns {boolean}
+ * @param {Object} flat
+ * @return {boolean}
  */
 function isModulaLightboxThumbsEnabled(flat) {
 	return flat.lightbox_thumbs === 1 || flat.lightbox_thumbsAutoStart === 1;
@@ -578,7 +578,7 @@ export function buildLightboxV6OptsFromFlat(flat, opts = {}) {
 }
 
 /**
- * @param {object} carousel
+ * @param {Object} carousel
  * @param {string} thumbsPosition
  */
 function applySidebarThumbsCarouselConfig(carousel, thumbsPosition) {
@@ -598,7 +598,7 @@ function applySidebarThumbsCarouselConfig(carousel, thumbsPosition) {
 }
 
 /**
- * @param {object} carousel
+ * @param {Object} carousel
  * @param {string} thumbsPosition
  */
 function applyBottomModernThumbsCarouselConfig(carousel, thumbsPosition) {
@@ -629,7 +629,7 @@ function applyBottomModernThumbsCarouselConfig(carousel, thumbsPosition) {
 
 /**
  * @param {string} position
- * @returns {(carouselInstance: object) => HTMLElement|null}
+ * @return {(carouselInstance: object) => HTMLElement|null}
  */
 function buildSidebarThumbsParentEl(position) {
 	return (carouselInstance) => {
@@ -657,9 +657,9 @@ function buildSidebarThumbsParentEl(position) {
 /**
  * Apply device / preview runtime adjustments to v6 opts.
  *
- * @param {object} v6Opts
+ * @param {Object}                                                                                         v6Opts
  * @param {{ isMobile?: boolean, compactToolbar?: boolean, editorPreview?: boolean, slideCount?: number }} [context]
- * @returns {object}
+ * @return {Object}
  */
 export function finalizeLightboxV6Runtime(v6Opts, context = {}) {
 	const next = { ...v6Opts };

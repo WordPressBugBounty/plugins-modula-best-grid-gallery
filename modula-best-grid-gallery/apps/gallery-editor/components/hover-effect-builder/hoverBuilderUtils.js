@@ -10,7 +10,7 @@ const DEFAULT_SLOT_POSITIONS = {
 
 /**
  * @param {unknown} value
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isEnabledFlag(value) {
 	return value === true || value === 1 || value === '1';
@@ -18,8 +18,8 @@ export function isEnabledFlag(value) {
 
 /**
  * @param {unknown} value
- * @param {number} fallback
- * @returns {number}
+ * @param {number}  fallback
+ * @return {number}
  */
 function normalizePercent(value, fallback) {
 	const n = Number(value);
@@ -61,8 +61,8 @@ export function chipPlainPreviewText(value) {
  * Read camelCase props; fall back to legacy lowercase (older PHP sanitizer used sanitize_key on object keys).
  *
  * @param {Record<string, unknown>} builder
- * @param {string} camel
- * @returns {unknown}
+ * @param {string}                  camel
+ * @return {unknown}
  */
 export function readHoverBuilderKey(builder, camel) {
 	if (!builder || typeof builder !== 'object') {
@@ -83,7 +83,10 @@ export function readHoverBuilderKey(builder, camel) {
 	return undefined;
 }
 
-/** @return {Record<string, { x: number, y: number }>} */
+/**
+ * @param  builder
+ * @return {Record<string, { x: number, y: number }>}
+ */
 export function mergeSlotPositions(builder) {
 	const rawSlot = readHoverBuilderKey(builder, 'slotPositions');
 	const raw =
@@ -107,8 +110,8 @@ export function mergeSlotPositions(builder) {
  * Typography from Captions & titles settings for WYSIWYG hover builder chips.
  *
  * @param {Record<string, unknown> | null | undefined} captions
- * @param {'title' | 'caption'} role
- * @returns {import('react').CSSProperties | undefined}
+ * @param {'title' | 'caption'}                        role
+ * @return {import('react').CSSProperties | undefined}
  */
 export function getCaptionsTypographyStyle(captions, role) {
 	if (!captions || typeof captions !== 'object') {

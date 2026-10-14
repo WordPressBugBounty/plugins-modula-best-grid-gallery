@@ -3,7 +3,7 @@ import { forwardRef, useId } from '@wordpress/element';
 /**
  * @param {Object}   props
  * @param {string}   [props.value]
- * @param {Function} [props.onChange] Receives string
+ * @param {Function} [props.onChange]    Receives string
  * @param {string}   [props.type='text']
  * @param {boolean}  [props.disabled]
  * @param {string}   [props.help]

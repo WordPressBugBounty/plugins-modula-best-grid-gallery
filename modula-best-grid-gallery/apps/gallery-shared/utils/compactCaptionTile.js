@@ -61,8 +61,8 @@ export function resolveCompactCaptionThresholds(minSidePx) {
 }
 
 /**
- * @param {number} widthPx
- * @param {number} heightPx
+ * @param {number}                                        widthPx
+ * @param {number}                                        heightPx
  * @param {{ stickyCompact?: boolean, minSize?: number }} [options]
  * @return {boolean}
  */
@@ -104,8 +104,8 @@ export function isCompactCaptionTileSize(widthPx, heightPx, options = {}) {
 }
 
 /**
- * @param {unknown} title
- * @param {unknown} description
+ * @param {unknown}                                            title
+ * @param {unknown}                                            description
  * @param {{ hideTitle?: boolean, hideDescription?: boolean }} [flags]
  * @return {boolean}
  */
@@ -128,10 +128,10 @@ export function itemHasCaptionText(title, description, flags = {}) {
  * @param {Object}  opts
  * @param {boolean} opts.showTitle
  * @param {boolean} opts.showDescription
- * @param {boolean} [opts.suppressOverlayText] Story/slider owns caption chrome.
- * @param {boolean} [opts.useCaptionPopover] Compact-tile popover owns the copy.
+ * @param {boolean} [opts.suppressOverlayText]      Story/slider owns caption chrome.
+ * @param {boolean} [opts.useCaptionPopover]        Compact-tile popover owns the copy.
  * @param {boolean} [opts.stripHoverBuilderClasses] Settings-editor canvas: hide overlay slots.
- * @param {boolean} [opts.previewAdminToolbar] Ignored for title/caption slots.
+ * @param {boolean} [opts.previewAdminToolbar]      Ignored for title/caption slots.
  * @return {{ hasOverlayTitle: boolean, hasOverlayDescription: boolean, hasBelowTitle: boolean, hasBelowDescription: boolean }}
  */
 export function resolveGalleryItemCaptionChrome(opts = {}) {
@@ -141,9 +141,7 @@ export function resolveGalleryItemCaptionChrome(opts = {}) {
 	const useCaptionPopover = Boolean(opts.useCaptionPopover);
 	const stripHoverBuilderClasses = Boolean(opts.stripHoverBuilderClasses);
 	const overlayOk =
-		!suppressOverlayText &&
-		!useCaptionPopover &&
-		!stripHoverBuilderClasses;
+		!suppressOverlayText && !useCaptionPopover && !stripHoverBuilderClasses;
 	return {
 		hasOverlayTitle: overlayOk && showTitle,
 		hasOverlayDescription: overlayOk && showDescription,

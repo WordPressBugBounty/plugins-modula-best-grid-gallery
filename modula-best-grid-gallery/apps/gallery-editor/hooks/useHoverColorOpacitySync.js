@@ -3,10 +3,7 @@
  * On first paint, compose rgba into `hoverColor` when the stored color is opaque.
  */
 import { useEffect, useRef } from '@wordpress/element';
-import {
-	formatRgbaColor,
-	parseCssColor,
-} from '../utils/cssColorValue';
+import { formatRgbaColor, parseCssColor } from '../utils/cssColorValue';
 
 /**
  * @param {number} alpha 0–1
@@ -31,7 +28,9 @@ export function useHoverColorOpacitySync(form) {
 			}
 
 			const colorRaw =
-				typeof hover.hoverColor === 'string' ? hover.hoverColor.trim() : '';
+				typeof hover.hoverColor === 'string'
+					? hover.hoverColor.trim()
+					: '';
 			const opacityRaw = Number(hover.hoverOpacity);
 			const opacityPct = Number.isFinite(opacityRaw)
 				? Math.min(100, Math.max(0, Math.round(opacityRaw)))

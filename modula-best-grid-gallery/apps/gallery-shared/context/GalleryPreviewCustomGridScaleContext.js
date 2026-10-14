@@ -27,8 +27,7 @@ const defaultValue = {
 	setScale: () => {},
 };
 
-export const GalleryPreviewCustomGridScaleContext =
-	createContext(defaultValue);
+export const GalleryPreviewCustomGridScaleContext = createContext(defaultValue);
 
 /**
  * @return {{ scale: number, setScale: (n: number | ((prev: number) => number)) => void }}

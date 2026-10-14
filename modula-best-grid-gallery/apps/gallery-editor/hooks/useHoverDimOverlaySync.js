@@ -27,7 +27,10 @@ export function useHoverDimOverlaySync(form) {
 			const rootDim = !!hover.dimOverlay;
 			const builderDim = !!builder.dimOverlay;
 
-			if (lastRootRef.current === null || lastBuilderRef.current === null) {
+			if (
+				lastRootRef.current === null ||
+				lastBuilderRef.current === null
+			) {
 				lastRootRef.current = rootDim;
 				lastBuilderRef.current = builderDim;
 				if (rootDim !== builderDim) {
@@ -46,7 +49,11 @@ export function useHoverDimOverlaySync(form) {
 			} else if (builderChanged && !rootChanged) {
 				form.setFieldValue('hover.dimOverlay', builderDim);
 				lastRootRef.current = builderDim;
-			} else if (rootChanged && builderChanged && rootDim !== builderDim) {
+			} else if (
+				rootChanged &&
+				builderChanged &&
+				rootDim !== builderDim
+			) {
 				form.setFieldValue(['hover', 'builder', 'dimOverlay'], rootDim);
 				lastBuilderRef.current = rootDim;
 			}

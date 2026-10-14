@@ -88,4 +88,4 @@ class ModulaGutenberg {
 	}
 }
 
-let modulaGutenberg = new ModulaGutenberg();
+const modulaGutenberg = new ModulaGutenberg();

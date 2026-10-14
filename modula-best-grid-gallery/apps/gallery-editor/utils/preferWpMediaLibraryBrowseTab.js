@@ -3,7 +3,7 @@
  * Match classic metabox: persist browse, then switch the router to Media Library.
  *
  * @param {{ content?: { mode?: (name?: string) => string } }} [frame]
- * @param {(name: string, value: string) => void} [setUserSetting]
+ * @param {(name: string, value: string) => void}              [setUserSetting]
  */
 export function preferWpMediaLibraryBrowseTab(frame, setUserSetting) {
 	if (typeof setUserSetting === 'function') {

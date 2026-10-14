@@ -14,7 +14,7 @@ const catalogInflight = new Map();
 
 /**
  * @param {object|null|undefined} settings Grouped gallery settings.
- * @returns {boolean}
+ * @return {boolean}
  */
 export function isShowAllOnLightbox(settings) {
 	return isLightboxToggleOn(settings?.lightbox?.showAll);
@@ -22,9 +22,9 @@ export function isShowAllOnLightbox(settings) {
 
 /**
  * @param {string|number|null|undefined} galleryId
- * @param {unknown[]} [activeFilters]
- * @param {number|null|undefined} shuffleSeed
- * @returns {string}
+ * @param {unknown[]}                    [activeFilters]
+ * @param {number|null|undefined}        shuffleSeed
+ * @return {string}
  */
 function buildLightboxCatalogCacheKey(galleryId, activeFilters, shuffleSeed) {
 	const id =
@@ -60,7 +60,7 @@ export function clearLightboxCatalogCache(galleryId) {
 
 /**
  * @param {unknown[]} list
- * @returns {unknown[]}
+ * @return {unknown[]}
  */
 function asItemList(list) {
 	return Array.isArray(list) ? list : [];
@@ -79,7 +79,7 @@ function asItemList(list) {
  *   totalItems?: number,
  *   shuffleSeed?: number|null,
  * }} args
- * @returns {Promise<unknown[]>}
+ * @return {Promise<unknown[]>}
  */
 export async function resolveLightboxItemsForOpen(args = {}) {
 	const displayItems = asItemList(args.displayItems);

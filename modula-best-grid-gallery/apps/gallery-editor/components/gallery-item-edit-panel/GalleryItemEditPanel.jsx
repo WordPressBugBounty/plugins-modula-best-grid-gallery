@@ -8,6 +8,7 @@ import {
 } from 'gallery-shared/preview';
 import { useEffect, useId, useMemo } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { SettingsPanelHeader } from 'editor-shell';
 import {
 	ActionRow,
 	Button,
@@ -41,8 +42,8 @@ import {
 	imageMetadataAiFormKey,
 	useImageMetadataAiGeneration,
 } from '../../hooks/useImageMetadataAiGeneration';
-import SettingsPanelHeader from '../sidebar/settings-panel/SettingsPanelHeader';
 import SettingsPanelSection from '../sidebar/settings-panel/SettingsPanelSection';
+import FreeformStackingControls from './FreeformStackingControls';
 import WatermarkActionButtonSlot from '../field/WatermarkActionButtonSlot';
 import MetadataFiltersAutocompleteControl from '../field/MetadataFiltersAutocompleteControl';
 import WpClassicCaptionEditor from '../field/WpClassicCaptionEditor';
@@ -297,6 +298,7 @@ export default function GalleryItemEditPanel({ storeIndex }) {
 				}}
 			/>
 			<div className="modula-settings-panel__scroll modula-gallery-item-edit-panel__scroll">
+				<FreeformStackingControls storeIndex={storeIndex} />
 				<SettingsPanelSection
 					label={__('This file', 'modula-best-grid-gallery')}
 				>

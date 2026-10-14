@@ -14,15 +14,16 @@ function stripInternalField(e) {
 	if (e.kind !== 'field') {
 		return e;
 	}
-	const { _field, ...rest } = /** @type {import('./settingsCommandPaletteEntries').PaletteIndexFieldEntry} */ (
-		e
-	);
+	const { _field, ...rest } =
+		/** @type {import('./settingsCommandPaletteEntries').PaletteIndexFieldEntry} */ (
+			e
+		);
 	return rest;
 }
 
 /**
  * @param {import('./settingsCommandPaletteEntries').PaletteIndexEntry[]} entries
- * @param {Record<string, Record<string, unknown>>} values
+ * @param {Record<string, Record<string, unknown>>}                       values
  * @return {import('./settingsCommandPaletteEntries').PaletteIndexEntry[]}
  */
 export function filterPaletteEntries(entries, values) {
@@ -55,7 +56,9 @@ export function filterPaletteEntries(entries, values) {
 		}
 		if (e.kind === 'field') {
 			const raw =
-				/** @type {import('./settingsCommandPaletteEntries').PaletteIndexFieldEntry} */ (e);
+				/** @type {import('./settingsCommandPaletteEntries').PaletteIndexFieldEntry} */ (
+					e
+				);
 			const f = raw._field;
 			if (!f || !isFieldVisible(f, values)) {
 				continue;
@@ -72,16 +75,12 @@ export function filterPaletteEntries(entries, values) {
  * @return {string[]}
  */
 export function tokenizeQuery(q) {
-	return q
-		.toLowerCase()
-		.trim()
-		.split(/\s+/)
-		.filter(Boolean);
+	return q.toLowerCase().trim().split(/\s+/).filter(Boolean);
 }
 
 /**
  * @param {import('./settingsCommandPaletteEntries').PaletteIndexEntry[]} entries
- * @param {string} query
+ * @param {string}                                                        query
  * @return {import('./settingsCommandPaletteEntries').PaletteIndexEntry[]}
  */
 export function searchPaletteEntries(entries, query) {
@@ -89,7 +88,5 @@ export function searchPaletteEntries(entries, query) {
 	if (tokens.length === 0) {
 		return entries;
 	}
-	return entries.filter((e) =>
-		tokens.every((t) => e.searchBlob.includes(t))
-	);
+	return entries.filter((e) => tokens.every((t) => e.searchBlob.includes(t)));
 }

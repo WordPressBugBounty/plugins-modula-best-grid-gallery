@@ -102,9 +102,7 @@ export default function GalleryPreviewSelectionBar({
 
 	const replaceEnabled =
 		model.selectedCount >= 1 &&
-		boundGalleryAllowsReplace(
-			getBoundGallerySummaryFromEditor(editor)
-		);
+		boundGalleryAllowsReplace(getBoundGallerySummaryFromEditor(editor));
 	const removeCopy = getBoundGalleryRemoveCopy(
 		getBoundGallerySummaryFromEditor(editor),
 		{ isSourceImage: true }
@@ -290,10 +288,7 @@ export default function GalleryPreviewSelectionBar({
 									onNavigateCategory?.('filters');
 								}}
 							>
-								{__(
-									'Manage all',
-									'modula-best-grid-gallery'
-								)}
+								{__('Manage all', 'modula-best-grid-gallery')}
 							</SelectionBarActionButton>
 						</SelectionBarMenuFooter>
 					</SelectionBarMenu>
@@ -379,48 +374,51 @@ export default function GalleryPreviewSelectionBar({
 			) : null}
 
 			{replaceEnabled ? (
-			<div className="modula-gallery-takeover__selection-bar-menu-wrap">
-				<SelectionBarActionButton
-					icon={selectionBarReplaceIcon}
-					chevron
-					disabled={!replaceEnabled}
-					aria-haspopup="menu"
-					aria-expanded={openMenu === 'replace'}
-					title={__(
-						'Replace the selected images',
-						'modula-best-grid-gallery'
-					)}
-					onClick={() => {
-						if (!replaceEnabled) {
-							return;
-						}
-						toggleMenu('replace');
-					}}
-				>
-					{__('Replace', 'modula-best-grid-gallery')}
-				</SelectionBarActionButton>
-				<SelectionBarMenu
-					open={openMenu === 'replace' && replaceEnabled}
-					onClose={closeMenu}
-					align="end"
-				>
-					<SelectionBarMenuHeading>
-						{__('Replace with', 'modula-best-grid-gallery')}
-					</SelectionBarMenuHeading>
-					<SelectionBarMenuItem
-						icon={selectionBarMediaLibraryIcon}
-						onClick={onReplaceFromLibrary}
-					>
-						{__('The media library', 'modula-best-grid-gallery')}
-					</SelectionBarMenuItem>
-					<SelectionBarMenuFooter
-						note={__(
-							'Clears the caption and alt text',
+				<div className="modula-gallery-takeover__selection-bar-menu-wrap">
+					<SelectionBarActionButton
+						icon={selectionBarReplaceIcon}
+						chevron
+						disabled={!replaceEnabled}
+						aria-haspopup="menu"
+						aria-expanded={openMenu === 'replace'}
+						title={__(
+							'Replace the selected images',
 							'modula-best-grid-gallery'
 						)}
-					/>
-				</SelectionBarMenu>
-			</div>
+						onClick={() => {
+							if (!replaceEnabled) {
+								return;
+							}
+							toggleMenu('replace');
+						}}
+					>
+						{__('Replace', 'modula-best-grid-gallery')}
+					</SelectionBarActionButton>
+					<SelectionBarMenu
+						open={openMenu === 'replace' && replaceEnabled}
+						onClose={closeMenu}
+						align="end"
+					>
+						<SelectionBarMenuHeading>
+							{__('Replace with', 'modula-best-grid-gallery')}
+						</SelectionBarMenuHeading>
+						<SelectionBarMenuItem
+							icon={selectionBarMediaLibraryIcon}
+							onClick={onReplaceFromLibrary}
+						>
+							{__(
+								'The media library',
+								'modula-best-grid-gallery'
+							)}
+						</SelectionBarMenuItem>
+						<SelectionBarMenuFooter
+							note={__(
+								'Clears the caption and alt text',
+								'modula-best-grid-gallery'
+							)}
+						/>
+					</SelectionBarMenu>
+				</div>
 			) : null}
 
 			<SelectionBarActionButton

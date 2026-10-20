@@ -8,6 +8,10 @@
  *   newGalleryUrl: string,
  *   postNewUrl: string,
  *   editorChoiceQueryArg: string,
+ *   presetQueryArg: string,
+ *   galleryPresets: unknown[],
+ *   defaultGalleryPresetId: unknown,
+ *   settingsUrl: string,
  *   createGalleryNonce: string,
  *   createAlbumNonce: string,
  *   editorChoiceHeroUrl: string,
@@ -48,6 +52,15 @@ export function getGalleryListingConfig() {
 			typeof raw.editorChoiceQueryArg === 'string'
 				? raw.editorChoiceQueryArg
 				: 'modula_editor',
+		presetQueryArg:
+			typeof raw.presetQueryArg === 'string'
+				? raw.presetQueryArg
+				: 'modula_preset',
+		galleryPresets: Array.isArray(raw.galleryPresets)
+			? raw.galleryPresets
+			: [],
+		defaultGalleryPresetId: raw.defaultGalleryPresetId ?? 0,
+		settingsUrl: typeof raw.settingsUrl === 'string' ? raw.settingsUrl : '',
 		createGalleryNonce:
 			typeof raw.createGalleryNonce === 'string'
 				? raw.createGalleryNonce

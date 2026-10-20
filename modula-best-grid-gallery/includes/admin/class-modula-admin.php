@@ -96,25 +96,16 @@ class Modula_Admin {
 			'priority'   => 4,
 		);
 
-		if ( current_user_can( 'install_plugins' ) ) {
-			$links[] = array(
-				'page_title' => esc_html__( 'Extensions', 'modula-best-grid-gallery' ),
-				'menu_title' => esc_html__( 'Extensions', 'modula-best-grid-gallery' ),
-				'capability' => 'manage_options',
-				'menu_slug'  => 'modula-addons',
-				'function'   => array( $this, 'add_extensions_react_root' ),
-				'priority'   => 99,
-			);
-
-			// $links[] = array(
-			//  'page_title' => esc_html__( 'Insights', 'modula-best-grid-gallery' ),
-			//  'menu_title' => esc_html__( 'Insights', 'modula-best-grid-gallery' ),
-			//  'capability' => 'manage_options',
-			//  'menu_slug'  => 'modula-insights',
-			//  'function'   => array( $this, 'add_insights_react_root' ),
-			//  'priority'   => 100,
-			// );
-		}
+		// Extensions are Pro modules, not plugins: managing them is a settings
+		// task, so install_plugins (absent for multisite site admins) is not required.
+		$links[] = array(
+			'page_title' => esc_html__( 'Extensions', 'modula-best-grid-gallery' ),
+			'menu_title' => esc_html__( 'Extensions', 'modula-best-grid-gallery' ),
+			'capability' => 'manage_options',
+			'menu_slug'  => 'modula-addons',
+			'function'   => array( $this, 'add_extensions_react_root' ),
+			'priority'   => 99,
+		);
 
 		$links['modulalicense'] = array(
 			'page_title' => esc_html__( 'Image Licenses', 'modula-best-grid-gallery' ),

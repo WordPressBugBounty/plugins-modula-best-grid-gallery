@@ -9,6 +9,9 @@ final class Proofing_Selections {
 	public const UNLOCK  = 'modula/unlock-proofing-selection';
 	public const DELETE  = 'modula/delete-proofing-selection';
 
+	/** Outcome results the Pro executor sets; Contract::outcome() adds the target gallery. */
+	private const RESULTS = array( 'selection' );
+
 	/** @return array<int,string> */
 	public static function names(): array {
 		return array( self::LISTING, self::READ, self::UNLOCK, self::DELETE );
@@ -28,11 +31,12 @@ final class Proofing_Selections {
 	 * Only an enabled, contract-ready package must expose this executor.
 	 */
 	public static function executor_ready( string $name ): bool {
-		return Proofing::service_executor_ready(
-			$name,
-			self::executor_methods(),
-			'\Modula_Pro\Extensions\Image_Proofing\Abilities\Selection_Executor'
-		);
+		return Proofing::package_owns_helpers()
+			&& Proofing::service_executor_ready(
+				$name,
+				self::executor_methods(),
+				'\Modula_Pro\Extensions\Image_Proofing\Abilities\Selection_Executor'
+			);
 	}
 
 	public static function mutations(): array {
@@ -128,7 +132,7 @@ final class Proofing_Selections {
 					'request_id' => Contract::request_id_schema(),
 				);
 				$required = array_keys( $fields );
-				$output   = Contract::outcome_schema();
+				$output   = Contract::outcome( $name, self::RESULTS );
 			} else {
 				$output = Contract::admitting( $output );
 			}

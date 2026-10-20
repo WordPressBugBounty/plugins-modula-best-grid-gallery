@@ -18,7 +18,7 @@ class Modula_Navigation_Handler extends Modula_Upsell_Base {
 	 * Register navigation-related hooks
 	 */
 	private function register_navigation_hooks() {
-		// Upgrade to PRO plugin action link
+		// Settings and Upgrade to PRO plugin action links
 		add_filter( 'plugin_action_links_' . MODULA_FILE, array( $this, 'filter_action_links' ), 60 );
 
 		if ( $this->extensions->is_upgradable_addon( 'modula-whitelabel' ) ) {
@@ -27,13 +27,28 @@ class Modula_Navigation_Handler extends Modula_Upsell_Base {
 	}
 
 	/**
-	 * Add the Upgrade to PRO plugin action link
+	 * Add the Settings and Upgrade to PRO plugin action links
+	 *
+	 * The row reads Upgrade to Premium, Settings, then core's Deactivate: Settings goes
+	 * in first so that Upgrade lands in front of it.
 	 *
 	 * @param array $links Existing plugin action links.
 	 * @return array Modified links array.
 	 * @since 2.6.0
 	 */
 	public function filter_action_links( $links ) {
+		$links = $this->add_settings_action_link( $links );
+
+		return $this->add_upgrade_action_link( $links );
+	}
+
+	/**
+	 * Put the Upgrade to PRO link in front of the row's links, unless no upgrade is available
+	 *
+	 * @param array $links Existing plugin action links.
+	 * @return array Links with the upgrade link first, when it applies.
+	 */
+	private function add_upgrade_action_link( $links ) {
 		$upgrade = apply_filters(
 			'modula_upgrade_plugin_action',
 			array(
@@ -49,6 +64,23 @@ class Modula_Navigation_Handler extends Modula_Upsell_Base {
 		array_unshift( $links, $upgrade['link'] );
 
 		return $links;
+	}
+
+	/**
+	 * Put the Settings link, which opens Modula Settings, in front of the row's links
+	 *
+	 * @param array $links Existing plugin action links.
+	 * @return array Links with Settings first, for users who can manage Modula settings.
+	 */
+	private function add_settings_action_link( $links ) {
+		// Same capability as the Settings submenu page.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return $links;
+		}
+
+		$settings = '<a href="' . esc_url( admin_url( 'edit.php?post_type=modula-gallery&page=modula' ) ) . '">' . esc_html__( 'Settings', 'modula-best-grid-gallery' ) . '</a>';
+
+		return array( 'settings' => $settings ) + $links;
 	}
 
 	/**

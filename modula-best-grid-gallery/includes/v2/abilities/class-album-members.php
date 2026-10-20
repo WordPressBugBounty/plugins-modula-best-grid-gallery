@@ -9,6 +9,9 @@ final class Album_Members {
 	public const CANDIDATES = 'modula/list-album-member-candidates';
 	public const OPERATION  = 'modula/update-album-members';
 
+	/** Outcome results the Pro executor sets; Contract::outcome() adds the target album. */
+	private const RESULTS = array( 'album' );
+
 	public static function callbacks(): array {
 		return Album_Explanation::callbacks_for(
 			array( self::READ, self::CANDIDATES, self::OPERATION )
@@ -22,7 +25,7 @@ final class Album_Members {
 			self::CANDIDATES => array( 'candidates' => 1 ),
 			self::OPERATION  => array( 'execute' => 1 ),
 		);
-		return isset( $methods[ $name ] ) && Pro_Dependency::methods( '\Modula_Pro\Extensions\Albums\Abilities\Member_Executor', $methods[ $name ] );
+		return isset( $methods[ $name ] ) && Pro_Dependency::methods( '\Modula_Pro\Extensions\Albums\Abilities\Member_Executor', $methods[ $name ] ) && Albums::executor_owns_access();
 	}
 
 	public static function abilities(): array {
@@ -130,7 +133,7 @@ final class Album_Members {
 		);
 		$out         = array();
 		foreach ( $inputs as $name => $input ) {
-			$output = self::OPERATION === $name ? Contract::outcome_schema() : Contract::admitting( $result );
+			$output = self::OPERATION === $name ? Contract::outcome( $name, self::RESULTS ) : Contract::admitting( $result );
 			if ( self::CANDIDATES === $name ) {
 				$output = Contract::admitting(
 					Contract::object(

@@ -13,6 +13,9 @@ class Presets {
 	public const BATCH        = 'modula/apply-gallery-presets';
 	public const DELETE       = 'modula/delete-gallery-preset';
 
+	/** Outcome results the Pro executor sets for a preset write; Contract::outcome() adds the target preset. */
+	private const RESULTS = array( 'preset', 'deleted_id' );
+
 	public static function name( string $verb ): string {
 		return 'modula/' . $verb . '-' . static::FAMILY . '-preset' . ( 'list' === $verb ? 's' : '' );
 	}
@@ -58,7 +61,8 @@ class Presets {
 			static::APPLY            => array( 'apply' => 1 ),
 			static::BATCH            => array( 'batch' => 1 ),
 		);
-		return isset( $methods[ $name ] ) && Pro_Dependency::methods( static::executor_class(), $methods[ $name ] );
+		// can_access marks an executor that owns the access check and batch preset fields Lite no longer ships.
+		return isset( $methods[ $name ] ) && Pro_Dependency::methods( static::executor_class(), $methods[ $name ] + array( 'can_access' => 3 ) );
 	}
 
 	public static function abilities(): array {
@@ -93,6 +97,17 @@ class Presets {
 			'type' => 'string',
 			'enum' => array( 'manual', 'dateCreatedNew', 'dateCreatedOld', 'dateModifiedFirst', 'dateModifiedLast', 'titleAZ', 'titleZA', 'random' ),
 		);
+	}
+
+	/**
+	 * Application reports its target (a gallery or an album), which Contract::outcome() adds for
+	 * the operation; a batch reports one application per target.
+	 */
+	private static function output_schema( string $name ): array {
+		if ( static::BATCH === $name ) {
+			return Contract::batch_outcome( array( static::APPLY ), array() );
+		}
+		return Contract::outcome( $name, static::APPLY === $name ? array() : self::RESULTS );
 	}
 
 	public static function definitions(): array {
@@ -141,7 +156,7 @@ class Presets {
 		);
 		$out = array();
 		foreach ( $inputs as $name => $input ) {
-			$output = Contract::outcome_schema();
+			$output = self::output_schema( $name );
 			if ( static::name( 'list' ) === $name ) {
 				$output = Contract::admitting(
 					Contract::object(
@@ -226,10 +241,6 @@ class Presets {
 			return current_user_can( 'edit_others_posts' );
 		}
 		return current_user_can( 'delete_post', $id );
-	}
-
-	public static function can_access( int $id = 0, string $status = '', bool $create = false ): bool {
-		return static::available() && static::object_access( $id, $status, $create );
 	}
 
 	public static function can_recover( array $record ): bool {

@@ -1,0 +1,33 @@
+.modula-admin-notice {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	padding: 10px 14px;
+	border-radius: var(--modula-admin-radius-lg);
+	font-size: var(--modula-admin-text-control);
+	line-height: 1.45;
+
+	// Keep the icon on the first line of a wrapped message.
+	svg {
+		flex-shrink: 0;
+		margin-top: 1px;
+	}
+
+	&.is-warning {
+		background: var(--modula-admin-warning-surface);
+		color: var(--modula-admin-warning-ink);
+	}
+
+	&.is-error {
+		background: var(--modula-admin-danger-surface);
+		color: var(--modula-admin-danger);
+	}
+}
+
+.modula-admin-notice__body {
+	min-width: 0;
+
+	p {
+		margin: 0;
+	}
+}

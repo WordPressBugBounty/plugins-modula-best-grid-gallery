@@ -10,6 +10,7 @@ import { Button, Notice, Snackbar } from '@wordpress/components';
 import { DataViews } from '@wordpress/dataviews/wp';
 import { useQueryClient } from '@tanstack/react-query';
 import { getGalleryListingConfig } from './config';
+import { getCreatePresetOptions } from './listingCreatePresets';
 import { getListingFields } from './fields';
 import { ListingPaginationFooter } from './ListingPaginationFooter';
 import { ListingSearchSummary } from './ListingSearchSummary';
@@ -86,6 +87,14 @@ const DEFAULT_LAYOUTS = {
  */
 export default function GalleryListingApp() {
 	const config = getGalleryListingConfig();
+	const createPresetOptions = useMemo(
+		() =>
+			getCreatePresetOptions({
+				galleryPresets: config.galleryPresets,
+				defaultGalleryPresetId: config.defaultGalleryPresetId,
+			}),
+		[config.galleryPresets, config.defaultGalleryPresetId]
+	);
 	const queryClient = useQueryClient();
 	const viewQuery = useListingViewQuery();
 	const viewMutation = useListingViewMutation();
@@ -542,9 +551,10 @@ export default function GalleryListingApp() {
 	}, [config.newAlbumUrl, config.albumTakeoverAvailable]);
 
 	const chooseEditorAndCreate = useCallback(
-		(choice) => {
+		(choice, start) => {
 			completeCreateEditorChoice({
 				choice,
+				start,
 				mode: editorChoiceMode,
 				config,
 				close: closeEditorChoice,
@@ -592,12 +602,12 @@ export default function GalleryListingApp() {
 	);
 
 	const handleEditorChoice = useCallback(
-		(choice) => {
+		(choice, start) => {
 			if ('open' === editorChoiceMode) {
 				void chooseEditorForOpen(choice);
 				return;
 			}
-			chooseEditorAndCreate(choice);
+			chooseEditorAndCreate(choice, start);
 		},
 		[editorChoiceMode, chooseEditorForOpen, chooseEditorAndCreate]
 	);
@@ -809,6 +819,10 @@ export default function GalleryListingApp() {
 				isOpen={editorChoiceMode !== null}
 				mode={editorChoiceMode === 'open' ? 'open' : 'create'}
 				heroUrl={config.editorChoiceHeroUrl}
+				presetOptions={
+					'create' === editorChoiceMode ? createPresetOptions : null
+				}
+				settingsUrl={config.settingsUrl}
 				onClose={dismissEditorChoice}
 				onChoose={handleEditorChoice}
 			/>

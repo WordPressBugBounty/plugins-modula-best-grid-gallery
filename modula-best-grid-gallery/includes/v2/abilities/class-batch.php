@@ -24,6 +24,9 @@ final class Batch {
 		return self::execute( $input, self::MEDIA ); }
 	public static function media_operations(): array {
 		return array_values( array_diff( array_merge( Collections::mutations(), Attachment_Lifecycle::operations() ), array( 'modula/create-collection' ) ) ); }
+	/** Results a media target can carry: those the families of media_operations() declare. */
+	public static function media_results(): array {
+		return array_merge( Collections::RESULTS, Attachment_Lifecycle::RESULTS ); }
 	private static function child_operation( string $operation ): string {
 		return Album_Presets::BATCH === $operation ? Album_Presets::APPLY : ( Presets::BATCH === $operation ? Presets::APPLY : Update::OPERATION ); }
 	public static function schema(): array {
@@ -50,7 +53,10 @@ final class Batch {
 			array( 'request_id', 'targets' )
 		);
 	}
-	public static function execute( array $input, string $operation = self::OPERATION ): array {
+	/**
+	 * @param callable|null $decorate_target Owner-supplied child fields, applied after the child request id. It must not change $input.
+	 */
+	public static function execute( array $input, string $operation = self::OPERATION, ?callable $decorate_target = null ): array {
 		$child_operation = self::child_operation( $operation );
 		$request         = $input['request_id'];
 		$existing        = Requests::existing( $input, $operation );
@@ -80,9 +86,8 @@ final class Batch {
 					$child_operation = is_string( $target['operation'] ?? null ) ? $target['operation'] : '';
 					unset( $target['operation'] ); }
 				$target['request_id'] = self::child_id( $request, $index );
-				if ( in_array( $operation, array( Presets::BATCH, Album_Presets::BATCH ), true ) ) {
-					$target['preset_id']       = $input['preset_id'];
-					$target['preset_revision'] = $input['preset_revision']; }
+				if ( null !== $decorate_target ) {
+					$target = $decorate_target( $target ); }
 				$previous = Requests::existing( $target, $child_operation );
 				if ( null !== $previous ) {
 					continue; }

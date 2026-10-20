@@ -81,10 +81,8 @@ final class Catalog {
 	}
 
 	public static function plan_map(): array {
-		if ( ! class_exists( 'Modula_Extensions_Base' ) ) {
-			require_once MODULA_PATH . 'includes/admin/rest-api/class-modula-extensions-base.php';
-		}
-		return \Modula_Extensions_Base::get_instance()->get_read_only_plan_map();
+		require_once MODULA_PATH . 'includes/admin/rest-api/class-modula-extension-catalog.php';
+		return \Modula_Extension_Catalog::plan_map();
 	}
 
 	public static function plan_map_consistent(): bool {

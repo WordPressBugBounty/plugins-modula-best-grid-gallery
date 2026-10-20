@@ -1,7 +1,7 @@
 import { __ } from '@wordpress/i18n';
-import { Button, Notice } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { Button, Notice } from 'admin-ui';
 
 export default function ButtonAction() {
 	const [isLoading, setIsLoading] = useState(false);
@@ -107,20 +107,23 @@ export default function ButtonAction() {
 		}
 	};
 
+	const result = notification ? (
+		<>
+			{notification.message}
+			{notification.details && <span> {notification.details}</span>}
+		</>
+	) : null;
+
 	return (
 		<div>
-			{notification && (
-				<Notice
-					status={notification.status}
-					isDismissible={false}
-					className="modula-notice"
-				>
-					{notification.message}
-					{notification.details && (
-						<span>{notification.details}</span>
-					)}
+			{notification && 'error' === notification.status ? (
+				<Notice tone="error" role="alert">
+					{result}
 				</Notice>
-			)}
+			) : null}
+			{notification && 'success' === notification.status ? (
+				<p role="status">{result}</p>
+			) : null}
 			<p>
 				{__(
 					'With the latest update, we have changed the way the image information is handled, now the information is retrieved from the Media Library. If you wish to set your previous details for the gallery images, please click the below button.',
@@ -129,7 +132,6 @@ export default function ButtonAction() {
 			</p>
 			<Button
 				variant="primary"
-				isBusy={isLoading}
 				disabled={isLoading}
 				onClick={handleButtonClick}
 			>
@@ -146,9 +148,7 @@ export default function ButtonAction() {
 					)}
 				</p>
 				<Button
-					isDestructive
-					variant="tertiary"
-					isBusy={isCleaning}
+					variant="danger"
 					disabled={isCleaning}
 					onClick={handleCleanupClick}
 				>

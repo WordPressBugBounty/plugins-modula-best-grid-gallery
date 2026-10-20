@@ -5,10 +5,14 @@ namespace Modula\V2\Abilities;
 defined( 'ABSPATH' ) || exit;
 
 final class Pro_Dependency {
-	/** Remaining check for premium service packages. Registration no longer depends on this. */
+	/** Abilities service floor read only by activates(). */
 	public const MIN_VERSION = '3.0.12';
 
-	/** True when installed Pro meets the abilities service floor. */
+	/**
+	 * Compatibility only: shipped Pro (3.0.16 and earlier) calls this from Freeform_Author::authors() on every
+	 * gallery write, so removing it would fatal. Current Pro no longer calls it; Lite never does.
+	 * Delete once Lite's Compatible Pro floor is past that release.
+	 */
 	public static function activates(): bool {
 		return defined( 'MODULA_PRO_VERSION' ) && version_compare( (string) MODULA_PRO_VERSION, self::MIN_VERSION, '>=' );
 	}
@@ -59,6 +63,11 @@ final class Pro_Dependency {
 	public static function license_status(): string {
 		return self::available() ? \Modula_Pro\Extensions\Licensing::get_instance()->get_read_only_status()['status'] : 'unavailable';
 	}
+	/**
+	 * Compatibility only: shipped Pro (3.0.16 and earlier) calls this from Site_Provider::contribute() before any
+	 * readiness check, so removing it would fatal abilities registration. Current Pro owns Site_Provider::can_toggle().
+	 * Delete once Lite's Compatible Pro floor is past that release.
+	 */
 	public static function can_toggle(): bool {
 		return self::available() && self::methods(
 			'\Modula_Pro\Extensions\Extensions',

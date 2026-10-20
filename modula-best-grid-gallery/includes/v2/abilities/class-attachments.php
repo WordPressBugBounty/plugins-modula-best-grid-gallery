@@ -11,6 +11,8 @@ defined( 'ABSPATH' ) || exit;
 final class Attachments {
 	public const UPDATE = 'modula/update-attachment-text';
 	public const USAGE  = 'modula/read-attachment-usage';
+	/** Outcome results the text update sets. */
+	private const RESULTS = array( 'attachment' );
 	public static function callbacks(): array {
 		return array(
 			'modula/list-attachments' => array( __CLASS__, 'listing' ),
@@ -167,7 +169,7 @@ final class Attachments {
 					),
 					array( 'id', 'request_id', 'revision', 'text' )
 				),
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( self::UPDATE, self::RESULTS ),
 			),
 		);
 	}

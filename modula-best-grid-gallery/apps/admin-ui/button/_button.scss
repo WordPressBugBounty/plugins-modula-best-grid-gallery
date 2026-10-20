@@ -1,0 +1,83 @@
+@use '../styles/mixins';
+
+.modula-admin-button {
+	@include mixins.button-reset;
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	height: var(--modula-admin-button-height);
+	padding: 0 16px;
+	border-radius: var(--modula-admin-radius-lg);
+	font-size: var(--modula-admin-text-control);
+	line-height: 1;
+	text-decoration: none;
+	white-space: nowrap;
+
+	&:disabled {
+		opacity: var(--modula-admin-disabled-opacity);
+		cursor: default;
+	}
+
+	&.is-primary {
+		background: var(--modula-admin-ink);
+		color: var(--modula-admin-ink-inverse);
+		font-weight: 500;
+
+		&:hover:not(:disabled) {
+			background: var(--modula-admin-ink-hover);
+			color: var(--modula-admin-ink-inverse);
+		}
+	}
+
+	&.is-secondary {
+		border: 1px solid var(--modula-admin-border-strong);
+		background: var(--modula-admin-surface);
+		color: var(--modula-admin-ink);
+
+		&:hover:not(:disabled) {
+			background: var(--modula-admin-surface-hover);
+			color: var(--modula-admin-ink);
+		}
+	}
+
+	// Plain text action beside another button ("Cancel").
+	&.is-ghost {
+		padding: 0 14px;
+		color: var(--modula-admin-ink-secondary);
+
+		&:hover:not(:disabled) {
+			background: var(--modula-admin-surface-hover);
+			color: var(--modula-admin-ink);
+		}
+	}
+
+	&.is-danger {
+		padding: 0 14px;
+		color: var(--modula-admin-danger);
+
+		&:hover:not(:disabled) {
+			background: var(--modula-admin-surface-hover);
+			color: var(--modula-admin-danger);
+		}
+	}
+
+	// Underlined text action ("Clear activity", "Copy the config instead").
+	&.is-link {
+		height: auto;
+		min-height: 32px;
+		padding: 0;
+		color: var(--modula-admin-ink);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+
+		&:hover:not(:disabled) {
+			color: var(--modula-admin-ink-hover);
+		}
+	}
+}
+
+.modula-admin-button__icon {
+	display: flex;
+}

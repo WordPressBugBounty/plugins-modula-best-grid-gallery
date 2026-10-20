@@ -11,6 +11,9 @@ final class Album_Lifecycle {
 	public const RESTORE   = 'modula/restore-album';
 	public const DELETE    = 'modula/delete-album';
 
+	/** Outcome results the Pro executor sets; Contract::outcome() adds the target album. */
+	private const RESULTS = array( 'album', 'deleted_id' );
+
 	public static function operations(): array {
 		return array( self::DUPLICATE, self::TRASH, self::RESTORE, self::DELETE );
 	}
@@ -28,7 +31,7 @@ final class Album_Lifecycle {
 			self::RESTORE   => array( 'restore' => 1 ),
 			self::DELETE    => array( 'delete' => 1 ),
 		);
-		return isset( $methods[ $name ] ) && Pro_Dependency::methods( '\Modula_Pro\Extensions\Albums\Abilities\Lifecycle_Executor', $methods[ $name ] );
+		return isset( $methods[ $name ] ) && Pro_Dependency::methods( '\Modula_Pro\Extensions\Albums\Abilities\Lifecycle_Executor', $methods[ $name ] ) && Albums::executor_owns_access();
 	}
 
 	public static function abilities(): array {
@@ -68,7 +71,7 @@ final class Album_Lifecycle {
 					),
 					array( 'id', 'revision', 'status' )
 				)
-			) : Contract::outcome_schema();
+			) : Contract::outcome( $name, self::RESULTS );
 			$out[ $name ] = array(
 				'label'         => str_replace( array( 'modula/', '-' ), array( '', ' ' ), $name ),
 				'description'   => 'Enabled Albums and current object permissions required. Read the lifecycle graph revision before writing, including in trash. Duplicate creates a root album with the same settings and member references, without reparenting or copying members/media. Duplicate and restore require draft/publish intent. Trash preserves hierarchy. Delete prunes references from editable Beta parents and detaches Beta children to root; classic mutations are refused. 30-day actor-scoped recovery.',

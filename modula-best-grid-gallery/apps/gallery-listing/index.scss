@@ -2283,6 +2283,49 @@
 	}
 }
 
+/* New from preset: main part + arrow read as one button. */
+.modula-editor-choice-modal__split {
+	display: inline-flex;
+}
+
+.modula-editor-choice-modal__split-main.modula-editor-choice-modal__button {
+	border-start-end-radius: 0;
+	border-end-end-radius: 0;
+}
+
+.modula-editor-choice-modal__split-arrow.modula-editor-choice-modal__button {
+	padding: 0 10px;
+	border-inline-start-width: 0;
+	border-start-start-radius: 0;
+	border-end-start-radius: 0;
+
+	&.modula-editor-choice-modal__button--primary {
+		border-inline-start: 1px solid rgba(255, 255, 255, 0.25);
+	}
+}
+
+.modula-editor-choice-modal__footer-text {
+	display: grid;
+	gap: 4px;
+	min-width: 0;
+}
+
+.modula-editor-choice-modal__start-hint {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.45;
+	color: #1e1e1e;
+}
+
+.modula-editor-choice-modal__start-menu {
+	min-width: 280px;
+}
+
+.modula-editor-choice-modal__start-presets {
+	max-height: 320px;
+	overflow-y: auto;
+}
+
 @media (max-width: 782px) {
 	.modula-editor-choice-modal {
 		padding: 12px;
@@ -2329,5 +2372,14 @@
 
 	.modula-editor-choice-modal__button {
 		width: 100%;
+	}
+
+	.modula-editor-choice-modal__split {
+		width: 100%;
+	}
+
+	.modula-editor-choice-modal__split-arrow.modula-editor-choice-modal__button {
+		flex-shrink: 0;
+		width: auto;
 	}
 }

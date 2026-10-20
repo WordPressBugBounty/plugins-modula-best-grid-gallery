@@ -1,0 +1,36 @@
+@use '../styles/mixins';
+
+.modula-admin-segmented {
+	@include mixins.segment-track;
+
+	// Disabled by its own prop or by a `<fieldset disabled>` (LockedCard).
+	&.is-disabled,
+	fieldset:disabled & {
+		opacity: var(--modula-admin-disabled-group-opacity);
+	}
+}
+
+.modula-admin-segmented__option {
+	@include mixins.segment-option;
+
+	&:disabled {
+		cursor: not-allowed;
+	}
+
+	&:hover:not(:disabled, .is-active) {
+		background: var(--modula-admin-surface-hover);
+	}
+
+	&.is-active {
+		@include mixins.segment-option-active;
+	}
+}
+
+// The number of items an option stands for, after its label.
+.modula-admin-segmented__count {
+	margin-left: 6px;
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-caption);
+	font-weight: 400;
+	font-variant-numeric: tabular-nums;
+}

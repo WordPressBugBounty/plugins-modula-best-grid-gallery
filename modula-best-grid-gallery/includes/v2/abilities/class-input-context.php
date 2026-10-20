@@ -18,8 +18,23 @@ final class Input_Context {
 	public static function capture( $response, $handler, $request ) {
 		$json           = $request->get_body();
 		$body           = is_string( $json ) && '' !== $json ? json_decode( $json ) : null;
-		self::$inputs[] = $body->input ?? $body->params->arguments->parameters ?? null;
+		self::$inputs[] = self::raw_input( $body );
 		return $response;
+	}
+
+	/** Native REST sends `input`; generic execute-ability nests `parameters`; a direct MCP tool call sends `arguments`. */
+	private static function raw_input( $body ) {
+		if ( isset( $body->input ) ) {
+			return $body->input;
+		}
+		$arguments = $body->params->arguments ?? null;
+		if ( ! $arguments instanceof \stdClass ) {
+			return null;
+		}
+		if ( isset( $arguments->ability_name ) ) {
+			return $arguments->parameters ?? null;
+		}
+		return 'tools/call' === ( $body->method ?? null ) ? $arguments : null;
 	}
 
 	public static function release( $response ) {

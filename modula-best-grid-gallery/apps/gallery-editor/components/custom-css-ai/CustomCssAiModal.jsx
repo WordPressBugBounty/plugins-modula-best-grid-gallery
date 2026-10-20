@@ -7,7 +7,7 @@ import {
 	Spinner,
 	TextareaControl,
 } from '@wordpress/components';
-import GalleryModal from '../gallery-modal/GalleryModal';
+import { GalleryModal } from 'editor-shell';
 import ImageMetadataAiSparkleIcon from '../image-metadata-modal/ImageMetadataAiSparkleIcon';
 import '../../styles/takeover/preview/_custom-css-ai-modal.scss';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';

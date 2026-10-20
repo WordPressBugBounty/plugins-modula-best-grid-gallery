@@ -9,6 +9,9 @@ final class Proofing_Clients {
 	public const CREATE    = 'modula/create-proofing-client';
 	public const ASSOCIATE = 'modula/associate-proofing-client';
 
+	/** Outcome results the Pro executor sets. */
+	private const RESULTS = array( 'client' );
+
 	/** @return array<int,string> */
 	public static function names(): array {
 		return array( self::READ, self::CREATE, self::ASSOCIATE );
@@ -121,7 +124,7 @@ final class Proofing_Clients {
 					),
 					array( 'request_id', 'username', 'email', 'send_password_email' )
 				),
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( self::CREATE, self::RESULTS ),
 			),
 			self::ASSOCIATE => array(
 				'label'         => 'Associate an existing Proofing client',
@@ -134,7 +137,7 @@ final class Proofing_Clients {
 					),
 					array( 'request_id', 'user_id', 'revision' )
 				),
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( self::ASSOCIATE, self::RESULTS ),
 			),
 		);
 	}

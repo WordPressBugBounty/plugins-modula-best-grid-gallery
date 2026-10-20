@@ -1,0 +1,236 @@
+@use '../admin-ui/styles';
+@use '../admin-ui/styles/mixins';
+@use '../admin-ui/page/stacked';
+
+.modula-admin-ui.modula-admin-demo {
+	max-width: 1100px;
+	margin-top: 12px;
+	padding: 28px 40px 60px;
+	border-radius: var(--modula-admin-radius-lg);
+	background: var(--modula-admin-surface);
+
+	@media (max-width: 782px) {
+		padding: 20px 16px 40px;
+	}
+
+	.modula-admin-demo__header {
+		margin-bottom: 28px;
+	}
+
+	.modula-admin-demo__title {
+		margin: 0 0 6px;
+		padding: 0;
+		color: var(--modula-admin-ink);
+		font-size: var(--modula-admin-text-title);
+		font-weight: 400;
+	}
+
+	.modula-admin-demo__intro,
+	.modula-admin-demo__section-text {
+		max-width: 680px;
+		margin: 0;
+		color: var(--modula-admin-ink-muted);
+		font-size: var(--modula-admin-text-help);
+	}
+
+	.modula-admin-demo__section {
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+		padding: 24px 0;
+		border-top: 1px solid var(--modula-admin-border);
+	}
+
+	.modula-admin-demo__section-title {
+		margin: 0;
+		color: var(--modula-admin-ink);
+		font-size: 16px;
+		font-weight: 600;
+	}
+
+	.modula-admin-demo__states {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 20px 28px;
+	}
+
+	.modula-admin-demo__state {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		min-width: 120px;
+		margin: 0;
+	}
+
+	.modula-admin-demo__state-body {
+		display: flex;
+		align-items: center;
+		min-height: 44px;
+	}
+
+	.modula-admin-demo__state-label {
+		color: var(--modula-admin-ink-muted);
+		font-size: 12.5px;
+	}
+
+	// Draw focus without keyboard focus, using the library's own rules.
+	.is-force-focus {
+		.modula-admin-toggle,
+		.modula-admin-button,
+		.modula-admin-segmented__option.is-active,
+		.modula-admin-tabs__tab[aria-selected="true"],
+		.modula-admin-checkbox__box {
+			@include mixins.focus-ring;
+		}
+
+		.modula-admin-text-input,
+		.modula-admin-select,
+		.modula-admin-textarea,
+		.modula-admin-search__input {
+			@include mixins.field-focus;
+		}
+
+		.modula-admin-search__input {
+			background: var(--modula-admin-surface);
+		}
+
+		// The range draws focus on its thumb.
+		.modula-admin-range__input::-webkit-slider-thumb {
+			@include mixins.focus-ring;
+		}
+
+		.modula-admin-range__input::-moz-range-thumb {
+			@include mixins.focus-ring;
+		}
+	}
+
+	.modula-admin-nav__item.is-force-focus {
+		@include mixins.focus-ring;
+		outline-offset: -2px;
+	}
+
+	// Draw hover without the pointer.
+	.modula-admin-nav__item.is-force-hover,
+	.is-force-hover li:first-child .modula-admin-search-results__item,
+	.is-force-hover .modula-admin-tabs__tab[aria-selected="false"] {
+		@include mixins.list-hover;
+	}
+
+	.is-force-hover .modula-admin-search__input {
+		background: var(--modula-admin-surface-hover-strong);
+	}
+
+	// Composite examples fill their state's width.
+	.modula-admin-demo__stack,
+	.modula-admin-demo__cards {
+		.modula-admin-demo__state-body > * {
+			flex: 1;
+			min-width: 0;
+		}
+	}
+
+	.modula-admin-demo__stack {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	.modula-admin-demo__frame {
+		overflow: hidden;
+		border: 1px solid var(--modula-admin-border);
+		border-radius: var(--modula-admin-radius-lg);
+
+		// Not `.is-stacked`: SettingsRow already uses that modifier.
+		&.is-narrow-page .modula-admin-page {
+			@include stacked.layout;
+		}
+	}
+
+	.modula-admin-demo__narrow {
+		max-width: stacked.$breakpoint;
+	}
+
+	.modula-admin-demo__nav {
+		overflow: hidden;
+		border: 1px solid var(--modula-admin-border);
+		border-radius: var(--modula-admin-radius-lg);
+
+		.modula-admin-nav {
+			min-height: 100%;
+			padding-bottom: 8px;
+			border-right: 0;
+		}
+	}
+
+	.modula-admin-demo__search-states {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		width: var(--modula-admin-nav-width);
+		padding: 16px;
+		background: var(--modula-admin-surface-sunken);
+	}
+
+	// Draw the toast in place instead of at the bottom of the viewport.
+	.modula-admin-demo__toast .modula-admin-toast-region {
+		position: static;
+		transform: none;
+	}
+
+	.modula-admin-demo__swatches {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+		gap: 10px 20px;
+	}
+
+	.modula-admin-demo__swatch {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		font-size: 12.5px;
+	}
+
+	.modula-admin-demo__swatch-chip {
+		width: 32px;
+		height: 32px;
+		flex-shrink: 0;
+		border: 1px solid var(--modula-admin-border);
+		border-radius: var(--modula-admin-radius-md);
+	}
+
+	.modula-admin-demo__type {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+
+		p {
+			margin: 0;
+		}
+	}
+
+	.modula-admin-demo__type-title {
+		font-size: var(--modula-admin-text-title);
+		font-weight: 400;
+	}
+
+	.modula-admin-demo__type-card {
+		font-size: var(--modula-admin-text-card-title);
+		font-weight: 600;
+	}
+
+	.modula-admin-demo__type-body {
+		font-size: var(--modula-admin-text-body);
+	}
+
+	.modula-admin-demo__type-help {
+		color: var(--modula-admin-ink-muted);
+		font-size: var(--modula-admin-text-help);
+	}
+
+	.modula-admin-demo__cards {
+		display: flex;
+		flex-direction: column;
+		gap: var(--modula-admin-section-gap);
+		max-width: 860px;
+	}
+}

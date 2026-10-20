@@ -22,6 +22,12 @@ export { default as InsertPositionSegment } from './canvas/InsertPositionSegment
 export { default as StatusBar } from './status-bar/StatusBar';
 export { default as DesktopOnlyNotice } from './notice/DesktopOnlyNotice';
 export { default as AppearanceToggle } from './appearance/AppearanceToggle';
+export {
+	default as GalleryModal,
+	GalleryModalHeader,
+	GalleryModalBody,
+	GalleryModalFooter,
+} from './modal/GalleryModal';
 export { default as SettingsEditorErrorBoundary } from './app/SettingsEditorErrorBoundary';
 export { default as SettingsEditorShellFallback } from './app/SettingsEditorShellFallback';
 export { getSidebarRailNavLabel } from './sidebar/sidebarRailLabels';

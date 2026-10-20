@@ -99,18 +99,21 @@ class Modula_Importer {
 			}
 
 			$galleries_fields[] = array(
-				'type'       => 'checkbox_group',
-				'name'       => 'galleries_to_import',
-				'label'      => esc_html__( 'Galleries to import', 'modula-best-grid-gallery' ),
-				'options'    => isset( $gallery['data'] ) ? $gallery['data'] : array(),
-				'conditions' => array(
+				'type'             => 'checkbox_group',
+				'name'             => 'galleries_to_import',
+				'label'            => esc_html__( 'Galleries to import', 'modula-best-grid-gallery' ),
+				'options'          => isset( $gallery['data'] ) ? $gallery['data'] : array(),
+				'conditions'       => array(
 					array(
 						'field'      => 'gallery_source',
 						'comparison' => '===',
 						'value'      => $slug,
 					),
 				),
-				'nonce'      => wp_create_nonce( 'modula-importer' ),
+				'nonce'            => wp_create_nonce( 'modula-importer' ),
+				// Whether the source records its imported galleries (the
+				// migrators do; the WP Core importer has no such action).
+				'records_imported' => (bool) has_action( 'wp_ajax_modula_importer_' . $slug . '_gallery_imported_update' ),
 			);
 		}
 
@@ -126,7 +129,7 @@ class Modula_Importer {
 				array(
 					'type'        => 'toggle',
 					'name'        => 'gallery_delete_source',
-					'label'       => esc_html__( 'Gallery database entries', 'modula-best-grid-gallery' ),
+					'label'       => esc_html__( 'Delete source galleries after import', 'modula-best-grid-gallery' ),
 					'default'     => false,
 					'conditions'  => array(
 						array(
@@ -147,7 +150,7 @@ class Modula_Importer {
 			'slug'    => 'migrate',
 			'subtabs' => array(
 				'migrate' => array(
-					'label'  => esc_html__( 'Migrate', 'modula-best-grid-gallery' ),
+					'label'  => esc_html__( 'Import galleries', 'modula-best-grid-gallery' ),
 					'config' => $config,
 				),
 			),

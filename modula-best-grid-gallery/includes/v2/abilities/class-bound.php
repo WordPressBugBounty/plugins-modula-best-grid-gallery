@@ -15,6 +15,9 @@ final class Bound {
 	public const READ    = 'modula/read-bound-gallery';
 	public const CREATE  = 'modula/create-bound-gallery';
 	public const EXCLUDE = 'modula/update-bound-exclusions';
+
+	/** Outcome results the Pro executor sets; Contract::outcome() adds the target gallery too. */
+	private const RESULTS = array( 'gallery' );
 	public static function mutations(): array {
 		return array( self::CREATE, self::EXCLUDE );
 	}
@@ -33,6 +36,8 @@ final class Bound {
 			array(
 				'run'        => 2,
 				'operations' => 0,
+				// The executor owns its execution check; an older one calls the Lite check that no longer exists.
+				'available'  => 0,
 			)
 		);
 	}
@@ -72,17 +77,14 @@ final class Bound {
 			self::callbacks(),
 			array(
 				'permission'     => array( self::class, 'can_invoke' ),
-				'available'      => array( self::class, 'available' ),
+				// Services and entitlement are explained by blockers(); discovery still hides gallery-only editors.
+				'available'      => array( Media_Folders::class, 'can_manage' ),
 				'requires_pro'   => true,
 				'blockers'       => array( self::class, 'blockers' ),
 				'executor_ready' => array( self::class, 'executor_ready' ),
 				'dependency'     => 'folders',
-				'mcp_public'     => array( Folders_Dependency::class, 'mcp_bound' ),
 			)
 		);
-	}
-	public static function available(): bool {
-		return Media_Folders::can_manage() && self::services_ready() && self::entitled();
 	}
 	/** Pure remote lookup also authorizes retained history after entitlement loss. */
 	private static function remote_membership( array $target ): array {
@@ -224,7 +226,7 @@ final class Bound {
 			),
 		);
 		foreach ( $defs as $name => $props ) {
-			$output = Contract::outcome_schema();
+			$output = Contract::outcome( $name, self::RESULTS );
 			if ( self::SOURCE === $name ) {
 				$output = Contract::admitting(
 					Contract::object(

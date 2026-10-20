@@ -28,6 +28,17 @@ class Modula_Settings {
 	const OPTION_SETTINGS        = 'modula_settings';
 
 	/**
+	 * Image Proofing email settings. Pro owns and saves this option; Lite only
+	 * shows it in the locked Email placeholder.
+	 */
+	const OPTION_PROOFING_EMAILS = 'modula_image_proofing_emails';
+
+	/**
+	 * Suffix of a role's album entry in the roles option (`editor_album`).
+	 */
+	const ALBUM_ROLE_SUFFIX = '_album';
+
+	/**
 	 * Field types
 	 */
 	const FIELD_TYPE_TOGGLE            = 'toggle';
@@ -45,6 +56,7 @@ class Modula_Settings {
 	const FIELD_TYPE_CREDENTIALS_GROUP = 'credentials_group';
 	const FIELD_TYPE_IA_RADIO          = 'ia_radio';
 	const FIELD_TYPE_MODULA_AI         = 'modula_ai';
+	const FIELD_TYPE_MCP_CONNECTIONS   = 'mcp_connections';
 	const FIELD_TYPE_ROLE              = 'role';
 
 	/**
@@ -95,11 +107,15 @@ class Modula_Settings {
 	 * @since 2.11.0
 	 */
 	public function __construct() {
-		add_action( 'modula_settings_api_update_modula_roles', array( $this, 'set_capabilities' ) );
+		add_filter( 'modula_settings_api_pre_update_' . self::OPTION_ROLES, array( $this, 'require_pro_roles' ) );
+		add_action( 'modula_settings_api_update_' . self::OPTION_ROLES, array( $this, 'set_capabilities' ) );
 
 		add_action( 'modula_settings_api_update_' . self::OPTION_STANDALONE, array( $this, 'schedule_rewrite_flush' ) );
 		add_filter( 'modula_settings_api_pre_update_' . Modula_Debug_Log::OPTION_KEY, array( $this, 'sync_debug_log_option' ), 10, 1 );
 		add_action( 'init', array( $this, 'maybe_flush_rewrite_rules' ), 999 );
+		// After Pro's own Image Proofing tab (priority 10), so it can step aside.
+		add_filter( 'modula_admin_page_main_tabs', array( $this, 'add_image_proofing_placeholder' ), 99 );
+		add_filter( 'modula_admin_page_main_tabs', array( $this, 'add_email_template_defaults' ), 99 );
 	}
 
 	public function schedule_rewrite_flush() {
@@ -574,21 +590,22 @@ class Modula_Settings {
 	 * @since 2.11.0
 	 */
 	public function get_tabs() {
+		// Subtab labels are the card titles on Modula Settings, and its search finds them.
 		$subtabs = array(
 			'standalone'      => array(
-				'label'  => esc_html__( 'Standalone', 'modula-best-grid-gallery' ),
+				'label'  => esc_html__( 'Standalone pages', 'modula-best-grid-gallery' ),
 				'badge'  => 'PRO',
 				'locked' => true,
 				'config' => apply_filters( 'modula_standalone_settings_tab', $this->get_standalone() ),
 			),
 			'compression'     => array(
-				'label'  => esc_html__( 'Performance', 'modula-best-grid-gallery' ),
+				'label'  => esc_html__( 'Image compression', 'modula-best-grid-gallery' ),
 				'badge'  => 'PRO',
 				'locked' => true,
 				'config' => apply_filters( 'modula_compression_settings_tab', $this->get_compression() ),
 			),
 			'shortcodes'      => array(
-				'label'  => esc_html__( 'Advanced Shortcodes', 'modula-best-grid-gallery' ),
+				'label'  => esc_html__( 'Page with all galleries', 'modula-best-grid-gallery' ),
 				'badge'  => 'PRO',
 				'locked' => true,
 				'config' => apply_filters( 'modula_shortcodes_settings_tab', $this->get_shortcodes() ),
@@ -600,29 +617,30 @@ class Modula_Settings {
 				'config' => apply_filters( 'modula_watermark_settings_tab', $this->get_watermark() ),
 			),
 			'image_licensing' => array(
-				'label'  => esc_html__( 'Image Licensing', 'modula-best-grid-gallery' ),
+				'label'  => esc_html__( 'Image licensing', 'modula-best-grid-gallery' ),
 				'locked' => false,
 				'config' => apply_filters( 'modula_image_licensing_settings_tab', $this->get_image_licensing() ),
 			),
 			'roles'           => array(
-				'label'  => esc_html__( 'Roles', 'modula-best-grid-gallery' ),
+				'label'  => esc_html__( 'Role permissions', 'modula-best-grid-gallery' ),
 				'badge'  => 'PRO',
 				'locked' => true,
 				'config' => apply_filters( 'modula_roles_settings_tab', $this->get_roles() ),
 			),
 			'social_media'    => array(
-				'label'  => esc_html__( 'Social Media Accounts', 'modula-best-grid-gallery' ),
+				'label'  => esc_html__( 'Accounts', 'modula-best-grid-gallery' ),
 				'badge'  => '',
 				'locked' => false,
 				'config' => apply_filters( 'modula_social_media_settings_tab', $this->get_social_media() ),
 			),
+			'mcp_connections' => $this->get_mcp_connections(),
 			'modula_ai'       => array(
-				'label'  => esc_html__( 'Modula AI', 'modula-best-grid-gallery' ),
+				'label'  => esc_html__( 'Smart Captions', 'modula-best-grid-gallery' ),
 				'locked' => false,
 				'config' => apply_filters( 'modula_ai_settings_tab', $this->get_modula_ai() ),
 			),
 			'diagnostics'     => array(
-				'label'  => esc_html__( 'Debug Log', 'modula-best-grid-gallery' ),
+				'label'  => esc_html__( 'Debug log', 'modula-best-grid-gallery' ),
 				'locked' => false,
 				'config' => apply_filters( 'modula_diagnostics_settings_tab', $this->get_diagnostics() ),
 			),
@@ -645,7 +663,6 @@ class Modula_Settings {
 				'slug'    => 'optimization',
 				'subtabs' => array(
 					'compression' => $subtabs['compression'],
-					'imageseo'    => $subtabs['modula_ai'],
 				),
 			),
 			array(
@@ -664,6 +681,15 @@ class Modula_Settings {
 				),
 			),
 			array(
+				'label'   => esc_html__( 'AI', 'modula-best-grid-gallery' ),
+				'slug'    => 'ai',
+				'subtabs' => array(
+					'mcp_connections' => $subtabs['mcp_connections'],
+					// The `imageseo` key is the Smart Captions card id.
+					'imageseo'        => $subtabs['modula_ai'],
+				),
+			),
+			array(
 				'label'   => esc_html__( 'Diagnostics', 'modula-best-grid-gallery' ),
 				'slug'    => 'diagnostics',
 				'subtabs' => array(
@@ -673,6 +699,63 @@ class Modula_Settings {
 		);
 
 		return apply_filters( 'modula_admin_page_main_tabs', $tabs );
+	}
+
+	/**
+	 * Adds a locked Image Proofing tab when Pro has not added its own, so
+	 * Modula Settings shows the Email section with its plan in Lite.
+	 *
+	 * @param array $tabs Main tabs.
+	 * @return array Main tabs.
+	 */
+	public function add_image_proofing_placeholder( $tabs ) {
+		if ( in_array( 'image_proofing', array_column( $tabs, 'slug' ), true ) ) {
+			return $tabs;
+		}
+
+		$tabs[] = array(
+			'label'   => esc_html__( 'Image Proofing', 'modula-best-grid-gallery' ),
+			'slug'    => 'image_proofing',
+			'subtabs' => array(
+				'image_proofing' => $this->get_image_proofing_placeholder(),
+			),
+		);
+
+		return $tabs;
+	}
+
+	/**
+	 * Adds each email template's default subject and body to Pro's Email
+	 * fields as `resetValue`, so "Reset to default" puts them back as unsaved
+	 * edits. Pro sends only the stored values, and its reset route saves at
+	 * once. Without Pro's Email_Settings, the tabs stay as they are.
+	 *
+	 * @param array $tabs Main tabs.
+	 * @return array Main tabs.
+	 */
+	public function add_email_template_defaults( $tabs ) {
+		$defaults_source = array( 'Modula_Pro\\Extensions\\Image_Proofing\\Email_Settings', 'get_defaults' );
+		if ( ! is_callable( $defaults_source ) ) {
+			return $tabs;
+		}
+		$defaults = call_user_func( $defaults_source );
+		if ( ! is_array( $defaults ) ) {
+			return $tabs;
+		}
+
+		foreach ( $tabs as $index => $tab ) {
+			$has_email_fields = isset( $tab['slug'], $tab['subtabs']['image_proofing']['config']['fields'] )
+				&& 'image_proofing' === $tab['slug'];
+			if ( ! $has_email_fields ) {
+				continue;
+			}
+			$tabs[ $index ]['subtabs']['image_proofing']['config']['fields'] = $this->with_template_reset_values(
+				$tab['subtabs']['image_proofing']['config']['fields'],
+				$defaults
+			);
+		}
+
+		return $tabs;
 	}
 
 	// =============================================================================
@@ -715,7 +798,7 @@ class Modula_Settings {
 			array(
 				$this->build_options_toggle_field(
 					'gallery.enable_rewrite',
-					esc_html__( 'Enable for Galleries', 'modula-best-grid-gallery' ),
+					esc_html__( 'Galleries get their own page', 'modula-best-grid-gallery' ),
 					$enable_default,
 					self::DEFAULT_ENABLED,
 					self::DEFAULT_DISABLED,
@@ -723,7 +806,7 @@ class Modula_Settings {
 				),
 				$this->build_text_field(
 					'gallery.slug',
-					esc_html__( 'Gallery Slug', 'modula-best-grid-gallery' ),
+					esc_html__( 'Gallery slug', 'modula-best-grid-gallery' ),
 					$slug_default,
 					array(
 						'size'       => 'small',
@@ -763,7 +846,7 @@ class Modula_Settings {
 			array(
 				$this->build_options_toggle_field(
 					'album.enable_rewrite',
-					esc_html__( 'Enable for Albums', 'modula-best-grid-gallery' ),
+					esc_html__( 'Albums get their own page', 'modula-best-grid-gallery' ),
 					$enable_default,
 					self::DEFAULT_ENABLED,
 					self::DEFAULT_DISABLED,
@@ -771,7 +854,7 @@ class Modula_Settings {
 				),
 				$this->build_text_field(
 					'album.slug',
-					esc_html__( 'Album Slug', 'modula-best-grid-gallery' ),
+					esc_html__( 'Album slug', 'modula-best-grid-gallery' ),
 					$slug_default,
 					array(
 						'size'       => 'small',
@@ -837,7 +920,7 @@ class Modula_Settings {
 
 		return $this->build_options_toggle_field(
 			'enable_optimization',
-			'Compression',
+			esc_html__( 'Compression', 'modula-best-grid-gallery' ),
 			$default,
 			self::DEFAULT_ENABLED,
 			self::DEFAULT_DISABLED,
@@ -867,7 +950,7 @@ class Modula_Settings {
 			array(
 				$this->build_select_field(
 					'thumbnail_optimization',
-					'Thumbnail Compression',
+					esc_html__( 'Thumbnails', 'modula-best-grid-gallery' ),
 					$compression_options,
 					$thumbnail_default,
 					array(
@@ -885,7 +968,7 @@ class Modula_Settings {
 				),
 				$this->build_select_field(
 					'lightbox_optimization',
-					'Lightbox Compression',
+					esc_html__( 'Lightbox', 'modula-best-grid-gallery' ),
 					$compression_options,
 					$lightbox_default,
 					array(
@@ -951,7 +1034,7 @@ class Modula_Settings {
 			'fields' => array(
 				$this->build_text_field(
 					self::OPTION_SHORTCODES,
-					esc_html__( 'Gallery link attribute', 'modula-best-grid-gallery' ),
+					esc_html__( 'Link parameter', 'modula-best-grid-gallery' ),
 					$shortcodes,
 					array(
 						'description' => sprintf(
@@ -985,7 +1068,7 @@ class Modula_Settings {
 					self::FIELD_TYPE_IMAGE_SELECT,
 					'watermark_image',
 					array(
-						'label'        => esc_html__( 'Watermark Image', 'modula-best-grid-gallery' ),
+						'label'        => esc_html__( 'Watermark image', 'modula-best-grid-gallery' ),
 						'default'      => $watermark_image_id,
 						'src'          => $watermark_image_src,
 						'sanitization' => array( 'number' ),
@@ -994,7 +1077,7 @@ class Modula_Settings {
 				$this->build_watermark_combo_fields( $watermark, $watermark_positions ),
 				$this->build_toggle_field(
 					'watermark_enable_backup',
-					esc_html__( 'Enable image backup', 'modula-best-grid-gallery' ),
+					esc_html__( 'Keep the original images', 'modula-best-grid-gallery' ),
 					isset( $watermark['watermark_enable_backup'] ) ? $watermark['watermark_enable_backup'] : '',
 					array(
 						'description' => esc_html__( 'Save original images (without watermark) in case you decide to delete the watermark from them you will be able to restore the original images to your gallery/media library.', 'modula-best-grid-gallery' ),
@@ -1024,7 +1107,7 @@ class Modula_Settings {
 			array(
 				$this->build_select_field(
 					'watermark_position',
-					esc_html__( 'Watermark Position', 'modula-best-grid-gallery' ),
+					esc_html__( 'Position', 'modula-best-grid-gallery' ),
 					$watermark_positions,
 					$position_default,
 					array( 'size' => 'small' )
@@ -1033,7 +1116,7 @@ class Modula_Settings {
 					self::FIELD_TYPE_RANGE_SELECT,
 					'watermark_margin',
 					array(
-						'label'        => esc_html__( 'Watermark Margin', 'modula-best-grid-gallery' ),
+						'label'        => esc_html__( 'Margin', 'modula-best-grid-gallery' ),
 						'default'      => $margin_default,
 						'min'          => 0,
 						'max'          => 50,
@@ -1097,7 +1180,7 @@ class Modula_Settings {
 				array(
 					'type'         => 'ia_radio',
 					'name'         => 'image_licensing',
-					'label'        => esc_html__( 'Choose license type', 'modula-best-grid-gallery' ),
+					'label'        => esc_html__( 'License', 'modula-best-grid-gallery' ),
 					'default'      => isset( $licensing['image_licensing'] ) ? $licensing['image_licensing'] : 'none',
 					'options'      => $licenses,
 					'sanitization' => array( 'enum' => array_column( $licenses, 'value' ) ),
@@ -1105,7 +1188,7 @@ class Modula_Settings {
 				array(
 					'type'         => 'toggle',
 					'name'         => 'display_with_description',
-					'label'        => esc_html__( 'Display licensing under gallery', 'modula-best-grid-gallery' ),
+					'label'        => esc_html__( 'Show the license under galleries', 'modula-best-grid-gallery' ),
 					'default'      => isset( $licensing['display_with_description'] ) ? $licensing['display_with_description'] : '',
 					'description'  => esc_html__( 'Enable this option to show image licensing attribution under each gallery for your website visitors. The selected license and the author/company info you add will be displayed below the gallery and included in the gallery’s code, helping visitors know the license conditions and allowing Google to identify images for copyright filtering.', 'modula-best-grid-gallery' ),
 					'sanitization' => array( 'bool' ),
@@ -1209,7 +1292,7 @@ class Modula_Settings {
 					'id'          => 'instagram',
 					'type'        => 'oauth',
 					'provider'    => 'instagram',
-					'title'       => esc_html__( 'Instagram', 'modula-best-grid-gallery' ),
+					'label'       => esc_html__( 'Instagram', 'modula-best-grid-gallery' ),
 					'description' => esc_html__( 'Connect Modula to your Instagram business account.', 'modula-best-grid-gallery' ),
 					'status'      => array(
 						'connected'        => $instagram_status,
@@ -1239,7 +1322,7 @@ class Modula_Settings {
 					'id'          => 'youtube',
 					'type'        => 'oauth',
 					'provider'    => 'youtube',
-					'title'       => esc_html__( 'YouTube', 'modula-best-grid-gallery' ),
+					'label'       => esc_html__( 'YouTube', 'modula-best-grid-gallery' ),
 					'description' => esc_html__( 'Connect Modula to your YouTube account.', 'modula-best-grid-gallery' ),
 					'status'      => array(
 						'connected'        => ! is_null( $youtube_oauth ) && $youtube_oauth->get_access_token() ? true : false,
@@ -1276,7 +1359,8 @@ class Modula_Settings {
 				array(
 					'id'          => 'vimeo_credentials',
 					'type'        => 'credentials_group',
-					'title'       => esc_html__( 'Vimeo credentials', 'modula-best-grid-gallery' ),
+					// The Connections card's row name, which search finds.
+					'label'       => esc_html__( 'Vimeo', 'modula-best-grid-gallery' ),
 					'description' => esc_html__( 'Add your Vimeo app keys to enable the connection.', 'modula-best-grid-gallery' ),
 					'oauth'       => array(
 						'status'     => array(
@@ -1306,7 +1390,7 @@ class Modula_Settings {
 						array(
 							'type'         => 'text',
 							'name'         => 'modula_video_vimeo_creds.client_id',
-							'label'        => esc_html__( 'Vimeo Client ID', 'modula-best-grid-gallery' ),
+							'label'        => esc_html__( 'Client ID', 'modula-best-grid-gallery' ),
 							'default'      => isset( $vimeo_creds['client_id'] ) ? $vimeo_creds['client_id'] : '',
 							'readonly'     => $vimeo_connected,
 							'sanitization' => array( 'text' ),
@@ -1314,7 +1398,7 @@ class Modula_Settings {
 						array(
 							'type'         => 'text',
 							'name'         => 'modula_video_vimeo_creds.client_secret',
-							'label'        => esc_html__( 'Vimeo Client Secret', 'modula-best-grid-gallery' ),
+							'label'        => esc_html__( 'Client secret', 'modula-best-grid-gallery' ),
 							'default'      => isset( $vimeo_creds['client_secret'] ) ? $vimeo_creds['client_secret'] : '',
 							'readonly'     => $vimeo_connected,
 							'sanitization' => array( 'text' ),
@@ -1322,7 +1406,7 @@ class Modula_Settings {
 						array(
 							'type'         => 'text',
 							'name'         => 'vimeo_redirect_uri',
-							'label'        => esc_html__( 'Vimeo RedirectURI', 'modula-best-grid-gallery' ),
+							'label'        => esc_html__( 'Redirect URI', 'modula-best-grid-gallery' ),
 							'default'      => $vimeo_redirect,
 							'readonly'     => true,
 							'sanitization' => array( 'url' ),
@@ -1333,6 +1417,124 @@ class Modula_Settings {
 				),
 			),
 		);
+	}
+
+	/**
+	 * MCP Connections panel: one React field with its own routes, so it has no Save button.
+	 * Administrators only; its routes check manage_options as well. An empty subtab is not rendered.
+	 *
+	 * @return array Subtab definition, or an empty array.
+	 */
+	private function get_mcp_connections() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return array();
+		}
+		return array(
+			'label'  => esc_html__( 'AI assistants', 'modula-best-grid-gallery' ),
+			'locked' => false,
+			'config' => array(
+				'fields'        => array( $this->build_field( self::FIELD_TYPE_MCP_CONNECTIONS, '' ) ),
+				'remove_button' => true,
+			),
+		);
+	}
+
+	/**
+	 * Locked Image Proofing subtab: Pro's Email tabs and Sender fields, with
+	 * the defaults Pro uses, for display only. No field has a sanitization
+	 * schema, so the save route never stores Pro's option from Lite.
+	 *
+	 * @return array Subtab definition.
+	 */
+	private function get_image_proofing_placeholder() {
+		$sender = array( 'group' => 'sender' );
+
+		return array(
+			'label'  => esc_html__( 'Email', 'modula-best-grid-gallery' ),
+			'badge'  => 'business',
+			'locked' => true,
+			'config' => array(
+				'option'  => self::OPTION_PROOFING_EMAILS,
+				'submenu' => array(
+					'options' => array(
+						array(
+							'label' => esc_html__( 'Sender', 'modula-best-grid-gallery' ),
+							'value' => 'sender',
+						),
+						array(
+							'label' => esc_html__( 'Invitation', 'modula-best-grid-gallery' ),
+							'value' => 'invitation',
+						),
+						array(
+							'label' => esc_html__( 'Photographer notification', 'modula-best-grid-gallery' ),
+							'value' => 'selection',
+						),
+					),
+				),
+				'fields'  => array(
+					$this->build_field(
+						self::FIELD_TYPE_TEXT,
+						'from_name',
+						$sender + array(
+							'label'   => esc_html__( 'From name', 'modula-best-grid-gallery' ),
+							'default' => get_bloginfo( 'name' ),
+						)
+					),
+					$this->build_field(
+						self::FIELD_TYPE_TEXT,
+						'from_email',
+						$sender + array(
+							'label'   => esc_html__( 'From email', 'modula-best-grid-gallery' ),
+							'default' => get_option( 'admin_email' ),
+						)
+					),
+					$this->build_field(
+						self::FIELD_TYPE_TEXT,
+						'reply_to',
+						$sender + array(
+							'label'   => esc_html__( 'Reply-to', 'modula-best-grid-gallery' ),
+							'default' => '',
+						)
+					),
+					$this->build_field(
+						self::FIELD_TYPE_IMAGE_SELECT,
+						'logo_id',
+						$sender + array(
+							'label'   => esc_html__( 'Logo', 'modula-best-grid-gallery' ),
+							'default' => 0,
+						)
+					),
+					// The test email, without a route: Lite has none to call.
+					$sender + array(
+						'type' => 'button',
+						'text' => esc_html__( 'Send a test email', 'modula-best-grid-gallery' ),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Gives each template field (`{template}.{part}`, like
+	 * `invitation.body`) its default from Pro's defaults.
+	 *
+	 * @param array $fields   Email fields.
+	 * @param array $defaults Pro's defaults: `{template}` => `{part}` => string.
+	 * @return array Fields.
+	 */
+	private function with_template_reset_values( $fields, $defaults ) {
+		foreach ( $fields as $index => $field ) {
+			$path        = isset( $field['name'] ) ? explode( '.', $field['name'] ) : array();
+			$has_default = 2 === count( $path )
+				&& isset( $defaults[ $path[0] ][ $path[1] ] )
+				&& is_string( $defaults[ $path[0] ][ $path[1] ] );
+			if ( ! $has_default ) {
+				continue;
+			}
+			$fields[ $index ]['resetValue'] = $defaults[ $path[0] ][ $path[1] ];
+		}
+
+		return $fields;
 	}
 
 	/**
@@ -1349,7 +1551,7 @@ class Modula_Settings {
 		$fields = array(
 			$this->build_toggle_field(
 				'use_modula_ai',
-				esc_html__( 'Use AI Features', 'modula-best-grid-gallery' ),
+				esc_html__( 'Write alt text, titles and captions with AI', 'modula-best-grid-gallery' ),
 				$enabled,
 				array(
 					'disabled' => $unavailable,
@@ -1379,9 +1581,11 @@ class Modula_Settings {
 				),
 			)
 		);
+		// The legacy page never draws the key and language fields (their
+		// conditions never match); their labels name the Smart Captions rows.
 		$fields[] = $this->build_text_field(
 			'modula_ai_api_key',
-			'',
+			esc_html__( 'API key', 'modula-best-grid-gallery' ),
 			'',
 			array(
 				'conditions' => array(
@@ -1398,6 +1602,7 @@ class Modula_Settings {
 			self::FIELD_TYPE_SELECT,
 			'modula_ai_language',
 			array(
+				'label'        => esc_html__( 'Language', 'modula-best-grid-gallery' ),
 				'sanitization' => array( 'text' ),
 				'conditions'   => array(
 					array(
@@ -1454,29 +1659,22 @@ class Modula_Settings {
 		$status = $log->get_status();
 		$active = ! empty( $status['active'] );
 
-		$size_label = ! empty( $status['has_file'] )
-			? size_format( max( 0, (int) $status['size'] ), 2 )
-			: esc_html__( 'empty', 'modula-best-grid-gallery' );
-
-		if ( $active && ! empty( $status['expires_at'] ) ) {
-			/* translators: 1: local datetime when logging auto-disables, 2: current log size label */
-			$status_text = sprintf(
-				esc_html__( 'Logging is active until %1$s. Log size: %2$s. This is the Modula Debug Log, not WordPress WP_DEBUG / debug.log.', 'modula-best-grid-gallery' ),
-				esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $status['expires_at'] ) ),
-				esc_html( $size_label )
-			);
-		} elseif ( ! empty( $status['has_file'] ) ) {
-			/* translators: %s: current log size label */
-			$status_text = sprintf(
-				esc_html__( 'Logging is off. A previous Modula Debug Log file is still available to download (size: %s). This is not WordPress WP_DEBUG / debug.log.', 'modula-best-grid-gallery' ),
-				esc_html( $size_label )
-			);
-		} else {
-			$status_text = esc_html__( 'Logging is off. Enable Modula Debug Log to capture Modula failures for support. This is not WordPress WP_DEBUG / debug.log.', 'modula-best-grid-gallery' );
-		}
+		$has_file  = ! empty( $status['has_file'] );
+		$file_size = $has_file ? size_format( max( 0, (int) $status['size'] ), 2 ) : '';
+		$expires   = ( $active && ! empty( $status['expires_at'] ) )
+			? wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $status['expires_at'] )
+			: '';
 
 		return array(
 			'option' => Modula_Debug_Log::OPTION_KEY,
+			// The Debug log card writes its own status line from this.
+			'log'    => array(
+				'active'        => $active,
+				'has_file'      => $has_file,
+				'size_label'    => $file_size,
+				'expires_label' => $expires,
+				'ttl_days'      => Modula_Debug_Log::TTL_DAYS,
+			),
 			'fields' => array(
 				$this->build_paragraph_field(
 					'modula_debug_log_intro',
@@ -1485,25 +1683,21 @@ class Modula_Settings {
 				),
 				$this->build_toggle_field(
 					'enabled',
-					esc_html__( 'Enable Modula Debug Log', 'modula-best-grid-gallery' ),
+					esc_html__( 'Record errors for support', 'modula-best-grid-gallery' ),
 					$active,
 					array(
 						'description' => esc_html__( 'Stays on for about 7 days, then stops writing automatically. The file is kept until you Clear it.', 'modula-best-grid-gallery' ),
 					)
 				),
-				$this->build_paragraph_field(
-					'modula_debug_log_status',
-					esc_html__( 'Status', 'modula-best-grid-gallery' ),
-					$status_text
-				),
 				array(
 					'type'           => 'button',
+					'name'           => 'modula_debug_log_download',
 					'text'           => esc_html__( 'Download log', 'modula-best-grid-gallery' ),
 					'loadingText'    => esc_html__( 'Preparing…', 'modula-best-grid-gallery' ),
 					'successMessage' => esc_html__( 'Download started.', 'modula-best-grid-gallery' ),
 					'errorMessage'   => esc_html__( 'Could not download the Modula Debug Log.', 'modula-best-grid-gallery' ),
 					'variant'        => 'secondary',
-					'disabled'       => empty( $status['has_file'] ),
+					'disabled'       => ! $has_file,
 					'api'            => array(
 						'path'     => '/modula-best-grid-gallery/v1/debug-log/download',
 						'method'   => 'GET',
@@ -1512,12 +1706,13 @@ class Modula_Settings {
 				),
 				array(
 					'type'           => 'button',
+					'name'           => 'modula_debug_log_clear',
 					'text'           => esc_html__( 'Clear log', 'modula-best-grid-gallery' ),
 					'loadingText'    => esc_html__( 'Clearing…', 'modula-best-grid-gallery' ),
 					'successMessage' => esc_html__( 'Modula Debug Log cleared.', 'modula-best-grid-gallery' ),
 					'errorMessage'   => esc_html__( 'Could not clear the Modula Debug Log.', 'modula-best-grid-gallery' ),
 					'variant'        => 'secondary',
-					'disabled'       => empty( $status['has_file'] ),
+					'disabled'       => ! $has_file,
 					'reload'         => true,
 					'api'            => array(
 						'path'   => '/modula-best-grid-gallery/v1/debug-log',
@@ -1616,11 +1811,11 @@ class Modula_Settings {
 				continue;
 			}
 
-			$option     = isset( $options[ $key . '_album' ]['enabled'] ) ? $options[ $key . '_album' ]['enabled'] : false;
+			$option     = isset( $options[ $key . self::ALBUM_ROLE_SUFFIX ]['enabled'] ) ? $options[ $key . self::ALBUM_ROLE_SUFFIX ]['enabled'] : false;
 			$role       = get_role( $key );
 			$role_array = array(
 				'type'         => self::FIELD_TYPE_ROLE,
-				'name'         => $key . '_album.enabled',
+				'name'         => $key . self::ALBUM_ROLE_SUFFIX . '.enabled',
 				'label'        => translate_user_role( $wp_role['name'] ),
 				'default'      => $this->is_role_enabled( $key, $option, $album_capabilities ),
 				'fields'       => array(),
@@ -1628,19 +1823,14 @@ class Modula_Settings {
 				'sanitization' => array( 'bool' ),
 			);
 
+			// Album permissions live under `{role}_album`, so they never share a
+			// field with the gallery card. Upload Files is one WordPress
+			// capability, offered once on the gallery card.
 			foreach ( $album_capabilities as $capability => $capability_name ) {
 				$role_array['fields'][] = $this->build_toggle_field(
-					$key . '.' . $capability,
+					$key . self::ALBUM_ROLE_SUFFIX . '.' . $capability,
 					$capability_name,
 					$role->has_cap( $capability )
-				);
-			}
-
-			if ( ! in_array( $key, array( 'editor', 'author' ), true ) ) {
-				$role_array['fields'][] = $this->build_toggle_field(
-					$key . '.upload_files',
-					__( 'Upload Files', 'modula-best-grid-gallery' ),
-					$role->has_cap( 'upload_files' )
 				);
 			}
 
@@ -1692,8 +1882,39 @@ class Modula_Settings {
 	 * @since 2.11.0
 	 */
 	public function set_capabilities( $settings ) {
-		$roles = new Modula_Pro\Extensions\Roles\Roles();
+		// require_pro_roles() already refused the save without Pro.
+		if ( ! self::has_pro_roles() ) {
+			return;
+		}
+
+		$roles = new \Modula_Pro\Extensions\Roles\Roles();
 		$roles->sanitize_option( $settings );
+	}
+
+	/**
+	 * Refuses the roles save before it is written when the Pro Roles class,
+	 * which turns the option into capabilities, is not loaded.
+	 *
+	 * @param mixed $value Sanitized roles option value.
+	 * @return mixed|WP_Error The value, or an error that stops the save.
+	 */
+	public function require_pro_roles( $value ) {
+		if ( self::has_pro_roles() ) {
+			return $value;
+		}
+
+		return new WP_Error(
+			'modula_roles_requires_pro',
+			esc_html__( 'Role permissions need Modula Pro.', 'modula-best-grid-gallery' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	/**
+	 * @return bool Whether Pro's Roles class can apply capabilities.
+	 */
+	private static function has_pro_roles() {
+		return class_exists( '\Modula_Pro\Extensions\Roles\Roles' );
 	}
 
 	/**

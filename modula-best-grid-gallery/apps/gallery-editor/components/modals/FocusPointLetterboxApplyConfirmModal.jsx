@@ -4,7 +4,7 @@
 import { useCallback } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import GalleryModal from '../gallery-modal/GalleryModal';
+import { GalleryModal } from 'editor-shell';
 
 /**
  * @param {Object}     props

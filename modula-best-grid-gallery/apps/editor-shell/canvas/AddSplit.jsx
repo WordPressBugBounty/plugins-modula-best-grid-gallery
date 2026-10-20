@@ -1,5 +1,6 @@
 /**
  * Add split: primary add action + caret menu of grouped add sources.
+ * Without a primary action it renders one menu trigger instead (menu-only).
  */
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
@@ -16,9 +17,9 @@ import { Icon, chevronDown, plus } from '@wordpress/icons';
 
 /**
  * @param {Object}                                                    props
- * @param {string}                                                    props.mainLabel   Primary action label (e.g. Add images).
- * @param {() => void}                                                props.onPrimary
- * @param {string}                                                    props.caretLabel  Screen-reader name of the caret.
+ * @param {string}                                                    props.mainLabel   Primary action label (e.g. Add images), or the menu trigger's visible label.
+ * @param {() => void}                                                [props.onPrimary] Omit for menu-only mode: one trigger that always opens the menu.
+ * @param {string}                                                    props.caretLabel  Accessible name of the caret, or of the menu-only trigger.
  * @param {Array<{ id: string, label: string, rows: AddSplitRow[] }>} props.menuGroups
  * @param {(row: AddSplitRow) => void}                                props.onSelectRow Called after the menu closes.
  */
@@ -55,27 +56,48 @@ export default function AddSplit({
 		};
 	}, [menuOpen]);
 
+	const toggleMenu = () => setMenuOpen((o) => !o);
+
 	return (
 		<div ref={wrapRef} className="modula-takeover__preview-add-split">
 			<div className="modula-takeover__preview-add-split-inner">
-				<button
-					type="button"
-					className="modula-takeover__preview-add-split-main"
-					onClick={onPrimary}
-				>
-					<Icon icon={plus} size={16} />
-					<span>{mainLabel}</span>
-				</button>
-				<button
-					type="button"
-					className="modula-takeover__preview-add-split-caret"
-					aria-expanded={menuOpen}
-					aria-haspopup="menu"
-					onClick={() => setMenuOpen((o) => !o)}
-				>
-					<Icon icon={chevronDown} size={16} />
-					<span className="screen-reader-text">{caretLabel}</span>
-				</button>
+				{onPrimary ? (
+					<>
+						<button
+							type="button"
+							className="modula-takeover__preview-add-split-main"
+							onClick={onPrimary}
+						>
+							<Icon icon={plus} size={16} />
+							<span>{mainLabel}</span>
+						</button>
+						<button
+							type="button"
+							className="modula-takeover__preview-add-split-caret"
+							aria-expanded={menuOpen}
+							aria-haspopup="menu"
+							onClick={toggleMenu}
+						>
+							<Icon icon={chevronDown} size={16} />
+							<span className="screen-reader-text">
+								{caretLabel}
+							</span>
+						</button>
+					</>
+				) : (
+					<button
+						type="button"
+						className="modula-takeover__preview-add-split-main"
+						aria-label={caretLabel}
+						aria-expanded={menuOpen}
+						aria-haspopup="menu"
+						onClick={toggleMenu}
+					>
+						<Icon icon={plus} size={16} />
+						<span>{mainLabel}</span>
+						<Icon icon={chevronDown} size={16} />
+					</button>
+				)}
 			</div>
 			{menuOpen ? (
 				<ul className="modula-takeover__preview-add-menu" role="menu">

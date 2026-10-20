@@ -168,6 +168,9 @@ export function completeCreateEditorChoice(params) {
 			? config.createAlbumNonce
 			: config.createGalleryNonce,
 		choice,
+		presetQueryArg: config.presetQueryArg,
+		// New from preset is galleries only; albums ignore any start.
+		start: creatingAlbum ? undefined : params.start,
 	});
 	completeEditorChoice({
 		action: choice,

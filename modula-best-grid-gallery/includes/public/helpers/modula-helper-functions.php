@@ -685,12 +685,54 @@ function modula_columns_to_vw_term( $cols ) {
  * spans when responsive columns change, but the visual fraction stays ≈ span/12
  * (except forced full-bleed when mobile columns === 1).
  *
- * @param int $span Span width in 12-unit grid cells.
+ * @param int   $span        Span width in 12-unit grid cells.
+ * @param float $cover_scale Rendered image width / tile width (>= 1), see
+ *                           modula_get_custom_grid_cover_scale().
  * @return string
  */
-function modula_custom_grid_span_to_vw_term( $span ) {
-	$span = max( 1, min( 12, (int) $span ) );
-	return (string) ( round( ( 100 * $span ) / 12, 2 ) ) . 'vw';
+function modula_custom_grid_span_to_vw_term( $span, $cover_scale = 1.0 ) {
+	$span  = max( 1, min( 12, (int) $span ) );
+	$width = min( 12, $span * max( 1.0, (float) $cover_scale ) );
+	return (string) ( round( ( 100 * $width ) / 12, 2 ) ) . 'vw';
+}
+
+/**
+ * Read a custom-grid span (`width` / `data-width`, `height` / `data-height`)
+ * from item template / JSON data.
+ *
+ * @param object|array|null $data      Item data.
+ * @param string            $dimension 'width' or 'height'.
+ * @return int|false Positive span, or false when unavailable.
+ */
+function modula_get_custom_grid_span( $data, $dimension ) {
+	if ( null === $data ) {
+		return false;
+	}
+
+	$attribute = 'data-' . $dimension;
+	$data      = is_object( $data ) ? get_object_vars( $data ) : $data;
+	if ( ! is_array( $data ) ) {
+		return false;
+	}
+
+	$candidates = array();
+	if ( isset( $data[ $dimension ] ) ) {
+		$candidates[] = $data[ $dimension ];
+	}
+	foreach ( array( 'item_attributes', 'itemAttributes' ) as $attributes_key ) {
+		if ( isset( $data[ $attributes_key ] ) && is_array( $data[ $attributes_key ] ) && isset( $data[ $attributes_key ][ $attribute ] ) ) {
+			$candidates[] = $data[ $attributes_key ][ $attribute ];
+		}
+	}
+
+	foreach ( $candidates as $candidate ) {
+		$span = absint( $candidate );
+		if ( $span > 0 ) {
+			return $span;
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -700,53 +742,51 @@ function modula_custom_grid_span_to_vw_term( $span ) {
  * @return int|false Positive span, or false when unavailable.
  */
 function modula_get_custom_grid_span_width( $data ) {
-	if ( null === $data ) {
-		return false;
+	$span = modula_get_custom_grid_span( $data, 'width' );
+	return false === $span ? false : min( 12, $span );
+}
+
+/**
+ * How much wider than its tile a custom-grid image renders.
+ *
+ * Custom-grid images cover their tile: a photo wider than the tile's aspect is
+ * scaled to the tile height and cropped at the sides, so the browser needs a
+ * candidate for that wider box. Grid cells are about square, so the tile aspect
+ * follows from the spans. Gutters make tall tiles slightly taller than
+ * height/width predicts; the next srcset candidate up absorbs that difference.
+ *
+ * @param int        $span_width  Span width in grid cells.
+ * @param int|false  $span_height Span height in grid cells, false when unknown.
+ * @param array|null $size_array  [width, height] of the displayed source.
+ * @return float Scale >= 1; 1 when the spans or the source size are unknown.
+ */
+function modula_get_custom_grid_cover_scale( $span_width, $span_height, $size_array ) {
+	if ( false === $span_height || ! is_array( $size_array ) || count( $size_array ) < 2 ) {
+		return 1.0;
 	}
 
-	$candidates = array();
-
-	if ( is_array( $data ) ) {
-		if ( isset( $data['width'] ) ) {
-			$candidates[] = $data['width'];
-		}
-		if ( isset( $data['item_attributes']['data-width'] ) ) {
-			$candidates[] = $data['item_attributes']['data-width'];
-		}
-		if ( isset( $data['itemAttributes']['data-width'] ) ) {
-			$candidates[] = $data['itemAttributes']['data-width'];
-		}
-	} elseif ( is_object( $data ) ) {
-		if ( isset( $data->width ) ) {
-			$candidates[] = $data->width;
-		}
-		if ( isset( $data->item_attributes ) && is_array( $data->item_attributes ) && isset( $data->item_attributes['data-width'] ) ) {
-			$candidates[] = $data->item_attributes['data-width'];
-		}
-		if ( isset( $data->itemAttributes ) && is_array( $data->itemAttributes ) && isset( $data->itemAttributes['data-width'] ) ) {
-			$candidates[] = $data->itemAttributes['data-width'];
-		}
+	$image_width  = (int) $size_array[0];
+	$image_height = (int) $size_array[1];
+	if ( $image_width <= 0 || $image_height <= 0 || $span_width <= 0 ) {
+		return 1.0;
 	}
 
-	foreach ( $candidates as $candidate ) {
-		$span = absint( $candidate );
-		if ( $span > 0 ) {
-			return max( 1, min( 12, $span ) );
-		}
-	}
+	$tile_height_per_width = $span_height / $span_width;
+	$image_aspect          = $image_width / $image_height;
 
-	return false;
+	return max( 1.0, $tile_height_per_width * $image_aspect );
 }
 
 /**
  * Estimate `sizes` for a custom-grid tile from its 12-unit span.
  *
- * @param array $settings Gallery settings.
- * @param int   $span     Span width (1–12).
+ * @param array $settings    Gallery settings.
+ * @param int   $span        Span width (1–12).
+ * @param float $cover_scale Rendered image width / tile width (>= 1).
  * @return string
  */
-function modula_estimate_custom_grid_span_sizes( $settings, $span ) {
-	$span_vw = modula_custom_grid_span_to_vw_term( $span );
+function modula_estimate_custom_grid_span_sizes( $settings, $span, $cover_scale = 1.0 ) {
+	$span_vw = modula_custom_grid_span_to_vw_term( $span, $cover_scale );
 
 	$enable_responsive = (bool) modula_get_setting_value( $settings, 'enable_responsive', 'enableResponsive', false );
 	$cols_mobile       = $enable_responsive
@@ -916,7 +956,9 @@ function modula_resolve_image_sizes_attr( $args ) {
 		$type = (string) modula_get_setting_value( $settings, 'type', 'type', 'creative-gallery' );
 		$span = modula_get_custom_grid_span_width( $data );
 		if ( 'custom-grid' === $type && false !== $span ) {
-			$sizes = modula_estimate_custom_grid_span_sizes( $settings, $span );
+			$size_array  = isset( $args['size_array'] ) ? $args['size_array'] : null;
+			$cover_scale = modula_get_custom_grid_cover_scale( $span, modula_get_custom_grid_span( $data, 'height' ), $size_array );
+			$sizes       = modula_estimate_custom_grid_span_sizes( $settings, $span, $cover_scale );
 		} else {
 			$item_count = isset( $args['item_count'] ) ? $args['item_count'] : 0;
 			$sizes      = modula_estimate_gallery_image_sizes( $settings, $item_count );

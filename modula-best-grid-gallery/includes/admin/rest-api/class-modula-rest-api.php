@@ -1,5 +1,8 @@
 <?php
 require_once MODULA_PATH . 'includes/admin/rest-api/class-modula-extensions-base.php';
+require_once MODULA_PATH . 'includes/admin/rest-api/class-modula-extension-states.php';
+require_once MODULA_PATH . 'includes/admin/rest-api/class-modula-password-protected-posts.php';
+require_once MODULA_PATH . 'includes/admin/rest-api/class-modula-license-card.php';
 require_once MODULA_PATH . 'includes/admin/rest-api/class-modula-settings-sanitizer.php';
 require_once MODULA_PATH . 'includes/admin/rest-api/class-modula-insights-base.php';
 
@@ -69,6 +72,16 @@ class Modula_Rest_Api {
 				'methods'             => 'GET',
 				'callback'            => array( $this, 'get_tabs' ),
 				'permission_callback' => array( $this, 'settings_permissions_check' ),
+				'args'                => array(
+					// `tabs`: main tabs and subtabs (current page);
+					// `groups`: settings groups → sections → cards (redesign).
+					'shape' => array(
+						'type'              => 'string',
+						'enum'              => array( 'tabs', 'groups' ),
+						'default'           => 'tabs',
+						'validate_callback' => 'rest_validate_request_arg',
+					),
+				),
 			)
 		);
 
@@ -99,6 +112,20 @@ class Modula_Rest_Api {
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'license_action' ),
 				'permission_callback' => array( $this, 'settings_permissions_check' ),
+				'args'                => array(
+					'action'      => array(
+						'required'          => true,
+						'type'              => 'string',
+						'enum'              => Modula_License_Card::ACTIONS,
+						'validate_callback' => 'rest_validate_request_arg',
+					),
+					// Only `activate` reads it; deactivate and check use the saved key.
+					'license_key' => array(
+						'type'              => 'string',
+						'default'           => '',
+						'validate_callback' => 'rest_validate_request_arg',
+					),
+				),
 			)
 		);
 
@@ -124,10 +151,10 @@ class Modula_Rest_Api {
 
 		register_rest_route(
 			$this->namespace,
-			'/menu',
+			'/password-protected',
 			array(
 				'methods'             => 'GET',
-				'callback'            => array( $this, 'get_menu' ),
+				'callback'            => array( $this, 'get_password_protected' ),
 				'permission_callback' => array( $this, 'settings_permissions_check' ),
 			)
 		);
@@ -216,8 +243,21 @@ class Modula_Rest_Api {
 		return new \WP_REST_Response( $sanitized_settings, 200 );
 	}
 
-	public function get_tabs() {
-		return new \WP_REST_Response( $this->settings->get_tabs(), 200 );
+	/**
+	 * Settings tabs, or with `shape=groups` the settings groups → sections →
+	 * cards projected from them.
+	 *
+	 * @param \WP_REST_Request $request Request; `shape` is validated by the route.
+	 * @return \WP_REST_Response
+	 */
+	public function get_tabs( $request ) {
+		$tabs = $this->settings->get_tabs();
+
+		if ( 'groups' === $request->get_param( 'shape' ) ) {
+			return new \WP_REST_Response( Modula_Settings_Sections::project( $tabs ), 200 );
+		}
+
+		return new \WP_REST_Response( $tabs, 200 );
 	}
 
 	public function youtube_action( $request ) {
@@ -290,44 +330,50 @@ class Modula_Rest_Api {
 		return Modula_Debug_Log_Rest::handle_download();
 	}
 
+	/**
+	 * License card actions: activate a key, deactivate or check the saved key.
+	 * The response is the license projected for the browser, never the full
+	 * key (Modula_License_Card::run()).
+	 *
+	 * @param \WP_REST_Request $request Request; `action` and `license_key` are validated by the route.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
 	public function license_action( $request ) {
-		$body        = $request->get_json_params();
-		$license_key = isset( $body['license_key'] ) ? $body['license_key'] : '';
-		$action      = isset( $body['action'] ) ? $body['action'] : '';
-		$saved       = get_option( 'modula_pro_license_key', '' );
-		if ( empty( $license_key ) && empty( $saved ) ) {
-			return new \WP_REST_Response(
-				array(
-					'message' => 'no_license_key',
-					'status'  => 'error',
-				),
-				200
-			);
+		$license = Modula_License_Card::handle( $request->get_param( 'action' ), $request->get_param( 'license_key' ) );
+
+		if ( is_wp_error( $license ) ) {
+			return $license;
 		}
 
-		if ( ! class_exists( 'Modula_Pro\Extensions\Licensing' ) ) {
-			return new \WP_REST_Response( 'Modula Pro is not installed.', 400 );
-		}
-
-		$license = Modula_Pro\Extensions\Licensing::get_instance();
-
-		if ( 'activate' === $action ) {
-			return new \WP_REST_Response( $license->activate_license( $license_key ), 200 );
-		}
-
-		if ( 'deactivate' === $action ) {
-			return new \WP_REST_Response( $license->deactivate_license( $license_key ), 200 );
-		}
-
-		return new \WP_REST_Response( $license->check_license(), 200 );
+		return new \WP_REST_Response( $license, 200 );
 	}
 
+	/**
+	 * The extension catalog grouped by plan, each extension with its state on
+	 * this site and the plans it can upgrade to (Modula_Extension_Catalog::groups()).
+	 *
+	 * @return \WP_REST_Response
+	 */
 	public function get_extensions() {
-		$instance = class_exists( 'Modula_Pro\Extensions\Extensions' )
-			? Modula_Pro\Extensions\Extensions::get_instance()
-			: Modula_Extensions_Base::get_instance();
+		$groups = Modula_Extension_Catalog::groups( Modula_Extension_States::for_site(), Modula_License_Card::current_state() );
 
-		return new \WP_REST_Response( $instance->get_extensions(), 200 );
+		return new \WP_REST_Response( $groups, 200 );
+	}
+
+	/**
+	 * How many galleries and albums have a password: what turning Password
+	 * Protect off would remove, for the Extensions page's confirmation.
+	 *
+	 * @return \WP_REST_Response|\WP_Error `{ count: int }`, or the query failure.
+	 */
+	public function get_password_protected() {
+		$count = Modula_Password_Protected_Posts::count();
+
+		if ( is_wp_error( $count ) ) {
+			return $count;
+		}
+
+		return new \WP_REST_Response( array( 'count' => $count ), 200 );
 	}
 
 	public function get_insights() {
@@ -420,130 +466,5 @@ class Modula_Rest_Api {
 		}
 
 		return array_keys( $unknown_array ) !== range( 0, count( $unknown_array ) - 1 );
-	}
-
-	public function get_menu() {
-		// Get extensions instance to check which extensions are active
-		$extensions_instance = class_exists( 'Modula_Pro\Extensions\Extensions' )
-			? Modula_Pro\Extensions\Extensions::get_instance()
-			: Modula_Extensions_Base::get_instance();
-
-		// Check which extensions are active
-		$image_proofing_active = $extensions_instance->extension_enabled( 'modula-image-proofing' );
-		$defaults_active       = $extensions_instance->extension_enabled( 'modula-defaults' );
-		$albums_active         = $extensions_instance->extension_enabled( 'modula-albums' );
-		$image_license_active  = post_type_exists( 'modula-image-license' );
-
-		// Build menu items - Extensions page is always current since this is called from there
-		$menu_items = array();
-
-		// Welcome
-		$menu_items[] = array(
-			'title' => 'Welcome',
-			'url'   => admin_url( 'edit.php?post_type=modula-gallery&page=wpchill-dashboard' ),
-			'class' => 'wp-first-item',
-		);
-
-		// Galleries
-		$menu_items[] = array(
-			'title' => 'Galleries',
-			'url'   => admin_url( 'edit.php?post_type=modula-gallery' ),
-			'class' => '',
-		);
-
-		// Proofing - requires image-proofing extension
-		if ( $image_proofing_active ) {
-			$menu_items[] = array(
-				'title' => 'Proofing',
-				'url'   => admin_url( 'edit.php?post_status=all&gallery_type=image-proofing&post_type=modula-gallery' ),
-				'class' => '',
-			);
-		}
-
-		// Presets (for galleries) - requires defaults extension
-		if ( $defaults_active ) {
-			$menu_items[] = array(
-				'title' => 'Presets',
-				'url'   => admin_url( 'edit.php?post_type=modula-defaults' ),
-				'class' => '',
-			);
-		}
-
-		// Albums - requires albums extension
-		if ( $albums_active ) {
-			$menu_items[] = array(
-				'title' => 'Albums',
-				'url'   => admin_url( 'edit.php?post_type=modula-album' ),
-				'class' => '',
-			);
-
-			// Presets (for albums) - requires albums AND defaults extensions
-			if ( $defaults_active ) {
-				$menu_items[] = array(
-					'title' => 'Presets',
-					'url'   => admin_url( 'edit.php?post_type=defaults-albums' ),
-					'class' => '',
-				);
-			}
-		}
-
-		// Image Licenses - requires image-license extension
-		if ( $image_license_active ) {
-			$menu_items[] = array(
-				'title' => 'Image Licenses',
-				'url'   => admin_url( 'edit.php?post_type=modula-image-license' ),
-				'class' => '',
-			);
-		}
-
-		// Settings
-		$menu_items[] = array(
-			'title' => 'Settings',
-			'url'   => admin_url( 'edit.php?post_type=modula-gallery&page=modula' ),
-			'class' => '',
-		);
-
-		// Extensions - always current since this is called from Extensions page
-		$menu_items[] = array(
-			'title' => 'Extensions',
-			'url'   => admin_url( 'edit.php?post_type=modula-gallery&page=modula-addons' ),
-			'class' => 'current',
-		);
-
-		// Menu is always open since Extensions is current
-		$menu_open_class = 'wp-has-submenu wp-has-current-submenu wp-menu-open';
-		$menu_li_class   = $menu_open_class . ' menu-top menu-icon-modula-gallery';
-		$menu_a_class    = $menu_open_class . ' menu-top menu-icon-modula-gallery';
-
-		// Get plugin icon URL
-		$icon_url = MODULA_URL . 'assets/images/modula.png';
-
-		// Build the HTML
-		$html  = '<li class="' . esc_attr( $menu_li_class ) . '" id="menu-posts-modula-gallery">';
-		$html .= '<a href="' . esc_url( admin_url( 'admin.php?page=wpchill-dashboard' ) ) . '" class="' . esc_attr( $menu_a_class ) . '">';
-		$html .= '<div class="wp-menu-image dashicons-before" aria-hidden="true">';
-		$html .= '<img src="' . esc_url( $icon_url ) . '" alt="">';
-		$html .= '</div>';
-		$html .= '<div class="wp-menu-name">Modula</div>';
-		$html .= '</a>';
-		$html .= '<ul class="wp-submenu wp-submenu-wrap">';
-		$html .= '<li class="wp-submenu-head" aria-hidden="true">Modula</li>';
-
-		foreach ( $menu_items as $item ) {
-			$li_class     = ! empty( $item['class'] ) ? $item['class'] : '';
-			$a_class      = ! empty( $item['class'] ) && strpos( $item['class'], 'current' ) !== false ? 'current' : '';
-			$aria_current = ( strpos( $item['class'], 'current' ) !== false ) ? ' aria-current="page"' : '';
-
-			$html .= '<li' . ( ! empty( $li_class ) ? ' class="' . esc_attr( $li_class ) . '"' : '' ) . '>';
-			$html .= '<a href="' . esc_url( $item['url'] ) . '"' . ( ! empty( $a_class ) ? ' class="' . esc_attr( $a_class ) . '"' : '' ) . $aria_current . '>';
-			$html .= esc_html( $item['title'] );
-			$html .= '</a>';
-			$html .= '</li>';
-		}
-
-		$html .= '</ul>';
-		$html .= '</li>';
-
-		return new \WP_REST_Response( array( 'html' => $html ), 200 );
 	}
 }

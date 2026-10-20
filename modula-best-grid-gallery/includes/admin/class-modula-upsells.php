@@ -23,13 +23,6 @@ class Modula_Upsells {
 	private $tab_content_handler;
 
 	/**
-	 * Settings tab handler instance
-	 *
-	 * @var Modula_Settings_Tab_Handler
-	 */
-	private $settings_tab_handler;
-
-	/**
 	 * Metabox handler instance
 	 *
 	 * @var Modula_Metabox_Handler
@@ -60,18 +53,16 @@ class Modula_Upsells {
 		require_once MODULA_PATH . 'includes/admin/upsells/class-modula-upsell-base.php';
 		require_once MODULA_PATH . 'includes/admin/upsells/class-modula-modal-handler.php';
 		require_once MODULA_PATH . 'includes/admin/upsells/class-modula-tab-content-handler.php';
-		require_once MODULA_PATH . 'includes/admin/upsells/class-modula-settings-tab-handler.php';
 		require_once MODULA_PATH . 'includes/admin/upsells/class-modula-metabox-handler.php';
 		require_once MODULA_PATH . 'includes/admin/upsells/class-modula-navigation-handler.php';
 		require_once MODULA_PATH . 'includes/admin/upsells/class-modula-button-handler.php';
 
 		// Initialize all handlers
-		$this->modal_handler        = new Modula_Modal_Handler();
-		$this->tab_content_handler  = new Modula_Tab_Content_Handler();
-		$this->settings_tab_handler = new Modula_Settings_Tab_Handler();
-		$this->metabox_handler      = new Modula_Metabox_Handler();
-		$this->navigation_handler   = new Modula_Navigation_Handler();
-		$this->button_handler       = new Modula_Button_Handler();
+		$this->modal_handler       = new Modula_Modal_Handler();
+		$this->tab_content_handler = new Modula_Tab_Content_Handler();
+		$this->metabox_handler     = new Modula_Metabox_Handler();
+		$this->navigation_handler  = new Modula_Navigation_Handler();
+		$this->button_handler      = new Modula_Button_Handler();
 	}
 
 	/**
@@ -90,15 +81,6 @@ class Modula_Upsells {
 	 */
 	public function get_tab_content_handler() {
 		return $this->tab_content_handler;
-	}
-
-	/**
-	 * Get settings tab handler instance
-	 *
-	 * @return Modula_Settings_Tab_Handler
-	 */
-	public function get_settings_tab_handler() {
-		return $this->settings_tab_handler;
 	}
 
 	/**

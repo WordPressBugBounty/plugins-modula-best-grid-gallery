@@ -408,12 +408,13 @@ class Ai_Helper {
 	}
 
 	/**
-	 * Block newly enabling use_modula_ai on a local site host.
+	 * Refuse newly enabling use_modula_ai on a local site host, so the save
+	 * fails with an explanation instead of reporting success.
 	 *
 	 * Existing enabled state is left alone (can stay on or be turned off).
 	 *
 	 * @param mixed $value Incoming option value.
-	 * @return mixed
+	 * @return mixed|\WP_Error The value, or an error that stops the save.
 	 */
 	public static function filter_pre_update_use_modula_ai( $value ) {
 		if ( ! self::is_unavailable_on_localhost() ) {
@@ -424,7 +425,11 @@ class Ai_Helper {
 		$currently = (bool) get_option( 'use_modula_ai', 0 );
 
 		if ( $enabling && ! $currently ) {
-			return 0;
+			return new \WP_Error(
+				'modula_ai_unavailable_localhost',
+				__( 'Modula AI is not available on a local site.', 'modula-best-grid-gallery' ),
+				array( 'status' => 400 )
+			);
 		}
 
 		return $value;

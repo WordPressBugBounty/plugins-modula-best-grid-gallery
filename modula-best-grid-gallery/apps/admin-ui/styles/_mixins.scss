@@ -1,0 +1,124 @@
+// Shared admin-ui rules. The demo page reuses them to show forced states.
+
+// Outline ring for buttons, switches and links.
+@mixin focus-ring {
+	outline: 2px solid var(--modula-admin-ink);
+	outline-offset: 2px;
+}
+
+// Border and halo for text-like fields. The transparent outline is drawn
+// only in forced-colors mode, where box-shadow disappears.
+@mixin field-focus {
+	outline: 2px solid transparent;
+	border-color: var(--modula-admin-ink);
+	box-shadow: var(--modula-admin-focus-field);
+}
+
+// Text input, select and textarea share one field look.
+@mixin field {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0 12px;
+	border: 1px solid var(--modula-admin-border-field);
+	border-radius: var(--modula-admin-radius-lg);
+	background: var(--modula-admin-surface);
+	color: var(--modula-admin-ink);
+	font: inherit;
+	font-size: var(--modula-admin-text-body);
+	line-height: 1.4;
+	box-shadow: none;
+
+	// wp-admin's `select:focus` / `textarea:focus` paint a blue border on
+	// mouse focus; the design only changes the field on keyboard focus.
+	&:focus {
+		border-color: var(--modula-admin-border-field);
+		outline: none;
+		box-shadow: none;
+	}
+
+	&:focus-visible {
+		@include field-focus;
+	}
+
+	// wp-admin restyles disabled fields (`.wp-core-ui select:disabled`,
+	// `input:disabled`); keep the design's colors and only dim them.
+	&:disabled {
+		border-color: var(--modula-admin-border-field);
+		background-color: var(--modula-admin-surface);
+		box-shadow: none;
+		color: var(--modula-admin-ink);
+		opacity: var(--modula-admin-disabled-opacity);
+		cursor: default;
+	}
+
+	&[aria-invalid="true"] {
+		border-color: var(--modula-admin-danger);
+	}
+}
+
+// Pill track and its options, shared by Segmented and Tabs so both have one
+// look.
+@mixin segment-track {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 2px;
+	padding: 3px;
+	border-radius: var(--modula-admin-radius-lg);
+	background: var(--modula-admin-surface-segment);
+}
+
+@mixin segment-option {
+	@include button-reset;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: var(--modula-admin-segment-height);
+	padding: 0 14px;
+	border-radius: var(--modula-admin-radius-md);
+	color: var(--modula-admin-ink-segment);
+	font-size: var(--modula-admin-text-control);
+	white-space: nowrap;
+}
+
+@mixin segment-option-active {
+	background: var(--modula-admin-surface);
+	box-shadow: var(--modula-admin-shadow-raised);
+	color: var(--modula-admin-ink);
+	font-weight: 600;
+}
+
+// Hover fill of full-width list buttons.
+@mixin list-hover {
+	background: var(--modula-admin-surface-hover);
+}
+
+// Full-width list buttons (nav items, search results, the matrix footer).
+// Focus is drawn inside the box so the ring is not clipped by the container
+// edge or drawn over the neighbouring item.
+@mixin list-button {
+	@include button-reset;
+	width: 100%;
+	padding: 0 20px;
+	text-align: left;
+
+	&:hover {
+		@include list-hover;
+	}
+
+	&:focus-visible {
+		outline-offset: -2px;
+	}
+}
+
+// Resets wp-admin button chrome before applying admin-ui styles.
+@mixin button-reset {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	border: none;
+	background: none;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+	box-shadow: none;
+}

@@ -1,0 +1,61 @@
+@use '../styles/mixins';
+
+.modula-admin-ui {
+	box-sizing: border-box;
+	color: var(--modula-admin-ink);
+	font-family: var(--modula-admin-font);
+	font-size: var(--modula-admin-text-body);
+	line-height: 1.45;
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: inherit;
+	}
+
+	button,
+	input,
+	select,
+	textarea {
+		font-family: inherit;
+	}
+
+	code {
+		padding: 0;
+		background: none;
+		font-family: var(--modula-admin-font-mono);
+		font-size: var(--modula-admin-text-mono);
+	}
+
+	:focus-visible {
+		@include mixins.focus-ring;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		*::before,
+		*::after {
+			transition: none !important;
+			animation: none !important;
+		}
+	}
+}
+
+// Skeleton placeholders (skeleton/_skeleton.scss). Reduced motion stops it
+// through the root rule above.
+@keyframes modula-admin-skeleton-pulse {
+
+	50% {
+		opacity: 0.45;
+	}
+}
+
+// Visually hidden text that screen readers still announce.
+.modula-admin-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}

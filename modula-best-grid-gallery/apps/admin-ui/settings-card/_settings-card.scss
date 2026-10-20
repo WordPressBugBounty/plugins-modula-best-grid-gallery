@@ -1,0 +1,168 @@
+@use '../styles/mixins';
+
+.modula-admin-card {
+	display: flex;
+	flex-direction: column;
+	gap: var(--modula-admin-card-title-gap);
+}
+
+.modula-admin-card__head {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.modula-admin-card__title {
+	margin: 0;
+	padding: 0;
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-card-title);
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+.modula-admin-card__body {
+	overflow: hidden;
+	border: 1px solid var(--modula-admin-border);
+	border-radius: var(--modula-admin-radius-lg);
+	background: var(--modula-admin-surface);
+}
+
+.modula-admin-card__note {
+	margin: 0;
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-help);
+	line-height: 1.5;
+}
+
+.modula-admin-row {
+	position: relative;
+
+	// Rows are separated by an inset rule, as in the design, also after an
+	// open nested group.
+	& + &::before,
+	.modula-admin-group + &::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		right: var(--modula-admin-row-padding-x);
+		left: var(--modula-admin-row-padding-x);
+		height: 1px;
+		background: var(--modula-admin-border-divider);
+	}
+}
+
+.modula-admin-row__main {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--modula-admin-row-gap);
+	min-height: var(--modula-admin-row-min-height);
+	padding: var(--modula-admin-row-padding-y) var(--modula-admin-row-padding-x);
+
+	.is-stacked > & {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
+		padding-top: 14px;
+		padding-bottom: 16px;
+	}
+}
+
+.modula-admin-row__label {
+	flex: 1 1 200px;
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-body);
+	line-height: 1.4;
+
+	.is-stacked & {
+		flex-basis: auto;
+	}
+}
+
+// Label with a description line under it; the pair takes the label's place.
+.modula-admin-row__heading {
+	display: flex;
+	flex: 1 1 200px;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 3px;
+
+	.modula-admin-row__label {
+		flex: none;
+	}
+}
+
+// An ExpandableRow's status line reads the same, links included.
+.modula-admin-row__description,
+.modula-admin-expandable__description {
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-help);
+	line-height: 1.45;
+
+	a {
+		color: var(--modula-admin-ink);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+
+		&:hover {
+			color: var(--modula-admin-ink-hover);
+		}
+
+		// wp-admin draws its blue ring on every `a:focus`.
+		&:focus {
+			box-shadow: none;
+		}
+
+		&:focus-visible {
+			@include mixins.focus-ring;
+		}
+	}
+}
+
+.modula-admin-row__control {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	max-width: 100%;
+
+	.is-stacked & {
+		display: block;
+	}
+}
+
+.modula-admin-row__help {
+	margin: 0;
+	padding: 0 var(--modula-admin-row-padding-x) 16px;
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-help);
+	line-height: 1.45;
+}
+
+.modula-admin-group {
+	margin: 0 var(--modula-admin-row-padding-x) 16px;
+	overflow: hidden;
+	border: 1px solid var(--modula-admin-border);
+	border-radius: var(--modula-admin-radius-lg);
+	background: var(--modula-admin-surface);
+
+	// Inside a group the rows sit closer to the group border.
+	.modula-admin-row__main,
+	.modula-admin-row__help {
+		padding-right: 16px;
+		padding-left: 16px;
+	}
+}
+
+.modula-admin-group__head {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	height: 48px;
+	padding: 0 16px;
+	border-bottom: 1px solid var(--modula-admin-border);
+	background: var(--modula-admin-surface-sunken);
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-group-title);
+	font-weight: 600;
+}

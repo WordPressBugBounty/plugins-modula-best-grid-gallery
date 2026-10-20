@@ -1,0 +1,88 @@
+@use "../../admin-ui/page/stacked";
+
+// Modula › About us: the intro card and the values grid.
+
+.modula-admin-ui {
+
+	.modula-about-us-intro {
+		padding: 20px var(--modula-admin-row-padding-x);
+		border: 1px solid var(--modula-admin-border);
+		border-radius: var(--modula-admin-radius-lg);
+		background: var(--modula-admin-surface);
+	}
+
+	.modula-about-us-intro__line {
+		margin: 0;
+		color: var(--modula-admin-ink-soft);
+		font-size: var(--modula-admin-text-body);
+		line-height: 1.6;
+
+		&:first-child {
+			color: var(--modula-admin-ink);
+		}
+	}
+
+	// Three cards a row, two on mid widths, one under the other on narrow
+	// screens.
+	.modula-about-us-values {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 16px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.modula-about-us-value {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
+		margin: 0;
+		padding: 20px var(--modula-admin-row-padding-x);
+		border: 1px solid var(--modula-admin-border);
+		border-radius: var(--modula-admin-radius-lg);
+		background: var(--modula-admin-surface);
+	}
+
+	.modula-about-us-value__icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		border-radius: var(--modula-admin-radius-md);
+		background: var(--modula-admin-surface-segment);
+		color: var(--modula-admin-ink);
+	}
+
+	.modula-about-us-value__title {
+		margin: 4px 0 0;
+		padding: 0;
+		color: var(--modula-admin-ink);
+		font-size: var(--modula-admin-text-card-title);
+		font-weight: 600;
+		line-height: 1.4;
+	}
+
+	.modula-about-us-value__description {
+		margin: 0;
+		color: var(--modula-admin-ink-soft);
+		font-size: var(--modula-admin-text-control);
+		line-height: 1.5;
+	}
+
+	@media (max-width: 1100px) {
+
+		.modula-about-us-values {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-width: stacked.$breakpoint) {
+
+		.modula-about-us-values {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+}

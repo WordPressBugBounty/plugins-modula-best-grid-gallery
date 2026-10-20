@@ -47,6 +47,8 @@ class Loader {
 		Admin\Settings_Editor_Metabox::init();
 		Admin\Beta_Gallery_Admin::init();
 		Admin\Gallery_Listing_Admin::init();
+		// SCRIPT_DEBUG only: hidden page that shows every admin-ui control (ADR 0046).
+		Admin\Admin_Ui_Demo::init();
 
 		// REST: GET gallery settings v2 / images v2 (optional filter by group or key).
 		Rest\Settings_Controller::init();
@@ -56,6 +58,15 @@ class Loader {
 		Rest\Gallery_Upload_Controller::init();
 		// REST: AI-assisted custom CSS generation.
 		Rest\Gallery_Css_Ai_Controller::init();
+		// REST: MCP Connections panel on the AI settings tab.
+		Rest\Mcp_Connections_Controller::init();
+		Mcp\Connections::boot();
+		Mcp\Activity::boot();
+		// OAuth for Direct MCP connections: discovery, consent screen, registration, tokens and Bearer auth.
+		Mcp\Oauth::boot();
+		Rest\Oauth_Controller::init();
+		// Modula's Uninstall form removes MCP credentials; uninstall.php does the same on delete.
+		Mcp\Uninstall::boot();
 
 		// WP-CLI: Gallery WP-CLI (list / Convert to new editor / Restore classic editor).
 		add_action( 'cli_init', array( Cli\Gallery_Command::class, 'register' ) );

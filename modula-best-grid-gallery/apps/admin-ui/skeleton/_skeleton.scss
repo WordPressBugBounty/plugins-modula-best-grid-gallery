@@ -1,0 +1,53 @@
+// Loaded under `.modula-admin-ui`; the pulse keyframes live in root.
+
+.modula-admin-skeleton {
+	display: block;
+	flex-shrink: 0;
+	max-width: 100%;
+	border-radius: var(--modula-admin-radius-sm);
+	background: var(--modula-admin-surface-segment);
+	animation: modula-admin-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+// Same spacing as a SettingsCard: title, then the bordered body of rows.
+.modula-admin-skeleton-card {
+	display: flex;
+	flex-direction: column;
+	gap: calc(var(--modula-admin-card-title-gap) + 4px);
+}
+
+.modula-admin-skeleton-card__body {
+	overflow: hidden;
+	border: 1px solid var(--modula-admin-border);
+	border-radius: var(--modula-admin-radius-lg);
+	background: var(--modula-admin-surface);
+}
+
+.modula-admin-skeleton-card__row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--modula-admin-row-gap);
+	min-height: var(--modula-admin-row-min-height);
+	padding: var(--modula-admin-row-padding-y) var(--modula-admin-row-padding-x);
+
+	& + & {
+		border-top: 1px solid var(--modula-admin-border-divider);
+	}
+}
+
+// Sized like NavHeading and NavItem.
+.modula-admin-nav-skeleton__heading {
+	display: flex;
+	align-items: center;
+	height: var(--modula-admin-nav-item-height);
+	margin: 0 20px 6px;
+	border-bottom: 1px solid var(--modula-admin-border-strong);
+}
+
+.modula-admin-nav-skeleton__item {
+	display: flex;
+	align-items: center;
+	height: var(--modula-admin-nav-item-height);
+	padding: 0 20px;
+}

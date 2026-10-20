@@ -10,14 +10,21 @@ defined( 'ABSPATH' ) || exit;
 final class Contract {
 	public const VERSION = '1';
 
+	/** Outcome properties any operation may return; the first seven are always present. */
+	private const ENVELOPE = array( 'schema_version', 'request_id', 'operation', 'status', 'code', 'message', 'reconciliation', 'expires_at', 'revision', 'blockers', 'recommendation' );
+
+	/** What the gallery operations' executors set; recovery adds the same object for their target. */
+	private const GALLERY_RESULTS = array( 'gallery' );
+
 	public static function object( array $properties, array $required = array() ): array {
 		return array( 'type' => 'object', 'properties' => $properties, 'required' => $required, 'additionalProperties' => false );
 	}
 
 	/** Success payload or a blocked explanation. The two shapes do not overlap. */
 	public static function admitting( array $success ): array {
+		// Read explanations carry blockers and a recommendation, never a result object.
 		return array(
-			'oneOf' => array( $success, self::outcome_schema() ),
+			'oneOf' => array( $success, self::outcome_object( array() ) ),
 		);
 	}
 
@@ -175,11 +182,125 @@ final class Contract {
 		return array( 'type' => 'string', 'minLength' => 16, 'maxLength' => 128, 'pattern' => '^[A-Za-z0-9_-]+$' );
 	}
 
-	public static function outcome_schema( bool $child = false ): array {
-		$gallery = self::gallery_schema();
-		$gallery['properties']['revision'] = self::revision_schema();
+	/**
+	 * Any operation's outcome: every result object, and batch targets. Only request recovery,
+	 * which can return any stored outcome, advertises it; operations declare theirs with outcome().
+	 */
+	public static function outcome_schema(): array {
+		$results = array_keys( self::results() );
+		return self::outcome_object( $results, self::targets( $results ) );
+	}
+
+	/**
+	 * One operation's outcome: the envelope, the result objects its executors set, and the object
+	 * request recovery reports for the operation's target (Requests::target_result()).
+	 *
+	 * @param array<int,string> $results Keys of results().
+	 */
+	public static function outcome( string $operation, array $results ): array {
+		$target = Requests::target_result( $operation );
+		return self::outcome_object( null === $target ? $results : array_merge( $results, array( $target ) ) );
+	}
+
+	/**
+	 * A batch outcome: the envelope and up to 25 targets, each the outcome of one child operation.
+	 *
+	 * @param array<int,string> $operations Child operations.
+	 * @param array<int,string> $results    Result keys those operations declare.
+	 */
+	public static function batch_outcome( array $operations, array $results ): array {
+		foreach ( $operations as $operation ) {
+			$target = Requests::target_result( $operation );
+			if ( null !== $target ) {
+				$results[] = $target;
+			}
+		}
+		return self::outcome_object( array(), self::targets( $results ) );
+	}
+
+	/**
+	 * Result objects an outcome can carry, keyed by outcome property. ai and css stay for outcomes
+	 * stored before their operations retired; request recovery can still return them.
+	 *
+	 * @return array<string,array>
+	 */
+	public static function results(): array {
+		// Its builders read no state, and the settings Registry they reach is cached for the process.
+		static $results = null;
+		if ( is_array( $results ) ) {
+			return $results;
+		}
+		$gallery                             = self::gallery_schema();
+		$gallery['properties']['revision']   = self::revision_schema();
 		$gallery['properties']['public_url'] = array( 'type' => 'string' );
-		$extra = $child ? array( 'id' => array( 'type' => 'integer' ) ) : array( 'targets' => array( 'type' => 'array', 'maxItems' => 25, 'items' => self::outcome_schema( true ) ) );
+		$membership                          = self::object(
+			array(
+				'object_id'   => array( 'type' => 'integer' ),
+				'object_type' => array( 'type' => 'string' ),
+				'folder_id'   => array( 'type' => 'integer' ),
+			),
+			array( 'object_id', 'object_type', 'folder_id' )
+		);
+		$results                             = array(
+			'gallery'        => $gallery,
+			'album'          => $gallery,
+			'preset'         => Presets::summary_schema(),
+			'folder'         => Media_Folders::folder_schema(),
+			'attachment'     => Attachments::summary_schema(),
+			'collection'     => Collections::collection_schema(),
+			'intake'         => Intake::result_schema(),
+			'file'           => Replacement::result_schema(),
+			'proofing'       => Proofing::result_schema(),
+			'proofing_email' => Proofing_Email::result_schema(),
+			'selection'      => Proofing_Selections::result_schema(),
+			'client'         => Proofing_Clients::result_schema(),
+			'watermark'      => Watermark::result_schema(),
+			'video'          => Video::result_schema(),
+			'instagram'      => Instagram::result_schema(),
+			'ai'             => Ai_Text::result_schema(),
+			'css'            => Ai_Css::result_schema(),
+			'storage'        => Storage::result_schema(),
+			'transfer'       => Transfers::result_schema(),
+			'diagnostics'    => Diagnostics::status_schema(),
+			'membership'     => $membership,
+			'deleted_id'     => array( 'type' => 'integer' ),
+		);
+		return $results;
+	}
+
+	/**
+	 * A closed outcome object with the envelope and the named results. Unknown names fail when the
+	 * catalog is built, so a family cannot declare a result the contract does not define.
+	 *
+	 * @param array<int,string>   $results Keys of results().
+	 * @param array<string,array> $extra   Leading properties: batch targets, or a target's id.
+	 */
+	private static function outcome_object( array $results, array $extra = array() ): array {
+		$unknown = array_diff( $results, array_keys( self::results() ) );
+		if ( array() !== $unknown ) {
+			throw new \InvalidArgumentException( 'Unknown outcome result: ' . esc_html( implode( ', ', $unknown ) ) );
+		}
+		$properties = array_intersect_key( self::outcome_properties(), array_flip( array_merge( self::ENVELOPE, $results ) ) );
+		return self::object( $extra + $properties, array_slice( self::ENVELOPE, 0, 7 ) );
+	}
+
+	/** @param array<int,string> $results Keys of results() each target can carry. */
+	private static function targets( array $results ): array {
+		return array(
+			'targets' => array(
+				'type'     => 'array',
+				'maxItems' => 25,
+				'items'    => self::outcome_object( $results, array( 'id' => array( 'type' => 'integer' ) ) ),
+			),
+		);
+	}
+
+	/** Every envelope and result property, in published order. */
+	private static function outcome_properties(): array {
+		static $properties = null;
+		if ( is_array( $properties ) ) {
+			return $properties;
+		}
 		$blocker = self::object(
 			array(
 				'reason'  => array( 'type' => 'string', 'enum' => array( 'needs_pro', 'needs_plan_upgrade', 'needs_enable', 'needs_pro_update', 'needs_service_update', 'dependency_unavailable', 'configuration_required', 'permission_denied', 'unsupported_context' ) ),
@@ -209,40 +330,30 @@ final class Contract {
 			),
 			array( 'id', 'feature', 'message', 'hint' )
 		);
-		return self::object( $extra + array(
-			'schema_version' => array( 'type' => 'string', 'enum' => array( self::VERSION ) ),
-			'request_id' => array( 'type' => 'string' ),
-			'operation' => array( 'type' => 'string' ),
-			'status' => array( 'type' => 'string', 'enum' => array( 'succeeded', 'rejected', 'in_progress', 'uncertain', 'expired', 'not_found', 'conflict', 'forbidden', 'partial', 'pending' ) ),
-			'code' => array( 'type' => 'string' ), 'message' => array( 'type' => 'string' ),
+
+		$properties = array(
+			'schema_version' => array(
+				'type' => 'string',
+				'enum' => array( self::VERSION ),
+			),
+			'request_id'     => array( 'type' => 'string' ),
+			'operation'      => array( 'type' => 'string' ),
+			'status'         => array(
+				'type' => 'string',
+				'enum' => array( 'succeeded', 'rejected', 'in_progress', 'uncertain', 'expired', 'not_found', 'conflict', 'forbidden', 'partial', 'pending' ),
+			),
+			'code'           => array( 'type' => 'string' ),
+			'message'        => array( 'type' => 'string' ),
 			'reconciliation' => array( 'type' => 'string' ),
-			'expires_at' => array( 'type' => 'integer' ),
-			'gallery' => $gallery,
-			'album' => $gallery,
-			'preset' => Presets::summary_schema(),
-			'folder' => Media_Folders::folder_schema(),
-			'attachment' => Attachments::summary_schema(),
-			'collection' => Collections::collection_schema(),
-			'intake' => Intake::result_schema(),
-			'file' => Replacement::result_schema(),
-			'proofing' => Proofing::result_schema(),
-			'proofing_email' => Proofing_Email::result_schema(),
-			'selection' => Proofing_Selections::result_schema(),
-			'client' => Proofing_Clients::result_schema(),
-			'watermark' => Watermark::result_schema(),
-			'video' => Video::result_schema(),
-			'instagram' => Instagram::result_schema(),
-			'ai' => Ai_Text::result_schema(),
-			'css' => Ai_Css::result_schema(),
-			'storage' => Storage::result_schema(),
-			'transfer' => Transfers::result_schema(),
-			'diagnostics' => Diagnostics::status_schema(),
-			'membership' => self::object( array( 'object_id' => array( 'type' => 'integer' ), 'object_type' => array( 'type' => 'string' ), 'folder_id' => array( 'type' => 'integer' ) ), array( 'object_id', 'object_type', 'folder_id' ) ),
-			'revision' => self::revision_schema(),
-			'deleted_id' => array( 'type' => 'integer' ),
-			'blockers' => array( 'type' => 'array', 'items' => $blocker ),
+			'expires_at'     => array( 'type' => 'integer' ),
+			'revision'       => self::revision_schema(),
+			'blockers'       => array(
+				'type'  => 'array',
+				'items' => $blocker,
+			),
 			'recommendation' => $recommendation,
-		), array( 'schema_version', 'request_id', 'operation', 'status', 'code', 'message', 'reconciliation' ) );
+		) + self::results();
+		return $properties;
 	}
 
 	public static function definitions(): array {
@@ -290,18 +401,18 @@ final class Contract {
 		), array( 'lite_version', 'pro_version', 'compatible_pro', 'license_status', 'license_source', 'extensions' ) );
 		$lifecycle = array();
 		foreach ( Lifecycle::operations() as $name ) {
-			$lifecycle[ $name ] = array( 'label' => str_replace( array( 'modula/', '-' ), array( '', ' ' ), $name ), 'description' => 'Explicit Beta gallery lifecycle with revision protection, 30-day recovery and shared-media preservation. Duplicate and restore require draft/publish intent. Classic or unavailable album dependencies are refused.', 'input_schema' => Lifecycle::schema( $name ), 'output_schema' => self::outcome_schema() );
+			$lifecycle[ $name ] = array( 'label' => str_replace( array( 'modula/', '-' ), array( '', ' ' ), $name ), 'description' => 'Explicit Beta gallery lifecycle with revision protection, 30-day recovery and shared-media preservation. Duplicate and restore require draft/publish intent. Classic or unavailable album dependencies are refused.', 'input_schema' => Lifecycle::schema( $name ), 'output_schema' => self::outcome( $name, array_merge( self::GALLERY_RESULTS, array( 'deleted_id' ) ) ) );
 		}
-		$cached = array( Batch::MEDIA => array( 'label' => 'Apply recoverable media targets', 'description' => '1–25 unique target IDs, each with operation (collection/member/favorite/local attachment mutation), id, revision and operation fields. Per-target validation and access; successes never repeat. Same revision is not refreshed implicitly between targets: later shared-organization targets may conflict and need reconciliation. No cross-target transaction. Collection creation is excluded; use the single creation operation.', 'input_schema' => Batch::schema(), 'output_schema' => self::outcome_schema() ) ) + Proofing_Email::definitions() + Proofing_Selections::definitions() + Proofing::definitions() + Proofing_Clients::definitions() + Instagram::definitions() + Watermark::definitions() + Video::definitions() + Transfers::definitions() + Bound::definitions() + Storage::definitions() + Replacement::definitions() + Diagnostics::definitions() + Server_Import::definitions() + Intake::definitions() + Site_Settings::definitions() + Attachment_Lifecycle::definitions() + Collections::definitions() + Attachment_Image::definitions() + Attachments::definitions() + Media_Folders::definitions() + Album_Lifecycle::definitions() + Album_Members::definitions() + Album_Presets::definitions() + Presets::definitions() + Albums::definitions() + $lifecycle + array(
-			Batch::OPERATION => array( 'label' => 'Update Beta galleries in a batch', 'description' => 'Update 1–25 distinct targets with individual revisions and outcomes. Resume the identical input to finish pending targets; completed or uncertain targets never execute again. Retry refused targets with current revisions in a new batch identity.', 'input_schema' => Batch::schema(), 'output_schema' => self::outcome_schema() ),
-			Embedded::OPERATION => array( 'label' => 'Patch Beta gallery content items', 'description' => 'Author content blocks and shortcode items and their mixed order in Lite and Compatible Pro. Preserves shared media; requires a revision and recoverable request identity.', 'input_schema' => Embedded::schema(), 'output_schema' => self::outcome_schema() ),
-			Composition::OPERATION => array( 'label' => 'Patch Beta gallery images', 'description' => 'Apply 1–100 ordered image changes against a revision. Preserve omitted and embedded items and shared media text/files. Bound galleries are unsupported. Recover the original outcome for 30 days.', 'input_schema' => Composition::schema(), 'output_schema' => self::outcome_schema() ),
+		$cached = array( Batch::MEDIA => array( 'label' => 'Apply recoverable media targets', 'description' => '1–25 unique target IDs, each with operation (collection/member/favorite/local attachment mutation), id, revision and operation fields. Per-target validation and access; successes never repeat. Same revision is not refreshed implicitly between targets: later shared-organization targets may conflict and need reconciliation. No cross-target transaction. Collection creation is excluded; use the single creation operation.', 'input_schema' => Batch::schema(), 'output_schema' => self::batch_outcome( Batch::media_operations(), Batch::media_results() ) ) ) + Proofing_Email::definitions() + Proofing_Selections::definitions() + Proofing::definitions() + Proofing_Clients::definitions() + Instagram::definitions() + Watermark::definitions() + Video::definitions() + Transfers::definitions() + Bound::definitions() + Storage::definitions() + Replacement::definitions() + Diagnostics::definitions() + Server_Import::definitions() + Intake::definitions() + Site_Settings::definitions() + Attachment_Lifecycle::definitions() + Collections::definitions() + Attachment_Image::definitions() + Attachments::definitions() + Media_Folders::definitions() + Album_Lifecycle::definitions() + Album_Members::definitions() + Album_Presets::definitions() + Presets::definitions() + Albums::definitions() + $lifecycle + array(
+			Batch::OPERATION => array( 'label' => 'Update Beta galleries in a batch', 'description' => 'Update 1–25 distinct targets with individual revisions and outcomes. Resume the identical input to finish pending targets; completed or uncertain targets never execute again. Retry refused targets with current revisions in a new batch identity.', 'input_schema' => Batch::schema(), 'output_schema' => self::batch_outcome( array( Update::OPERATION ), self::GALLERY_RESULTS ) ),
+			Embedded::OPERATION => array( 'label' => 'Patch Beta gallery content items', 'description' => 'Author content blocks and shortcode items and their mixed order in Lite and Compatible Pro. Preserves shared media; requires a revision and recoverable request identity.', 'input_schema' => Embedded::schema(), 'output_schema' => self::outcome( Embedded::OPERATION, self::GALLERY_RESULTS ) ),
+			Composition::OPERATION => array( 'label' => 'Patch Beta gallery images', 'description' => 'Apply 1–100 ordered image changes against a revision. Preserve omitted and embedded items and shared media text/files. Bound galleries are unsupported. Recover the original outcome for 30 days.', 'input_schema' => Composition::schema(), 'output_schema' => self::outcome( Composition::OPERATION, self::GALLERY_RESULTS ) ),
 			'modula/update-gallery' => array( 'label' => 'Update a Beta gallery', 'description' => 'Patch selected metadata and grouped settings against a read revision. Known locked fields and values return their feature requirement and save nothing on that target. Unknown fields, invalid values and secrets stay invalid. Preserve omitted settings and items; no attachment text, email, watermark, import or provider effects. Recover identical requests for 30 days.',
 				'input_schema' => self::object( array( 'request_id' => self::request_id_schema(), 'id' => array( 'type' => 'integer', 'minimum' => 1 ), 'revision' => self::revision_schema(), 'metadata' => self::object( array( 'title' => array( 'type' => 'string', 'minLength' => 1, 'maxLength' => 200 ), 'status' => array( 'type' => 'string', 'enum' => array( 'draft', 'publish', 'pending', 'private' ) ) ) ) + array( 'minProperties' => 1 ), 'settings' => Settings_Contract::recognized() ), array( 'request_id', 'id', 'revision' ) ),
-				'output_schema' => self::outcome_schema() ),
+				'output_schema' => self::outcome( Update::OPERATION, self::GALLERY_RESULTS ) ),
 			'modula/create-gallery' => array( 'label' => 'Create a Beta gallery', 'description' => 'Create one Beta gallery from 1–100 existing image attachments with explicit draft/publish intent. Recover the same request for 30 days; never retry uncertain effects with a new identity.',
 				'input_schema' => self::object( array( 'request_id' => self::request_id_schema(), 'title' => array( 'type' => 'string', 'minLength' => 1, 'maxLength' => 200 ), 'status' => array( 'type' => 'string', 'enum' => array( 'draft', 'publish' ) ), 'attachment_ids' => array( 'type' => 'array', 'minItems' => 1, 'maxItems' => 100, 'uniqueItems' => true, 'items' => array( 'type' => 'integer', 'minimum' => 1 ) ) ), array( 'request_id', 'title', 'status', 'attachment_ids' ) ),
-				'output_schema' => self::outcome_schema() ),
+				'output_schema' => self::outcome( Creation::OPERATION, self::GALLERY_RESULTS ) ),
 			'modula/recover-request' => array( 'label' => 'Recover a Modula request', 'description' => 'Read an actor/site-isolated request outcome with current permissions. Expired and interrupted identities cannot execute anew.',
 				'input_schema' => self::object( array( 'request_id' => self::request_id_schema() ), array( 'request_id' ) ), 'output_schema' => self::outcome_schema() ),
 			'modula/discover' => array( 'label' => 'Discover Modula operations', 'description' => 'Read operation contracts, the recognized gallery setting vocabulary, the currently usable subset and stored feature availability. Discovery does not authorize a target.',

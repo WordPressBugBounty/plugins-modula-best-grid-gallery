@@ -1,37 +1,36 @@
+import { addPendingEdit, withoutSaved } from '../model/settingsPageModel';
+
 export const actionTypes = {
-	SET_ACTIVE_TAB: 'SET_ACTIVE_TAB',
-	SET_OPTIONS: 'SET_OPTIONS',
-	UPDATE_SETTINGS: 'UPDATE_SETTINGS',
-	TOGGLE_ADVANCED_REGISTRATION: 'TOGGLE_ADVANCED_REGISTRATION',
-	SET_LOGGED_IN: 'SET_LOGGED_IN',
+	RECORD_EDIT: 'RECORD_EDIT',
+	CLEAR_SAVED: 'CLEAR_SAVED',
+	SET_DRAFT: 'SET_DRAFT',
 };
 
 export const reducer = (state, action) => {
 	switch (action.type) {
-		case actionTypes.SET_ACTIVE_TAB:
+		// `options`: pending edits by option, posted by the global Save.
+		case actionTypes.RECORD_EDIT:
 			return {
 				...state,
-				activeTab: action.payload,
+				options: addPendingEdit(
+					state.options,
+					action.payload.option,
+					action.payload.value
+				),
 			};
-		case actionTypes.SET_OPTIONS:
+		case actionTypes.CLEAR_SAVED:
 			return {
 				...state,
-				options: action.payload,
+				options: withoutSaved(state.options, action.payload),
 			};
-		case actionTypes.UPDATE_SETTINGS:
+		// `drafts`: values of cards that do not save (Migrate), never posted.
+		case actionTypes.SET_DRAFT:
 			return {
 				...state,
-				settings: action.payload,
-			};
-		case actionTypes.TOGGLE_ADVANCED_REGISTRATION:
-			return {
-				...state,
-				isAdvancedRegistration: action.payload,
-			};
-		case actionTypes.SET_LOGGED_IN:
-			return {
-				...state,
-				isLoggedIn: action.payload,
+				drafts: {
+					...state.drafts,
+					[action.payload.option]: action.payload.value,
+				},
 			};
 		default:
 			return state;

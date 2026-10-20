@@ -1,0 +1,198 @@
+@use "../admin-ui/styles";
+@use "../admin-ui/styles/mixins";
+@use "../admin-ui/page/stacked";
+@use "about/about";
+@use "partners/partners";
+
+// wp-admin adds a 10px gutter at 782px and below (`.auto-fold #wpcontent`).
+#wpcontent,
+.auto-fold #wpcontent {
+	padding-left: 0;
+}
+
+// The page fills the window under the admin bar, as Settings and Extensions
+// do. This stylesheet loads only on Modula › Getting Started.
+#wpbody-content {
+	padding-bottom: 0;
+}
+
+#wpfooter {
+	display: none;
+}
+
+.modula-getting-started-page .modula-admin-page {
+	min-height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
+}
+
+.modula-admin-ui {
+
+	// The line under the page title belongs to it, so it sits closer than
+	// the page's blocks do to each other.
+	.modula-getting-started-intro {
+		margin: -12px 0 0;
+		color: var(--modula-admin-ink-soft);
+		font-size: var(--modula-admin-text-control);
+		line-height: 1.5;
+	}
+
+	// Two cards a row; one under the other on narrow screens.
+	.modula-getting-started-resources {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.modula-getting-started-resource {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
+		margin: 0;
+		padding: 20px var(--modula-admin-row-padding-x);
+		border: 1px solid var(--modula-admin-border);
+		border-radius: var(--modula-admin-radius-lg);
+		background: var(--modula-admin-surface);
+	}
+
+	.modula-getting-started-resource__icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		border-radius: var(--modula-admin-radius-md);
+		background: var(--modula-admin-surface-segment);
+		color: var(--modula-admin-ink);
+	}
+
+	.modula-getting-started-resource__title {
+		margin: 4px 0 0;
+		padding: 0;
+		color: var(--modula-admin-ink);
+		font-size: var(--modula-admin-text-card-title);
+		font-weight: 600;
+		line-height: 1.4;
+	}
+
+	.modula-getting-started-resource__description {
+		flex-grow: 1;
+		margin: 0;
+		color: var(--modula-admin-ink-soft);
+		font-size: var(--modula-admin-text-control);
+		line-height: 1.5;
+	}
+
+	.modula-getting-started-resource__action {
+		margin-top: 8px;
+	}
+
+	.modula-getting-started-use-cases {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.modula-getting-started-use-case {
+		position: relative;
+		margin: 0;
+
+		// Inset rule between questions, as between settings rows.
+		& + &::before {
+			content: "";
+			position: absolute;
+			top: 0;
+			right: var(--modula-admin-row-padding-x);
+			left: var(--modula-admin-row-padding-x);
+			height: 1px;
+			background: var(--modula-admin-border-divider);
+		}
+
+		.modula-admin-disclosure {
+			gap: 0;
+		}
+
+		// The whole row opens the answer, with the chevron at its end.
+		.modula-admin-disclosure__toggle {
+			align-self: stretch;
+			justify-content: space-between;
+			gap: 16px;
+			min-height: 52px;
+			padding: 12px var(--modula-admin-row-padding-x);
+			font-size: var(--modula-admin-text-body);
+			line-height: 1.4;
+			text-align: left;
+
+			&:focus-visible {
+				outline-offset: -2px;
+			}
+		}
+
+		.modula-admin-disclosure__panel {
+			padding: 0 var(--modula-admin-row-padding-x) 16px;
+		}
+	}
+
+	.modula-getting-started-use-case__answer {
+		color: var(--modula-admin-ink-soft);
+		font-size: var(--modula-admin-text-control);
+		line-height: 1.6;
+
+		p {
+			margin: 0 0 8px;
+			font-size: inherit;
+			line-height: inherit;
+		}
+
+		> :last-child {
+			margin-bottom: 0;
+		}
+
+		a {
+			color: var(--modula-admin-ink);
+			text-decoration: underline;
+			text-underline-offset: 3px;
+
+			&:hover {
+				color: var(--modula-admin-ink-hover);
+			}
+
+			&:focus {
+				box-shadow: none;
+			}
+
+			&:focus-visible {
+				@include mixins.focus-ring;
+			}
+		}
+	}
+
+	.modula-getting-started-help {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		padding: 20px var(--modula-admin-row-padding-x);
+	}
+
+	.modula-getting-started-help__text {
+		margin: 0;
+		color: var(--modula-admin-ink-soft);
+		font-size: var(--modula-admin-text-control);
+		line-height: 1.5;
+	}
+
+	.modula-getting-started-help__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+	}
+
+	@media (max-width: stacked.$breakpoint) {
+
+		.modula-getting-started-resources {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+}

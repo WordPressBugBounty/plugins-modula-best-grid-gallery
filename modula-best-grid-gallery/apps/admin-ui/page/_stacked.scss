@@ -1,0 +1,46 @@
+// The stacked page layout, kept as a mixin so the demo page can draw it at
+// any width.
+
+// WordPress admin's mobile breakpoint.
+$breakpoint: 782px;
+
+// The nav sits above the content and the gutter narrows. Include it under
+// `.modula-admin-page`.
+@mixin layout {
+	--modula-admin-page-gutter: 16px;
+
+	.modula-admin-page-header {
+		flex-wrap: wrap;
+		height: auto;
+		min-height: var(--modula-admin-header-height);
+		padding-top: 12px;
+		padding-bottom: 12px;
+	}
+
+	// Closer tabs, so the four page tabs still fit one line on a phone.
+	.modula-admin-page-tabs__list {
+		column-gap: 20px;
+	}
+
+	.modula-admin-page__body {
+		flex-direction: column;
+	}
+
+	.modula-admin-nav {
+		width: auto;
+		padding-bottom: 8px;
+		border-right: 0;
+		border-bottom: 1px solid var(--modula-admin-border);
+	}
+
+	// Above the content the nav scrolls with the page; only the header sticks.
+	.modula-admin-page__body > .modula-admin-nav {
+		position: static;
+		height: auto;
+		overflow-y: visible;
+	}
+
+	.modula-admin-page__content {
+		padding: 20px var(--modula-admin-page-gutter) 40px;
+	}
+}

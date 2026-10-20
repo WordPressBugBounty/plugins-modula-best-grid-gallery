@@ -8,13 +8,10 @@ final class Diagnostics {
 	public const ENABLE  = 'modula/enable-debug-log';
 	public const DISABLE = 'modula/disable-debug-log';
 	public const CLEAR   = 'modula/clear-debug-log';
+	/** Outcome results the log writes set. */
+	private const RESULTS = array( 'diagnostics' );
 	public static function mutations(): array {
 		return array( self::ENABLE, self::DISABLE, self::CLEAR );
-	}
-
-	/** @return array<int,string> */
-	public static function names(): array {
-		return array( self::READ, self::LOG, self::ENABLE, self::DISABLE, self::CLEAR );
 	}
 	public static function callbacks(): array {
 		return array(
@@ -127,7 +124,7 @@ final class Diagnostics {
 				'label'         => str_replace( array( 'modula/', '-' ), array( '', ' ' ), $name ),
 				'description'   => $effect . ' Explicit manage_options action against the current Diagnostics revision; serialized with existing admin and log writers. Same request recovers its 30-day outcome without repeating the effect. No WordPress debug.log changes.',
 				'input_schema'  => $input,
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( $name, self::RESULTS ),
 			);
 		}
 		return $definitions;

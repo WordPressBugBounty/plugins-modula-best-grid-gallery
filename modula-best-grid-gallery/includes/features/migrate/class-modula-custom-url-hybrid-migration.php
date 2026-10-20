@@ -421,7 +421,8 @@ class Modula_Custom_Url_Hybrid_Migration {
 	}
 
 	/**
-	 * Prepend Custom URL hybrid migration controls to Diagnostics.
+	 * Prepend Custom URL hybrid migration controls to Diagnostics while a
+	 * gallery is eligible; with none left there is nothing to fix.
 	 *
 	 * @param array $config Diagnostics tab config.
 	 * @return array
@@ -431,7 +432,11 @@ class Modula_Custom_Url_Hybrid_Migration {
 			$config = array();
 		}
 
-		$count  = $this->count_eligible_galleries( true );
+		$count = $this->count_eligible_galleries( true );
+		if ( $count < 1 ) {
+			return $config;
+		}
+
 		$fields = isset( $config['fields'] ) && is_array( $config['fields'] ) ? $config['fields'] : array();
 
 		/* translators: %d: number of Beta galleries */
@@ -460,12 +465,12 @@ class Modula_Custom_Url_Hybrid_Migration {
 			),
 			array(
 				'type'           => 'button',
+				'name'           => 'modula_custom_url_hybrid_fix',
 				'text'           => esc_html__( 'Fix Custom URL links', 'modula-best-grid-gallery' ),
 				'loadingText'    => esc_html__( 'Fixing…', 'modula-best-grid-gallery' ),
 				'successMessage' => esc_html__( 'Eligible galleries updated to hybrid Image click.', 'modula-best-grid-gallery' ),
 				'errorMessage'   => esc_html__( 'Could not migrate Custom URL galleries.', 'modula-best-grid-gallery' ),
 				'variant'        => 'secondary',
-				'disabled'       => $count < 1,
 				'reload'         => true,
 				'api'            => array(
 					'path'   => '/modula-best-grid-gallery/v1/custom-url-hybrid-migrate',

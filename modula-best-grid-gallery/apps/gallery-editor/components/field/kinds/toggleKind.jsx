@@ -1,6 +1,7 @@
 import { Switch } from 'shared-ui';
 import { isNil } from '../../../logic/isNil';
 import { isWpTruthy } from '../../../logic/wpTruthy';
+import { resolveToggleSwitchAriaLabel } from './toggleSwitchName';
 
 /**
  * When stored value is missing, prefer schema.default so toggles with default:true
@@ -67,6 +68,7 @@ export function renderToggleKind({
 			<div className="modula-settings-editor__toggle-end">
 				<Switch
 					label={labelText}
+					aria-label={resolveToggleSwitchAriaLabel(field, labelText)}
 					checked={on}
 					disabled={disabled}
 					showStatus
@@ -84,6 +86,7 @@ export function renderToggleKind({
 	return (
 		<div className="modula-settings-editor__toggle-end">
 			<Switch
+				aria-label={resolveToggleSwitchAriaLabel(field, '')}
 				checked={checked}
 				disabled={disabled}
 				showStatus

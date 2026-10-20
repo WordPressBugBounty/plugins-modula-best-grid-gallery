@@ -1126,7 +1126,7 @@ class Modula_CPT {
 				),
 			);
 
-			if ( current_user_can( 'install_plugins' ) ) {
+			if ( current_user_can( 'manage_options' ) ) {
 				$tabs['extensions'] = array(
 					'name'     => esc_html__( 'Extensions', 'modula-best-grid-gallery' ),
 					'url'      => admin_url( 'edit.php?post_type=modula-gallery&page=modula-addons' ),

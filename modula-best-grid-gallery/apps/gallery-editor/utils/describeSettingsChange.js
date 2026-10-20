@@ -4,6 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	formatDefaultsFieldValue,
+	getDefaultsFieldControlValue,
 	getDefaultsFieldLabel,
 } from './defaultsFieldDisplay';
 
@@ -62,10 +63,11 @@ export function listGroupedSettingsDiffs(prev, next) {
 /**
  * @param {string}  groupId
  * @param {string}  key
- * @param {unknown} value
+ * @param {unknown} storedValue
  * @return {string}
  */
-function formatStepValue(groupId, key, value) {
+function formatStepValue(groupId, key, storedValue) {
+	const value = getDefaultsFieldControlValue(groupId, key, storedValue);
 	if (value === true || value === 1 || value === '1') {
 		return __('on', 'modula-best-grid-gallery');
 	}
@@ -81,7 +83,7 @@ function formatStepValue(groupId, key, value) {
 			return __('off', 'modula-best-grid-gallery');
 		}
 	}
-	const formatted = formatDefaultsFieldValue(groupId, key, value);
+	const formatted = formatDefaultsFieldValue(groupId, key, storedValue);
 	if (typeof formatted === 'string' && formatted.trim() !== '') {
 		return formatted.trim();
 	}

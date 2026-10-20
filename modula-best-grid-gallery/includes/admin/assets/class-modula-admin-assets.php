@@ -45,7 +45,7 @@ class Modula_Admin_Assets {
 			'_wpnonce'     => wp_create_nonce( 'modula-ajax-save' ),
 			'ajax_url'     => admin_url( 'admin-ajax.php' ),
 			'admin_url'    => admin_url(),
-			'settings_url' => admin_url( 'edit.php?post_type=modula-gallery&page=modula&tab=optimization' ),
+			'settings_url' => admin_url( 'edit.php?post_type=modula-gallery&page=modula&tab=ai' ),
 		);
 
 		$allowed_post_types = apply_filters( 'modula_enqueue_for_post_types', array( 'modula-gallery' ) );
@@ -194,35 +194,96 @@ class Modula_Admin_Assets {
 		wp_enqueue_style( 'modula-edit-style', MODULA_URL . 'assets/css/admin/edit' . $suffix . '.css', null, MODULA_LITE_VERSION );
 	}
 
-	public function general_settings_page_scripts() {
+	/**
+	 * Whether the current admin screen is Modula Settings.
+	 *
+	 * @return bool
+	 */
+	private function is_general_settings_screen() {
 		$screen = get_current_screen();
 
-		if ( 'modula-gallery' !== $screen->post_type ) {
+		return $screen
+			&& 'modula-gallery' === $screen->post_type
+			&& 'modula-gallery_page_modula' === $screen->base;
+	}
+
+	/**
+	 * Whether the current admin screen is Modula › Extensions.
+	 *
+	 * @return bool
+	 */
+	private function is_extensions_screen() {
+		$screen = get_current_screen();
+
+		return $screen
+			&& 'modula-gallery' === $screen->post_type
+			&& 'modula-gallery_page_modula-addons' === $screen->base;
+	}
+
+	/**
+	 * On Modula Settings and Extensions the header bell shows the WPChill
+	 * notifications, so the floating WPChill bubble would repeat them.
+	 *
+	 * @return void
+	 */
+	public function hide_wpchill_notification_bubble() {
+		if ( ! $this->is_general_settings_screen() && ! $this->is_extensions_screen() ) {
 			return;
 		}
 
-		if ( 'modula-gallery_page_modula' !== $screen->base ) {
+		self::dequeue_wpchill_notification_bubble();
+	}
+
+	/**
+	 * Removes the floating WPChill bubble from a page whose header bell shows
+	 * the same notifications. Call it after WPChill enqueues the bubble
+	 * (`admin_enqueue_scripts`, priority 10).
+	 *
+	 * @return void
+	 */
+	public static function dequeue_wpchill_notification_bubble() {
+		wp_dequeue_script( 'wpchill-notification-system' );
+		wp_dequeue_style( 'wpchill-notification-system' );
+	}
+
+	/**
+	 * Prints the header bell's avatar for a page script as
+	 * `window.<property> = { iconUrl }`. Its notifications come from the
+	 * WPChill notification center, so there is no bell without it.
+	 *
+	 * @param string $handle   Page script handle.
+	 * @param string $property Window property the page reads.
+	 * @return void
+	 */
+	public static function add_notifications_icon( $handle, $property ) {
+		if ( ! class_exists( 'WPChill_Notifications' ) ) {
+			return;
+		}
+
+		wp_add_inline_script(
+			$handle,
+			'window.' . $property . ' = ' . wp_json_encode( array( 'iconUrl' => MODULA_URL . 'includes/admin/wpchill/icons/wpchill-logo.jpg' ) ) . ';',
+			'before'
+		);
+	}
+
+	public function general_settings_page_scripts() {
+		if ( ! $this->is_general_settings_screen() ) {
 			return;
 		}
 
 		wp_enqueue_media();
 
-		// TinyMCE (Visual) + CodeMirror (Code) for HTML settings fields.
-		wp_enqueue_editor();
-		wp_enqueue_code_editor( array( 'type' => 'text/html' ) );
-
 		$scripts = Modula\Scripts::get_instance();
 
 		$scripts->load_js_asset(
 			'modula-settings',
-			'assets/js/admin/general-settings',
-			array( 'editor' )
+			'assets/js/admin/general-settings'
 		);
 
 		$scripts->load_css_asset(
 			'modula-settings',
-			'assets/js/admin/general-settings',
-			array( 'wp-components' )
+			'assets/js/admin/general-settings'
 		);
 
 		wp_add_inline_script(
@@ -230,6 +291,15 @@ class Modula_Admin_Assets {
 			'const modulaUrl = ' . wp_json_encode( MODULA_URL ),
 			'before'
 		);
+
+		// The site address the Galleries section shows in its example links.
+		wp_add_inline_script(
+			'modula-settings',
+			'window.modulaSettingsSite = ' . wp_json_encode( array( 'homeUrl' => home_url( '/' ) ) ) . ';',
+			'before'
+		);
+
+		self::add_notifications_icon( 'modula-settings', 'modulaSettingsNotifications' );
 
 		$unavailable_on_localhost = class_exists( '\Modula\Ai\Ai_Helper' )
 			? \Modula\Ai\Ai_Helper::is_unavailable_on_localhost()
@@ -248,12 +318,7 @@ class Modula_Admin_Assets {
 	}
 
 	public function extensions_scripts() {
-		$screen = get_current_screen();
-		if ( 'modula-gallery' !== $screen->post_type ) {
-			return;
-		}
-
-		if ( 'modula-gallery_page_modula-addons' !== $screen->base ) {
+		if ( ! $this->is_extensions_screen() ) {
 			return;
 		}
 
@@ -265,17 +330,15 @@ class Modula_Admin_Assets {
 
 		$scripts->load_css_asset(
 			'modula-extensions',
-			'assets/js/admin/extensions',
-			array( 'wp-components' )
+			'assets/js/admin/extensions'
 		);
 
-		wp_localize_script(
+		self::add_notifications_icon( 'modula-extensions', 'modulaExtensionsNotifications' );
+
+		// Only Compatible Pro has a license, so only then does the page show the license card.
+		wp_add_inline_script(
 			'modula-extensions',
-			'extensionsStrings',
-			array(
-				'proExists' => modula_is_compatible_pro(),
-				'offer'     => apply_filters( 'modula_extensions_offer', new \stdClass() ),
-			),
+			'window.modulaExtensionsPage = ' . wp_json_encode( array( 'licenseCard' => Modula_License_Card::is_available() ) ) . ';',
 			'before'
 		);
 	}

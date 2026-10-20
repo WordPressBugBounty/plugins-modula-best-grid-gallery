@@ -1,0 +1,46 @@
+@use '../styles/mixins';
+
+.modula-admin-disclosure {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.modula-admin-disclosure__toggle {
+	@include mixins.button-reset;
+	display: flex;
+	align-items: center;
+	align-self: flex-start;
+	gap: 6px;
+	min-height: 32px;
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-control);
+
+	&:hover {
+		color: var(--modula-admin-ink-hover);
+	}
+
+	&:focus-visible {
+		@include mixins.focus-ring;
+	}
+}
+
+.modula-admin-disclosure__chevron {
+	display: flex;
+	transition: transform var(--modula-admin-transition);
+
+	// Only this disclosure's chevron, not those nested in its panel.
+	.is-open > .modula-admin-disclosure__toggle & {
+		transform: rotate(180deg);
+	}
+}
+
+.modula-admin-disclosure__panel {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+
+	&[hidden] {
+		display: none;
+	}
+}

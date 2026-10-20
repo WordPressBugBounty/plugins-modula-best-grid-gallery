@@ -13,6 +13,11 @@ function modula_duplicate_gallery_save_as_new_post( $status = '' ) {
 
 	$post = get_post( $id );
 
+	// The nonce only proves intent; the copy also needs the source and type caps.
+	if ( $post && ! modula_duplicate_gallery_current_user_can_duplicate( $post ) ) {
+		wp_die( esc_html__( 'Sorry, you are not allowed to duplicate this item.', 'modula-best-grid-gallery' ), '', array( 'response' => 403 ) );
+	}
+
 	// Copy the post and insert it
 	if ( isset( $post ) && $post != null ) {
 		$new_id = modula_duplicate_gallery_create_duplicate( $post, $status );
@@ -94,6 +99,33 @@ function modula_duplicate_gallery_clone_post_link( $link = null, $before = '', $
 }
 
 /**
+ * Whether the current user may copy a post: edit the source and create its type.
+ *
+ * @param WP_Post $post Source post.
+ * @return bool
+ */
+function modula_duplicate_gallery_current_user_can_duplicate( $post ) {
+	return current_user_can( 'edit_post', $post->ID )
+		&& modula_duplicate_gallery_current_user_has_type_cap( $post->post_type, 'create_posts' );
+}
+
+/**
+ * Checks a post type's own primitive capability, e.g. `publish_posts` maps to
+ * `publish_galleries` or `publish_albums` when Pro Roles gives the type its caps.
+ *
+ * @param string $post_type Post type.
+ * @param string $cap_key   Key of the post type object's `cap` map.
+ * @return bool False for an unregistered post type.
+ */
+function modula_duplicate_gallery_current_user_has_type_cap( $post_type, $cap_key ) {
+	$post_type_object = get_post_type_object( $post_type );
+	if ( ! $post_type_object || ! isset( $post_type_object->cap->$cap_key ) ) {
+		return false;
+	}
+	return current_user_can( $post_type_object->cap->$cap_key );
+}
+
+/**
  * Create a duplicate from gallery
  */
 function modula_duplicate_gallery_create_duplicate( $post, $status = '', $parent_id = '' ) {
@@ -115,14 +147,8 @@ function modula_duplicate_gallery_create_duplicate( $post, $status = '', $parent
 
 		if ( 'publish' == $new_post_status || 'future' == $new_post_status ) {
 			// check if the user has the right capability
-			if ( is_post_type_hierarchical( $post->post_type ) ) {
-				if ( ! current_user_can( 'publish_pages' ) ) {
-					$new_post_status = 'pending';
-				}
-			} else {
-				if ( ! current_user_can( 'publish_posts' ) ) {
-					$new_post_status = 'pending';
-				}
+			if ( ! modula_duplicate_gallery_current_user_has_type_cap( $post->post_type, 'publish_posts' ) ) {
+				$new_post_status = 'pending';
 			}
 		}
 	}
@@ -130,14 +156,8 @@ function modula_duplicate_gallery_create_duplicate( $post, $status = '', $parent
 	$new_post_author    = wp_get_current_user();
 	$new_post_author_id = $new_post_author->ID;
 	// check if the user has the right capability
-	if ( is_post_type_hierarchical( $post->post_type ) ) {
-		if ( current_user_can( 'edit_others_pages' ) ) {
-			$new_post_author_id = $post->post_author;
-		}
-	} else {
-		if ( current_user_can( 'edit_others_posts' ) ) {
-			$new_post_author_id = $post->post_author;
-		}
+	if ( modula_duplicate_gallery_current_user_has_type_cap( $post->post_type, 'edit_others_posts' ) ) {
+		$new_post_author_id = $post->post_author;
 	}
 
 	$menu_order = $post->menu_order;

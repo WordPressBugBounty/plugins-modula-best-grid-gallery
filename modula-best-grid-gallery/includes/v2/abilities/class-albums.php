@@ -13,6 +13,9 @@ final class Albums {
 	public const CREATE = 'modula/create-album';
 	public const UPDATE = 'modula/update-album';
 
+	/** Outcome results the Pro executor sets; Contract::outcome() adds the target album. */
+	private const RESULTS = array( 'album' );
+
 	public static function available(): bool {
 		return Settings_Contract::extension( 'modula-albums' ) && class_exists( Meta_Sync::class );
 	}
@@ -35,7 +38,12 @@ final class Albums {
 			self::CREATE => array( 'create' => 1 ),
 			self::UPDATE => array( 'update' => 1 ),
 		);
-		return isset( $methods[ $name ] ) && Pro_Dependency::methods( '\Modula_Pro\Extensions\Albums\Abilities\Album_Executor', $methods[ $name ] );
+		return isset( $methods[ $name ] ) && Pro_Dependency::methods( '\Modula_Pro\Extensions\Albums\Abilities\Album_Executor', $methods[ $name ] ) && self::executor_owns_access();
+	}
+
+	/** Album executors share Pro's access check; a Pro without it still calls the one Lite no longer ships. */
+	public static function executor_owns_access(): bool {
+		return Pro_Dependency::methods( '\Modula_Pro\Extensions\Albums\Abilities\Album_Executor', array( 'can_access' => 3 ) );
 	}
 
 	public static function abilities(): array {
@@ -137,7 +145,7 @@ final class Albums {
 					)
 				);
 			} else {
-				$output = Contract::outcome_schema();
+				$output = Contract::outcome( $name, self::RESULTS );
 			}
 			$out[ $name ] = array(
 				'label'         => str_replace( array( 'modula/', '-' ), array( '', ' ' ), $name ),
@@ -220,10 +228,6 @@ final class Albums {
 			return current_user_can( 'edit_others_posts' );
 		}
 		return current_user_can( 'delete_post', $id );
-	}
-
-	public static function can_access( int $id = 0, string $status = '', bool $create = false ): bool {
-		return self::available() && self::object_access( $id, $status, $create );
 	}
 
 	/** Retained inspection does not require the Pro executor or current Albums entitlement. */

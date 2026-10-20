@@ -7,7 +7,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { getGalleryListingConfig } from './config';
 import { queryClient } from './query/client';
 import GalleryListingApp from './GalleryListingApp';
-import './dataviews.css';
+import '../shared-styles/dataviews.css';
 import 'shared-ui/menu-select/_menu-select.scss';
 import './index.scss';
 

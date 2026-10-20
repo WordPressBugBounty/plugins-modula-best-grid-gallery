@@ -1,5 +1,7 @@
 <?php
 
+require_once MODULA_PATH . 'includes/admin/rest-api/class-modula-extension-catalog.php';
+
 /**
  * Extensions class for Modula Pro plugin.
  */
@@ -52,79 +54,20 @@ class Modula_Extensions_Base {
 	}
 
 	/**
-	 * Create plan map
+	 * Create plan map from the extension catalog. `free` (no plan) keeps the
+	 * lookups below working for a site without Pro.
 	 */
 	private function create_plan_map() {
-		$free = array();
-
-		$starter = array(
-			'divider-starter',
-			'modula-video',
-			'modula-slideshow',
-		);
-
-		$trio = array_merge(
-			$starter,
-			array(
-				'divider-trio',
-				'modula-speedup',
-				'modula-standalone',
-				'modula-advanced-shortcodes',
-				'modula-image-guardian',
-				'modula-password-protect',
-				'modula-albums',
-				'modula-slider',
-				'modula-fullscreen',
-				'modula-image-licensing',
-				'modula-fullscreen',
-				'modula-instagram',
-				'modula-content-galleries',
-			)
-		);
-
-		$business = array_merge(
-			$trio,
-			array(
-				'modula-defaults',
-				'modula-roles',
-				'modula-zoom',
-				'modula-exif',
-				'modula-watermark',
-				'modula-deeplink',
-				'modula-pagination',
-				'modula-whitelabel',
-				'modula-image-proofing',
-				'modula-comments',
-				'modula-download',
-			)
-		);
-
-		$this->plan_map = array(
-			'free'     => $free,
-			'starter'  => $starter,
-			'trio'     => $trio,
-			'business' => $business,
-		);
+		$this->plan_map = array_merge( array( 'free' => array() ), Modula_Extension_Catalog::plan_map() );
 	}
 
 	/**
-	 * Plan membership from the existing Lite commercial authority, without dividers.
+	 * Plan membership from the extension catalog, with the empty `free` entry.
 	 *
 	 * @return array<string,string[]>
 	 */
 	public function get_read_only_plan_map() {
-		$out = array();
-		foreach ( $this->plan_map as $plan => $slugs ) {
-			$out[ $plan ] = array_values(
-				array_filter(
-					$slugs,
-					static function ( $slug ) {
-						return is_string( $slug ) && 0 === strpos( $slug, 'modula-' );
-					}
-				)
-			);
-		}
-		return $out;
+		return $this->plan_map;
 	}
 
 	/**
@@ -139,179 +82,19 @@ class Modula_Extensions_Base {
 	}
 
 	/**
-	 * Add default extensions
+	 * Add default extensions: the catalog, every extension unavailable.
 	 */
 	public function add_default_extensions() {
-		$this->extensions = array(
-			'modula-standalone'          => array(
+		$this->extensions = array();
+		foreach ( Modula_Extension_Catalog::copy() as $slug => $copy ) {
+			$this->extensions[ $slug ] = array(
 				'available'   => false,
 				'enabled'     => false,
-				'name'        => __( 'Standalone', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-standalone',
-				'description' => __( 'Create standalone galleries and albums that can be used on any page or post.', 'modula-best-grid-gallery' ),
-			),
-			'modula-defaults'            => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Presets', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-defaults',
-				'description' => __( 'Set preset settings for all your galleries to save time and maintain consistency.', 'modula-best-grid-gallery' ),
-			),
-			'modula-comments'            => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Comments', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-comments',
-				'description' => __( 'Allow your site users to comment on your gallery images.', 'modula-best-grid-gallery' ),
-			),
-			'modula-image-proofing'      => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Image Proofing', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-image-proofing',
-				'description' => __( 'Create photo proofing galleries with ease in your WordPress website.', 'modula-best-grid-gallery' ),
-			),
-			'modula-content-galleries'   => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Content Galleries', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-content-galleries',
-				'description' => __( 'Create galleries directly from your WordPress content with automatic image extraction.', 'modula-best-grid-gallery' ),
-			),
-			'modula-download'            => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Download', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-download',
-				'description' => __( 'Allow visitors to download images from your galleries with customizable download options.', 'modula-best-grid-gallery' ),
-			),
-			'modula-zoom'                => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Zoom', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-zoom',
-				'description' => __( 'Add zoom functionality to your gallery images for detailed viewing and better user experience.', 'modula-best-grid-gallery' ),
-			),
-			'modula-albums'              => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Albums', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-albums',
-				'description' => __( 'Organize your galleries into beautiful albums and collections for better content management.', 'modula-best-grid-gallery' ),
-			),
-			'modula-video'               => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Video', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-video',
-				'description' => __( 'Add video galleries with self-hosted videos or external sources like YouTube and Vimeo to your website.', 'modula-best-grid-gallery' ),
-			),
-			'modula-watermark'           => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Watermark', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-watermark',
-				'description' => __( 'Easily protect your photos by adding custom watermarks to your WordPress image galleries.', 'modula-best-grid-gallery' ),
-			),
-			'modula-slideshow'           => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Slideshow', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-slideshow',
-				'description' => __( 'Enhance your gallery with beautiful lightbox effects and advanced image viewing options.', 'modula-best-grid-gallery' ),
-			),
-			'modula-roles'               => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Roles', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-roles',
-				'description' => __( 'Granular control over user roles and permissions for your Modula galleries.', 'modula-best-grid-gallery' ),
-			),
-			'modula-deeplink'            => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Deep Link', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-deeplink',
-				'description' => __( 'Full SEO control over your galleries. Create a unique and indexable URL for each Modula Gallery item.', 'modula-best-grid-gallery' ),
-			),
-			'modula-instagram'           => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Instagram', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-instagram',
-				'description' => __( 'Import and display Instagram photos directly in your Modula galleries.', 'modula-best-grid-gallery' ),
-			),
-			'modula-image-guardian'      => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Image Guardian', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-image-guardian',
-				'description' => __( 'Protect your galleries from right-click, hide images URLs, and blur images when browser focus is lost.', 'modula-best-grid-gallery' ),
-			),
-			'modula-speedup'             => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Speed Up', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-speedup',
-				'description' => __( 'Automatically optimize your images to load fast by reducing file sizes and using a CDN.', 'modula-best-grid-gallery' ),
-			),
-			'modula-advanced-shortcodes' => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Advanced Shortcodes', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-advanced-shortcodes',
-				'description' => __( 'Link dynamically to specific galleries using URLs with query strings, without creating pages.', 'modula-best-grid-gallery' ),
-			),
-			'modula-password-protect'    => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Password Protect', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-password-protect',
-				'description' => __( 'Password protect your galleries for exclusive or client access.', 'modula-best-grid-gallery' ),
-			),
-			'modula-slider'              => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Slider', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-slider',
-				'description' => __( 'Transform your galleries into stunning sliders with smooth transitions and effects.', 'modula-best-grid-gallery' ),
-			),
-			'modula-fullscreen'          => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Fullscreen', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-fullscreen',
-				'description' => __( 'Display your galleries in fullscreen mode for an immersive viewing experience.', 'modula-best-grid-gallery' ),
-			),
-			'modula-whitelabel'          => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Whitelabel', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-whitelabel',
-				'description' => __( 'Customize the Modula branding and interface to match your brand identity.', 'modula-best-grid-gallery' ),
-			),
-			'modula-exif'                => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'EXIF', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-exif',
-				'description' => __( 'Display EXIF data from your images including camera settings, location, and more.', 'modula-best-grid-gallery' ),
-			),
-			'modula-pagination'          => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Pagination', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-pagination',
-				'description' => __( 'Add pagination to your galleries to improve performance and organize large collections.', 'modula-best-grid-gallery' ),
-			),
-			'modula-image-licensing'     => array(
-				'available'   => false,
-				'enabled'     => false,
-				'name'        => __( 'Image Licensing', 'modula-best-grid-gallery' ),
-				'slug'        => 'modula-image-licensing',
-				'description' => __( 'Manage image licensing and copyright information directly within your galleries.', 'modula-best-grid-gallery' ),
-			),
-		);
+				'name'        => $copy['name'],
+				'slug'        => $slug,
+				'description' => $copy['description'],
+			);
+		}
 	}
 
 	/**
@@ -534,7 +317,7 @@ class Modula_Extensions_Base {
 					'is_divider' => true,
 					'slug'       => $divider_data['divider_key'],
 					'plan'       => $divider_data['plan'],
-					'url'        => \MODULA_PRO_STORE_UPGRADE_URL . '?utm_source=modula-pro&utm_medium=extensions&utm_campaign=upgrade-to-' . $divider_data['plan'],
+					'url'        => Modula_Extension_Catalog::upgrade_url( $divider_data['plan'] ),
 				);
 			}
 			$extensions_with_divider[ $slug ] = $ext;

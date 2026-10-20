@@ -1,0 +1,307 @@
+// The license card (ADR 0049), on admin-ui tokens. Values are the
+// "7 · Extensions" artboard's. A host app `@use`s this after admin-ui's
+// styles and renders the card inside `AdminUiRoot`.
+@use "../admin-ui/styles/mixins";
+@use "../admin-ui/page/stacked";
+
+.modula-admin-ui {
+
+	.modula-license-card {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+		padding: 24px;
+		border: 1px solid var(--modula-admin-border);
+		border-radius: var(--modula-admin-radius-lg);
+		background: var(--modula-admin-surface);
+
+		&.is-form {
+			align-items: flex-start;
+		}
+	}
+
+	.modula-license-card__icon {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		width: var(--modula-admin-hit-target);
+		height: var(--modula-admin-hit-target);
+		border-radius: var(--modula-admin-radius-pill);
+		background: var(--modula-admin-surface-sunken);
+		color: var(--modula-admin-ink-secondary);
+	}
+
+	.modula-license-card__main {
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
+		gap: 6px;
+		min-width: 0;
+	}
+
+	.modula-license-card__title-line {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.modula-license-card__title {
+		color: var(--modula-admin-ink);
+		font-size: 17px;
+		font-weight: 500;
+	}
+
+	.modula-license-card__badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		height: 24px;
+		padding: 0 10px;
+		border-radius: 12px;
+		font-size: var(--modula-admin-text-badge);
+		font-weight: 500;
+
+		&::before {
+			content: "";
+			width: 7px;
+			height: 7px;
+			border-radius: 50%;
+			background: currentcolor;
+		}
+
+		&.is-active {
+			background: var(--modula-admin-success-surface);
+			color: var(--modula-admin-success-ink);
+		}
+
+		&.is-inactive {
+			background: var(--modula-admin-plan-surface);
+			color: var(--modula-admin-plan-ink);
+		}
+
+		&.is-warning {
+			background: var(--modula-admin-warning-surface);
+			color: var(--modula-admin-warning-ink);
+		}
+
+		&.is-danger {
+			background: var(--modula-admin-danger-surface);
+			color: var(--modula-admin-danger);
+		}
+	}
+
+	.modula-license-card__meta {
+		color: var(--modula-admin-ink-muted);
+		font-size: var(--modula-admin-text-help);
+	}
+
+	.modula-license-card__key {
+		color: var(--modula-admin-ink-secondary);
+		font-family: var(--modula-admin-font-mono);
+		letter-spacing: 0.04em;
+	}
+
+	.modula-license-card__sites {
+		display: flex;
+		flex-direction: column;
+		flex-shrink: 0;
+		gap: 6px;
+		width: 340px;
+		max-width: 100%;
+	}
+
+	.modula-license-card__sites-line {
+		display: flex;
+		align-items: baseline;
+		gap: 12px;
+		color: var(--modula-admin-ink-secondary);
+		font-size: var(--modula-admin-text-help);
+	}
+
+	.modula-license-card__sites-count {
+		margin-left: auto;
+		color: var(--modula-admin-ink);
+		font-variant-numeric: tabular-nums;
+	}
+
+	.modula-license-card__account {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		margin: -4px -5px -4px 0;
+		border-radius: var(--modula-admin-radius-sm);
+		color: var(--modula-admin-ink-soft);
+
+		&:hover {
+			background: var(--modula-admin-surface-hover);
+			color: var(--modula-admin-ink);
+		}
+
+		&:focus-visible {
+
+			@include mixins.focus-ring;
+			box-shadow: none;
+		}
+	}
+
+	.modula-license-card__meter {
+		display: block;
+		height: 6px;
+		border-radius: 3px;
+		background: var(--modula-admin-border-divider);
+
+		> span {
+			display: block;
+			height: 100%;
+			border-radius: 3px;
+			background: var(--modula-admin-ink);
+		}
+	}
+
+	.modula-license-card__actions {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+		gap: 8px;
+	}
+
+	// A key action is in progress: its buttons stay focusable but wait.
+	.modula-license-card [aria-disabled="true"] {
+		cursor: progress;
+		opacity: var(--modula-admin-disabled-opacity);
+	}
+
+	.modula-license-card__form {
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
+		gap: 14px;
+		min-width: 0;
+		max-width: 760px;
+
+		.modula-license-card__title-line {
+			min-height: var(--modula-admin-hit-target);
+		}
+	}
+
+	.modula-license-card__intro {
+		margin: -6px 0 0;
+		color: var(--modula-admin-ink-soft);
+		font-size: var(--modula-admin-text-control);
+		line-height: 1.5;
+	}
+
+	.modula-license-card__key-row {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin: 0;
+	}
+
+	.modula-license-card__key-field {
+		position: relative;
+		display: flex;
+		flex-grow: 1;
+		align-items: center;
+		min-width: 0;
+
+		.modula-admin-text-input {
+			padding-right: var(--modula-admin-hit-target);
+			font-family: var(--modula-admin-font-mono);
+			font-size: var(--modula-admin-text-control);
+			letter-spacing: 0.04em;
+		}
+	}
+
+	.modula-license-card__show {
+
+		@include mixins.button-reset;
+		position: absolute;
+		right: 6px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border-radius: var(--modula-admin-radius-sm);
+		color: var(--modula-admin-ink-muted);
+
+		&:hover,
+		&[aria-pressed="true"] {
+			background: var(--modula-admin-surface-hover);
+			color: var(--modula-admin-ink);
+		}
+
+		&:focus-visible {
+
+			@include mixins.focus-ring;
+		}
+	}
+
+	.modula-license-card__error {
+		margin: -4px 0 0;
+		color: var(--modula-admin-danger);
+		font-size: var(--modula-admin-text-help);
+	}
+
+	.modula-license-card__links {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 18px;
+		font-size: var(--modula-admin-text-control);
+
+		a {
+			display: inline-flex;
+			align-items: center;
+			min-height: 24px;
+			margin: -4px 0;
+			color: var(--modula-admin-ink);
+			text-decoration: underline;
+			text-underline-offset: 3px;
+
+			&:hover {
+				color: var(--modula-admin-ink-hover);
+			}
+
+			&:focus-visible {
+
+				@include mixins.focus-ring;
+				box-shadow: none;
+			}
+		}
+	}
+
+	// Narrow screens: the sites and actions go under the license, and the
+	// key field takes its own line above Activate.
+	@media (max-width: stacked.$breakpoint) {
+
+		.modula-license-card {
+			flex-wrap: wrap;
+			align-items: flex-start;
+			padding: 20px;
+		}
+
+		.modula-license-card__main,
+		.modula-license-card__form {
+			flex-basis: calc(100% - var(--modula-admin-hit-target) - 20px);
+		}
+
+		.modula-license-card__sites {
+			width: 100%;
+		}
+
+		.modula-license-card__actions,
+		.modula-license-card__key-row {
+			flex-wrap: wrap;
+		}
+
+		.modula-license-card__key-field {
+			flex-basis: 100%;
+		}
+	}
+}

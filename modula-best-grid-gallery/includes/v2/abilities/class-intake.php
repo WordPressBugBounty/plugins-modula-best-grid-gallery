@@ -7,15 +7,12 @@ final class Intake {
 	public const PROVIDER = 'modula-lite-intake';
 	public const UPLOAD   = 'modula/upload-image';
 	public const ZIP      = 'modula/import-zip';
+	/** Outcome results every intake operation sets, server import included; Contract::outcome() adds the target gallery. */
+	public const RESULTS = array( 'intake' );
 
 	/** @return array<int,string> */
 	public static function premium(): array {
 		return array_keys( self::executor_methods() );
-	}
-
-	/** @return array<int,string> */
-	public static function owned_names(): array {
-		return array_merge( array( self::UPLOAD ), self::premium() );
 	}
 
 	/**
@@ -40,10 +37,13 @@ final class Intake {
 		);
 	}
 
-	/** Inspect the executor signature without constructing a service. */
+	/**
+	 * Inspect the executor signature without constructing a service.
+	 * An executor without its own MAX_EXPANDED still reads the archive limits Lite no longer ships.
+	 */
 	public static function executor_ready( string $name ): bool {
 		$methods = self::executor_methods();
-		return isset( $methods[ $name ] ) && Pro_Dependency::methods( '\Modula_Pro\Abilities\Intake_Executor', $methods[ $name ] );
+		return isset( $methods[ $name ] ) && Pro_Dependency::methods( '\Modula_Pro\Abilities\Intake_Executor', $methods[ $name ] ) && defined( '\Modula_Pro\Abilities\Intake_Executor::MAX_EXPANDED' );
 	}
 
 	public static function operations(): array {
@@ -69,17 +69,17 @@ final class Intake {
 		) + Intake_Explanation::callbacks_for( self::premium() );
 	}
 	public static function abilities(): array {
-		$upload  = array(
+		$upload = array(
 			'permission' => array( self::class, 'can_upload' ),
 			'available'  => array( self::class, 'can_upload' ),
 		);
+		// requires_pro already reports the editor's Compatible Pro gate before any executor runs.
 		$premium = array(
 			'permission'     => array( self::class, 'can_upload' ),
 			'requires_pro'   => true,
 			'executor_ready' => array( self::class, 'executor_ready' ),
 			'gates'          => array(
 				array( self::class, 'can_upload' ),
-				array( self::class, 'editor_entitled' ),
 			),
 		);
 		$import  = array(
@@ -89,7 +89,6 @@ final class Intake {
 			'gates'          => array(
 				array( Server_Import::class, 'can_import' ),
 				array( self::class, 'can_upload' ),
-				array( self::class, 'editor_entitled' ),
 			),
 		);
 		return Operation_Table::from_callbacks(
@@ -105,11 +104,6 @@ final class Intake {
 	}
 	public static function can_upload(): bool {
 		return get_current_user_id() && current_user_can( 'upload_files' );
-	}
-
-	/** Editor add-new uses this same Compatible Pro check for ZIP and folder import. */
-	public static function editor_entitled(): bool {
-		return function_exists( 'modula_is_compatible_pro' ) && modula_is_compatible_pro();
 	}
 	public static function result_schema(): array {
 		return Contract::object(
@@ -173,13 +167,13 @@ final class Intake {
 				'label'         => 'Upload one image',
 				'description'   => $description,
 				'input_schema'  => $input,
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( self::UPLOAD, self::RESULTS ),
 			),
 			self::ZIP    => array(
 				'label'         => 'Import ZIP images',
 				'description'   => $description . ' ZIP: at most 100 entries, 32 MiB expanded and 100:1 ratio per entry. Reject traversal, links, encrypted/invalid/non-image entries and duplicate basenames before importing; ignore directories and macOS metadata. Temporary staging is removed on completion or shutdown. Requires the editor Compatible Pro gate; Lite explains that requirement before staging.',
 				'input_schema'  => $input,
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( self::ZIP, self::RESULTS ),
 			),
 		);
 	}

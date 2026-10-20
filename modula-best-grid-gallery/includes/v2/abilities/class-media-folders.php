@@ -11,6 +11,8 @@ use WPChill\Folders\Storage\Folder_Transfer_State;
 defined( 'ABSPATH' ) || exit;
 final class Media_Folders {
 	public const DELETE = 'modula/delete-media-folder';
+	/** Outcome results the folder writes set: the folder, the assignment or the deleted ID. */
+	private const RESULTS = array( 'folder', 'membership', 'deleted_id' );
 	public static function can_manage(): bool {
 		return get_current_user_id() && Folders_Dependency::available() && true === Status_Controller::can_view_status();
 	}
@@ -135,7 +137,7 @@ final class Media_Folders {
 				'label'         => str_replace( array( 'modula/', '-' ), array( '', ' ' ), $name ),
 				'description'   => 'Organizer mutation with current permissions, organization revision and 30-day request recovery. Delete removes the subtree and assignments only, never objects or bytes. Assign supports attachment IDs; folder_id 0 clears media folder location (Uncategorized). Storage assignments that require byte transfer belong to storage operations.',
 				'input_schema'  => Contract::object( $properties, $required ),
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( $name, self::RESULTS ),
 			);
 		}
 		return $out;

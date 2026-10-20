@@ -10,6 +10,9 @@ final class Instagram {
 	public const READ = 'modula/read-instagram-state';
 	public const SYNC = 'modula/sync-instagram-gallery';
 
+	/** Outcome results the Pro executor sets; Contract::outcome() adds the target gallery too. */
+	private const RESULTS = array( 'instagram', 'gallery' );
+
 	/** @return array<int,string> */
 	public static function names(): array {
 		return array( self::READ, self::SYNC );
@@ -21,7 +24,14 @@ final class Instagram {
 	 * @return array<string,array<string,int>>
 	 */
 	public static function executor_methods(): array {
-		return array_fill_keys( self::names(), array( 'run' => 2 ) );
+		// account_configured marks an executor that owns the account checks Lite no longer ships.
+		return array_fill_keys(
+			self::names(),
+			array(
+				'run'                => 2,
+				'account_configured' => 0,
+			)
+		);
 	}
 
 	/**
@@ -78,27 +88,6 @@ final class Instagram {
 
 	public static function target_eligible( int $id ): bool {
 		return Beta_Settings::is_beta_gallery( $id ) && 'trash' !== get_post_status( $id ) && ! get_post_meta( $id, '_modula_bind_target_type', true );
-	}
-
-	/** Local account presence and expiry only. The token value is never returned. */
-	public static function account_configured(): bool {
-		$expiry = (int) get_option( 'modula_instagram_expiry_date', 0 );
-		return (bool) get_option( 'modula_instagram_access_token', false ) && ( ! $expiry || $expiry > time() );
-	}
-
-	/**
-	 * Account changes are conflicts too. Credentials enter only an irreversible digest.
-	 */
-	public static function state_revision( int $id, bool $lock = false ): string {
-		global $wpdb;
-		$gallery = Revision::state( $id, $lock );
-		// Authoritative snapshot: fixed option names and boolean-selected FOR UPDATE; caching would hide conflicts.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
-		$config = $wpdb->get_results( "SELECT option_name,option_value FROM {$wpdb->options} WHERE option_name IN ('modula_instagram_access_token','modula_instagram_expiry_date') ORDER BY option_name" . ( $lock ? ' FOR UPDATE' : '' ), ARRAY_A );
-		if ( $wpdb->last_error ) {
-			throw new \RuntimeException( 'Account state unavailable.' );
-		}
-		return hash( 'sha256', $gallery . wp_json_encode( $config ) );
 	}
 
 	public static function result_schema(): array {
@@ -168,7 +157,7 @@ final class Instagram {
 					),
 					array( 'id', 'revision', 'request_id' )
 				),
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( self::SYNC, self::RESULTS ),
 			),
 		);
 	}
@@ -187,11 +176,7 @@ final class Instagram {
 		if ( ! self::target_eligible( $id ) ) {
 			return array( self::unsupported_blocker() );
 		}
-		$blockers = Availability::blockers( $name );
-		if ( $blockers || self::READ === $name || self::account_configured() ) {
-			return $blockers;
-		}
-		return array( self::configuration_blocker() );
+		return Availability::blockers( $name );
 	}
 
 	/**
@@ -225,19 +210,6 @@ final class Instagram {
 			'remedy'  => array(
 				'action'      => 'contact_administrator',
 				'explanation' => __( 'Instagram sync applies to an editable Beta gallery that is not bound to another source.', 'modula-best-grid-gallery' ),
-			),
-		);
-	}
-
-	/** @return array{reason:string,feature:string,remedy:array{action:string,explanation:string,destination:string}} */
-	private static function configuration_blocker(): array {
-		return array(
-			'reason'  => 'configuration_required',
-			'feature' => 'modula-instagram',
-			'remedy'  => array(
-				'action'      => 'configure_service',
-				'explanation' => __( 'Connect an Instagram account before syncing media. This operation does not accept credentials.', 'modula-best-grid-gallery' ),
-				'destination' => admin_url( 'edit.php?post_type=modula-gallery&page=modula' ),
 			),
 		);
 	}

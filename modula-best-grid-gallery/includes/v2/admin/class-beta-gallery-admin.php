@@ -16,6 +16,16 @@ class Beta_Gallery_Admin {
 
 	public const QUERY_ARG = 'modula_editor';
 
+	/** New from preset arg on a new-editor create: a preset ID or `blank`. */
+	public const PRESET_QUERY_ARG = 'modula_preset';
+
+	/** Preset choice values passed to `modula_new_beta_gallery_created`. */
+	public const PRESET_CHOICE_DEFAULT = 'default';
+	public const PRESET_CHOICE_BLANK   = 'blank';
+
+	/** @var array<int, true> Beta galleries already created from the editor choice this request. */
+	private static $created_galleries = array();
+
 	/**
 	 * @return void
 	 */
@@ -395,6 +405,8 @@ class Beta_Gallery_Admin {
 			if ( 'beta' === $choice ) {
 				\Modula\V2\Beta_Settings::mark_as_beta_gallery( $post_id );
 				\Modula\V2\Meta_Sync::apply_new_beta_gallery_create_defaults( $post_id );
+				// The bare post-new modal has no preset picker: always the Default preset.
+				self::fire_new_beta_gallery_created( $post_id, self::PRESET_CHOICE_DEFAULT );
 			}
 		} else {
 			wp_die( esc_html__( 'You are not allowed to create this item.', 'modula-best-grid-gallery' ) );
@@ -463,8 +475,57 @@ class Beta_Gallery_Admin {
 			return;
 		}
 
+		// Older admin load orders run the create choice twice (insert + current_screen).
+		// A second built-in defaults pass would overwrite the Preset Pro just applied.
+		if ( isset( self::$created_galleries[ $post_id ] ) ) {
+			return;
+		}
+
 		\Modula\V2\Beta_Settings::mark_as_beta_gallery( $post_id );
 		\Modula\V2\Meta_Sync::apply_new_beta_gallery_create_defaults( $post_id );
+
+		$raw_preset = isset( $_GET[ self::PRESET_QUERY_ARG ] ) ? wp_unslash( $_GET[ self::PRESET_QUERY_ARG ] ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- normalize_preset_choice() whitelists the value.
+		self::fire_new_beta_gallery_created( $post_id, self::normalize_preset_choice( $raw_preset ) );
+	}
+
+	/**
+	 * Normalize the New from preset arg of a new-editor create.
+	 *
+	 * @param mixed $raw Raw `modula_preset` query value: string, array, or null when missing.
+	 * @return int|string Positive preset ID, `blank`, or `default` for anything else.
+	 */
+	public static function normalize_preset_choice( $raw ) {
+		if ( self::PRESET_CHOICE_BLANK === $raw ) {
+			return self::PRESET_CHOICE_BLANK;
+		}
+		if ( is_string( $raw ) && ctype_digit( $raw ) && (int) $raw > 0 ) {
+			return (int) $raw;
+		}
+		return self::PRESET_CHOICE_DEFAULT;
+	}
+
+	/**
+	 * Record the create and let Pro start the gallery from a Preset.
+	 *
+	 * @param int        $post_id       New Beta gallery ID.
+	 * @param int|string $preset_choice Preset ID, `blank`, or `default`.
+	 * @return void
+	 */
+	private static function fire_new_beta_gallery_created( $post_id, $preset_choice ) {
+		self::$created_galleries[ $post_id ] = true;
+
+		/**
+		 * Fires once after a new Beta gallery from the admin editor choice gets built-in create defaults.
+		 *
+		 * Only the listing's New gallery editor choice and the post-new editor choice fire it.
+		 * Agent, bound-gallery, Duplicate, Convert and Try the beta creates never do.
+		 * Lite does not check the preset ID; the listener owns that.
+		 *
+		 * @param int        $post_id       New Beta gallery ID.
+		 * @param int|string $preset_choice Positive preset ID (New from preset), `blank`
+		 *                                  (built-in defaults), or `default` (use the Default preset).
+		 */
+		do_action( 'modula_new_beta_gallery_created', $post_id, $preset_choice );
 	}
 
 	/**

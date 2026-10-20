@@ -1,0 +1,99 @@
+@use "../../admin-ui/page/stacked";
+
+// Modula › Partners: the partner plugin grid.
+
+.modula-admin-ui {
+
+	// Two cards a row; one under the other on narrow screens.
+	.modula-partners {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.modula-partner {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 12px;
+		margin: 0;
+		padding: 20px var(--modula-admin-row-padding-x);
+		border: 1px solid var(--modula-admin-border);
+		border-radius: var(--modula-admin-radius-lg);
+		background: var(--modula-admin-surface);
+	}
+
+	.modula-partner__head {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+	}
+
+	.modula-partner__image {
+		flex-shrink: 0;
+		width: 56px;
+		height: 56px;
+		border-radius: var(--modula-admin-radius-md);
+		object-fit: cover;
+	}
+
+	.modula-partner__name {
+		margin: 0;
+		padding: 0;
+		color: var(--modula-admin-ink);
+		font-size: var(--modula-admin-text-card-title);
+		font-weight: 600;
+		line-height: 1.4;
+	}
+
+	.modula-partner__version {
+		margin: 2px 0 0;
+		color: var(--modula-admin-ink-muted);
+		font-size: var(--modula-admin-text-caption);
+		line-height: 1.4;
+	}
+
+	.modula-partner__description {
+		flex-grow: 1;
+		margin: 0;
+		color: var(--modula-admin-ink-soft);
+		font-size: var(--modula-admin-text-control);
+		line-height: 1.5;
+	}
+
+	.modula-partner__action {
+		margin-top: 4px;
+	}
+
+	// As the license card's Active badge.
+	.modula-partners-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		height: 24px;
+		padding: 0 10px;
+		border-radius: 12px;
+		background: var(--modula-admin-success-surface);
+		color: var(--modula-admin-success-ink);
+		font-size: var(--modula-admin-text-badge);
+		font-weight: 500;
+
+		&::before {
+			content: "";
+			width: 7px;
+			height: 7px;
+			border-radius: 50%;
+			background: currentcolor;
+		}
+	}
+
+	@media (max-width: stacked.$breakpoint) {
+
+		.modula-partners {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+}

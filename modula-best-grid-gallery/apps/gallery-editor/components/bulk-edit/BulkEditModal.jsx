@@ -15,7 +15,7 @@ import {
 	Spinner,
 	__experimentalConfirmDialog as ConfirmDialog,
 } from '@wordpress/components';
-import { useTakeoverSaveStatus } from 'editor-shell';
+import { GalleryModal, useTakeoverSaveStatus } from 'editor-shell';
 import { useBulkEdit } from '../../context/BulkEditContext';
 import { useGalleryPreviewTileSelection } from '../../context/GalleryPreviewTileSelectionContext';
 import { usePreviewReduxStoreItems } from '../../hooks/usePreviewReduxStoreItems';
@@ -28,7 +28,6 @@ import {
 	getBoundGallerySummaryFromEditor,
 } from '../../utils/boundGalleryChromePolicy';
 import { getGalleryPreviewReduxStore } from '../../utils/previewReduxStoreRef';
-import GalleryModal from '../gallery-modal/GalleryModal';
 import {
 	filterBulkEditRowsByStoreIndices,
 	galleryFilterSuggestions,

@@ -16,15 +16,15 @@ export function getGalleryListUrl(config = getModulaSettingsEditorConfig()) {
 }
 
 /**
- * Modula AI settings tab in wp-admin.
+ * Modula AI settings in wp-admin; the panel lives on the AI tab.
  *
  * @param {Record<string, unknown>} [config]
- * @return {string}
+ * @return {string} Settings URL opening the AI tab.
  */
 export function getModulaAiSettingsAdminUrl(
 	config = getModulaSettingsEditorConfig()
 ) {
 	const listUrl = getGalleryListUrl(config);
 	const base = listUrl.split('?')[0];
-	return `${base}?post_type=modula-gallery&page=modula&tab=modula_ai`;
+	return `${base}?post_type=modula-gallery&page=modula&tab=ai`;
 }

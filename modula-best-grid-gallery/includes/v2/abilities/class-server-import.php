@@ -89,7 +89,7 @@ final class Server_Import {
 					),
 					array( 'request_id', 'root', 'paths', 'delete_after_import' )
 				),
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( self::IMPORT, Intake::RESULTS ),
 			),
 		);
 	}

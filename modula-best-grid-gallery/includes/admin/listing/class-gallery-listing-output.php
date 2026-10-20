@@ -111,7 +111,7 @@ class Gallery_Listing_Output {
 			'report'  => $this->convert_to_camel_case( $this->get_gallery_report( $post_id ) ),
 		);
 
-		$js_data['report']['modulaAiSettings'] = esc_url( admin_url( 'edit.php?post_type=modula-gallery&page=modula&tab=modula_ai' ) );
+		$js_data['report']['modulaAiSettings'] = esc_url( admin_url( 'edit.php?post_type=modula-gallery&page=modula&tab=ai' ) );
 
 		wp_add_inline_script(
 			$js_data['handle'],

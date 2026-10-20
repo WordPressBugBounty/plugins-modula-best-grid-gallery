@@ -1,0 +1,111 @@
+// admin-ui design tokens (ADR 0046).
+// Values come from the "3 · Settings" artboard of the Modula Layout Panel
+// Redesign canvas. They are custom properties on the page container only, so
+// nothing leaks into other wp-admin screens or into Shared UI.
+
+$root-class: 'modula-admin-ui';
+
+.#{$root-class} {
+	// Type
+	--modula-admin-font: "Figtree", -apple-system, blinkmacsystemfont, "Segoe UI", helvetica, sans-serif;
+	--modula-admin-font-mono: ui-monospace, sfmono-regular, menlo, monospace;
+	--modula-admin-text-page-title: 22px;
+	--modula-admin-text-title: 20px;
+	--modula-admin-text-card-title: 15px;
+	--modula-admin-text-body: 15px;
+	--modula-admin-text-control: 14px;
+	--modula-admin-text-group-title: 14.5px;
+	--modula-admin-text-result: 14.5px;
+	--modula-admin-text-help: 13.5px;
+	--modula-admin-text-badge: 12.5px;
+	--modula-admin-text-caption: 12.5px;
+	--modula-admin-text-mono: 13px;
+
+	// Ink
+	--modula-admin-ink: #1f1f1c;
+	--modula-admin-ink-hover: #3d3b35;
+	// Same value as ink-hover, different role: nav items, matrix headers.
+	--modula-admin-ink-secondary: #3d3b35;
+	--modula-admin-ink-muted: #6b6860;
+	--modula-admin-ink-soft: #5f5c53;
+	--modula-admin-ink-segment: #4a4a45;
+	--modula-admin-ink-inverse: #fff;
+
+	// Surfaces
+	--modula-admin-surface: #fff;
+	--modula-admin-surface-sunken: #f6f5f2;
+	--modula-admin-surface-segment: #f0efea;
+	--modula-admin-surface-hover: #ebe9e3;
+	// The search field rests on surface-hover, so it hovers one step darker.
+	--modula-admin-surface-hover-strong: #e4e2dc;
+	--modula-admin-surface-toast: #1f1f1c;
+
+	// Borders
+	--modula-admin-border: #e4e2dc;
+	--modula-admin-border-divider: #efede8;
+	--modula-admin-border-strong: #d6d3c8;
+	--modula-admin-border-field: #8f8b80;
+
+	// Status
+	--modula-admin-success: #4a7556;
+	// The green status pill.
+	--modula-admin-success-surface: #e7ede8;
+	--modula-admin-success-ink: #3f5a47;
+	--modula-admin-danger: #a3261b;
+	// No artboard value for an error banner: a pale tint of danger.
+	--modula-admin-danger-surface: #fbeeec;
+	--modula-admin-warning: #b26200;
+	--modula-admin-warning-surface: #fbf3e6;
+	--modula-admin-warning-ink: #5c3b00;
+	--modula-admin-connected: #2e8540;
+	--modula-admin-plan-ink: #6a5a3c;
+	--modula-admin-plan-surface: #f1ece2;
+	// The notification count on the header bell.
+	--modula-admin-notification-dot: #d63638;
+
+	// Radii
+	--modula-admin-radius-sm: 4px;
+	--modula-admin-radius-md: 6px;
+	--modula-admin-radius-lg: 8px;
+	--modula-admin-radius-pill: 999px;
+
+	// Sizes and spacing
+	--modula-admin-control-height: 42px;
+	--modula-admin-button-height: 40px;
+	--modula-admin-segment-height: 34px;
+	--modula-admin-hit-target: 44px;
+	--modula-admin-field-width: 320px;
+	--modula-admin-row-min-height: 60px;
+	--modula-admin-row-padding-y: 10px;
+	--modula-admin-row-padding-x: 20px;
+	--modula-admin-row-gap: 16px;
+	--modula-admin-card-title-gap: 10px;
+	--modula-admin-section-gap: 28px;
+
+	// Page chrome. The stacked layout (782px and below) narrows the gutter.
+	--modula-admin-header-height: 64px;
+	--modula-admin-page-gutter: 40px;
+	--modula-admin-nav-width: 260px;
+	--modula-admin-nav-item-height: 42px;
+	--modula-admin-search-height: 44px;
+	--modula-admin-content-width: 860px;
+	--modula-admin-content-gap: 22px;
+	--modula-admin-toast-height: 46px;
+	--modula-admin-matrix-column-width: 84px;
+	--modula-admin-matrix-row-height: 52px;
+	// Header row and "Show N more" footer.
+	--modula-admin-matrix-head-height: 48px;
+	--modula-admin-matrix-cell-target: 36px;
+
+	// Effects
+	--modula-admin-shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.12);
+	--modula-admin-shadow-toast: 0 12px 32px rgba(0, 0, 0, 0.2);
+	// Off-canvas panel (notifications) and the page dimmed behind it.
+	--modula-admin-shadow-panel: -16px 0 40px rgba(0, 0, 0, 0.16);
+	--modula-admin-backdrop: rgba(28, 27, 25, 0.3);
+	--modula-admin-focus-field: 0 0 0 3px rgba(31, 31, 28, 0.14);
+	--modula-admin-disabled-opacity: 0.45;
+	// The design dims a whole segmented track less than a single control.
+	--modula-admin-disabled-group-opacity: 0.6;
+	--modula-admin-transition: 0.15s;
+}

@@ -1,9 +1,8 @@
 <?php
-/** Proofing descriptors, projection and retained-result authorization. Pro owns settings and invitation effects. */
+/** Proofing descriptors and retained-result authorization. Pro owns the locked read, settings and invitation effects. */
 namespace Modula\V2\Abilities;
 
 use Modula\V2\Beta_Settings;
-use Modula\V2\Meta_Sync;
 
 defined( 'ABSPATH' ) || exit;
 final class Proofing {
@@ -13,6 +12,9 @@ final class Proofing {
 	public const INVITATION = 'modula/update-proofing-invitation';
 	public const DELETE     = 'modula/delete-proofing-invitation';
 
+	/** Outcome results the Pro executor sets; Contract::outcome() adds the target gallery. */
+	private const RESULTS = array( 'proofing' );
+
 	/** @return array<int,string> */
 	public static function names(): array {
 		return array( self::READ, self::UPDATE, self::CREATE, self::INVITATION, self::DELETE );
@@ -20,11 +22,18 @@ final class Proofing {
 
 	/**
 	 * Signature contract for the Pro Proofing executor. Lite checks it without constructing Pro.
+	 * inspect marks a Pro that owns the helpers Lite no longer ships; Pro contributes the whole family or none of it.
 	 *
 	 * @return array<string,array<string,int>>
 	 */
 	public static function executor_methods(): array {
-		return array_fill_keys( self::names(), array( 'run' => 2 ) );
+		return array_fill_keys(
+			self::names(),
+			array(
+				'run'     => 2,
+				'inspect' => 2,
+			)
+		);
 	}
 
 	/**
@@ -46,6 +55,17 @@ final class Proofing {
 			return false;
 		}
 		return Pro_Dependency::methods( $executor_class, $methods[ $name ] );
+	}
+
+	/**
+	 * Whether Pro owns the Proofing helpers Lite stopped shipping in 3.0.14. Email and selection
+	 * executors from older Pro pass their own signature check but call those helpers, so they need this marker.
+	 */
+	public static function package_owns_helpers(): bool {
+		return Pro_Dependency::methods(
+			'\Modula_Pro\Extensions\Image_Proofing\Abilities\Proofing_Executor',
+			array( 'inspect' => 2 )
+		);
 	}
 
 	/** Stored Image Proofing entitlement and enabled state. It does not admit an operation by itself. */
@@ -81,7 +101,8 @@ final class Proofing {
 	}
 	public static function settings_schema(): array {
 		$source = \Modula\V2\Settings\Registry::get_schema();
-		$fields = Contract::settings_schema( $source )['properties']['proofing']['properties'];
+		// Only the proofing group: every outcome schema embeds this one, and the full catalog is 33 groups.
+		$fields = Contract::settings_schema( array( 'proofing' => $source['proofing'] ?? array() ) )['properties']['proofing']['properties'];
 		foreach ( $fields as $key => &$field ) {
 			foreach ( array( 'minimum', 'maximum', 'enum' ) as $constraint ) {
 				if ( isset( $source['proofing'][ $key ][ $constraint ] ) ) {
@@ -168,32 +189,14 @@ final class Proofing {
 					'label'         => ucwords( str_replace( '-', ' ', substr( $name, 7 ) ) ),
 					'description'   => 'Explicit Proofing administration with read-proofing revision and 30-day request recovery. Requires current extension eligibility and gallery rights. Settings use the existing grouped Proofing schema; locked also sets imageProofing to the same value, matching existing administration. Creation requires exactly one existing modula_client user_id (edit_user access) or guest_identifier; does not create accounts or change roles. Existing pair is returned without reactivation. Update only changes expired; deletion removes only the invitation and preserves selections. Never sends email, submits selections, publishes or enables extensions. Stale state rejects the whole request; identical replay never repeats effects. Requires the Image Proofing extension; Lite explains that requirement before writing settings or invitation records.',
 					'input_schema'  => Contract::object( $fields, $required ),
-					'output_schema' => Contract::outcome_schema(),
+					'output_schema' => Contract::outcome( $name, self::RESULTS ),
 				);
 		}
 		return $definitions;
 	}
-	/**
-	 * Retained inspection uses current gallery and client rights. It does not require Pro or another Proofing effect.
-	 *
-	 * @param array<string,mixed> $record Stored request record.
-	 */
 	/** Live gallery administration. Recovery uses can_recover(), which also requires stored client ids. */
 	public static function can_administer( int $id ): bool {
 		return $id > 0 && Update::can_update( $id );
-	}
-
-	/**
-	 * Context an executor records when it admits a request, before its transaction.
-	 * A failure rolls the transaction back, so later context writes are lost; recovery still needs the users.
-	 * An unknown row references no client yet: the executor's locked read rejects it or reports uncertainty,
-	 * and success records the clients it touched.
-	 *
-	 * @param array<string,mixed> $input
-	 * @return array<string,mixed> Proofing administration, selection and email context: proofing_users.
-	 */
-	public static function admission_context( string $name, array $input ): array {
-		return self::rejection_context( $name, $input ) ?? array( 'proofing_users' => array() );
 	}
 
 	/** Capture only resources referenced by a refused operation, without any Proofing effect. */
@@ -217,6 +220,11 @@ final class Proofing {
 		return array( 'proofing_users' => array_values( array_unique( $users ) ) );
 	}
 
+	/**
+	 * Retained inspection uses current gallery and client rights. It does not require Pro or another Proofing effect.
+	 *
+	 * @param array<string,mixed> $record Stored request record.
+	 */
 	public static function can_recover( array $record ): bool {
 		$target = isset( $record['target'] ) ? (int) $record['target'] : 0;
 		if ( ! self::can_administer( $target ) || ! array_key_exists( 'proofing_users', $record ) ) {
@@ -251,26 +259,8 @@ final class Proofing {
 		return $id > 0 && get_userdata( $id ) instanceof \WP_User && current_user_can( 'edit_user', $id );
 	}
 
-	/**
-	 * @return array{0:string,1:string} Status and code for a failed Proofing effect.
-	 */
-	public static function failure_status( \Throwable $error, string $fallback ): array {
-		if ( ! $error instanceof \DomainException ) {
-			return array( 'uncertain', $fallback );
-		}
-		$code = $error->getMessage();
-		if ( 'stale_revision' === $code ) {
-			return array( 'conflict', $code );
-		}
-		return array( 'rejected', $code );
-	}
-
 	public static function target_eligible( int $id ): bool {
 		return Update::can_update( $id ) && Beta_Settings::is_beta_gallery( $id ) && 'trash' !== get_post_status( $id ) && ! self::is_bound( $id );
-	}
-
-	public static function eligible( int $id ): bool {
-		return self::available() && self::target_eligible( $id );
 	}
 
 	public static function is_bound( int $id ): bool {
@@ -383,38 +373,6 @@ final class Proofing {
 				'action'      => 'contact_administrator',
 				'explanation' => __( 'Proofing administration applies to an editable Beta gallery that is not bound to another source.', 'modula-best-grid-gallery' ),
 			),
-		);
-	}
-	/** Raw rows are hashed, but only authorized records are returned. Lock gaps cover ordinary inserts. */
-	public static function inspect( int $id, bool $lock = false ): array {
-		if ( ! self::eligible( $id ) ) {
-			throw new \DomainException( 'unsupported_proofing_target' ); }
-		$revision = Revision::state( $id, $lock );
-		global $wpdb;
-		$table = $wpdb->prefix . 'modula_image_proofing_invitations';
-		if ( $lock ) {
-			Revision::require_transactional_table( $table ); }
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL -- Authoritative locked reads; identifiers and lock suffix are internal, values are prepared.
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id,user_id,expired FROM $table WHERE gallery_id = %d ORDER BY id LIMIT 1001" . ( $lock ? ' FOR UPDATE' : '' ), $id ), ARRAY_A );
-		if ( $wpdb->last_error || count( $rows ) > 1000 ) {
-			throw new \DomainException( 'proofing_records_unavailable' ); }
-		$visible = array();
-		foreach ( $rows as $row ) {
-			if ( ctype_digit( $row['user_id'] ) && ( ! get_userdata( (int) $row['user_id'] ) || ! current_user_can( 'edit_user', (int) $row['user_id'] ) ) ) {
-				continue; }
-			$visible[] = array(
-				'id'      => (int) $row['id'],
-				'client'  => $row['user_id'],
-				'expired' => (bool) $row['expired'],
-			);
-		}
-		$settings = Meta_Sync::get_settings_v2( $id, false );
-		return array(
-			'id'          => $id,
-			'revision'    => hash( 'sha256', wp_json_encode( array( $revision, $rows ) ) ),
-			'settings'    => $settings['proofing'] ?? array(),
-			'locked'      => (bool) get_post_meta( $id, '_modula_locked_for_proofing', true ),
-			'invitations' => $visible,
 		);
 	}
 }

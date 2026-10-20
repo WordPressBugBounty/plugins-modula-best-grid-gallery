@@ -1,0 +1,71 @@
+@use '../styles/mixins';
+
+.modula-admin-checkbox {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 24px;
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-control);
+	cursor: pointer;
+
+	// Disabled by its own prop or by a `<fieldset disabled>` (LockedCard):
+	// the native input is the single source of truth.
+	&:has(.modula-admin-checkbox__input:disabled) {
+		opacity: var(--modula-admin-disabled-opacity);
+		cursor: default;
+	}
+
+	&.is-bordered {
+		height: 40px;
+		padding: 0 14px 0 10px;
+		border: 1px solid var(--modula-admin-border-strong);
+		border-radius: var(--modula-admin-radius-lg);
+		background: var(--modula-admin-surface);
+		white-space: nowrap;
+	}
+
+	&.is-bordered.is-checked {
+		border-color: var(--modula-admin-ink);
+	}
+}
+
+// The native input stays in the accessibility tree and takes focus;
+// the box draws it.
+.modula-admin-checkbox__input {
+	position: absolute;
+	width: 1px;
+	min-width: 0; // wp-admin sets `min-width: 1rem` on checkboxes.
+	height: 1px;
+	margin: 0;
+	opacity: 0;
+
+	// wp-admin's `input[type="checkbox"]:disabled { opacity: 0.7 }` outranks
+	// the rule above and would show the native box under ours.
+	&:disabled {
+		opacity: 0;
+	}
+}
+
+.modula-admin-checkbox__box {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	border: 1.5px solid var(--modula-admin-border-field);
+	border-radius: var(--modula-admin-radius-sm);
+	color: transparent;
+
+	.is-checked & {
+		border-color: var(--modula-admin-ink);
+		background: var(--modula-admin-ink);
+		color: var(--modula-admin-ink-inverse);
+	}
+
+	.modula-admin-checkbox__input:focus-visible + & {
+		@include mixins.focus-ring;
+	}
+}

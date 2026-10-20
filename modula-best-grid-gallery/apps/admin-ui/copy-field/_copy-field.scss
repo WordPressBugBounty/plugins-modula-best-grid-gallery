@@ -1,0 +1,64 @@
+.modula-admin-copy-field {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--modula-admin-row-gap);
+	min-width: 0;
+	max-width: 100%;
+}
+
+.modula-admin-copy-field__value {
+	display: flex;
+	align-items: center;
+	min-width: 0;
+	height: var(--modula-admin-segment-height);
+	padding: 0 10px;
+	overflow: hidden;
+	border-radius: var(--modula-admin-radius-md);
+	background: var(--modula-admin-surface-sunken);
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-help);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+// A code block that wraps, with the button beside its first line.
+.modula-admin-copy-field.is-multiline {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	width: 100%;
+
+	.modula-admin-copy-field__value {
+		display: block;
+		flex-grow: 1;
+		height: auto;
+		margin: 0;
+		padding: 10px 14px;
+		border: 1px solid var(--modula-admin-border);
+		border-radius: var(--modula-admin-radius-lg);
+		font-family: var(--modula-admin-font-mono);
+		font-size: var(--modula-admin-text-mono);
+		line-height: 1.55;
+		white-space: pre-wrap;
+		word-break: break-all;
+
+		code {
+			padding: 0;
+			background: none;
+			font: inherit;
+		}
+	}
+}
+
+// Fixed width so "Copy" and "Copied" do not shift the row.
+.modula-admin-copy-field__button {
+	min-width: 96px;
+
+	&.is-copied .modula-admin-button__icon {
+		color: var(--modula-admin-success);
+	}
+
+	&.is-failed {
+		color: var(--modula-admin-danger);
+	}
+}

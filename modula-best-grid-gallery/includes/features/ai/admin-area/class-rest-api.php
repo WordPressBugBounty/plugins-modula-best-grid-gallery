@@ -100,15 +100,8 @@ class Rest_Api {
 				'permission_callback' => array( $this, '_permissions_check' ),
 			)
 		);
-		register_rest_route(
-			$this->namespace,
-			'/ai-settings',
-			array(
-				'methods'             => 'POST',
-				'callback'            => array( $this, 'update_ai_settings' ),
-				'permission_callback' => array( $this, '_permissions_check' ),
-			)
-		);
+		// The AI key and language are saved by the Modula Settings save route
+		// (modula-best-grid-gallery/v1/general-settings); there is no POST here.
 
 		register_rest_route(
 			$this->namespace,
@@ -116,16 +109,6 @@ class Rest_Api {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'generate_alt_text' ),
-				'permission_callback' => array( $this, '_permissions_check' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
-			'/get-ai-user/',
-			array(
-				'methods'             => 'GET',
-				'callback'            => array( $this, 'get_cloud_user' ),
 				'permission_callback' => array( $this, '_permissions_check' ),
 			)
 		);

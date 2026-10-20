@@ -1,0 +1,313 @@
+@use "../admin-ui/styles";
+@use "../admin-ui/page/stacked";
+@use "../license-card/license-card";
+
+// wp-admin adds a 10px gutter at 782px and below (`.auto-fold #wpcontent`).
+#wpcontent,
+.auto-fold #wpcontent {
+	padding-left: 0;
+}
+
+// The page fills the window under the admin bar, as in the design, which has
+// no WordPress footer. This stylesheet loads only on Modula › Extensions.
+#wpbody-content {
+	padding-bottom: 0;
+}
+
+#wpfooter {
+	display: none;
+}
+
+.modula-extensions-page .modula-admin-page {
+	min-height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
+}
+
+// The extensions table is drawn wider than a settings section.
+.modula-admin-ui.modula-extensions-page {
+	--modula-admin-content-width: 1100px;
+}
+
+.modula-admin-ui {
+
+	// The artboard puts a little more space between the license card and
+	// "All extensions" than between the page's other blocks.
+	.modula-extensions-license + .modula-admin-page__title {
+		margin-top: 10px;
+	}
+
+	// The filter and the table, spaced as the page content's own children.
+	.modula-extensions-list {
+		display: flex;
+		flex-direction: column;
+		gap: var(--modula-admin-content-gap);
+	}
+
+	.modula-extensions-table {
+		width: 100%;
+		border-collapse: separate;
+		border-spacing: 0;
+		table-layout: fixed;
+
+		// Zero specificity, so the column and row rules below set the padding.
+		:where(th, td) {
+			padding: 0;
+			text-align: left;
+			vertical-align: middle;
+		}
+	}
+
+	// Columns: 240px name, the description, an 80px status, 24px apart.
+	.modula-extensions-table__name {
+		width: 284px;
+		padding: 10px 24px 10px var(--modula-admin-row-padding-x);
+	}
+
+	.modula-extensions-table__description {
+		padding: 10px 24px 10px 0;
+	}
+
+	.modula-extensions-table__status {
+		width: 104px;
+		padding-right: 4px;
+		text-align: right;
+
+		.modula-admin-toggle {
+			margin-left: auto;
+		}
+	}
+
+	.modula-extensions-table__head {
+
+		th {
+			height: var(--modula-admin-matrix-head-height);
+			background: var(--modula-admin-surface-segment);
+			color: var(--modula-admin-ink-secondary);
+			font-size: 12px;
+			font-weight: 600;
+			letter-spacing: 0.06em;
+			text-transform: uppercase;
+		}
+
+		.modula-extensions-table__name {
+			border-top-left-radius: var(--modula-admin-radius-md);
+		}
+
+		.modula-extensions-table__status {
+			padding-right: 8px;
+			border-top-right-radius: var(--modula-admin-radius-md);
+		}
+	}
+
+	.modula-extensions-table__group {
+
+		th,
+		td {
+			padding: 24px 8px 10px 0;
+			border-bottom: 2px solid var(--modula-admin-ink);
+		}
+
+		th {
+			padding-left: var(--modula-admin-row-padding-x);
+		}
+	}
+
+	.modula-extensions-table__group-title {
+		color: var(--modula-admin-ink);
+		font-size: 17px;
+		font-weight: 600;
+	}
+
+	.modula-extensions-table__group-count {
+		color: var(--modula-admin-ink-muted);
+		font-size: var(--modula-admin-text-control);
+		font-weight: 400;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.modula-extensions-table__group-action {
+		text-align: right;
+
+		.modula-admin-button {
+			white-space: nowrap;
+		}
+	}
+
+	.modula-extensions-table__row {
+
+		th,
+		td {
+			height: 68px;
+			border-bottom: 1px solid var(--modula-admin-border-divider);
+		}
+
+		.modula-extensions-table__name {
+			color: var(--modula-admin-ink-muted);
+			font-size: var(--modula-admin-text-body);
+			font-weight: 500;
+		}
+
+		&.is-active .modula-extensions-table__name {
+			color: var(--modula-admin-ink);
+		}
+
+		// Name over its Settings link.
+		.modula-extensions-table__name-text {
+			display: block;
+		}
+
+		.modula-extensions-table__description {
+			color: var(--modula-admin-ink-soft);
+			font-size: var(--modula-admin-text-control);
+			line-height: 1.5;
+		}
+	}
+
+	.modula-extensions-table__settings {
+		display: inline-flex;
+		align-items: center;
+		min-height: 24px;
+		margin: 2px -4px -6px;
+		padding: 0 4px;
+		color: var(--modula-admin-ink-secondary);
+		font-size: var(--modula-admin-text-caption);
+		font-weight: 400;
+		text-decoration: none;
+
+		&:hover {
+			color: var(--modula-admin-ink);
+			text-decoration: underline;
+			text-underline-offset: 3px;
+		}
+	}
+
+	// A change is saving: the changed controls show the requested state,
+	// dimmed, and the other controls wait for it.
+	.modula-extensions-table [aria-busy="true"] {
+		opacity: var(--modula-admin-disabled-opacity);
+	}
+
+	.modula-extensions-table [aria-disabled="true"] {
+		cursor: progress;
+	}
+
+	.modula-extensions-table__empty {
+		padding: 32px var(--modula-admin-row-padding-x);
+		color: var(--modula-admin-ink-muted);
+		font-size: var(--modula-admin-text-result);
+	}
+
+	// Loading placeholders, laid out like the filter and the table.
+	.modula-extensions-skeleton {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.modula-extensions-skeleton__head {
+		height: var(--modula-admin-matrix-head-height);
+		margin-top: var(--modula-admin-content-gap);
+		border-radius: var(--modula-admin-radius-md) var(--modula-admin-radius-md) 0 0;
+		background: var(--modula-admin-surface-segment);
+	}
+
+	.modula-extensions-skeleton__group {
+		padding: 24px 0 10px var(--modula-admin-row-padding-x);
+		border-bottom: 2px solid var(--modula-admin-border);
+	}
+
+	.modula-extensions-skeleton__row {
+		display: grid;
+		grid-template-columns: 240px minmax(0, 1fr) 80px;
+		align-items: center;
+		column-gap: 24px;
+		min-height: 68px;
+		padding-left: var(--modula-admin-row-padding-x);
+		border-bottom: 1px solid var(--modula-admin-border-divider);
+
+		> :last-child {
+			justify-self: end;
+			margin-right: 8px;
+		}
+	}
+
+	// Narrow screens: no column header; each extension shows its name and
+	// switch on one line and the description under them.
+	@media (max-width: stacked.$breakpoint) {
+
+		.modula-extensions-table {
+
+			&,
+			tbody,
+			th,
+			td {
+				display: block;
+				width: auto;
+				height: auto;
+			}
+
+			// Zero specificity, so the row and group rules below lay them out.
+			:where(tr) {
+				display: block;
+			}
+		}
+
+		.modula-extensions-table__head {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			overflow: hidden;
+			clip: rect(0 0 0 0);
+		}
+
+		.modula-extensions-table__group {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 8px;
+			padding: 24px 0 10px;
+			border-bottom: 2px solid var(--modula-admin-ink);
+
+			th,
+			td {
+				padding: 0;
+				border-bottom: 0;
+			}
+
+			.modula-extensions-table__group-action {
+				margin-left: auto;
+			}
+		}
+
+		.modula-extensions-table__row {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto;
+			column-gap: 16px;
+			padding: 10px 0;
+			border-bottom: 1px solid var(--modula-admin-border-divider);
+
+			th,
+			td {
+				padding: 0;
+				border-bottom: 0;
+			}
+
+			.modula-extensions-table__status {
+				grid-row: 1 / span 2;
+				grid-column: 2;
+				align-self: center;
+			}
+		}
+
+		.modula-extensions-skeleton__row {
+			grid-template-columns: minmax(0, 1fr) 40px;
+
+			> :nth-child(2) {
+				grid-row: 2;
+			}
+
+			> :last-child {
+				grid-row: 1 / span 2;
+				grid-column: 2;
+			}
+		}
+	}
+}

@@ -1,0 +1,28 @@
+// Fixed to the viewport, above wp-admin content but below its admin bar.
+.modula-admin-toast-region {
+	position: fixed;
+	z-index: 9999;
+	bottom: 32px;
+	left: 50%;
+	max-width: calc(100vw - 32px);
+	transform: translateX(-50%);
+}
+
+.modula-admin-toast {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-height: var(--modula-admin-toast-height);
+	padding: 0 18px;
+	border-radius: var(--modula-admin-radius-lg);
+	background: var(--modula-admin-surface-toast);
+	box-shadow: var(--modula-admin-shadow-toast);
+	color: var(--modula-admin-ink-inverse);
+	font-size: var(--modula-admin-text-control);
+
+	// Not in the design: failures use the danger color so they read apart
+	// from confirmations.
+	&.is-error {
+		background: var(--modula-admin-danger);
+	}
+}

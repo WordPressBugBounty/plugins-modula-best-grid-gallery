@@ -1,0 +1,138 @@
+@use '../styles/mixins';
+
+.modula-admin-nav {
+	display: flex;
+	flex-shrink: 0;
+	flex-direction: column;
+	width: var(--modula-admin-nav-width);
+	padding: 16px 0 0;
+	border-right: 1px solid var(--modula-admin-border);
+	background: var(--modula-admin-surface-sunken);
+}
+
+.modula-admin-nav__search {
+	padding: 0 16px 14px;
+}
+
+// Outranks wp-admin's `h2` rules.
+.modula-admin-nav__heading {
+	display: flex;
+	align-items: center;
+	height: var(--modula-admin-nav-item-height);
+	margin: 0 20px 6px;
+	padding: 0;
+	border-bottom: 1px solid var(--modula-admin-border-strong);
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-body);
+	font-weight: 700;
+	line-height: 1.3;
+
+	// A later group keeps a gap from the items above it.
+	* + & {
+		margin-top: 10px;
+	}
+}
+
+.modula-admin-nav__item {
+	@include mixins.list-button;
+	display: flex;
+	align-items: center;
+	height: var(--modula-admin-nav-item-height);
+	color: var(--modula-admin-ink-secondary);
+	font-size: var(--modula-admin-text-body);
+
+	&.is-current {
+		box-shadow: inset 4px 0 0 var(--modula-admin-ink);
+		color: var(--modula-admin-ink);
+		font-weight: 600;
+
+		&:hover {
+			background: none;
+		}
+	}
+}
+
+.modula-admin-search {
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+
+.modula-admin-search__icon {
+	position: absolute;
+	left: 14px;
+	display: flex;
+	color: var(--modula-admin-ink-soft);
+	pointer-events: none;
+}
+
+// Outranks wp-admin's `input[type="search"]` and its `:focus` rule.
+.modula-admin-search__input {
+	box-sizing: border-box;
+	width: 100%;
+	height: var(--modula-admin-search-height);
+	margin: 0;
+	padding: 0 12px 0 38px;
+	border: 1px solid transparent;
+	border-radius: var(--modula-admin-radius-lg);
+	background: var(--modula-admin-surface-hover);
+	box-shadow: none;
+	color: var(--modula-admin-ink);
+	font: inherit;
+	font-size: var(--modula-admin-text-body);
+
+	&::placeholder {
+		color: var(--modula-admin-ink-muted);
+	}
+
+	&:hover {
+		background: var(--modula-admin-surface-hover-strong);
+	}
+
+	&:focus {
+		border-color: transparent;
+		outline: none;
+		background: var(--modula-admin-surface);
+		box-shadow: none;
+	}
+
+	&:focus-visible {
+		@include mixins.field-focus;
+	}
+}
+
+.modula-admin-search-results__empty {
+	margin: 0;
+	padding: 10px 20px;
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-control);
+}
+
+.modula-admin-search-results {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	li {
+		margin: 0;
+	}
+}
+
+.modula-admin-search-results__item {
+	@include mixins.list-button;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding-top: 9px;
+	padding-bottom: 9px;
+}
+
+.modula-admin-search-results__label {
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-result);
+}
+
+.modula-admin-search-results__path {
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-caption);
+}

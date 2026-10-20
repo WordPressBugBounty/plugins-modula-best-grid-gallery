@@ -4,10 +4,8 @@ namespace Modula\V2\Abilities;
 
 defined( 'ABSPATH' ) || exit;
 final class Intake_Files {
-	public const MAX_BYTES    = 8388608;
-	public const MAX_EXPANDED = 33554432;
-	public const MAX_ENTRIES  = 100;
-	private $temporary        = array();
+	public const MAX_BYTES = 8388608;
+	private $temporary     = array();
 	public function __construct() {
 		register_shutdown_function( array( $this, 'cleanup' ) );
 	}
@@ -59,17 +57,6 @@ final class Intake_Files {
 			'size'     => strlen( $bytes ),
 			'error'    => 0,
 		);
-	}
-	/** Copy bounded server bytes into owned staging; never move the original source. */
-	public function prepare_server( string $path, string $name ): array {
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-		require_once ABSPATH . 'wp-admin/includes/media.php';
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Bounded local source, never a remote URL.
-		$bytes = file_get_contents( $path, false, null, 0, self::MAX_BYTES + 1 );
-		if ( false === $bytes ) {
-			throw new \InvalidArgumentException( 'source_unreadable' ); }
-		return $this->image( $bytes, $name );
 	}
 	public function decode( array $input ): array {
 		require_once ABSPATH . 'wp-admin/includes/file.php';

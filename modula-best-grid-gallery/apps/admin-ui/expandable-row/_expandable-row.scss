@@ -1,0 +1,22 @@
+.modula-admin-expandable__text {
+	display: flex;
+	flex: 1 1 200px;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.modula-admin-expandable__label {
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-body);
+	line-height: 1.4;
+}
+
+.modula-admin-expandable__chevron {
+	display: flex;
+	transition: transform var(--modula-admin-transition);
+
+	// Only this row's chevron, not those of rows nested in its panel.
+	.is-open > .modula-admin-row__main & {
+		transform: rotate(180deg);
+	}
+}

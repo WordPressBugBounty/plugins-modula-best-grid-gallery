@@ -7,6 +7,48 @@ final class Site_Settings {
 	public const READ      = 'modula/read-site-settings';
 	public const UPDATE    = 'modula/update-site-settings';
 	public const EXTENSION = 'modula/set-extension';
+
+	/** Modula-owned capability to read and change Modula → Settings. */
+	public const MANAGE_CAPABILITY = 'modula_manage_settings';
+
+	/** Modula-owned capability to turn the Modula extensions of the license package on or off. */
+	public const EXTENSION_CAPABILITY = 'modula_toggle_extensions';
+
+	/**
+	 * The WordPress capabilities a person needs for each Modula capability. The Modula agent
+	 * never holds them; Agent_Access grants it the Modula capabilities themselves, only while a
+	 * Modula tool runs (ADR 0045).
+	 */
+	private const CAPABILITY_MAP = array(
+		self::MANAGE_CAPABILITY    => array( 'manage_options' ),
+		self::EXTENSION_CAPABILITY => array( 'manage_options', 'activate_plugins' ),
+	);
+
+	/**
+	 * The Modula-owned capabilities, which Agent_Access grants the agent during a Modula tool call.
+	 *
+	 * @return string[]
+	 */
+	public static function capabilities(): array {
+		return array_keys( self::CAPABILITY_MAP );
+	}
+
+	/**
+	 * Maps a Modula capability to what its holder needs: WordPress capabilities for people, the
+	 * Modula capability itself for the agent.
+	 *
+	 * @param string[] $caps    Primitive capabilities the capability maps to so far.
+	 * @param string   $cap     Capability being checked.
+	 * @param int      $user_id User being checked.
+	 * @return string[]
+	 */
+	public static function map_capability( $caps, $cap, $user_id ) {
+		if ( ! isset( self::CAPABILITY_MAP[ $cap ] ) ) {
+			return $caps;
+		}
+		return Agent::is_agent( (int) $user_id ) ? array( $cap ) : self::CAPABILITY_MAP[ $cap ];
+	}
+
 	public static function mutations(): array {
 		return array( self::UPDATE, self::EXTENSION );
 	}
@@ -27,7 +69,8 @@ final class Site_Settings {
 			array(
 				self::EXTENSION => array(
 					'permission'     => array( self::class, 'can_manage' ),
-					'available'      => array( self::class, 'extension_executable' ),
+					// Pro contributes the toggle only when its service supports it, so discovery needs just the capability.
+					'available'      => array( self::class, 'can_activate' ),
 					'requires_pro'   => true,
 					'executor_ready' => array( self::class, 'executor_ready' ),
 				),
@@ -38,12 +81,12 @@ final class Site_Settings {
 		return function_exists( 'modula_is_compatible_pro' ) && modula_is_compatible_pro();
 	}
 	public static function can_manage(): bool {
-		return get_current_user_id() && current_user_can( 'manage_options' );
+		return get_current_user_id() && current_user_can( self::MANAGE_CAPABILITY );
 	}
 
-	/** WordPress caps for an extension toggle. Commercial readiness is not a permission. */
+	/** Capability for an extension toggle; for people it includes manage_options. Commercial readiness is not a permission. */
 	public static function can_activate(): bool {
-		return self::can_manage() && current_user_can( 'activate_plugins' );
+		return get_current_user_id() && current_user_can( self::EXTENSION_CAPABILITY );
 	}
 
 	/** Recovery reads a retained toggle. It does not require Pro and does not run hooks again. */
@@ -51,20 +94,6 @@ final class Site_Settings {
 		return self::can_activate();
 	}
 
-	/** Discovery executable state. Permission stays manage_options so a locked call can explain itself. */
-	public static function extension_executable(): bool {
-		return self::can_activate() && Pro_Dependency::can_toggle() && Pro_Dependency::host_executor_ready( self::EXTENSION );
-	}
-
-	/** @return array<int,string> */
-	public static function names(): array {
-		return array( self::READ, self::UPDATE, self::EXTENSION );
-	}
-
-	/** @return array<int,string> */
-	public static function owned_names(): array {
-		return array_merge( self::names(), Diagnostics::names() );
-	}
 
 	/**
 	 * Signature of the Pro extension toggle. Lite checks it without constructing Pro.
@@ -84,6 +113,7 @@ final class Site_Settings {
 	}
 
 	public static function boot(): void {
+		add_filter( 'map_meta_cap', array( self::class, 'map_capability' ), 10, 3 );
 		$operations = array(
 			self::READ   => array( 'execute' => array( self::class, 'read' ) ),
 			self::UPDATE => array( 'execute' => array( self::class, 'update' ) ),
@@ -245,19 +275,20 @@ final class Site_Settings {
 		return array(
 			self::READ      => array(
 				'label'         => 'Read Modula Settings',
-				'description'   => 'manage_options required. Read supported non-secret settings and stored license/extension status without provider refresh, repairs or side effects. Credentials, roles, AI/provider and Diagnostics controls remain outside this contract.',
+				'description'   => 'Requires the Modula settings capability (manage_options for people). Read supported non-secret settings and stored license/extension status without provider refresh, repairs or side effects. Credentials, roles, AI/provider and Diagnostics controls remain outside this contract.',
 				'input_schema'  => Contract::object( array() ) + array( 'default' => array() ),
 				'output_schema' => $output,
 			),
 			self::UPDATE    => array(
 				'label'         => 'Update Modula Settings',
-				'description'   => 'Patch only allowlisted non-secret fields against the site revision; preserve omitted configuration. Requires manage_options. Free fields stay in Lite. Premium extension groups are written by Pro when that extension service is ready; a locked group rejects the whole patch with a feature explanation and writes nothing. Standalone changes schedule the existing rewrite refresh. Watermark configuration does not watermark files. 30-day recovery, no license/provider refresh.',
+				'description'   => 'Patch only allowlisted non-secret fields against the site revision; preserve omitted configuration. Requires the Modula settings capability (manage_options for people). Free fields stay in Lite. Premium extension groups are written by Pro when that extension service is ready; a locked group rejects the whole patch with a feature explanation and writes nothing. Standalone changes schedule the existing rewrite refresh. Watermark configuration does not watermark files. 30-day recovery, no license/provider refresh.',
 				'input_schema'  => Contract::object( $base + array( 'settings' => self::schema() + array( 'minProperties' => 1 ) ), array( 'request_id', 'revision', 'settings' ) ),
-				'output_schema' => Contract::outcome_schema(),
+				// Site writes report only the envelope: the new revision, or the blockers.
+				'output_schema' => Contract::outcome( self::UPDATE, array() ),
 			),
 			self::EXTENSION => array(
 				'label'         => 'Set Modula extension state',
-				'description'   => 'Explicit desired enabled state. manage_options and activate_plugins are required and are not replaced by an upgrade. Pro performs the toggle when the extension service contract is ready; Lite explains a missing package, entitlement or service before any hook. Activation requires stored entitlement. No implicit license refresh. Revision and 30-day recovery prevent repeat hooks. Recovery after Pro removal rechecks these capabilities and does not toggle again.',
+				'description'   => 'Explicit desired enabled state. Requires the Modula extension capability (manage_options and activate_plugins for people), which an upgrade does not replace. Pro performs the toggle when the extension service contract is ready; Lite explains a missing package, entitlement or service before any hook. Activation requires stored entitlement. No implicit license refresh. Revision and 30-day recovery prevent repeat hooks. Recovery after Pro removal rechecks these capabilities and does not toggle again.',
 				'input_schema'  => Contract::object(
 					$base + array(
 						'extension' => array(
@@ -269,7 +300,7 @@ final class Site_Settings {
 					),
 					array( 'request_id', 'revision', 'extension', 'enabled' )
 				),
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( self::EXTENSION, array() ),
 			),
 		);
 	}
@@ -397,17 +428,15 @@ final class Site_Settings {
 		if ( ! self::can_manage() ) {
 			return array( self::permission_blocker( 'manage_options' ) );
 		}
-		if ( ! current_user_can( 'activate_plugins' ) ) {
+		if ( ! self::can_activate() ) {
 			return array( self::permission_blocker( 'activate_plugins' ) );
 		}
+		// A Pro without the toggle service contributes no executor, so Availability reports needs_service_update.
 		$blockers = Availability::blockers( self::EXTENSION );
-		if ( Pro_Dependency::available() && ! Pro_Dependency::can_toggle() ) {
-			$blockers[] = self::service_blocker();
-		}
-		$slug    = is_string( $input['extension'] ?? null ) ? $input['extension'] : '';
-		$enable  = $input['enabled'] ?? null;
-		$status  = '' !== $slug ? ( Pro_Dependency::extensions()[ $slug ] ?? null ) : null;
-		$missing = true === $enable && is_array( $status ) && true !== ( $status['available'] ?? null );
+		$slug     = is_string( $input['extension'] ?? null ) ? $input['extension'] : '';
+		$enable   = $input['enabled'] ?? null;
+		$status   = '' !== $slug ? ( Pro_Dependency::extensions()[ $slug ] ?? null ) : null;
+		$missing  = true === $enable && is_array( $status ) && true !== ( $status['available'] ?? null );
 		if ( $missing ) {
 			$blockers = array_merge(
 				$blockers,

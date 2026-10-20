@@ -43,11 +43,29 @@ class Gallery_Listing_Admin {
 			'edit.php?post_type=modula-gallery',
 			__( 'Galleries', 'modula-best-grid-gallery' ),
 			__( 'Galleries', 'modula-best-grid-gallery' ),
-			'edit_posts',
+			self::listing_capability(),
 			Listing_Controller::PAGE_SLUG,
 			array( __CLASS__, 'render_page' ),
 			1
 		);
+	}
+
+	/**
+	 * Capability that opens the listing for the current user.
+	 *
+	 * add_submenu_page() takes one capability, so this is the edit cap of the
+	 * first type the user can list. When they can list none, the gallery edit
+	 * cap keeps the page closed. Album-only roles cannot open the gallery CPT
+	 * parent, so WordPress links the Modula menu to its first open submenu,
+	 * this listing (see reorder_modula_submenu()).
+	 *
+	 * @return string
+	 */
+	private static function listing_capability() {
+		$post_types = Listing_Controller::listable_post_types();
+		$post_type  = $post_types ? $post_types[0] : 'modula-gallery';
+		$object     = get_post_type_object( $post_type );
+		return $object ? $object->cap->edit_posts : 'edit_posts';
 	}
 
 	/**
@@ -181,10 +199,8 @@ class Gallery_Listing_Admin {
 			return;
 		}
 		$post_type = isset( $_GET['post_type'] ) ? sanitize_key( wp_unslash( $_GET['post_type'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! in_array( $post_type, array( 'modula-gallery', 'modula-album' ), true ) ) {
-			return;
-		}
-		if ( ! current_user_can( 'edit_posts' ) ) {
+		// Only users who can edit the requested type; edit.php denies the rest itself.
+		if ( ! in_array( $post_type, Listing_Controller::listable_post_types(), true ) ) {
 			return;
 		}
 		wp_safe_redirect( Listing_Controller::admin_url() );
@@ -223,7 +239,7 @@ class Gallery_Listing_Admin {
 	 * @return void
 	 */
 	public static function render_page() {
-		if ( ! current_user_can( 'edit_posts' ) ) {
+		if ( ! Listing_Controller::listable_post_types() ) {
 			wp_die( esc_html__( 'You are not allowed to list galleries.', 'modula-best-grid-gallery' ) );
 		}
 		echo '<div class="wrap modula-gallery-listing-wrap">';
@@ -251,6 +267,16 @@ class Gallery_Listing_Admin {
 			array( 'wp-components' )
 		);
 
+		/**
+		 * Filters the gallery listing bootstrap.
+		 *
+		 * New from preset keys, filled by Pro Defaults (Lite only reads them):
+		 * - `galleryPresets`: list of `{ id: int, title: string, summary?: string }`.
+		 *   Empty keeps the plain New gallery editor choice (no arrows, no footer line).
+		 * - `defaultGalleryPresetId`: usable Default preset ID, 0 for none.
+		 *
+		 * @param array<string, mixed> $config Listing bootstrap.
+		 */
 		wp_localize_script(
 			'modula-gallery-listing',
 			'modulaGalleryListing',
@@ -263,6 +289,10 @@ class Gallery_Listing_Admin {
 					'newGalleryUrl'         => admin_url( 'post-new.php?post_type=modula-gallery' ),
 					'postNewUrl'            => admin_url( 'post-new.php?post_type=modula-gallery' ),
 					'editorChoiceQueryArg'  => Beta_Gallery_Admin::QUERY_ARG,
+					'presetQueryArg'        => Beta_Gallery_Admin::PRESET_QUERY_ARG,
+					'galleryPresets'        => array(),
+					'defaultGalleryPresetId' => 0,
+					'settingsUrl'           => admin_url( 'edit.php?post_type=modula-gallery&page=modula&section=galleries' ),
 					'createGalleryNonce'    => wp_create_nonce( 'modula-gallery-create-choice' ),
 					'createAlbumNonce'      => wp_create_nonce( 'modula-album-create-choice' ),
 					'editorChoiceHeroUrl'   => MODULA_URL . 'assets/images/admin/beta-editor-choice-hero.png',

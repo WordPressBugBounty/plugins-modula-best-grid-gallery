@@ -1,0 +1,110 @@
+@use 'stacked';
+
+.modula-admin-page {
+	// Where the header sticks: under the WordPress admin bar, which stops
+	// being fixed at 600px and below. The value feeds calc(), where a
+	// unitless 0 is invalid, hence `0px`.
+	// stylelint-disable-next-line length-zero-no-unit
+	--modula-admin-sticky-top: var(--wp-admin--admin-bar--height, 0px);
+
+	display: flex;
+	flex-direction: column;
+	background: var(--modula-admin-surface);
+
+	@media (max-width: stacked.$breakpoint) {
+		@include stacked.layout;
+	}
+
+	@media (max-width: 600px) {
+		// stylelint-disable-next-line length-zero-no-unit -- used in calc().
+		--modula-admin-sticky-top: 0px;
+	}
+}
+
+// Sticky, so Save and the save state stay in view on long sections. Below
+// the WordPress admin menu, whose flyouts open over it.
+.modula-admin-page-header {
+	position: sticky;
+	top: var(--modula-admin-sticky-top);
+	z-index: 10;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	height: var(--modula-admin-header-height);
+	padding: 0 var(--modula-admin-page-gutter);
+	border-bottom: 1px solid var(--modula-admin-border);
+	background: var(--modula-admin-surface);
+}
+
+// Outranks wp-admin's `.wrap h1`.
+.modula-admin-page-header__title {
+	margin: 0;
+	padding: 0;
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-page-title);
+	font-weight: 400;
+	line-height: 1.3;
+}
+
+.modula-admin-page-header__actions {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	margin-left: auto;
+}
+
+.modula-admin-page-header__state {
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-help);
+	white-space: nowrap;
+
+	&.is-dirty {
+		color: var(--modula-admin-ink);
+	}
+}
+
+// Nothing to save: the button keeps its look but does nothing (design).
+.modula-admin-page-header__save[aria-disabled="true"] {
+	cursor: default;
+}
+
+.modula-admin-page__body {
+	display: flex;
+	flex-grow: 1;
+	min-height: 0;
+
+	// The nav column stays under the header as the content scrolls. It is
+	// as tall as the window below the header, so its background still fills
+	// the column, and scrolls on its own if it is taller.
+	> .modula-admin-nav {
+		--modula-admin-nav-top: calc(var(--modula-admin-sticky-top) + var(--modula-admin-header-height));
+
+		position: sticky;
+		top: var(--modula-admin-nav-top);
+		align-self: flex-start;
+		height: calc(100vh - var(--modula-admin-nav-top));
+		overflow-y: auto;
+	}
+}
+
+.modula-admin-page__content {
+	flex-grow: 1;
+	min-width: 0;
+	padding: 28px var(--modula-admin-page-gutter) 60px;
+}
+
+.modula-admin-page__inner {
+	display: flex;
+	flex-direction: column;
+	gap: var(--modula-admin-content-gap);
+	max-width: var(--modula-admin-content-width);
+}
+
+.modula-admin-page__title {
+	margin: 0;
+	padding: 0;
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-title);
+	font-weight: 400;
+	line-height: 1.3;
+}

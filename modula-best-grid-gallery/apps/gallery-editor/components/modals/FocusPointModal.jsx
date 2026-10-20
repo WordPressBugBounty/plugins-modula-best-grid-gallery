@@ -20,8 +20,11 @@ import { crop as cropIcon } from '@wordpress/icons';
 import Cropper from 'react-easy-crop';
 import { useSelector, useStore } from 'react-redux';
 import { Button as SharedButton } from 'shared-ui';
-import { SettingsPanelHeader, useTakeoverSaveStatus } from 'editor-shell';
-import GalleryModal from '../gallery-modal/GalleryModal';
+import {
+	GalleryModal,
+	SettingsPanelHeader,
+	useTakeoverSaveStatus,
+} from 'editor-shell';
 import { useFocusPointMutations } from '../../hooks/useFocusPointMutations';
 import { FOCUS_MATCH_LAYOUT_SESSION_KEY } from '../../utils/getFocusModalCropHints';
 import { getCustomGridItemFocusAspect } from '../../utils/getCustomGridItemFocusAspect';

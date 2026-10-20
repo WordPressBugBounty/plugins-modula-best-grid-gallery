@@ -1,12 +1,6 @@
-export const getInitialTab = () => {
-	const url = new URL(window.location);
-	return url.searchParams.get('tab') || 'display';
-};
-
 export const initialState = {
-	api_key: '',
-	isAdvancedRegistration: false,
-	isLoggedIn: false,
-	activeTab: getInitialTab(),
+	// Pending edits by option (see reducer).
 	options: {},
+	// Values of cards that do not save, by option or field name.
+	drafts: {},
 };

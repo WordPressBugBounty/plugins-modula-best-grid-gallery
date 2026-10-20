@@ -1,0 +1,83 @@
+@use '../styles/mixins';
+
+.modula-admin-matrix {
+	overflow: hidden;
+	border: 1px solid var(--modula-admin-border);
+	border-radius: var(--modula-admin-radius-lg);
+	background: var(--modula-admin-surface);
+}
+
+.modula-admin-matrix__scroll {
+	overflow-x: auto;
+}
+
+// At least the card's width; wider when the columns do not fit, so the
+// scroll container scrolls instead of squeezing the cells.
+.modula-admin-matrix__table {
+	width: max-content;
+	min-width: 100%;
+}
+
+.modula-admin-matrix__row {
+	display: grid;
+	grid-template-columns:
+		minmax(0, 1fr)
+		repeat(var(--modula-admin-matrix-columns), var(--modula-admin-matrix-column-width));
+	align-items: center;
+	min-height: var(--modula-admin-matrix-row-height);
+	padding: 0 12px 0 20px;
+	border-bottom: 1px solid var(--modula-admin-border-divider);
+
+	&.is-head {
+		min-height: var(--modula-admin-matrix-head-height);
+		border-bottom-color: var(--modula-admin-border);
+		background: var(--modula-admin-surface-sunken);
+		color: var(--modula-admin-ink-secondary);
+		font-size: var(--modula-admin-text-caption);
+		font-weight: 600;
+	}
+
+	// Without a footer the card border closes the last row.
+	.modula-admin-matrix__table > &:last-child {
+		border-bottom: 0;
+	}
+}
+
+.modula-admin-matrix__column {
+	text-align: center;
+}
+
+.modula-admin-matrix__row-label {
+	padding-right: 16px;
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-body);
+	white-space: nowrap;
+}
+
+.modula-admin-matrix__cell {
+	display: flex;
+	justify-content: center;
+
+	// A 36px hit target around the 20px box, as in the design.
+	.modula-admin-checkbox {
+		justify-content: center;
+		width: var(--modula-admin-matrix-cell-target);
+		height: var(--modula-admin-matrix-cell-target);
+		border-radius: var(--modula-admin-radius-md);
+	}
+}
+
+.modula-admin-matrix__na {
+	color: var(--modula-admin-ink-muted);
+}
+
+.modula-admin-matrix__more {
+	@include mixins.list-button;
+	display: flex;
+	align-items: center;
+	height: var(--modula-admin-matrix-head-height);
+	border-top: 1px solid var(--modula-admin-border-divider);
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-control);
+	font-weight: 500;
+}

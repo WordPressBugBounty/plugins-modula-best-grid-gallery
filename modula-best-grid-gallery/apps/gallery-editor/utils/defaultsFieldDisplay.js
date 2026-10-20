@@ -108,16 +108,42 @@ function labelFromOptionMap(field, value) {
 }
 
 /**
+ * @param {object|undefined} field
+ * @param {unknown}          value
+ * @return {unknown} The value as the field's control shows it.
+ */
+function toControlValue(field, value) {
+	if (typeof value === 'boolean' && field?.control?.invertBoolean === true) {
+		return !value;
+	}
+	return value;
+}
+
+/**
+ * A stored value as its control shows it: an inverted toggle ("Show …" over a
+ * stored hide flag) reads true when the flag is false.
+ *
  * @param {string}  groupId
  * @param {string}  key
  * @param {unknown} value
- * @return {string}
+ * @return {unknown} The value as the control shows it.
+ */
+export function getDefaultsFieldControlValue(groupId, key, value) {
+	const field = getEnrichedFieldByGroupedPath(`${groupId}.${key}`)?.field;
+	return toControlValue(field, value);
+}
+
+/**
+ * @param {string}  groupId
+ * @param {string}  key
+ * @param {unknown} value
+ * @return {string} Display text for the value, as its control shows it.
  */
 export function formatDefaultsFieldValue(groupId, key, value) {
-	const hit = getEnrichedFieldByGroupedPath(`${groupId}.${key}`);
-	const labeled = labelFromOptionMap(hit?.field, value);
+	const field = getEnrichedFieldByGroupedPath(`${groupId}.${key}`)?.field;
+	const labeled = labelFromOptionMap(field, value);
 	if (labeled) {
 		return labeled;
 	}
-	return stringifyFallback(value);
+	return stringifyFallback(toControlValue(field, value));
 }

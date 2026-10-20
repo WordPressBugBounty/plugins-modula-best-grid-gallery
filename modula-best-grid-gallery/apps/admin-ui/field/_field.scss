@@ -1,0 +1,69 @@
+@use '../styles/mixins';
+
+.modula-admin-field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	width: var(--modula-admin-field-width);
+	max-width: 100%;
+
+	&.is-full {
+		width: 100%;
+	}
+}
+
+.modula-admin-field__error {
+	margin: 0;
+	color: var(--modula-admin-danger);
+	font-size: var(--modula-admin-text-help);
+	line-height: 1.45;
+}
+
+.modula-admin-text-input {
+	@include mixins.field;
+	width: 100%;
+	height: var(--modula-admin-control-height);
+}
+
+.modula-admin-textarea {
+	@include mixins.field;
+	width: 100%;
+	min-height: 104px;
+	padding: 10px 12px;
+	resize: vertical;
+}
+
+// The design's chevron. wp-admin's `.wp-core-ui select` and
+// `select:disabled` both set their own arrow, so it is restated wherever
+// wp-admin would override it. A mixin, not a placeholder: it must follow
+// the field's `background` shorthand in the same rule, which an extended
+// placeholder (emitted earlier) loses to.
+@mixin select-chevron {
+	background-image:
+		linear-gradient(45deg, transparent 50%, var(--modula-admin-ink-soft) 50%),
+		linear-gradient(135deg, var(--modula-admin-ink-soft) 50%, transparent 50%);
+	background-position:
+		calc(100% - 19px) 55%,
+		calc(100% - 14px) 55%;
+	background-size: 5px 5px, 5px 5px;
+	background-repeat: no-repeat;
+}
+
+.modula-admin-select {
+	@include mixins.field;
+	@include select-chevron;
+	width: 100%;
+	max-width: none;
+	height: var(--modula-admin-control-height);
+	padding-right: 34px;
+	appearance: none;
+
+	// wp-admin colors selects blue on hover; keep the ink color.
+	&:hover {
+		color: var(--modula-admin-ink);
+	}
+
+	&:disabled {
+		@include select-chevron;
+	}
+}

@@ -1,0 +1,35 @@
+.modula-admin-image-picker {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+}
+
+// A fixed square, so choosing or removing an image does not move the row.
+.modula-admin-image-picker__frame {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 56px;
+	height: 56px;
+	overflow: hidden;
+	border: 1px solid var(--modula-admin-border);
+	border-radius: var(--modula-admin-radius-md);
+	background: var(--modula-admin-surface-sunken);
+	color: var(--modula-admin-ink-muted);
+
+	img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+
+	// Dimmed like the buttons: disabled itself, or inside a LockedCard.
+	.is-disabled > &,
+	fieldset:disabled & {
+		opacity: var(--modula-admin-disabled-opacity);
+	}
+}

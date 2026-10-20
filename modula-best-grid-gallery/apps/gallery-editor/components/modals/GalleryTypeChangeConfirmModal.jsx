@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from 'shared-ui';
-import GalleryModal from '../gallery-modal/GalleryModal';
+import { GalleryModal } from 'editor-shell';
 
 /**
  * @param {Object}     props

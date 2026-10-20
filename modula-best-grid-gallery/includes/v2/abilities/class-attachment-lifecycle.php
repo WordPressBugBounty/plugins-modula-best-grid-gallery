@@ -13,6 +13,8 @@ defined( 'ABSPATH' ) || exit;
 final class Attachment_Lifecycle {
 	public const TRASH  = 'modula/trash-attachment';
 	public const DELETE = 'modula/delete-attachment';
+	/** Outcome results these operations set, here and as media batch targets. */
+	public const RESULTS = array( 'attachment', 'deleted_id' );
 	public static function operations(): array {
 		return array( self::TRASH, 'modula/restore-attachment', self::DELETE ); }
 	public static function available( string $operation ): bool {
@@ -58,7 +60,7 @@ final class Attachment_Lifecycle {
 					),
 					array( 'request_id', 'id', 'revision' )
 				),
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( $name, self::RESULTS ),
 			);
 		}
 		return $out;

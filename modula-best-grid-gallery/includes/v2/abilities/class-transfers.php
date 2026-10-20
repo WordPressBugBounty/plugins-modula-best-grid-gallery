@@ -11,6 +11,9 @@ final class Transfers {
 	public const START   = 'modula/start-folder-transfer';
 	public const READ    = 'modula/read-folder-transfer';
 	public const CANCEL  = 'modula/cancel-folder-transfer';
+
+	/** Outcome results the Pro executor sets. */
+	private const RESULTS = array( 'transfer' );
 	/** @return array<int,string> */
 	public static function names(): array {
 		return array( self::START, self::LIBRARY, self::READ, self::CANCEL ); }
@@ -28,6 +31,8 @@ final class Transfers {
 			array(
 				'run'        => 2,
 				'operations' => 0,
+				// The executor owns its execution check; an older one calls the Lite check that no longer exists.
+				'available'  => 0,
 			)
 		);
 	}
@@ -59,12 +64,12 @@ final class Transfers {
 			self::callbacks(),
 			array(
 				'permission'     => array( self::class, 'can_invoke' ),
-				'available'      => array( self::class, 'available' ),
+				// Transfer state readiness is explained by blockers(); storage services and media administration gate discovery.
+				'available'      => array( Storage::class, 'available' ),
 				'requires_pro'   => true,
 				'blockers'       => array( self::class, 'blockers' ),
 				'executor_ready' => array( self::class, 'executor_ready' ),
 				'dependency'     => 'folders',
-				'mcp_public'     => array( Folders_Dependency::class, 'mcp_transfers' ),
 			),
 			array(
 				self::START   => array( 'destructive' => true ),
@@ -75,8 +80,6 @@ final class Transfers {
 	}
 	public static function inspect_ready(): bool {
 		return Folders_Dependency::available( 'usage' ) && method_exists( Folder_Transfer_State::class, 'retained' ); }
-	public static function available(): bool {
-		return Storage::available() && self::inspect_ready(); }
 	public static function result_schema(): array {
 		$props = array();
 		foreach ( array( 'id', 'type', 'connection_id', 'status', 'code' ) as $key ) {
@@ -155,7 +158,7 @@ final class Transfers {
 						),
 						array( 'schema_version', 'transfer' )
 					)
-				) : Contract::outcome_schema(),
+				) : Contract::outcome( $name, self::RESULTS ),
 			);
 		}
 		return $defs;

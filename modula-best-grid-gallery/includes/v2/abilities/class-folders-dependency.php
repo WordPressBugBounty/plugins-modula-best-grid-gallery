@@ -28,23 +28,10 @@ final class Folders_Dependency {
 		return self::available( 'usage' );
 	}
 
-	public static function mcp_transfers(): bool {
-		return true;
-	}
-
 	public static function mcp_collections( string $name ): bool {
 		if ( false !== strpos( $name, 'favorite' ) ) {
 			return self::available( 'collections' );
 		}
-		return true;
-	}
-
-	public static function mcp_storage(): bool {
-		return true;
-	}
-
-	/** Keep bound-gallery tools listed so Lite can explain a closed host gate. */
-	public static function mcp_bound(): bool {
 		return true;
 	}
 

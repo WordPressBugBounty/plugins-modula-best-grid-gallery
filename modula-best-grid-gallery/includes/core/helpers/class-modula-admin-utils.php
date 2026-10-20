@@ -31,9 +31,7 @@ class Modula_Admin_Utils {
 		new Modula_Dashboard(
 			MODULA_FILE,
 			'modula-gallery',
-			MODULA_URL . 'assets/images/dashboard/',
-			$links,
-			'modula_page_header'
+			$links
 		);
 	}
 

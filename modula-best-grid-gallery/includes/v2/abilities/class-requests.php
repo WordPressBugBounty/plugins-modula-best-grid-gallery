@@ -170,11 +170,9 @@ final class Requests {
 			$record['required_caps'] = in_array( $operation, array( 'modula/delete-gallery-preset', 'modula/delete-album-preset' ), true ) ? array_unique( array_merge( map_meta_cap( 'edit_post', get_current_user_id(), $input['id'] ), map_meta_cap( 'delete_post', get_current_user_id(), $input['id'] ) ) ) : array();
 		}
 		if ( in_array( $operation, Watermark::mutations(), true ) ) {
-			$record['attachment_ids'] = Watermark::referenced_attachment_ids( $input, $operation ); }
+			$record['attachment_ids'] = Watermark::referenced_attachment_ids( $input ); }
 		if ( Video::UPDATE === $operation ) {
 			$record['attachment_ids'] = Video::referenced_attachment_ids( $input['video_changes'], $input['id'] ); }
-		if ( Proofing_Clients::ASSOCIATE === $operation ) {
-			$record['client_id'] = $input['user_id']; }
 		$record = array_merge( $record, $context );
 		// The unique option_name is the cross-process admission lock. Never steal it.
 		if ( add_option( self::key( $request ), $record, '', false ) ) {
@@ -247,8 +245,6 @@ final class Requests {
 			return Batch::recover( $request, $record );
 		}
 		// Identity is never an access token. Recheck the original operation and every target.
-		$preset = in_array( $record['operation'], array_merge( Presets::mutations(), Album_Presets::mutations() ), true );
-		$album  = Album_Presets::APPLY === $record['operation'] || in_array( $record['operation'], Album_Lifecycle::operations(), true ) || Album_Members::OPERATION === $record['operation'] || in_array( $record['operation'], Albums::mutations(), true );
 		if ( ! Outcomes::authorize( $record ) ) {
 			return self::outcome( $request, 'forbidden', 'current_permission_denied', 'Current operation, resource and attachment permissions are required.', $record['operation'] );
 		}
@@ -280,30 +276,58 @@ final class Requests {
 			$outcome['file'] = $record['file']; }
 		if ( isset( $record['intake'] ) ) {
 			$outcome['intake'] = $record['intake']; }
-		if ( $record['target'] && Ai_Text::GENERATE !== $record['operation'] && ! in_array( $record['operation'], Storage::mutations(), true ) && Replacement::WRITE !== $record['operation'] && ! in_array( $record['operation'], Attachment_Lifecycle::operations(), true ) && ! in_array( $record['operation'], Collections::mutations(), true ) && Attachments::UPDATE !== $record['operation'] && ! in_array( $record['operation'], Media_Folders::mutations(), true ) ) {
-			$kind = $album ? 'album' : ( $preset && Presets::APPLY !== $record['operation'] ? 'preset' : 'gallery' );
-			if ( get_post( $record['target'] ) ) {
-				$outcome[ $kind ] = $album ? Albums::summary( $record['target'] ) : ( 'preset' === $kind ? Presets::summary( $record['target'] ) : Integration::gallery( get_post( $record['target'] ) ) ); }
+		$kind = $record['target'] ? self::target_result( $record['operation'] ) : null;
+		if ( null !== $kind && get_post( $record['target'] ) ) {
+			$outcome[ $kind ] = self::target_summary( $kind, $record['target'] );
 		}
 		return $outcome;
 	}
 
+	/**
+	 * The result object an unfinished request reports for its record's target.
+	 * Contract::outcome() declares the same object, so recovery never returns an undeclared key.
+	 *
+	 * @return string|null album, preset or gallery; null for operations whose target is not a gallery post.
+	 */
+	public static function target_result( string $operation ): ?string {
+		if ( self::untargeted( $operation ) ) {
+			return null;
+		}
+		if ( Album_Presets::APPLY === $operation || in_array( $operation, array_merge( Album_Lifecycle::operations(), Albums::mutations() ), true ) || Album_Members::OPERATION === $operation ) {
+			return 'album';
+		}
+		if ( Presets::APPLY !== $operation && in_array( $operation, array_merge( Presets::mutations(), Album_Presets::mutations() ), true ) ) {
+			return 'preset';
+		}
+		return 'gallery';
+	}
+
+	/** Media, storage and folder targets are attachments or terms, never a gallery post. */
+	private static function untargeted( string $operation ): bool {
+		$media = array_merge( Storage::mutations(), Attachment_Lifecycle::operations(), Collections::mutations(), Media_Folders::mutations() );
+		return in_array( $operation, array( Ai_Text::GENERATE, Replacement::WRITE, Attachments::UPDATE ), true ) || in_array( $operation, $media, true );
+	}
+
+	private static function target_summary( string $kind, int $id ): array {
+		if ( 'album' === $kind ) {
+			return Albums::summary( $id );
+		}
+		if ( 'preset' === $kind ) {
+			return Presets::summary( $id );
+		}
+		return Integration::gallery( get_post( $id ) );
+	}
+
+	/**
+	 * Fallback for operations without a registered authorizer. Proofing, Instagram, Watermark and Video
+	 * register theirs in each *_Explanation::boot(), so they never reach this method.
+	 */
 	public static function can_recover_record( array $record ): bool {
 		$operation = $record['operation'];
-		if ( in_array( $operation, array_merge( Proofing::mutations(), Proofing_Selections::mutations(), array( Proofing_Email::SEND ) ), true ) ) {
-			return Proofing::can_recover( $record ); }
-		if ( in_array( $operation, Proofing_Clients::mutations(), true ) ) {
-			return Proofing_Clients::can_recover( $record ); }
 		if ( Ai_Css::GENERATE === $operation ) {
 			return Ai_Css::can_recover( $record ); }
-		if ( Instagram::SYNC === $operation ) {
-			return Instagram::can_recover( $record ); }
 		if ( Ai_Text::GENERATE === $operation ) {
 			return Ai_Text::can_recover( $record ); }
-		if ( in_array( $operation, Watermark::mutations(), true ) ) {
-			return Watermark::can_recover( $record ); }
-		if ( in_array( $operation, Video::mutations(), true ) ) {
-			return Video::can_recover( $record ); }
 		if ( in_array( $operation, Transfers::mutations(), true ) ) {
 			return Transfers::can_recover( $record ); }
 		if ( in_array( $operation, Bound::mutations(), true ) ) {

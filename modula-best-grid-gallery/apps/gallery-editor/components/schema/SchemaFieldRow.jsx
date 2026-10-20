@@ -4,7 +4,7 @@
 
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
 import { validateFieldValue } from '../../logic/validateFieldValue';
-import { humanizeKey } from '../../logic/humanizeKey';
+import { resolveFieldRowLabel } from '../../logic/fieldRowLabel';
 import { useGalleryTypeChangeConfirm } from '../../hooks/useGalleryTypeChangeConfirm';
 import { useGalleryTypeChangeContext } from '../../context/GalleryTypeChangeContext';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
@@ -73,10 +73,7 @@ export default function SchemaFieldRow({
 						value: v,
 					});
 				};
-	const label =
-		typeof field.editorLabel === 'string' && field.editorLabel !== ''
-			? field.editorLabel
-			: humanizeKey(field.groupedKey);
+	const label = resolveFieldRowLabel(field);
 
 	const indentLegacy = hierarchicalIndent;
 	const compactStack = Boolean(field.editorUi?.compactStack);

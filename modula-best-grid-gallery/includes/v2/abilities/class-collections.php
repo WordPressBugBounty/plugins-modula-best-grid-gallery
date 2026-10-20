@@ -18,6 +18,9 @@ final class Collections {
 	public const UNSTAR        = 'modula/remove-favorite';
 	public const DELETE        = 'modula/delete-collection';
 
+	/** Outcome results the writes set, here and as media batch targets; member and favorite writes set none. */
+	public const RESULTS = array( 'collection', 'deleted_id' );
+
 	public static function entitled(): bool {
 		return Folders_Dependency::loaded() && Plugin::instance()->config()->folders();
 	}
@@ -209,7 +212,7 @@ final class Collections {
 				array( 'schema_version', 'revision', $key, 'page', 'per_page', 'total', 'total_pages' )
 			);
 			if ( $write ) {
-				$output = Contract::outcome_schema();
+				$output = Contract::outcome( $name, self::RESULTS );
 			} elseif ( in_array( $name, self::premium(), true ) ) {
 				$output = Contract::admitting( $page );
 			} else {

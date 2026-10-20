@@ -13,6 +13,9 @@ final class Storage {
 	public const DELETE   = 'modula/delete-storage-object';
 	public const UNINGEST = 'modula/uningest-storage-object';
 
+	/** Outcome results the Pro executor sets; delete shares the uningest schema. */
+	private const RESULTS = array( 'storage' );
+
 	/** @return array<int,string> */
 	public static function names(): array {
 		return array_merge( array( self::LISTING, self::BROWSE ), self::mutations() );
@@ -76,7 +79,6 @@ final class Storage {
 				'blockers'       => array( self::class, 'blockers' ),
 				'executor_ready' => array( self::class, 'executor_ready' ),
 				'dependency'     => 'folders',
-				'mcp_public'     => array( Folders_Dependency::class, 'mcp_storage' ),
 			),
 			array(
 				self::UNINGEST => array( 'destructive' => true ),
@@ -192,7 +194,7 @@ final class Storage {
 					),
 					array( 'request_id', 'revision', 'connection_id', 'key' )
 				),
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( self::INGEST, self::RESULTS ),
 			),
 			self::UNINGEST => array(
 				'input_schema'  => Contract::object(
@@ -207,7 +209,7 @@ final class Storage {
 					),
 					array( 'request_id', 'id', 'revision', 'storage_revision' )
 				),
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( self::UNINGEST, self::RESULTS ),
 			),
 		);
 		$names[ self::DELETE ] = $names[ self::UNINGEST ];

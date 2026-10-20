@@ -1,0 +1,44 @@
+@use '../styles/mixins';
+
+.modula-admin-tabs {
+	display: flex;
+	flex-direction: column;
+	gap: var(--modula-admin-section-gap);
+}
+
+.modula-admin-tabs__list {
+	@include mixins.segment-track;
+	align-self: flex-start;
+}
+
+// The tab list with `aside` at the end of its line; they wrap when narrow.
+.modula-admin-tabs__bar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px 24px;
+}
+
+.modula-admin-tabs__aside {
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-help);
+}
+
+.modula-admin-tabs__tab {
+	@include mixins.segment-option;
+
+	&:hover:not([aria-selected="true"]) {
+		background: var(--modula-admin-surface-hover);
+	}
+
+	&[aria-selected="true"] {
+		@include mixins.segment-option-active;
+	}
+}
+
+.modula-admin-tabs__panel {
+	display: flex;
+	flex-direction: column;
+	gap: var(--modula-admin-section-gap);
+}

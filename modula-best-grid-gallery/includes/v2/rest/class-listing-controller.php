@@ -258,11 +258,31 @@ class Listing_Controller {
 	}
 
 	/**
+	 * Listing post types the current user can edit, in listing order.
+	 *
+	 * Each type is checked against its own edit_posts capability: with Pro
+	 * Roles, galleries and albums use their own caps (edit_galleries,
+	 * edit_albums), so a role may hold one, both, or neither.
+	 *
+	 * @return string[] Registered post types among modula-gallery and modula-album.
+	 */
+	public static function listable_post_types() {
+		$listable = array();
+		foreach ( array( 'modula-gallery', 'modula-album' ) as $post_type ) {
+			$post_type_object = get_post_type_object( $post_type );
+			if ( $post_type_object && current_user_can( $post_type_object->cap->edit_posts ) ) {
+				$listable[] = $post_type;
+			}
+		}
+		return $listable;
+	}
+
+	/**
 	 * @param \WP_REST_Request $request Request.
 	 * @return bool|\WP_Error
 	 */
 	public static function check_list_access( $request ) {
-		if ( ! current_user_can( 'edit_posts' ) ) {
+		if ( ! self::listable_post_types() ) {
 			return new \WP_Error(
 				'rest_forbidden',
 				__( 'Sorry, you are not allowed to list galleries.', 'modula-best-grid-gallery' ),
@@ -832,7 +852,9 @@ class Listing_Controller {
 		$has_password = rest_sanitize_boolean( $request->get_param( 'hasPassword' ) );
 		$has_videos   = rest_sanitize_boolean( $request->get_param( 'hasVideos' ) );
 
-		if ( 'album' === $row_type && ! post_type_exists( 'modula-album' ) ) {
+		$listable   = self::listable_post_types();
+		$post_types = array_values( array_intersect( self::requested_post_types( $row_type ), $listable ) );
+		if ( ! $post_types ) {
 			return rest_ensure_response(
 				array(
 					'rows'         => array(),
@@ -842,8 +864,8 @@ class Listing_Controller {
 						'page'    => $page,
 						'perPage' => $per_page,
 					),
-					'totals'       => self::get_listing_totals(),
-					'statusCounts' => self::get_listing_status_counts(),
+					'totals'       => self::get_listing_totals( $listable ),
+					'statusCounts' => self::get_listing_status_counts( $listable ),
 				)
 			);
 		}
@@ -853,15 +875,6 @@ class Listing_Controller {
 		}
 
 		$post_status = self::resolve_post_status( $status );
-		if ( 'album' === $row_type ) {
-			$post_types = 'modula-album';
-		} elseif ( 'gallery' === $row_type ) {
-			$post_types = 'modula-gallery';
-		} elseif ( post_type_exists( 'modula-album' ) ) {
-			$post_types = array( 'modula-gallery', 'modula-album' );
-		} else {
-			$post_types = 'modula-gallery';
-		}
 
 		$query_args = array(
 			'post_type'              => $post_types,
@@ -953,10 +966,23 @@ class Listing_Controller {
 					'page'    => $page,
 					'perPage' => $per_page,
 				),
-				'totals'       => self::get_listing_totals(),
-				'statusCounts' => self::get_listing_status_counts(),
+				'totals'       => self::get_listing_totals( $listable ),
+				'statusCounts' => self::get_listing_status_counts( $listable ),
 			)
 		);
+	}
+
+	/**
+	 * Post types a listing `type` filter asks for, before capability filtering.
+	 *
+	 * @param string $row_type Request `type`: gallery, album, or anything else for the mixed listing.
+	 * @return string[]
+	 */
+	private static function requested_post_types( $row_type ) {
+		if ( 'album' === $row_type || 'gallery' === $row_type ) {
+			return array( self::post_type_for_row_type( $row_type ) );
+		}
+		return array( 'modula-gallery', 'modula-album' );
 	}
 
 	/**
@@ -1085,55 +1111,43 @@ class Listing_Controller {
 	}
 
 	/**
-	 * Non-trash listing totals for the header.
+	 * Non-trash listing totals for the header, over the post types the user can list.
 	 *
+	 * The transient holds totals per registered listing type, so one cache entry
+	 * serves users whose gallery and album capabilities differ.
+	 *
+	 * @param string[] $post_types Post types the current user can list.
 	 * @return array{rows: int, items: int}
 	 */
-	private static function get_listing_totals() {
-		$cached = get_transient( 'modula_v2_listing_totals' );
-		if ( is_array( $cached ) && isset( $cached['rows'], $cached['items'] ) ) {
-			return array(
-				'rows'  => (int) $cached['rows'],
-				'items' => (int) $cached['items'],
-			);
+	private static function get_listing_totals( $post_types ) {
+		$by_type = get_transient( 'modula_v2_listing_totals' );
+		if ( ! self::has_counts_for_types( $by_type, $post_types ) ) {
+			$by_type = self::count_listing_totals_by_type();
+			set_transient( 'modula_v2_listing_totals', $by_type, 2 * MINUTE_IN_SECONDS );
 		}
 
-		$counts = wp_count_posts( 'modula-gallery' );
-		$rows   = 0;
-		foreach ( array( 'publish', 'draft', 'private', 'pending', 'future' ) as $st ) {
-			if ( isset( $counts->$st ) ) {
-				$rows += (int) $counts->$st;
-			}
-		}
-
-		$item_total = 0;
-		$ids        = get_posts(
-			array(
-				'post_type'              => 'modula-gallery',
-				'post_status'            => array( 'publish', 'draft', 'private', 'pending', 'future' ),
-				'posts_per_page'         => -1,
-				'fields'                 => 'ids',
-				'no_found_rows'          => true,
-				'update_post_meta_cache' => true,
-				'update_post_term_cache' => false,
-			)
+		$totals = array(
+			'rows'  => 0,
+			'items' => 0,
 		);
-		foreach ( $ids as $id ) {
-			$item_total += self::count_gallery_items( (int) $id )['total'];
+		foreach ( $post_types as $post_type ) {
+			$totals['rows']  += (int) $by_type[ $post_type ]['rows'];
+			$totals['items'] += (int) $by_type[ $post_type ]['items'];
 		}
+		return $totals;
+	}
 
-		if ( post_type_exists( 'modula-album' ) ) {
-			$album_counts = wp_count_posts( 'modula-album' );
-			foreach ( array( 'publish', 'draft', 'private', 'pending', 'future' ) as $st ) {
-				if ( isset( $album_counts->$st ) ) {
-					$rows += (int) $album_counts->$st;
-				}
-			}
-
-			$album_ids = get_posts(
+	/**
+	 * @return array<string, array{rows: int, items: int}> Totals keyed by post type.
+	 */
+	private static function count_listing_totals_by_type() {
+		$live_statuses = array( 'publish', 'draft', 'private', 'pending', 'future' );
+		$by_type       = array();
+		foreach ( self::registered_listing_post_types() as $post_type ) {
+			$ids   = get_posts(
 				array(
-					'post_type'              => 'modula-album',
-					'post_status'            => array( 'publish', 'draft', 'private', 'pending', 'future' ),
+					'post_type'              => $post_type,
+					'post_status'            => $live_statuses,
 					'posts_per_page'         => -1,
 					'fields'                 => 'ids',
 					'no_found_rows'          => true,
@@ -1141,55 +1155,84 @@ class Listing_Controller {
 					'update_post_term_cache' => false,
 				)
 			);
-			foreach ( $album_ids as $album_id ) {
-				$item_total += self::count_album_items( (int) $album_id )['total'];
+			$items = 0;
+			foreach ( $ids as $id ) {
+				$counts = 'modula-album' === $post_type ? self::count_album_items( (int) $id ) : self::count_gallery_items( (int) $id );
+				$items += $counts['total'];
 			}
+			$by_type[ $post_type ] = array(
+				'rows'  => array_sum( self::count_posts_by_status( $post_type, $live_statuses ) ),
+				'items' => $items,
+			);
 		}
-
-		$totals = array(
-			'rows'  => $rows,
-			'items' => $item_total,
-		);
-		set_transient( 'modula_v2_listing_totals', $totals, 2 * MINUTE_IN_SECONDS );
-
-		return $totals;
+		return $by_type;
 	}
 
 	/**
-	 * Row counts per status for the listing status filter menu.
+	 * Row counts per status for the listing status filter menu, over the post types the user can list.
 	 *
+	 * @param string[] $post_types Post types the current user can list.
 	 * @return array{publish: int, draft: int, private: int, trash: int, future: int}
 	 */
-	private static function get_listing_status_counts() {
-		$cached = get_transient( 'modula_v2_listing_status_counts' );
-		if ( is_array( $cached ) && isset( $cached['publish'], $cached['future'] ) && ! isset( $cached['everything'] ) ) {
-			return $cached;
+	private static function get_listing_status_counts( $post_types ) {
+		$statuses = array( 'publish', 'draft', 'private', 'trash', 'future' );
+		$by_type  = get_transient( 'modula_v2_listing_status_counts' );
+		if ( ! self::has_counts_for_types( $by_type, $post_types ) ) {
+			$by_type = array();
+			foreach ( self::registered_listing_post_types() as $post_type ) {
+				$by_type[ $post_type ] = self::count_posts_by_status( $post_type, $statuses );
+			}
+			set_transient( 'modula_v2_listing_status_counts', $by_type, 2 * MINUTE_IN_SECONDS );
 		}
 
-		$post_types = array( 'modula-gallery' );
-		if ( post_type_exists( 'modula-album' ) ) {
-			$post_types[] = 'modula-album';
-		}
-
-		$counts = array(
-			'publish' => 0,
-			'draft'   => 0,
-			'private' => 0,
-			'trash'   => 0,
-			'future'  => 0,
-		);
-
+		$counts = array_fill_keys( $statuses, 0 );
 		foreach ( $post_types as $post_type ) {
-			$post_counts = wp_count_posts( $post_type );
-			foreach ( array( 'publish', 'draft', 'private', 'trash', 'future' ) as $status ) {
-				if ( isset( $post_counts->$status ) ) {
-					$counts[ $status ] += (int) $post_counts->$status;
-				}
+			foreach ( $statuses as $status ) {
+				$counts[ $status ] += (int) $by_type[ $post_type ][ $status ];
 			}
 		}
+		return $counts;
+	}
 
-		set_transient( 'modula_v2_listing_status_counts', $counts, 2 * MINUTE_IN_SECONDS );
+	/**
+	 * Whether a cached per-type count map covers every requested type.
+	 *
+	 * Older caches held one flat total; they fail this check and are rebuilt.
+	 *
+	 * @param mixed    $by_type    Cached value.
+	 * @param string[] $post_types Post types to read.
+	 * @return bool
+	 */
+	private static function has_counts_for_types( $by_type, $post_types ) {
+		if ( ! is_array( $by_type ) ) {
+			return false;
+		}
+		foreach ( $post_types as $post_type ) {
+			if ( ! isset( $by_type[ $post_type ] ) || ! is_array( $by_type[ $post_type ] ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
 
+	/**
+	 * @return string[] Registered listing post types, regardless of the current user.
+	 */
+	private static function registered_listing_post_types() {
+		return array_values( array_filter( array( 'modula-gallery', 'modula-album' ), 'post_type_exists' ) );
+	}
+
+	/**
+	 * @param string   $post_type Post type.
+	 * @param string[] $statuses  Statuses to count.
+	 * @return array<string, int> Count per status.
+	 */
+	private static function count_posts_by_status( $post_type, $statuses ) {
+		$post_counts = wp_count_posts( $post_type );
+		$counts      = array();
+		foreach ( $statuses as $status ) {
+			$counts[ $status ] = isset( $post_counts->$status ) ? (int) $post_counts->$status : 0;
+		}
 		return $counts;
 	}
 

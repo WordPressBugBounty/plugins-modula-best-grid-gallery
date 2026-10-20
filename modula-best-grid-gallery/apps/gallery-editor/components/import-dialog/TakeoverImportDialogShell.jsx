@@ -1,6 +1,5 @@
 import '../../styles/takeover/preview/_import-dialog-shell.scss';
-import GalleryModal from '../gallery-modal/GalleryModal';
-import GalleryModalFooter from '../gallery-modal/GalleryModalFooter';
+import { GalleryModal, GalleryModalFooter } from 'editor-shell';
 
 const BASE_CLASS = 'modula-import-dialog';
 

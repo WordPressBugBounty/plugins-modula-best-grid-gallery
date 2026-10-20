@@ -70,27 +70,6 @@ abstract class Modula_Upsell_Base {
 	}
 
 	/**
-	 * Generate upsell config array for settings tabs
-	 *
-	 * @param string $label   The label for the upsell.
-	 * @param string $desc    The description.
-	 * @param array  $buttons Array of button configurations.
-	 * @return array The upsell configuration array.
-	 */
-	protected function generate_upsell_config( $label = '', $desc = '', $buttons = array() ) {
-		return array(
-			'fields' => array(
-				array(
-					'type'    => 'upsell',
-					'label'   => $label,
-					'desc'    => $desc,
-					'buttons' => $buttons,
-				),
-			),
-		);
-	}
-
-	/**
 	 * Get the Free vs Pro link
 	 *
 	 * @return string The Free vs Pro link URL.

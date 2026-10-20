@@ -6,6 +6,9 @@ defined( 'ABSPATH' ) || exit;
 final class Video {
 	public const RESOLVE = 'modula/resolve-video-source';
 	public const UPDATE  = 'modula/update-gallery-videos';
+
+	/** Outcome results the Pro executor sets; Contract::outcome() adds the target gallery too. */
+	private const RESULTS = array( 'video', 'gallery' );
 	public static function available(): bool {
 		return Settings_Contract::extension( 'modula-video' ) && Pro_Dependency::host_executor_ready( self::RESOLVE );
 	}
@@ -26,13 +29,15 @@ final class Video {
 	}
 	/**
 	 * Inspect only the declared executor signature; feature blockers are assessed separately.
+	 * A Pro without the service URL check still calls the provider_url() Lite no longer ships.
 	 */
 	public static function executor_ready( string $name ): bool {
 		$methods = self::executor_methods();
 		if ( ! isset( $methods[ $name ] ) ) {
 			return false;
 		}
-		return Pro_Dependency::methods( '\Modula_Pro\Extensions\Video\Abilities\Video_Executor', $methods[ $name ] );
+		return Pro_Dependency::methods( '\Modula_Pro\Extensions\Video\Abilities\Video_Executor', $methods[ $name ] )
+			&& Pro_Dependency::methods( '\Modula_Pro\Extensions\Video\Video', array( 'supported_provider_url' => 2 ) );
 	}
 	public static function callbacks(): array {
 		return Video_Explanation::callbacks_for( self::names() );
@@ -129,7 +134,7 @@ final class Video {
 					),
 					array( 'id', 'revision', 'request_id', 'kind', 'url' )
 				),
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( self::RESOLVE, self::RESULTS ),
 			),
 			self::UPDATE  => array(
 				'label'         => 'Patch Beta gallery video items',
@@ -166,7 +171,7 @@ final class Video {
 					),
 					array( 'id', 'revision', 'request_id', 'video_changes' )
 				),
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( self::UPDATE, self::RESULTS ),
 			),
 		);
 	}
@@ -238,65 +243,6 @@ final class Video {
 				'explanation' => __( 'Current gallery and video attachment permissions are required. An upgrade does not grant this access.', 'modula-best-grid-gallery' ),
 			),
 		);
-	}
-	/** Only canonical supported provider endpoints; never accept a generic URL fetch. */
-	public static function provider_url( string $url, bool $playlist = false ): bool {
-		$parts = wp_parse_url( $url );
-		if ( ! is_array( $parts ) || 'https' !== ( $parts['scheme'] ?? '' ) || isset( $parts['user'] ) || isset( $parts['pass'] ) || isset( $parts['port'] ) || isset( $parts['fragment'] ) ) {
-			return false;
-		}
-		$host = strtolower( (string) ( $parts['host'] ?? '' ) );
-		$path = (string) ( $parts['path'] ?? '' );
-		parse_str( (string) ( $parts['query'] ?? '' ), $query );
-		if ( in_array( $host, array( 'youtube.com', 'www.youtube.com', 'youtu.be' ), true ) ) {
-			if ( $playlist ) {
-				return in_array( $path, array( '/playlist', '/watch' ), true ) && isset( $query['list'] ) && is_string( $query['list'] ) && 1 === preg_match( '/^[A-Za-z0-9_-]{1,120}$/D', $query['list'] ) && ! array_diff( array_keys( $query ), array( 'v', 'list' ) );
-			}
-			return ! array_diff( array_keys( $query ), array( 'v' ) ) && '' !== self::youtube_id( $url );
-		}
-		if ( $playlist && in_array( $host, array( 'vimeo.com', 'www.vimeo.com' ), true ) ) {
-			return self::vimeo_playlist( $parts );
-		}
-		return in_array( $host, array( 'vimeo.com', 'www.vimeo.com' ), true ) && ! $query && 1 === preg_match( '~^/[0-9]+/?$~D', $path );
-	}
-	/** Same 11-character identity the video service accepts, without loading that service. */
-	private static function youtube_id( string $url ): string {
-		$matched = preg_match( '/(?:youtube\.com|youtu\.be|youtube\-nocookie\.com)\/(?:.*?(?:v=|v\/|u\/|embed\/|shorts\/))?([\w-]{11})/i', $url, $matches );
-		return 1 === $matched && isset( $matches[1] ) ? $matches[1] : '';
-	}
-	/**
-	 * Showcase share links and channel paths. Matches the video service collection rules.
-	 *
-	 * @param array<string,mixed> $parts Parsed URL parts.
-	 */
-	private static function vimeo_playlist( array $parts ): bool {
-		$path = (string) ( $parts['path'] ?? '' );
-		if ( 1 === preg_match( '~^/showcase/([0-9]+)/?$~D', $path ) ) {
-			return self::showcase_query_allowed( $parts );
-		}
-		return self::vimeo_channel_path( $parts );
-	}
-	/**
-	 * @param array<string,mixed> $parts Parsed URL parts.
-	 */
-	private static function showcase_query_allowed( array $parts ): bool {
-		$query = array();
-		if ( isset( $parts['query'] ) && is_string( $parts['query'] ) && '' !== $parts['query'] ) {
-			$query = explode( '&', $parts['query'] );
-		}
-		foreach ( $query as $param ) {
-			if ( 1 !== preg_match( '#^(fl|fe)=[A-Za-z0-9._~%\-]*$#D', $param ) ) {
-				return false;
-			}
-		}
-		return true;
-	}
-	/**
-	 * @param array<string,mixed> $parts Parsed URL parts.
-	 */
-	private static function vimeo_channel_path( array $parts ): bool {
-		$path = (string) ( $parts['path'] ?? '' );
-		return ( ! isset( $parts['query'] ) || '' === $parts['query'] ) && 1 === preg_match( '~^/channels/[A-Za-z0-9_-]+/?$~D', $path );
 	}
 	public static function referenced_attachment_ids( array $changes, int $gallery = 0 ): array {
 		$ids     = array_column( $changes, 'attachment_id' );

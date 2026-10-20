@@ -1,0 +1,91 @@
+@use '../styles/mixins';
+
+.modula-admin-range {
+	display: inline-flex;
+	align-items: center;
+	gap: 14px;
+	width: var(--modula-admin-field-width);
+	max-width: 100%;
+}
+
+// Track and thumb are restyled per engine; the filled part comes from the
+// component's `--modula-admin-range-filled`.
+@mixin range-track {
+	$filled: var(--modula-admin-range-filled, 0%);
+	height: 4px;
+	border-radius: 2px;
+	background: linear-gradient(to right, var(--modula-admin-ink) $filled, var(--modula-admin-border-strong) $filled);
+}
+
+@mixin range-thumb {
+	box-sizing: border-box;
+	width: 18px;
+	height: 18px;
+	border: 2px solid var(--modula-admin-ink);
+	border-radius: 50%;
+	background: var(--modula-admin-surface);
+	box-shadow: var(--modula-admin-shadow-raised);
+	cursor: pointer;
+}
+
+.modula-admin-range__input {
+	flex: 1 1 auto;
+	min-width: 0;
+	height: var(--modula-admin-hit-target);
+	margin: 0;
+	background: transparent;
+	cursor: pointer;
+	appearance: none;
+
+	&::-webkit-slider-runnable-track {
+		@include range-track;
+	}
+
+	&::-moz-range-track {
+		@include range-track;
+	}
+
+	&::-webkit-slider-thumb {
+		@include range-thumb;
+		margin-top: -7px;
+		appearance: none;
+	}
+
+	&::-moz-range-thumb {
+		@include range-thumb;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		&::-webkit-slider-thumb {
+			@include mixins.focus-ring;
+		}
+
+		&::-moz-range-thumb {
+			@include mixins.focus-ring;
+		}
+	}
+
+	&:disabled {
+		opacity: var(--modula-admin-disabled-opacity);
+		cursor: default;
+	}
+}
+
+// Fixed width, so the slider does not move as the value changes.
+.modula-admin-range__value {
+	flex-shrink: 0;
+	min-width: 48px;
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-control);
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+
+	:disabled + &,
+	fieldset:disabled & {
+		opacity: var(--modula-admin-disabled-opacity);
+	}
+}

@@ -1,0 +1,63 @@
+@use '../styles/mixins';
+
+// Under the page header, aligned with its title. The links wrap onto a
+// second line when narrow, so none is cut off.
+.modula-admin-page-tabs {
+	padding: 0 var(--modula-admin-page-gutter);
+	border-bottom: 1px solid var(--modula-admin-border);
+	background: var(--modula-admin-surface);
+}
+
+// Outranks wp-admin's `ul` and `li` margins.
+.modula-admin-page-tabs__list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0 28px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	> li {
+		margin: 0;
+	}
+}
+
+// The underline is a border, not a box-shadow, so it survives wp-admin's
+// `a:focus` box-shadow reset below and forced-colors mode. The side padding,
+// taken back by the margin, keeps the inset focus ring off the label while
+// the text stays aligned with the title.
+.modula-admin-page-tabs__tab {
+	display: flex;
+	align-items: center;
+	box-sizing: border-box;
+	min-height: var(--modula-admin-hit-target);
+	margin: 0 -4px;
+	padding: 0 4px;
+	border-bottom: 2px solid transparent;
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-control);
+	text-decoration: none;
+	white-space: nowrap;
+
+	&:hover {
+		color: var(--modula-admin-ink);
+	}
+
+	// wp-admin draws a blue ring on any focused link.
+	&:focus {
+		outline: none;
+		box-shadow: none;
+		color: var(--modula-admin-ink);
+	}
+
+	&:focus-visible {
+		@include mixins.focus-ring;
+		outline-offset: -2px;
+	}
+
+	&[aria-current="page"] {
+		border-bottom-color: var(--modula-admin-ink);
+		color: var(--modula-admin-ink);
+		font-weight: 600;
+	}
+}

@@ -12,6 +12,9 @@ final class Watermark {
 	public const APPLY  = 'modula/apply-watermark';
 	public const REMOVE = 'modula/remove-watermark';
 
+	/** Outcome results the Pro executor sets; Contract::outcome() adds the target gallery. */
+	private const RESULTS = array( 'watermark' );
+
 	public static function available( string $name = self::READ ): bool {
 		if ( ! in_array( $name, self::names(), true ) ) {
 			return false;
@@ -31,11 +34,18 @@ final class Watermark {
 
 	/**
 	 * Signature contract for the Pro watermark executor. Lite checks it without constructing Pro.
+	 * An executor without referenced_attachment_ids still expects the settings helpers Lite no longer ships.
 	 *
 	 * @return array<string,array<string,int>>
 	 */
 	public static function executor_methods(): array {
-		return array_fill_keys( self::names(), array( 'run' => 2 ) );
+		return array_fill_keys(
+			self::names(),
+			array(
+				'run'                       => 2,
+				'referenced_attachment_ids' => 2,
+			)
+		);
 	}
 
 	/**
@@ -127,70 +137,20 @@ final class Watermark {
 					),
 					array( 'id', 'attachment_id', 'revision', 'request_id' )
 				),
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( $name, self::RESULTS ),
 			);
 		}
 		return $definitions;
 	}
 
 	/**
-	 * Attachments whose current read right must survive for this effect and its recovery.
+	 * Attachment recorded for a Lite rejection. Pro records the mark image too when it applies a watermark.
 	 *
 	 * @param array<string,mixed> $input
 	 * @return array<int,int>
 	 */
-	public static function referenced_attachment_ids( array $input, string $operation ): array {
-		$ids  = array( (int) $input['attachment_id'] );
-		$mark = self::APPLY === $operation ? self::image_mark_id( (int) $input['id'] ) : 0;
-		if ( $mark > 0 ) {
-			$ids[] = $mark;
-		}
-		return array_values( array_unique( $ids ) );
-	}
-
-	/**
-	 * Site option or gallery settings, using the stored checkbox convention.
-	 * Absent, 0, "0" and "" select the site watermark option.
-	 *
-	 * @return array{custom:mixed,burn:array<string,mixed>}
-	 */
-	public static function burn_settings( int $gallery ): array {
-		$settings = get_post_meta( $gallery, 'modula-settings', true );
-		$settings = is_array( $settings ) ? $settings : array();
-		$custom   = $settings['custom_settings_watermark'] ?? null;
-		$burn     = self::checkbox_enabled( $custom ) ? $settings : get_option( 'modula_watermark', array() );
-		return array(
-			'custom' => $custom,
-			'burn'   => is_array( $burn ) ? $burn : array(),
-		);
-	}
-
-	/**
-	 * Image used as the mark, or 0 for a custom text mark or an unset image.
-	 */
-	public static function image_mark_id( int $gallery ): int {
-		$resolved = self::burn_settings( $gallery );
-		return self::image_mark_from( $resolved['custom'], $resolved['burn'] );
-	}
-
-	/**
-	 * @param array<string,mixed> $burn
-	 */
-	public static function image_mark_from( $custom, array $burn ): int {
-		if ( self::checkbox_enabled( $custom ) && 'text' === ( $burn['watermark_type'] ?? '' ) ) {
-			return 0;
-		}
-		$image = $burn['watermark_image'] ?? 0;
-		return is_numeric( $image ) && (int) $image > 0 ? (int) $image : 0;
-	}
-
-	/**
-	 * Historical watermark checkboxes are stored as 1/"1" or left unset.
-	 *
-	 * @param mixed $value
-	 */
-	public static function checkbox_enabled( $value ): bool {
-		return true === $value || 1 === $value || '1' === $value;
+	public static function referenced_attachment_ids( array $input ): array {
+		return array( (int) $input['attachment_id'] );
 	}
 
 	/**
@@ -240,18 +200,7 @@ final class Watermark {
 		}
 		$id         = $input['id'] ?? null;
 		$attachment = $input['attachment_id'] ?? null;
-		if ( ! is_int( $id ) || ! is_int( $attachment ) || ! Update::can_update( $id ) || ! Attachments::can_read( $attachment ) ) {
-			return false;
-		}
-		if ( ! in_array( $name, self::mutations(), true ) ) {
-			return true;
-		}
-		foreach ( self::referenced_attachment_ids( $input, $name ) as $referenced ) {
-			if ( ! is_numeric( $referenced ) || ! Attachments::can_read( (int) $referenced ) ) {
-				return false;
-			}
-		}
-		return true;
+		return is_int( $id ) && is_int( $attachment ) && Update::can_update( $id ) && Attachments::can_read( $attachment );
 	}
 
 	/**
@@ -278,8 +227,12 @@ final class Watermark {
 		return is_string( $bound ) && '' !== $bound;
 	}
 
-	/** @return array{reason:string,feature:string,remedy:array{action:string,explanation:string}} */
-	private static function permission_blocker(): array {
+	/**
+	 * Pro reuses it when the actor cannot read the configured mark image.
+	 *
+	 * @return array{reason:string,feature:string,remedy:array{action:string,explanation:string}}
+	 */
+	public static function permission_blocker(): array {
 		return array(
 			'reason'  => 'permission_denied',
 			'feature' => 'modula-watermark',

@@ -85,32 +85,8 @@ final class Attachment_Image {
 	}
 
 	public static function init(): void {
-		add_filter( 'mcp_adapter_default_server_config', array( __CLASS__, 'server_config' ) );
-		add_filter( 'mcp_adapter_tools_list', array( __CLASS__, 'tools_list' ), 10, 3 );
+		// Integration::tools_list drops this tool's output schema, with every Modula tool's.
 		add_filter( 'mcp_adapter_tool_call_result', array( __CLASS__, 'mcp_result' ), 10, 4 );
-	}
-
-	public static function server_config( array $config ): array {
-		if ( ! Folders_Dependency::operation_available( self::IMAGE ) ) {
-			return $config;
-		}
-		if ( ! in_array( self::IMAGE, $config['tools'], true ) ) {
-			$config['tools'][] = self::IMAGE;
-		}
-		return $config;
-	}
-
-	/** Image-only results have no structuredContent; do not advertise the native JSON output schema. */
-	public static function tools_list( array $tools, $server, $schema ): array {
-		foreach ( $tools as $index => $tool ) {
-			if ( 'modula-read-attachment-image' !== $tool->getName() ) {
-				continue;
-			}
-			$data = (array) $tool->jsonSerialize();
-			unset( $data['outputSchema'] );
-			$tools[ $index ] = $schema->fromArray( \WP\McpSchema\Record\Tool::class, $data );
-		}
-		return $tools;
 	}
 
 	public static function mcp_result( $result, $args, $name, $tool ) {

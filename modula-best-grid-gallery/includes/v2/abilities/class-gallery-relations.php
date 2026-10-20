@@ -13,7 +13,12 @@ final class Gallery_Relations {
 			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key,meta_value FROM {$wpdb->postmeta} WHERE post_id = %d ORDER BY meta_id" . $suffix, $post['ID'] ), ARRAY_A );
 			$meta = array_column( $rows, 'meta_value', 'meta_key' );
 			$doc = json_decode( $meta['modula_album_members_v2'] ?? '', true );
-			$members = $doc['members'] ?? maybe_unserialize( $meta['modula-album-galleries'] ?? '' );
+			$classic = maybe_unserialize( $meta['modula-album-galleries'] ?? '' );
+			$members = $doc['members'] ?? $classic;
+			// Pro stamps current documents with `version`; an unstamped one is legacy and yields to classic, as in Members_Document.
+			if ( ! isset( $doc['version'] ) && is_array( $classic ) ) {
+				$members = $classic;
+			}
 			foreach ( is_array( $members ) ? $members : array() as $member ) {
 				if ( is_array( $member ) && absint( $member['id'] ?? 0 ) === $gallery && in_array( sanitize_text_field( $member['itemType'] ?? '' ), array( '', 'modula-gallery' ), true ) ) {
 					$result[] = array( 'id' => (int) $post['ID'], 'beta' => ! empty( $meta['_modula_beta'] ), 'post' => $post, 'meta' => $rows );

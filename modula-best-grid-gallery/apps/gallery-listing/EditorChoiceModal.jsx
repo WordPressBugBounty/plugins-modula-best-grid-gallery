@@ -1,7 +1,58 @@
-import { createPortal, useEffect, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	createPortal,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon, close } from '@wordpress/icons';
+import { EditorChoiceSplitButton } from './EditorChoiceSplitButton';
 import { skipActiveViewTransition } from './completeEditorChoice';
+
+/**
+ * Esc inside the New from preset menu closes the menu, not the whole modal.
+ *
+ * @param {KeyboardEvent} event Keydown event.
+ * @return {boolean} True when the key event comes from an open popover.
+ */
+function isFromPopover(event) {
+	const target = event.target;
+	return Boolean(
+		target &&
+			typeof target.closest === 'function' &&
+			target.closest('.components-popover')
+	);
+}
+
+/**
+ * @param {import('./listingCreatePresets').CreatePresetOptions} presetOptions Menu model.
+ * @return {import('react').ReactNode} What the new-editor main click starts from.
+ */
+function renderStartHint(presetOptions) {
+	if (!presetOptions.defaultPreset) {
+		return createInterpolateElement(
+			__(
+				'New gallery starts from <b>built-in defaults</b>. Use the arrow to start from a preset.',
+				'modula-best-grid-gallery'
+			),
+			{ b: <strong /> }
+		);
+	}
+	// The title goes in as an element so markup in a preset title stays text.
+	return createInterpolateElement(
+		/* translators: <preset /> is replaced by the Default preset title. */
+		__(
+			'New gallery starts from <preset />, your default preset.',
+			'modula-best-grid-gallery'
+		),
+		{ preset: <strong>{presetOptions.defaultPreset.title}</strong> }
+	);
+}
+
+const SECONDARY_BUTTON_CLASS =
+	'modula-editor-choice-modal__button modula-editor-choice-modal__button--secondary';
+const PRIMARY_BUTTON_CLASS =
+	'modula-editor-choice-modal__button modula-editor-choice-modal__button--primary';
 
 const FEATURES = [
 	{
@@ -31,18 +82,25 @@ const FEATURES = [
 ];
 
 /**
+ * `presetOptions` is for gallery create only; the caller passes null for open
+ * and album create, which keeps the plain two buttons.
+ *
  * @param {{
  *   isOpen: boolean,
  *   mode?: 'create' | 'open',
  *   heroUrl?: string,
+ *   presetOptions?: import('./listingCreatePresets').CreatePresetOptions | null,
+ *   settingsUrl?: string,
  *   onClose: () => void,
- *   onChoose: (choice: 'beta' | 'classic') => void,
+ *   onChoose: (choice: 'beta' | 'classic', start?: number | 'blank') => void,
  * }} props
  */
 export function EditorChoiceModal({
 	isOpen,
 	mode = 'create',
 	heroUrl = '',
+	presetOptions = null,
+	settingsUrl = '',
 	onClose,
 	onChoose,
 }) {
@@ -57,7 +115,7 @@ export function EditorChoiceModal({
 		document.body.style.overflow = 'hidden';
 
 		const onKeyDown = (event) => {
-			if ('Escape' !== event.key) {
+			if ('Escape' !== event.key || isFromPopover(event)) {
 				return;
 			}
 			skipActiveViewTransition(document);
@@ -87,11 +145,41 @@ export function EditorChoiceModal({
 		onClose();
 	};
 
-	const handleChoose = (choice) => {
+	const handleChoose = (choice, start) => {
 		skipActiveViewTransition(document);
-		onChoose(choice);
+		onChoose(choice, start);
 	};
 
+	const editorChoices = [
+		{
+			choice: 'classic',
+			className: SECONDARY_BUTTON_CLASS,
+			content: __('Not now', 'modula-best-grid-gallery'),
+			menuLabel: __(
+				'Classic editor: start from',
+				'modula-best-grid-gallery'
+			),
+			arrowLabel: __(
+				'Classic editor: choose a starting preset',
+				'modula-best-grid-gallery'
+			),
+		},
+		{
+			choice: 'beta',
+			className: PRIMARY_BUTTON_CLASS,
+			content: (
+				<>
+					{__('Try the new editor', 'modula-best-grid-gallery')}
+					<span aria-hidden>→</span>
+				</>
+			),
+			menuLabel: __('New editor: start from', 'modula-best-grid-gallery'),
+			arrowLabel: __(
+				'New editor: choose a starting preset',
+				'modula-best-grid-gallery'
+			),
+		},
+	];
 	const showHeroImage = Boolean(heroUrl) && !heroFailed;
 	const disclaimer =
 		'open' === mode
@@ -195,28 +283,43 @@ export function EditorChoiceModal({
 				</div>
 
 				<div className="modula-editor-choice-modal__footer">
-					<p className="modula-editor-choice-modal__disclaimer">
-						{disclaimer}
-					</p>
+					<div className="modula-editor-choice-modal__footer-text">
+						{presetOptions ? (
+							<p className="modula-editor-choice-modal__start-hint">
+								{renderStartHint(presetOptions)}
+							</p>
+						) : null}
+						<p className="modula-editor-choice-modal__disclaimer">
+							{disclaimer}
+						</p>
+					</div>
 					<div className="modula-editor-choice-modal__actions">
-						<button
-							type="button"
-							className="modula-editor-choice-modal__button modula-editor-choice-modal__button--secondary"
-							onClick={() => handleChoose('classic')}
-						>
-							{__('Not now', 'modula-best-grid-gallery')}
-						</button>
-						<button
-							type="button"
-							className="modula-editor-choice-modal__button modula-editor-choice-modal__button--primary"
-							onClick={() => handleChoose('beta')}
-						>
-							{__(
-								'Try the new editor',
-								'modula-best-grid-gallery'
-							)}
-							<span aria-hidden>→</span>
-						</button>
+						{editorChoices.map((option) =>
+							presetOptions ? (
+								<EditorChoiceSplitButton
+									key={option.choice}
+									className={option.className}
+									menuLabel={option.menuLabel}
+									arrowLabel={option.arrowLabel}
+									presetOptions={presetOptions}
+									settingsUrl={settingsUrl}
+									onChoose={(start) =>
+										handleChoose(option.choice, start)
+									}
+								>
+									{option.content}
+								</EditorChoiceSplitButton>
+							) : (
+								<button
+									key={option.choice}
+									type="button"
+									className={option.className}
+									onClick={() => handleChoose(option.choice)}
+								>
+									{option.content}
+								</button>
+							)
+						)}
 					</div>
 				</div>
 			</div>

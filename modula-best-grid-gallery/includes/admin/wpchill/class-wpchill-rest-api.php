@@ -125,7 +125,41 @@ class WPChill_Rest_Api {
 	public function plugin_activation( $request ) {
 		$plugin_slug = $request->get_param( 'plugin' );
 
-		return rest_ensure_response( WPChill_About_Us::activate_plugin( $plugin_slug ) );
+		return rest_ensure_response( $this->activate_plugin( $plugin_slug ) );
+	}
+
+	/**
+	 * Activates an installed plugin, for a notification's action.
+	 *
+	 * @param string $plugin_slug Plugin file relative to the plugins folder.
+	 * @return array{success: bool, message: string}
+	 */
+	private function activate_plugin( $plugin_slug ) {
+
+		if ( ! $plugin_slug ) {
+			return array(
+				'success' => false,
+				'message' => 'Plugin slug is missing.',
+			);
+		}
+
+		if ( ! function_exists( 'activate_plugin' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		$result = activate_plugin( $plugin_slug );
+
+		if ( is_wp_error( $result ) ) {
+			return array(
+				'success' => false,
+				'message' => $result->get_error_message(),
+			);
+		}
+
+		return array(
+			'success' => true,
+			'message' => 'Plugin activated.',
+		);
 	}
 
 	public function _permissions_check() {

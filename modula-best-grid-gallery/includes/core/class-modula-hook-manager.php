@@ -24,6 +24,8 @@ class Modula_Hook_Manager {
 		add_action( 'admin_head', array( $admin_assets, 'output_wp_css_variables' ), 5 );
 		add_action( 'admin_enqueue_scripts', array( $admin_assets, 'admin_scripts' ), 20 );
 		add_action( 'admin_enqueue_scripts', array( $admin_assets, 'general_settings_page_scripts' ) );
+		// After WPChill enqueues its bubble (priority 10).
+		add_action( 'admin_enqueue_scripts', array( $admin_assets, 'hide_wpchill_notification_bubble' ), 20 );
 		add_action( 'admin_enqueue_scripts', array( $admin_assets, 'extensions_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $admin_assets, 'insights_scripts' ) );
 

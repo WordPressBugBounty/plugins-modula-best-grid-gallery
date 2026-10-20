@@ -1,0 +1,38 @@
+// admin-ui — Sass entry. Host apps `@use` this once and render inside
+// AdminUiRoot.
+
+// Component rules are loaded under `.modula-admin-ui` so they outrank
+// wp-admin's forms.css element selectors (for example `input[type=text]`,
+// `.wp-core-ui select`) without `!important`.
+@use 'sass:meta';
+@use 'fonts';
+@use 'tokens';
+@use '../root/root';
+
+.modula-admin-ui {
+	@include meta.load-css('../toggle/toggle');
+	@include meta.load-css('../checkbox/checkbox');
+	@include meta.load-css('../segmented/segmented');
+	@include meta.load-css('../field/field');
+	@include meta.load-css('../button/button');
+	@include meta.load-css('../copy-field/copy-field');
+	@include meta.load-css('../settings-card/settings-card');
+	@include meta.load-css('../locked-card/locked-card');
+	@include meta.load-css('../page/page');
+	@include meta.load-css('../page-tabs/page-tabs');
+	@include meta.load-css('../nav/nav');
+	@include meta.load-css('../toast/toast');
+	@include meta.load-css('../confirm-dialog/confirm-dialog');
+	@include meta.load-css('../tabs/tabs');
+	@include meta.load-css('../expandable-row/expandable-row');
+	@include meta.load-css('../matrix/matrix');
+	@include meta.load-css('../icon-note/icon-note');
+	@include meta.load-css('../skeleton/skeleton');
+	@include meta.load-css('../image-picker/image-picker');
+	@include meta.load-css('../range/range');
+	@include meta.load-css('../token-picker/token-picker');
+	@include meta.load-css('../notice/notice');
+	@include meta.load-css('../steps/steps');
+	@include meta.load-css('../disclosure/disclosure');
+	@include meta.load-css('../notification-center/notification-center');
+}

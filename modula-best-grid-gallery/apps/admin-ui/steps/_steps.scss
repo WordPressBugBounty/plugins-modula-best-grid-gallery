@@ -1,0 +1,47 @@
+.modula-admin-steps {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.modula-admin-steps__item {
+	display: flex;
+	gap: 12px;
+	margin: 0;
+}
+
+.modula-admin-steps__number {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	background: var(--modula-admin-ink);
+	color: var(--modula-admin-ink-inverse);
+	font-size: var(--modula-admin-text-mono);
+	font-weight: 600;
+	// An inherited tall line box puts the numeral (no descender) above the
+	// middle of the chip; a 1em line box centers it.
+	line-height: 1;
+}
+
+.modula-admin-steps__body {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	gap: 8px;
+	min-width: 0;
+	padding-top: 2px;
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-result);
+	line-height: 1.45;
+
+	p {
+		margin: 0;
+	}
+}

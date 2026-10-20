@@ -63,6 +63,7 @@ import { useWatermarkPreviewSelection } from '../context/WatermarkPreviewSelecti
 import { useQueryClient } from '@tanstack/react-query';
 import {
 	AppearanceToggle,
+	GalleryModal,
 	SettingsEditorErrorBoundary,
 	SidebarRailFooter,
 	useTakeoverSaveStatus,
@@ -73,7 +74,6 @@ import {
 	useGalleryBootstrapQuery,
 } from '../query/useGalleryBootstrapQuery';
 
-import GalleryModal from '../components/gallery-modal/GalleryModal';
 import GalleryTakeoverTopBar from '../components/shell/GalleryTakeoverTopBar';
 import SchemaCollapsibleFieldGroup from '../components/schema/SchemaCollapsibleFieldGroup';
 import SchemaCompositeRow from '../components/schema/SchemaCompositeRow';

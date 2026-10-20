@@ -7,6 +7,9 @@ defined( 'ABSPATH' ) || exit;
 final class Proofing_Email {
 	public const SEND = 'modula/send-proofing-invitation';
 
+	/** Outcome results the Pro executor sets; Contract::outcome() adds the target gallery. */
+	private const RESULTS = array( 'proofing_email' );
+
 	/** @return array<int,string> */
 	public static function names(): array {
 		return array( self::SEND );
@@ -26,11 +29,12 @@ final class Proofing_Email {
 	 * Only an enabled, contract-ready package must expose this executor.
 	 */
 	public static function executor_ready( string $name ): bool {
-		return Proofing::service_executor_ready(
-			$name,
-			self::executor_methods(),
-			'\Modula_Pro\Extensions\Image_Proofing\Abilities\Email_Executor'
-		);
+		return Proofing::package_owns_helpers()
+			&& Proofing::service_executor_ready(
+				$name,
+				self::executor_methods(),
+				'\Modula_Pro\Extensions\Image_Proofing\Abilities\Email_Executor'
+			);
 	}
 
 	/** @return array<string,callable> */
@@ -89,7 +93,7 @@ final class Proofing_Email {
 					),
 					array( 'id', 'invitation_id', 'recipient', 'revision', 'request_id' )
 				),
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( self::SEND, self::RESULTS ),
 			),
 		);
 	}

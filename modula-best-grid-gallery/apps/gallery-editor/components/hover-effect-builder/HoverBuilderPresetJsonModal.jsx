@@ -1,7 +1,7 @@
 import { useId, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { ActionRow, Button, FieldStack, Textarea } from 'shared-ui';
-import GalleryModal from '../gallery-modal/GalleryModal';
+import { GalleryModal } from 'editor-shell';
 import { getMatchingPresetId } from './hoverBuilderPresets';
 
 const IMPORTABLE_BUILDER_KEYS = new Set([

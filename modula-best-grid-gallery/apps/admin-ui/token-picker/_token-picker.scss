@@ -1,0 +1,105 @@
+@use '../styles/mixins';
+
+.modula-admin-token-picker {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	width: 100%;
+}
+
+.modula-admin-token-picker__tokens {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.modula-admin-token-picker__token {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	height: 30px;
+	margin: 0;
+	padding: 0 2px 0 10px;
+	border: 1px solid var(--modula-admin-border);
+	border-radius: var(--modula-admin-radius-pill);
+	background: var(--modula-admin-surface-sunken);
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-control);
+}
+
+.modula-admin-token-picker__remove {
+	@include mixins.button-reset;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	border-radius: 50%;
+	color: var(--modula-admin-ink-soft);
+
+	&:focus-visible {
+		@include mixins.focus-ring;
+		outline-offset: 0;
+	}
+
+	&:disabled {
+		opacity: var(--modula-admin-disabled-opacity);
+		cursor: default;
+	}
+
+	&:hover:not(:disabled) {
+		@include mixins.list-hover;
+		color: var(--modula-admin-ink);
+	}
+}
+
+.modula-admin-token-picker__search {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	width: var(--modula-admin-field-width);
+	max-width: 100%;
+}
+
+// The results push the rows below down instead of overlapping them: a
+// card body clips what overflows it.
+.modula-admin-token-picker__results {
+	max-height: 240px;
+	margin: 0;
+	padding: 4px 0;
+	overflow-y: auto;
+	border: 1px solid var(--modula-admin-border);
+	border-radius: var(--modula-admin-radius-lg);
+	background: var(--modula-admin-surface);
+	list-style: none;
+
+	&[hidden] {
+		display: none;
+	}
+}
+
+.modula-admin-token-picker__result {
+	margin: 0;
+	padding: 9px 14px;
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-result);
+	cursor: pointer;
+
+	&:hover,
+	&.is-active {
+		@include mixins.list-hover;
+	}
+}
+
+.modula-admin-token-picker__status {
+	margin: 0;
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-help);
+
+	&:empty {
+		display: none;
+	}
+}

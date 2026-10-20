@@ -23,6 +23,7 @@ import {
 	useLegacyPlacement as getLegacyPlacementMode,
 	getPictureSourcesForItem,
 	getImgStyleForItem,
+	getRenderedImageWidth,
 	parseItemFocalPoint,
 	parseItemFocalCrop,
 	buildImgAttrs,
@@ -165,14 +166,6 @@ export function getGalleryItemViewModel(itemData, config, options = {}) {
 		item?.width ??
 		null;
 
-	const effectiveSizes = getEffectiveSizes({
-		slotWidth,
-		imageSizes,
-		lazyLoad: item.lazyLoad ?? config?.lazyLoad,
-		config,
-		spanWidth,
-	});
-
 	const valign =
 		itemData?.valign ?? item.imgAttributes?.['data-valign'] ?? 'middle';
 	const halign =
@@ -211,6 +204,39 @@ export function getGalleryItemViewModel(itemData, config, options = {}) {
 		captionBelowNaturalFlow,
 		objectFit: resolvedObjectFit,
 		objectPosition: resolvedObjectPosition,
+	});
+
+	// A covered or zoomed image renders wider than its tile; a letterboxed
+	// (contain) one never does. `sizes` must describe the image, not the tile.
+	const renderedWidth = getRenderedImageWidth({
+		useLegacy,
+		slotWidth,
+		slotHeight,
+		intrinsicWidth,
+		intrinsicHeight,
+		focalPoint,
+		focalCrop,
+		captionBelowNaturalFlow,
+		objectFit: resolvedObjectFit,
+	});
+	// Before the tile is measured, custom-grid sizes are estimated from spans.
+	const spanHeight =
+		itemData?.height ??
+		item?.itemAttributes?.['data-height'] ??
+		item?.height ??
+		null;
+	const customGridCover =
+		resolvedObjectFit === 'cover'
+			? { spanHeight, intrinsicWidth, intrinsicHeight }
+			: null;
+
+	const effectiveSizes = getEffectiveSizes({
+		renderedWidth,
+		imageSizes,
+		lazyLoad: item.lazyLoad ?? config?.lazyLoad,
+		config,
+		spanWidth,
+		customGridCover,
 	});
 
 	const pictureSources = getPictureSourcesForItem({ itemData });

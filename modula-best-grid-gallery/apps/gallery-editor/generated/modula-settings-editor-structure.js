@@ -613,6 +613,7 @@ export default {
 							summaryKind: "zoom",
 							groupedPaths: [
 								"zoom.sectionStyle",
+								"zoom.zoomOnHover",
 								"zoom.zoomType",
 								"zoom.zoomEffect",
 								"zoom.sectionMagnifiedWindow",

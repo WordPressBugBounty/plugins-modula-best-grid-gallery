@@ -9,6 +9,9 @@ defined( 'ABSPATH' ) || exit;
 final class Replacement {
 	public const READ  = 'modula/read-attachment-file';
 	public const WRITE = 'modula/replace-attachment-file';
+
+	/** Outcome results the replacement sets. */
+	private const RESULTS = array( 'file' );
 	public static function available(): bool {
 		return Media_Folders::can_manage() && class_exists( File_Ops_Controller::class ) && class_exists( Mutation_Lock::class );
 	}
@@ -85,7 +88,7 @@ final class Replacement {
 					),
 					array( 'id', 'revision', 'request_id', 'filename', 'content_base64' )
 				),
-				'output_schema' => Contract::outcome_schema(),
+				'output_schema' => Contract::outcome( self::WRITE, self::RESULTS ),
 			),
 		);
 	}

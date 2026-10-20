@@ -1,0 +1,40 @@
+.modula-admin-plan-badge {
+	display: inline-flex;
+	align-items: center;
+	height: 24px;
+	padding: 0 10px;
+	border-radius: var(--modula-admin-radius-pill);
+	background: var(--modula-admin-plan-surface);
+	color: var(--modula-admin-plan-ink);
+	font-size: var(--modula-admin-text-badge);
+	font-weight: 500;
+}
+
+.modula-admin-locked__fieldset {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.modula-admin-locked__footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+	min-height: var(--modula-admin-row-min-height);
+	padding: var(--modula-admin-row-padding-y) var(--modula-admin-row-padding-x);
+	border-top: 1px solid var(--modula-admin-border);
+	background: var(--modula-admin-surface-sunken);
+}
+
+.modula-admin-locked__lock {
+	display: flex;
+	color: var(--modula-admin-ink-soft);
+}
+
+.modula-admin-locked__text {
+	flex: 1 1 200px;
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-help);
+}

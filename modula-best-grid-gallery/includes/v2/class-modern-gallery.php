@@ -340,6 +340,8 @@ final class Modern_Gallery {
 					'loadingGallery' => esc_html__( 'Loading gallery…', 'modula-best-grid-gallery' ),
 					'loadingFailed'  => esc_html__( 'Could not load gallery.', 'modula-best-grid-gallery' ),
 					'tryAgain'       => esc_html__( 'Try again', 'modula-best-grid-gallery' ),
+					'previous'       => esc_html__( 'Previous', 'modula-best-grid-gallery' ),
+					'next'           => esc_html__( 'Next', 'modula-best-grid-gallery' ),
 				),
 			)
 		);

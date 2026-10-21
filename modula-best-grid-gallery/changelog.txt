@@ -1,3 +1,6 @@
+= 3.0.15 - 21.10.2026 =
+Fixed: The Previous and Next pagination buttons in Beta galleries can now be translated.
+
 = 3.0.13 - 14.10.2026 =
 Added: Freeform gallery type: place and stack images freely on the desktop canvas with alignment guides; tablet and mobile layouts are built automatically.
 Added: Custom Grid shows alignment guides while you move and resize tiles, including in the preview.

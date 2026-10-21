@@ -418,6 +418,8 @@ class Modula_Shortcode_Modern {
 					'strings'    => array(
 						'loadingGallery' => esc_html__( 'Loading gallery…', 'modula-best-grid-gallery' ),
 						'loadingFailed'  => esc_html__( 'Could not load gallery.', 'modula-best-grid-gallery' ),
+						'previous'       => esc_html__( 'Previous', 'modula-best-grid-gallery' ),
+						'next'           => esc_html__( 'Next', 'modula-best-grid-gallery' ),
 					),
 				)
 			);

@@ -117,7 +117,7 @@ export default function PaginationControls() {
 				onClick={() => goToPage(currentPage - 1)}
 				aria-label="Previous page"
 			>
-				Previous
+				{window.modulaGallery?.strings?.previous || 'Previous'}
 			</button>
 			{linkItems.map((item, index) => {
 				if (item.type === 'ellipsis') {
@@ -155,7 +155,7 @@ export default function PaginationControls() {
 				onClick={() => goToPage(currentPage + 1)}
 				aria-label="Next page"
 			>
-				Next
+				{window.modulaGallery?.strings?.next || 'Next'}
 			</button>
 		</nav>
 	);

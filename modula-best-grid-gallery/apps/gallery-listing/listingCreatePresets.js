@@ -6,7 +6,10 @@
  */
 
 /**
- * @typedef {{ id: number, title: string, summary: string, isDefault: boolean }} CreatePreset
+ * `classicEditor` is false when the preset layout is one the classic editor
+ * can't show (e.g. Freeform); rows without the flag (older Pro) keep true.
+ *
+ * @typedef {{ id: number, title: string, summary: string, isDefault: boolean, classicEditor: boolean }} CreatePreset
  * @typedef {{ presets: CreatePreset[], defaultPreset: CreatePreset | null }} CreatePresetOptions
  */
 
@@ -46,6 +49,21 @@ function toCreatePreset(row, defaultId) {
 		title,
 		summary: 'string' === typeof row.summary ? row.summary : '',
 		isDefault: id === defaultId,
+		classicEditor: false !== row.classicEditor,
+	};
+}
+
+/**
+ * @param {CreatePreset[]} presets Normalized presets.
+ * @return {CreatePresetOptions | null} Menu model, or null when no preset is offered.
+ */
+function toPresetOptions(presets) {
+	if (!presets.length) {
+		return null;
+	}
+	return {
+		presets,
+		defaultPreset: presets.find((preset) => preset.isDefault) ?? null,
 	};
 }
 
@@ -58,14 +76,23 @@ export function getCreatePresetOptions(config) {
 		? config.galleryPresets
 		: [];
 	const defaultId = toPresetId(config?.defaultGalleryPresetId);
-	const presets = rows
-		.map((row) => toCreatePreset(row, defaultId))
-		.filter(Boolean);
-	if (!presets.length) {
+	return toPresetOptions(
+		rows.map((row) => toCreatePreset(row, defaultId)).filter(Boolean)
+	);
+}
+
+/**
+ * The classic editor's New from preset list leaves out presets it would open
+ * without their layout; they stay in the new editor's list.
+ *
+ * @param {CreatePresetOptions | null} options New editor menu model.
+ * @return {CreatePresetOptions | null} Classic menu model, or null when no preset is left.
+ */
+export function getClassicPresetOptions(options) {
+	if (!options) {
 		return null;
 	}
-	return {
-		presets,
-		defaultPreset: presets.find((preset) => preset.isDefault) ?? null,
-	};
+	return toPresetOptions(
+		options.presets.filter((preset) => preset.classicEditor)
+	);
 }

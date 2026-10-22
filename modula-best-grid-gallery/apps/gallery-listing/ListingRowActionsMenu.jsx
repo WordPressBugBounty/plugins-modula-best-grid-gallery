@@ -14,7 +14,7 @@ import {
 	trash,
 	undo,
 } from '@wordpress/icons';
-import { copyText } from './copyText';
+import { copyText } from 'admin-ui/copy-field/copyText';
 import { getGalleryListingConfig } from './config';
 import {
 	ListingDropdown,

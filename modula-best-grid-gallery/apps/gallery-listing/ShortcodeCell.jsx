@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Popover } from '@wordpress/components';
 import { Icon, check, chevronDown, copy } from '@wordpress/icons';
-import { copyText } from './copyText';
+import { copyText } from 'admin-ui/copy-field/copyText';
 import { listingRowToFields } from './listingRowToFields';
 
 /** Below this td width, show icon-only shortcode controls. */

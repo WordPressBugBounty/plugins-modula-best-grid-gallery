@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
 import { Icon, close } from '@wordpress/icons';
 import { EditorChoiceSplitButton } from './EditorChoiceSplitButton';
 import { skipActiveViewTransition } from './completeEditorChoice';
+import { getClassicPresetOptions } from './listingCreatePresets';
 
 /**
  * Esc inside the New from preset menu closes the menu, not the whole modal.
@@ -150,9 +151,11 @@ export function EditorChoiceModal({
 		onChoose(choice, start);
 	};
 
+	// Classic leaves out presets it can't show; with none left it keeps a plain button.
 	const editorChoices = [
 		{
 			choice: 'classic',
+			presetOptions: getClassicPresetOptions(presetOptions),
 			className: SECONDARY_BUTTON_CLASS,
 			content: __('Not now', 'modula-best-grid-gallery'),
 			menuLabel: __(
@@ -166,6 +169,7 @@ export function EditorChoiceModal({
 		},
 		{
 			choice: 'beta',
+			presetOptions,
 			className: PRIMARY_BUTTON_CLASS,
 			content: (
 				<>
@@ -295,13 +299,13 @@ export function EditorChoiceModal({
 					</div>
 					<div className="modula-editor-choice-modal__actions">
 						{editorChoices.map((option) =>
-							presetOptions ? (
+							option.presetOptions ? (
 								<EditorChoiceSplitButton
 									key={option.choice}
 									className={option.className}
 									menuLabel={option.menuLabel}
 									arrowLabel={option.arrowLabel}
-									presetOptions={presetOptions}
+									presetOptions={option.presetOptions}
 									settingsUrl={settingsUrl}
 									onChoose={(start) =>
 										handleChoose(option.choice, start)

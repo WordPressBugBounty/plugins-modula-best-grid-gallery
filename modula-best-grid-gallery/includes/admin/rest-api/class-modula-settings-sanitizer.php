@@ -141,7 +141,58 @@ class Modula_Settings_Sanitizer {
 
 		$sanitized = $this->strip_leading_empty_paragraphs( $sanitized );
 
-		return $sanitized;
+		return self::strip_mce_attributes( $sanitized );
+	}
+
+	/**
+	 * Remove the `data-mce-*` attributes TinyMCE leaves in saved HTML.
+	 *
+	 * kses allows every `data-*` attribute, so bodies saved by the old
+	 * TinyMCE email editor keep them. Other `data-*` attributes and text,
+	 * including `{{placeholders}}`, are left as they are. Compatible Pro
+	 * cleans stored email bodies on read through this same helper.
+	 *
+	 * @param string $html HTML content.
+	 * @return string
+	 */
+	public static function strip_mce_attributes( $html ) {
+		// A start tag; quoted attribute values may contain `>`.
+		$stripped = preg_replace_callback(
+			'/<[a-z][^\s\/>]*(?:"[^"]*"|\'[^\']*\'|[^"\'>])*>/i',
+			array( __CLASS__, 'strip_mce_attributes_from_tag' ),
+			$html
+		);
+
+		return is_string( $stripped ) ? $stripped : $html;
+	}
+
+	/**
+	 * Remove the `data-mce-*` attributes from one start tag.
+	 *
+	 * Each attribute is matched with its whole value, so attribute-like text
+	 * inside another attribute's value is never touched.
+	 *
+	 * @param array $tag_match preg match; index 0 is the start tag.
+	 * @return string
+	 */
+	private static function strip_mce_attributes_from_tag( $tag_match ) {
+		$stripped = preg_replace_callback(
+			'/\s+([^\s"\'\/>=]+)(?:\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s"\'>]+))?/',
+			array( __CLASS__, 'drop_mce_attribute' ),
+			$tag_match[0]
+		);
+
+		return is_string( $stripped ) ? $stripped : $tag_match[0];
+	}
+
+	/**
+	 * Drop one attribute when it is a `data-mce-*` attribute.
+	 *
+	 * @param array $attribute_match preg match; index 1 is the attribute name.
+	 * @return string
+	 */
+	private static function drop_mce_attribute( $attribute_match ) {
+		return 0 === stripos( $attribute_match[1], 'data-mce-' ) ? '' : $attribute_match[0];
 	}
 
 	/**

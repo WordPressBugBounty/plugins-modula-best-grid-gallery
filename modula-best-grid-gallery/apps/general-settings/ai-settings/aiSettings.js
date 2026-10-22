@@ -5,8 +5,8 @@ import { LANGUAGES } from './settings-form/languages';
 // their current values with the credits.
 export const AI_API_KEY_OPTION = 'modula_ai_api_key';
 export const AI_LANGUAGE_OPTION = 'modula_ai_language';
-// Where a new API key is claimed.
-export const AI_CLAIM_URL = 'https://wp-modula.com/my-account';
+// Where a new API key is claimed: the Modula AI key tab of the store account.
+export const AI_CLAIM_URL = 'https://wp-modula.com/my-new-account/#/ai-key';
 
 /**
  * The AI language to show: the one the AI settings route returns (stored, or

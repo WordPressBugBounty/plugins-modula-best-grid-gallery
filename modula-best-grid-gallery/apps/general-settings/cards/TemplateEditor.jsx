@@ -1,12 +1,18 @@
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Segmented } from 'admin-ui';
-import { htmlFromVisual, insertPlaceholder, visualText } from './emailTemplate';
+import {
+	htmlFromVisual,
+	insertPlaceholder,
+	visualPlaceholder,
+	visualText,
+} from './emailTemplate';
 
 /**
  * An email template's message: a Visual/Code switch, the text, and Insert
  * chips for the template's placeholders. Visual shows the body as
- * paragraphs (see emailTemplate.js), Code the stored HTML; both edit the
+ * paragraphs with links as `[label](url)` (see emailTemplate.js), and its
+ * link chips insert a whole link token; Code the stored HTML; both edit the
  * same stored HTML. A body Visual cannot show opens in Code, with Visual
  * unavailable.
  *
@@ -80,7 +86,11 @@ export function TemplateEditor({ id, label, value, onChange, placeholders }) {
 			textarea && shown === caretText.current
 				? { start: textarea.selectionStart, end: textarea.selectionEnd }
 				: null;
-		const inserted = insertPlaceholder(shown, token, selection);
+		const inserted = insertPlaceholder(
+			shown,
+			isVisual ? visualPlaceholder(token, placeholders) : token,
+			selection
+		);
 		pendingCaret.current = inserted.caret;
 		editText(inserted.value);
 	};

@@ -147,8 +147,8 @@ class Modula_Dashboard {
 	 *     partners?: array<int, array<string, mixed>>|null
 	 * } The view to show (see current_view()); where the cards and the help
 	 *   box lead (keyed by documentation, settings, galleries, extensions,
-	 *   facebookGroup, supportForum and aboutUs); the common use cases; and, on
-	 *   Partners only, the partner plugins (see partners()).
+	 *   supportForum and aboutUs); the common use cases; and, on Partners
+	 *   only, the partner plugins (see partners()).
 	 */
 	private function getting_started_data() {
 		$links = array(
@@ -156,7 +156,6 @@ class Modula_Dashboard {
 			'settings'      => admin_url( 'edit.php?post_type=' . $this->plugin_cpt . '&page=modula' ),
 			'galleries'     => admin_url( 'edit.php?post_type=' . $this->plugin_cpt ),
 			'extensions'    => $this->plugin_link['extensions'],
-			'facebookGroup' => $this->plugin_link['fbcommunity'],
 			'supportForum'  => $this->plugin_link['support'],
 			'aboutUs'       => 'https://wpchill.com/about/',
 		);

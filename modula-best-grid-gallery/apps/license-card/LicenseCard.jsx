@@ -586,17 +586,12 @@ function LicenseCardSkeleton() {
 }
 
 /**
- * The license card (ADR 0049): the Modula Pro license on this site and its
- * key actions. Render it only with Compatible Pro; it loads the license
- * itself and needs the page's `QueryClientProvider`. It reads no page
- * globals, so any Modula admin screen can show it.
+ * The card for the license query's state: loading, failed or loaded.
  *
  * @param {Object}   props
- * @param {Function} [props.onLicenseChange] Called after a key is activated or
- *                                           deactivated, when the plan (and so
- *                                           the available extensions) may change.
+ * @param {Function} [props.onLicenseChange]
  */
-export function LicenseCard({ onLicenseChange }) {
+function LicenseCardState({ onLicenseChange }) {
 	const query = useLicenseQuery();
 
 	if (query.isPending) {
@@ -626,5 +621,25 @@ export function LicenseCard({ onLicenseChange }) {
 			license={query.data}
 			onLicenseChange={onLicenseChange}
 		/>
+	);
+}
+
+/**
+ * The license card (ADR 0049): the Modula Pro license on this site and its
+ * key actions. Render it only with Compatible Pro; it loads the license
+ * itself and needs the page's `QueryClientProvider`. It reads no page
+ * globals, so any Modula admin screen can show it.
+ *
+ * @param {Object}   props
+ * @param {Function} [props.onLicenseChange] Called after a key is activated or
+ *                                           deactivated, when the plan (and so
+ *                                           the available extensions) may change.
+ */
+export function LicenseCard({ onLicenseChange }) {
+	// Every state lays itself out by this box's width (_license-card.scss).
+	return (
+		<div className="modula-license-card-container">
+			<LicenseCardState onLicenseChange={onLicenseChange} />
+		</div>
 	);
 }

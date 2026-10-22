@@ -24,6 +24,7 @@ import {
 	rowHelpId,
 	rowLabelId,
 } from 'admin-ui';
+import { AI_CLAIM_URL } from '../general-settings/ai-settings/aiSettings';
 import {
 	ExpandableStates,
 	HeaderStates,
@@ -542,9 +543,7 @@ function CardExample() {
 				<SettingsRow
 					label="API key"
 					controlId="demo-ai-key"
-					description={
-						<a href="https://wp-modula.com/my-account">Get a key</a>
-					}
+					description={<a href={AI_CLAIM_URL}>Get a key</a>}
 					help="Your API key is valid and you have 120 credits left"
 				>
 					<TextInput

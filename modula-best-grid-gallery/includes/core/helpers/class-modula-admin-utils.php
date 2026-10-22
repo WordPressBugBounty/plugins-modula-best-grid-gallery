@@ -24,7 +24,6 @@ class Modula_Admin_Utils {
 			'extensions'    => admin_url( 'edit.php?post_type=modula-gallery&page=modula-addons' ),
 			'lite_vs_pro'   => 'https://wp-modula.com/free-vs-pro/?utm_source=modula-lite&utm_medium=link&utm_campaign=upsell&utm_term=lite-vs-pro',
 			'support'       => 'https://wordpress.org/support/plugin/modula-best-grid-gallery/',
-			'fbcommunity'   => 'https://www.facebook.com/groups/wpmodula/',
 			'changelog'     => 'https://wp-modula.com/changelog/?utm_source=modula-lite&utm_medium=link&utm_campaign=settings&utm_term=changelog',
 		);
 

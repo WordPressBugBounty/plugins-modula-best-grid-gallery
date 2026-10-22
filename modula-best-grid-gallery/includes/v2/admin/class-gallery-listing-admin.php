@@ -271,8 +271,10 @@ class Gallery_Listing_Admin {
 		 * Filters the gallery listing bootstrap.
 		 *
 		 * New from preset keys, filled by Pro Defaults (Lite only reads them):
-		 * - `galleryPresets`: list of `{ id: int, title: string, summary?: string }`.
+		 * - `galleryPresets`: list of `{ id: int, title: string, summary?: string, classicEditor?: bool }`.
 		 *   Empty keeps the plain New gallery editor choice (no arrows, no footer line).
+		 *   `classicEditor: false` leaves the preset out of the classic list (its layout,
+		 *   e.g. Freeform, has no classic equivalent); missing means true.
 		 * - `defaultGalleryPresetId`: usable Default preset ID, 0 for none.
 		 *
 		 * @param array<string, mixed> $config Listing bootstrap.

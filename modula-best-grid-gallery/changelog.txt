@@ -1,3 +1,13 @@
+= 3.0.16 - 22.10.2026 =
+Fixed: Copy shortcode works on sites that are not served over HTTPS.
+Fixed: Settings › Connections no longer shows an account as connected when your plan does not include it.
+Fixed: Email templates no longer keep leftover editor code in their links.
+Fixed: Starting a classic gallery from a preset only offers presets the classic editor can show.
+Improved: The Visual email editor shows links as [text](link) instead of HTML.
+Improved: The License section in Settings shows your plan and key on one line.
+Changed: The Get a key link in Smart Captions opens the Modula AI key page of your account.
+Removed: The Facebook Community link from Getting Started.
+
 = 3.0.15 - 21.10.2026 =
 Fixed: The Previous and Next pagination buttons in Beta galleries can now be translated.
 

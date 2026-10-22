@@ -4,7 +4,6 @@
  * @property {string} settings      Modula Settings.
  * @property {string} galleries     The gallery list.
  * @property {string} extensions    Modula › Extensions.
- * @property {string} facebookGroup The Modula Facebook group.
  * @property {string} supportForum  The wordpress.org support forum.
  * @property {string} aboutUs       The WPChill about page.
  */

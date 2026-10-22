@@ -2,22 +2,9 @@ import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Button } from '../button/Button';
 import { CheckIcon, CopyIcon } from '../icons/icons';
+import { copyText } from './copyText';
 
 const RESET_AFTER_MS = 1600;
-
-/**
- * Writes text to the clipboard.
- *
- * @param {string} text
- * @return {Promise<void>} Rejects when the Clipboard API is missing or refuses.
- */
-function writeClipboard(text) {
-	if (!window.navigator?.clipboard?.writeText) {
-		return Promise.reject(new Error('Clipboard API unavailable'));
-	}
-
-	return window.navigator.clipboard.writeText(text);
-}
 
 /**
  * A read-only value (shortcode, URL, config) with a Copy button that
@@ -54,7 +41,7 @@ export function CopyField({
 	}, [status]);
 
 	const copy = () => {
-		writeClipboard(value).then(
+		copyText(value).then(
 			() => setStatus('copied'),
 			() => setStatus('failed')
 		);

@@ -114,14 +114,17 @@ function accountActions(oauth, connected) {
 }
 
 /**
- * One account row.
+ * One account row. A locked account is never connected.
  *
  * @param {Object} field Account field.
  * @return {Object} Row.
  */
 function accountRow(field) {
 	const oauth = oauthOf(field);
-	const connected = true === oauth.status?.connected;
+	// Pro's plan badges lock an account the plan lacks (no license, no plan).
+	// The token stays stored, so it connects again once the plan includes it.
+	const locked = true === field.locked;
+	const connected = !locked && true === oauth.status?.connected;
 
 	return {
 		id: field.id,
@@ -132,7 +135,7 @@ function accountRow(field) {
 			: oauth.status?.textDisconnected,
 		actions: accountActions(oauth, connected),
 		docs: oauth.docs?.href ? oauth.docs : null,
-		locked: true === field.locked,
+		locked,
 		// The plan slug, as the projection keeps it for cards; '' means none.
 		badge:
 			'string' === typeof field.badge && '' !== field.badge

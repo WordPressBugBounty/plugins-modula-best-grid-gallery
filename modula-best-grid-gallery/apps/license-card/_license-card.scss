@@ -2,9 +2,14 @@
 // "7 · Extensions" artboard's. A host app `@use`s this after admin-ui's
 // styles and renders the card inside `AdminUiRoot`.
 @use "../admin-ui/styles/mixins";
-@use "../admin-ui/page/stacked";
 
 .modula-admin-ui {
+
+	// The card lays itself out by its own width, which depends on the host
+	// page (Settings has a nav beside it, Extensions does not).
+	.modula-license-card-container {
+		container: modula-license-card / inline-size;
+	}
 
 	.modula-license-card {
 		display: flex;
@@ -181,14 +186,15 @@
 		flex-grow: 1;
 		gap: 14px;
 		min-width: 0;
-		max-width: 760px;
 
 		.modula-license-card__title-line {
 			min-height: var(--modula-admin-hit-target);
 		}
 	}
 
+	// The form fills the card; only its prose keeps a readable line length.
 	.modula-license-card__intro {
+		max-width: 760px;
 		margin: -6px 0 0;
 		color: var(--modula-admin-ink-soft);
 		font-size: var(--modula-admin-text-control);
@@ -276,9 +282,28 @@
 		}
 	}
 
-	// Narrow screens: the sites and actions go under the license, and the
-	// key field takes its own line above Activate.
-	@media (max-width: stacked.$breakpoint) {
+	// Narrower than the artboard's 1100px (Settings, a smaller window): the
+	// sites go under the license, so the plan name and the key keep room
+	// for one line each.
+	@container modula-license-card (640px <= width < 1100px) {
+
+		.modula-license-card:not(.is-form) {
+			display: grid;
+			grid-template-columns: auto minmax(0, 1fr) auto;
+			row-gap: 16px;
+		}
+
+		// The icon, the license and the actions fill the first row in source
+		// order; only the sites are placed, under the license.
+		.modula-license-card__sites {
+			grid-row: 2;
+			grid-column: 2;
+		}
+	}
+
+	// A narrow card (phones): the sites and actions go under the license,
+	// and the key field takes its own line above Activate.
+	@container modula-license-card (width < 640px) {
 
 		.modula-license-card {
 			flex-wrap: wrap;

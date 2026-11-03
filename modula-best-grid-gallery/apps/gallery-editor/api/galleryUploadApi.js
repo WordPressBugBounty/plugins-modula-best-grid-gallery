@@ -268,14 +268,38 @@ export async function uploadBrowserImageFilesToGallery(
 	if (!ids.length) {
 		return { ids: [] };
 	}
-	const pos = opts.uploadPosition === 'start' ? 'start' : 'end';
-	await runPersistTask(async () => {
+	await addAttachmentsToGallery(
+		galleryId,
+		ids,
+		opts.uploadPosition,
+		runPersistTask
+	);
+	return { ids };
+}
+
+/**
+ * Add existing attachments to the gallery at the insert position, through
+ * the save-bar serialiser. The server skips attachments already in it.
+ *
+ * @param {number}                                                            galleryId
+ * @param {number[]}                                                          ids            Attachment ids.
+ * @param {string}                                                            uploadPosition `start`; anything else adds at the end.
+ * @param {(fn: () => void | Promise<void>, label?: string) => Promise<void>} runPersistTask Save-bar serialiser from TakeoverSaveStatusContext.
+ * @return {Promise<void>}
+ */
+export function addAttachmentsToGallery(
+	galleryId,
+	ids,
+	uploadPosition,
+	runPersistTask
+) {
+	const pos = uploadPosition === 'start' ? 'start' : 'end';
+	return runPersistTask(async () => {
 		await galleryUploadPost(galleryId, 'add-images', {
 			ids,
 			upload_position: pos,
 		});
 	}, 'gallery-add-images');
-	return { ids };
 }
 
 export async function runZipAttachmentPipeline(

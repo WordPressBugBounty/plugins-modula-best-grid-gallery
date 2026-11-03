@@ -1,12 +1,13 @@
 import { useEffect, useRef } from '@wordpress/element';
 
 /**
- * Sync takeover auxiliary column from active category / nested stack frame.
+ * Sync the takeover auxiliary column with the active category: open the
+ * category's own panel, and close a panel the settings opened (the hover
+ * effect builder) when the tab changes.
  *
  * @param {{
  *   categories: Array<{name: string, auxiliaryPanel?: {kind: string} | null}>,
  *   activeCategory: string,
- *   stack: Array<{ auxiliaryPanel?: {kind: string} | null }>,
  *   auxiliary: { openedFrom?: string } | null | undefined,
  *   openFromCategory: (categoryName: string, descriptor: object) => void,
  *   closePanel: () => void,
@@ -15,7 +16,6 @@ import { useEffect, useRef } from '@wordpress/element';
 export function useTakeoverAuxiliarySync({
 	categories,
 	activeCategory,
-	stack,
 	auxiliary,
 	openFromCategory,
 	closePanel,
@@ -28,28 +28,20 @@ export function useTakeoverAuxiliarySync({
 			return;
 		}
 		const cat = categories.find((c) => c.name === activeCategory);
-		const top = stack.length > 0 ? stack[stack.length - 1] : null;
-		const stackAux =
-			top &&
-			top.auxiliaryPanel &&
-			typeof top.auxiliaryPanel === 'object' &&
-			typeof top.auxiliaryPanel.kind === 'string' &&
-			top.auxiliaryPanel.kind !== ''
-				? top.auxiliaryPanel
-				: null;
 		const catAux =
-			stack.length === 0 &&
 			cat?.auxiliaryPanel &&
 			typeof cat.auxiliaryPanel === 'object' &&
 			typeof cat.auxiliaryPanel.kind === 'string' &&
 			cat.auxiliaryPanel.kind !== ''
 				? cat.auxiliaryPanel
 				: null;
-		const desc = stackAux || catAux;
-		if (desc) {
-			openFromCategory(activeCategory, desc);
-		} else if (auxiliaryRef.current?.openedFrom === 'category') {
+		if (catAux) {
+			openFromCategory(activeCategory, catAux);
+			return;
+		}
+		const openedFrom = auxiliaryRef.current?.openedFrom;
+		if (openedFrom === 'category' || openedFrom === 'settings') {
 			closePanel();
 		}
-	}, [categories, activeCategory, stack, openFromCategory, closePanel]);
+	}, [categories, activeCategory, openFromCategory, closePanel]);
 }

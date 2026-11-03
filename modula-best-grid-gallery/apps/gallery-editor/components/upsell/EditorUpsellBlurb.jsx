@@ -4,12 +4,14 @@
  */
 
 import { __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
+import { Button } from 'admin-ui';
+import { AdminUiScope } from 'editor-shell';
 import {
 	getLightboxUpsellExtensionSlugs,
 	hasExtensionPlanUpgradeBarrier,
 	resolveExtensionUpsellBarrier,
 } from '../../logic/proGateLock';
+import { resolveLiteUpsell } from '../../logic/liteUpsell';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 import { appendQuery, withV3Utm } from 'gallery-shared/utils/withV3Utm';
 
@@ -95,48 +97,25 @@ export default function EditorUpsellBlurb({ field, wrapperClassName = '' }) {
 						__('Upgrade', 'modula-best-grid-gallery');
 			const primaryIsActivate = reason === 'needs_enable';
 			return wrap(
-				<div className="modula-settings-editor__editor-upsell">
-					{title ? (
-						<h3 className="modula-settings-editor__editor-upsell-heading">
-							{title}
-						</h3>
-					) : null}
-					<p className="modula-settings-editor__editor-upsell-text">
-						{message}
-					</p>
-					<div className="modula-settings-editor__editor-upsell-actions">
-						<Button
+				<BlurbCard title={title} message={message}>
+					{primaryIsActivate ? (
+						<BlurbLink variant="primary" href={extensionsUrl}>
+							{activateLabel}
+						</BlurbLink>
+					) : (
+						<BlurbLink
 							variant="primary"
-							href={
-								primaryIsActivate
-									? extensionsUrl
-									: upgradeHrefPro
-							}
-							target={primaryIsActivate ? undefined : '_blank'}
-							rel={
-								primaryIsActivate
-									? undefined
-									: 'noopener noreferrer'
-							}
-							className="modula-settings-editor__editor-upsell-btn modula-settings-editor__editor-upsell-btn--primary"
+							href={upgradeHrefPro}
+							newTab
 						>
-							{primaryIsActivate ? activateLabel : upgradeLabel}
-						</Button>
-					</div>
-				</div>
+							{upgradeLabel}
+						</BlurbLink>
+					)}
+				</BlurbCard>
 			);
 		}
-		const titleRaw = lightboxCfg.title;
-		const title =
-			typeof titleRaw === 'string' && titleRaw.trim() !== ''
-				? titleRaw.trim()
-				: '';
-		const msgRaw = lightboxCfg.needsProMessage;
-		const message =
-			typeof msgRaw === 'string' && msgRaw.trim() !== ''
-				? msgRaw.trim()
-				: '';
-		if (!message) {
+		const upsell = resolveLiteUpsell(schema, editor);
+		if (!upsell) {
 			return null;
 		}
 		const freeLabel =
@@ -148,60 +127,19 @@ export default function EditorUpsellBlurb({ field, wrapperClassName = '' }) {
 			lightboxCfg.compareUrl !== ''
 				? withV3Utm(lightboxCfg.compareUrl)
 				: '';
-		const premiumLabel =
-			typeof lightboxCfg.getPremiumLabel === 'string' &&
-			lightboxCfg.getPremiumLabel.trim() !== ''
-				? lightboxCfg.getPremiumLabel.trim()
-				: /* translators: primary CTA on Lite lightbox upsell */
-					__('Get Premium!', 'modula-best-grid-gallery');
-		const pricingUrl =
-			typeof lightboxCfg.pricingUrl === 'string' &&
-			lightboxCfg.pricingUrl !== ''
-				? lightboxCfg.pricingUrl
-				: '';
-		const upgradeUrl = withV3Utm(
-			pricingUrl
-				? pricingUrl
-				: appendQuery(
-						baseUpgrade,
-						'utm_source=modula-lite&utm_medium=settings-editor-lightbox&utm_campaign=upsell'
-					)
-		);
 		const showCompare = Boolean(freeLabel && compareUrl);
 
 		return wrap(
-			<div className="modula-settings-editor__editor-upsell">
-				{title ? (
-					<h3 className="modula-settings-editor__editor-upsell-heading">
-						{title}
-					</h3>
+			<BlurbCard title={upsell.title} message={upsell.message}>
+				{showCompare ? (
+					<BlurbLink variant="secondary" href={compareUrl} newTab>
+						{freeLabel}
+					</BlurbLink>
 				) : null}
-				<p className="modula-settings-editor__editor-upsell-text">
-					{message}
-				</p>
-				<div className="modula-settings-editor__editor-upsell-actions">
-					{showCompare ? (
-						<Button
-							variant="secondary"
-							href={compareUrl}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="modula-settings-editor__editor-upsell-btn modula-settings-editor__editor-upsell-btn--secondary"
-						>
-							{freeLabel}
-						</Button>
-					) : null}
-					<Button
-						variant="primary"
-						href={upgradeUrl}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="modula-settings-editor__editor-upsell-btn modula-settings-editor__editor-upsell-btn--primary"
-					>
-						{premiumLabel}
-					</Button>
-				</div>
-			</div>
+				<BlurbLink variant="primary" href={upsell.href} newTab>
+					{upsell.ctaLabel}
+				</BlurbLink>
+			</BlurbCard>
 		);
 	}
 
@@ -247,19 +185,59 @@ export default function EditorUpsellBlurb({ field, wrapperClassName = '' }) {
 		__('View plans', 'modula-best-grid-gallery');
 
 	return wrap(
-		<div className="modula-settings-editor__editor-upsell">
-			<p className="modula-settings-editor__editor-upsell-text">{body}</p>
-			<div className="modula-settings-editor__editor-upsell-actions">
-				<Button
-					variant="primary"
-					href={upgradeUrl}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="modula-settings-editor__editor-upsell-btn modula-settings-editor__editor-upsell-btn--primary"
-				>
-					{plansLabel}
-				</Button>
+		<BlurbCard message={body}>
+			<BlurbLink variant="primary" href={upgradeUrl} newTab>
+				{plansLabel}
+			</BlurbLink>
+		</BlurbCard>
+	);
+}
+
+/**
+ * The blurb in the Lite upsell card's look (`LiteUpsellCard`): an optional
+ * heading, the message, then the calls to action stacked full width.
+ *
+ * @param {Object}                    props
+ * @param {string}                    [props.title]
+ * @param {string}                    props.message
+ * @param {import('react').ReactNode} props.children The BlurbLinks.
+ */
+function BlurbCard({ title = '', message, children }) {
+	return (
+		<AdminUiScope>
+			<div className="modula-lite-upsell is-blurb">
+				{title ? (
+					<h3 className="modula-lite-upsell__heading">{title}</h3>
+				) : null}
+				<p className="modula-lite-upsell__message">{message}</p>
+				<div className="modula-lite-upsell__actions">{children}</div>
 			</div>
-		</div>
+		</AdminUiScope>
+	);
+}
+
+/**
+ * @param {Object}                    props
+ * @param {'primary'|'secondary'}     props.variant
+ * @param {string}                    props.href
+ * @param {boolean}                   [props.newTab] Opens in a new tab, and says so to screen readers.
+ * @param {import('react').ReactNode} props.children
+ */
+function BlurbLink({ variant, href, newTab = false, children }) {
+	return (
+		<Button
+			variant={variant}
+			href={href}
+			target={newTab ? '_blank' : undefined}
+			rel={newTab ? 'noopener noreferrer' : undefined}
+			className="modula-lite-upsell__cta"
+		>
+			{children}
+			{newTab ? (
+				<span className="modula-admin-sr-only">
+					{__('(opens in a new tab)', 'modula-best-grid-gallery')}
+				</span>
+			) : null}
+		</Button>
 	);
 }

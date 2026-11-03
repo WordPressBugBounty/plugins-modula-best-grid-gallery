@@ -19,10 +19,13 @@
 	line-height: 1.45;
 }
 
+// WP 7.1 gives text inputs a 40px min-height, which a smaller
+// `--modula-admin-control-height` (the editor's 32px) must undo.
 .modula-admin-text-input {
 	@include mixins.field;
 	width: 100%;
 	height: var(--modula-admin-control-height);
+	min-height: 0;
 }
 
 .modula-admin-textarea {
@@ -47,6 +50,106 @@
 		calc(100% - 14px) 55%;
 	background-size: 5px 5px, 5px 5px;
 	background-repeat: no-repeat;
+}
+
+// A unit after a number reads as muted text in a 4px inset, whether it is
+// fixed (UnitInput) or a menu (Range's unit box), so the number keeps its
+// place either way.
+@mixin unit-text {
+	padding: 2px 4px;
+	color: var(--modula-admin-ink-soft);
+	font-family: inherit;
+	font-size: var(--modula-admin-text-control);
+	line-height: 1.4;
+}
+
+// The unit menu's button after a number: plain dotted-underlined text.
+.modula-admin-unit-select {
+	@include unit-text;
+	min-height: 24px;
+	margin: 0;
+	border: 0;
+	border-radius: var(--modula-admin-radius-sm);
+	background: none;
+	box-shadow: none;
+	text-decoration: underline dotted;
+	text-underline-offset: 3px;
+	cursor: pointer;
+
+	&:focus {
+		box-shadow: none;
+		color: var(--modula-admin-ink);
+	}
+
+	&:focus-visible {
+		@include mixins.focus-ring;
+		outline-offset: 1px;
+	}
+
+	&:disabled {
+		background: none;
+		cursor: default;
+	}
+
+	&:hover:not(:disabled) {
+		background: var(--modula-admin-surface-segment);
+		color: var(--modula-admin-ink);
+	}
+}
+
+// Number and unit in one bordered field (UnitInput). The box takes the
+// field look; the number inside is unstyled.
+.modula-admin-unit-input {
+	@include mixins.field;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	width: 100%;
+	height: var(--modula-admin-control-height);
+	padding-right: 6px;
+
+	&:focus-within {
+		@include mixins.field-focus;
+	}
+
+	&.is-invalid {
+		border-color: var(--modula-admin-danger);
+	}
+
+	&.is-disabled {
+		opacity: var(--modula-admin-disabled-opacity);
+	}
+}
+
+.modula-admin-unit-input__unit {
+	@include unit-text;
+	flex: none;
+}
+
+.modula-admin-unit-input__number {
+	flex: 1 1 auto;
+	min-width: 0;
+	height: 100%;
+	// WP 7.1's 40px text-input min-height, as on `.modula-admin-text-input`.
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	box-shadow: none;
+	color: inherit;
+	font: inherit;
+	font-variant-numeric: tabular-nums;
+
+	&:focus {
+		outline: none;
+		box-shadow: none;
+	}
+
+	&:disabled {
+		background: none;
+		color: inherit;
+	}
 }
 
 .modula-admin-select {

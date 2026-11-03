@@ -11,8 +11,13 @@
  */
 
 /**
+ * `Modal` is the proofing manager (Summary and Invitations). The editor
+ * mounts it while the gallery is locked and the manager is open; it closes
+ * through `useProofingMode().closeManager` and stops proofing through
+ * `unlock`.
+ *
  * @typedef {{
- *   TakeoverShell?: ProofingSlotComponent,
+ *   Modal?: ProofingSlotComponent,
  *   api?: ImageProofingApi,
  * }} ImageProofingEditorRegistration
  */

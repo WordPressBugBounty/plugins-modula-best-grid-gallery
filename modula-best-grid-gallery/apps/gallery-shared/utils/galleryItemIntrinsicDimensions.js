@@ -34,11 +34,13 @@ function looksLikeGridSpan(width, height) {
 }
 
 /**
+ * Size of the file the row loads, from its img attributes or pixel row size.
+ *
  * @param {Object|null|undefined} itemData
  * @param {Object|null|undefined} config   Gallery config (`config.type`).
  * @return {{ width: number|undefined, height: number|undefined }}
  */
-export function resolveGalleryItemIntrinsicDimensions(itemData, config) {
+export function resolveGalleryItemLoadedFileDimensions(itemData, config) {
 	const imgAttrSource =
 		itemData?.imgAttributes || itemData?.img_attributes || {};
 	const attrWidth = positiveNumber(
@@ -60,6 +62,34 @@ export function resolveGalleryItemIntrinsicDimensions(itemData, config) {
 	const rowHeight = positiveNumber(itemData?.height);
 	if (rowWidth && rowHeight && !looksLikeGridSpan(rowWidth, rowHeight)) {
 		return { width: rowWidth, height: rowHeight };
+	}
+
+	return { width: undefined, height: undefined };
+}
+
+/**
+ * Bitmap proportions of an item, for layout and focal-crop math.
+ *
+ * Showcase, Template, Story and Video rows load the full file without
+ * dimensions, and the editor keeps those rows after a type switch. The
+ * editor-only `fullImageSize` (the attachment's original) then gives the
+ * proportions; without them an `img[sizes=auto]` lays out at Chrome's
+ * 300×150 placeholder.
+ *
+ * @param {Object|null|undefined} itemData
+ * @param {Object|null|undefined} config   Gallery config (`config.type`).
+ * @return {{ width: number|undefined, height: number|undefined }}
+ */
+export function resolveGalleryItemIntrinsicDimensions(itemData, config) {
+	const loaded = resolveGalleryItemLoadedFileDimensions(itemData, config);
+	if (loaded.width && loaded.height) {
+		return loaded;
+	}
+
+	const fullWidth = positiveNumber(itemData?.fullImageSize?.width);
+	const fullHeight = positiveNumber(itemData?.fullImageSize?.height);
+	if (fullWidth && fullHeight) {
+		return { width: fullWidth, height: fullHeight };
 	}
 
 	return { width: undefined, height: undefined };

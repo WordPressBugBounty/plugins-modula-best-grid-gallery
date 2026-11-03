@@ -3,12 +3,10 @@
 	margin: 1rem 0;
 }
 
-.modula-settings-editor__error-boundary-text {
-	margin: 0 0 0.75rem;
-}
-
+// The admin-ui Notice clears its paragraphs' margins; the details and the
+// actions keep the space under the message.
 .modula-settings-editor__error-boundary-details {
-	margin: 0 0 0.75rem;
+	margin: 0.75rem 0 0;
 
 	summary {
 		cursor: pointer;

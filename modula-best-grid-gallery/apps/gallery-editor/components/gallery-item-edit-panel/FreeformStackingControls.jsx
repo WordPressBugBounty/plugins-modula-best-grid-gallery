@@ -1,6 +1,7 @@
 /** Freeform paint order uses the same sidebar actions and settings history as item editing. */
 import { __ } from '@wordpress/i18n';
-import { ActionRow, Button } from 'shared-ui';
+import { Button } from 'admin-ui';
+import { ItemEditCard } from 'editor-shell';
 import {
 	changeFreeformStacking,
 	freeformOccurrenceIds,
@@ -10,23 +11,10 @@ import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormCont
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 import { usePreviewReduxStoreItems } from '../../hooks/usePreviewReduxStoreItems';
 import { useGalleryPreviewAdminActionsOptional } from '../../hooks/useGalleryPreviewAdminActionsOptional';
-import SettingsPanelSection from '../sidebar/settings-panel/SettingsPanelSection';
-
-const ACTIONS = [
-	{
-		action: 'forward',
-		label: __('Bring forward', 'modula-best-grid-gallery'),
-	},
-	{
-		action: 'backward',
-		label: __('Send backward', 'modula-best-grid-gallery'),
-	},
-	{
-		action: 'front',
-		label: __('Bring to front', 'modula-best-grid-gallery'),
-	},
-	{ action: 'back', label: __('Send to back', 'modula-best-grid-gallery') },
-];
+import {
+	FREEFORM_STACKING_STEPS,
+	commitFreeformStacking,
+} from '../../utils/freeformStacking';
 
 export default function FreeformStackingControls({ storeIndex }) {
 	const { form, undoRedo } = useGallerySettingsFormBundle();
@@ -49,42 +37,39 @@ export default function FreeformStackingControls({ storeIndex }) {
 				);
 				const id = ids[storeIndex];
 				return (
-					<SettingsPanelSection
-						label={__('Stacking', 'modula-best-grid-gallery')}
+					<ItemEditCard
+						title={__('Stacking', 'modula-best-grid-gallery')}
 					>
-						{ACTIONS.map(({ action, label }) => {
-							const next = changeFreeformStacking(
-								composition,
-								id,
-								action
-							);
-							return (
-								<ActionRow key={action}>
-									<Button
-										variant="ghost"
-										disabled={
-											!editable || next === composition
-										}
-										onClick={() =>
-											undoRedo.commitSettingsStep(
-												__(
-													'Change stacking',
-													'modula-best-grid-gallery'
-												),
-												() =>
-													form.setFieldValue(
-														'freeform.placements',
-														next
-													)
-											)
-										}
-									>
-										{label}
-									</Button>
-								</ActionRow>
-							);
-						})}
-					</SettingsPanelSection>
+						<div className="modula-gallery-item-edit-panel__button-grid">
+							{FREEFORM_STACKING_STEPS.map(
+								({ action, label }) => {
+									const next = changeFreeformStacking(
+										composition,
+										id,
+										action
+									);
+									return (
+										<Button
+											key={action}
+											disabled={
+												!editable ||
+												next === composition
+											}
+											onClick={() =>
+												commitFreeformStacking(
+													form,
+													undoRedo,
+													next
+												)
+											}
+										>
+											{label}
+										</Button>
+									);
+								}
+							)}
+						</div>
+					</ItemEditCard>
 				);
 			}}
 		</form.Subscribe>

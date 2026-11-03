@@ -4,7 +4,7 @@
 
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import { TextInput } from 'shared-ui';
+import { TextInput } from 'admin-ui';
 import { isNil } from '../../logic/isNil';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 
@@ -46,6 +46,7 @@ function resolveZipPreview(tokens, pattern, samples) {
 
 /**
  * @param {Object}           props
+ * @param {string}           [props.id]     Pattern field id.
  * @param {Object}           props.control
  * @param {*}                props.value
  * @param {Function}         props.onChange
@@ -53,6 +54,7 @@ function resolveZipPreview(tokens, pattern, samples) {
  * @param {string|undefined} props.help
  */
 export default function PlaceholderPatternControl({
+	id,
 	control,
 	value,
 	onChange,
@@ -106,6 +108,8 @@ export default function PlaceholderPatternControl({
 	return (
 		<div className="modula-settings-editor__placeholder-pattern">
 			<TextInput
+				id={id}
+				width="full"
 				value={displayValue}
 				onChange={onChange}
 				disabled={disabled}

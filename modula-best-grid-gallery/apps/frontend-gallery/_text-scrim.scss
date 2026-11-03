@@ -1,0 +1,23 @@
+// The text scrim's strength and gradient (Motion ticket 11, `_hover-v2.scss`).
+// Pro's album bottom band (`album-on-image-text.scss`) draws the same fade at
+// its top, so the two stay one curve. The stops read the band's own
+// `--modula-hover-scrim-alpha` (the strength, less the Darken on hover dim).
+
+$hover-scrim-strength: 0.5;
+$hover-scrim-fade: 1.5em;
+
+// From transparent at the band's top to full strength one fade down.
+$hover-scrim-fade-in:
+	rgb(0 0 0 / 0) 0,
+	rgb(0 0 0 / calc(var(--modula-hover-scrim-alpha) * 0.35))
+	calc(#{$hover-scrim-fade} * 0.5),
+	rgb(0 0 0 / var(--modula-hover-scrim-alpha)) $hover-scrim-fade;
+
+// Its mirror: from full strength one fade above the band's bottom to
+// transparent.
+$hover-scrim-fade-out:
+	rgb(0 0 0 / var(--modula-hover-scrim-alpha))
+	calc(100% - #{$hover-scrim-fade}),
+	rgb(0 0 0 / calc(var(--modula-hover-scrim-alpha) * 0.35))
+	calc(100% - #{$hover-scrim-fade} * 0.5),
+	rgb(0 0 0 / 0) 100%;

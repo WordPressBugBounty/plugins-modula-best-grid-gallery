@@ -6,16 +6,17 @@ import {
 	useState,
 } from '@wordpress/element';
 import '../../styles/takeover/preview/_bulk-edit.scss';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import {
 	Button,
-	ButtonGroup,
+	ConfirmDialog,
+	Dialog,
+	Menu,
+	MenuItem,
 	Notice,
-	Placeholder,
-	Spinner,
-	__experimentalConfirmDialog as ConfirmDialog,
-} from '@wordpress/components';
-import { GalleryModal, useTakeoverSaveStatus } from 'editor-shell';
+	Toast,
+} from 'admin-ui';
+import { AdminUiScope, useTakeoverSaveStatus } from 'editor-shell';
 import { useBulkEdit } from '../../context/BulkEditContext';
 import { useGalleryPreviewTileSelection } from '../../context/GalleryPreviewTileSelectionContext';
 import { usePreviewReduxStoreItems } from '../../hooks/usePreviewReduxStoreItems';
@@ -28,17 +29,186 @@ import {
 	getBoundGallerySummaryFromEditor,
 } from '../../utils/boundGalleryChromePolicy';
 import { getGalleryPreviewReduxStore } from '../../utils/previewReduxStoreRef';
+import { useWatermarkRegistration } from '../../hooks/useWatermarkRegistration';
+import WatermarkActionButtonSlot from '../field/WatermarkActionButtonSlot';
 import {
+	bulkEditWatermarkTargetIds,
 	filterBulkEditRowsByStoreIndices,
-	galleryFilterSuggestions,
 	hasBulkEditFiltersColumn,
+	hasBulkEditWatermarkAction,
 } from './bulkEditUtils';
 import { useBulkEditDraft } from './useBulkEditDraft';
 import { persistBulkEditDraft, bulkEditRowIsModified } from './bulkEditSave';
 import BulkEditTable, { buildBulkEditRowsWithIndices } from './BulkEditTable';
 
+const NO_TOAST = { message: '', tone: 'success' };
+
 /**
- * Fullscreen bulk metadata editor for takeover preview.
+ * The watermark actions on the selection (Pro's watermark action button).
+ *
+ * @return {{ action: 'apply_watermark'|'remove_watermark', label: string }[]} Rows; `label` takes the image count.
+ */
+function bulkEditWatermarkActions() {
+	return [
+		{
+			action: 'apply_watermark',
+			/* translators: %d: number of images */
+			label: __('Apply watermark (%d)', 'modula-best-grid-gallery'),
+		},
+		{
+			action: 'remove_watermark',
+			/* translators: %d: number of images */
+			label: __('Remove watermark (%d)', 'modula-best-grid-gallery'),
+		},
+	];
+}
+
+/**
+ * @param {string} postTitle
+ * @param {number} galleryId
+ * @return {string} Dialog title, "Bulk edit · Slider 3.0" in the canvas.
+ */
+function bulkEditTitle(postTitle, galleryId) {
+	if (postTitle) {
+		return sprintf(
+			/* translators: %s: gallery title */
+			__('Bulk edit · %s', 'modula-best-grid-gallery'),
+			postTitle
+		);
+	}
+	if (galleryId) {
+		return sprintf(
+			/* translators: %d: gallery id */
+			__('Bulk edit · Gallery #%d', 'modula-best-grid-gallery'),
+			galleryId
+		);
+	}
+	return __('Bulk edit', 'modula-best-grid-gallery');
+}
+
+/**
+ * @param {number} imageCount
+ * @param {number} modifiedCount
+ * @return {string} "1 image · 0 modified".
+ */
+function bulkEditCountLabel(imageCount, modifiedCount) {
+	return sprintf(
+		/* translators: 1: "3 images", 2: number of modified images */
+		__('%1$s · %2$d modified', 'modula-best-grid-gallery'),
+		sprintf(
+			/* translators: %d: number of images */
+			_n('%d image', '%d images', imageCount, 'modula-best-grid-gallery'),
+			imageCount
+		),
+		modifiedCount
+	);
+}
+
+/**
+ * The confirm before "Delete selected": canvas copy, or the hide copy for a
+ * bound gallery, whose images stay in their source gallery.
+ *
+ * @param {number}  count
+ * @param {boolean} isHide
+ * @return {{ title: string, message: string, confirmLabel: string }} ConfirmDialog copy.
+ */
+function deleteSelectedConfirmCopy(count, isHide) {
+	if (isHide) {
+		return {
+			title: sprintf(
+				/* translators: %d: number of images */
+				_n(
+					'Hide %d image?',
+					'Hide %d images?',
+					count,
+					'modula-best-grid-gallery'
+				),
+				count
+			),
+			message: __(
+				'Hidden images stay in their source gallery.',
+				'modula-best-grid-gallery'
+			),
+			confirmLabel: __('Hide', 'modula-best-grid-gallery'),
+		};
+	}
+	return {
+		title: sprintf(
+			/* translators: %d: number of images */
+			_n(
+				'Delete %d image?',
+				'Delete %d images?',
+				count,
+				'modula-best-grid-gallery'
+			),
+			count
+		),
+		message: _n(
+			'It will be removed from this gallery. The file stays in your Media Library.',
+			'They will be removed from this gallery. The files stay in your Media Library.',
+			count,
+			'modula-best-grid-gallery'
+		),
+		confirmLabel: __('Delete', 'modula-best-grid-gallery'),
+	};
+}
+
+function ChevronDownIcon() {
+	return (
+		<svg
+			width="12"
+			height="12"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="1.7"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			aria-hidden="true"
+		>
+			<path d="M6 9l6 6 6-6" />
+		</svg>
+	);
+}
+
+/**
+ * The header's Columns menu: the optional CSS class column (canvas).
+ *
+ * @param {Object}                   props
+ * @param {boolean}                  props.showCssClass
+ * @param {(show: boolean) => void}  props.onShowCssClassChange
+ */
+function BulkEditColumnsMenu({ showCssClass, onShowCssClassChange }) {
+	const [open, setOpen] = useState(false);
+	const label = __('Columns', 'modula-best-grid-gallery');
+	return (
+		<Menu
+			open={open}
+			onOpenChange={setOpen}
+			label={label}
+			align="end"
+			trigger={(triggerProps) => (
+				<Button {...triggerProps} className="modula-bulk-edit__columns">
+					{label}
+					<ChevronDownIcon />
+				</Button>
+			)}
+		>
+			<MenuItem
+				toggle
+				checked={showCssClass}
+				onSelect={() => onShowCssClassChange(!showCssClass)}
+			>
+				{__('CSS class', 'modula-best-grid-gallery')}
+			</MenuItem>
+		</Menu>
+	);
+}
+
+/**
+ * Bulk metadata editor for the takeover preview (canvas "Bulk edit"): an
+ * admin-ui Dialog with one row per image, a footer to save or delete, and a
+ * toast for results while it is open.
  */
 export default function BulkEditModal() {
 	const config = useModulaSettingsEditorConfig();
@@ -52,10 +222,9 @@ export default function BulkEditModal() {
 	const { form } = useGallerySettingsFormBundle();
 	const { runPersistTask } = useTakeoverSaveStatus();
 	const invalidateBootstrap = useInvalidateGalleryBootstrap(galleryId);
-	const [notices, setNotices] = useState(
-		/** @type {{ id: string, status: string, text: string }[]} */ ([])
-	);
+	const [toast, setToast] = useState(NO_TOAST);
 	const [busy, setBusy] = useState(false);
+	const [showCssClassColumn, setShowCssClassColumn] = useState(false);
 	const [confirmKind, setConfirmKind] = useState(
 		/** @type {'discard'|'discard-close'|'delete'|null} */ (null)
 	);
@@ -95,41 +264,34 @@ export default function BulkEditModal() {
 		[rows, draft.localChanges]
 	);
 
-	const showFiltersColumn = hasBulkEditFiltersColumn(config);
-	const filterSuggestions = useMemo(
-		() => galleryFilterSuggestions(form.state.values?.filters?.filters),
-		[form.state.values?.filters?.filters]
+	const watermarkRegistration = useWatermarkRegistration();
+	const watermarkTargetIds = useMemo(
+		() => bulkEditWatermarkTargetIds(rows, draft.selectedIds),
+		[rows, draft.selectedIds]
 	);
 
 	const aiSettingsQuery = useModulaAiDescriptorSettingsQuery({
 		enabled: isOpen,
 	});
-	const aiConfigured = Boolean(aiSettingsQuery.data?.aiConfigured);
-	const unavailableOnLocalhost = Boolean(
-		aiSettingsQuery.data?.unavailableOnLocalhost
-	);
 
-	const addNotice = useCallback((text, status = 'info') => {
-		const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-		setNotices((prev) => [...prev, { id, status, text }]);
+	const showToast = useCallback((message, tone = 'success') => {
+		setToast({ message, tone });
 	}, []);
 
-	const dismissNotice = useCallback((id) => {
-		setNotices((prev) => prev.filter((n) => n.id !== id));
-	}, []);
+	const dismissToast = useCallback(() => setToast(NO_TOAST), []);
 
-	const finishDiscardDraft = useCallback(() => {
-		draft.resetDraft();
-		setNotices([]);
-	}, [draft]);
+	const close = useCallback(() => {
+		setToast(NO_TOAST);
+		closeBulkEdit();
+	}, [closeBulkEdit]);
 
 	const requestClose = useCallback(() => {
 		if (draft.hasChanges) {
 			setConfirmKind('discard-close');
 			return;
 		}
-		closeBulkEdit();
-	}, [closeBulkEdit, draft.hasChanges]);
+		close();
+	}, [close, draft.hasChanges]);
 
 	const handleDiscardDraft = useCallback(() => {
 		if (!draft.hasChanges) {
@@ -138,12 +300,23 @@ export default function BulkEditModal() {
 		setConfirmKind('discard');
 	}, [draft.hasChanges]);
 
+	const confirmDiscard = useCallback(() => {
+		const closeAfter = confirmKind === 'discard-close';
+		setConfirmKind(null);
+		draft.resetDraft();
+		if (closeAfter) {
+			close();
+			return;
+		}
+		showToast(__('Unsaved changes discarded.', 'modula-best-grid-gallery'));
+	}, [close, confirmKind, draft, showToast]);
+
 	const handleSaveAll = useCallback(async () => {
 		if (!galleryId || !previewStore) {
 			return;
 		}
 		if (!draft.hasChanges) {
-			closeBulkEdit();
+			close();
 			return;
 		}
 		setBusy(true);
@@ -158,13 +331,9 @@ export default function BulkEditModal() {
 			}, 'bulk-edit');
 			invalidateBootstrap();
 			draft.resetDraft();
-			addNotice(
-				__('All changes saved.', 'modula-best-grid-gallery'),
-				'success'
-			);
-			closeBulkEdit();
+			close();
 		} catch (err) {
-			addNotice(
+			showToast(
 				err?.message ||
 					__(
 						'Could not save bulk edits.',
@@ -176,14 +345,14 @@ export default function BulkEditModal() {
 			setBusy(false);
 		}
 	}, [
-		addNotice,
-		closeBulkEdit,
+		close,
 		draft,
 		form,
 		galleryId,
 		invalidateBootstrap,
 		previewStore,
 		runPersistTask,
+		showToast,
 	]);
 
 	const performDeleteSelected = useCallback(async () => {
@@ -204,20 +373,16 @@ export default function BulkEditModal() {
 			}, 'bulk-remove');
 			invalidateBootstrap();
 			draft.resetDraft();
-			addNotice(
+			showToast(
 				hideCopy.isHide
 					? __(
 							'Selected images hidden from this gallery.',
 							'modula-best-grid-gallery'
 						)
-					: __(
-							'Selected images deleted.',
-							'modula-best-grid-gallery'
-						),
-				'success'
+					: __('Selected images deleted.', 'modula-best-grid-gallery')
 			);
 		} catch (err) {
-			addNotice(
+			showToast(
 				err?.message ||
 					__(
 						'Could not delete selected images.',
@@ -229,7 +394,6 @@ export default function BulkEditModal() {
 			setBusy(false);
 		}
 	}, [
-		addNotice,
 		draft,
 		form,
 		galleryId,
@@ -237,6 +401,7 @@ export default function BulkEditModal() {
 		invalidateBootstrap,
 		previewStore,
 		runPersistTask,
+		showToast,
 	]);
 
 	const handleDeleteSelected = useCallback(() => {
@@ -250,57 +415,115 @@ export default function BulkEditModal() {
 		return null;
 	}
 
-	const title = postTitle
-		? sprintf(
-				/* translators: %s: gallery title */
-				__('Bulk edit: %s', 'modula-best-grid-gallery'),
-				postTitle
-			)
-		: galleryId
-			? sprintf(
-					/* translators: %d: gallery id */
-					__('Bulk edit: Gallery #%d', 'modula-best-grid-gallery'),
-					galleryId
-				)
-			: __('Bulk edit gallery', 'modula-best-grid-gallery');
-
-	const subtitle = sprintf(
-		/* translators: 1: image count, 2: modified count */
-		__('%1$d images • %2$d modified', 'modula-best-grid-gallery'),
-		rows.length,
-		modifiedCount
+	const showFiltersColumn = hasBulkEditFiltersColumn(config);
+	const aiConfigured = Boolean(aiSettingsQuery.data?.aiConfigured);
+	const unavailableOnLocalhost = Boolean(
+		aiSettingsQuery.data?.unavailableOnLocalhost
+	);
+	const showWatermarkAction = hasBulkEditWatermarkAction(
+		config,
+		watermarkRegistration
+	);
+	const deleteCopy = deleteSelectedConfirmCopy(
+		draft.selectedCount,
+		hideCopy.isHide
 	);
 
 	return (
-		<>
-			<GalleryModal
-				isOpen
+		<AdminUiScope>
+			<Dialog
+				open
 				onClose={requestClose}
-				size="xlarge"
-				title={title}
-				subtitle={subtitle}
-				titleId="modula-bulk-edit-modal-title"
+				title={bulkEditTitle(postTitle, galleryId)}
+				subtitle={bulkEditCountLabel(rows.length, modifiedCount)}
+				headerActions={
+					<BulkEditColumnsMenu
+						showCssClass={showCssClassColumn}
+						onShowCssClassChange={setShowCssClassColumn}
+					/>
+				}
 				className="modula-bulk-edit-modal"
-				panelClassName="modula-bulk-edit-modal__panel"
-				bodyClassName="modula-bulk-edit-modal__body"
-				bodyOverflow="hidden"
-				closeOnBackdropClick={false}
-				footerLeft={
+				closeDisabled={busy}
+			>
+				{unavailableOnLocalhost ? (
+					<Notice tone="warning" className="modula-bulk-edit__notice">
+						{__(
+							'AI unavailable on localhost',
+							'modula-best-grid-gallery'
+						)}
+					</Notice>
+				) : null}
+
+				{!previewStore ? (
+					<p className="modula-bulk-edit__empty">
+						{__(
+							'Preview is still loading…',
+							'modula-best-grid-gallery'
+						)}
+					</p>
+				) : null}
+				{previewStore && rows.length === 0 ? (
+					<div className="modula-bulk-edit__empty">
+						<p className="modula-bulk-edit__empty-title">
+							{__(
+								'No images in this gallery',
+								'modula-best-grid-gallery'
+							)}
+						</p>
+						<p>
+							{__(
+								'Add images in the preview, then open bulk edit again.',
+								'modula-best-grid-gallery'
+							)}
+						</p>
+					</div>
+				) : null}
+				{previewStore && rows.length > 0 ? (
+					<BulkEditTable
+						rows={rows}
+						showFiltersColumn={showFiltersColumn}
+						showCssClassColumn={showCssClassColumn}
+						isHide={hideCopy.isHide}
+						aiConfigured={aiConfigured}
+						unavailableOnLocalhost={unavailableOnLocalhost}
+						selectedIds={draft.selectedIds}
+						draft={draft}
+						galleryId={galleryId}
+						previewStore={previewStore}
+						runPersistTask={runPersistTask}
+						onNotice={showToast}
+					/>
+				) : null}
+
+				<div className="modula-bulk-edit__footer">
 					<Button
 						variant="link"
-						className="modula-gallery-modal__footer-link"
 						onClick={handleDiscardDraft}
 						disabled={busy || !draft.hasChanges}
 					>
 						{__('Discard changes', 'modula-best-grid-gallery')}
 					</Button>
-				}
-				footerRight={
-					<ButtonGroup>
+					<div className="modula-bulk-edit__footer-actions">
+						{showWatermarkAction
+							? bulkEditWatermarkActions().map(
+									({ action, label }) => (
+										<WatermarkActionButtonSlot
+											key={action}
+											action={action}
+											buttonLabel={sprintf(
+												label,
+												watermarkTargetIds.length
+											)}
+											disabled={
+												busy ||
+												watermarkTargetIds.length === 0
+											}
+											imageIds={watermarkTargetIds}
+										/>
+									)
+								)
+							: null}
 						<Button
-							variant="secondary"
-							className="modula-gallery-modal__footer-destructive"
-							isDestructive
 							onClick={handleDeleteSelected}
 							disabled={busy || draft.selectedCount === 0}
 						>
@@ -315,126 +538,48 @@ export default function BulkEditModal() {
 						</Button>
 						<Button
 							variant="primary"
-							className="modula-gallery-modal__footer-primary"
 							onClick={handleSaveAll}
 							disabled={busy || !draft.hasChanges}
-							isBusy={busy}
 						>
 							{__(
 								'Save all and close',
 								'modula-best-grid-gallery'
 							)}
 						</Button>
-					</ButtonGroup>
-				}
-			>
-				{unavailableOnLocalhost ? (
-					<div className="modula-bulk-edit-modal__notices">
-						<Notice status="warning" isDismissible={false}>
-							{__(
-								'AI unavailable on localhost',
-								'modula-best-grid-gallery'
-							)}
-						</Notice>
 					</div>
-				) : null}
+				</div>
 
-				{notices.length > 0 ? (
-					<div className="modula-bulk-edit-modal__notices">
-						{notices.map((n) => (
-							<Notice
-								key={n.id}
-								status={n.status}
-								isDismissible
-								onRemove={() => dismissNotice(n.id)}
-							>
-								{n.text}
-							</Notice>
-						))}
-					</div>
-				) : null}
-
-				{!previewStore ? (
-					<Placeholder>
-						<Spinner />
-						<p>
-							{__(
-								'Preview is still loading…',
-								'modula-best-grid-gallery'
-							)}
-						</p>
-					</Placeholder>
-				) : rows.length === 0 ? (
-					<Placeholder
-						icon="format-gallery"
-						label={__(
-							'No images in this gallery',
-							'modula-best-grid-gallery'
-						)}
-						instructions={__(
-							'Add images in the preview, then open bulk edit again.',
-							'modula-best-grid-gallery'
-						)}
-					/>
-				) : (
-					<BulkEditTable
-						rows={rows}
-						modifiedCount={modifiedCount}
-						showFiltersColumn={showFiltersColumn}
-						filterSuggestions={filterSuggestions}
-						aiConfigured={aiConfigured}
-						unavailableOnLocalhost={unavailableOnLocalhost}
-						selectedIds={draft.selectedIds}
-						draft={draft}
-						galleryId={galleryId}
-						previewStore={previewStore}
-						runPersistTask={runPersistTask}
-						onNotice={addNotice}
-						busy={busy}
-					/>
-				)}
-			</GalleryModal>
-			<ConfirmDialog
-				isOpen={
-					confirmKind === 'discard' || confirmKind === 'discard-close'
-				}
-				onConfirm={() => {
-					finishDiscardDraft();
-					if (confirmKind === 'discard-close') {
-						closeBulkEdit();
-					} else {
-						addNotice(
-							__(
-								'Unsaved changes discarded.',
-								'modula-best-grid-gallery'
-							),
-							'info'
-						);
+				<ConfirmDialog
+					open={
+						confirmKind === 'discard' ||
+						confirmKind === 'discard-close'
 					}
-					setConfirmKind(null);
-				}}
-				onCancel={() => setConfirmKind(null)}
-			>
-				{__('Discard unsaved bulk edits?', 'modula-best-grid-gallery')}
-			</ConfirmDialog>
-			<ConfirmDialog
-				isOpen={confirmKind === 'delete'}
-				onConfirm={() => {
-					setConfirmKind(null);
-					void performDeleteSelected();
-				}}
-				onCancel={() => setConfirmKind(null)}
-			>
-				{hideCopy.isHide
-					? __(
-							'Hide selected images from this gallery?',
-							'modula-best-grid-gallery'
-						)
-					: __(
-							'Delete selected images from this gallery?',
-							'modula-best-grid-gallery'
-						)}
-			</ConfirmDialog>
-		</>
+					title={__('Discard changes?', 'modula-best-grid-gallery')}
+					message={__(
+						'Your unsaved edits in Bulk edit will be lost.',
+						'modula-best-grid-gallery'
+					)}
+					confirmLabel={__('Discard', 'modula-best-grid-gallery')}
+					onConfirm={confirmDiscard}
+					onCancel={() => setConfirmKind(null)}
+				/>
+				<ConfirmDialog
+					open={confirmKind === 'delete'}
+					title={deleteCopy.title}
+					message={deleteCopy.message}
+					confirmLabel={deleteCopy.confirmLabel}
+					onConfirm={() => {
+						setConfirmKind(null);
+						void performDeleteSelected();
+					}}
+					onCancel={() => setConfirmKind(null)}
+				/>
+				<Toast
+					message={toast.message}
+					tone={toast.tone}
+					onDismiss={dismissToast}
+				/>
+			</Dialog>
+		</AdminUiScope>
 	);
 }

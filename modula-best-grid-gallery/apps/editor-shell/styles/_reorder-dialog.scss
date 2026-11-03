@@ -1,0 +1,193 @@
+// Reorder (canvas "1 · Editor", `reorder.open`), for `CanvasReorderDialog`:
+// an admin-ui Dialog with a grid of square thumbnails on the sunken surface
+// between a header and a footer. It renders in the editor's admin-ui scope,
+// so colours are admin-ui tokens in both appearances. Rules sit under
+// `.modula-admin-ui`, like admin-ui's own, so they outrank the component
+// rules they adjust. The tile sizes, the round badge and arrows, and the
+// badge's dark fill are the canvas's (`he-ro`), as drawn over a photo.
+
+@use "../../admin-ui/styles/mixins" as admin;
+
+.modula-admin-ui {
+
+	// The canvas draws it 1840px wide, as tall as its grid up to 1240px. A
+	// modal <dialog> has `inset: 0`, so `height: auto` would stretch it
+	// between the insets; `fit-content` keeps it to its content.
+	.modula-admin-dialog.modula-takeover__reorder-dialog {
+		width: min(1840px, calc(100vw - 64px));
+		height: fit-content;
+		max-height: min(1240px, calc(100vh - 48px));
+	}
+
+	.modula-takeover__reorder-dialog .modula-admin-dialog__header {
+		align-items: flex-start;
+		border-bottom: 1px solid var(--modula-admin-border);
+	}
+
+	.modula-takeover__reorder-dialog .modula-admin-dialog__body {
+		background: var(--modula-admin-surface-sunken);
+	}
+
+	.modula-takeover__reorder-scroll {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow-y: auto;
+	}
+
+	.modula-takeover__reorder-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+		align-content: start;
+		gap: 10px;
+		margin: 0;
+		padding: 20px 32px;
+		list-style: none;
+	}
+
+	.modula-takeover__reorder-empty {
+		margin: 0;
+		padding: 24px 32px;
+		color: var(--modula-admin-ink-muted);
+	}
+
+	.modula-takeover__reorder-footer {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+		padding: 16px 32px;
+		border-top: 1px solid var(--modula-admin-border);
+		background: var(--modula-admin-surface);
+	}
+
+	.modula-takeover__reorder-tile {
+		position: relative;
+		overflow: hidden;
+		margin: 0;
+		border-radius: var(--modula-admin-radius-md);
+		background: var(--modula-admin-surface-hover-strong);
+		cursor: grab;
+		touch-action: none;
+		transition:
+			box-shadow var(--modula-admin-transition),
+			opacity var(--modula-admin-transition);
+
+		&.is-dragging {
+			z-index: 2;
+			opacity: 0.35;
+			cursor: grabbing;
+		}
+
+		&.is-over {
+			box-shadow: 0 0 0 3px var(--modula-admin-ink);
+		}
+	}
+
+	.modula-takeover__reorder-tile-media {
+		display: block;
+		width: 100%;
+		aspect-ratio: 1 / 1;
+		object-fit: cover;
+		pointer-events: none;
+	}
+
+	// A content block: its colour, with its title in a chip that stays
+	// readable on any colour.
+	.modula-takeover__reorder-tile-media--block {
+		display: flex;
+		align-items: flex-end;
+		box-sizing: border-box;
+		padding: 8px;
+	}
+
+	.modula-takeover__reorder-tile-block-label {
+		overflow: hidden;
+		max-width: 100%;
+		padding: 2px 6px;
+		border-radius: var(--modula-admin-radius-sm);
+		background: var(--modula-admin-surface);
+		color: var(--modula-admin-ink);
+		font-size: var(--modula-admin-text-caption);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	// No thumbnail: diagonal stripes.
+	.modula-takeover__reorder-tile-media--placeholder {
+		$base: var(--modula-admin-surface-sunken);
+		$stripe: var(--modula-admin-border-divider);
+		background: repeating-linear-gradient(-45deg, $base 0 4px, $stripe 4px 8px);
+	}
+
+	// The place in the draft: a dark badge, as drawn over the photo in both
+	// appearances.
+	.modula-takeover__reorder-tile-position {
+		position: absolute;
+		top: 6px;
+		left: 6px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		min-width: 22px;
+		height: 22px;
+		padding: 0 6px;
+		border-radius: 11px;
+		background: rgba(31, 31, 28, 0.82);
+		color: #fff;
+		font-size: 12px;
+		font-variant-numeric: tabular-nums;
+		font-weight: 600;
+	}
+
+	// The arrows show on hover and while a control in the tile has focus.
+	.modula-takeover__reorder-tile-arrows {
+		position: absolute;
+		right: 6px;
+		bottom: 6px;
+		display: flex;
+		gap: 4px;
+		opacity: 0;
+		transition: opacity var(--modula-admin-transition);
+	}
+
+	// Not nested in the arrows rule: there `&` already starts with
+	// `.modula-admin-ui`, so `.tile:hover &` would look for the scope inside
+	// the tile and never match (ticket 80).
+	.modula-takeover__reorder-tile:is(:hover, :focus-within) .modula-takeover__reorder-tile-arrows {
+		opacity: 1;
+	}
+
+	.modula-takeover__reorder-tile-edit {
+		position: absolute;
+		top: 6px;
+		right: 6px;
+	}
+
+	.modula-takeover__reorder-tile-button {
+
+		@include admin.button-reset;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		width: 30px;
+		height: 30px;
+		border-radius: 15px;
+		background: var(--modula-admin-surface-raised);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+		color: var(--modula-admin-ink);
+		cursor: pointer;
+
+		&:focus-visible {
+
+			@include admin.focus-ring;
+		}
+
+		svg {
+			display: block;
+			fill: currentcolor;
+		}
+	}
+}

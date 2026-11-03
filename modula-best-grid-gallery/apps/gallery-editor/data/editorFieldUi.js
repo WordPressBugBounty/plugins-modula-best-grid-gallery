@@ -21,23 +21,9 @@ export const EDITOR_UI_COMPOSITE_EQUAL_PAIR = {
 export const EDITOR_UI_BY_PATH = {
 	'general.type': { sortIndex: 10 },
 	'template.templateLayout': { sortIndex: 11 },
-	'general.width': {
-		sortIndex: 20,
-		row: 'gen-width-align',
-		slot: 0,
-		compositeHeading: true,
-		compositeStackTitle: __(
-			'Width & alignment',
-			'modula-best-grid-gallery'
-		),
-		compositeStackColumns: true,
-	},
-	'general.alignment': {
-		sortIndex: 20,
-		row: 'gen-width-align',
-		slot: 1,
-		compositeStackColumns: true,
-	},
+	/* Canvas: Gallery width is its own row; Alignment lives in More settings. */
+	'general.width': { sortIndex: 20 },
+	'general.alignment': { sortIndex: 20 },
 	'general.height': { sortIndex: 22 },
 	'video.maxHeight': { sortIndex: 21 },
 	'general.shuffle': { sortIndex: 99 },
@@ -60,20 +46,9 @@ export const EDITOR_UI_BY_PATH = {
 	'polaroid.rotationMax': { sortIndex: 10 },
 	'polaroid.scatterMax': { sortIndex: 20 },
 	'polaroid.showPin': { sortIndex: 30 },
-	'polaroid.framePadding': {
-		sortIndex: 40,
-		row: 'polaroid-frame',
-		slot: 0,
-		compositeHeading: true,
-		compositeStackTitle: __('Polaroid frame', 'modula-best-grid-gallery'),
-		...EDITOR_UI_COMPOSITE_EQUAL_PAIR,
-	},
-	'polaroid.chinHeight': {
-		sortIndex: 40,
-		row: 'polaroid-frame',
-		slot: 1,
-		...EDITOR_UI_COMPOSITE_EQUAL_PAIR,
-	},
+	/* Canvas: one slider row each, no "Polaroid frame" pair. */
+	'polaroid.framePadding': { sortIndex: 40 },
+	'polaroid.chinHeight': { sortIndex: 41 },
 
 	'layout.gridType': { sortIndex: 12 },
 	'layout.uniformGridTileAspect': { sortIndex: 13 },
@@ -86,10 +61,7 @@ export const EDITOR_UI_BY_PATH = {
 		row: 'lay-gut',
 		slot: 0,
 		compositeHeading: true,
-		compositeStackTitle: __(
-			'Space between images',
-			'modula-best-grid-gallery'
-		),
+		compositeStackTitle: __('Spacing', 'modula-best-grid-gallery'),
 		compositeDeviceTabs: true,
 	},
 	'layout.tabletGutter': {
@@ -154,8 +126,6 @@ export const EDITOR_UI_BY_PATH = {
 	'loadingEffects.loadedHSlide': { sortIndex: 45 },
 	'loadingEffects.loadedVSlide': { sortIndex: 50 },
 
-	'hover.sectionPresets': { sortIndex: 4, compactHeading: true },
-	'hover.effectBuilder': { sortIndex: 5 },
 	'hover.sectionOverlay': { sortIndex: 20, compactHeading: true },
 	'hover.dimOverlay': { sortIndex: 25 },
 	'hover.hoverColor': { sortIndex: 26 },
@@ -290,7 +260,8 @@ export const EDITOR_UI_BY_PATH = {
 	'slideshow.pauseOnHover': { sortIndex: 50 },
 	'slideshow.slideshowSpeed': { sortIndex: 60 },
 
-	/* Social: networks then style (enableSocial is synced, not shown). */
+	/* Social: Enable sharing, then networks and style while it is on. */
+	'social.enableSocial': { sortIndex: 5 },
 	'social.sectionWhereTheyCanShare': { sortIndex: 10, compactHeading: true },
 	'social.enableTwitter': { sortIndex: 20, compactStack: true },
 	'social.enableFacebook': { sortIndex: 30, compactStack: true },
@@ -335,6 +306,7 @@ export const EDITOR_UI_BY_PATH = {
 	'proofing.expireRejectionNotice': { sortIndex: 60 },
 	'proofing.expireLinkToPage': { sortIndex: 70 },
 	'proofing.expireLinkToPageUrl': { sortIndex: 80 },
+	'proofing.manageProofing': { sortIndex: 90 },
 
 	'pagination.maxImagesCount': {
 		sortIndex: 10030,
@@ -352,23 +324,9 @@ export const EDITOR_UI_BY_PATH = {
 		compositeDeviceTabs: true,
 	},
 	'pagination.paginationNumber': { sortIndex: 10040 },
-	'pagination.paginationColor': {
-		sortIndex: 10050,
-		row: 'pag-colors',
-		slot: 0,
-		compositeHeading: true,
-		compositeStackTitle: __(
-			'Page button colors',
-			'modula-best-grid-gallery'
-		),
-		compositeStackColumns: true,
-	},
-	'pagination.activePaginationColor': {
-		sortIndex: 10050,
-		row: 'pag-colors',
-		slot: 1,
-		compositeStackColumns: true,
-	},
+	/* Canvas: Default and Active are plain colour rows. */
+	'pagination.paginationColor': { sortIndex: 10050 },
+	'pagination.activePaginationColor': { sortIndex: 10051 },
 	'pagination.paginationPosition': { sortIndex: 10070 },
 
 	'video.playlistPosition': { sortIndex: 10 },
@@ -384,7 +342,6 @@ export const EDITOR_UI_BY_PATH = {
 	'video.previewVideo': { sortIndex: 100 },
 	'video.autoplayThumbnail': { sortIndex: 110 },
 	'video.previewVideoDuration': { sortIndex: 120 },
-	'video.previewVideoOffHint': { sortIndex: 130 },
 
 	'passwordProtect.enablePassword': { sortIndex: 10 },
 	'passwordProtect.sectionPasswordForm': {
@@ -435,7 +392,7 @@ export const EDITOR_UI_BY_PATH = {
 	'watermark.customSettingsWatermark': { sortIndex: 20 },
 	'watermark.sectionText': { sortIndex: 30 },
 	'watermark.watermarkText': { sortIndex: 40 },
-	'watermark.watermarkTextSize': { sortIndex: 50 },
+	'watermark.watermarkTextSizeShare': { sortIndex: 50 },
 	'watermark.watermarkTextColor': { sortIndex: 60 },
 	'watermark.watermarkTextTypeHint': { sortIndex: 65 },
 	'watermark.sectionImage': { sortIndex: 70 },
@@ -445,7 +402,7 @@ export const EDITOR_UI_BY_PATH = {
 	'watermark.watermarkImageDimensionHeight': { sortIndex: 96 },
 	'watermark.sectionPlacement': { sortIndex: 100 },
 	'watermark.watermarkPosition': { sortIndex: 110 },
-	'watermark.watermarkMargin': { sortIndex: 120 },
+	'watermark.watermarkMarginShare': { sortIndex: 120 },
 	'watermark.watermarkOpacity': { sortIndex: 130 },
 	'watermark.sectionAppliesTo': { sortIndex: 140 },
 	'watermark.watermarkApplyScope': { sortIndex: 150 },
@@ -590,7 +547,7 @@ export const EDITOR_UI_BY_PATH = {
 		omitFromSchemaGroupDrill: true,
 	},
 	'slider.imageInfo': {
-		sortIndex: 142,
+		sortIndex: 115,
 		omitFromSchemaGroupDrill: true,
 	},
 };

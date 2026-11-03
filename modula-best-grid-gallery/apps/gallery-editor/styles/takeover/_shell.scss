@@ -1,4 +1,7 @@
 @use '../variables' as *;
+@use "../../../editor-shell/styles/device-frame" as *;
+
+$paper-preview-states: ".modula-takeover__live-preview-empty-state, .modula-gallery-takeover__live-preview-body--lightbox-preview";
 
 .modula-gallery-takeover__mount .modula-settings-editor__app {
 	display: flex;
@@ -48,15 +51,30 @@
 			padding: 0;
 		}
 
-		.modula-gallery-takeover__preview-loading,
-		.modula-gallery-takeover__preview-placeholder {
+		// On the dark stage (the desktop artboard has no paper).
+		.modula-gallery-takeover__preview-loading {
 			background: transparent;
 			border-bottom-color: transparent;
+			color: var(--modula-takeover-stage-ink-muted, #{$mod-takeover-stage-ink-muted});
 		}
 	}
 
-	.modula-takeover__preview-wrap--tablet .modula-gallery-takeover__live-preview-body,
-	.modula-takeover__preview-wrap--mobile .modula-gallery-takeover__live-preview-body {
-		padding: $mod-space-18;
+	// Tablet and phone draw the gallery on the stage, as desktop does; the
+	// empty state and the Lightbox preview keep the light device frame they
+	// are styled for. (Custom grid editing is desktop only.)
+	@include device-canvas-on-stage(".modula-gallery-takeover__live-preview", $paper-preview-states);
+
+	:is(#{$device-preview-wraps}) {
+		.modula-gallery-takeover__live-preview:not(:has(#{$paper-preview-states})) {
+			background: transparent;
+
+			.modula-gallery-takeover__live-preview-body {
+				padding: 0;
+			}
+		}
+
+		.modula-gallery-takeover__live-preview:has(#{$paper-preview-states}) .modula-gallery-takeover__live-preview-body {
+			padding: $mod-space-18;
+		}
 	}
 }

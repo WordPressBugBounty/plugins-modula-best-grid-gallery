@@ -1,44 +1,35 @@
 /**
- * Canvas toolbar above the artboard: document actions on the left; device
- * switch and the Add split on the right.
+ * Canvas toolbar above the artboard: document actions on the left, the Add
+ * split on the right. The device switch floats on the canvas
+ * (`CanvasDevicePill`, rendered by `TakeoverLayout`).
  */
-import { __ } from '@wordpress/i18n';
-import { Notice, Spinner } from '@wordpress/components';
-import { Icon, desktop, mobile, tablet } from '@wordpress/icons';
-import { IconButton } from 'shared-ui';
-
-const VIEWPORTS = /** @type {const} */ ([
-	{
-		id: 'desktop',
-		icon: desktop,
-		label: __('Desktop preview', 'modula-best-grid-gallery'),
-	},
-	{
-		id: 'tablet',
-		icon: tablet,
-		label: __('Tablet preview', 'modula-best-grid-gallery'),
-	},
-	{
-		id: 'mobile',
-		icon: mobile,
-		label: __('Mobile preview', 'modula-best-grid-gallery'),
-	},
-]);
+import { Notice, Spinner } from 'admin-ui';
 
 /**
- * @param {Object}                                          props
- * @param {'desktop'|'tablet'|'mobile'}                     props.previewViewport
- * @param {(viewport: 'desktop'|'tablet'|'mobile') => void} [props.onPreviewViewportChange]
- * @param {import('react').ReactNode}                       [props.actions]                 Toolbar actions (`CanvasToolbarActionButton`s).
- * @param {string}                                          [props.busyMessage]             Live status shown after the actions (e.g. upload progress).
- * @param {import('react').ReactNode}                       [props.addSplit]                Omitted when the document cannot add content in the current mode.
- * @param {string}                                          [props.errorNotice]             Dismissible error above the toolbar row.
- * @param {() => void}                                      [props.onDismissErrorNotice]
- * @param {import('react').ReactNode}                       [props.children]                Non-visual helpers mounted with the toolbar (file inputs, dialogs).
+ * Moves focus to the toolbar's first action (Done selecting in Selection
+ * mode). A control that goes with the selection (Clear, or an action that
+ * empties it) calls this before it disappears or turns disabled, so focus
+ * stays in the toolbar.
+ *
+ * @param {Element} control A control inside the toolbar's actions.
+ */
+export function focusCanvasToolbarFirstAction(control) {
+	control
+		.closest('.modula-takeover__canvas-toolbar-left')
+		?.querySelector('button')
+		?.focus();
+}
+
+/**
+ * @param {Object}                    props
+ * @param {import('react').ReactNode} [props.actions]              Toolbar actions (`CanvasToolbarActionButton`s).
+ * @param {string}                    [props.busyMessage]          Live status shown after the actions (e.g. upload progress).
+ * @param {import('react').ReactNode} [props.addSplit]             Omitted when the document cannot add content in the current mode.
+ * @param {string}                    [props.errorNotice]          Dismissible error above the toolbar row.
+ * @param {() => void}                [props.onDismissErrorNotice]
+ * @param {import('react').ReactNode} [props.children]             Non-visual helpers mounted with the toolbar (file inputs, dialogs).
  */
 export default function CanvasToolbar({
-	previewViewport,
-	onPreviewViewportChange,
 	actions = null,
 	busyMessage = '',
 	addSplit = null,
@@ -51,9 +42,9 @@ export default function CanvasToolbar({
 			{errorNotice ? (
 				<Notice
 					className="modula-takeover__canvas-toolbar-notice"
-					status="error"
-					isDismissible
-					onRemove={onDismissErrorNotice}
+					tone="error"
+					role="alert"
+					onDismiss={onDismissErrorNotice}
 				>
 					{errorNotice}
 				</Notice>
@@ -76,46 +67,11 @@ export default function CanvasToolbar({
 					) : null}
 				</div>
 
-				<div className="modula-takeover__canvas-toolbar-right">
-					<div
-						className="modula-takeover__canvas-toolbar-viewport"
-						role="group"
-						aria-label={__(
-							'Preview viewport',
-							'modula-best-grid-gallery'
-						)}
-					>
-						{VIEWPORTS.map((vp) => {
-							const isActive = previewViewport === vp.id;
-							return (
-								<IconButton
-									key={vp.id}
-									label={vp.label}
-									className={
-										isActive
-											? 'modula-takeover__canvas-toolbar-viewport-btn is-active'
-											: 'modula-takeover__canvas-toolbar-viewport-btn'
-									}
-									aria-pressed={isActive}
-									onClick={() => {
-										onPreviewViewportChange?.(vp.id);
-									}}
-								>
-									<Icon icon={vp.icon} size={18} />
-								</IconButton>
-							);
-						})}
+				{addSplit ? (
+					<div className="modula-takeover__canvas-toolbar-right">
+						{addSplit}
 					</div>
-					{addSplit ? (
-						<>
-							<span
-								className="modula-takeover__canvas-toolbar-divider"
-								aria-hidden="true"
-							/>
-							{addSplit}
-						</>
-					) : null}
-				</div>
+				) : null}
 			</div>
 		</div>
 	);

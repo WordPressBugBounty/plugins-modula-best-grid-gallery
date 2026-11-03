@@ -1,25 +1,16 @@
 /**
- * Hover effect builder entitlements from PHP bootstrap config.
+ * Hover effect builder entitlements.
  */
-import { getModulaSettingsEditorConfig } from '../config/modulaSettingsEditorConfig';
 
 /**
- * @param {Record<string, unknown>} [editorConfig]
- * @return {{ freePresetCount: number, customizeTabEnabled: boolean }}
+ * Without Compatible Pro the presets the animation catalog marks Pro are
+ * locked. PHP applies the same rule to an image's own hover
+ * (`Item_Fields::hover_builder_for_item`).
+ *
+ * @param {{ pro: boolean }}        preset       A `HOVER_BUILDER_PRESETS` entry.
+ * @param {Record<string, unknown>} editorConfig
+ * @return {boolean} The preset is locked on this site.
  */
-export function getHoverBuilderEntitlements(editorConfig) {
-	const editor = editorConfig || getModulaSettingsEditorConfig();
-	const entitlements =
-		editor.hoverBuilderEntitlements &&
-		typeof editor.hoverBuilderEntitlements === 'object'
-			? editor.hoverBuilderEntitlements
-			: {};
-	const freePresetCount = Number(entitlements.freePresetCount);
-	return {
-		freePresetCount:
-			Number.isFinite(freePresetCount) && freePresetCount >= 0
-				? freePresetCount
-				: 5,
-		customizeTabEnabled: Boolean(entitlements.customizeTabEnabled),
-	};
+export function isHoverPresetLocked(preset, editorConfig) {
+	return !editorConfig?.isPro && preset.pro === true;
 }

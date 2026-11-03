@@ -18,6 +18,8 @@ import { buildLayoutFlat } from '../utils/justifiedLayout';
 import { useContainerWidth } from '../hooks/useContainerWidth';
 import { usePreviewCatalogChunks } from '../hooks/usePreviewCatalogChunks';
 import { isCaptionBelowImage } from '../utils/captionPlacement';
+import { parseItemFocalCrop } from '../utils/galleryItemImage';
+import { resolveGalleryItemIntrinsicDimensions } from '../utils/galleryItemIntrinsicDimensions';
 
 const ROW_DEBUG_COLORS = [
 	'#4a90d9',
@@ -55,6 +57,7 @@ function isLayoutDebugMode() {
  * @param {string}  props.lastRowAlignment
  * @param {string}  props.debugKeyPrefix
  * @param           props.captionBelowImage
+ * @param {boolean} props.widens            Widen on hover: each tile's width follows `--modula-widen` (motion/widenOnHover.js) and its image covers it.
  */
 function JustifiedGridChunk({
 	chunk,
@@ -67,24 +70,18 @@ function JustifiedGridChunk({
 	lastRowAlignment,
 	debugKeyPrefix,
 	captionBelowImage = false,
+	widens = false,
 }) {
 	const tileShellOverflow =
 		parseInt(config?.shadowSize ?? 0, 10) > 0 ? 'visible' : 'hidden';
 	const layoutInput = (chunk || []).map((item) => {
+		const intrinsic = resolveGalleryItemIntrinsicDimensions(item, config);
 		const w =
-			Number(
-				item?.imgAttributes?.width ??
-					item?.itemAttributes?.['data-width'] ??
-					item?.width ??
-					0
-			) || 1;
+			intrinsic.width ??
+			(Number(item?.itemAttributes?.['data-width']) || 1);
 		const h =
-			Number(
-				item?.imgAttributes?.height ??
-					item?.itemAttributes?.['data-height'] ??
-					item?.height ??
-					0
-			) || 1;
+			intrinsic.height ??
+			(Number(item?.itemAttributes?.['data-height']) || 1);
 		return {
 			...item,
 			src: item?.src || item?.thumbnail || item?.url,
@@ -165,9 +162,12 @@ function JustifiedGridChunk({
 					typeof layoutItem.marginLeft === 'number'
 						? layoutItem.marginLeft
 						: 0;
+				const tileWidth = widens
+					? `calc(${slotWidth}px + var(--modula-widen, 0px))`
+					: slotWidth;
 				const style = {
-					width: slotWidth,
-					minWidth: slotWidth,
+					width: tileWidth,
+					minWidth: tileWidth,
 					margin: marginPerTile,
 					position: 'relative',
 					flexShrink: 0,
@@ -192,7 +192,7 @@ function JustifiedGridChunk({
 					style.flexGrow = 1;
 					style.maxWidth = 'none';
 				} else {
-					style.maxWidth = slotWidth;
+					style.maxWidth = tileWidth;
 				}
 				if (layoutMarginLeft > 0) {
 					style.marginLeft = marginPerTile + layoutMarginLeft;
@@ -237,12 +237,21 @@ function JustifiedGridChunk({
 						key={itemData.id ?? `${debugKeyPrefix}-${i}`}
 						className="modula-justified-tile"
 						style={style}
+						data-modula-slot-width={widens ? slotWidth : undefined}
+						// A focal crop places its image in px from the slot width,
+						// so its tile may give width up but never grow.
+						data-modula-widen-fixed={
+							widens && parseItemFocalCrop(itemData)
+								? ''
+								: undefined
+						}
 					>
 						<GalleryItem
 							itemData={itemData}
 							config={config}
 							slotWidth={slotWidth}
 							slotHeight={slotHeight}
+							fillSlot={widens}
 							style={
 								captionBelowImage
 									? {
@@ -278,6 +287,8 @@ export default function JustifiedGridLayout() {
 	const rowHeight = Number.isFinite(rowHeightRaw) ? rowHeightRaw : 180;
 	const lastRowAlignment = config?.lastRow ?? 'justify';
 	const captionBelowImage = isCaptionBelowImage(config);
+	// A caption under the image would rewrap as its tile widens.
+	const widens = config?.widenOnHover === true && !captionBelowImage;
 
 	const chunks = usePreviewCatalogChunks(items, config);
 
@@ -298,7 +309,10 @@ export default function JustifiedGridLayout() {
 	return (
 		<div
 			ref={containerRef}
-			className="modula-items modula-justified-grid modula-justified-grid--editor-pages"
+			className={
+				'modula-items modula-justified-grid modula-justified-grid--editor-pages' +
+				(widens ? ' modula-justified-grid--widen' : '')
+			}
 			style={containerStyle}
 		>
 			{layoutDebug && (
@@ -342,6 +356,7 @@ export default function JustifiedGridLayout() {
 						lastRowAlignment={lastRowAlignment}
 						debugKeyPrefix={`jg-${ci}`}
 						captionBelowImage={captionBelowImage}
+						widens={widens}
 					/>
 				</Fragment>
 			))}

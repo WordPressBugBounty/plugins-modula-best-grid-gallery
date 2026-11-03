@@ -1,0 +1,46 @@
+// A segmented control in the takeover settings panel, as the canvas draws
+// it. Mixin only: this file emits no CSS. Each editor includes it with its
+// field class block, whose device switch keeps its own width. The first rule
+// names no block: both editors include it alike, and they never share a page.
+@mixin takeover-segmented($block) {
+
+	// In the takeover a segmented control is as tall as the fields around it: a
+	// 32px track of 28px options in 13px text, which fill the row in equal
+	// columns (canvas). The device switch and other fixed-width segmented
+	// controls (the gallery image panel's On click) keep their own width: their
+	// rules set `display: inline-flex`.
+	.modula-admin-ui.modula-takeover__admin-ui-scope .modula-admin-segmented {
+		--modula-admin-segment-height: 28px;
+		display: grid;
+		grid-auto-columns: minmax(0, 1fr);
+		grid-auto-flow: column;
+		box-sizing: border-box;
+		height: var(--modula-admin-control-height);
+		padding: 2px;
+		border-radius: 7px;
+
+		.modula-admin-segmented__option {
+			padding: 0 4px;
+			border-radius: 5px;
+			font-size: 13px;
+		}
+	}
+
+	// The per-device switch: 30×28 icon buttons with 14px icons (canvas). Same
+	// specificity as the rule above, so it must stay after it.
+	.modula-admin-ui.modula-takeover__admin-ui-scope .#{$block}__device-switch {
+		display: inline-flex;
+
+		// `padding: 0` again: the text option padding above outranks admin-ui's
+		// own icon rule.
+		.modula-admin-segmented__option.is-icon {
+			width: 30px;
+			padding: 0;
+		}
+
+		svg {
+			width: 14px;
+			height: 14px;
+		}
+	}
+}

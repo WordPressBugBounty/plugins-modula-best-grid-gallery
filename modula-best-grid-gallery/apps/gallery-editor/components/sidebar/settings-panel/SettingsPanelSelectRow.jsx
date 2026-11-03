@@ -1,48 +1,29 @@
 /**
- * Redesign settings panel — select row chrome; control rendering lives in selectKind.
+ * Redesign settings panel — select row; the control comes from selectKind.
  */
-import { FieldStack, SettingsRow } from 'shared-ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTakeoverSaveStatus } from 'editor-shell';
-import { useGallerySettingsFormBundle } from '../../../form/GallerySettingsFormContext';
-import { validateFieldValue } from '../../../logic/validateFieldValue';
 import { useModulaSettingsEditorConfig } from '../../../hooks/useModulaSettingsEditorConfig';
-import { resolveHubV2FieldLabel } from '../../../constants/sidebarV2Meta';
-import EditorUpsellBlurb from '../../upsell/EditorUpsellBlurb';
-import { resolveOmitControlInLite } from '../../../logic/proGateLock';
-import {
-	isSettingsValueAtDefault,
-	resetSettingsFieldValue,
-} from '../../../logic/settingsFieldDefault';
-import FieldControl from '../../field/FieldControl';
-import { shouldUseMenuSelect } from '../../field/kinds/selectKind';
 import { getGalleryPreviewReduxStore } from '../../../utils/previewReduxStoreRef';
 import { seedTemplateContentBlocksForLayout } from '../../../logic/applyTemplateLayoutSideEffects';
+import SettingsPanelFieldRow from './SettingsPanelFieldRow';
 
 /**
  * @param {Object} props
  * @param {string} props.groupKey
  * @param {Object} props.field
  * @param {string} [props.labelId]
+ * @param {Object} [props.dependentsReset] Reset of the headless box under the field.
  */
-export default function SettingsPanelSelectRow({ groupKey, field, labelId }) {
-	const { form } = useGallerySettingsFormBundle();
+export default function SettingsPanelSelectRow({
+	groupKey,
+	field,
+	labelId,
+	dependentsReset,
+}) {
 	const editor = useModulaSettingsEditorConfig();
 	const queryClient = useQueryClient();
 	const { runPersistTask } = useTakeoverSaveStatus();
-	const isPro = Boolean(editor.isPro);
-	const label = resolveHubV2FieldLabel(field);
-	const titleId =
-		labelId ||
-		`modula-settings-panel-select-${String(field?.groupedPath || 'field').replace(/[^a-z0-9.-]/gi, '-')}`;
-	const fieldName = `${groupKey}.${field.groupedKey}`;
-	const schemaObj =
-		field.schema && typeof field.schema === 'object' ? field.schema : null;
-	const omitControlInLite = resolveOmitControlInLite(schemaObj, editor);
-	const disabledByLiteSchema =
-		!isPro && schemaObj && schemaObj.editorDisabledInLite === true;
-	const controlDisabled = disabledByLiteSchema || omitControlInLite;
-	const stacked = shouldUseMenuSelect(field);
 
 	const fieldWithoutHelp = {
 		...field,
@@ -54,97 +35,41 @@ export default function SettingsPanelSelectRow({ groupKey, field, labelId }) {
 		},
 	};
 
-	const fieldValidators = {
-		onChange: ({ value: v }) => {
-			const r = validateFieldValue(field, v);
-			return r.valid ? undefined : r.message;
-		},
+	const writeSelect = (next, { form, fieldName }) => {
+		form.setFieldValue(fieldName, next);
+		if (field?.groupedPath !== 'template.templateLayout') {
+			return;
+		}
+		const store = getGalleryPreviewReduxStore();
+		const galleryId = Number(editor.galleryId) || 0;
+		const slug = String(next || '').trim();
+		if (!store || !galleryId || !slug) {
+			return;
+		}
+		void seedTemplateContentBlocksForLayout(
+			store,
+			galleryId,
+			slug,
+			runPersistTask,
+			queryClient
+		).catch((err) => {
+			// eslint-disable-next-line no-console
+			console.error('[modula] template content block seed failed', err);
+		});
 	};
 
-	if (omitControlInLite) {
-		return (
-			<div className="modula-settings-panel__toggle-upsell">
-				<span className="modula-settings-panel__toggle-upsell-label">
-					{label}
-				</span>
-				<EditorUpsellBlurb field={field} />
-			</div>
-		);
-	}
-
 	return (
-		<form.Field name={fieldName} validators={fieldValidators}>
-			{(fieldApi) => {
-				const dirty = !isSettingsValueAtDefault(
-					fieldApi.state.value,
-					field.schema
-				);
-				const onReset = () => {
-					resetSettingsFieldValue(
-						form,
-						fieldName,
-						field.schema,
-						field.groupedPath
-					);
-				};
-				const control = (
-					<FieldControl
-						field={fieldWithoutHelp}
-						value={fieldApi.state.value}
-						onChange={(next) => {
-							form.setFieldValue(fieldName, next);
-							if (
-								field?.groupedPath === 'template.templateLayout'
-							) {
-								const store = getGalleryPreviewReduxStore();
-								const galleryId = Number(editor.galleryId) || 0;
-								const slug = String(next || '').trim();
-								if (store && galleryId && slug) {
-									void seedTemplateContentBlocksForLayout(
-										store,
-										galleryId,
-										slug,
-										runPersistTask,
-										queryClient
-									).catch((err) => {
-										// eslint-disable-next-line no-console
-										console.error(
-											'[modula] template content block seed failed',
-											err
-										);
-									});
-								}
-							}
-						}}
-						disabled={controlDisabled}
-					/>
-				);
-
-				if (stacked) {
-					return (
-						<FieldStack
-							className="modula-settings-panel__select-row modula-settings-panel__select-row--stacked"
-							label={label}
-							htmlFor={titleId}
-							dirty={dirty}
-							onReset={onReset}
-						>
-							{control}
-						</FieldStack>
-					);
-				}
-
-				return (
-					<SettingsRow
-						className="modula-settings-panel__select-row"
-						label={label}
-						id={titleId}
-						dirty={dirty}
-						onReset={onReset}
-						end={control}
-					/>
-				);
-			}}
-		</form.Field>
+		<SettingsPanelFieldRow
+			groupKey={groupKey}
+			field={field}
+			labelId={
+				labelId ||
+				`modula-settings-panel-select-${String(field?.groupedPath || 'field').replace(/[^a-z0-9.-]/gi, '-')}`
+			}
+			className="modula-settings-panel__select-row"
+			controlField={fieldWithoutHelp}
+			writeValue={writeSelect}
+			dependentsReset={dependentsReset}
+		/>
 	);
 }

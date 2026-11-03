@@ -24,6 +24,12 @@
 	&.is-active {
 		@include mixins.segment-option-active;
 	}
+
+	// Icon-only options are square.
+	&.is-icon {
+		width: var(--modula-admin-segment-height);
+		padding: 0;
+	}
 }
 
 // The number of items an option stands for, after its label.

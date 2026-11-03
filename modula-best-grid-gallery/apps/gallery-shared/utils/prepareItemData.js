@@ -198,8 +198,12 @@ export function prepareItemData(itemData, config, options = {}) {
 			!config.enableSocial ||
 			(Boolean(itemData.hideSocials) && !config.socialDesktopCollapsed) ||
 			false,
-		/** Folded share FAB on desktop (listing expandable UX); not the same as hideSocials. */
-		socialDesktopCollapsed: !!config.socialDesktopCollapsed,
+		/**
+		 * Folded share FAB on desktop (listing expandable UX); not the same as hideSocials.
+		 * A hover whose look is the social icons (Social strip) keeps them inline.
+		 */
+		socialDesktopCollapsed:
+			!!config.socialDesktopCollapsed && !config.inlineSocial,
 		lazyLoad: itemData.lazyLoad || config.lazyLoad || false,
 
 		// Always copy: Redux/Immer may freeze `itemData.itemClasses`; slider/story mutate below.

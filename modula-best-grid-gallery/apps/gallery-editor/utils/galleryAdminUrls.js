@@ -16,6 +16,16 @@ export function getGalleryListUrl(config = getModulaSettingsEditorConfig()) {
 }
 
 /**
+ * New-gallery screen in the new editor from PHP bootstrap (`newGalleryUrl`).
+ *
+ * @param {Record<string, unknown>} [config]
+ * @return {string} Empty when the user cannot create galleries.
+ */
+export function getNewGalleryUrl(config = getModulaSettingsEditorConfig()) {
+	return typeof config.newGalleryUrl === 'string' ? config.newGalleryUrl : '';
+}
+
+/**
  * Modula AI settings in wp-admin; the panel lives on the AI tab.
  *
  * @param {Record<string, unknown>} [config]

@@ -11,6 +11,7 @@ import {
 	storeIndexToCoreIndex,
 } from 'gallery-shared/preview';
 import { captionToPlainString } from './captionToPlainString';
+import { ITEM_CSS_CLASS_KEY, ITEM_HOVER_PRESET_KEY } from './galleryItemFields';
 import {
 	applyVideoTemplateDisplayFieldsToPreviewItem,
 	isVideoTemplateRow,
@@ -643,6 +644,16 @@ export function mergeModulaRowIntoPreviewItem(prevItem, row) {
 		gridX: mergeRowFieldIfPresent(row, prevItem, 'gridX'),
 		gridY: mergeRowFieldIfPresent(row, prevItem, 'gridY'),
 		gridLocked: mergeRowFieldIfPresent(row, prevItem, 'gridLocked'),
+		[ITEM_HOVER_PRESET_KEY]: mergeRowFieldIfPresent(
+			row,
+			prevItem,
+			ITEM_HOVER_PRESET_KEY
+		),
+		[ITEM_CSS_CLASS_KEY]: mergeRowFieldIfPresent(
+			row,
+			prevItem,
+			ITEM_CSS_CLASS_KEY
+		),
 	};
 
 	if (

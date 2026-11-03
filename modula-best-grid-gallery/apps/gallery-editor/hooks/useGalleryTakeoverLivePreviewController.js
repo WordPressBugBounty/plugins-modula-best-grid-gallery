@@ -2,10 +2,8 @@
  * State, effects, and admin callbacks for the takeover live preview mounted body.
  */
 import { useCallback, useRef } from '@wordpress/element';
-import { useInvalidateGalleryBootstrap } from './useInvalidateGalleryBootstrap';
 import { useTakeoverPreviewStore } from './takeover-live-preview/useTakeoverPreviewStore';
 import { usePreviewPersistCoordinator } from './takeover-live-preview/usePreviewPersistCoordinator';
-import { usePreviewUploadDropZones } from './takeover-live-preview/usePreviewUploadDropZones';
 import { usePreviewItemModals } from './takeover-live-preview/usePreviewItemModals';
 import { usePreviewItemAdminActions } from './takeover-live-preview/usePreviewItemAdminActions';
 import { useCustomGridPaginationLayoutEffect } from './takeover-live-preview/useCustomGridPaginationLayoutEffect';
@@ -54,6 +52,7 @@ export function useGalleryTakeoverLivePreviewController({
 		bootstrapQueryKey,
 		runPersistTaskWithDeferredRefresh,
 		schedulePersistPreviewItems,
+		holdScheduledPreviewPersist,
 		flushPreviewItemsPersistNow,
 		resetPreviewPersistDirty,
 		isPreviewItemsPersistPending,
@@ -135,22 +134,8 @@ export function useGalleryTakeoverLivePreviewController({
 			saveMetaModalReturnFocus,
 			setMetaModalStoreIndex,
 			schedulePersistPreviewItems,
+			holdScheduledPreviewPersist,
 		});
-
-	const invalidateBootstrap = useInvalidateGalleryBootstrap(galleryId);
-
-	const {
-		dropZoneError,
-		dismissDropZoneError,
-		startZoneDisplay,
-		endZoneDisplay,
-		dropZoneInteractive,
-		handleDropZoneFiles,
-	} = usePreviewUploadDropZones({
-		galleryId,
-		runPreviewItemMutation,
-		invalidateBootstrap,
-	});
 
 	const previewItemPersistApi = {
 		runPersistTaskWithDeferredRefresh,
@@ -173,12 +158,5 @@ export function useGalleryTakeoverLivePreviewController({
 		setContentBlockEdit,
 		handleSaveContentBlock,
 		previewAdminValue,
-		runPreviewItemMutation,
-		dropZoneError,
-		dismissDropZoneError,
-		startZoneDisplay,
-		endZoneDisplay,
-		dropZoneInteractive,
-		handleDropZoneFiles,
 	};
 }

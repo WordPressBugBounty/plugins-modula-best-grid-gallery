@@ -1,0 +1,160 @@
+@use 'variables' as *;
+@use 'settings-panel-rows' as *;
+
+// Item edit panels (canvas "Edit image", the album's member panel): bordered
+// cards (`ItemEditCard`) in the settings panel's column under
+// `ItemEditPanelHeader`. Colours come from admin-ui tokens; the panel sits in
+// the sidebar's admin-ui scope. The classes keep the gallery's
+// `modula-gallery-item-edit-panel` block, where they started; the gallery's
+// own cards (text, link, hover, More settings) stay in its partial.
+.modula-gallery-item-edit-panel {
+	// The canvas draws this panel's fields, thumbnails and buttons with 3px
+	// corners, squarer than the settings panel's.
+	--modula-admin-radius-sm: 3px;
+
+	@include column-admin-rows;
+}
+
+// The panel's buttons take the canvas's `hf-tb` look: the fields' border,
+// 3px corners, a quiet hover, and when disabled only the text fades. The
+// admin-ui root and panel classes outrank admin-ui's secondary rules, so
+// Modula Settings and the canvas toolbar keep their 8px buttons.
+.modula-admin-ui .modula-gallery-item-edit-panel .modula-admin-button.is-secondary {
+	border-color: var(--modula-admin-border-field);
+	border-radius: var(--modula-admin-radius-sm);
+
+	&:disabled {
+		opacity: 1;
+		color: var(--modula-admin-ink-disabled);
+	}
+
+	&:hover:not(:disabled) {
+		background: var(--modula-admin-surface-hover-soft);
+	}
+}
+
+// The ink action (Image focus's Apply crop) has the same 3px corners.
+.modula-admin-ui .modula-gallery-item-edit-panel .modula-admin-button.is-primary {
+	border-radius: var(--modula-admin-radius-sm);
+}
+
+// Two equal buttons side by side (Replace / Remove, page moves, stacking).
+.modula-gallery-item-edit-panel__button-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: $mod-space-8;
+
+	.modula-admin-button {
+		width: 100%;
+		min-width: 0;
+	}
+}
+
+.modula-gallery-item-edit-panel__card {
+	display: flex;
+	flex-direction: column;
+	margin: 0 $mod-se-gut $mod-space-12;
+	padding: $mod-space-6 0;
+	border: 1px solid var(--modula-admin-border);
+	border-radius: var(--modula-admin-radius-lg);
+	background: var(--modula-admin-surface);
+
+	> .modula-gallery-item-edit-panel__button-grid {
+		margin: $mod-space-4 $mod-se-gut $mod-space-10;
+	}
+}
+
+.modula-gallery-item-edit-panel__card-title {
+	margin: 0;
+	padding: $mod-space-10 $mod-se-gut $mod-space-4;
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-control);
+	font-weight: 500;
+	line-height: 1.4;
+}
+
+// Danger text (canvas); admin-ui's scoped secondary colour, hover included,
+// outranks a two-class rule.
+.modula-gallery-item-edit-panel .modula-admin-button.is-secondary.modula-gallery-item-edit-panel__remove {
+	color: var(--modula-admin-danger);
+
+	&:hover:not(:disabled) {
+		color: var(--modula-admin-danger);
+	}
+}
+
+// The file card: the canvas pads the whole card, rows included.
+.modula-gallery-item-edit-panel__file {
+	--modula-admin-row-padding-x: 0;
+	gap: $mod-space-14;
+	padding: $mod-space-14 $mod-se-gut;
+
+	> .modula-gallery-item-edit-panel__button-grid {
+		margin: 0;
+	}
+
+	.modula-admin-row__help {
+		padding-bottom: 0;
+	}
+}
+
+.modula-gallery-item-edit-panel__file-summary {
+	display: flex;
+	align-items: center;
+	gap: $mod-space-14;
+	min-width: 0;
+}
+
+.modula-gallery-item-edit-panel__file-thumb {
+	display: block;
+	flex-shrink: 0;
+	width: 72px;
+	height: 72px;
+	border-radius: var(--modula-admin-radius-sm);
+	object-fit: cover;
+}
+
+.modula-gallery-item-edit-panel__file-text {
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-4;
+	min-width: 0;
+}
+
+.modula-gallery-item-edit-panel__file-name {
+	overflow: hidden;
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-control);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.modula-gallery-item-edit-panel__file-meta {
+	color: var(--modula-admin-ink-muted);
+	font-size: 13px;
+	font-variant-numeric: tabular-nums;
+}
+
+// Stacked field: label line, control, help.
+.modula-gallery-item-edit-panel__field {
+	display: flex;
+	flex-direction: column;
+	gap: $mod-space-8;
+	padding: $mod-space-10 $mod-se-gut;
+	min-width: 0;
+}
+
+.modula-gallery-item-edit-panel__field-label-line {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: $mod-space-8;
+	min-width: 0;
+}
+
+.modula-gallery-item-edit-panel__field-label {
+	min-width: 0;
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-control);
+	line-height: 1.4;
+}

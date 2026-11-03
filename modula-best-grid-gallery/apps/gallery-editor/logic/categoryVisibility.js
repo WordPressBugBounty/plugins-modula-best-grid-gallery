@@ -7,7 +7,7 @@
  * - **slider**: All `slider` schema fields render under **Gallery & layout** (with general / layout); **Playback** is only **slideshow** timing.
  *   Style hub is available (corner radius / border / shadow apply to carousel slides). Loading effects and Hover effects hubs stay hidden.
  *   Layout grid fields stay hidden for slider where rules say so — empty group cards are not rendered.
- * - **video**: **Video** category for Video type and mixed image galleries (hidden for story/slider). Video type shows playlist + play icon + autoplay thumbnail; mixed types show lightbox autoplay/loop, play icon, and hover preview.
+ * - **video**: **Video** category for Video type and mixed image galleries (hidden for story/slider). It needs the Video extension (`requiresExtension` on the category). Video type shows playlist + play icon + autoplay thumbnail; mixed types show lightbox autoplay/loop, play icon, and hover preview.
  * - **slider / story / showcase / template / freeform / parallax-masonry / bnb / video**: Pagination hub item and fields hidden;
  *   visitor pagination chrome off (`GALLERY_TYPES_WITHOUT_PAGINATION`).
  * - **creative-gallery**: Infinite scroll hidden (fixed packery height); numbered pages / load more only.
@@ -29,7 +29,7 @@
  * - **parallax-masonry**: Captions stay inside-image only (moving photo wall).
  * - **video**: Shuffle on load hidden (playlist order is intentional; PHP shuffle permit list excludes video).
  * - **video**: Protection keeps Password protect only; Watermark, Image licensing, and Image Guardian hub items hidden.
- * - **video**: Advanced category hidden (EXIF, Zoom, Deeplink, Instagram, Performance, Image proofing).
+ * - **video**: Instagram and Proofing categories hidden; EXIF, Zoom and Deeplink live in the hidden Lightbox category.
  * - **video**: Captions & titles hub hidden (VideoLayout has no grid caption placement; hover is already off).
  * - **video**: Interaction category hidden (Download, Social, Comments). Video layout has no lightbox share,
  *   no tile social chrome / collapsible share button, and no meaningful download ZIP.
@@ -39,30 +39,51 @@ import { evaluateWhen } from './fieldVisibility';
 import { getModulaSettingsEditorConfig } from '../config/modulaSettingsEditorConfig';
 import { resolveProGateLock } from './proGateLock';
 
-const VIDEO_EXTENSION_SLUG = 'modula-video';
+/**
+ * The gate of a category with `requiresExtension` (Video): it shows only when
+ * that extension is available and enabled. Lite locks it (`needs_pro`).
+ *
+ * @param {{ requiresExtension?: string }} category
+ * @param {Object}                         editor   Editor config.
+ * @return {ReturnType<typeof resolveProGateLock>} Allowed for a category without an extension.
+ */
+export function resolveCategoryExtensionGate(category, editor) {
+	const slug =
+		typeof category.requiresExtension === 'string'
+			? category.requiresExtension.trim()
+			: '';
+	if (slug === '') {
+		return { allowed: true };
+	}
+	return resolveProGateLock(
+		{ kind: 'requiresExtension', extensionSlug: slug },
+		editor
+	);
+}
 
 /**
- * @param {{ name: string, visibleWhen?: object }}  category
+ * @param {{ visibleWhen?: object }}                category
  * @param {Record<string, Record<string, unknown>>} groupedValues TanStack form values (grouped shape).
- * @return {boolean}
+ * @return {boolean} True when the category has no `visibleWhen` rule, or it passes.
+ */
+export function passesCategoryVisibleWhen(category, groupedValues) {
+	return (
+		!category.visibleWhen ||
+		evaluateWhen(category.visibleWhen, groupedValues)
+	);
+}
+
+/**
+ * @param {{ name: string, visibleWhen?: object, requiresExtension?: string }} category
+ * @param {Record<string, Record<string, unknown>>}                            groupedValues TanStack form values (grouped shape).
+ * @return {boolean} True when the category's rule and extension gate allow it.
  */
 export function isCategoryVisible(category, groupedValues) {
-	if (
-		category.visibleWhen &&
-		!evaluateWhen(category.visibleWhen, groupedValues)
-	) {
-		return false;
-	}
-	if (category.name === 'video') {
-		const { allowed } = resolveProGateLock(
-			{ kind: 'requiresExtension', extensionSlug: VIDEO_EXTENSION_SLUG },
-			getModulaSettingsEditorConfig()
-		);
-		if (!allowed) {
-			return false;
-		}
-	}
-	return true;
+	return (
+		passesCategoryVisibleWhen(category, groupedValues) &&
+		resolveCategoryExtensionGate(category, getModulaSettingsEditorConfig())
+			.allowed
+	);
 }
 
 /**

@@ -35,9 +35,7 @@ export default function GalleryDefaultsEditorSlot({ slot, itemCount }) {
 	);
 	const commitAppliedSettings =
 		useCommitAppliedGalleryDefaultsSettings(galleryId);
-	const { data: bootstrap } = useGalleryBootstrapQuery(
-		config.takeover ? galleryId : null
-	);
+	const { data: bootstrap } = useGalleryBootstrapQuery(galleryId);
 
 	const entitled = isGalleryDefaultsEntitled(config);
 	const Component = registration?.[slot];

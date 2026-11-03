@@ -1,17 +1,14 @@
-@use '../../shared-styles/spacing' as *;
-@forward '../../shared-styles/spacing';
-@use '../../shared-styles/radii' as *;
-@forward '../../shared-styles/radii';
+@use 'spacing' as *;
+@forward 'spacing';
+@use 'radii' as *;
+@forward 'radii';
 @use 'theme' as *;
 @forward 'theme';
 
-// Shared “chip” height so Exit (link) and Save (WP Button) share one baseline and center line.
-$modula-topbar-action-h: $mod-space-32;
-$modula-topbar-action-pad-x: $mod-space-12;
-
-// Fixed style-kit accent (not WP admin theme colour). See docs/contributors/23-style-guide.md.
+// Retired style-kit accent: the gallery editor uses admin-ui ink (ADR 0050).
+// Only the Pro Albums editor still reads these (its own `_app-accent-vars`
+// and preview partials); delete them when Albums moves to admin-ui tokens.
 $modula-takeover-accent: #2e4fe8 !default;
-$modula-takeover-accent-strong: #2e4fe8 !default;
 $modula-takeover-accent-hover: #4563f0 !default;
 $modula-takeover-accent-soft: #edf0fe !default;
 $modula-takeover-accent-dark: #6b85ff !default;

@@ -1,6 +1,6 @@
 <?php
 /**
- * Per-post Beta opt-in: Beta gallery (editor + visitor) or Beta album (Albums editor only).
+ * Per-post Beta opt-in: Beta gallery or Beta album (editor + visitor).
  *
  * @package Modula
  */
@@ -149,46 +149,33 @@ final class Beta_Settings {
 	}
 
 	/**
-	 * Whether this post is a Beta album (Albums editor takeover; classic visitor shortcode).
+	 * Whether this post is a Beta album (Albums editor takeover and Album visitor frontend).
 	 *
-	 * Stored `_modula_beta` is the per-album opt-in. While `modula_album_takeover_ui`
-	 * is true, every album is a Beta album so the edit screen does not wait on that
-	 * meta or on the editor-choice prompt.
+	 * Stored `_modula_beta` is the per-album opt-in, as for a Beta gallery; no
+	 * filter makes an album Beta (ADR 0054).
 	 *
 	 * @param int $post_id Album post ID.
 	 * @return bool
 	 */
 	public static function is_beta_album( $post_id ) {
-		$post_id = absint( $post_id );
-		if ( $post_id < 1 ) {
-			return false;
-		}
-		if ( 'modula-album' !== get_post_type( $post_id ) ) {
-			return false;
-		}
-		if ( self::is_album_takeover_forced() ) {
-			return true;
-		}
-
-		return '1' === (string) get_post_meta( $post_id, self::META_KEY, true );
+		return self::is_stored_beta_album( $post_id );
 	}
 
 	/**
-	 * Site-wide force-on for the Albums editor. Default false.
+	 * Whether this album stores `_modula_beta` itself (Try the beta, Convert, a new
+	 * Beta album, a save in the Albums editor). The same answer as is_beta_album();
+	 * the visitor dispatch names the stored flag it switches on (ADRs 0052, 0054).
 	 *
-	 * Re-entrancy guard: callers of this filter must not re-enter `is_beta_album()`.
-	 *
+	 * @param int $post_id Album post ID.
 	 * @return bool
 	 */
-	private static function is_album_takeover_forced() {
-		static $resolving = false;
-		if ( $resolving ) {
+	public static function is_stored_beta_album( $post_id ) {
+		$post_id = absint( $post_id );
+		if ( $post_id < 1 || 'modula-album' !== get_post_type( $post_id ) ) {
 			return false;
 		}
-		$resolving = true;
-		$forced    = (bool) apply_filters( 'modula_album_takeover_ui', false );
-		$resolving = false;
-		return $forced;
+
+		return '1' === (string) get_post_meta( $post_id, self::META_KEY, true );
 	}
 
 	/**
@@ -299,13 +286,18 @@ final class Beta_Settings {
 	}
 
 	/**
-	 * @param bool $enabled Unused prior value; identifier is the sole gate.
-	 * @param int  $post_id Gallery or album post ID.
+	 * @param bool $enabled Prior value; kept only when there is no post.
+	 * @param int  $post_id Gallery or album post ID; 0 asks site-wide.
 	 * @return bool
 	 */
 	public static function filter_settings_editor( $enabled, $post_id = 0 ) {
-		unset( $enabled );
 		$post_id = (int) $post_id;
+		// With no post the identifier cannot answer, so the caller's default stands:
+		// false on a gallery create screen, true for the site-wide Albums editor
+		// availability, which a later `__return_false` still turns off.
+		if ( $post_id < 1 ) {
+			return (bool) $enabled;
+		}
 		return self::is_beta_gallery( $post_id ) || self::is_beta_album( $post_id );
 	}
 

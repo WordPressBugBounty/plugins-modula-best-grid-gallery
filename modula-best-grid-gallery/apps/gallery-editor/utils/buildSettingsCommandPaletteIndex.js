@@ -10,38 +10,7 @@ import {
 import { getCategoryGroupKeys } from '../logic/editorCategoryHub';
 import { getEnrichedFieldsForGroup } from '../data/formSchema';
 import { humanizeKey } from '../logic/humanizeKey';
-
-/**
- * @param {string[]} parts
- * @return {string} Single lowercase string used for palette text matching.
- */
-function normalizeBlob(parts) {
-	return parts
-		.filter((p) => p !== undefined && p !== null && String(p).trim() !== '')
-		.map((p) => String(p).trim())
-		.join('\n')
-		.toLowerCase();
-}
-
-/**
- * @param {Object} field Form field descriptor.
- * @return {string} Text blob from editor/schema descriptions.
- */
-function fieldDescriptionBlob(field) {
-	const bits = [];
-	if (typeof field.editorDescription === 'string') {
-		bits.push(field.editorDescription);
-	}
-	const schema = field.schema;
-	if (
-		schema &&
-		typeof schema === 'object' &&
-		typeof schema.description === 'string'
-	) {
-		bits.push(schema.description);
-	}
-	return bits.join(' ');
-}
+import { fieldDescriptionBlob, normalizeBlob } from 'editor-shell/logic';
 
 /**
  * @param {Array<Record<string, unknown>>}  out

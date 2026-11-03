@@ -222,17 +222,20 @@ export function resolveBelowImageTextColor(
 }
 
 /**
- * Settings-editor preview: follow light/dark chrome when colors are still overlay defaults.
+ * Settings-editor preview: while the colors are still the overlay defaults,
+ * text outside the image reads the canvas stage's ink. The stage is dark in
+ * both appearances, so the panel's ink would vanish on it in the light one
+ * (ticket 104). Outside the stage it falls back to the visitor's defaults.
  *
  * @param {string}            [configuredColor]
  * @param {'title'|'caption'} kind
- * @return {string}
+ * @return {string} The picked color, or the stage's ink as a CSS `var()`.
  */
 export function resolveBelowImagePreviewTextColor(configuredColor, kind) {
 	if (!isOverlayDefaultCaptionColor(configuredColor)) {
 		return String(configuredColor).trim();
 	}
 	return kind === 'title'
-		? 'var(--mod-se-preview-ink, #1e1e1e)'
-		: 'var(--mod-se-preview-ink-muted, #50575e)';
+		? 'var(--modula-takeover-stage-ink, #1e1e1e)'
+		: 'var(--modula-takeover-stage-ink-muted, #50575e)';
 }

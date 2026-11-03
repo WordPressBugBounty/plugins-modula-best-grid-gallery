@@ -8,8 +8,10 @@ import {
 	renderStringListKind,
 	renderObjectKind,
 } from './kinds/basicInputKinds';
+import { renderCssLengthKind } from './kinds/cssLengthKind';
 import { renderCustomCssTextareaKind } from './kinds/customCssTextareaKind';
 import { renderRangeKind } from './kinds/rangeKind';
+import { renderProofingSelectionRangeKind } from './kinds/proofingSelectionRangeKind';
 import { renderSelectKind } from './kinds/selectKind';
 import { renderLicenseImageSelectKind } from './kinds/licenseImageSelectKind';
 import {
@@ -22,104 +24,83 @@ import { renderColorKind } from './kinds/colorKind';
 import { renderParallaxOverlayColorKind } from './kinds/parallaxOverlayColorKind';
 import { renderTuple3Kind } from './kinds/tuple3Kind';
 import { renderDimensionsKind } from './kinds/dimensionsKind';
-import { renderFallbackKind } from './kinds/fallbackKind';
+import { renderUnknownKind } from './kinds/unknownKind';
 import { renderPasswordWithStrengthKind } from './kinds/passwordWithStrengthKind';
 import { renderSegmentedEnumKind } from './kinds/segmentedEnumKind';
 import { renderPositionGridKind } from './kinds/positionGridKind';
 import { renderWatermarkApplyScopeKind } from './kinds/watermarkApplyScopeKind';
 import { renderPlaceholderPatternKind } from './kinds/placeholderPatternKind';
 import { renderTemplateLayoutSelectKind } from './kinds/templateLayoutSelectKind';
+import { renderMotionChoiceKind } from './kinds/motionChoiceKind';
 
 /**
- * Maps `control.kind` to field UI (see `FieldControl.jsx` entry).
+ * The one mapping from `control.kind` to its admin-ui control (entry:
+ * `FieldControl.jsx`). Kinds that draw a whole row instead of a control
+ * (headings, callouts, previews) live in `schema/schemaRowKinds.jsx`;
+ * `fieldKindMapping.test.js` checks both cover the generated schema.
+ *
+ * Each renderer receives the field context below and returns the control;
+ * the row around it (label, reset dot, upsell) belongs to the caller.
  */
-
-const CTX_KEYS = ['field', 'control', 'value', 'onChange', 'disabled', 'help'];
-
-function ctxPick(props) {
-	/** @type {Record<string, unknown>} */
-	const o = {};
-	for (const k of CTX_KEYS) {
-		if (props[k] !== undefined) {
-			o[k] = props[k];
-		}
-	}
-	return o;
-}
+const FIELD_CONTROL_RENDERERS = {
+	toggle: renderToggleKind,
+	// The nested drill is row chrome (SchemaFieldRowToggleWithNestedGrid);
+	// the control is the toggle.
+	toggleWithNested: renderToggleKind,
+	text: renderTextKind,
+	cssLength: renderCssLengthKind,
+	metadataFiltersAutocomplete: renderMetadataFiltersAutocompleteKind,
+	number: renderNumberKind,
+	actionButton: renderActionButtonKind,
+	range: renderRangeKind,
+	proofingSelectionRange: renderProofingSelectionRangeKind,
+	select: renderSelectKind,
+	licenseImageSelect: renderLicenseImageSelectKind,
+	segmentedEnum: renderSegmentedEnumKind,
+	positionGrid: renderPositionGridKind,
+	watermarkApplyScope: renderWatermarkApplyScopeKind,
+	placeholderPattern: renderPlaceholderPatternKind,
+	templateLayoutSelect: renderTemplateLayoutSelectKind,
+	motionChoice: renderMotionChoiceKind,
+	defaultActiveFilterSelect: renderDefaultActiveFilterKind,
+	textarea: renderTextareaKind,
+	customCssTextarea: renderCustomCssTextareaKind,
+	passwordWithStrength: renderPasswordWithStrengthKind,
+	color: renderColorKind,
+	parallaxOverlayColor: renderParallaxOverlayColorKind,
+	tuple3: renderTuple3Kind,
+	dimensions: renderDimensionsKind,
+	filterNameList: renderFilterNameListKind,
+	mediaAttachment: renderMediaAttachmentKind,
+	mediaUrl: renderMediaUrlKind,
+	stringList: renderStringListKind,
+	object: renderObjectKind,
+};
 
 /**
- * @param {Object}           props
- * @param {Object}           props.field
- * @param {Object}           props.control
- * @param {string}           props.kind
- * @param {*}                props.value
- * @param {Function}         props.onChange
- * @param {boolean}          props.disabled
- * @param {string|undefined} props.help
+ * @typedef {Object} FieldControlContext
+ * @property {Object}           field     Enriched form schema field.
+ * @property {Object}           control   `field.control`.
+ * @property {string}           kind
+ * @property {string}           controlId Id for the native control, so the row label names it.
+ * @property {string}           label     Setting name, for controls named by their own button.
+ * @property {*}                value
+ * @property {Function}         onChange
+ * @property {boolean}          disabled
+ * @property {string|undefined} help
  */
-export function renderFieldControlKind(props) {
-	const { kind } = props;
-	const ctx = ctxPick(props);
 
-	switch (kind) {
-		case 'toggle':
-			return renderToggleKind(ctx);
-		case 'toggleWithNested':
-			return renderToggleKind({
-				...ctx,
-				control: { ...ctx.control, kind: 'toggle' },
-			});
-		case 'text':
-			return renderTextKind(ctx);
-		case 'metadataFiltersAutocomplete':
-			return renderMetadataFiltersAutocompleteKind(ctx);
-		case 'number':
-			return renderNumberKind(ctx);
-		case 'actionButton':
-			return renderActionButtonKind(ctx);
-		case 'range':
-			return renderRangeKind(ctx);
-		case 'select':
-			return renderSelectKind(ctx);
-		case 'licenseImageSelect':
-			return renderLicenseImageSelectKind(ctx);
-		case 'segmentedEnum':
-			return renderSegmentedEnumKind(ctx);
-		case 'positionGrid':
-			return renderPositionGridKind(ctx);
-		case 'watermarkApplyScope':
-			return renderWatermarkApplyScopeKind(ctx);
-		case 'placeholderPattern':
-			return renderPlaceholderPatternKind(ctx);
-		case 'templateLayoutSelect':
-			return renderTemplateLayoutSelectKind(ctx);
-		case 'defaultActiveFilterSelect':
-			return renderDefaultActiveFilterKind(ctx);
-		case 'textarea':
-			return renderTextareaKind(ctx);
-		case 'customCssTextarea':
-			return renderCustomCssTextareaKind(ctx);
-		case 'passwordWithStrength':
-			return renderPasswordWithStrengthKind(ctx);
-		case 'color':
-			return renderColorKind(ctx);
-		case 'parallaxOverlayColor':
-			return renderParallaxOverlayColorKind(ctx);
-		case 'tuple3':
-			return renderTuple3Kind(ctx);
-		case 'dimensions':
-			return renderDimensionsKind(ctx);
-		case 'filterNameList':
-			return renderFilterNameListKind(ctx);
-		case 'mediaAttachment':
-			return renderMediaAttachmentKind(ctx);
-		case 'mediaUrl':
-			return renderMediaUrlKind(ctx);
-		case 'stringList':
-			return renderStringListKind(ctx);
-		case 'object':
-			return renderObjectKind(ctx);
-		default:
-			return renderFallbackKind({ ...ctx, kind });
-	}
+/**
+ * @param {FieldControlContext} ctx
+ * @return {import('react').ReactNode} The control for `ctx.kind`.
+ */
+export function renderFieldControlKind(ctx) {
+	const render = Object.prototype.hasOwnProperty.call(
+		FIELD_CONTROL_RENDERERS,
+		ctx.kind
+	)
+		? FIELD_CONTROL_RENDERERS[ctx.kind]
+		: renderUnknownKind;
+
+	return render(ctx);
 }

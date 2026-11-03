@@ -1,20 +1,38 @@
 /** Pointer gestures are transient; only a completed rectangle enters the settings form. */
-import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import {
+	useCallback,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useStore } from 'react-redux';
 import {
 	FreeformLayout,
 	FreeformSurface,
+	GalleryPreviewAdminActionsContext,
+	changeFreeformStacking,
 	constrainFreeformPlacement,
 	getCustomGridEditorDragCancelSelector,
 	InteractionGridGuide,
 	commitPreviewCatalog,
 	freeformOccurrenceIds,
+	freeformRectangle,
+	freeformSurfaceWidth,
 } from 'gallery-shared/preview';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
-import { getModulaSettingsEditorConfig } from '../../config/modulaSettingsEditorConfig';
+import { useGalleryItemEditSidebar } from '../../context/GalleryItemEditSidebarContext';
+import { canArrangeFreeform } from '../../utils/canArrangeFreeform';
+import {
+	FREEFORM_STACKING_STEPS,
+	commitFreeformStacking,
+} from '../../utils/freeformStacking';
+import { freeformToolbarPosition } from '../../utils/freeformToolbarPosition';
+import { selectedTileActions } from '../../utils/selectedTileActions';
+import { FreeformSelectionFrame, FreeformSizeBadge } from './FreeformSelection';
+import TileToolbar, { TILE_SELECT_BUTTON_SELECTOR } from './TileToolbar';
 
-const HANDLES = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
 function FreeformEditorSurface({
 	items,
 	config,
@@ -25,11 +43,11 @@ function FreeformEditorSurface({
 	const { form, undoRedo, beginSettingsGesture } =
 		useGallerySettingsFormBundle();
 	const previewStore = useStore();
+	const itemEdit = useGalleryItemEditSidebar();
 	const [live, setLive] = useState(null);
 	const gestureRef = useRef(null);
 	const suppressedClick = useRef(false);
-	const editable =
-		getModulaSettingsEditorConfig().isPro && device === 'desktop';
+	const editable = canArrangeFreeform(device);
 
 	useEffect(() => {
 		if (editable && items.some((item) => !item.freeformId)) {
@@ -154,7 +172,7 @@ function FreeformEditorSurface({
 			window.removeEventListener('keydown', key, true);
 		};
 	}, [cancel, form, undoRedo]);
-	const start = (event, placement) => {
+	const start = (event, placement, handle) => {
 		const activeGesture = gestureRef.current;
 		if (activeGesture && event.pointerId !== activeGesture.pointerId) {
 			return;
@@ -167,8 +185,6 @@ function FreeformEditorSurface({
 		) {
 			return;
 		}
-		const handle = event.target.closest('[data-freeform-resize]')?.dataset
-			.freeformResize;
 		cancel();
 		gestureRef.current = {
 			endSettingsGesture: beginSettingsGesture(),
@@ -193,14 +209,23 @@ function FreeformEditorSurface({
 			event.preventDefault();
 		}
 	};
+	const painted = live || composition;
+	const selectedIndex =
+		editable && Number.isInteger(itemEdit?.selectedIndex)
+			? itemEdit.selectedIndex
+			: -1;
+	const selected = painted[selectedIndex] ?? null;
+	const resizing =
+		live && gestureRef.current?.handle ? gestureRef.current.next : null;
 	return (
 		<FreeformSurface
 			items={items}
 			config={config}
-			composition={live || composition}
+			composition={painted}
 			metrics={metrics}
 			device={device}
 			editor
+			// A tile body moves (no handle); only the selection frame's handles resize.
 			onTilePointerDown={start}
 			onTileClickCapture={(event) => {
 				if (suppressedClick.current) {
@@ -209,19 +234,6 @@ function FreeformEditorSurface({
 					suppressedClick.current = false;
 				}
 			}}
-			tileControls={
-				editable
-					? () =>
-							HANDLES.map((handle) => (
-								<span
-									key={handle}
-									data-freeform-resize={handle}
-									className={`react-resizable-handle react-resizable-handle-${handle}`}
-									aria-hidden="true"
-								/>
-							))
-					: undefined
-			}
 		>
 			{editable && live && gestureRef.current?.next ? (
 				<InteractionGridGuide
@@ -230,7 +242,90 @@ function FreeformEditorSurface({
 					rectangle={gestureRef.current.next}
 				/>
 			) : null}
+			{selected ? (
+				<FreeformSelectionFrame
+					rectangle={freeformRectangle(selected, metrics)}
+					onHandlePointerDown={(event, handle) =>
+						start(event, composition[selectedIndex], handle)
+					}
+				/>
+			) : null}
+			{resizing ? (
+				<FreeformSizeBadge placement={resizing} metrics={metrics} />
+			) : null}
+			{selected && !live ? (
+				<FreeformTileToolbar
+					key={selected.id}
+					storeIndex={selectedIndex}
+					item={items[selectedIndex]}
+					composition={composition}
+					metrics={metrics}
+				/>
+			) : null}
 		</FreeformSurface>
+	);
+}
+
+/**
+ * @param {HTMLElement} toolbar Toolbar inside the Freeform surface.
+ * @param {string}      tileId  `data-modula-freeform-item` of the tile.
+ * @return {HTMLElement|null} The tile's select button.
+ */
+function findFreeformSelectButton(toolbar, tileId) {
+	return (
+		toolbar
+			.closest('.modula-freeform')
+			?.querySelector(
+				`[data-modula-freeform-item="${CSS.escape(tileId)}"] ${TILE_SELECT_BUTTON_SELECTOR}`
+			) ?? null
+	);
+}
+
+/**
+ * The selected tile's toolbar beside it: Edit, Freeform stacking, Remove.
+ *
+ * @param {Object}   props
+ * @param {number}   props.storeIndex  Selected catalog index.
+ * @param {Object}   props.item        Selected catalog row.
+ * @param {Object[]} props.composition Committed placements.
+ * @param {Object}   props.metrics     Freeform cell metrics.
+ */
+function FreeformTileToolbar({ storeIndex, item, composition, metrics }) {
+	const { form, undoRedo } = useGallerySettingsFormBundle();
+	const adminActions = useContext(GalleryPreviewAdminActionsContext);
+	const placement = composition[storeIndex];
+	const { edit, onRemove } = selectedTileActions(
+		item,
+		storeIndex,
+		'freeform',
+		adminActions
+	);
+	const stacking = FREEFORM_STACKING_STEPS.map((step) => {
+		const next = changeFreeformStacking(
+			composition,
+			placement.id,
+			step.action
+		);
+		return {
+			...step,
+			disabled: next === composition,
+			onClick: () => commitFreeformStacking(form, undoRedo, next),
+		};
+	});
+	return (
+		<TileToolbar
+			className="modula-tile-toolbar--beside"
+			style={freeformToolbarPosition(
+				freeformRectangle(placement, metrics),
+				freeformSurfaceWidth(metrics)
+			)}
+			findSelectButton={(toolbar) =>
+				findFreeformSelectButton(toolbar, placement.id)
+			}
+			edit={edit}
+			stacking={stacking}
+			onRemove={onRemove}
+		/>
 	);
 }
 export default function FreeformEditorLayout() {

@@ -12,19 +12,4 @@
 	border-top: 1px solid var(--mod-se-line, var(--mod-se-preview-toolbar-border, #{$mod-takeover-preview-toolbar-border}));
 	color: var(--mod-se-ink-2, var(--mod-se-preview-ink-secondary, #{$mod-takeover-text-base}));
 	font-size: 12px;
-
-	.modula-settings-editor__save-bar {
-		flex-direction: row;
-		align-items: center;
-		gap: $mod-space-10;
-		padding: 0;
-		margin: 0;
-		border: none;
-		color: inherit;
-
-		p,
-		.components-notice__content {
-			color: var(--mod-se-preview-ink-muted, #{$mod-takeover-text-muted});
-		}
-	}
 }

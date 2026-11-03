@@ -33,8 +33,7 @@ import {
 import { isSettingsEditorPreview } from './displayContext';
 import {
 	buildFilteringFromSettings,
-	filterEntryMatchesDefaultActive,
-	normalizeFilterBarEntry,
+	resolveFilterBarInitialActiveFilters,
 } from './filterBarModel';
 
 /**
@@ -218,25 +217,17 @@ export function buildPreloadedState(data, element) {
 	const skipFilters = isGalleryTypeWithoutFilters(layoutType);
 	let filteredItems = null;
 	if (!isSettingsEditorPreviewContext && filtering.enabled && !skipFilters) {
-		const defaultEntry = filtering.availableFilters
-			.map(normalizeFilterBarEntry)
-			.find((entry) =>
-				filterEntryMatchesDefaultActive(
-					entry,
-					settings.filters?.defaultActiveFilter
-				)
+		filtering.activeFilters = resolveFilterBarInitialActiveFilters({
+			availableFilters: filtering.availableFilters,
+			defaultActive: settings.filters?.defaultActiveFilter,
+		});
+		const [defaultFilter] = filtering.activeFilters;
+		if (defaultFilter && filtering.type === 'client') {
+			filteredItems = filterItems(
+				rawItems,
+				defaultFilter.key,
+				defaultFilter.value
 			);
-		if (defaultEntry) {
-			filtering.activeFilters = [
-				{ key: defaultEntry.key, value: defaultEntry.value },
-			];
-			if (filtering.type === 'client') {
-				filteredItems = filterItems(
-					rawItems,
-					defaultEntry.key,
-					defaultEntry.value
-				);
-			}
 		}
 	}
 

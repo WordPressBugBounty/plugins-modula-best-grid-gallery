@@ -36,6 +36,18 @@ export const ChevronDownIcon = () => (
 	<StrokeIcon size={12} strokeWidth={1.7} d="M6 9l6 6 6-6" />
 );
 
+export const ChevronLeftIcon = () => (
+	<StrokeIcon strokeWidth={1.7} d="M15 18l-6-6 6-6" />
+);
+
+export const ChevronRightIcon = () => (
+	<StrokeIcon strokeWidth={1.7} d="M9 18l6-6-6-6" />
+);
+
+export const PlusIcon = () => (
+	<StrokeIcon size={13} strokeWidth={2.5} d="M12 5v14M5 12h14" />
+);
+
 export const SearchIcon = () => (
 	<StrokeIcon d="M11 4a7 7 0 100 14 7 7 0 000-14zM20 20l-4-4" />
 );
@@ -77,10 +89,24 @@ export const ExternalIcon = () => (
 	/>
 );
 
-export const LockIcon = () => (
+// Small sizes (the plan pill) need a heavier stroke to stay legible.
+export const LockIcon = ({ size = 15, strokeWidth = 1.7 }) => (
 	<StrokeIcon
-		size={15}
-		strokeWidth={1.7}
+		size={size}
+		strokeWidth={strokeWidth}
 		d="M6 11h12v10H6zM8.5 11V7.5a3.5 3.5 0 017 0V11"
 	/>
+);
+
+// Device icons for per-device values (Segmented icon options).
+export const DesktopIcon = () => (
+	<StrokeIcon size={14} strokeWidth={2} d="M3 4h18v12H3zM8 20h8M12 16v4" />
+);
+
+export const TabletIcon = () => (
+	<StrokeIcon size={14} strokeWidth={2} d="M5 3h14v18H5zM11 18h2" />
+);
+
+export const PhoneIcon = () => (
+	<StrokeIcon size={14} strokeWidth={2} d="M7 2h10v20H7zM11 18h2" />
 );

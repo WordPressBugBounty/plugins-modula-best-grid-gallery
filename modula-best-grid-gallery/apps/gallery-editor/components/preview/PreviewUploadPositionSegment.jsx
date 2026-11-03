@@ -1,5 +1,5 @@
 /**
- * Start/End segment for “new images” insert position (reorder panel), with gallery copy.
+ * Start/End segment for “new images” insert position (the Sort popover), with gallery copy.
  */
 import { __ } from '@wordpress/i18n';
 import { InsertPositionSegment } from 'editor-shell';
@@ -15,7 +15,7 @@ export default function PreviewUploadPositionSegment({ value, onChange }) {
 		<InsertPositionSegment
 			value={value}
 			onChange={onChange}
-			label={__('New images', 'modula-best-grid-gallery')}
+			label={__('New images go to the', 'modula-best-grid-gallery')}
 			groupLabel={__(
 				'Where to add new images in the gallery list',
 				'modula-best-grid-gallery'

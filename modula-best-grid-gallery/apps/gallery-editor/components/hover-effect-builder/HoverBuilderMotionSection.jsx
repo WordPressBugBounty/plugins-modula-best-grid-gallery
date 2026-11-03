@@ -1,20 +1,24 @@
 import { useId } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { FieldStack, Select, Slider } from 'shared-ui';
-import { FieldValidationError } from '../form-field-auxiliary/shared';
+import { Chip, Range, SettingsRow } from 'admin-ui';
+import { ItemEditCard, SelectMenuControl } from 'editor-shell';
+import { getAnimationPrimitives } from '../../data/animationCatalog';
+import { FieldValidationError } from './FieldValidationError';
 
-const CARD_OPTIONS = [
-	{ value: 'none', label: __('None', 'modula-best-grid-gallery') },
-	{ value: 'zoom', label: __('Zoom image', 'modula-best-grid-gallery') },
-	{ value: 'grayscale', label: __('Grayscale', 'modula-best-grid-gallery') },
-	{ value: 'lift', label: __('Lift', 'modula-best-grid-gallery') },
-];
+/**
+ * @param {'card'|'graphic'|'layer'} kind Animation catalog primitive kind.
+ * @return {{ value: string, label: string }[]} Menu options in catalog order.
+ */
+function primitiveOptions(kind) {
+	return getAnimationPrimitives(kind).map(({ id, label }) => ({
+		value: id,
+		label,
+	}));
+}
 
-const GRAPHIC_OPTIONS = [
-	{ value: 'none', label: __('None', 'modula-best-grid-gallery') },
-	{ value: 'frame', label: __('Frame', 'modula-best-grid-gallery') },
-	{ value: 'diamond', label: __('Diamond', 'modula-best-grid-gallery') },
-];
+const CARD_OPTIONS = primitiveOptions('card');
+
+const GRAPHIC_OPTIONS = primitiveOptions('graphic');
 
 const GRAPHIC_VISIBILITY_OPTIONS = [
 	{
@@ -27,25 +31,7 @@ const GRAPHIC_VISIBILITY_OPTIONS = [
 	},
 ];
 
-const ENTER_OPTIONS = [
-	{ value: 'none', label: __('None', 'modula-best-grid-gallery') },
-	{ value: 'fade', label: __('Fade in', 'modula-best-grid-gallery') },
-	{ value: 'slide-up', label: __('Slide up', 'modula-best-grid-gallery') },
-	{
-		value: 'slide-down',
-		label: __('Slide down', 'modula-best-grid-gallery'),
-	},
-	{
-		value: 'slide-left',
-		label: __('Slide left', 'modula-best-grid-gallery'),
-	},
-	{
-		value: 'slide-right',
-		label: __('Slide right', 'modula-best-grid-gallery'),
-	},
-	{ value: 'blur-in', label: __('Blur in', 'modula-best-grid-gallery') },
-	{ value: 'scale', label: __('Scale in', 'modula-best-grid-gallery') },
-];
+const ENTER_OPTIONS = primitiveOptions('layer');
 
 const VISIBILITY_OPTIONS = [
 	{
@@ -74,6 +60,63 @@ function motionSectionHeading(target) {
 }
 
 /**
+ * A menu select under its label: the panel's column row, since the builder
+ * column is too narrow for a select beside these labels. The trigger is a
+ * button, which a `<label>` cannot name, so the label is a span and the menu
+ * select names itself.
+ *
+ * @param {Object}                              props
+ * @param {string}                              props.id
+ * @param {string}                              props.label
+ * @param {string}                              props.value
+ * @param {{ value: string, label: string }[]} props.options
+ * @param {Function}                            props.onChange Receives the option value.
+ */
+function MotionSelectField({ id, label, value, options, onChange }) {
+	return (
+		<SettingsRow label={label} controlId={id} labelElement="span" stacked>
+			<SelectMenuControl
+				id={id}
+				label={label}
+				value={value}
+				groups={[{ id: 'default', options }]}
+				onChange={onChange}
+			/>
+		</SettingsRow>
+	);
+}
+
+/**
+ * A timing slider as the panel draws one: label and value box on one line,
+ * the slider under them.
+ *
+ * @param {Object}   props
+ * @param {string}   props.id
+ * @param {string}   props.label
+ * @param {number}   props.value
+ * @param {Function} props.onChange Receives the number.
+ * @param {number}   props.min
+ * @param {number}   props.max
+ * @param {number}   props.step
+ */
+function MotionRangeField({ id, label, value, onChange, min, max, step }) {
+	return (
+		<div className="modula-gallery-takeover__hover-builder-range-row">
+			<SettingsRow label={label} controlId={id}>
+				<Range
+					id={id}
+					value={value}
+					onChange={onChange}
+					min={min}
+					max={max}
+					step={step}
+				/>
+			</SettingsRow>
+		</div>
+	);
+}
+
+/**
  * @param {Object}                            props
  * @param {any}                               props.form
  * @param {'card'|'title'|'caption'|'social'} props.selectedTarget
@@ -95,7 +138,7 @@ export default function HoverBuilderMotionSection({
 	const staggerFieldId = useId();
 
 	return (
-		<section className="modula-gallery-takeover__reorder-setup-block">
+		<ItemEditCard title={motionSectionHeading(selectedTarget)}>
 			<form.Field name="hover.builder">
 				{(builderField) => {
 					const builder =
@@ -232,211 +275,152 @@ export default function HoverBuilderMotionSection({
 
 					return (
 						<>
-							<h3 className="modula-gallery-takeover__reorder-setup-title">
-								{motionSectionHeading(selectedTarget)}
-							</h3>
-							<div className="modula-gallery-takeover__reorder-setup-body">
-								<p className="modula-gallery-takeover__hover-builder-layer-help">
-									{__(
-										'When linked layers are selected, changing entrance animation updates the whole linked group.',
-										'modula-best-grid-gallery'
-									)}
-								</p>
-								<div className="modula-gallery-takeover__hover-builder-motion modula-settings-editor__inline-field-control">
-									{groupedMotionTarget ? (
-										<div className="modula-gallery-takeover__hover-builder-motion-badge-wrap">
-											<span className="modula-gallery-takeover__hover-builder-inline-badge">
-												{sprintf(
-													/* translators: %d: number of linked layers */
-													__(
-														'Applies to %d linked layers',
-														'modula-best-grid-gallery'
-													),
-													linkedSlots.length
-												)}
-											</span>
-										</div>
-									) : null}
-									<FieldStack
-										label={sprintf(
-											/* translators: %s: selected layer name */
+							<p className="modula-gallery-takeover__hover-builder-help">
+								{__(
+									'When linked layers are selected, changing entrance animation updates the whole linked group.',
+									'modula-best-grid-gallery'
+								)}
+							</p>
+							{groupedMotionTarget ? (
+								<div className="modula-gallery-takeover__hover-builder-chips">
+									<Chip>
+										{sprintf(
+											/* translators: %d: number of linked layers */
 											__(
-												'Preset for %s',
+												'Applies to %d linked layers',
 												'modula-best-grid-gallery'
 											),
-											selectedTargetLabel
+											linkedSlots.length
 										)}
-										htmlFor={presetFieldId}
-									>
-										<Select
-											id={presetFieldId}
-											value={currentValue}
-											options={motionOptions}
-											onChange={applyMotionValue}
-										/>
-									</FieldStack>
-									{selectedTarget === 'card' ? (
-										<>
-											<FieldStack
-												label={__(
-													'Graphic element',
-													'modula-best-grid-gallery'
-												)}
-												htmlFor={graphicFieldId}
-											>
-												<Select
-													id={graphicFieldId}
-													value={
-														builder.graphicElement ||
-														'none'
-													}
-													options={GRAPHIC_OPTIONS}
-													onChange={(next) =>
-														builderField.handleChange(
-															{
-																...builder,
-																graphicElement:
-																	next ||
-																	'none',
-															}
-														)
-													}
-												/>
-											</FieldStack>
-											<FieldStack
-												label={__(
-													'Graphic visibility',
-													'modula-best-grid-gallery'
-												)}
-												htmlFor={
-													graphicVisibilityFieldId
-												}
-											>
-												<Select
-													id={
-														graphicVisibilityFieldId
-													}
-													value={
-														builder.graphicVisibility ||
-														'on-hover'
-													}
-													options={
-														GRAPHIC_VISIBILITY_OPTIONS
-													}
-													onChange={(next) =>
-														builderField.handleChange(
-															{
-																...builder,
-																graphicVisibility:
-																	next ===
-																	'always'
-																		? 'always'
-																		: 'on-hover',
-															}
-														)
-													}
-												/>
-											</FieldStack>
-										</>
-									) : (
-										<FieldStack
-											label={__(
-												'Layer visibility',
-												'modula-best-grid-gallery'
-											)}
-											htmlFor={visibilityFieldId}
-										>
-											<Select
-												id={visibilityFieldId}
-												value={visibilityValue}
-												options={VISIBILITY_OPTIONS}
-												onChange={applyVisibilityValue}
-											/>
-										</FieldStack>
-									)}
-									<FieldStack
-										label={__(
-											'Duration (ms)',
-											'modula-best-grid-gallery'
-										)}
-										htmlFor={durationFieldId}
-									>
-										<Slider
-											id={durationFieldId}
-											value={durationValue}
-											onChange={(next) =>
-												applyTimingValue(
-													'Duration',
-													next,
-													120,
-													1200,
-													280
-												)
-											}
-											min={120}
-											max={1200}
-											step={10}
-										/>
-									</FieldStack>
-									<FieldStack
-										label={__(
-											'Base delay (ms)',
-											'modula-best-grid-gallery'
-										)}
-										htmlFor={delayFieldId}
-									>
-										<Slider
-											id={delayFieldId}
-											value={delayValue}
-											onChange={(next) =>
-												applyTimingValue(
-													'Delay',
-													next,
-													0,
-													600,
-													0
-												)
-											}
-											min={0}
-											max={600}
-											step={10}
-										/>
-									</FieldStack>
-									{isCardTarget ? null : (
-										<FieldStack
-											label={__(
-												'Layer stagger (ms)',
-												'modula-best-grid-gallery'
-											)}
-											htmlFor={staggerFieldId}
-										>
-											<Slider
-												id={staggerFieldId}
-												value={staggerValue}
-												onChange={(next) =>
-													applyTimingValue(
-														'Stagger',
-														next,
-														0,
-														300,
-														45
-													)
-												}
-												min={0}
-												max={300}
-												step={5}
-											/>
-										</FieldStack>
-									)}
-									<FieldValidationError
-										fieldApi={builderField}
-									/>
+									</Chip>
 								</div>
-							</div>
+							) : null}
+							<MotionSelectField
+								id={presetFieldId}
+								label={sprintf(
+									/* translators: %s: selected layer name */
+									__(
+										'Preset for %s',
+										'modula-best-grid-gallery'
+									),
+									selectedTargetLabel
+								)}
+								value={currentValue}
+								options={motionOptions}
+								onChange={applyMotionValue}
+							/>
+							{selectedTarget === 'card' ? (
+								<>
+									<MotionSelectField
+										id={graphicFieldId}
+										label={__(
+											'Graphic element',
+											'modula-best-grid-gallery'
+										)}
+										value={builder.graphicElement || 'none'}
+										options={GRAPHIC_OPTIONS}
+										onChange={(next) =>
+											builderField.handleChange({
+												...builder,
+												graphicElement: next || 'none',
+											})
+										}
+									/>
+									<MotionSelectField
+										id={graphicVisibilityFieldId}
+										label={__(
+											'Graphic visibility',
+											'modula-best-grid-gallery'
+										)}
+										value={
+											builder.graphicVisibility ||
+											'on-hover'
+										}
+										options={GRAPHIC_VISIBILITY_OPTIONS}
+										onChange={(next) =>
+											builderField.handleChange({
+												...builder,
+												graphicVisibility:
+													next === 'always'
+														? 'always'
+														: 'on-hover',
+											})
+										}
+									/>
+								</>
+							) : (
+								<MotionSelectField
+									id={visibilityFieldId}
+									label={__(
+										'Layer visibility',
+										'modula-best-grid-gallery'
+									)}
+									value={visibilityValue}
+									options={VISIBILITY_OPTIONS}
+									onChange={applyVisibilityValue}
+								/>
+							)}
+							<MotionRangeField
+								id={durationFieldId}
+								label={__(
+									'Duration (ms)',
+									'modula-best-grid-gallery'
+								)}
+								value={durationValue}
+								onChange={(next) =>
+									applyTimingValue(
+										'Duration',
+										next,
+										120,
+										1200,
+										280
+									)
+								}
+								min={120}
+								max={1200}
+								step={10}
+							/>
+							<MotionRangeField
+								id={delayFieldId}
+								label={__(
+									'Base delay (ms)',
+									'modula-best-grid-gallery'
+								)}
+								value={delayValue}
+								onChange={(next) =>
+									applyTimingValue('Delay', next, 0, 600, 0)
+								}
+								min={0}
+								max={600}
+								step={10}
+							/>
+							{isCardTarget ? null : (
+								<MotionRangeField
+									id={staggerFieldId}
+									label={__(
+										'Layer stagger (ms)',
+										'modula-best-grid-gallery'
+									)}
+									value={staggerValue}
+									onChange={(next) =>
+										applyTimingValue(
+											'Stagger',
+											next,
+											0,
+											300,
+											45
+										)
+									}
+									min={0}
+									max={300}
+									step={5}
+								/>
+							)}
+							<FieldValidationError fieldApi={builderField} />
 						</>
 					);
 				}}
 			</form.Field>
-		</section>
+		</ItemEditCard>
 	);
 }

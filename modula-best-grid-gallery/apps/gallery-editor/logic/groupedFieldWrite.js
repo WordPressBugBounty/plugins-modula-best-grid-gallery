@@ -7,8 +7,12 @@
 import { applyCaptionsPlacementSideEffects } from './captionsBelowImageDefaults';
 import { coerceSettingsFieldValue } from './coerceSettingsFieldValue';
 import { applyLoadingEffectsEnableSideEffects } from './loadingEffectsEnableSideEffects';
+import {
+	applyMotionEntranceSideEffects,
+	applyMotionHoverSideEffects,
+} from './motionChoice';
 import { applyProofingSelectionSideEffects } from './proofingSelectionCoupling';
-import { applySocialEnableSideEffects } from './socialEnableSideEffects';
+import { applySliderImageInfoSideEffects } from './sliderImageInfoSideEffects';
 
 /**
  * Local copy so ticket-02 can make settingsFieldDefault call this module
@@ -36,7 +40,9 @@ function applyFieldCouplings(form, groupedPath, value) {
 	applyCaptionsPlacementSideEffects(form, groupedPath, value);
 	applyProofingSelectionSideEffects(form, groupedPath, value);
 	applyLoadingEffectsEnableSideEffects(form, groupedPath, value);
-	applySocialEnableSideEffects(form, groupedPath, value);
+	applyMotionHoverSideEffects(form, groupedPath, value);
+	applyMotionEntranceSideEffects(form, groupedPath);
+	applySliderImageInfoSideEffects(form, groupedPath, value);
 }
 
 /**

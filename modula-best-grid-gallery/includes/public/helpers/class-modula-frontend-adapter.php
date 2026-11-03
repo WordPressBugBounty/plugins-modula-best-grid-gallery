@@ -8,6 +8,8 @@
  * @package Modula
  */
 
+use Modula\V2\Images\Item_Fields;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -333,6 +335,7 @@ class Modula_Frontend_Adapter {
 
 		$converted_item = self::with_focal_fields( $converted_item, $image );
 		$converted_item = self::with_tile_image_fit( $converted_item, $image );
+		$converted_item = self::with_item_fields( $converted_item, $image );
 
 		$converted_item = self::with_react_video_fields( $converted_item, $image, $item_data );
 		$converted_item = self::with_exif_fields( $converted_item, $image );
@@ -466,6 +469,7 @@ class Modula_Frontend_Adapter {
 
 		$converted_item = self::with_focal_fields( $converted_item, $image );
 		$converted_item = self::with_tile_image_fit( $converted_item, $image );
+		$converted_item = self::with_item_fields( $converted_item, $image );
 
 		$converted_item = self::with_react_video_fields( $converted_item, $image, $item_data );
 
@@ -1320,6 +1324,27 @@ class Modula_Frontend_Adapter {
 		$fit = sanitize_text_field( (string) $image['tile_image_fit'] );
 		if ( in_array( $fit, array( 'contain', 'cover' ), true ) ) {
 			$converted_item['tile_image_fit'] = $fit;
+		}
+		return $converted_item;
+	}
+
+	/**
+	 * Add the image's own hover effect and CSS classes (`Item_Fields`) for the
+	 * editor; the visitor gets them through `itemClasses`. Unset fields stay
+	 * absent, so galleries without them keep the same JSON.
+	 *
+	 * @param array $converted_item Frontend JSON item.
+	 * @param array $image          Raw gallery row.
+	 * @return array
+	 */
+	private static function with_item_fields( $converted_item, $image ) {
+		$hover_preset = Item_Fields::sanitize_hover_preset( $image[ Item_Fields::HOVER_PRESET ] ?? '' );
+		if ( '' !== $hover_preset ) {
+			$converted_item[ Item_Fields::HOVER_PRESET ] = $hover_preset;
+		}
+		$css_class = Item_Fields::sanitize_css_class( $image[ Item_Fields::CSS_CLASS ] ?? '' );
+		if ( '' !== $css_class ) {
+			$converted_item[ Item_Fields::CSS_CLASS ] = $css_class;
 		}
 		return $converted_item;
 	}

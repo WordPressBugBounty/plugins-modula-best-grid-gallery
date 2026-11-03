@@ -12,7 +12,7 @@ const EMPTY_PREVIEW_ITEMS = [];
  * (bulk modal renders at takeover shell level, outside preview `<Provider>`).
  *
  * Also re-subscribes when the module-level store ref is registered after mount
- * (status bar is a sibling of the preview column).
+ * (shell consumers such as the settings panel sit outside the preview column).
  *
  * @param {boolean} [enabled=true]
  * @return {Object[]}

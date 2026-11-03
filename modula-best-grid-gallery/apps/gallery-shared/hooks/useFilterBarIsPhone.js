@@ -8,6 +8,7 @@
 import { useEffect, useState } from '@wordpress/element';
 import {
 	FILTER_BAR_PHONE_MQ,
+	isFilterBarPhoneDevice,
 	isFilterBarPhoneViewport,
 } from '../utils/filterBarModel';
 import { getForcedPreviewViewport } from '../utils/resolvePreviewViewport';
@@ -30,7 +31,7 @@ export function useFilterBarIsPhone(config, previewViewport) {
 
 	useEffect(() => {
 		if (forced) {
-			setIsPhone(forced === 'mobile');
+			setIsPhone(isFilterBarPhoneDevice(forced));
 			return undefined;
 		}
 		if (

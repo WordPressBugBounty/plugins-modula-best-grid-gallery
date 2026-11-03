@@ -1,10 +1,11 @@
 import { __, sprintf } from '@wordpress/i18n';
-import { Segmented } from 'shared-ui';
+import { Segmented } from 'admin-ui';
 import { useModulaSettingsEditorConfig } from '../../../hooks/useModulaSettingsEditorConfig';
 import { useGalleryBootstrapQuery } from '../../../query/useGalleryBootstrapQuery';
 import { resolveGalleryAdminPostId } from '../../../utils/resolveGalleryAdminPostId';
 import { isNil } from '../../../logic/isNil';
 import { useGalleryPreviewTileSelection } from '../../../context/GalleryPreviewTileSelectionContext';
+import { ControlHelp, describedByHelp } from './ControlHelp';
 
 /**
  * @param {unknown[]} items
@@ -31,17 +32,22 @@ function countWatermarkableImages(items) {
 }
 
 /**
- * Applies-to segmented control with live “All N images” label.
- *
- * @param {Object}           ctx
- * @param {Object}           ctx.control
- * @param {*}                ctx.value
- * @param {Function}         ctx.onChange
- * @param {boolean}          ctx.disabled
- * @param {string|undefined} ctx.help
+ * @param {import('../fieldControlKinds').FieldControlContext} ctx
  */
-export function renderWatermarkApplyScopeKind({
+export function renderWatermarkApplyScopeKind(ctx) {
+	return <WatermarkApplyScopeControl {...ctx} />;
+}
+
+/**
+ * Applies-to segmented control with live “All N images” label. A component,
+ * not a render function, because it reads the gallery and the selection.
+ *
+ * @param {import('../fieldControlKinds').FieldControlContext} props
+ */
+function WatermarkApplyScopeControl({
 	control,
+	controlId,
+	label: settingLabel,
 	value,
 	onChange,
 	disabled,
@@ -49,9 +55,7 @@ export function renderWatermarkApplyScopeKind({
 }) {
 	const config = useModulaSettingsEditorConfig();
 	const galleryId = resolveGalleryAdminPostId(config);
-	const { data: bootstrap } = useGalleryBootstrapQuery(
-		config.takeover ? galleryId : null
-	);
+	const { data: bootstrap } = useGalleryBootstrapQuery(galleryId);
 	const imageCount = countWatermarkableImages(bootstrap?.items);
 	const tileSelection = useGalleryPreviewTileSelection();
 	const selectedCount = tileSelection?.selectedStoreIndices?.length ?? 0;
@@ -95,14 +99,15 @@ export function renderWatermarkApplyScopeKind({
 	return (
 		<div className="modula-settings-editor__segmented-enum">
 			<Segmented
+				id={controlId}
+				aria-label={settingLabel || undefined}
+				aria-describedby={describedByHelp(controlId, help)}
 				options={segmentedOptions}
 				value={current}
 				onChange={onChange}
 				disabled={disabled}
 			/>
-			{help ? (
-				<p className="modula-settings-editor__field-help">{help}</p>
-			) : null}
+			<ControlHelp help={help} controlId={controlId} />
 		</div>
 	);
 }

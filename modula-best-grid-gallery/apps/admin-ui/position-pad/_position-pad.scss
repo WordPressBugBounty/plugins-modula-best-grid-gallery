@@ -1,0 +1,106 @@
+@use '../styles/mixins';
+
+// The image, as a sunken frame split into a 3 × 3 grid of places.
+.modula-admin-position-pad {
+	position: relative;
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	// A row never gets shorter than its places: shorter tracks let each row's
+	// places spill over the row above and take its clicks.
+	grid-template-rows: repeat(3, minmax(24px, 1fr));
+	gap: 2px;
+	box-sizing: border-box;
+	width: 100%;
+	// The 4:3 frame that holds three 24px rows (3 × 24 + 2 × 2 gap + 2 × 6
+	// padding + 2 border = 90px high). It also keeps the pad this wide in a
+	// shrink-to-fit column, where `width: 100%` resolves to its min-content.
+	min-width: 120px;
+	max-width: var(--modula-admin-field-width);
+	aspect-ratio: 4 / 3;
+	padding: 6px;
+	border: 1px solid var(--modula-admin-border);
+	border-radius: var(--modula-admin-radius-md);
+	background: var(--modula-admin-surface-sunken);
+
+	&.is-disabled,
+	fieldset:disabled & {
+		opacity: var(--modula-admin-disabled-opacity);
+	}
+}
+
+// Centre lines, as on the canvas.
+.modula-admin-position-pad__guide {
+	position: absolute;
+	background: var(--modula-admin-border);
+	pointer-events: none;
+
+	&.is-x {
+		top: 50%;
+		right: 6px;
+		left: 6px;
+		height: 1px;
+	}
+
+	&.is-y {
+		top: 6px;
+		bottom: 6px;
+		left: 50%;
+		width: 1px;
+	}
+}
+
+.modula-admin-position-pad__cell {
+	@include mixins.button-reset;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 0;
+	border-radius: var(--modula-admin-radius-sm);
+
+	&:focus-visible {
+		@include mixins.focus-ring;
+		outline-offset: -2px;
+	}
+
+	&:disabled {
+		cursor: default;
+	}
+
+	// A faint dot shows where a click would put the mark.
+	&:not(.is-chosen, :disabled):hover::after {
+		content: "";
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--modula-admin-border-field);
+	}
+}
+
+.modula-admin-position-pad__mark {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 100%;
+	padding: 2px 6px;
+	overflow: hidden;
+	border-radius: var(--modula-admin-radius-sm);
+	background: var(--modula-admin-surface);
+	box-shadow: var(--modula-admin-shadow-raised);
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-caption);
+	white-space: nowrap;
+
+	img {
+		display: block;
+		max-width: 48px;
+		max-height: 24px;
+	}
+}
+
+.modula-admin-position-pad__dot {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: var(--modula-admin-ink);
+}

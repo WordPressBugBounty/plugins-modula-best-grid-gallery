@@ -1,5 +1,7 @@
 /**
- * Content block edit sidebar panel — settings-column takeover (aligned with Image edit).
+ * Content block edit panel: the item edit chrome of the Image panel (header
+ * with previous/next, cards) over the block's Content, Spacing & font and
+ * Colors.
  */
 import { isTemplateProtectedEmbeddedRow } from 'gallery-shared/preview';
 import {
@@ -10,8 +12,8 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { ActionRow, Button } from 'shared-ui';
-import { SettingsPanelHeader } from 'editor-shell';
+import { Button } from 'admin-ui';
+import { ItemEditCard, ItemEditPanelHeader } from 'editor-shell';
 import { useGalleryItemEditSidebar } from '../../context/GalleryItemEditSidebarContext';
 import { useGalleryPreviewAdminActionsOptional } from '../../hooks/useGalleryPreviewAdminActionsOptional';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
@@ -27,8 +29,8 @@ import {
 import { snapshotCaptionFromImageMetadataEditor } from '../../utils/galleryItemEditDirtyState';
 import { CONTENT_BLOCK_MODAL_SECTIONS } from '../../constants/contentBlockModalSections';
 import ContentBlockEditSectionContent from '../gallery-item-edit-modal/ContentBlockEditSectionContent';
-import SettingsPanelSection from '../sidebar/settings-panel/SettingsPanelSection';
 import FreeformStackingControls from './FreeformStackingControls';
+import { removeAfterFlush, useItemEditPager } from './useItemEditPager';
 
 /**
  * @param {Object} props
@@ -37,10 +39,17 @@ import FreeformStackingControls from './FreeformStackingControls';
 export default function GalleryItemContentBlockPanel({ storeIndex }) {
 	const editor = useModulaSettingsEditorConfig();
 	const galleryId = resolveGalleryAdminPostId(editor);
-	const { close } = useGalleryItemEditSidebar() || { close: () => {} };
+	const itemEdit = useGalleryItemEditSidebar();
+	const close = itemEdit?.close;
+	const back = itemEdit?.back;
 	const adminActions = useGalleryPreviewAdminActionsOptional();
 	const { form: gallerySettingsForm } = useGallerySettingsFormBundle();
 	const reduxItems = usePreviewReduxStoreItems(true);
+	const pager = useItemEditPager(
+		reduxItems,
+		storeIndex,
+		__('Content block', 'modula-best-grid-gallery')
+	);
 	const item = reduxItems[storeIndex] || null;
 	const galleryType =
 		gallerySettingsForm.state.values?.general?.type ||
@@ -109,56 +118,62 @@ export default function GalleryItemContentBlockPanel({ storeIndex }) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [storeIndex]);
 
+	// Back to the settings; the tile stays selected.
 	const onBack = useCallback(() => {
 		void (async () => {
 			await flush();
-			close();
+			back?.();
 		})();
-	}, [close, flush]);
+	}, [back, flush]);
 
-	const onDeleteBlock = useCallback(() => {
-		void (async () => {
-			await flush();
-			await adminActions?.removeItem?.(storeIndex);
-		})();
-	}, [adminActions, flush, storeIndex]);
+	const onRemove = useMemo(
+		() => removeAfterFlush(flush, storeIndex, adminActions),
+		[adminActions, flush, storeIndex]
+	);
 
 	if (!item || !isContentBlockGalleryItemRow(item)) {
 		return (
 			<div className="modula-settings-panel modula-gallery-item-edit-panel modula-gallery-item-content-block-panel">
-				<SettingsPanelHeader
+				<ItemEditPanelHeader
 					title={__('Content block', 'modula-best-grid-gallery')}
-					description={__(
+					onBack={close}
+				/>
+				<p className="modula-gallery-item-edit-panel__gone">
+					{__(
 						'This tile is no longer in the gallery.',
 						'modula-best-grid-gallery'
 					)}
-					isNested
-					parentTitle={__('Gallery', 'modula-best-grid-gallery')}
-					onBack={close}
-				/>
+				</p>
 			</div>
 		);
 	}
 
 	return (
 		<div className="modula-settings-panel modula-gallery-item-edit-panel modula-gallery-item-content-block-panel">
-			<SettingsPanelHeader
-				title={__('Content block', 'modula-best-grid-gallery')}
-				description={__(
-					'Headline, body, spacing, and colors for this tile.',
-					'modula-best-grid-gallery'
-				)}
-				isNested
-				parentTitle={__('Gallery', 'modula-best-grid-gallery')}
-				onBack={onBack}
-			/>
+			<ItemEditPanelHeader {...pager} onBack={onBack} />
 			<div className="modula-settings-panel__scroll modula-gallery-item-edit-panel__scroll">
+				<ItemEditCard className="modula-gallery-item-edit-panel__file">
+					<div className="modula-gallery-item-edit-panel__file-text">
+						<span className="modula-gallery-item-edit-panel__file-name">
+							{__('Content block', 'modula-best-grid-gallery')}
+						</span>
+						<span className="modula-gallery-item-edit-panel__file-meta">
+							{__('Text tile', 'modula-best-grid-gallery')}
+						</span>
+					</div>
+					{isTemplateSlot ? null : (
+						<Button
+							className="modula-gallery-item-edit-panel__remove"
+							disabled={!adminActions?.removeItem}
+							onClick={onRemove}
+						>
+							{__('Remove', 'modula-best-grid-gallery')}
+						</Button>
+					)}
+				</ItemEditCard>
 				<FreeformStackingControls storeIndex={storeIndex} />
 				{CONTENT_BLOCK_MODAL_SECTIONS.map((section) => (
-					<SettingsPanelSection
-						key={section.name}
-						label={section.title}
-					>
+					<ItemEditCard key={section.name} title={section.title}>
 						<ContentBlockEditSectionContent
 							sectionName={section.name}
 							state={state}
@@ -166,36 +181,9 @@ export default function GalleryItemContentBlockPanel({ storeIndex }) {
 							editorInstanceKey={editorInstanceKey}
 							disabled={false}
 							hasWpEditor={hasWpEditor}
-							hideSectionChrome
 						/>
-					</SettingsPanelSection>
+					</ItemEditCard>
 				))}
-				{isTemplateSlot ? null : (
-					<SettingsPanelSection
-						label={__('Block', 'modula-best-grid-gallery')}
-					>
-						<ActionRow>
-							<Button
-								variant="ghost"
-								className="modula-gallery-item-edit-panel__danger"
-								disabled={!adminActions?.removeItem}
-								confirm={__(
-									'Confirm deletion?',
-									'modula-best-grid-gallery'
-								)}
-								onClick={onDeleteBlock}
-							>
-								{__('Delete block', 'modula-best-grid-gallery')}
-							</Button>
-						</ActionRow>
-						<p className="modula-gallery-item-edit-panel__file-help">
-							{__(
-								'Removes this content block from the gallery. You can add a new one anytime.',
-								'modula-best-grid-gallery'
-							)}
-						</p>
-					</SettingsPanelSection>
-				)}
 			</div>
 		</div>
 	);

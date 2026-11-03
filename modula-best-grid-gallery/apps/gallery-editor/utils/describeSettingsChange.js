@@ -1,5 +1,5 @@
 /**
- * Human-readable one-line description of a settings edit (status-bar history step).
+ * Human-readable one-line description of a settings edit (a History popover step).
  */
 import { __, sprintf } from '@wordpress/i18n';
 import {

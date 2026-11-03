@@ -1,0 +1,58 @@
+// The Motion picker's Entrance menu and its replay button
+// (`fields/MotionChoicePicker.jsx`) read as one field, as in the artboard: a
+// 32px button behind a divider at the trigger's end. Mixin only: this file
+// emits no CSS. Each editor includes it with the menu select's `classBlock`.
+@mixin motion-picker($block) {
+
+	.modula-settings-panel__entrance-picker {
+		display: flex;
+		min-width: 0;
+	}
+
+	// Prefixed to outrank the shared
+	// `.modula-admin-ui .<block>__select-menu*` rules.
+	.modula-admin-ui .modula-settings-panel__entrance-picker {
+
+		.#{$block}__select-menu {
+			flex: 1 1 auto;
+			min-width: 0;
+		}
+
+		.#{$block}__select-menu-trigger {
+			border-top-right-radius: 0;
+			border-bottom-right-radius: 0;
+		}
+	}
+
+	.modula-settings-panel__entrance-replay {
+		box-sizing: border-box;
+		display: inline-flex;
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: var(--modula-admin-control-height);
+		margin: 0;
+		padding: 0;
+		border: 1px solid var(--modula-admin-border-field);
+		border-left: 0;
+		border-radius: 0 var(--modula-admin-radius-sm) var(--modula-admin-radius-sm) 0;
+		background: var(--modula-admin-surface);
+		color: var(--modula-admin-ink);
+		cursor: pointer;
+
+		&:hover:not(:disabled) {
+			background: var(--modula-admin-surface-hover);
+		}
+
+		&:focus-visible {
+			outline: 2px solid transparent;
+			box-shadow: var(--modula-admin-focus-field);
+		}
+
+		&:disabled {
+			opacity: var(--modula-admin-disabled-opacity);
+			cursor: default;
+		}
+	}
+}

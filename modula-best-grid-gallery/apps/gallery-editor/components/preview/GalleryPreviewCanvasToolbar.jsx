@@ -1,23 +1,23 @@
 /**
  * Redesign canvas toolbar above the live preview:
- * Select multiple | Select all | Bulk edit | Sort ··· viewport strip | Add images split (+ import host).
+ * Select multiple | Bulk edit | Sort · <mode> ⌄ ··· Add split (+ import host).
+ * In selection mode: Done selecting | Select all | N selected · Clear | Bulk edit (N) | Sort.
+ * Sort opens its popover (GallerySortPopover).
  */
-import { useEffect, useRef, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { useEffect, useState } from '@wordpress/element';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import {
 	CanvasToolbar,
 	CanvasToolbarActionButton,
+	CanvasToolbarSelectionCount,
 	useTakeoverSaveStatus,
 } from 'editor-shell';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
 import { useInvalidateGalleryBootstrap } from '../../hooks/useInvalidateGalleryBootstrap';
 import { ExtensionImportHostProvider } from '../../platform/ExtensionImportHostContext';
-import { useGalleryItemEditSidebar } from '../../context/GalleryItemEditSidebarContext';
-import { useGalleryReorderSidebar } from '../../context/GalleryReorderSidebarContext';
 import { useBulkEdit } from '../../context/BulkEditContext';
 import { useGalleryPreviewTileSelection } from '../../context/GalleryPreviewTileSelectionContext';
 import { getModulaSettingsEditorConfig } from '../../config/modulaSettingsEditorConfig';
-import TakeoverImageUploader from './TakeoverImageUploader';
 import PreviewAddNewSplit from './PreviewAddNewSplit';
 import TakeoverPreviewImportModals from '../import-dialog/TakeoverPreviewImportModals';
 import { useTakeoverPreviewImportFlows } from '../../hooks/useTakeoverPreviewImportFlows';
@@ -25,36 +25,31 @@ import {
 	canvasToolbarBulkEditIcon,
 	canvasToolbarSelectAllIcon,
 	canvasToolbarSelectMultipleIcon,
-	canvasToolbarSortIcon,
 } from './canvasToolbarIcons';
+import GallerySortPopover from './GallerySortPopover';
 
 /**
  * @param {{
  *   galleryId?: number,
  *   galleryType?: string,
- *   previewViewport?: 'desktop'|'tablet'|'mobile',
- *   onPreviewViewportChange?: (v: 'desktop'|'tablet'|'mobile') => void,
  *   runPreviewItemMutation?: (task: () => void | Promise<void>) => Promise<void>,
  * }} props
  */
 export default function GalleryPreviewCanvasToolbar({
 	galleryId = 0,
 	galleryType = '',
-	previewViewport = 'desktop',
-	onPreviewViewportChange,
 	runPreviewItemMutation,
 }) {
 	const { form } = useGallerySettingsFormBundle();
 	const { runPersistTask } = useTakeoverSaveStatus();
 	const persistItemMutation = runPreviewItemMutation ?? runPersistTask;
-	const reorderSidebar = useGalleryReorderSidebar();
-	const itemEdit = useGalleryItemEditSidebar();
 	const { openBulkEdit } = useBulkEdit();
 	const tileSelection = useGalleryPreviewTileSelection();
+	const selectedCount = tileSelection?.modeActive
+		? tileSelection.selectedStoreIndices.length
+		: 0;
 	const editor = getModulaSettingsEditorConfig();
 	const [mediaLibraryError, setMediaLibraryError] = useState('');
-	const [pluploadBusy, setPluploadBusy] = useState(false);
-	const imageImporterRef = useRef(null);
 
 	const invalidateBootstrap = useInvalidateGalleryBootstrap(galleryId);
 	const { openFlow, openPreviewImport, closePreviewImport, zipSession } =
@@ -107,18 +102,8 @@ export default function GalleryPreviewCanvasToolbar({
 					}}
 				>
 					<CanvasToolbar
-						previewViewport={previewViewport}
-						onPreviewViewportChange={onPreviewViewportChange}
 						errorNotice={mediaLibraryError}
 						onDismissErrorNotice={() => setMediaLibraryError('')}
-						busyMessage={
-							editor.takeover && pluploadBusy
-								? __(
-										'Uploading images…',
-										'modula-best-grid-gallery'
-									)
-								: ''
-						}
 						actions={
 							<>
 								{editor.isPro ? (
@@ -171,6 +156,21 @@ export default function GalleryPreviewCanvasToolbar({
 												)}
 									</CanvasToolbarActionButton>
 								) : null}
+								{editor.isPro && selectedCount > 0 ? (
+									<CanvasToolbarSelectionCount
+										label={sprintf(
+											/* translators: %d: number of selected images */
+											_n(
+												'%d image selected',
+												'%d images selected',
+												selectedCount,
+												'modula-best-grid-gallery'
+											),
+											selectedCount
+										)}
+										onClear={tileSelection.clear}
+									/>
+								) : null}
 								{editor.isPro ? (
 									<CanvasToolbarActionButton
 										icon={canvasToolbarBulkEditIcon}
@@ -182,45 +182,36 @@ export default function GalleryPreviewCanvasToolbar({
 											openBulkEdit();
 										}}
 									>
-										{__(
-											'Bulk edit',
-											'modula-best-grid-gallery'
-										)}
+										{selectedCount > 0
+											? sprintf(
+													/* translators: %d: number of selected images */
+													__(
+														'Bulk edit (%d)',
+														'modula-best-grid-gallery'
+													),
+													selectedCount
+												)
+											: __(
+													'Bulk edit',
+													'modula-best-grid-gallery'
+												)}
 									</CanvasToolbarActionButton>
 								) : null}
 								{editor.isPro ? (
-									<CanvasToolbarActionButton
-										icon={canvasToolbarSortIcon}
-										disabled={!galleryId}
-										onClick={() => {
-											if (!galleryId) {
-												return;
-											}
-											itemEdit?.close();
-											reorderSidebar?.open();
-										}}
-									>
-										{__('Sort', 'modula-best-grid-gallery')}
-									</CanvasToolbarActionButton>
+									<GallerySortPopover galleryId={galleryId} />
 								) : null}
 							</>
 						}
 						addSplit={
 							<PreviewAddNewSplit
 								mainLabel={__(
-									'Add images',
+									'Add',
 									'modula-best-grid-gallery'
 								)}
 								galleryId={galleryId}
 								galleryType={galleryType}
 								uploadPosition={uploadPosition}
 								runPersistTask={persistItemMutation}
-								onTakeoverOpenUpload={
-									editor.takeover && galleryId
-										? () =>
-												imageImporterRef.current?.openFileDialog()
-										: undefined
-								}
 								onLibraryAdded={() => {
 									setMediaLibraryError('');
 									invalidateBootstrap();
@@ -230,20 +221,6 @@ export default function GalleryPreviewCanvasToolbar({
 							/>
 						}
 					>
-						{editor.takeover && galleryId ? (
-							<TakeoverImageUploader
-								ref={imageImporterRef}
-								galleryId={galleryId}
-								uploadPosition={uploadPosition}
-								runPersistTask={persistItemMutation}
-								onBusy={setPluploadBusy}
-								onSuccess={() => {
-									setMediaLibraryError('');
-									invalidateBootstrap();
-								}}
-								onError={setMediaLibraryError}
-							/>
-						) : null}
 						{editor.takeover && editor.isPro && galleryId ? (
 							<TakeoverPreviewImportModals
 								galleryId={galleryId}

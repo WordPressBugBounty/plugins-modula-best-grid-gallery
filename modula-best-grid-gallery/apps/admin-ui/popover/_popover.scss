@@ -1,0 +1,27 @@
+.modula-admin-popover-anchor {
+	display: inline-flex;
+}
+
+// Fixed to the window at the place `Popover` measures (`placePopover`), so
+// no ancestor's overflow clips it; taller than the room, it scrolls inside.
+.modula-admin-popover {
+	position: fixed;
+	z-index: 30;
+	box-sizing: border-box;
+	min-width: 220px;
+	max-width: min(360px, calc(100vw - 32px));
+	max-height: var(--modula-admin-popover-room, none);
+	// Scrolls down, never sideways (a classic scrollbar takes width).
+	overflow: hidden auto;
+	padding: 6px 0;
+	border: 1px solid var(--modula-admin-border);
+	border-radius: var(--modula-admin-radius-md);
+	background: var(--modula-admin-surface);
+	box-shadow: var(--modula-admin-shadow-popover);
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-control);
+
+	&:focus {
+		outline: none;
+	}
+}

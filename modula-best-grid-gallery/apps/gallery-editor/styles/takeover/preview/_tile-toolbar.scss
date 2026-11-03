@@ -1,0 +1,65 @@
+/*
+ * The selected tile's toolbar, canvas "16 · Editor – Canvas gallery"
+ * (`data-cvtb`): every gallery type shows it on the selected tile. The canvas
+ * values are written out; admin-ui tokens make it follow the editor's light or
+ * dark appearance. Freeform places it beside the tile
+ * (`_freeform-selection.scss`); every other type inside it.
+ */
+.modula-gallery-takeover__live-preview {
+
+	.modula-tile-toolbar {
+		display: flex;
+		align-items: center;
+		gap: 2px;
+		padding: 4px;
+		border-radius: 8px;
+		background: var(--modula-admin-surface);
+		// The canvas toolbar shadow; admin-ui's popover shadow has no hairline.
+		box-shadow: 0 8px 28px rgba(28, 27, 25, 0.18), 0 0 0 1px var(--modula-admin-border);
+		white-space: nowrap;
+		pointer-events: auto;
+
+		.modula-admin-button {
+			height: 32px;
+			border-radius: 5px;
+			color: var(--modula-admin-ink);
+
+			&:hover:not(:disabled) {
+				background: var(--modula-admin-surface-sunken);
+			}
+		}
+	}
+
+	.modula-tile-toolbar__edit.modula-admin-button {
+		padding: 0 10px;
+		font-weight: 500;
+	}
+
+	.modula-tile-toolbar__icon.modula-admin-button {
+		width: 34px;
+		padding: 0;
+	}
+
+	.modula-tile-toolbar__divider {
+		width: 1px;
+		height: 20px;
+		margin: 0 4px;
+		background: var(--modula-admin-border);
+	}
+
+	/*
+	 * Inside the tile, 8px from its top-left corner: the canvas's placement
+	 * for a tile with no room above it. Most layouts clip their tiles, so the
+	 * toolbar cannot sit above. It carries Remove, so the hover trash goes.
+	 */
+	.modula-tile-toolbar--in-tile {
+		position: absolute;
+		top: 8px;
+		left: 8px;
+		z-index: 4;
+	}
+
+	.modula-gallery-preview-item-admin.is-item-selected:has(.modula-tile-toolbar--in-tile) .modula-gallery-preview-item-admin__trash {
+		display: none;
+	}
+}

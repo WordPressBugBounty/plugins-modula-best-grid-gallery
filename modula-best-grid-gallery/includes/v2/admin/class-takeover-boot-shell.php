@@ -3,7 +3,7 @@
  * Pre-React boot shell shared by the takeover editors.
  *
  * The gallery editor (Lite) and the Albums editor (Pro) paint the same mount,
- * loading spinner and desktop-only notice before their React bundles load, and
+ * loader (the Modula logo) and desktop-only notice before their React bundles load, and
  * resolve the shared editor appearance preference from localStorage first.
  * Each editor supplies its root id/classes, listing URL and notice copy.
  *
@@ -40,6 +40,13 @@ class Takeover_Boot_Shell {
 	const DOCUMENT_APPEARANCE_ATTR = 'data-modula-se-appearance';
 
 	/**
+	 * One blade of the Modula mark in the `-50 -50 100 100` view box, tip up,
+	 * drawn every 60°. Same geometry as admin-ui's `BrandLoader`, which the
+	 * React fallback renders; `BrandLoader.test.js` keeps them in step.
+	 */
+	const MARK_BLADE_POINTS = '-14,-30 1.5,-46 19,-12';
+
+	/**
 	 * Enqueue the boot shell stylesheet.
 	 *
 	 * @return void
@@ -71,10 +78,12 @@ class Takeover_Boot_Shell {
 	}
 
 	/**
-	 * Fixed mount with the boot spinner and the desktop-only notice.
+	 * Fixed mount with the boot loader (the Modula logo) and the desktop-only notice.
 	 *
-	 * React replaces the mount children when it renders. On phones and tablets the
-	 * CSS shows the notice instead of the spinner.
+	 * The loader is the mark, the wordmark the CSS fills in beside it, and a
+	 * visually hidden label the status region announces. React replaces the
+	 * mount children when it renders. On phones and tablets the CSS shows the
+	 * notice instead of the loader.
 	 *
 	 * @param array{id: string, class: string, back_url: string, desktop_message: string} $args Root id, editor root classes,
 	 *        listing URL for the notice's Back link, and the notice body (translated by the owning plugin).
@@ -86,14 +95,33 @@ class Takeover_Boot_Shell {
 		echo '<div id="' . esc_attr( $root_id ) . '" class="' . esc_attr( $args['class'] . ' modula-takeover__mount' ) . '" data-appearance="light">';
 		self::render_desktop_only_notice( $args['back_url'], $args['desktop_message'] );
 		echo '<div class="modula-takeover__boot" role="status" aria-live="polite" aria-busy="true">';
-		echo '<span class="modula-takeover__boot-spinner" aria-hidden="true"></span>';
+		self::render_mark();
+		echo '<span class="modula-takeover__boot-wordmark" aria-hidden="true"></span>';
 		echo '<span class="modula-takeover__boot-label">' . esc_html__( 'Loading editor…', 'modula-best-grid-gallery' ) . '</span>';
 		echo '</div>';
 		echo '</div>';
 
-		// Sync the mount attribute from the early <html> flag (set in admin_head).
+		// Sync the mount attribute from the early <html> flag (set in admin_head),
+		// and run the loader on the page's clock (startTime 0), as admin-ui's
+		// BrandLoader does: React swaps the loader node while the editor loads,
+		// and on one clock each new node continues the motion instead of restarting it.
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON-encoded strings.
-		echo '<script>(function(){var r=document.getElementById(' . wp_json_encode( $root_id ) . ');var a=document.documentElement.getAttribute(' . wp_json_encode( self::DOCUMENT_APPEARANCE_ATTR ) . ');if(r&&(a==="dark"||a==="light")){r.setAttribute("data-appearance",a);}})();</script>' . "\n";
+		echo '<script>(function(){var r=document.getElementById(' . wp_json_encode( $root_id ) . ');var a=document.documentElement.getAttribute(' . wp_json_encode( self::DOCUMENT_APPEARANCE_ATTR ) . ');if(r&&(a==="dark"||a==="light")){r.setAttribute("data-appearance",a);}if(r&&r.getAnimations){r.getAnimations({subtree:true}).forEach(function(n){n.startTime=0;});}})();</script>' . "\n";
+	}
+
+	/**
+	 * The Modula mark the boot CSS animates as an aperture (decorative).
+	 *
+	 * @return void
+	 */
+	private static function render_mark() {
+		echo '<svg class="modula-takeover__boot-mark" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false">';
+		echo '<g class="modula-takeover__boot-blades">';
+		foreach ( array( 0, 60, 120, 180, 240, 300 ) as $angle ) {
+			echo '<g transform="rotate(' . (int) $angle . ')"><polygon class="modula-takeover__boot-blade" points="' . esc_attr( self::MARK_BLADE_POINTS ) . '"/></g>';
+		}
+		echo '</g>';
+		echo '</svg>';
 	}
 
 	/**

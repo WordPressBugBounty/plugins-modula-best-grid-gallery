@@ -620,7 +620,10 @@
                             "none",
                             "zoom",
                             "grayscale",
-                            "lift"
+                            "lift",
+                            "tilt",
+                            "spotlight",
+                            "pan"
                         ],
                         "default": "none"
                     },
@@ -946,6 +949,77 @@
                 "default": 50
             }
         },
+        "motion": {
+            "entrance": {
+                "type": "string",
+                "enum": [
+                    "auto",
+                    "none",
+                    "rise",
+                    "develop",
+                    "sweep",
+                    "darkroom",
+                    "flip",
+                    "drop",
+                    "deal",
+                    "aperture",
+                    "curtain",
+                    "letterbox",
+                    "pop",
+                    "custom"
+                ],
+                "default": "auto"
+            },
+            "speed": {
+                "type": "string",
+                "enum": [
+                    "slow",
+                    "normal",
+                    "fast"
+                ],
+                "default": "normal"
+            },
+            "hover": {
+                "type": "string",
+                "enum": [
+                    "auto",
+                    "none",
+                    "none-with-captions",
+                    "balanced-reveal",
+                    "portfolio-lift",
+                    "center-hero",
+                    "caption-spotlight",
+                    "cinematic-dark",
+                    "editorial-corner-left",
+                    "editorial-corner-right",
+                    "monochrome-frame",
+                    "social-strip-bottom",
+                    "product-card-clean",
+                    "soft-zoom-stack",
+                    "accessible-no-motion",
+                    "captions",
+                    "zoom",
+                    "lift",
+                    "tilt",
+                    "spot",
+                    "pan",
+                    "custom"
+                ],
+                "default": "auto"
+            },
+            "phones": {
+                "type": "boolean",
+                "default": true
+            },
+            "widen": {
+                "type": "boolean",
+                "default": true
+            },
+            "movePrints": {
+                "type": "boolean",
+                "default": false
+            }
+        },
         "interaction": {
             "respectReducedMotion": {
                 "type": "boolean",
@@ -981,6 +1055,7 @@
             },
             "customCss": {
                 "type": "string",
+                "format": "css",
                 "default": ""
             }
         },
@@ -1311,14 +1386,6 @@
                 "minimum": 1.1,
                 "maximum": 1.75,
                 "default": 1.4
-            },
-            "centerBias": {
-                "type": "string",
-                "enum": [
-                    "center",
-                    "left"
-                ],
-                "default": "center"
             },
             "arrowPosition": {
                 "type": "string",
@@ -1875,11 +1942,11 @@
                 "type": "string",
                 "default": ""
             },
-            "watermarkTextSize": {
-                "type": "integer",
-                "default": 18,
-                "minimum": 8,
-                "maximum": 120
+            "watermarkTextSizeShare": {
+                "type": "number",
+                "default": 1.8,
+                "minimum": 0.5,
+                "maximum": 12
             },
             "watermarkTextColor": {
                 "type": "string",
@@ -1917,12 +1984,12 @@
                     "bottom_right"
                 ]
             },
-            "watermarkMargin": {
-                "type": "integer",
-                "default": 10,
+            "watermarkMarginShare": {
+                "type": "number",
+                "default": 1,
                 "minimum": 0,
-                "maximum": 100,
-                "description": "Space from the edge of the image (px)."
+                "maximum": 10,
+                "description": "Space from the edge as a share of the image width, the same on every photo size."
             },
             "watermarkOpacity": {
                 "type": "integer",

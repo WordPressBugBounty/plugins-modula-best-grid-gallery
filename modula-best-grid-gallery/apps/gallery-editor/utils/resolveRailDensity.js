@@ -1,15 +1,15 @@
 /**
  * Takeover sidebar layout measurement helpers.
  *
- * The sidebar rail is a fixed 72 CSS px icon-only column. Comfortable/compact
+ * The sidebar rail is a fixed 112 CSS px column. Comfortable/compact
  * density switching is retired; these fallbacks stay aligned with theme tokens
  * (`--mod-se-rail-w` / `--mod-se-panel-w`) for any leftover math callers.
  */
 
 /** Layout measurement fallbacks matching takeover theme tokens. */
 export const RAIL_LAYOUT_FALLBACKS = {
-	railWidth: 72,
-	panelWidth: 300,
+	railWidth: 112,
+	panelWidth: 400,
 	stagePaddingX: 24,
 	/**
 	 * Unused when density switching is retired. Kept so transitional callers

@@ -1,5 +1,5 @@
 /**
- * Image Focus UI inside the Image sidebar (replaces FocusPointModal for takeover).
+ * Image focus view of the item edit column: FocusPointModal on the preview's store.
  */
 import { Provider } from 'react-redux';
 import { useQueryClient } from '@tanstack/react-query';
@@ -50,7 +50,6 @@ export default function GalleryItemFocusPanel({ storeIndex }) {
 		<Provider store={store}>
 			<FocusPointModal
 				key={`${galleryId}-${storeIndex}`}
-				embedded
 				isOpen
 				onClose={closeFocus}
 				galleryId={galleryId}

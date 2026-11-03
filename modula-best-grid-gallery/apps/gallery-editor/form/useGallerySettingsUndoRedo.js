@@ -9,7 +9,7 @@ import {
 import { describeSettingsChange } from '../utils/describeSettingsChange';
 import { buildSettingsHistoryChange } from '../utils/galleryEditorHistoryPresentation';
 import { applyGroupedSettingsToForm } from '../utils/applyGroupedSettingsToForm';
-import { createGalleryEditorHistory } from '../utils/galleryEditorHistory';
+import { createEditorHistory } from 'editor-shell';
 
 const DEBOUNCE_MS = 400;
 /**
@@ -31,7 +31,7 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 
 	const historyRef = useRef(null);
 	if (historyRef.current === null) {
-		historyRef.current = createGalleryEditorHistory({
+		historyRef.current = createEditorHistory({
 			initialSettings: cloneGroupedSettings(form.store.state.values),
 		});
 	}
@@ -48,6 +48,8 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 	const ghostEchoUntilRef = useRef(0);
 	/** @type {import('react').MutableRefObject<((layout: Record<string, unknown>) => void)|null>} */
 	const layoutApplierRef = useRef(null);
+	/** @type {import('react').MutableRefObject<((op: import('editor-shell/history/editorHistoryStack').EditorItemsOp) => void)|null>} */
+	const itemsApplierRef = useRef(null);
 	const [stackVersion, setStackVersion] = useState(0);
 
 	const bump = useCallback(() => {
@@ -228,6 +230,46 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 		layoutApplierRef.current?.(layout);
 	}, []);
 
+	/**
+	 * Preview host registers how to undo or redo one item change (catalog + persist).
+	 *
+	 * @param {((op: import('editor-shell/history/editorHistoryStack').EditorItemsOp) => void)|null} applyItems
+	 * @return {() => void} Unsubscribe.
+	 */
+	const registerItemsApplier = useCallback((applyItems) => {
+		itemsApplierRef.current =
+			typeof applyItems === 'function' ? applyItems : null;
+		return () => {
+			if (itemsApplierRef.current === applyItems) {
+				itemsApplierRef.current = null;
+			}
+		};
+	}, []);
+
+	const applyItemsOps = useCallback((ops) => {
+		for (const op of ops) {
+			itemsApplierRef.current?.(op);
+		}
+	}, []);
+
+	/**
+	 * Apply what one undo or redo restored: a settings or layout snapshot, or
+	 * an item change.
+	 *
+	 * @param {{ type: string, settings: Record<string, Record<string, unknown>>, layout: Record<string, unknown>, items: import('editor-shell/history/editorHistoryStack').EditorItemsOp[] }} snap
+	 */
+	const applyStepSnapshot = useCallback(
+		(snap) => {
+			if (snap.type === 'settings') {
+				applySettingsSnapshot(snap);
+			} else if (snap.type === 'layout') {
+				applyLayoutSnapshot(snap.layout);
+			}
+			applyItemsOps(snap.items);
+		},
+		[applySettingsSnapshot, applyLayoutSnapshot, applyItemsOps]
+	);
+
 	const undo = useCallback(() => {
 		clearDebounce();
 		const snap = historyRef.current.undo();
@@ -235,19 +277,9 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 			return;
 		}
 		armGhostEchoWindow();
-		if (snap.type === 'settings') {
-			applySettingsSnapshot(snap);
-		} else if (snap.type === 'layout') {
-			applyLayoutSnapshot(snap.layout);
-		}
+		applyStepSnapshot(snap);
 		bump();
-	}, [
-		bump,
-		armGhostEchoWindow,
-		applySettingsSnapshot,
-		applyLayoutSnapshot,
-		clearDebounce,
-	]);
+	}, [bump, armGhostEchoWindow, applyStepSnapshot, clearDebounce]);
 
 	const redo = useCallback(() => {
 		clearDebounce();
@@ -256,19 +288,9 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 			return;
 		}
 		armGhostEchoWindow();
-		if (snap.type === 'settings') {
-			applySettingsSnapshot(snap);
-		} else if (snap.type === 'layout') {
-			applyLayoutSnapshot(snap.layout);
-		}
+		applyStepSnapshot(snap);
 		bump();
-	}, [
-		bump,
-		armGhostEchoWindow,
-		applySettingsSnapshot,
-		applyLayoutSnapshot,
-		clearDebounce,
-	]);
+	}, [bump, armGhostEchoWindow, applyStepSnapshot, clearDebounce]);
 
 	/**
 	 * Restore the snapshot at `index` and truncate every step after it.
@@ -284,6 +306,8 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 			}
 			armGhostEchoWindow();
 			applySettingsSnapshot(snap);
+			// Items first: a restored image then takes its cell from the layout.
+			applyItemsOps(snap.items);
 			applyLayoutSnapshot(snap.layout);
 			bump();
 			return snap;
@@ -292,6 +316,7 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 			bump,
 			armGhostEchoWindow,
 			applySettingsSnapshot,
+			applyItemsOps,
 			applyLayoutSnapshot,
 			clearDebounce,
 		]
@@ -371,6 +396,25 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 	);
 
 	/**
+	 * Commit one item change (an image removed from the gallery). A pending
+	 * settings edit is committed first, so the steps keep their order.
+	 *
+	 * @param {{ label: string, change: unknown }} args
+	 * @return {number} Step id, to compare with `currentStepId`.
+	 */
+	const commitItemsStep = useCallback(
+		(args) => {
+			const before = commitPendingSettings();
+			lastSnapshotRef.current = before;
+			pendingSerializedRef.current = canonicalSerialize(before);
+			const stepId = historyRef.current.commitItemsStep(args);
+			bump();
+			return stepId;
+		},
+		[commitPendingSettings, canonicalSerialize, bump]
+	);
+
+	/**
 	 * @param {Record<string, unknown>|null|undefined} layout
 	 */
 	const adoptLayoutCheckpoint = useCallback((layout) => {
@@ -399,6 +443,7 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 			lastStepLabel: history.lastStepLabel(),
 			undoStepLabel: history.undoStepLabel(),
 			redoStepLabel: history.redoStepLabel(),
+			currentStepId: history.currentStepId(),
 			syncCheckpointFromForm,
 			adoptCheckpointFromForm,
 			stackVersion,
@@ -411,6 +456,8 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 			adoptLayoutCheckpoint,
 			dropLayoutSteps,
 			registerLayoutApplier,
+			commitItemsStep,
+			registerItemsApplier,
 		};
 	}, [
 		undo,
@@ -426,5 +473,7 @@ export function useGallerySettingsUndoRedo(form, cloneGroupedSettings) {
 		adoptLayoutCheckpoint,
 		dropLayoutSteps,
 		registerLayoutApplier,
+		commitItemsStep,
+		registerItemsApplier,
 	]);
 }

@@ -2,7 +2,8 @@
  * Code-split entry for the takeover live gallery preview (gallery-shared + Redux).
  */
 import { lazy } from '@wordpress/element';
-import { Spinner } from '@wordpress/components';
+import { Spinner } from 'admin-ui';
+import { AdminUiScope } from 'editor-shell';
 import { __ } from '@wordpress/i18n';
 import LazySettingsEditorBoundary from '../shell/LazySettingsEditorBoundary';
 
@@ -23,7 +24,9 @@ export default function GalleryTakeoverLivePreviewLazy(props) {
 					aria-live="polite"
 					aria-busy="true"
 				>
-					<Spinner />
+					<AdminUiScope>
+						<Spinner />
+					</AdminUiScope>
 					<span>
 						{__('Loading preview…', 'modula-best-grid-gallery')}
 					</span>

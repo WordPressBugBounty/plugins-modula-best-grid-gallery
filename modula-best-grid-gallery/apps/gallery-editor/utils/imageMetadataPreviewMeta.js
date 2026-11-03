@@ -71,9 +71,12 @@ export function buildImageMetadataPreviewChips(item, media) {
 		dimensions = `${width}`;
 	}
 
-	const fileFromMedia = typeof md?.file === 'string' ? md.file : '';
+	// WordPress stores `file` relative to uploads ("2026/07/name.jpg"); the
+	// chip shows the file name only.
+	const mediaFileName =
+		typeof md?.file === 'string' ? md.file.split('/').pop() : '';
 	const filename =
-		fileFromMedia ||
+		mediaFileName ||
 		filenameFromUrl(media?.source_url) ||
 		filenameFromUrl(item?.url) ||
 		filenameFromUrl(item?.src) ||

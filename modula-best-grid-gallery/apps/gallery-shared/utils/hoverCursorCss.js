@@ -50,23 +50,33 @@ export function resolveHoverCursorCssValue({
 }
 
 /**
+ * Cursor of a tile's link; empty when the tiles have no link or no cursor is set.
+ *
  * @param {string}                                                                                   root Gallery root selector (e.g. `#modula-123`).
  * @param {{ cursor?: string, customCursorUrl?: string, lightbox?: string, changeCursor?: boolean }} args
  * @return {string}
  */
-export function buildHoverCursorCss(
+function resolveTileLinkCursor(
 	root,
 	{ cursor, customCursorUrl, lightbox, changeCursor = true }
 ) {
 	if (!root || lightbox === 'no-link') {
 		return '';
 	}
-
-	const cursorValue = resolveHoverCursorCssValue({
+	return resolveHoverCursorCssValue({
 		cursor,
 		customCursorUrl,
 		changeCursor,
 	});
+}
+
+/**
+ * @param {string}                                                                                   root Gallery root selector (e.g. `#modula-123`).
+ * @param {{ cursor?: string, customCursorUrl?: string, lightbox?: string, changeCursor?: boolean }} args
+ * @return {string}
+ */
+export function buildHoverCursorCss(root, args) {
+	const cursorValue = resolveTileLinkCursor(root, args);
 	if (!cursorValue) {
 		return '';
 	}
@@ -80,4 +90,20 @@ export function buildHoverCursorCss(
 	let css = `${linkSelectors}{cursor:${cursorValue};}`;
 	css += `${root}.modula-gallery .modula-item-content .modula-no-follow{cursor:default;}`;
 	return css;
+}
+
+/**
+ * Settings-editor preview: the tiles render no link, so the link cursor goes
+ * on `--modula-preview-tile-cursor`, which the editor's tile select hit reads.
+ *
+ * @param {string}                                                                                   root Gallery root selector (e.g. `#modula-123`).
+ * @param {{ cursor?: string, customCursorUrl?: string, lightbox?: string, changeCursor?: boolean }} args
+ * @return {string}
+ */
+export function buildPreviewTileCursorCss(root, args) {
+	const cursorValue = resolveTileLinkCursor(root, args);
+	if (!cursorValue) {
+		return '';
+	}
+	return `${root} .modula-item{--modula-preview-tile-cursor:${cursorValue};}`;
 }

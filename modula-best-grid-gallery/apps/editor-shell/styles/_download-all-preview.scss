@@ -1,0 +1,47 @@
+// The “Download all” button in an editor canvas (gallery-shared
+// `DownloadAllButton`). The theme's block-button CSS is missing in admin, so
+// this mirrors the front TT-style pill. Mixin only: this file emits no CSS.
+// Each editor includes it in its canvas scope; the button's colors and
+// alignment come inline from its settings.
+@mixin download-all-preview {
+
+	.modula-download-all-button.wp-block-button {
+		margin-top: 10px;
+		margin-bottom: 10px;
+	}
+
+	.modula-download-all-button .modula-download-all {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4em;
+		box-sizing: border-box;
+		padding: 0.65em 1.35em;
+		border: none;
+		border-radius: 9999px;
+		background-color: var(--wp--preset--color--contrast, #111);
+		color: var(--wp--preset--color--base, #fff);
+		font: inherit;
+		font-weight: 500;
+		line-height: 1.25;
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	.modula-download-all-button .modula-download-all:hover,
+	.modula-download-all-button .modula-download-all:focus,
+	.modula-download-all-button .modula-download-all:focus-visible {
+		color: var(--wp--preset--color--base, #fff);
+		text-decoration: none;
+		outline: none;
+	}
+
+	.modula-download-all-button .modula-download-all svg {
+		display: block;
+		width: 1.2em;
+		height: 1.2em;
+		flex: 0 0 auto;
+		max-width: 1.5rem;
+		max-height: 1.5rem;
+		fill: currentColor;
+	}
+}

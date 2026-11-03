@@ -49,17 +49,73 @@ export function getShowcaseItemAspectRatio(item, config) {
 }
 
 /**
- * Worst-case weighted AR for a window: neighbors at 1×, center slot at scale.
- * Stable across activeIndex (max over every circular window).
+ * Photos the strip fits across the viewport ("How many photos to show at
+ * once"). Odd counts are the centre photo plus whole neighbours; even counts
+ * are the centre, whole neighbours and half a photo at each edge, because the
+ * active photo is always centred. A gallery smaller than the count shows each
+ * photo once (two photos excepted); one photo and Simplify on phones show one.
+ *
+ * @param {Object}  opts
+ * @param {number}  opts.visibleCount setting value, already 2–5 (settingsToConfig)
+ * @param {number}  opts.itemCount
+ * @param {boolean} opts.simplify     phone with Simplify on phones
+ * @return {number} photos across the viewport, 1–5
+ */
+export function resolveShowcaseVisibleCount({
+	visibleCount,
+	itemCount,
+	simplify,
+}) {
+	if (simplify || itemCount <= 1) {
+		return 1;
+	}
+	if (itemCount >= visibleCount) {
+		return visibleCount;
+	}
+	/*
+	 * Fewer photos than asked: an even window would show the same photo halved
+	 * at both edges, so drop to the odd count below. Two photos stay at two —
+	 * the other photo peeking on both sides is how a two-photo loop looks.
+	 */
+	const edgeHalvesWouldRepeat = itemCount % 2 === 0 && itemCount > 2;
+	return edgeHalvesWouldRepeat ? itemCount - 1 : itemCount;
+}
+
+/**
+ * One side of a centred window, in aspect-ratio units: half the scaled centre,
+ * the whole neighbours, and half of the edge photo for even counts.
+ *
+ * @param {(index: number) => number} arAt         circular AR lookup
+ * @param {number}                    active       centre index
+ * @param {-1|1}                      dir          left or right
+ * @param {number}                    visibleCount resolved count
+ * @param {number}                    scale        centre scale
+ * @return {number} AR units from the centre of the active photo to the edge
+ */
+function showcaseHalfWindowAspect(arAt, active, dir, visibleCount, scale) {
+	const wholeNeighbors = Math.floor((visibleCount - 1) / 2);
+	let sum = (arAt(active) * scale) / 2;
+	for (let k = 1; k <= wholeNeighbors; k++) {
+		sum += arAt(active + dir * k);
+	}
+	if (visibleCount % 2 === 0) {
+		sum += arAt(active + dir * (wholeNeighbors + 1)) / 2;
+	}
+	return sum;
+}
+
+/**
+ * Widest half-window over every active photo and both sides, so the strip
+ * height does not change as the carousel moves.
  *
  * @param {number[]} aspectRatios
- * @param {number}   windowSize
+ * @param {number}   visibleCount resolved count (resolveShowcaseVisibleCount)
  * @param {number}   centerScale
- * @return {number}
+ * @return {number} AR units; 0 for an empty gallery
  */
-export function maxShowcaseWindowWeightedAspectSum(
+export function maxShowcaseHalfWindowAspect(
 	aspectRatios,
-	windowSize,
+	visibleCount,
 	centerScale
 ) {
 	const ratios = Array.isArray(aspectRatios) ? aspectRatios : [];
@@ -67,27 +123,27 @@ export function maxShowcaseWindowWeightedAspectSum(
 	if (n === 0) {
 		return 0;
 	}
-	const size = Math.max(1, Math.min(n, Math.round(windowSize) || 3));
+	const count = Math.max(1, Math.round(visibleCount) || 1);
 	const scale = Math.max(1, Number(centerScale) || 1);
-	const activeSlot = Math.floor((size - 1) / 2);
+	const arAt = (i) => {
+		const ar = ratios[((i % n) + n) % n];
+		return Number.isFinite(ar) && ar > 0 ? ar : 0.75;
+	};
 	let max = 0;
-	for (let start = 0; start < n; start++) {
-		let sum = 0;
-		for (let k = 0; k < size; k++) {
-			const ar = ratios[(start + k) % n];
-			const safe = Number.isFinite(ar) && ar > 0 ? ar : 0.75;
-			sum += k === activeSlot ? safe * scale : safe;
-		}
-		if (sum > max) {
-			max = sum;
-		}
+	for (let active = 0; active < n; active++) {
+		max = Math.max(
+			max,
+			showcaseHalfWindowAspect(arAt, active, -1, count, scale),
+			showcaseHalfWindowAspect(arAt, active, 1, count, scale)
+		);
 	}
 	return max;
 }
 
 /**
- * Neighbor height so a full window (with scaled center footprint) fits.
- * Stable for a given gallery (does not depend on which slide is active).
+ * Neighbor height so the chosen number of photos (scaled centre included)
+ * fits the viewport with the active photo centred. Stable for a given gallery
+ * (does not depend on which slide is active).
  *
  * @param {Object}   opts
  * @param {number}   opts.viewportWidth
@@ -95,8 +151,8 @@ export function maxShowcaseWindowWeightedAspectSum(
  * @param {number}   opts.centerScale
  * @param {boolean}  opts.mobile
  * @param {number[]} opts.aspectRatios
- * @param {number}   opts.windowSize
- * @return {number}
+ * @param {number}   opts.visibleCount  resolved count
+ * @return {number} neighbour slide height in px
  */
 export function resolveShowcaseTrackHeight({
 	viewportWidth,
@@ -104,7 +160,7 @@ export function resolveShowcaseTrackHeight({
 	centerScale,
 	mobile,
 	aspectRatios,
-	windowSize = 3,
+	visibleCount,
 }) {
 	const vw = Math.max(0, Number(viewportWidth) || 0);
 	if (vw <= 0) {
@@ -117,20 +173,26 @@ export function resolveShowcaseTrackHeight({
 	}
 
 	const g = Math.max(0, Number(gap) || 0);
-	const size = Math.max(1, Math.round(windowSize) || 3);
-	const gaps = Math.max(0, size - 1) * g;
-	const weightedAr = maxShowcaseWindowWeightedAspectSum(
+	const count = Math.max(1, Math.round(visibleCount) || 1);
+	// Every count puts floor(count / 2) gaps between the centre and an edge.
+	const sideGaps = Math.floor(count / 2) * g;
+	const halfAr = maxShowcaseHalfWindowAspect(
 		ratios,
-		size,
+		count,
 		mobile ? 1 : centerScale
 	);
 
 	const fit = mobile ? 0.94 : 0.98;
-	const usable = Math.max(80, vw * fit - gaps);
-	const neighborH = weightedAr > 0 ? usable / weightedAr : 320;
+	const usable = Math.max(40, (vw * fit) / 2 - sideGaps);
+	const neighborH = halfAr > 0 ? usable / halfAr : 320;
 
+	/*
+	 * The cap keeps tall photos on a screen; the desktop floor only guards
+	 * against a collapsed strip, so it stays below what 5 landscape photos
+	 * need on a tablet-width canvas and the chosen count wins.
+	 */
 	const maxH = mobile ? Math.min(vw * 0.9, 420) : Math.min(vw * 0.7, 640);
-	const minH = mobile ? 120 : 140;
+	const minH = mobile ? 120 : 48;
 	return Math.round(Math.min(maxH, Math.max(minH, neighborH)));
 }
 
@@ -185,15 +247,15 @@ export function resolveShowcaseActiveMarginX(width, centerScale) {
 
 /**
  * Translate so trackIndex stays centered (accounts for active scale margins).
+ * A lone photo is centred too: Showcase has no other active photo position.
  *
- * @param {Object}          opts
- * @param {number[]}        opts.slideWidths
- * @param {number}          opts.trackIndex
- * @param {number}          opts.viewportWidth
- * @param {number}          opts.gap
- * @param {number}          [opts.centerScale]
- * @param {'center'|'left'} opts.centerBias
- * @return {number}
+ * @param {Object}   opts
+ * @param {number[]} opts.slideWidths
+ * @param {number}   opts.trackIndex
+ * @param {number}   opts.viewportWidth
+ * @param {number}   opts.gap
+ * @param {number}   [opts.centerScale]
+ * @return {number} Track translateX in px.
  */
 export function computeShowcaseTranslateX({
 	slideWidths,
@@ -201,7 +263,6 @@ export function computeShowcaseTranslateX({
 	viewportWidth,
 	gap,
 	centerScale = 1,
-	centerBias,
 }) {
 	const widths = Array.isArray(slideWidths) ? slideWidths : [];
 	const len = widths.length;
@@ -223,10 +284,5 @@ export function computeShowcaseTranslateX({
 	 * scaled active footprint is midpoint of (margin + width + margin).
 	 */
 	const footprintCenter = marginX + activeW / 2;
-	const bias = centerBias === 'left' ? 0.38 : 0.5;
-	const targetCenter = viewportWidth * bias;
-	if (centerBias === 'left') {
-		return -(offset + activeW * bias + marginX - targetCenter);
-	}
-	return -(offset + footprintCenter - targetCenter);
+	return -(offset + footprintCenter - viewportWidth / 2);
 }

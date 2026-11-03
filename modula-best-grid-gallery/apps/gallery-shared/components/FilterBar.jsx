@@ -24,9 +24,11 @@ import {
 	FILTER_SELECT_ALL_VALUE,
 	isFilterBarAllCurrent,
 	isFilterBarEntryCurrent,
+	isFilterBarFilterApplied,
 	normalizeFilterBarEntry,
 	resolveFilterBarCollapsibleActionText,
 	resolveFilterSelectValue,
+	shouldShowFilterSelectPlaceholder,
 	shouldUseCollapsibleFilterBar,
 	shouldUseFilterDropdown,
 } from '../utils/filterBarModel';
@@ -70,7 +72,7 @@ export default function FilterBar() {
 		(state) => state.items?.originalItems || state.items?.items || []
 	);
 	const filtersSettings = settings.filters || {};
-	const { applyFilter, removeFilter, clearFilters } = useGalleryActions();
+	const { applyFilter, clearFilters } = useGalleryActions();
 
 	const containerClass = buildFilterBarContainerClasses();
 	const listId = useId();
@@ -140,11 +142,7 @@ export default function FilterBar() {
 	);
 
 	const isFilterActive = useCallback(
-		(key, value) =>
-			activeFilters.some(
-				(f) =>
-					f.key === key && (value === undefined || f.value === value)
-			),
+		(key, value) => isFilterBarFilterApplied(activeFilters, key, value),
 		[activeFilters]
 	);
 
@@ -160,13 +158,12 @@ export default function FilterBar() {
 				return;
 			}
 			if (isFilterActive(key, value)) {
-				removeFilter(key);
 				return;
 			}
 			clearFilters();
 			applyFilter(key, value);
 		},
-		[applyFilter, clearFilters, isFilterActive, removeFilter]
+		[applyFilter, clearFilters, isFilterActive]
 	);
 
 	const selectOptions = useMemo(
@@ -239,9 +236,10 @@ export default function FilterBar() {
 		: '';
 
 	if (useDropdown) {
-		// Hidden All still needs an honest label when no named filter is applied.
-		const hasUnfilteredPlaceholder =
-			hideAllFilter && activeFilters.length === 0;
+		const hasUnfilteredPlaceholder = shouldShowFilterSelectPlaceholder({
+			hideAllFilter,
+			activeFilters,
+		});
 		return (
 			<div
 				className={`${containerClass} filters--dropdown`}

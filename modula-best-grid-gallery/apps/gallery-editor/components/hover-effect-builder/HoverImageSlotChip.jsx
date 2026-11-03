@@ -5,7 +5,7 @@ import {
 	getSlotAnchorPercent,
 	getSlotMaxWidthPercent,
 	getSlotTextAlign,
-} from './hoverSlotRails';
+} from 'gallery-shared/hover/hoverSlotRails';
 
 const DRAG_THRESHOLD_PX = 5;
 const GRID_STEP_PERCENT = 12.5; // 8x8 grid

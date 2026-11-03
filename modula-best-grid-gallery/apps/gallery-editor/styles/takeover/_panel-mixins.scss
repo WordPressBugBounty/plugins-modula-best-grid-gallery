@@ -1,0 +1,4 @@
+// Mixins the settings panel shares with the editor's side columns (the item
+// edit panel, the hover builder). They live in the editor shell, which the
+// Albums editor's panels read too; this file only forwards them.
+@forward '../../../editor-shell/styles/settings-panel-rows' show panel-slider-parts, column-admin-rows;

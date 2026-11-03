@@ -7,7 +7,7 @@ export const WP_MEDIA_FRAME_BODY_CLASS = 'modula-wp-media-frame-open';
 
 /**
  * Close a custom overlay/dialog on Escape (capture phase).
- * Matches SettingsCommandPalette / bulk-edit modal patterns; use `stopImmediate` when
+ * Matches the bulk-edit modal pattern; use `stopImmediate` when
  * WP admin global shortcuts must lose to the modal (e.g. metadata + TinyMCE focus fights).
  *
  * @param {boolean}                               enabled

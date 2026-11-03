@@ -332,6 +332,86 @@ function modula_resolve_gallery_filter_list_save( $incoming, $existing, $key_pre
 }
 
 /**
+ * Keep a grouped save's `filters.filters` list as modula_resolve_gallery_filter_list_save()
+ * decides it, after schema sanitize filled the placeholder default. Shared by the
+ * gallery and album settings writers.
+ *
+ * @param array<string, array<string, mixed>> $existing  Grouped settings before merge.
+ * @param array<string, array<string, mixed>> $incoming  Raw PATCH body.
+ * @param array<string, array<string, mixed>> $sanitized Sanitized merged settings.
+ * @return array<string, array<string, mixed>> `$sanitized` with the resolved list.
+ */
+function modula_protect_filter_list_on_grouped_save( array $existing, array $incoming, array $sanitized ) {
+	$key_present = isset( $incoming['filters'] ) && is_array( $incoming['filters'] )
+		&& array_key_exists( 'filters', $incoming['filters'] );
+
+	$existing_list = ( isset( $existing['filters'] ) && is_array( $existing['filters'] )
+		&& array_key_exists( 'filters', $existing['filters'] ) )
+		? $existing['filters']['filters']
+		: array( '' );
+
+	/*
+	 * Use the client payload when the key was present. Schema sanitize fills
+	 * default `['']` for empty arrays, which would block intentional clear.
+	 */
+	$incoming_list = $key_present ? $incoming['filters']['filters'] : null;
+
+	if ( ! isset( $sanitized['filters'] ) || ! is_array( $sanitized['filters'] ) ) {
+		$sanitized['filters'] = array();
+	}
+
+	$resolved = modula_resolve_gallery_filter_list_save(
+		$incoming_list,
+		$existing_list,
+		$key_present
+	);
+
+	if ( is_array( $resolved ) ) {
+		$resolved = array_map(
+			static function ( $entry ) {
+				return sanitize_text_field( (string) $entry );
+			},
+			$resolved
+		);
+	}
+
+	$sanitized['filters']['filters'] = $resolved;
+
+	return $sanitized;
+}
+
+/**
+ * Names a grouped save removes from `filters.filters`, after
+ * modula_protect_filter_list_on_grouped_save() resolved the list. The writer
+ * strips them from its items before writing the settings, so read-time repair
+ * cannot refill them. Shared by the gallery and album settings writers.
+ *
+ * @param array<string, array<string, mixed>> $existing  Grouped settings before merge.
+ * @param array<string, array<string, mixed>> $incoming  Raw PATCH body.
+ * @param array<string, array<string, mixed>> $sanitized Sanitized settings after protect.
+ * @return string[] Removed names; none when the save does not carry the list.
+ */
+function modula_filter_list_removed_names_on_grouped_save( array $existing, array $incoming, array $sanitized ) {
+	$key_present = isset( $incoming['filters'] ) && is_array( $incoming['filters'] )
+		&& array_key_exists( 'filters', $incoming['filters'] );
+	if ( ! $key_present ) {
+		return array();
+	}
+
+	$existing_list = ( isset( $existing['filters'] ) && is_array( $existing['filters'] )
+		&& array_key_exists( 'filters', $existing['filters'] ) )
+		? $existing['filters']['filters']
+		: array( '' );
+
+	$resolved_list = ( isset( $sanitized['filters'] ) && is_array( $sanitized['filters'] )
+		&& array_key_exists( 'filters', $sanitized['filters'] ) )
+		? $sanitized['filters']['filters']
+		: array( '' );
+
+	return modula_gallery_filter_list_removed_names( $existing_list, $resolved_list );
+}
+
+/**
  * Repair a wiped gallery filter list from image tags when needed.
  *
  * @param mixed $stored_list Current gallery-level filters.

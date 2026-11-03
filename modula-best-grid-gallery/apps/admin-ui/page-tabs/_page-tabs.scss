@@ -26,9 +26,13 @@
 // `a:focus` box-shadow reset below and forced-colors mode. The side padding,
 // taken back by the margin, keeps the inset focus ring off the label while
 // the text stays aligned with the title.
+// A tab is a link to another page, or a button that switches the page's own
+// section; both look the same.
 .modula-admin-page-tabs__tab {
+	@include mixins.button-reset;
 	display: flex;
 	align-items: center;
+	gap: 8px;
 	box-sizing: border-box;
 	min-height: var(--modula-admin-hit-target);
 	margin: 0 -4px;
@@ -60,4 +64,12 @@
 		color: var(--modula-admin-ink);
 		font-weight: 600;
 	}
+}
+
+// "(24)": muted and normal weight, also on the current tab.
+.modula-admin-page-tabs__count {
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-caption);
+	font-weight: 400;
+	font-variant-numeric: tabular-nums;
 }

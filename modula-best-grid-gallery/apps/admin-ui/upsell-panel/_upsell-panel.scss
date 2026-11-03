@@ -1,0 +1,147 @@
+// The section upsell ("6 · Content – Lite"): copy and actions on the left,
+// three example images on a sunken tile to the right. The page around it
+// supplies the padding.
+.modula-admin-upsell-panel {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 480px;
+	align-items: center;
+	column-gap: 72px;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 1040px;
+	margin: 0 auto;
+
+	// The images go under the copy where both columns do not fit.
+	@media (max-width: 1200px) {
+		grid-template-columns: minmax(0, 1fr);
+		row-gap: 40px;
+		max-width: 640px;
+	}
+}
+
+.modula-admin-upsell-panel__copy {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 20px;
+}
+
+.modula-admin-upsell-panel__title {
+	margin: 0;
+	color: var(--modula-admin-ink);
+	font-size: 32px;
+	font-weight: 400;
+	line-height: 1.2;
+	text-wrap: balance;
+}
+
+.modula-admin-upsell-panel__text {
+	max-width: 460px;
+	margin: 0;
+	color: var(--modula-admin-ink-soft);
+	font-size: 16px;
+	line-height: 1.55;
+}
+
+.modula-admin-upsell-panel__benefits {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin: 4px 0 0;
+	padding: 0;
+	list-style: none;
+
+	li {
+		display: flex;
+		align-items: flex-start;
+		gap: 12px;
+		margin: 0;
+		color: var(--modula-admin-ink);
+		font-size: 16px;
+		line-height: 1.4;
+	}
+
+	svg {
+		flex-shrink: 0;
+		margin-top: 1px;
+		color: var(--modula-admin-success);
+	}
+}
+
+.modula-admin-upsell-panel__plan {
+	margin: 0;
+	color: var(--modula-admin-ink-secondary);
+	font-size: var(--modula-admin-text-result);
+}
+
+.modula-admin-upsell-panel__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 20px;
+	padding-top: 12px;
+}
+
+.modula-admin-upsell-panel__cta {
+	height: 46px;
+	padding: 0 22px;
+	font-size: var(--modula-admin-text-body);
+}
+
+.modula-admin-upsell-panel__note {
+	margin: 0;
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-help);
+}
+
+.modula-admin-upsell-panel__images {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 12px;
+	padding: 20px;
+	border-radius: var(--modula-admin-radius-lg);
+	background: var(--modula-admin-surface-sunken);
+}
+
+.modula-admin-upsell-panel__image {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+	margin: 0;
+
+	figcaption {
+		overflow: hidden;
+		color: var(--modula-admin-ink-secondary);
+		font-size: 13px;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+}
+
+.modula-admin-upsell-panel__frame {
+	position: relative;
+
+	img {
+		display: block;
+		width: 100%;
+		aspect-ratio: 3 / 4;
+		border-radius: var(--modula-admin-radius-md);
+		object-fit: cover;
+	}
+}
+
+.modula-admin-upsell-panel__picked {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	border-radius: 50%;
+	background: var(--modula-admin-surface);
+	box-shadow: var(--modula-admin-shadow-raised);
+	color: var(--modula-admin-success);
+}

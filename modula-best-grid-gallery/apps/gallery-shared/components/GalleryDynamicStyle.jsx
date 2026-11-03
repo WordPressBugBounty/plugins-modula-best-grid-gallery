@@ -6,7 +6,10 @@ import {
 import { galleryUsesFancyboxLightbox } from '../utils/resolveGalleryItemLink';
 import { galleryRootSelector } from '../utils/galleryRootSelector';
 import { getForcedPreviewViewport } from '../utils/resolvePreviewViewport';
-import { buildHoverCursorCss } from '../utils/hoverCursorCss';
+import {
+	buildHoverCursorCss,
+	buildPreviewTileCursorCss,
+} from '../utils/hoverCursorCss';
 import { resolveHoverDimCssVars } from '../utils/resolveHoverDimCssVars';
 import { useWpAttachmentSourceUrl } from '../hooks/useWpAttachmentSourceUrl';
 import {
@@ -101,12 +104,15 @@ export default function GalleryDynamicStyle() {
 	const lightboxTypeForCursor =
 		safeString(groupedLightbox.lightbox) || safeString(config.lightbox);
 
-	let css = buildHoverCursorCss(root, {
+	const cursorArgs = {
 		cursor: hoverCursor,
 		customCursorUrl,
 		lightbox: lightboxTypeForCursor,
 		changeCursor: hoverChangeCursor,
-	});
+	};
+	let css = isSettingsEditorPreviewContext
+		? buildPreviewTileCursorCss(root, cursorArgs)
+		: buildHoverCursorCss(root, cursorArgs);
 
 	const dimVars = resolveHoverDimCssVars(
 		safeString(config.hoverColor) || safeString(groupedHover.hoverColor),
@@ -466,7 +472,14 @@ export default function GalleryDynamicStyle() {
 		css += `${root}{${rootDecls}}`;
 	}
 
-	const skipLoadingEffects = isGalleryTypeWithoutLoadingEffects(config.type);
+	/*
+	 * Loading effects are the Motion entrance's `custom` choice (settingsToConfig);
+	 * a legacy config without grouped settings only knows its layout.
+	 */
+	const skipLoadingEffects = !(
+		config.playsLoadingEffects ??
+		!isGalleryTypeWithoutLoadingEffects(config.type)
+	);
 	const scaleEnabled =
 		!Object.prototype.hasOwnProperty.call(groupedLoading, 'enableScale') ||
 		groupedLoading.enableScale === true ||
@@ -539,14 +552,11 @@ export default function GalleryDynamicStyle() {
 		const loadFxRule = `${loadFxRootSel} ${loadFxMediaLoadedSel}{animation:modulaScaling 1s ease forwards;opacity:1;}`;
 		const loadFxKeyframes = `@keyframes modulaScaling{0%{transform:${loadedFxNeutral}}50%{transform:${loadedFxTransform}}100%{transform:${loadedFxNeutral}}}`;
 		/*
-		 * Visitor frontend + respectReducedMotion On: only animate when OS allows motion.
+		 * Visitor frontend: only animate when the OS allows motion, whatever the
+		 * gallery's reduced-motion setting (utils/reducedMotion.js).
 		 * Editor preview always emits so authors can design load-in.
-		 * Setting Off: always play even when prefers-reduced-motion is set.
 		 */
-		const honorOsReduce =
-			!isSettingsEditorPreviewContext &&
-			config.respectReducedMotion !== false;
-		if (honorOsReduce) {
+		if (!isSettingsEditorPreviewContext) {
 			css += `@media (prefers-reduced-motion: no-preference){${loadFxRule}${loadFxKeyframes}}`;
 		} else {
 			css += `${loadFxRule}${loadFxKeyframes}`;

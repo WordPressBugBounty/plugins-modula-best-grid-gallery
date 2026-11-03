@@ -522,6 +522,40 @@ class Modula_Helper {
 	}
 
 	/**
+	 * Sanitize a gallery's Custom CSS: the one rule for saved, AI-generated and printed CSS.
+	 *
+	 * Keeps line breaks, indentation and valid CSS (`>`, quotes, `\` escapes, `@media`).
+	 * Removes script/style elements, HTML tags, every remaining `<` (so nothing can close
+	 * the `<style>` block or the gallery's JSON `<script>`), and the CSS constructs that run
+	 * code or load remote styles.
+	 *
+	 * @param mixed $css Raw CSS.
+	 * @return string Sanitized CSS, or '' for a non-scalar value or a regex failure.
+	 */
+	public static function sanitize_custom_css( $css ) {
+		if ( ! is_scalar( $css ) ) {
+			return '';
+		}
+		$patterns = array(
+			'/<\s*(script|style)\b[^>]*>.*?<\s*\/\s*\1\s*>/is',
+			// A tag stays on one line without CSS braces or `;`, so a stray `<` cannot swallow rules up to a child selector's `>`.
+			'/<\/?[a-z!][^<>{};\n]*>/i',
+			// Each construct ends at its own `;`, block or line, so a missing `;` cannot take the rules after it.
+			'/@import\b[^;{}\n]*;?/i',
+			'/(?<![\w-])expression\s*\([^)]*\)/i',
+			'/javascript\s*:/i',
+			'/(?<![\w-])behavior\s*:[^;{}\n]*;?/i',
+		);
+		$clean    = preg_replace( $patterns, '', (string) $css );
+		if ( null === $clean ) {
+			return '';
+		}
+		// `< ` and `<=` (range media queries) cannot open a tag or end the block.
+		$clean = preg_replace( '/<(?![\s=])/', '', $clean );
+		return null === $clean ? '' : $clean;
+	}
+
+	/**
 	 * Sanitize a CSS color for Modula settings (hex, rgb, rgba, or empty/transparent).
 	 *
 	 * @param mixed $color Raw color from request / settings.

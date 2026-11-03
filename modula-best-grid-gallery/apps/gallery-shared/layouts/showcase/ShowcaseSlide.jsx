@@ -5,8 +5,9 @@
  * @package
  */
 
-import { memo, useCallback, useMemo } from '@wordpress/element';
+import { memo, useCallback, useContext, useMemo } from '@wordpress/element';
 import { useSelector } from 'react-redux';
+import { GalleryPreviewHoverTileContext } from '../../context/GalleryPreviewHoverTileContext';
 import { getTileLinkRenderOptions } from '../../utils/resolveGalleryItemLink';
 import { isSettingsEditorPreview } from '../../utils/displayContext';
 import GalleryPreviewAdminToolbarSlot from '../../components/GalleryPreviewAdminToolbarSlot';
@@ -14,6 +15,9 @@ import { GalleryItemTextContent } from '../../components/GalleryItemMarkup';
 import { getItemTileViewModel } from '../../utils/galleryItemViewModel';
 import { mergeReactClassNameProps } from '../../utils/attributeUtils';
 import GalleryItemExpandableSocials from '../../components/social/GalleryItemExpandableSocials';
+
+// The editor's tile select hit (`GalleryPreviewItemAdminToolbar`).
+const ADMIN_SELECT_HIT_CLASS = 'modula-gallery-preview-item-admin__select-hit';
 
 /**
  * @param {unknown} styleValue
@@ -77,6 +81,7 @@ function ShowcaseSlide({
 	const isPreview = useSelector((s) =>
 		isSettingsEditorPreview(s.gallery.metadata)
 	);
+	const previewHoverTile = useContext(GalleryPreviewHoverTileContext);
 	const vm = useMemo(() => {
 		const linkRender = getTileLinkRenderOptions(isPreview);
 		return getItemTileViewModel(itemData, config, {
@@ -84,9 +89,15 @@ function ShowcaseSlide({
 			forceLinkNewTab: linkRender.forceLinkNewTab,
 			fillSlot: false,
 			stripHoverBuilderClasses: isPreview,
+			hoverTile: previewHoverTile,
 			extraClassName: 'modula-showcase__slide',
 		});
-	}, [itemData, config, isPreview]);
+	}, [itemData, config, isPreview, previewHoverTile]);
+	/*
+	 * The canvas plays the live hover as grid tiles do, so it shows the text
+	 * and hover chrome the visitor sees; without a hover effect it shows none.
+	 */
+	const showsHoverLayer = !isPreview || Boolean(vm?.hasLiveHoverTile);
 
 	const src = typeof vm?.imageSrc === 'string' ? vm.imageSrc.trim() : '';
 	const alt = typeof vm?.item?.alt === 'string' ? vm.item.alt : '';
@@ -100,15 +111,16 @@ function ShowcaseSlide({
 
 	const item = vm?.item;
 	const showTitle =
-		!isPreview &&
+		showsHoverLayer &&
 		item &&
 		!item.hideTitle &&
 		String(item.title || '').trim() !== '';
 	const showDescription =
-		!isPreview &&
+		showsHoverLayer &&
 		item &&
 		!item.hideDescription &&
 		String(item.description || '').trim() !== '';
+	// The canvas draws no socials, as on grid tiles: the tile hover is the admin trash's.
 	const hasSocialNetworks =
 		!isPreview &&
 		item &&
@@ -119,7 +131,7 @@ function ShowcaseSlide({
 	const hasInlineSocials = hasSocialNetworks && !socialDesktopCollapsed;
 	const showExpandableSocials = hasSocialNetworks;
 	const hasHoverChrome =
-		!isPreview &&
+		showsHoverLayer &&
 		Array.isArray(vm?.itemClasses) &&
 		vm.itemClasses.some((cls) =>
 			String(cls || '').startsWith('modula-hover-')
@@ -154,6 +166,34 @@ function ShowcaseSlide({
 	) : null;
 
 	/*
+	 * On the visitor page a side photo's link only centres it; the lightbox
+	 * or link opens from the centre photo. The lightbox listens natively on
+	 * the gallery host, inside this React root, so its bubble listener runs
+	 * before React's bubble handlers: the side photo stops the event in the
+	 * capture phase. Its touchend stops too, so the double-tap gate leaves
+	 * the tap's click to centre it. The canvas keeps its own click handling.
+	 */
+	const centresOnActivate = !isPreview && !isActive;
+	const centreFromSide = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		onSelect?.();
+	};
+	const sideLinkCaptureHandlers = centresOnActivate
+		? {
+				onClickCapture: centreFromSide,
+				onKeyDownCapture: (e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						centreFromSide(e);
+					}
+				},
+				onTouchEndCapture: (e) => {
+					e.stopPropagation();
+				},
+			}
+		: {};
+
+	/*
 	 * Match grid tile stacking: media is a sibling under an empty absolute
 	 * hit target. Putting the opaque <img> inside the link paints above the
 	 * dim overlay (z-index 1) and clips the hover tint to letterbox/gaps.
@@ -162,6 +202,7 @@ function ShowcaseSlide({
 		showLink && linkProps ? (
 			<a
 				{...linkProps}
+				{...sideLinkCaptureHandlers}
 				href={linkHref}
 				aria-label={alt || undefined}
 				onMouseDown={(e) => {
@@ -189,13 +230,32 @@ function ShowcaseSlide({
 			/>
 		);
 
+	/*
+	 * On the canvas the admin mount sits above the hit target, as on grid
+	 * tiles, so the selected tile's toolbar takes clicks. Its select hit
+	 * covers the slide; a click on it still moves the strip there. The
+	 * toolbar and trash leave the strip where it is.
+	 */
+	const onAdminMountClickCapture = (e) => {
+		if (e.target?.classList?.contains(ADMIN_SELECT_HIT_CLASS)) {
+			onSelect?.();
+		}
+	};
+
 	if (!vm) {
 		return null;
 	}
 
 	const { style: itemInlineStyle, ...itemAttrsSansStyle } =
 		vm.itemAttrs || {};
-	const rootInlineStyle = parseInlineStyle(itemInlineStyle);
+	const rootInlineStyle = {
+		...parseInlineStyle(itemInlineStyle),
+		/*
+		 * The live hover vars replace the saved ones, as on grid tiles. Only
+		 * those: vm.style also carries tile sizing the strip sets itself.
+		 */
+		...(vm.hasLiveHoverTile ? previewHoverTile.style : {}),
+	};
 	const rootClass = [
 		itemAttrsSansStyle.className,
 		isActive ? 'is-active' : '',
@@ -224,9 +284,6 @@ function ShowcaseSlide({
 					'modula-showcase__scale' + (isActive ? ' is-active' : '')
 				}
 			>
-				{isPreview ? (
-					<GalleryPreviewAdminToolbarSlot itemData={itemData} />
-				) : null}
 				<div className="modula-showcase__hover-media">
 					{img}
 					{hasOverlayChrome ? (
@@ -259,6 +316,18 @@ function ShowcaseSlide({
 					) : null}
 				</div>
 				{hitTarget}
+				{isPreview ? (
+					<div
+						className="modula-item-preview-admin-mount"
+						onClickCapture={onAdminMountClickCapture}
+					>
+						<div className="modula-item-preview-admin-mount__inner">
+							<GalleryPreviewAdminToolbarSlot
+								itemData={itemData}
+							/>
+						</div>
+					</div>
+				) : null}
 				{showExpandableSocials ? (
 					<GalleryItemExpandableSocials
 						itemId={item.id}

@@ -9,8 +9,9 @@ import {
 	previewItemRowLookupKey,
 	storeIndexToCoreIndex,
 } from 'gallery-shared/preview';
-import { useCallback, useEffect, useMemo } from '@wordpress/element';
+import { useCallback, useEffect, useMemo, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { useUndoToastOffer } from 'editor-shell';
 import {
 	galleryRemoveImageByIndex,
 	galleryReplaceImageByIndex,
@@ -31,6 +32,8 @@ import {
 	reanchorEmbeddedRowsInMergedList,
 } from '../../utils/embeddedGalleryItems';
 import { useGalleryItemEditSidebar } from '../../context/GalleryItemEditSidebarContext';
+import SelectedTileToolbar from '../../components/preview/SelectedTileToolbar';
+import { selectedTileActions } from '../../utils/selectedTileActions';
 import { getNextImageStoreIndexAfterRemove } from '../../utils/galleryItemEditNavigation';
 import { getModulaSettingsEditorConfig } from '../../config/modulaSettingsEditorConfig';
 import {
@@ -44,6 +47,37 @@ import {
 	commitCustomGridLockHistoryStep,
 	restoreCatalogFromLayoutHistory,
 } from '../../utils/customGridLayoutHistory';
+import {
+	applyItemRemovalOp,
+	buildItemRemovalChange,
+	describeRemovedItem,
+} from '../../utils/galleryItemRemovalHistory';
+
+/**
+ * After a removal: the panel moves to the next image when it showed the
+ * removed one; otherwise any selection goes, because store indices shifted
+ * and it would point at a neighbour.
+ *
+ * @param {import('../../context/GalleryItemEditSidebarContext').GalleryItemEditSidebarValue|null} itemEditSidebar
+ * @param {boolean}     wasEditingThis The panel showed the removed item.
+ * @param {number|null} nextStoreIndex Image to show next, if any.
+ */
+function settleSelectionAfterRemoval(
+	itemEditSidebar,
+	wasEditingThis,
+	nextStoreIndex
+) {
+	if (!itemEditSidebar) {
+		return;
+	}
+	if (wasEditingThis && nextStoreIndex !== null) {
+		itemEditSidebar.open(nextStoreIndex);
+		return;
+	}
+	if (wasEditingThis || itemEditSidebar.selectedIndex !== null) {
+		itemEditSidebar.close();
+	}
+}
 
 /**
  * Preview item admin actions (remove, replace, content blocks) and context value.
@@ -59,6 +93,7 @@ import {
  *   saveMetaModalReturnFocus: () => void,
  *   setMetaModalStoreIndex: (idx: number | null) => void,
  *   schedulePersistPreviewItems: () => void,
+ *   holdScheduledPreviewPersist: () => (() => void),
  * }} args
  */
 export function usePreviewItemAdminActions({
@@ -72,11 +107,24 @@ export function usePreviewItemAdminActions({
 	saveMetaModalReturnFocus,
 	setMetaModalStoreIndex: _setMetaModalStoreIndex,
 	schedulePersistPreviewItems,
+	holdScheduledPreviewPersist,
 }) {
 	const itemEditSidebar = useGalleryItemEditSidebar();
 	const { undoRedo } = useGallerySettingsFormBundle();
-	const { adoptLayoutCheckpoint, commitLayoutStep, registerLayoutApplier } =
-		undoRedo;
+	const {
+		adoptLayoutCheckpoint,
+		commitLayoutStep,
+		registerLayoutApplier,
+		commitItemsStep,
+		registerItemsApplier,
+		currentStepId,
+		undo,
+	} = undoRedo;
+	const offerRemovalUndo = useUndoToastOffer({ undo, currentStepId });
+	// Releases the save hold of the Custom Grid gesture in progress.
+	const releaseGesturePersistRef = useRef(
+		/** @type {(() => void)|null} */ (null)
+	);
 
 	useEffect(() => {
 		return registerLayoutApplier((layout) => {
@@ -93,6 +141,38 @@ export function usePreviewItemAdminActions({
 		});
 	}, [registerLayoutApplier, schedulePersistPreviewItems, storeRef]);
 
+	useEffect(() => {
+		return registerItemsApplier((op) => {
+			const st = storeRef.current;
+			if (!st) {
+				return;
+			}
+			const next = applyItemRemovalOp(
+				asGalleryItemList(st.getState().items.items),
+				op
+			);
+			if (!next) {
+				return;
+			}
+			// Store indices shift, so an open Image panel or a kept selection
+			// would point at a neighbour.
+			if (
+				itemEditSidebar &&
+				(itemEditSidebar.storeIndex !== null ||
+					itemEditSidebar.selectedIndex !== null)
+			) {
+				itemEditSidebar.close();
+			}
+			commitPreviewCatalog(st, reanchorEmbeddedRowsInMergedList(next));
+			schedulePersistPreviewItems();
+		});
+	}, [
+		itemEditSidebar,
+		registerItemsApplier,
+		schedulePersistPreviewItems,
+		storeRef,
+	]);
+
 	const onCustomGridLayoutInteractionStart = useCallback(
 		(_args) => {
 			const st = storeRef.current;
@@ -101,9 +181,20 @@ export function usePreviewItemAdminActions({
 			}
 			const core = asGalleryItemList(st.getState().items.items);
 			adoptLayoutCheckpoint(snapshotCustomGridItemCells(core));
+			if (!releaseGesturePersistRef.current) {
+				releaseGesturePersistRef.current =
+					holdScheduledPreviewPersist();
+			}
 		},
-		[adoptLayoutCheckpoint, storeRef]
+		[adoptLayoutCheckpoint, holdScheduledPreviewPersist, storeRef]
 	);
+
+	// Drag/resize released or cancelled: saves held back since its start go now.
+	const onCustomGridLayoutInteractionEnd = useCallback(() => {
+		const release = releaseGesturePersistRef.current;
+		releaseGesturePersistRef.current = null;
+		release?.();
+	}, []);
 
 	const onCustomGridLayoutCommit = useCallback(
 		({ kind }) => {
@@ -120,11 +211,15 @@ export function usePreviewItemAdminActions({
 		[commitLayoutStep, storeRef]
 	);
 
+	/**
+	 * @param {number} storeIndex
+	 * @return {Promise<boolean>} True once the row is removed and saved.
+	 */
 	const performRemoveItem = useCallback(
 		async (storeIndex) => {
 			const st = storeRef.current;
 			if (!st || !galleryId) {
-				return;
+				return false;
 			}
 			const itemsSnap = st.getState().items.items;
 			const row = itemsSnap[storeIndex];
@@ -135,11 +230,11 @@ export function usePreviewItemAdminActions({
 			const removeOwner = `item-remove:${galleryId}:${occurrenceId}`;
 			if (row && isEmbeddedGalleryItemRow(row)) {
 				if (isTemplateProtectedEmbeddedRow(row, galleryType)) {
-					return;
+					return false;
 				}
 				const coreIndex = storeIndexToCoreIndex(itemsSnap, storeIndex);
 				if (coreIndex < 0) {
-					return;
+					return false;
 				}
 				const wasEditingThis =
 					itemEditSidebar?.storeIndex !== null &&
@@ -154,21 +249,24 @@ export function usePreviewItemAdminActions({
 						);
 					}, removeOwner);
 					commitPreviewCatalog(st, core);
-					if (wasEditingThis) {
-						itemEditSidebar.close();
-					}
+					settleSelectionAfterRemoval(
+						itemEditSidebar,
+						wasEditingThis,
+						null
+					);
+					return true;
 				} catch (e) {
 					// eslint-disable-next-line no-console
 					console.error(e);
+					return false;
 				}
-				return;
 			}
 			const restRowIndex = modulaImagesRowIndexForPreviewWrite(
 				itemsSnap,
 				storeIndex
 			);
 			if (restRowIndex < 0) {
-				return;
+				return false;
 			}
 			const wasEditingThis =
 				itemEditSidebar?.storeIndex !== null &&
@@ -182,16 +280,16 @@ export function usePreviewItemAdminActions({
 					// Update Redux before deferred bootstrap patch (runPersistTaskWithDeferredRefresh).
 					removePreviewItemAtStoreIndex(st, storeIndex);
 				}, removeOwner);
-				if (wasEditingThis) {
-					if (nextStoreIndex !== null) {
-						itemEditSidebar.open(nextStoreIndex);
-					} else {
-						itemEditSidebar.close();
-					}
-				}
+				settleSelectionAfterRemoval(
+					itemEditSidebar,
+					wasEditingThis,
+					nextStoreIndex
+				);
+				return true;
 			} catch (e) {
 				// eslint-disable-next-line no-console
 				console.error(e);
+				return false;
 			}
 		},
 		[
@@ -203,9 +301,27 @@ export function usePreviewItemAdminActions({
 		]
 	);
 
+	/** Remove at once; the removal is a history step, with Undo in a toast. */
 	const requestRemoveItem = useCallback(
-		(storeIndex) => performRemoveItem(storeIndex),
-		[performRemoveItem]
+		async (storeIndex) => {
+			const st = storeRef.current;
+			if (!st) {
+				return;
+			}
+			const itemsSnap = st.getState().items.items;
+			const change = buildItemRemovalChange(
+				asGalleryItemList(itemsSnap),
+				storeIndexToCoreIndex(itemsSnap, storeIndex)
+			);
+			const removed = await performRemoveItem(storeIndex);
+			if (!removed || !change) {
+				return;
+			}
+			const copy = describeRemovedItem(change.row);
+			const stepId = commitItemsStep({ label: copy.stepLabel, change });
+			offerRemovalUndo(stepId, copy);
+		},
+		[commitItemsStep, offerRemovalUndo, performRemoveItem, storeRef]
 	);
 
 	const openReplaceMedia = useCallback(
@@ -510,8 +626,8 @@ export function usePreviewItemAdminActions({
 		[schedulePersistPreviewItems, storeRef]
 	);
 
-	const previewAdminValue = useMemo(
-		() => ({
+	const previewAdminValue = useMemo(() => {
+		const adminActions = {
 			openEditMetadata: (idx) => {
 				saveMetaModalReturnFocus();
 				if (itemEditSidebar?.open) {
@@ -543,26 +659,46 @@ export function usePreviewItemAdminActions({
 				galleryType === 'custom-grid'
 					? onCustomGridLayoutCommit
 					: undefined,
-			selectedEditStoreIndex: itemEditSidebar?.storeIndex ?? null,
-			isItemEditSelected: (idx) =>
-				itemEditSidebar?.storeIndex !== null &&
-				itemEditSidebar?.storeIndex === idx,
-		}),
-		[
-			galleryType,
-			openReplaceMedia,
-			requestRemoveItem,
-			toggleGridItemLock,
-			openEditContentBlock,
-			moveItemToPreviousPage,
-			moveItemToNextPage,
-			schedulePersistPreviewItems,
-			onCustomGridLayoutInteractionStart,
-			onCustomGridLayoutCommit,
-			saveMetaModalReturnFocus,
-			itemEditSidebar,
-		]
-	);
+			onCustomGridLayoutInteractionEnd:
+				galleryType === 'custom-grid'
+					? onCustomGridLayoutInteractionEnd
+					: undefined,
+			selectItem: (idx) => itemEditSidebar?.select(idx),
+			// Double-click runs the tile toolbar's Edit (same panel, same `open`).
+			openItem: (idx) => {
+				const row = storeRef.current?.getState().items.items[idx];
+				if (!row) {
+					return;
+				}
+				selectedTileActions(
+					row,
+					idx,
+					galleryType,
+					adminActions
+				).edit?.onClick();
+			},
+			isItemSelected: (idx) =>
+				itemEditSidebar?.selectedIndex !== null &&
+				itemEditSidebar?.selectedIndex === idx,
+			SelectedTileToolbar,
+		};
+		return adminActions;
+	}, [
+		galleryType,
+		openReplaceMedia,
+		requestRemoveItem,
+		toggleGridItemLock,
+		openEditContentBlock,
+		moveItemToPreviousPage,
+		moveItemToNextPage,
+		schedulePersistPreviewItems,
+		onCustomGridLayoutInteractionStart,
+		onCustomGridLayoutCommit,
+		onCustomGridLayoutInteractionEnd,
+		saveMetaModalReturnFocus,
+		itemEditSidebar,
+		storeRef,
+	]);
 
 	return {
 		handleSaveContentBlock,

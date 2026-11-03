@@ -1,7 +1,7 @@
-// admin-ui design tokens (ADR 0046).
+// admin-ui design tokens (ADR 0050).
 // Values come from the "3 · Settings" artboard of the Modula Layout Panel
 // Redesign canvas. They are custom properties on the page container only, so
-// nothing leaks into other wp-admin screens or into Shared UI.
+// nothing leaks into other wp-admin screens or into the frontend gallery.
 
 $root-class: 'modula-admin-ui';
 
@@ -20,6 +20,10 @@ $root-class: 'modula-admin-ui';
 	--modula-admin-text-badge: 12.5px;
 	--modula-admin-text-caption: 12.5px;
 	--modula-admin-text-mono: 13px;
+	// The editor's PRO pills (tracked caps).
+	--modula-admin-text-pill: 11.5px;
+	// Table column heads: same size as the pills, different role.
+	--modula-admin-text-table-head: 11.5px;
 
 	// Ink
 	--modula-admin-ink: #1f1f1c;
@@ -30,6 +34,8 @@ $root-class: 'modula-admin-ui';
 	--modula-admin-ink-soft: #5f5c53;
 	--modula-admin-ink-segment: #4a4a45;
 	--modula-admin-ink-inverse: #fff;
+	// A disabled button's text when its border stays (the canvas's `hf-tb`).
+	--modula-admin-ink-disabled: #c9c6bc;
 
 	// Surfaces
 	--modula-admin-surface: #fff;
@@ -38,7 +44,16 @@ $root-class: 'modula-admin-ui';
 	--modula-admin-surface-hover: #ebe9e3;
 	// The search field rests on surface-hover, so it hovers one step darker.
 	--modula-admin-surface-hover-strong: #e4e2dc;
+	// The canvas's bordered toolbar buttons (`hf-tb`) hover one step lighter.
+	--modula-admin-surface-hover-soft: #f6f5f2;
 	--modula-admin-surface-toast: #1f1f1c;
+	// The editor's Custom CSS code field: dark in both themes (canvas).
+	--modula-admin-code-surface: #1e1f24;
+	--modula-admin-code-ink: #abb2bf;
+	--modula-admin-code-gutter: #8a919e;
+	--modula-admin-code-caret: #fff;
+	// The selected segment, lifted off its track. Same as surface in light.
+	--modula-admin-surface-raised: #fff;
 
 	// Borders
 	--modula-admin-border: #e4e2dc;
@@ -54,9 +69,15 @@ $root-class: 'modula-admin-ui';
 	--modula-admin-danger: #a3261b;
 	// No artboard value for an error banner: a pale tint of danger.
 	--modula-admin-danger-surface: #fbeeec;
+	// A solid red fill with white text (the error toast). Same value as
+	// danger in light, different role: dark keeps this fill red.
+	--modula-admin-danger-fill: #a3261b;
+	--modula-admin-danger-fill-ink: #fff;
 	--modula-admin-warning: #b26200;
 	--modula-admin-warning-surface: #fbf3e6;
 	--modula-admin-warning-ink: #5c3b00;
+	// The Content page's license expired banner outline.
+	--modula-admin-warning-border: #e3b98a;
 	--modula-admin-connected: #2e8540;
 	--modula-admin-plan-ink: #6a5a3c;
 	--modula-admin-plan-surface: #f1ece2;
@@ -96,10 +117,15 @@ $root-class: 'modula-admin-ui';
 	// Header row and "Show N more" footer.
 	--modula-admin-matrix-head-height: 48px;
 	--modula-admin-matrix-cell-target: 36px;
+	// Table head and body rows (the Content page).
+	--modula-admin-table-head-height: 44px;
+	--modula-admin-table-row-height: 68px;
 
 	// Effects
 	--modula-admin-shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.12);
 	--modula-admin-shadow-toast: 0 12px 32px rgba(0, 0, 0, 0.2);
+	// Menus and popovers: the toast's spread, lighter.
+	--modula-admin-shadow-popover: 0 12px 32px rgba(0, 0, 0, 0.12);
 	// Off-canvas panel (notifications) and the page dimmed behind it.
 	--modula-admin-shadow-panel: -16px 0 40px rgba(0, 0, 0, 0.16);
 	--modula-admin-backdrop: rgba(28, 27, 25, 0.3);
@@ -108,4 +134,76 @@ $root-class: 'modula-admin-ui';
 	// The design dims a whole segmented track less than a single control.
 	--modula-admin-disabled-group-opacity: 0.6;
 	--modula-admin-transition: 0.15s;
+}
+
+// Dark set: AdminUiRoot adds `is-dark` when the page resolves to dark.
+// It redefines the color tokens only; sizes, radii and type are shared.
+// Values come from the canvas's dark editor (its `.hf-dark` overrides of the
+// light colors). Tokens the canvas has no dark color for are marked.
+.#{$root-class}.is-dark {
+	color-scheme: dark;
+
+	// Ink
+	--modula-admin-ink: #f2efe8;
+	--modula-admin-ink-hover: #d9d5cc;
+	--modula-admin-ink-secondary: #d9d5cc;
+	--modula-admin-ink-muted: #aaa598;
+	--modula-admin-ink-soft: #bdb8ad;
+	--modula-admin-ink-segment: #d9d5cc;
+	--modula-admin-ink-inverse: #1b1a18;
+	--modula-admin-ink-disabled: #5e5a52;
+
+	// Surfaces
+	--modula-admin-surface: #1b1a18;
+	--modula-admin-surface-sunken: #232220;
+	--modula-admin-surface-segment: #2e2d2a;
+	--modula-admin-surface-hover: #2e2d2a;
+	// The canvas's dark search field hover.
+	--modula-admin-surface-hover-strong: #34332f;
+	// The canvas's dark `hf-tb` hover is surface-hover's value.
+	--modula-admin-surface-hover-soft: #2e2d2a;
+	--modula-admin-surface-toast: #f2efe8;
+	// The Custom CSS code field stays dark: the light values again.
+	--modula-admin-code-surface: #1e1f24;
+	--modula-admin-code-ink: #abb2bf;
+	--modula-admin-code-gutter: #8a919e;
+	--modula-admin-code-caret: #fff;
+	--modula-admin-surface-raised: #45433e;
+
+	// Borders
+	--modula-admin-border: #3a3834;
+	--modula-admin-border-divider: #3a3834;
+	--modula-admin-border-strong: #4d4a44;
+	--modula-admin-border-field: #7a766c;
+
+	// Status
+	--modula-admin-success: #9cc5a6;
+	--modula-admin-success-surface: #26302a;
+	--modula-admin-success-ink: #c9d8cc;
+	--modula-admin-danger: #ff8a7a;
+	// Not in the canvas: a dark tint of danger.
+	--modula-admin-danger-surface: #3a2320;
+	// The canvas keeps the red fill and white text in dark.
+	--modula-admin-danger-fill: #a3261b;
+	--modula-admin-danger-fill-ink: #fff;
+	// Not in the canvas: amber lightened for dark, on a dark amber tint.
+	--modula-admin-warning: #f0a54a;
+	--modula-admin-warning-surface: #352a1a;
+	--modula-admin-warning-ink: #f2d9b0;
+	--modula-admin-warning-border: #6b5130;
+	// Not in the canvas: connected green lightened like success.
+	--modula-admin-connected: #7cc48a;
+	--modula-admin-plan-ink: #e6dcc6;
+	--modula-admin-plan-surface: #332d22;
+	// Not in the canvas: danger's red, so the dark count reads on it.
+	--modula-admin-notification-dot: #ff8a7a;
+
+	// Effects. Only the field focus halo is in the canvas; shadows and the
+	// backdrop need more opacity to show on dark surfaces.
+	--modula-admin-shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.4);
+	--modula-admin-shadow-toast: 0 12px 32px rgba(0, 0, 0, 0.5);
+	--modula-admin-shadow-popover: 0 12px 32px rgba(0, 0, 0, 0.4);
+	--modula-admin-shadow-panel: -16px 0 40px rgba(0, 0, 0, 0.45);
+	--modula-admin-backdrop: rgba(0, 0, 0, 0.55);
+	--modula-admin-focus-field: 0 0 0 3px rgba(242, 239, 232, 0.22);
 }

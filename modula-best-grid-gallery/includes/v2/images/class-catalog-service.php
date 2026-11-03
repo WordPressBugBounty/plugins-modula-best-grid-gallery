@@ -118,19 +118,8 @@ final class Catalog_Service {
 		if ( is_array( $f ) ) {
 			return array_map( 'strval', $f );
 		}
-		$s = (string) $f;
-		if ( '' === trim( $s ) ) {
-			return array();
-		}
-		$parts = array_map( 'trim', explode( ',', $s ) );
-		return array_values(
-			array_filter(
-				$parts,
-				static function ( $part ) {
-					return '' !== $part;
-				}
-			)
-		);
+		// A comma inside a name is stored as `&#44;`.
+		return modula_gallery_filter_list_parse_image_filters( (string) $f );
 	}
 
 	/**

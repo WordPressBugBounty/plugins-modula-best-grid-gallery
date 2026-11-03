@@ -477,6 +477,26 @@ export function resolveItemAutoplayThumbnail(item, galleryAutoplay) {
 }
 
 /**
+ * Whether a grid tile's video starts by itself. "Start playing by itself" is
+ * part of the hover preview: while Preview on hover is off, neither the
+ * gallery value nor a per-image override plays the tile. The Video gallery's
+ * main player has no hover preview and reads `resolveItemAutoplayThumbnail`.
+ *
+ * @param {Object} item
+ * @param {Object} [videoSettings] config.video
+ * @return {boolean} Whether the tile autoplays.
+ */
+export function resolveTileAutoplayThumbnail(item, videoSettings = {}) {
+	if (!videoSettings.previewVideo) {
+		return false;
+	}
+	return resolveItemAutoplayThumbnail(
+		item,
+		!!videoSettings.autoplayThumbnail
+	);
+}
+
+/**
  * @param {Object} item
  * @param {Object} galleryConfig
  * @return {Object|null}

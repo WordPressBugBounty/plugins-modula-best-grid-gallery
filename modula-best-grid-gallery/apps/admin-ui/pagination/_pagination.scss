@@ -1,0 +1,117 @@
+@use '../styles/mixins';
+
+// The content table's footer ("2 · Content" board): 64px under a hairline,
+// range and rows per page on the left, 36px page buttons on the right.
+.modula-admin-pagination {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px 24px;
+	min-height: 64px;
+	border-top: 1px solid var(--modula-admin-border);
+	color: var(--modula-admin-ink-soft);
+	font-size: var(--modula-admin-text-control);
+}
+
+.modula-admin-pagination__summary {
+	display: flex;
+	align-items: center;
+	gap: 24px;
+}
+
+.modula-admin-pagination__range {
+	font-variant-numeric: tabular-nums;
+}
+
+.modula-admin-pagination__per-page {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+// The rows-per-page menu select, drawn as the board's 36px field.
+.modula-admin-pagination__size {
+	@include mixins.button-reset;
+	@include mixins.control-label;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	height: 36px;
+	padding: 0 10px;
+	border: 1px solid var(--modula-admin-border-field);
+	border-radius: var(--modula-admin-radius-sm);
+	background: var(--modula-admin-surface);
+	color: var(--modula-admin-ink);
+	font-variant-numeric: tabular-nums;
+
+	&:focus-visible {
+		@include mixins.field-focus;
+	}
+
+	&[aria-expanded="true"] {
+		border-color: var(--modula-admin-ink);
+	}
+}
+
+.modula-admin-pagination__pages {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+// The 36px square of the arrows and page numbers.
+@mixin page-button {
+	@include mixins.button-reset;
+	@include mixins.control-label;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 36px;
+	height: 36px;
+	border-radius: var(--modula-admin-radius-sm);
+	color: var(--modula-admin-ink);
+	transition: background var(--modula-admin-transition);
+
+	&:hover {
+		background: var(--modula-admin-surface-hover);
+	}
+
+	&:focus-visible {
+		@include mixins.focus-ring;
+	}
+}
+
+.modula-admin-pagination__step {
+	@include page-button;
+
+	// At the end of the list: still focusable, nothing to do.
+	&[aria-disabled="true"] {
+		color: var(--modula-admin-ink-disabled);
+		cursor: default;
+
+		&:hover {
+			background: none;
+		}
+	}
+}
+
+.modula-admin-pagination__page {
+	@include page-button;
+	padding: 0 6px;
+	font-variant-numeric: tabular-nums;
+
+	&[aria-current="page"] {
+		background: var(--modula-admin-ink);
+		color: var(--modula-admin-ink-inverse);
+		font-weight: 500;
+	}
+}
+
+.modula-admin-pagination__ellipsis {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 24px;
+	height: 36px;
+}

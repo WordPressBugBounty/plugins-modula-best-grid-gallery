@@ -1,44 +1,37 @@
 /**
  * Redesign isolation — category rail + settings panel column (no preview canvas).
  *
- * Full two-column sidebar + CategoryPanelContentV2 is quarantined under `legacy/`.
  * HoverEffectBuilderProvider lives on GalleryTakeoverShell (aux + nested share it).
  */
-import { useCallback } from '@wordpress/element';
+import { useCallback, useState } from '@wordpress/element';
 import { TakeoverSidebar } from 'editor-shell';
 import TakeoverSidebarNavV2 from './TakeoverSidebarNavV2';
 import SettingsPanel from './settings-panel/SettingsPanel';
 import { useGalleryItemEditSidebar } from '../../context/GalleryItemEditSidebarContext';
-import { useGalleryReorderSidebar } from '../../context/GalleryReorderSidebarContext';
-import { useTakeoverSidebarStack } from '../../context/TakeoverSidebarStackContext';
 
 /**
  * @param {Object}                 props
  * @param {string}                 props.activeCategory
  * @param {(name: string) => void} props.setActiveCategory
- * @param {string}                 [props.docsUrl]
  */
 export default function GallerySidebarRail({
 	activeCategory,
 	setActiveCategory,
-	docsUrl = '',
 }) {
 	const itemEdit = useGalleryItemEditSidebar();
-	const reorderSidebar = useGalleryReorderSidebar();
-	const { clearStack } = useTakeoverSidebarStack();
+	// Setting search lives here so switching the rail tab clears it.
+	const [searchQuery, setSearchQuery] = useState('');
 
 	const selectCategory = useCallback(
 		(name) => {
+			// Like "Back to settings": the panel goes, the tile stays selected.
 			if (itemEdit?.isOpen) {
-				itemEdit.close();
+				itemEdit.back();
 			}
-			if (reorderSidebar?.isOpen) {
-				reorderSidebar.close();
-			}
-			clearStack();
+			setSearchQuery('');
 			setActiveCategory(name);
 		},
-		[clearStack, itemEdit, reorderSidebar, setActiveCategory]
+		[itemEdit, setActiveCategory]
 	);
 
 	return (
@@ -48,13 +41,14 @@ export default function GallerySidebarRail({
 					activeCategory={activeCategory}
 					onActiveCategoryChange={selectCategory}
 					onSelect={selectCategory}
-					docsUrl={docsUrl}
 				/>
 			}
 		>
 			<SettingsPanel
 				activeCategory={activeCategory}
-				setActiveCategory={selectCategory}
+				onSelectCategory={selectCategory}
+				searchQuery={searchQuery}
+				onSearchQueryChange={setSearchQuery}
 			/>
 		</TakeoverSidebar>
 	);

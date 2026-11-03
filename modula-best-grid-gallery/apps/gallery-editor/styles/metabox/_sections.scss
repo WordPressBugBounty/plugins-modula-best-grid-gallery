@@ -1,14 +1,5 @@
 @use '../variables' as *;
 
-.modula-settings-editor__category-desc {
-	margin: 0 0 $mod-space-14;
-	padding: 0;
-	color: #646970;
-	font-size: 13px;
-	line-height: 1.45;
-	max-width: 44em;
-}
-
 .modula-settings-editor__sections {
 	display: flex;
 	flex-direction: column;

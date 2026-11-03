@@ -18,6 +18,7 @@ export {
 	openModulaGalleryLightboxAtRoot,
 } from './modulaGalleryLightbox';
 
+export { bindModulaLightboxActivation } from './bindModulaLightboxActivation';
 export { useModulaGalleryLightbox } from './useModulaGalleryLightbox';
 export {
 	closeModulaLightbox,

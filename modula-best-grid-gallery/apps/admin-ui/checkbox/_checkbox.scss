@@ -59,7 +59,8 @@
 	border-radius: var(--modula-admin-radius-sm);
 	color: transparent;
 
-	.is-checked & {
+	.is-checked &,
+	.is-indeterminate & {
 		border-color: var(--modula-admin-ink);
 		background: var(--modula-admin-ink);
 		color: var(--modula-admin-ink-inverse);

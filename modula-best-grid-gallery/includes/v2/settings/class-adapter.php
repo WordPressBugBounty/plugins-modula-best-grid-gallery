@@ -10,6 +10,8 @@
 
 namespace Modula\V2\Settings;
 
+use Modula\V2\Motion\Motion_Settings;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -99,8 +101,44 @@ class Adapter {
 		);
 	}
 
+	/**
+	 * Whether a flat import keeps a field's value as stored: a list of text, such
+	 * as the filter names (`007`, `0`, `1`), is not cast entry by entry, and the
+	 * sanitizer types the entries by the schema's `items`. Lists of numbers or
+	 * objects keep the import's cast, since the visitor shortcode reads the import
+	 * unsanitized. Shared with the album adapter (Pro).
+	 *
+	 * @param array<string, mixed>|null $definition The field's schema definition, `items` included.
+	 * @return bool
+	 */
+	public static function keeps_text_list_as_stored( $definition ) {
+		return is_array( $definition )
+			&& isset( $definition['type'], $definition['items']['type'] )
+			&& 'array' === $definition['type']
+			&& 'string' === $definition['items']['type'];
+	}
+
+	/**
+	 * Schema definition of the grouped field a flat key maps to.
+	 *
+	 * @param string $flat_key Flat modula-settings key.
+	 * @return array<string, mixed>|null Null when the flat key is unmapped or has no definition.
+	 */
+	private static function get_definition_for_flat_key( $flat_key ) {
+		$map = Field_Registry::get_flat_to_grouped_mapping();
+		if ( ! isset( $map[ $flat_key ] ) ) {
+			return null;
+		}
+		$entry  = $map[ $flat_key ];
+		$schema = Registry::get_schema();
+		return $schema[ $entry['group'] ][ $entry['key'] ] ?? null;
+	}
+
 	private static function normalize_for_grouped( $value, $flat_key ) {
 		if ( '' === $value || null === $value ) {
+			return $value;
+		}
+		if ( self::keeps_text_list_as_stored( self::get_definition_for_flat_key( $flat_key ) ) ) {
 			return $value;
 		}
 		if ( is_array( $value ) ) {
@@ -159,6 +197,8 @@ class Adapter {
 		$legacy_import = ! empty( $options['legacy_import'] );
 		$grouped       = array();
 		$flat_map      = Field_Registry::get_flat_to_grouped_mapping();
+		// Watermark text size and margin saved in px import as shares of the image width.
+		$flat = Watermark_Scale::migrate_flat( $flat );
 		foreach ( $flat as $flat_key => $value ) {
 			if ( ! isset( $flat_map[ $flat_key ] ) ) {
 				continue;
@@ -195,7 +235,8 @@ class Adapter {
 			$grouped['loadingEffects'] = array();
 		}
 		Sanitizer::hydrate_loading_effects_enables( $grouped['loadingEffects'] );
-		return $grouped;
+		// Classic settings saved before the Motion settings keep what they play.
+		return Motion_Settings::with_existing_gallery_values( $grouped );
 	}
 
 	/**
@@ -266,6 +307,10 @@ class Adapter {
 	/**
 	 * Legacy flat `effect` = under (title & caption below image) → v2 captions.contentPlacement.
 	 *
+	 * Flat settings that already carry a placement keep it: a v2 save writes
+	 * `effect = under` back from the imported builder's stamp, so Where it
+	 * sits decides once the gallery has one (ticket 105).
+	 *
 	 * @param array<string, array<string, mixed>> $grouped Grouped settings (by ref).
 	 * @param array<string, mixed>                $flat    Flat settings.
 	 */
@@ -273,10 +318,7 @@ class Adapter {
 		if ( ! isset( $grouped['captions'] ) || ! is_array( $grouped['captions'] ) ) {
 			$grouped['captions'] = array();
 		}
-		if (
-			isset( $grouped['captions']['contentPlacement'] )
-			&& 'below-image' === $grouped['captions']['contentPlacement']
-		) {
+		if ( isset( $grouped['captions']['contentPlacement'] ) ) {
 			return;
 		}
 		$effect = isset( $flat['effect'] ) ? sanitize_key( (string) $flat['effect'] ) : '';

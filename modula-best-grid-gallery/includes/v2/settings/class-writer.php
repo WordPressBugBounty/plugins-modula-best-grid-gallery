@@ -9,6 +9,7 @@ namespace Modula\V2\Settings;
 
 use Modula\V2\Meta_Sync;
 use Modula\V2\Freeform_Catalog;
+use Modula\V2\Motion\Motion_Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -50,6 +51,18 @@ class Writer {
 		return true;
 	}
 
+	/**
+	 * Merged settings, sanitized. A save can't make Under Image a hover again
+	 * (Motion_Settings::without_imported_under_hover), so a strict write that
+	 * names `custom` there is refused before it writes.
+	 *
+	 * @param array<string, mixed> $merged Stored settings with the patch merged in.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function sanitized_settings( array $merged ): array {
+		return Motion_Settings::without_imported_under_hover( Sanitizer::sanitize_grouped( $merged ) );
+	}
+
 	/** Validate that requested values already use canonical sanitizer forms before any effects. */
 	public static function validate_strict_patch( int $id, array $incoming ) {
 		// Preset validation has no target catalog; only gallery patches replace occurrences.
@@ -65,7 +78,7 @@ class Writer {
 			}
 		}
 		$existing = json_decode( (string) get_post_meta( $id, Meta_Sync::SETTINGS_V2_META_KEY, true ), true ) ?: array();
-		$sanitized = Sanitizer::sanitize_grouped( self::merge_grouped_settings( $existing, $incoming ) );
+		$sanitized = self::sanitized_settings( self::merge_grouped_settings( $existing, $incoming ) );
 		foreach ( $incoming as $group => $keys ) {
 			foreach ( $keys as $key => $value ) {
 				if ( 'filters' === $group && 'filters' === $key && array() === $value ) {
@@ -105,8 +118,10 @@ class Writer {
 		$existing = $preserve_unrequested
 			? ( json_decode( (string) get_post_meta( $id, Meta_Sync::SETTINGS_V2_META_KEY, true ), true ) ?: array() )
 			: Meta_Sync::get_settings_v2( $id );
+		$incoming  = Motion_Settings::with_hover_choice_from_builder_write( $existing, $incoming );
+		$incoming  = Motion_Settings::with_entrance_choice_from_loading_write( $existing, $incoming );
 		$merged    = self::merge_grouped_settings( $existing, $incoming );
-		$sanitized = Sanitizer::sanitize_grouped( $merged );
+		$sanitized = self::sanitized_settings( $merged );
 		if ( $preserve_unrequested ) {
 			// Normalize requested fields only; unknown, dormant and sparse stored settings survive.
 			$selected = $existing;
@@ -117,8 +132,10 @@ class Writer {
 			}
 			$sanitized = $selected;
 		}
-		if ( ! $preserve_unrequested || isset( $incoming['filters']['filters'] ) ) {
-			$sanitized = self::protect_gallery_filter_list_on_save( $existing, $incoming, $sanitized );
+		// Keep a non-empty filter list when sanitize fills the placeholder default.
+		$writes_filter_list = ! $preserve_unrequested || isset( $incoming['filters']['filters'] );
+		if ( $writes_filter_list ) {
+			$sanitized = modula_protect_filter_list_on_grouped_save( $existing, $incoming, $sanitized );
 		}
 		if ( ! $preserve_unrequested ) {
 			self::strip_removed_gallery_filter_names_from_images( $id, $existing, $incoming, $sanitized );
@@ -153,7 +170,8 @@ class Writer {
 				update_post_meta( $id, '_modula_filter_list_image_revision', hash( 'sha256', wp_json_encode( get_post_meta( $id, 'modula-images', true ) ) ) );
 			}
 		}
-		update_post_meta( $id, 'modula-settings', $flat );
+		// update_post_meta() unslashes; without wp_slash() CSS escapes such as `\201C` lose their backslash.
+		update_post_meta( $id, 'modula-settings', wp_slash( $flat ) );
 
 		/**
 		 * Fires after gallery settings are saved through the shared grouped-settings writer.
@@ -202,57 +220,6 @@ class Writer {
 	}
 
 	/**
-	 * Keep a non-empty gallery filter list when sanitize fills schema placeholder defaults.
-	 *
-	 * @param array<string, array<string, mixed>> $existing  Grouped settings before merge.
-	 * @param array<string, array<string, mixed>> $incoming  Raw PATCH body.
-	 * @param array<string, array<string, mixed>> $sanitized Sanitized merged settings.
-	 * @return array<string, array<string, mixed>>
-	 */
-	private static function protect_gallery_filter_list_on_save( array $existing, array $incoming, array $sanitized ) {
-		if ( ! function_exists( 'modula_resolve_gallery_filter_list_save' ) ) {
-			return $sanitized;
-		}
-
-		$key_present = isset( $incoming['filters'] ) && is_array( $incoming['filters'] )
-			&& array_key_exists( 'filters', $incoming['filters'] );
-
-		$existing_list = ( isset( $existing['filters'] ) && is_array( $existing['filters'] )
-			&& array_key_exists( 'filters', $existing['filters'] ) )
-			? $existing['filters']['filters']
-			: array( '' );
-
-		/*
-		 * Use the client payload when the key was present. Schema sanitize fills
-		 * default `['']` for empty arrays, which would block intentional clear.
-		 */
-		$incoming_list = $key_present ? $incoming['filters']['filters'] : null;
-
-		if ( ! isset( $sanitized['filters'] ) || ! is_array( $sanitized['filters'] ) ) {
-			$sanitized['filters'] = array();
-		}
-
-		$resolved = modula_resolve_gallery_filter_list_save(
-			$incoming_list,
-			$existing_list,
-			$key_present
-		);
-
-		if ( is_array( $resolved ) ) {
-			$resolved = array_map(
-				static function ( $entry ) {
-					return sanitize_text_field( (string) $entry );
-				},
-				$resolved
-			);
-		}
-
-		$sanitized['filters']['filters'] = $resolved;
-
-		return $sanitized;
-	}
-
-	/**
 	 * Persist image-tag strip for names removed by an intentional filter-list save.
 	 *
 	 * Runs before settings meta write so a subsequent repair-on-read cannot refill
@@ -265,27 +232,11 @@ class Writer {
 	 * @return void
 	 */
 	private static function strip_removed_gallery_filter_names_from_images( $id, array $existing, array $incoming, array $sanitized ) {
-		if ( ! function_exists( 'modula_gallery_filter_list_removed_names' ) ) {
+		if ( ! function_exists( 'modula_filter_list_removed_names_on_grouped_save' ) ) {
 			return;
 		}
 
-		$key_present = isset( $incoming['filters'] ) && is_array( $incoming['filters'] )
-			&& array_key_exists( 'filters', $incoming['filters'] );
-		if ( ! $key_present ) {
-			return;
-		}
-
-		$existing_list = ( isset( $existing['filters'] ) && is_array( $existing['filters'] )
-			&& array_key_exists( 'filters', $existing['filters'] ) )
-			? $existing['filters']['filters']
-			: array( '' );
-
-		$resolved_list = ( isset( $sanitized['filters'] ) && is_array( $sanitized['filters'] )
-			&& array_key_exists( 'filters', $sanitized['filters'] ) )
-			? $sanitized['filters']['filters']
-			: array( '' );
-
-		$removed = modula_gallery_filter_list_removed_names( $existing_list, $resolved_list );
+		$removed = modula_filter_list_removed_names_on_grouped_save( $existing, $incoming, $sanitized );
 		if ( empty( $removed ) ) {
 			return;
 		}

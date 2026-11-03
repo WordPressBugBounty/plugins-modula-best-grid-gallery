@@ -4,7 +4,10 @@
  * @package
  */
 
+import { buildExifCaptionHtml } from './exifCaption';
+import { mergeLightboxCaptionWithExtra } from './lightboxCaptionExtra';
 import { isLightboxToggleOn } from './lightboxSettingsToFancyboxOpts';
+import { sanitizeCaptionHtml } from './sanitizeCaptionHtml';
 
 /**
  * @param {string} text
@@ -20,6 +23,9 @@ function escapeHtml(text) {
 }
 
 /**
+ * The title is plain text; the description is caption HTML, as on grid tiles
+ * and the classic lightbox's `data-caption`.
+ *
  * @param {{ title?: string, description?: string }} row
  * @param {Object}                                   lightboxSettings
  * @return {string}
@@ -39,7 +45,7 @@ export function buildLightboxPreviewCaption(row, lightboxSettings) {
 	}
 	if (showCaption && description) {
 		parts.push(
-			`<span class="modula-caption-description">${escapeHtml(description)}</span>`
+			`<span class="modula-caption-description">${sanitizeCaptionHtml(description)}</span>`
 		);
 	}
 	return parts.join('<br>');
@@ -47,15 +53,25 @@ export function buildLightboxPreviewCaption(row, lightboxSettings) {
 
 /**
  * @param {import('./collectGalleryImageRowsForLightboxPreview').LightboxPreviewImageRow[]} rows
- * @param {Object}                                                                          settings Grouped gallery settings.
+ * @param {Object}                                                                          settings              Grouped gallery settings.
+ * @param {{ exifCaption?: import('./exifCaption').ExifCaptionConfig }}                     [options]
+ * @param {import('./exifCaption').ExifCaptionConfig}                                       [options.exifCaption] The EXIF line's icon and month names, from Pro; without it no EXIF is shown.
  * @return {Array<{ src: string, opts: { caption?: string, alt?: string, thumb?: string } }>}
  */
-export function buildLightboxPreviewSlides(rows, settings) {
+export function buildLightboxPreviewSlides(rows, settings, options = {}) {
 	const lightbox = settings?.lightbox || {};
 	return rows.map((row) => ({
 		src: row.src,
 		opts: {
-			caption: buildLightboxPreviewCaption(row, lightbox),
+			// EXIF follows the caption, as the visitor's `captionExtraHtml` does.
+			caption: mergeLightboxCaptionWithExtra(
+				buildLightboxPreviewCaption(row, lightbox),
+				buildExifCaptionHtml(
+					row.exif,
+					settings?.exif,
+					options.exifCaption
+				)
+			),
 			alt: row.alt || row.title || '',
 			thumb: row.thumb || row.src,
 		},

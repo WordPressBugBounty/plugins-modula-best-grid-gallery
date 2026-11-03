@@ -1,0 +1,159 @@
+@use 'variables' as *;
+
+// Settings panel row parts the gallery editor and the Albums editor share
+// (canvas range and `dev` rows, open colour, side column rows). Mixins only:
+// this file emits no CSS. Each editor places them in its own row classes.
+
+// A slider row's parts in the row's grid (canvas range and `dev` rows): the
+// read-only value box ends the label line, the slider spans the line under
+// it. `$value-column` is the box's grid column.
+@mixin panel-slider-parts($value-column) {
+
+	.modula-admin-range {
+		display: contents;
+	}
+
+	.modula-admin-range__value {
+		grid-column: $value-column;
+		grid-row: 1;
+		box-sizing: border-box;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 64px;
+		height: var(--modula-admin-control-height);
+		margin-left: $mod-space-10;
+		padding: 0 $mod-space-10;
+		border: 1px solid var(--modula-admin-border-field);
+		border-radius: var(--modula-admin-radius-sm);
+		background: var(--modula-admin-surface);
+		color: var(--modula-admin-ink);
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+
+	// The unit reads muted after the value, as the canvas's unit menu does.
+	// The box is a flex container, which drops the space before the unit,
+	// so the margin stands in for it (the menu's 4px inset).
+	.modula-admin-range__unit {
+		margin-left: $mod-space-4;
+		color: var(--modula-admin-ink-soft);
+	}
+
+	// The canvas's 24px slider, pulled 2px into the gap on each side: 20px
+	// of the row, so a slider row is 84px.
+	.modula-admin-range__input {
+		grid-column: 1 / -1;
+		grid-row: 2;
+		width: 100%;
+		height: 24px;
+		margin-block: -2px;
+	}
+}
+
+// An open colour (canvas `cpOpen`) keeps its trigger right of the label, so
+// the reset dot stays put, and opens the picker under both, across the row.
+// The control's wrappers step aside so the trigger, the picker and anything
+// after them (help) join the row. The picker sits 4px under the row's 52px
+// line and ends 16px above the next row (6px past the row's own spacing).
+// `$control` is the row's control wrapper; the row places the parts.
+@mixin open-color-joins-row($control) {
+
+	#{$control}:has(.modula-admin-color.is-open),
+	#{$control} :has(.modula-admin-color.is-open),
+	.modula-admin-color.is-open {
+		display: contents;
+	}
+
+	.modula-admin-color.is-open > .modula-admin-color__panel {
+		margin-block: $mod-space-6;
+	}
+}
+
+// A host's single dependent row (canvas "↳ Arrows over the image",
+// `DependentRowIcon`): no box, a 28px inset instead of 16px and the ↳
+// before its label. `$block` is the editor's row block
+// (`modula-settings-editor`, `modula-albums-editor`).
+@mixin dependent-row($block) {
+
+	.modula-settings-panel__dependent-row .#{$block}__field-row:not(.#{$block}__field-row--control-only) {
+		padding-inline-start: $mod-space-28;
+	}
+
+	.modula-settings-panel__dependent-icon {
+		display: flex;
+		flex-shrink: 0;
+		margin-inline-end: $mod-space-6;
+		color: var(--modula-admin-ink-soft);
+
+		svg {
+			width: 15px;
+			height: 15px;
+		}
+	}
+}
+
+// A text row (canvas `isText`): label left, the 150px text box right. The
+// canvas's label line holds only the label; ours adds the ⓘ and the reset
+// dot, so the box gives up their room before the label wraps (gallery
+// ticket 78). The dot's room is held while the value is at its default, so
+// the box keeps its width when the dot appears under the caret.
+// `$block` is the editor's row block (`modula-settings-editor`,
+// `modula-albums-editor`); include it after the editor's row rules.
+@mixin text-row($block) {
+	// The canvas's box, the ⓘ and the reset dot (admin-ui `ResetButton`), and
+	// the label line's gap before each.
+	$box-width: 150px;
+	$tip-size: $mod-space-22;
+	$reset-size: $mod-space-24;
+	$line-gap: $mod-space-4;
+	$tip-room: $tip-size + $line-gap;
+	$reset-room: $reset-size + $line-gap;
+
+	.#{$block}__field-row--layout-row:has(> .#{$block}__field-control-col > [id^="modula-field-"] > .modula-admin-field > .modula-admin-text-input) {
+		grid-template-columns: minmax(0, max-content) minmax($box-width - $tip-room - $reset-room, 1fr);
+
+		.#{$block}__field-control-col {
+			width: 100%;
+			max-width: $box-width;
+		}
+
+		.modula-admin-field {
+			min-width: 0;
+		}
+
+		.modula-admin-text-input {
+			width: 100%;
+		}
+
+		.#{$block}__field-label-line:not(:has(.#{$block}__field-reset))::after {
+			content: "";
+			flex: 0 0 $reset-size;
+		}
+	}
+}
+
+// admin-ui rows and buttons in a side column's cards (canvas "Edit image"):
+// 52px rows, 16px sides, no dividers, the panel's 14px label, 32px buttons,
+// 10px under a row's help.
+// Include it inside the column's admin-ui scope, which declares its own
+// defaults.
+@mixin column-admin-rows {
+	--modula-admin-row-min-height: 52px;
+	--modula-admin-row-padding-x: #{$mod-se-gut};
+	--modula-admin-row-padding-y: 0;
+	--modula-admin-row-gap: #{$mod-space-10};
+	--modula-admin-button-height: 32px;
+
+	.modula-admin-row + .modula-admin-row::before {
+		display: none;
+	}
+
+	.modula-admin-row__label {
+		font-size: var(--modula-admin-text-control);
+	}
+
+	.modula-admin-row__help {
+		padding-bottom: $mod-space-10;
+	}
+}

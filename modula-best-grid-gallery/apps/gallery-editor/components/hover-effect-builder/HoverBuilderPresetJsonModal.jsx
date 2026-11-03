@@ -1,6 +1,6 @@
 import { useId, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { ActionRow, Button, FieldStack, Textarea } from 'shared-ui';
+import { Button, SettingsRow, Textarea, rowHelpId } from 'admin-ui';
 import { GalleryModal } from 'editor-shell';
 import { getMatchingPresetId } from './hoverBuilderPresets';
 
@@ -194,13 +194,10 @@ export default function HoverBuilderPresetJsonModal({
 			isOpen={isOpen}
 			onClose={onClose}
 			size="medium"
-			titleId="modula-hover-builder-preset-json-title"
 			title={__(
 				'Import / export preset JSON',
 				'modula-best-grid-gallery'
 			)}
-			className="modula-gallery-modal--hover-preset-json"
-			closeOnBackdropClick={false}
 			footerRight={
 				<>
 					<Button variant="ghost" onClick={onClose}>
@@ -219,22 +216,23 @@ export default function HoverBuilderPresetJsonModal({
 						'modula-best-grid-gallery'
 					)}
 				</p>
-				<ActionRow className="modula-gallery-modal__preset-json-actions">
-					<Button variant="ghost" onClick={handleLoadCurrent}>
+				<div className="modula-gallery-modal__preset-json-actions">
+					<Button onClick={handleLoadCurrent}>
 						{__('Load current JSON', 'modula-best-grid-gallery')}
 					</Button>
-					<Button variant="plain" onClick={handleCopyCurrent}>
+					<Button variant="ghost" onClick={handleCopyCurrent}>
 						{copyLabel ||
 							__('Copy current JSON', 'modula-best-grid-gallery')}
 					</Button>
-				</ActionRow>
-				<FieldStack
+				</div>
+				<SettingsRow
 					label={__('Preset JSON', 'modula-best-grid-gallery')}
-					htmlFor={jsonFieldId}
+					controlId={jsonFieldId}
 					help={__(
 						'Accepted shape: { "builder": { … }, "hover": { "hoverColor": "rgba(0,0,0,.5)", "hoverOpacity": 50 } }',
 						'modula-best-grid-gallery'
 					)}
+					stacked
 				>
 					<Textarea
 						id={jsonFieldId}
@@ -244,8 +242,9 @@ export default function HoverBuilderPresetJsonModal({
 							setError('');
 						}}
 						rows={16}
+						aria-describedby={rowHelpId(jsonFieldId)}
 					/>
-				</FieldStack>
+				</SettingsRow>
 				{error ? (
 					<p
 						className="modula-gallery-modal__preset-json-error"

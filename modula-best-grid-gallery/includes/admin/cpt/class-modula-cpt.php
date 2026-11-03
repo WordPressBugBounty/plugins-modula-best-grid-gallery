@@ -837,6 +837,7 @@ class Modula_CPT {
 		}
 
 		$modula_settings = $this->ensure_hover_builder_in_flat_settings( $post_id, $modula_settings );
+		$modula_settings = $this->ensure_motion_in_flat_settings( $post_id, $modula_settings );
 		$modula_settings = $this->ensure_gallery_filter_list_on_classic_save( $post_id, $settings, $modula_settings );
 
 		return $modula_settings;
@@ -891,6 +892,28 @@ class Modula_CPT {
 			}
 		}
 
+		return $modula_settings;
+	}
+
+	/**
+	 * Preserve the stored Motion choices (`motion_*`) on save: the classic fields do not
+	 * include them, and without them the v2 rebuild would migrate the gallery again
+	 * (an `auto` choice would become explicit).
+	 *
+	 * @param int                  $post_id          Gallery post ID.
+	 * @param array<string, mixed> $modula_settings Sanitized flat settings.
+	 * @return array<string, mixed>
+	 */
+	private function ensure_motion_in_flat_settings( $post_id, array $modula_settings ) {
+		$prev = get_post_meta( $post_id, 'modula-settings', true );
+		if ( ! is_array( $prev ) ) {
+			return $modula_settings;
+		}
+		foreach ( \Modula\V2\Settings\Field_Registry::get_flat_to_grouped_mapping() as $flat_key => $field ) {
+			if ( 'motion' === $field['group'] && array_key_exists( $flat_key, $prev ) && ! array_key_exists( $flat_key, $modula_settings ) ) {
+				$modula_settings[ $flat_key ] = $prev[ $flat_key ];
+			}
+		}
 		return $modula_settings;
 	}
 

@@ -7,28 +7,22 @@ import {
 } from '@wordpress/element';
 
 /**
- * @typedef {'chrome' | 'category'} TakeoverAuxiliaryOpenSource
+ * @typedef {'chrome' | 'category' | 'settings'} TakeoverAuxiliaryOpenSource
  */
 
 /**
- * @typedef {Object} FormFieldAuxiliaryDescriptor
- * @property {'formField'} kind        routed panel kind (`formField` → schema lookup)
- * @property {string}      groupedPath dotted path matching form schema `groupedPath`
+ * @typedef {{ kind: 'hoverEffectBuilder' }} HoverEffectBuilderAuxiliaryDescriptor
  */
 
 /**
- * @typedef {{ kind: 'hoverEffectBuilder', mode?: 'customizeOnly' }} HoverEffectBuilderAuxiliaryDescriptor
- */
-
-/**
- * @typedef {FormFieldAuxiliaryDescriptor | HoverEffectBuilderAuxiliaryDescriptor} TakeoverAuxiliaryDescriptor
+ * @typedef {HoverEffectBuilderAuxiliaryDescriptor} TakeoverAuxiliaryDescriptor
  */
 
 /**
  * @typedef {Object} TakeoverAuxiliaryState
- * @property {TakeoverAuxiliaryOpenSource} openedFrom     chrome toolbar vs settings category nav
+ * @property {TakeoverAuxiliaryOpenSource} openedFrom     chrome toolbar, settings category nav, or a settings row
  * @property {string}                      [categoryName] category key when `openedFrom` is category
- * @property {TakeoverAuxiliaryDescriptor} descriptor     what to render (`formField`, `hoverEffectBuilder`, …)
+ * @property {TakeoverAuxiliaryDescriptor} descriptor     what to render (`hoverEffectBuilder`)
  */
 
 const TakeoverAuxiliaryPanelContext = createContext(null);
@@ -74,6 +68,28 @@ export function TakeoverAuxiliaryPanelProvider({ children }) {
 		[]
 	);
 
+	const openFromSettings = useCallback(
+		/**
+		 * A settings row of the active tab opens the panel (the hover effect
+		 * builder's Customize). It closes when the tab changes or the row
+		 * leaves the panel (`closeFromSettings`).
+		 *
+		 * @param {TakeoverAuxiliaryDescriptor} descriptor
+		 */
+		(descriptor) => {
+			setAuxiliary({
+				openedFrom: 'settings',
+				descriptor,
+			});
+		},
+		[]
+	);
+
+	// Leaves a panel the chrome or the category opened in place.
+	const closeFromSettings = useCallback(() => {
+		setAuxiliary((prev) => (prev?.openedFrom === 'settings' ? null : prev));
+	}, []);
+
 	const value = useMemo(
 		() => ({
 			auxiliary,
@@ -81,9 +97,18 @@ export function TakeoverAuxiliaryPanelProvider({ children }) {
 			isAuxiliaryOpen: auxiliary !== null,
 			openFromChrome,
 			openFromCategory,
+			openFromSettings,
+			closeFromSettings,
 			closePanel,
 		}),
-		[auxiliary, openFromChrome, openFromCategory, closePanel]
+		[
+			auxiliary,
+			openFromChrome,
+			openFromCategory,
+			openFromSettings,
+			closeFromSettings,
+			closePanel,
+		]
 	);
 
 	return (
@@ -91,6 +116,16 @@ export function TakeoverAuxiliaryPanelProvider({ children }) {
 			{children}
 		</TakeoverAuxiliaryPanelContext.Provider>
 	);
+}
+
+/**
+ * For rows that render in both editors: the takeover's auxiliary panel, or
+ * null in the metabox editor, which has none.
+ *
+ * @return {ReturnType<typeof useTakeoverAuxiliaryPanel>|null} The panel API, or null outside the takeover.
+ */
+export function useOptionalTakeoverAuxiliaryPanel() {
+	return useContext(TakeoverAuxiliaryPanelContext);
 }
 
 export function useTakeoverAuxiliaryPanel() {

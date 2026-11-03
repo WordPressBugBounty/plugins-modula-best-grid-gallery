@@ -15,16 +15,15 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, Notice, ToggleControl } from '@wordpress/components';
-import { crop as cropIcon } from '@wordpress/icons';
 import Cropper from 'react-easy-crop';
 import { useSelector, useStore } from 'react-redux';
-import { Button as SharedButton } from 'shared-ui';
+import { Button, Notice } from 'admin-ui';
 import {
-	GalleryModal,
+	ItemEditCard,
 	SettingsPanelHeader,
 	useTakeoverSaveStatus,
 } from 'editor-shell';
+import ItemEditTipToggleRow from '../gallery-item-edit-panel/ItemEditTipToggleRow';
 import { useFocusPointMutations } from '../../hooks/useFocusPointMutations';
 import { FOCUS_MATCH_LAYOUT_SESSION_KEY } from '../../utils/getFocusModalCropHints';
 import { getCustomGridItemFocusAspect } from '../../utils/getCustomGridItemFocusAspect';
@@ -43,6 +42,9 @@ import {
 const LETTERBOX_TILE_TYPES = new Set(['custom-grid', 'freeform']);
 
 /**
+ * The Image focus view of the item edit column: crop and focal point, or the
+ * letterbox alignment, with Reset / Cancel / Apply.
+ *
  * @param {Object}                                                                                                              props
  * @param {boolean}                                                                                                             props.isOpen
  * @param {() => void}                                                                                                          props.onClose
@@ -51,7 +53,6 @@ const LETTERBOX_TILE_TYPES = new Set(['custom-grid', 'freeform']);
  * @param {import('@tanstack/react-query').QueryClient}                                                                         props.queryClient
  * @param {import('@tanstack/react-query').QueryKey}                                                                            props.bootstrapQueryKey
  * @param {{ suggestedAspect: number|null, canLockToLayout: boolean, layoutHint: string|null, showMatchLayoutToggle: boolean }} [props.focusCropHints]
- * @param {boolean}                                                                                                             [props.embedded]        When true, render in Image sidebar instead of GalleryModal.
  */
 export default function FocusPointModal({
 	isOpen,
@@ -66,7 +67,6 @@ export default function FocusPointModal({
 		layoutHint: null,
 		showMatchLayoutToggle: false,
 	},
-	embedded = false,
 }) {
 	const store = useStore();
 	const { runPersistTask } = useTakeoverSaveStatus();
@@ -336,13 +336,26 @@ export default function FocusPointModal({
 		return null;
 	}
 
+	const showMatchLayoutRow = showMatchLayoutToggle && !letterboxFit;
+	// react-easy-crop zooms on wheel/pinch; the view has no zoom buttons.
+	const cropHelp = showMatchLayoutRow
+		? __(
+				'Drag the image to frame the subject and scroll to zoom. Match tile shape sets the crop frame to the gallery tile. Apply crop saves this framing for the preview and the live gallery.',
+				'modula-best-grid-gallery'
+			)
+		: __(
+				'Drag the image to frame the subject and scroll to zoom. Apply crop saves this framing for the preview and the live gallery.',
+				'modula-best-grid-gallery'
+			);
+
 	const focusBody = (
 		<>
+			{/* The next Apply or Reset clears the error. */}
 			{persistError ? (
 				<Notice
-					status="error"
-					isDismissible
-					onRemove={() => setPersistError('')}
+					tone="error"
+					role="alert"
+					className="modula-focus-point-modal__notice"
 				>
 					{persistError}
 				</Notice>
@@ -353,62 +366,58 @@ export default function FocusPointModal({
 							'The full photo fits inside the tile. Use the preview below to choose alignment when empty space appears above or below the image.',
 							'modula-best-grid-gallery'
 						)
-					: __(
-							'Drag the image and use the zoom controls or scroll wheel to frame the subject. Save stores focal point and crop so the preview and front-end match your framing.',
-							'modula-best-grid-gallery'
-						)}
+					: cropHelp}
 			</p>
-			{showLetterboxToggle ? (
-				<div className="modula-focus-point-modal__match-layout">
-					<ToggleControl
-						__nextHasNoMarginBottom
-						label={__(
-							'Show entire image in tile (letterbox)',
-							'modula-best-grid-gallery'
-						)}
-						help={__(
-							'When on, the full photo is visible inside the tile. Empty space may appear when the tile shape differs from the photo.',
-							'modula-best-grid-gallery'
-						)}
-						checked={letterboxFit}
-						onChange={setLetterboxFit}
-					/>
-				</div>
-			) : null}
-			{showMatchLayoutToggle && !letterboxFit ? (
-				<div className="modula-focus-point-modal__match-layout">
-					<ToggleControl
-						__nextHasNoMarginBottom
-						label={sprintf(
-							/* translators: %s: aspect label e.g. 1:1 or 9:16 */
-							__(
-								'Match tile shape (%s)',
+			{showLetterboxToggle || showMatchLayoutRow ? (
+				<ItemEditCard>
+					{showLetterboxToggle ? (
+						<ItemEditTipToggleRow
+							label={__(
+								'Show entire image in tile (letterbox)',
 								'modula-best-grid-gallery'
-							),
-							layoutHint || String(suggestedAspect)
-						)}
-						help={
-							matchLayout
-								? sprintf(
-										/* translators: %s: aspect label e.g. 1:1 */
-										__(
-											"Crop frame matches gallery cells (%s). Turn off to use the photo's own shape.",
+							)}
+							help={__(
+								'When on, the full photo is visible inside the tile. Empty space may appear when the tile shape differs from the photo.',
+								'modula-best-grid-gallery'
+							)}
+							checked={letterboxFit}
+							onChange={setLetterboxFit}
+						/>
+					) : null}
+					{showMatchLayoutRow ? (
+						<ItemEditTipToggleRow
+							label={sprintf(
+								/* translators: %s: aspect label e.g. 1:1 or 9:16 */
+								__(
+									'Match tile shape (%s)',
+									'modula-best-grid-gallery'
+								),
+								layoutHint || String(suggestedAspect)
+							)}
+							help={
+								matchLayout
+									? sprintf(
+											/* translators: %s: aspect label e.g. 1:1 */
+											__(
+												"Crop frame matches gallery cells (%s). Turn off to use the photo's own shape.",
+												'modula-best-grid-gallery'
+											),
+											layoutHint ||
+												String(suggestedAspect)
+										)
+									: __(
+											"Crop frame follows the photo's aspect ratio. The gallery tile still uses its own shape; this chooses which part of the photo is shown.",
 											'modula-best-grid-gallery'
-										),
-										layoutHint || String(suggestedAspect)
-									)
-								: __(
-										"Crop frame follows the photo's aspect ratio. The gallery tile still uses its own shape; this chooses which part of the photo is shown.",
-										'modula-best-grid-gallery'
-									)
-						}
-						checked={matchLayout}
-						onChange={setMatchLayoutPersist}
-					/>
-				</div>
+										)
+							}
+							checked={matchLayout}
+							onChange={setMatchLayoutPersist}
+						/>
+					) : null}
+				</ItemEditCard>
 			) : null}
 			{!previewSrc ? (
-				<Notice status="warning" isDismissible={false}>
+				<Notice className="modula-focus-point-modal__notice">
 					{__(
 						'No image URL for this item.',
 						'modula-best-grid-gallery'
@@ -448,129 +457,57 @@ export default function FocusPointModal({
 		</>
 	);
 
-	const letterboxConfirm = (
-		<FocusPointLetterboxApplyConfirmModal
-			isOpen={letterboxApplyConfirmOpen}
-			isBusy={saveMutation.isPending}
-			otherCount={otherLetterboxCount}
-			onCancel={() => setLetterboxApplyConfirmOpen(false)}
-			onApplyThisOnly={handleApplyThisImageOnly}
-			onApplyAll={handleApplyLetterboxToAll}
-		/>
-	);
-
-	if (embedded) {
-		return (
-			<>
-				<div className="modula-settings-panel modula-gallery-item-focus-panel">
-					<SettingsPanelHeader
-						title={__('Image focus', 'modula-best-grid-gallery')}
-						description={
-							subtitleParts.length
-								? subtitleParts.join(' • ')
-								: __(
-										'Frame this tile for the gallery layout.',
-										'modula-best-grid-gallery'
-									)
-						}
-						isNested
-						parentTitle={__('Image', 'modula-best-grid-gallery')}
-						onBack={onClose}
-					/>
-					<div className="modula-settings-panel__scroll modula-gallery-item-focus-panel__scroll modula-focus-point-modal__content">
-						{focusBody}
-					</div>
-					<div className="modula-gallery-item-focus-panel__footer">
-						<SharedButton
-							variant="ghost"
-							mini
-							disabled={!previewSrc || busy || !item}
-							onClick={() => clearMutation.mutate()}
-						>
-							{__('Reset crop', 'modula-best-grid-gallery')}
-						</SharedButton>
-						<div className="modula-gallery-item-focus-panel__footer-end">
-							<SharedButton
-								variant="ghost"
-								mini
-								disabled={busy}
-								onClick={onClose}
-							>
-								{__('Cancel', 'modula-best-grid-gallery')}
-							</SharedButton>
-							<SharedButton
-								variant="primary"
-								mini
-								disabled={!previewSrc || busy || !item}
-								onClick={handleApplyClick}
-							>
-								{saveMutation.isPending
-									? __(
-											'Applying…',
-											'modula-best-grid-gallery'
-										)
-									: __(
-											'Apply crop',
-											'modula-best-grid-gallery'
-										)}
-							</SharedButton>
-						</div>
-					</div>
-				</div>
-				{letterboxConfirm}
-			</>
-		);
-	}
-
+	// The image panel's class brings its rows, 3px corners and buttons.
 	return (
 		<>
-			<GalleryModal
-				isOpen={isOpen}
-				onClose={onClose}
-				size="large"
-				titleId="modula-focus-point-modal-title"
-				title={__('Crop image', 'modula-best-grid-gallery')}
-				subtitle={subtitleParts.length ? subtitleParts.join(' • ') : ''}
-				icon={cropIcon}
-				panelClassName="modula-focus-point-modal__panel"
-				bodyClassName="modula-focus-point-modal__content"
-				bodyOverflow="auto"
-				footerLeft={
+			<div className="modula-settings-panel modula-gallery-item-edit-panel modula-gallery-item-focus-panel">
+				<SettingsPanelHeader
+					title={__('Image focus', 'modula-best-grid-gallery')}
+					description={
+						subtitleParts.length
+							? subtitleParts.join(' • ')
+							: __(
+									'Frame this tile for the gallery layout.',
+									'modula-best-grid-gallery'
+								)
+					}
+					isNested
+					parentTitle={__('Image', 'modula-best-grid-gallery')}
+					onBack={onClose}
+				/>
+				<div className="modula-settings-panel__scroll modula-gallery-item-focus-panel__scroll modula-focus-point-modal__content">
+					{focusBody}
+				</div>
+				<div className="modula-gallery-item-edit-panel__footer">
 					<Button
-						variant="link"
-						className="modula-gallery-modal__footer-link"
-						onClick={() => clearMutation.mutate()}
-						isBusy={clearMutation.isPending}
 						disabled={!previewSrc || busy || !item}
+						onClick={() => clearMutation.mutate()}
 					>
 						{__('Reset crop', 'modula-best-grid-gallery')}
 					</Button>
-				}
-				footerRight={
-					<>
-						<Button
-							variant="tertiary"
-							className="modula-gallery-modal__footer-cancel"
-							onClick={onClose}
-							disabled={busy}
-						>
+					<div className="modula-gallery-item-edit-panel__footer-end">
+						<Button disabled={busy} onClick={onClose}>
 							{__('Cancel', 'modula-best-grid-gallery')}
 						</Button>
 						<Button
 							variant="primary"
-							className="modula-gallery-modal__footer-primary"
-							onClick={handleApplyClick}
-							isBusy={saveMutation.isPending}
 							disabled={!previewSrc || busy || !item}
+							onClick={handleApplyClick}
 						>
-							{__('Apply crop', 'modula-best-grid-gallery')}
+							{saveMutation.isPending
+								? __('Applying…', 'modula-best-grid-gallery')
+								: __('Apply crop', 'modula-best-grid-gallery')}
 						</Button>
-					</>
-				}
-			>
-				{focusBody}
-			</GalleryModal>
-			{letterboxConfirm}
+					</div>
+				</div>
+			</div>
+			<FocusPointLetterboxApplyConfirmModal
+				isOpen={letterboxApplyConfirmOpen}
+				otherCount={otherLetterboxCount}
+				onCancel={() => setLetterboxApplyConfirmOpen(false)}
+				onApplyThisOnly={handleApplyThisImageOnly}
+				onApplyAll={handleApplyLetterboxToAll}
+			/>
 		</>
 	);
 }

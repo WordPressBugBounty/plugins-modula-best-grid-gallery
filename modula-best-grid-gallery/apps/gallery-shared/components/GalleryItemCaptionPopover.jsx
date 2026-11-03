@@ -6,6 +6,10 @@
  * Cursor / press position updates mutate the portaled node directly to avoid
  * React re-render loops on mousemove.
  *
+ * The panel is a manual popover shown in the top layer, so no gallery
+ * container clips it and no neighbouring card (Polaroid) paints over it.
+ * Browsers without the Popover API keep the fixed, high z-index panel.
+ *
  * @param {Object}  props
  * @param {boolean} [props.showTitle]
  * @param {boolean} [props.showDescription]
@@ -25,32 +29,36 @@ import {
 import { __ } from '@wordpress/i18n';
 
 import { useCoarsePointer } from '../hooks/useCompactCaptionTile';
+import { placeCaptionPanel } from '../utils/captionPopoverPlacement';
+import { SHARE_CONTROLS_SELECTOR } from './social/GalleryItemExpandableSocials';
 
-const PANEL_OFFSET_PX = 14;
-const PANEL_MAX_WIDTH_PX = 280;
 const LONG_PRESS_MS = 480;
 const LONG_PRESS_MOVE_PX = 12;
 
 /**
- * @param {number}                            clientX
- * @param {number}                            clientY
- * @param {{ width: number, height: number }} size
- * @return {{ left: number, top: number }}
+ * @param {Element|null|undefined} host The `.modula-item` tile.
+ * @return {Array<DOMRect>} Client rects of the visible share controls.
  */
-function clampPanelPosition(clientX, clientY, size) {
-	const vw = typeof window !== 'undefined' ? window.innerWidth : 1024;
-	const vh = typeof window !== 'undefined' ? window.innerHeight : 768;
-	const width = size.width || PANEL_MAX_WIDTH_PX;
-	const height = size.height || 80;
-	let left = clientX + PANEL_OFFSET_PX;
-	let top = clientY + PANEL_OFFSET_PX;
-	if (left + width > vw - 8) {
-		left = Math.max(8, clientX - width - PANEL_OFFSET_PX);
+function readShareControlRects(host) {
+	if (!host) {
+		return [];
 	}
-	if (top + height > vh - 8) {
-		top = Math.max(8, clientY - height - PANEL_OFFSET_PX);
+	return Array.from(host.querySelectorAll(SHARE_CONTROLS_SELECTOR))
+		.map((element) => element.getBoundingClientRect())
+		.filter((rect) => rect.width > 0 && rect.height > 0);
+}
+
+/**
+ * @param {HTMLElement} node Panel carrying `popover="manual"`.
+ */
+function showInTopLayer(node) {
+	if (typeof node.showPopover !== 'function') {
+		return;
 	}
-	return { left, top };
+	if (node.matches(':popover-open')) {
+		return;
+	}
+	node.showPopover();
 }
 
 export default function GalleryItemCaptionPopover({
@@ -89,11 +97,17 @@ export default function GalleryItemCaptionPopover({
 		if (!node) {
 			return;
 		}
-		const { left, top } = clampPanelPosition(
-			clientX,
-			clientY,
-			panelSizeRef.current
-		);
+		const { left, top } = placeCaptionPanel({
+			pointer: { x: clientX, y: clientY },
+			size: panelSizeRef.current,
+			viewport: {
+				width: document.documentElement.clientWidth,
+				height: document.documentElement.clientHeight,
+			},
+			avoid: readShareControlRects(
+				rootRef.current?.closest('.modula-item')
+			),
+		});
 		node.style.left = `${left}px`;
 		node.style.top = `${top}px`;
 	}, []);
@@ -102,20 +116,15 @@ export default function GalleryItemCaptionPopover({
 		if (!open || !panelNode) {
 			return undefined;
 		}
-		applyPanelPosition(lastPointerRef.current.x, lastPointerRef.current.y);
+		showInTopLayer(panelNode);
+		// Runs before the first paint and on every size change, so the panel
+		// is placed with its real size, never with a stale or guessed one.
 		const measure = () => {
 			const rect = panelNode.getBoundingClientRect();
-			const next = {
-				width: Math.round(rect.width),
-				height: Math.round(rect.height),
+			panelSizeRef.current = {
+				width: Math.ceil(rect.width),
+				height: Math.ceil(rect.height),
 			};
-			if (
-				next.width === panelSizeRef.current.width &&
-				next.height === panelSizeRef.current.height
-			) {
-				return;
-			}
-			panelSizeRef.current = next;
 			applyPanelPosition(
 				lastPointerRef.current.x,
 				lastPointerRef.current.y
@@ -175,13 +184,18 @@ export default function GalleryItemCaptionPopover({
 		const onLeave = () => {
 			setOpen(false);
 		};
+		// A click opens the lightbox or link over the tile without moving the
+		// pointer, so no mouseleave comes; the top-layer panel would stay on
+		// top of the lightbox.
 		host.addEventListener('mouseenter', onEnter);
 		host.addEventListener('mousemove', onMove);
 		host.addEventListener('mouseleave', onLeave);
+		host.addEventListener('click', onLeave);
 		return () => {
 			host.removeEventListener('mouseenter', onEnter);
 			host.removeEventListener('mousemove', onMove);
 			host.removeEventListener('mouseleave', onLeave);
+			host.removeEventListener('click', onLeave);
 		};
 	}, [isTouch, applyPanelPosition]);
 
@@ -285,10 +299,11 @@ export default function GalleryItemCaptionPopover({
 					className={[
 						'modula-caption-popover__panel',
 						'is-open',
-						isTouch ? 'modula-caption-popover__panel--touch' : '',
-					]
-						.filter(Boolean)
-						.join(' ')}
+						isTouch
+							? 'modula-caption-popover__panel--touch'
+							: 'modula-caption-popover__panel--hover',
+					].join(' ')}
+					popover="manual"
 					data-modula-caption-popover=""
 					role="tooltip"
 					aria-label={__(

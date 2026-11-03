@@ -557,7 +557,7 @@ class Modula_Gallery_Upload {
 				'height'      => $def_h,
 				'filters'     => '',
 			);
-			$modula_images[ $image_id ] = $this->sanitize_image( $image );
+			$modula_images[ $image_id ] = $this->prepare_new_image_row( $image );
 		}
 		if ( empty( $modula_images ) ) {
 			return new \WP_Error(
@@ -645,7 +645,20 @@ class Modula_Gallery_Upload {
 			'height'      => $def_h,
 			'filters'     => '',
 		);
-		return $this->sanitize_image( $image );
+		return $this->prepare_new_image_row( $image );
+	}
+
+	/**
+	 * Sanitize a row joining a gallery, then let extensions fill it from its attachment.
+	 *
+	 * Sanitizing goes first: extensions fill only the empty keys it adds. This runs once,
+	 * when the image joins; filling on read would bring back a value the user cleared.
+	 *
+	 * @param array $image Unsanitized row.
+	 * @return array
+	 */
+	private function prepare_new_image_row( $image ) {
+		return apply_filters( 'modula_image_properties', $this->sanitize_image( $image ) );
 	}
 
 	/**

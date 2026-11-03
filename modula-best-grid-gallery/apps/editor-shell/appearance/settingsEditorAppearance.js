@@ -15,6 +15,13 @@ export const ALBUMS_EDITOR_APPEARANCE_LEGACY_STORAGE_KEY =
 export const SETTINGS_EDITOR_APPEARANCE_DOCUMENT_ATTR =
 	'data-modula-se-appearance';
 
+/**
+ * The shared boot shell's mount in both editors (`Takeover_Boot_Shell`). Its
+ * `data-appearance` is copied from `<html>` before React and painted by the
+ * boot CSS, so JS keeps it in step after boot.
+ */
+const TAKEOVER_MOUNT_SELECTOR = '.modula-takeover__mount';
+
 export const APPEARANCE_LIGHT = /** @type {const} */ ('light');
 export const APPEARANCE_DARK = /** @type {const} */ ('dark');
 export const APPEARANCE_SYSTEM = /** @type {const} */ ('system');
@@ -56,6 +63,8 @@ export function resolveEditorAppearance(preference, systemScheme) {
 }
 
 /**
+ * Paints the resolved appearance on `<html>` and on the takeover mount.
+ *
  * @param {SettingsEditorAppearance} appearance
  */
 export function syncDocumentAppearance(appearance) {
@@ -66,6 +75,9 @@ export function syncDocumentAppearance(appearance) {
 		SETTINGS_EDITOR_APPEARANCE_DOCUMENT_ATTR,
 		appearance
 	);
+	document.querySelectorAll(TAKEOVER_MOUNT_SELECTOR).forEach((mount) => {
+		mount.setAttribute('data-appearance', appearance);
+	});
 }
 
 /**
@@ -141,7 +153,7 @@ export function readStoredAppearance() {
  * @param {SettingsEditorAppearance}   [systemScheme]
  */
 export function writeStoredPreference(preference, systemScheme) {
-	if (typeof window === 'undefined' || !VALID_PREFERENCES.has(preference)) {
+	if (typeof window === 'undefined' || !isAppearancePreference(preference)) {
 		return;
 	}
 	persistPreference(preference);
@@ -149,9 +161,20 @@ export function writeStoredPreference(preference, systemScheme) {
 }
 
 /**
+ * @param {unknown} value
+ * @return {boolean} Whether the value is a preference: light, dark or system.
+ */
+export function isAppearancePreference(value) {
+	return VALID_PREFERENCES.has(value);
+}
+
+/**
+ * Stores the preference without painting it. Callers validate it first with
+ * `isAppearancePreference`.
+ *
  * @param {EditorAppearancePreference} preference
  */
-function persistPreference(preference) {
+export function persistPreference(preference) {
 	try {
 		window.localStorage?.setItem(
 			SETTINGS_EDITOR_APPEARANCE_STORAGE_KEY,

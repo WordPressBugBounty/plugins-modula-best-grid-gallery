@@ -5,6 +5,7 @@ import { SETTINGS_EDITOR_CATEGORIES } from '../constants/editorStructure';
 import { getEnrichedFieldsForGroup } from '../data/formSchema';
 import { isCategoryVisible } from '../logic/categoryVisibility';
 import { isFieldVisible } from '../logic/fieldVisibility';
+import { matchesQueryTokens, tokenizeQuery } from 'editor-shell/logic';
 
 /**
  * @param {import('./settingsCommandPaletteEntries').PaletteIndexEntry} e
@@ -71,14 +72,6 @@ export function filterPaletteEntries(entries, values) {
 }
 
 /**
- * @param {string} q
- * @return {string[]}
- */
-export function tokenizeQuery(q) {
-	return q.toLowerCase().trim().split(/\s+/).filter(Boolean);
-}
-
-/**
  * @param {import('./settingsCommandPaletteEntries').PaletteIndexEntry[]} entries
  * @param {string}                                                        query
  * @return {import('./settingsCommandPaletteEntries').PaletteIndexEntry[]}
@@ -88,5 +81,5 @@ export function searchPaletteEntries(entries, query) {
 	if (tokens.length === 0) {
 		return entries;
 	}
-	return entries.filter((e) => tokens.every((t) => e.searchBlob.includes(t)));
+	return entries.filter((e) => matchesQueryTokens(e.searchBlob, tokens));
 }

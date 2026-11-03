@@ -289,6 +289,15 @@
 	}
 
 	.fancybox__sidebar[data-modula-thumbs-sidebar='right'] {
+		right: 10px;
+	}
+
+	/*
+	 * `has-sidebar` alone sets Fancybox's `--sidebar-container-width` to the
+	 * full sidebar width, so only the comments column (0 while hidden) may
+	 * move the strip.
+	 */
+	&.has-modula-comments .fancybox__sidebar[data-modula-thumbs-sidebar='right'] {
 		right: calc(var(--sidebar-container-width, 0px) + 10px);
 	}
 

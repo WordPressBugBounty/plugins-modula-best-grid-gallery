@@ -11,6 +11,10 @@ import {
 	focusedImageMetadataProtectedFieldName,
 	shouldApplyImageMetadataExternalReset,
 } from '../utils/imageMetadataAutosavePolicy';
+import {
+	ITEM_CSS_CLASS_KEY,
+	ITEM_HOVER_PRESET_KEY,
+} from '../utils/galleryItemFields';
 
 const EMPTY_VALUES = {
 	title: '',
@@ -35,6 +39,8 @@ const EMPTY_VALUES = {
 	exif_aperture: '',
 	exif_iso: '',
 	exif_date: '',
+	[ITEM_HOVER_PRESET_KEY]: '',
+	[ITEM_CSS_CLASS_KEY]: '',
 };
 
 function triStateFromItem(v, fallback) {
@@ -98,6 +104,8 @@ function buildValuesFromItem(item) {
 		exif_aperture: item.exif_aperture || '',
 		exif_iso: item.exif_iso || '',
 		exif_date: item.exif_date || '',
+		[ITEM_HOVER_PRESET_KEY]: item[ITEM_HOVER_PRESET_KEY] || '',
+		[ITEM_CSS_CLASS_KEY]: item[ITEM_CSS_CLASS_KEY] || '',
 	};
 }
 

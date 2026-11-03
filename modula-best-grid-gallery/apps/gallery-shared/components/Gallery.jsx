@@ -16,6 +16,7 @@ import {
 } from '@wordpress/element';
 import { useSelector, shallowEqual } from 'react-redux';
 import { GalleryPreviewEagerLayoutsContext } from '../context/GalleryPreviewEagerLayoutsContext';
+import { GalleryPreviewFilterBarContext } from '../context/GalleryPreviewFilterBarContext';
 import { getLayoutLoader, resolveGalleryLayoutType } from '../layouts';
 import GalleryDynamicStyle from './GalleryDynamicStyle';
 import { useModulaGalleryLightbox } from '../lightbox/lightboxOpenFacade';
@@ -28,6 +29,10 @@ import { useGalleryImageLoaded } from '../hooks/useGalleryImageLoaded';
 import { useGalleryInView } from '../hooks/useGalleryInView';
 import { useGalleryProRuntime } from '../hooks/useGalleryProRuntime';
 import { useGalleryRootClasses } from '../hooks/useGalleryRootClasses';
+import { useGalleryEntrance } from '../hooks/useGalleryEntrance';
+import { useGalleryMotionAllowed } from '../hooks/useGalleryMotionAllowed';
+import { useHoverPointer } from '../hooks/useHoverPointer';
+import { useLayoutMotion } from '../hooks/useLayoutMotion';
 import {
 	DEFAULT_GALLERY_TYPE,
 	isGalleryTypeWithoutFilters,
@@ -43,6 +48,7 @@ import {
 } from '../utils/displayContext';
 import {
 	resolveFilterBarPlacements,
+	resolveFilterLayoutPreviewViewport,
 	resolveFilterLayoutShellClass,
 	resolveFilterPositioning,
 } from '../utils/filterBarModel';
@@ -84,6 +90,7 @@ function GalleryFilterBar() {
 
 export default function Gallery() {
 	const eagerLayoutMap = useContext(GalleryPreviewEagerLayoutsContext);
+	const PreviewFilterBar = useContext(GalleryPreviewFilterBarContext);
 	const {
 		config,
 		settings,
@@ -131,17 +138,20 @@ export default function Gallery() {
 		};
 	}, [galleryId]);
 
+	const catalogItems = originalItems?.length ? originalItems : items;
 	const lightboxHostRef = useModulaGalleryLightbox(config, {
 		enabled: !hideVisitorChrome,
 		items: displayItems,
 		settings,
 		resolveItems: resolveLightboxItems,
+		catalogItems,
 	});
 	useModulaGalleryDeeplink(lightboxHostRef, config, {
 		enabled: !hideVisitorChrome,
 		items: displayItems,
 		settings,
 		resolveItems: resolveLightboxItems,
+		catalogItems,
 	});
 	useGalleryInView(lightboxHostRef, !!config?.inView && !hideVisitorChrome);
 	useGalleryImageLoaded(lightboxHostRef, !hideVisitorChrome);
@@ -149,15 +159,28 @@ export default function Gallery() {
 		imageGuardian: !hideVisitorChrome,
 		visitorChrome: !hideVisitorChrome,
 	});
-	useGalleryRootClasses(lightboxHostRef, config, metadata);
+	const motionAllowed = useGalleryMotionAllowed(settings, config, metadata);
+	useGalleryRootClasses(lightboxHostRef, config, metadata, motionAllowed);
+	useGalleryEntrance(lightboxHostRef, settings, metadata, motionAllowed);
+	useHoverPointer(lightboxHostRef, motionAllowed);
+	useLayoutMotion(lightboxHostRef, settings, config, motionAllowed);
 
+	// Only the visitor filters: the settings-editor canvas draws the static
+	// bar its editor provides, or none (Lite ticket 96).
+	const PlacedFilterBar = isSettingsEditorPreview(metadata)
+		? PreviewFilterBar
+		: GalleryFilterBar;
 	const showFilters =
-		!skipFilters && filtering.enabled && !isSettingsEditorPreview(metadata);
+		!skipFilters && filtering.enabled && PlacedFilterBar !== null;
 	const filterPositioning = resolveFilterPositioning(config, settings);
 	const filterPlacements = resolveFilterBarPlacements(filterPositioning);
 	const filterLayoutShellClass = resolveFilterLayoutShellClass(
 		filterPositioning,
 		showFilters
+	);
+	// Only the settings editor forces a device; none at the visitor.
+	const filterLayoutViewport = resolveFilterLayoutPreviewViewport(
+		config?.previewViewport
 	);
 
 	return (
@@ -172,16 +195,19 @@ export default function Gallery() {
 			<Suspense fallback={null}>
 				<LazyGalleryDownloadAllButton placement="above" />
 			</Suspense>
-			<div className={filterLayoutShellClass}>
+			<div
+				className={filterLayoutShellClass}
+				data-preview-viewport={filterLayoutViewport}
+			>
 				{showFilters && filterPlacements.before ? (
-					<GalleryFilterBar />
+					<PlacedFilterBar />
 				) : null}
 				<GalleryLayout
 					layoutType={layoutType}
 					EagerLayout={eagerLayoutMap?.[layoutType] ?? null}
 				/>
 				{showFilters && filterPlacements.after ? (
-					<GalleryFilterBar />
+					<PlacedFilterBar />
 				) : null}
 			</div>
 			{showPagination && (

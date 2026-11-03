@@ -1,27 +1,13 @@
 import { __ } from '@wordpress/i18n';
 import { CanvasEmptyState } from 'editor-shell';
-import GalleryTakeoverPreviewUploadDropZone from './GalleryTakeoverPreviewUploadDropZone';
 
 /**
- * Centered empty state shown when the gallery has nothing to paint yet.
+ * Centered empty state shown when the gallery has nothing to paint yet:
+ * "No images yet" with an "Add images" button (the toolbar's primary Add).
  *
- * @param {{
- *   galleryType?: string,
- *   status?: 'idle'|'loading'|'complete',
- *   uploadCurrent?: number,
- *   uploadTotal?: number,
- *   interactive?: boolean,
- *   onFilesSelected?: (files: FileList | File[]) => void,
- * }} props
+ * @param {{ galleryType?: string }} props
  */
-export default function GalleryTakeoverPreviewEmptyState({
-	galleryType = '',
-	status = 'idle',
-	uploadCurrent,
-	uploadTotal,
-	interactive = false,
-	onFilesSelected,
-}) {
+export default function GalleryTakeoverPreviewEmptyState({ galleryType = '' }) {
 	if (galleryType === 'video') {
 		return (
 			<CanvasEmptyState
@@ -38,27 +24,9 @@ export default function GalleryTakeoverPreviewEmptyState({
 	}
 
 	return (
-		<CanvasEmptyState>
-			<GalleryTakeoverPreviewUploadDropZone
-				placement="empty"
-				status={status}
-				uploadCurrent={uploadCurrent}
-				uploadTotal={uploadTotal}
-				interactive={interactive}
-				onFilesSelected={onFilesSelected}
-				idleCaption={__(
-					'Drop images here to start your gallery.',
-					'modula-best-grid-gallery'
-				)}
-				completeCaption={__(
-					'Images added to your gallery.',
-					'modula-best-grid-gallery'
-				)}
-				regionLabel={__(
-					'Empty gallery drop zone',
-					'modula-best-grid-gallery'
-				)}
-			/>
-		</CanvasEmptyState>
+		<CanvasEmptyState
+			message={__('No images yet', 'modula-best-grid-gallery')}
+			actionLabel={__('Add images', 'modula-best-grid-gallery')}
+		/>
 	);
 }

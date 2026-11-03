@@ -1,0 +1,63 @@
+// The license expired banner: the editor's strip under the canvas toolbar
+// ("5 · Editor – Lite") and the Content page's box above its toolbar
+// ("6 · Content – Lite").
+.modula-admin-license-banner {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	background: var(--modula-admin-warning-surface);
+	color: var(--modula-admin-warning-ink);
+
+	&.is-canvas {
+		padding: 12px 24px;
+		border-bottom: 1px solid var(--modula-admin-border);
+		font-size: var(--modula-admin-text-body);
+	}
+
+	&.is-page {
+		padding: 12px 16px;
+		border: 1px solid var(--modula-admin-warning-border);
+		border-radius: var(--modula-admin-radius-sm);
+		font-size: var(--modula-admin-text-control);
+	}
+}
+
+.modula-admin-license-banner__lock {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+
+	.is-canvas > & {
+		width: 34px;
+		height: 34px;
+		border-radius: 50%;
+		background: var(--modula-admin-ink);
+		color: var(--modula-admin-ink-inverse);
+	}
+}
+
+.modula-admin-license-banner__text {
+	flex-grow: 1;
+	min-width: 0;
+	margin: 0;
+
+	strong {
+		font-weight: 600;
+	}
+
+	.is-canvas > & {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+
+		strong {
+			color: var(--modula-admin-ink);
+		}
+	}
+}
+
+// The page box's button is shorter than a default one (the board's 36px).
+.is-page > .modula-admin-license-banner__renew {
+	height: 36px;
+}

@@ -1,0 +1,57 @@
+@use '../styles/mixins';
+
+.modula-admin-choice-list {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	width: 100%;
+}
+
+// A full-width list row; focus is drawn inside the box (list-button), so the
+// container edge does not clip it.
+.modula-admin-choice-list__option {
+	@include mixins.list-button;
+	@include mixins.control-label;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-height: 32px;
+	padding: 6px 10px;
+	border-radius: var(--modula-admin-radius-sm);
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-control);
+
+	&.is-active {
+		background: var(--modula-admin-surface-sunken);
+		font-weight: 500;
+	}
+
+	&:disabled {
+		opacity: var(--modula-admin-disabled-opacity);
+		cursor: default;
+
+		&:hover {
+			background: none;
+		}
+	}
+}
+
+// The radio ring: an outline, filled in ink on the chosen row.
+.modula-admin-choice-list__ring {
+	flex-shrink: 0;
+	box-sizing: border-box;
+	width: 16px;
+	height: 16px;
+	border: 1.5px solid var(--modula-admin-border-field);
+	border-radius: 50%;
+
+	.is-active > & {
+		border: 5px solid var(--modula-admin-ink);
+	}
+}
+
+.modula-admin-choice-list__label {
+	flex-grow: 1;
+	min-width: 0;
+	line-height: 1.3;
+}

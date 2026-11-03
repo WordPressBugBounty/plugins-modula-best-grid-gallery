@@ -88,6 +88,20 @@ final class Modern_Gallery {
 	}
 
 	/**
+	 * Whether the visible lightbox zoom master is available to a visitor
+	 * lightbox: the gallery's, and the Pro album's gallery members'.
+	 *
+	 * @return bool
+	 */
+	public static function is_zoom_extension_active(): bool {
+		if ( ! modula_is_compatible_pro() || ! class_exists( 'Modula_Extensions_Base' ) ) {
+			return false;
+		}
+		$extensions = \Modula_Extensions_Base::get_instance();
+		return method_exists( $extensions, 'extension_enabled' ) && $extensions->extension_enabled( 'modula-zoom' );
+	}
+
+	/**
 	 * Master Pagination hub toggle only (flat `enable_pagination`).
 	 * Nested infinite scroll / load-more are ignored when this is off — matches settings-editor drill-in.
 	 * Does not treat maxImagesCount alone as enabled — matches React bootstrap / visitor UX.
@@ -313,15 +327,9 @@ final class Modern_Gallery {
 			return;
 		}
 
-		$version    = self::visitor_renderer_asset_version();
-		$css_handle = 'modula-gallery';
-		$css_path   = MODULA_URL . 'assets/css/front/modula-gallery.css';
+		self::enqueue_visitor_stylesheets();
 
-		if ( ! wp_style_is( $css_handle, 'enqueued' ) ) {
-			wp_enqueue_style( $css_handle, $css_path, array(), $version );
-		}
-		self::attach_gallery_chrome_inline_style( $css_handle );
-
+		$version       = self::visitor_renderer_asset_version();
 		$script_handle = 'modula-gallery';
 		$script_path   = MODULA_URL . 'assets/js/front/modula-gallery.js';
 
@@ -346,10 +354,6 @@ final class Modern_Gallery {
 			)
 		);
 
-		self::enqueue_bootstrap_stylesheet();
-		self::attach_gallery_chrome_inline_style( 'modula-gallery-bootstrap' );
-		self::preload_bootstrap_stylesheet();
-
 		if ( ! $with_extra_scripts ) {
 			return;
 		}
@@ -360,6 +364,27 @@ final class Modern_Gallery {
 		 * @hook modula_extra_scripts
 		 */
 		do_action( 'modula_extra_scripts', $settings, is_array( $images ) ? $images : array() );
+	}
+
+	/**
+	 * Enqueue the visitor gallery's stylesheets: the shell, the layout bootstrap
+	 * stylesheet and its preload. Pro's Album visitor frontend renders with them
+	 * too, without the gallery's loader script.
+	 */
+	public static function enqueue_visitor_stylesheets(): void {
+		if ( ! self::visitor_renderer_assets_available() ) {
+			return;
+		}
+
+		$css_handle = 'modula-gallery';
+		if ( ! wp_style_is( $css_handle, 'enqueued' ) ) {
+			wp_enqueue_style( $css_handle, MODULA_URL . 'assets/css/front/modula-gallery.css', array(), self::visitor_renderer_asset_version() );
+		}
+		self::attach_gallery_chrome_inline_style( $css_handle );
+
+		self::enqueue_bootstrap_stylesheet();
+		self::attach_gallery_chrome_inline_style( 'modula-gallery-bootstrap' );
+		self::preload_bootstrap_stylesheet();
 	}
 
 	/**

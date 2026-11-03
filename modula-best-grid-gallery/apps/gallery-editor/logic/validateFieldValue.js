@@ -11,7 +11,6 @@ export function validateFieldValue(field, value) {
 		field.control?.kind === 'heading' ||
 		field.control?.kind === 'speedupHelp' ||
 		field.control?.kind === 'infoCallout' ||
-		field.control?.kind === 'hoverEffectBuilder' ||
 		field.control?.kind === 'exifResultPreview' ||
 		field.control?.kind === 'deeplinkUrlPreview' ||
 		field.control?.kind === 'galleryDefaultsShell' ||

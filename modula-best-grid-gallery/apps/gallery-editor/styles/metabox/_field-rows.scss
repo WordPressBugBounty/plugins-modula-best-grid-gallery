@@ -6,7 +6,7 @@
 	gap: $mod-space-12 $mod-space-20;
 	align-items: start;
 	padding: $mod-space-10 0;
-	border-bottom: 1px solid var(--mod-se-line-soft, #f6f7f7);
+	border-bottom: 1px solid var(--modula-admin-border-divider);
 
 	&:last-child {
 		border-bottom: none;
@@ -28,7 +28,7 @@
 	}
 
 	&--compact-stack+&:not(.modula-settings-editor__field-row--compact-stack):not(.modula-settings-editor__field-row--section-heading) {
-		border-top: 1px solid #f0f0f1;
+		border-top: 1px solid var(--modula-admin-border-divider);
 		margin-top: $mod-space-4;
 		padding-top: $mod-space-12;
 	}
@@ -37,7 +37,7 @@
 		opacity: 0.72;
 		pointer-events: none;
 
-		.modula-settings-editor__editor-upsell {
+		.modula-lite-upsell {
 			pointer-events: auto;
 		}
 	}
@@ -108,7 +108,7 @@
 	pointer-events: none;
 
 	.modula-settings-editor__field-path-tip,
-	.modula-ui-reset-to-default {
+	.modula-settings-editor__field-reset {
 		pointer-events: auto;
 	}
 }
@@ -130,7 +130,7 @@
 	pointer-events: none;
 
 	.modula-settings-editor__field-path-tip,
-	.modula-ui-reset-to-default {
+	.modula-settings-editor__field-reset {
 		pointer-events: auto;
 	}
 }
@@ -155,7 +155,7 @@
 	min-width: 36px;
 	pointer-events: none;
 	align-self: center;
-	color: #787c82;
+	color: var(--modula-admin-ink-muted);
 
 	svg {
 		fill: currentColor;
@@ -165,14 +165,4 @@
 .modula-settings-editor__field-row--toggle-nested .modula-settings-editor__field-toggle-foot {
 	grid-column: 1 / -1;
 	grid-row: 2;
-}
-
-.modula-settings-editor__nested-sidebar-head {
-	margin-bottom: $mod-space-10;
-}
-
-.modula-settings-editor__nested-sidebar-title {
-	font-size: 14px;
-	font-weight: 600;
-	margin: $mod-space-8 0 0;
 }

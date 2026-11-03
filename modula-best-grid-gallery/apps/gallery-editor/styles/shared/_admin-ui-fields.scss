@@ -1,0 +1,326 @@
+// Settings fields on admin-ui (ADR 0050): the scope root, the row chrome
+// around every control (label, reset dot, help, error) and the few controls
+// the editor composes from admin-ui primitives (menu select, dimensions,
+// media summary, filter chips). Colours come from admin-ui tokens only, so
+// light and dark follow AdminUiRoot.
+@use '../../../editor-shell/styles/select-menu' as *;
+@use '../../../editor-shell/styles/takeover-segmented' as *;
+@use '../../../editor-shell/styles/filter-name-list' as *;
+
+// AdminUiScope's root never takes part in layout (see editor-shell's
+// AdminUiScope.jsx; the metabox editor does not load the shell layout).
+// The canvas draws the editor denser than the Settings page: 32px fields,
+// full-width controls in the 400px panel.
+.modula-admin-ui.modula-takeover__admin-ui-scope {
+	--modula-admin-control-height: 32px;
+	--modula-admin-field-width: 100%;
+	display: contents;
+	font-size: var(--modula-admin-text-control);
+	line-height: 1.4;
+
+	// Its text fields match the menu selects beside them: 4px corners and
+	// control-size text, where the Settings page uses 8px and body text.
+	// The colour picker's hex keeps its smaller mono text.
+	.modula-admin-text-input:not(.modula-admin-color__hex),
+	.modula-admin-textarea,
+	.modula-admin-unit-input {
+		border-radius: var(--modula-admin-radius-sm);
+		font-size: var(--modula-admin-text-control);
+	}
+}
+
+.modula-admin-ui {
+
+	.modula-settings-editor__field-label,
+	.modula-settings-editor__inline-field-label {
+		color: var(--modula-admin-ink);
+		font-size: var(--modula-admin-text-control);
+		font-weight: 500;
+	}
+
+	.modula-settings-editor__field-reset {
+		margin-left: auto;
+	}
+
+	.modula-settings-editor__field-help,
+	.modula-settings-editor__action-button-hint {
+		margin: 6px 0 0;
+		color: var(--modula-admin-ink-muted);
+		font-size: var(--modula-admin-text-help);
+		line-height: 1.45;
+	}
+
+	.modula-settings-editor__field-error {
+		margin: 6px 0 0;
+		color: var(--modula-admin-danger);
+		font-size: var(--modula-admin-text-help);
+	}
+
+	.modula-settings-editor__toggle-end {
+		align-items: center;
+		gap: 8px;
+	}
+
+	.modula-settings-editor__toggle-label {
+		color: var(--modula-admin-ink-soft);
+		font-size: var(--modula-admin-text-caption);
+	}
+
+	// A colour row opens its panel under the swatch, across the row.
+	.modula-admin-color.is-open {
+		width: 100%;
+	}
+
+	.modula-settings-editor__code-textarea {
+		font-family: var(--modula-admin-font-mono);
+		font-size: var(--modula-admin-text-mono);
+	}
+
+	.modula-settings-editor__device-switch {
+		align-self: flex-start;
+	}
+
+	.modula-settings-editor__dimensions {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 8px;
+	}
+
+	.modula-settings-editor__dimensions-item {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		min-width: 0;
+	}
+
+	.modula-settings-editor__dimensions-label {
+		color: var(--modula-admin-ink-muted);
+		font-size: var(--modula-admin-text-caption);
+	}
+
+	.modula-settings-editor__password-visibility-toggle {
+		flex-shrink: 0;
+		width: var(--modula-admin-control-height);
+		padding: 0;
+	}
+
+	.modula-settings-editor__license-tiles img {
+		display: block;
+		max-width: 100%;
+		height: 24px;
+		object-fit: contain;
+	}
+
+	.modula-settings-editor__position-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+}
+
+// Select drawn as a menu button (SelectMenuControl, shared with the Albums
+// editor).
+@include select-menu('modula-settings-editor');
+
+// Segmented controls fill their row; the device switch keeps its width
+// (shared with the Albums editor).
+@include takeover-segmented('modula-settings-editor');
+
+// Image edit "This file" summary (MediaAttachmentControl variant="summary").
+.modula-admin-ui .modula-settings-editor__media-summary {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	min-width: 0;
+}
+
+.modula-admin-ui .modula-settings-editor__media-summary-thumb {
+	display: block;
+	flex: 0 0 auto;
+	width: 72px;
+	height: 72px;
+	border-radius: var(--modula-admin-radius-sm);
+	background: var(--modula-admin-surface-segment);
+	object-fit: cover;
+}
+
+.modula-admin-ui .modula-settings-editor__media-summary-body {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+
+.modula-admin-ui .modula-settings-editor__media-summary-title,
+.modula-admin-ui .modula-settings-editor__media-summary-meta {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.modula-admin-ui .modula-settings-editor__media-summary-title {
+	font-weight: 600;
+}
+
+.modula-admin-ui .modula-settings-editor__media-summary-meta {
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-caption);
+	font-variant-numeric: tabular-nums;
+}
+
+.modula-admin-ui .modula-settings-editor__media-summary-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	margin-top: 12px;
+
+	> * {
+		flex: 1 1 0;
+	}
+}
+
+// Buttons among the fields (Choose image; filter Add in editor-shell's
+// filter-name-list) take the fields' look instead of the 40px page button:
+// 32px, field border, 4px corners (canvas).
+.modula-admin-ui .modula-admin-button.modula-settings-editor__media-attachment {
+	height: var(--modula-admin-control-height);
+	padding: 0 14px;
+	border-color: var(--modula-admin-border-field);
+	border-radius: var(--modula-admin-radius-sm);
+	font-weight: 500;
+}
+
+// A media setting's row controls (MediaAttachmentControl): "Choose image",
+// or the chosen file's 32px thumbnail, name, Change and × (canvas).
+.modula-admin-ui .modula-settings-editor__media-attachment.is-set {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+
+	.modula-admin-button {
+		height: var(--modula-admin-control-height);
+	}
+
+	.modula-admin-button.is-link {
+		padding: 0 4px;
+	}
+}
+
+.modula-admin-ui .modula-settings-editor__media-attachment-thumb {
+	display: block;
+	flex-shrink: 0;
+	width: 32px;
+	height: 32px;
+	object-fit: cover;
+}
+
+.modula-admin-ui .modula-settings-editor__media-attachment-name {
+	min-width: 0;
+	max-width: 96px;
+	overflow: hidden;
+	color: var(--modula-admin-ink-soft);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.modula-admin-ui .modula-settings-editor__media-attachment-remove {
+	flex-shrink: 0;
+	width: var(--modula-admin-control-height);
+	padding: 0;
+	color: var(--modula-admin-ink-soft);
+}
+
+// Custom CSS (customCssTextareaKind): the gallery selector chip with Copy,
+// then a dark code field with line numbers, the same in both themes.
+.modula-admin-ui .modula-custom-css-field__scope {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	height: 26px;
+	padding: 0 4px 0 8px;
+	border: 0;
+	border-radius: 3px;
+	background: var(--modula-admin-surface-segment);
+
+	.modula-admin-copy-field__value {
+		height: auto;
+		padding: 0;
+		background: none;
+		color: var(--modula-admin-ink-secondary);
+		font-family: var(--modula-admin-font-mono);
+		font-size: 12px;
+	}
+
+	.modula-admin-copy-field__button {
+		min-width: 0;
+		height: 20px;
+		min-height: 0;
+		padding: 0 6px;
+		border: 0;
+		border-radius: 2px;
+		background: var(--modula-admin-surface);
+		font-size: 11.5px;
+		font-weight: 400;
+	}
+
+	.modula-admin-button__icon {
+		display: none;
+	}
+}
+
+.modula-admin-ui .modula-custom-css-field__editor {
+	display: flex;
+	overflow: hidden;
+	border: 1px solid var(--modula-admin-code-surface);
+	border-radius: var(--modula-admin-radius-md);
+	background: var(--modula-admin-code-surface);
+	font-family: var(--modula-admin-font-mono);
+	font-size: 12.5px;
+	line-height: 20px;
+
+	&:focus-within {
+		box-shadow: var(--modula-admin-focus-field);
+	}
+
+	.modula-admin-field {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+}
+
+.modula-admin-ui .modula-custom-css-field__gutter {
+	display: flex;
+	flex: 0 0 40px;
+	flex-direction: column;
+	box-sizing: border-box;
+	padding: 12px 10px 12px 0;
+	color: var(--modula-admin-code-gutter);
+	text-align: right;
+	user-select: none;
+}
+
+// Inside the editor box, to outrank admin-ui's textarea rule loaded later.
+.modula-admin-ui .modula-custom-css-field__editor .modula-custom-css-field__textarea {
+	min-height: 0;
+	padding: 12px 12px 12px 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	box-shadow: none;
+	color: var(--modula-admin-code-ink);
+	caret-color: var(--modula-admin-code-caret);
+	font: inherit;
+	line-height: inherit;
+	white-space: pre;
+	resize: none;
+
+	&:focus {
+		border: 0;
+		box-shadow: none;
+	}
+}
+
+// Gallery filter chips and their Add button.
+@include filter-name-list-admin-ui;

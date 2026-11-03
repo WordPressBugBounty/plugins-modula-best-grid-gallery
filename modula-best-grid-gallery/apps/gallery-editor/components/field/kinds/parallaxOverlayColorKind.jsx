@@ -1,5 +1,5 @@
 import { useRef, useState } from '@wordpress/element';
-import CompactColorControl from '../CompactColorControl';
+import SettingsColorControl from '../SettingsColorControl';
 
 const DEFAULT_BASE_COLOR = '#000000';
 
@@ -66,11 +66,13 @@ function buildParallaxOverlayGradient(baseHex) {
  * switch) - never from our own gradient echoing back.
  *
  * @param {Object}   props
+ * @param {string}   props.id
+ * @param {string}   props.label
  * @param {*}        props.value
  * @param {Function} props.onChange
  * @param {boolean}  props.disabled
  */
-function ParallaxOverlayColorControl({ value, onChange, disabled }) {
+function ParallaxOverlayColorControl({ id, label, value, onChange, disabled }) {
 	const lastEmittedRef = useRef(null);
 	const [baseHex, setBaseHex] = useState(() =>
 		extractBaseColorFromGradient(value)
@@ -87,13 +89,10 @@ function ParallaxOverlayColorControl({ value, onChange, disabled }) {
 	}
 
 	return (
-		<div
-			className={`modula-settings-editor__color-picker modula-settings-editor__color-picker--swatch${
-				disabled ? ' is-disabled' : ''
-			}`}
-			aria-disabled={disabled || undefined}
-		>
-			<CompactColorControl
+		<div className="modula-settings-editor__color-picker modula-settings-editor__color-picker--swatch">
+			<SettingsColorControl
+				id={id}
+				label={label}
 				value={baseHex}
 				onChange={(nextHex) => {
 					setBaseHex(nextHex);
@@ -102,21 +101,25 @@ function ParallaxOverlayColorControl({ value, onChange, disabled }) {
 					onChange(gradient);
 				}}
 				disabled={disabled}
-				variant="swatch"
 			/>
 		</div>
 	);
 }
 
 /**
- * @param {Object}   ctx
- * @param {*}        ctx.value
- * @param {Function} ctx.onChange
- * @param {boolean}  ctx.disabled
+ * @param {import('../fieldControlKinds').FieldControlContext} ctx
  */
-export function renderParallaxOverlayColorKind({ value, onChange, disabled }) {
+export function renderParallaxOverlayColorKind({
+	controlId,
+	label,
+	value,
+	onChange,
+	disabled,
+}) {
 	return (
 		<ParallaxOverlayColorControl
+			id={controlId}
+			label={label}
 			value={value}
 			onChange={onChange}
 			disabled={disabled}

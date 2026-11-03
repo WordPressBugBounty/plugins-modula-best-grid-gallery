@@ -4,13 +4,59 @@ import { LockIcon } from '../icons/icons';
 import { SettingsCard } from '../settings-card/SettingsCard';
 
 /**
- * Plan pill shown after a card title (Trio, Business, Starter).
- *
- * @param {Object} props
- * @param {string} props.plan
+ * @typedef {'plan' | 'outline' | 'solid'} PlanBadgeTone
  */
-export function PlanBadge({ plan }) {
-	return <span className="modula-admin-plan-badge">{plan}</span>;
+
+/**
+ * Plan pill: the plan name after a card title (Trio, Business, Starter), or
+ * the editor's PRO pill with a lock. `outline` is the quiet pill in a
+ * section header; `solid` is the dark pill on a locked setting. With
+ * `onClick` it is a button (it opens the upsell), so give it an
+ * `aria-label` that says what it does ("Image focus needs PRO. See plans").
+ *
+ * @param {Object}        props
+ * @param {string}        props.plan          Plan name, or "PRO".
+ * @param {PlanBadgeTone} [props.tone='plan']
+ * @param {boolean}       [props.lock]        Lock icon before the name.
+ * @param {Function}      [props.onClick]
+ * @param {string}        [props.className]
+ */
+export function PlanBadge({
+	plan,
+	tone = 'plan',
+	lock = false,
+	onClick,
+	className = '',
+	...rest
+}) {
+	const classes = [
+		'modula-admin-plan-badge',
+		`is-${tone}`,
+		onClick ? 'is-action' : '',
+		className,
+	]
+		.filter(Boolean)
+		.join(' ');
+	const content = (
+		<>
+			{lock ? <LockIcon size={11} strokeWidth={2.4} /> : null}
+			{plan}
+		</>
+	);
+
+	if (!onClick) {
+		return (
+			<span className={classes} {...rest}>
+				{content}
+			</span>
+		);
+	}
+
+	return (
+		<button type="button" className={classes} onClick={onClick} {...rest}>
+			{content}
+		</button>
+	);
 }
 
 /**

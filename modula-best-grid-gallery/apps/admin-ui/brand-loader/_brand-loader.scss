@@ -1,0 +1,55 @@
+// Loaded under `.modula-admin-ui`; the turn, breathe and sweep keyframes live
+// in root. Keep the timing in step with assets/css/admin/takeover-boot.css.
+
+.modula-admin-brand-loader {
+	display: inline-flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 14px;
+}
+
+.modula-admin-brand-loader__mark {
+	display: block;
+	flex-shrink: 0;
+	overflow: visible;
+	fill: var(--modula-admin-ink);
+}
+
+// The view box is centred on the mark, so `0 0` turns it about its middle.
+.modula-admin-brand-loader__blades {
+	transform-origin: 0 0;
+	animation: modula-admin-brand-loader-turn 2.8s linear infinite;
+}
+
+// Each blade slides along its own axis: its group carries the rotation.
+.modula-admin-brand-loader__blade {
+	animation: modula-admin-brand-loader-breathe 1.4s ease-in-out infinite;
+}
+
+// Blade k of the six (its group's place) starts k × 0.1s late.
+@for $blade from 2 through 6 {
+	.modula-admin-brand-loader__blades > :nth-child(#{$blade}) > * {
+		animation-delay: ($blade - 1) * 0.1s;
+	}
+}
+
+// The word "Modula" cut from `assets/images/modula-logo-black.webp` (mark +
+// word; the word sits at x 101–288, y 20–60 of 288 × 80): the mask is sized
+// and placed so only that box shows. The letters are the faint ink; the full
+// ink is a layer over it that grows from the left. At rest (reduced motion)
+// the layer covers them all.
+.modula-admin-brand-loader__wordmark {
+	display: block;
+	flex-shrink: 0;
+	aspect-ratio: 187 / 41;
+	background-color: color-mix(in srgb, var(--modula-admin-ink) 20%, transparent);
+	background-image: linear-gradient(var(--modula-admin-ink), var(--modula-admin-ink));
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	// Through the alias (as styles/_fonts.scss): Sass inlines this partial, so
+	// a relative URL would resolve from each app's entry stylesheet, and Pro's
+	// sit elsewhere.
+	-webkit-mask: url(~admin-ui/../../assets/images/modula-logo-black.webp) right 51.28% / 154.01% 195.12% no-repeat;
+	mask: url(~admin-ui/../../assets/images/modula-logo-black.webp) right 51.28% / 154.01% 195.12% no-repeat;
+	animation: modula-admin-brand-loader-sweep 2s ease-in-out infinite;
+}

@@ -1,17 +1,29 @@
-import { Slider } from 'shared-ui';
+import { Range } from 'admin-ui';
+import { ControlHelp, describedByHelp } from './ControlHelp';
 
 /**
- * @param {Object}           ctx
- * @param {Object}           [ctx.field]
- * @param {Object}           ctx.control
- * @param {*}                ctx.value
- * @param {Function}         ctx.onChange
- * @param {boolean}          ctx.disabled
- * @param {string|undefined} ctx.help
+ * Unit shown after the value. Stored px strings ("12px") read as px; a
+ * schema may name its unit in `control.unit`. Settings store no unit choice,
+ * so the canvas's unit menu is not offered (no stored value may change).
+ *
+ * @param {Object} control
+ * @return {string} Unit, or '' for a plain number.
+ */
+export function rangeUnit(control) {
+	if (control.valueFormat === 'px') {
+		return 'px';
+	}
+
+	return typeof control.unit === 'string' ? control.unit : '';
+}
+
+/**
+ * @param {import('../fieldControlKinds').FieldControlContext} ctx
  */
 export function renderRangeKind({
 	field,
 	control,
+	controlId,
 	value,
 	onChange,
 	disabled,
@@ -76,14 +88,19 @@ export function renderRangeKind({
 	};
 
 	return (
-		<Slider
-			value={safe}
-			onChange={emit}
-			min={min}
-			max={max}
-			step={step}
-			disabled={disabled}
-			help={help}
-		/>
+		<>
+			<Range
+				id={controlId}
+				value={safe}
+				onChange={emit}
+				min={min}
+				max={max}
+				step={step}
+				unit={rangeUnit(control)}
+				disabled={disabled}
+				aria-describedby={describedByHelp(controlId, help)}
+			/>
+			<ControlHelp help={help} controlId={controlId} />
+		</>
 	);
 }

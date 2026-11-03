@@ -5,11 +5,13 @@
  * @package
  */
 
+import { parseFilterTagText } from '../utils/filterTagText';
+
 /**
  * Category/tag tokens for an item (matches PHP Catalog_Service::row_filter_tokens).
  *
  * @param {Object} item Gallery item row.
- * @return {string[]}
+ * @return {string[]} The filter names the item carries.
  */
 export function itemFilterTokens(item) {
 	if (Array.isArray(item?.categories) && item.categories.length > 0) {
@@ -22,11 +24,8 @@ export function itemFilterTokens(item) {
 	if (Array.isArray(raw)) {
 		return raw.map(String);
 	}
-	if (typeof raw === 'string' && raw.trim() !== '') {
-		return raw
-			.split(',')
-			.map((part) => part.trim())
-			.filter(Boolean);
+	if (typeof raw === 'string') {
+		return parseFilterTagText(raw);
 	}
 	return [];
 }

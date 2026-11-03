@@ -141,6 +141,7 @@ return array(
 	'proofing.expireRejectionNotice'         => 'Message shown when a proofing link is no longer valid.',
 	'proofing.imageProofing'                 => 'Enables client selection and approval flows for this gallery.',
 	'proofing.loginRejectionNotice'          => 'Message when a user must log in to access proofing.',
+	'proofing.manageProofing'                => 'Locks the gallery for proofing and opens the proofing manager, where you invite clients and review their selections.',
 	'proofing.maxSelection'                  => 'Maximum number of images a client may approve or select.',
 	'proofing.minSelection'                  => 'Minimum selections required before submitting.',
 	'proofing.notificationEmail'             => 'Where to send the email when a client submits their final selection. Defaults to the gallery owner email.',

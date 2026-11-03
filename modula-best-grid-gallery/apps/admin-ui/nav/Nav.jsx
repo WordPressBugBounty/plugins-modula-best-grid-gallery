@@ -100,6 +100,8 @@ function resultCountMessage(resultCount) {
  * Search box for the nav ("Find a setting…"). It owns the live region that
  * announces the result count: the field stays mounted while results come
  * and go, and a live region only announces changes, not its first content.
+ * Any other prop goes to the input: the combobox role, its ARIA state and
+ * `onKeyDown` when the caller moves through the results with the keyboard.
  *
  * @param {Object}      props
  * @param {string}      props.value
@@ -116,6 +118,7 @@ export function SearchField({
 	resultCount,
 	placeholder = '',
 	inputRef = null,
+	...inputProps
 }) {
 	return (
 		<div className="modula-admin-search">
@@ -123,6 +126,7 @@ export function SearchField({
 				<SearchIcon />
 			</span>
 			<input
+				{...inputProps}
 				ref={inputRef}
 				type="search"
 				className="modula-admin-search__input"

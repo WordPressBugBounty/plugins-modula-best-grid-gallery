@@ -10,6 +10,8 @@
 
 namespace Modula\V2\Settings;
 
+use Modula\V2\Motion\Animation_Catalog;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -24,6 +26,17 @@ class Settings_Schema_Exporter {
 	 * @var string
 	 */
 	public const SETTINGS_EDITOR_GENERATED_RELATIVE = 'apps/gallery-editor/generated';
+
+	/**
+	 * Relative path to the animation catalog's runtime projection, which the
+	 * gallery runtime (visitor and preview) imports. Unlike the editor's
+	 * `generated/` files it is committed: Pro's albums editor bundles
+	 * gallery-shared without running this codegen. tests/test-animation-catalog.php
+	 * fails when it is out of date.
+	 *
+	 * @var string
+	 */
+	public const MOTION_RUNTIME_RELATIVE = 'apps/gallery-shared/motion/modula-motion-runtime.json';
 
 	/**
 	 * Infer editor control from v2 field definition (parity with generate-modula-settings-form-schema.mjs).
@@ -78,10 +91,7 @@ class Settings_Schema_Exporter {
 					foreach ( array_slice( $schema_field['default'], 0, 3 ) as $d ) {
 						$defaults[] = is_numeric( $d ) ? (int) $d : 0;
 					}
-					while ( count( $defaults ) < 3 ) {
-						$defaults[] = 0;
-					}
-					$control['defaults'] = $defaults;
+					$control['defaults'] = array_pad( $defaults, 3, 0 );
 				}
 				return $control;
 			}
@@ -339,11 +349,13 @@ class Settings_Schema_Exporter {
 	 */
 	public static function write_json_file( $data, $path ) {
 		$flags = JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
-		// json_encode (not wp_json_encode) so the generator runs under plain PHP CLI without WordPress.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- codegen runs under plain PHP CLI, without WordPress.
 		$encoded = json_encode( $data, $flags );
 		if ( false === $encoded ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI error message, never rendered as HTML.
 			throw new \RuntimeException( 'json_encode failed for ' . $path );
 		}
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- codegen runs under plain PHP CLI, without WP_Filesystem.
 		return false !== file_put_contents( $path, $encoded . "\n" );
 	}
 
@@ -385,17 +397,11 @@ class Settings_Schema_Exporter {
 			'/^groups\.\d+\.fields\.\d+\.control\.sidebarNestedPanel\.title$/',
 			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.(title|description|navHelp|panelDescription)$/',
 			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.auxiliaryPanel\.(title|description)$/',
-			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.hubSections\.\d+\.label$/',
-			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.hubSections\.\d+\.text$/',
-			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.hubSections\.\d+\.hubHelp$/',
-			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.hubSections\.\d+\.items\.\d+\.label$/',
-			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.hubSections\.\d+\.items\.\d+\.text$/',
-			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.hubSections\.\d+\.items\.\d+\.hubHelp$/',
-			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.hubSections\.\d+\.items\.\d+\.items\.\d+\.label$/',
-			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.hubSections\.\d+\.items\.\d+\.items\.\d+\.text$/',
-			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.hubSections\.\d+\.items\.\d+\.items\.\d+\.hubHelp$/',
-			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.hubSections\.\d+\.items\.\d+\.summaryParts\.\d+\.template$/',
-			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.hubSections\.\d+\.items\.\d+\.summaryParts\.\d+\.zeroLabel$/',
+			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.liteUpsell\.(title|pitch|needsProMessage|getPremiumLabel)$/',
+			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.liteUpsell\.points\.\d+\.label$/',
+			// Hub sections nest `items` to any depth (submenu → drill → nested drill).
+			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.hubSections\.\d+(\.items\.\d+)*\.(label|text|hubHelp)$/',
+			'/^SETTINGS_EDITOR_CATEGORIES\.\d+\.hubSections\.\d+(\.items\.\d+)*\.summaryParts\.\d+\.(template|zeroLabel)$/',
 			'/^GROUP_LABELS\.[a-zA-Z0-9_-]+$/',
 			'/^imageMetadataModal\.tabs\.\d+\.title$/',
 			'/^imageMetadataModal\.tabs\.\d+\.fields\.\d+\.editorLabel$/',
@@ -405,6 +411,10 @@ class Settings_Schema_Exporter {
 			'/^imageMetadataModal\.tabs\.\d+\.fields\.\d+\.control\.buttonLabel$/',
 			'/^imageMetadataModal\.tabs\.\d+\.fields\.\d+\.control\.mediaFrameTitle$/',
 			'/^imageMetadataModal\.tabs\.\d+\.fields\.\d+\.control\.selectButtonLabel$/',
+			// Animation catalog (modula-animation-catalog.js).
+			'/^primitives\.[a-z]+\.items\.\d+\.label$/',
+			'/^presets\.\d+\.(label|description)$/',
+			'/^menus\.[a-z]+\.items\.\d+\.label$/',
 		);
 		foreach ( $patterns as $pattern ) {
 			if ( 1 === preg_match( $pattern, $path ) ) {
@@ -423,7 +433,7 @@ class Settings_Schema_Exporter {
 			return true;
 		}
 		$keys = array_keys( $arr );
-		return $keys === range( 0, count( $arr ) - 1 );
+		return range( 0, count( $arr ) - 1 ) === $keys;
 	}
 
 	/**
@@ -439,17 +449,20 @@ class Settings_Schema_Exporter {
 
 		if ( is_string( $val ) ) {
 			if ( self::form_schema_path_is_translatable( $path ) ) {
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- codegen runs under plain PHP CLI, without WordPress.
 				$enc = json_encode( $val, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
 				if ( false === $enc ) {
 					$enc = '""';
 				}
 				return '__( ' . $enc . ", 'modula-best-grid-gallery' )";
 			}
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- codegen runs under plain PHP CLI, without WordPress.
 			$enc = json_encode( $val, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
 			return false !== $enc ? $enc : '""';
 		}
 
 		if ( is_int( $val ) || is_float( $val ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- codegen runs under plain PHP CLI, without WordPress.
 			$enc = json_encode( $val );
 			return false !== $enc ? $enc : '0';
 		}
@@ -525,6 +538,7 @@ class Settings_Schema_Exporter {
 			"import { __ } from '@wordpress/i18n';\n\n" .
 			'export default ';
 		$footer = ";\n";
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- codegen runs under plain PHP CLI, without WP_Filesystem.
 		return false !== file_put_contents( $path, $header . $body . $footer );
 	}
 
@@ -546,6 +560,29 @@ class Settings_Schema_Exporter {
 			"import { __ } from '@wordpress/i18n';\n\n" .
 			'export default ';
 		$footer = ";\n";
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- codegen runs under plain PHP CLI, without WP_Filesystem.
+		return false !== file_put_contents( $path, $header . $body . $footer );
+	}
+
+	/**
+	 * Write the animation catalog as an ES module for the editor; labels use __().
+	 *
+	 * @param array<string, mixed> $catalog Animation_Catalog::data().
+	 * @param string               $path    Absolute path to .js file.
+	 * @return bool
+	 */
+	public static function write_animation_catalog_js( array $catalog, $path ) {
+		$body   = self::form_value_to_js_expr( $catalog, '', 0 );
+		$header = "/* eslint-disable */\n" .
+			"/**\n * Generated by scripts/generate-modula-settings-schemas.php — do not hand-edit.\n" .
+			" * Source: includes/v2/motion/data/animation-catalog.php.\n" .
+			" * User-facing strings use @wordpress/i18n.__ for wp_set_script_translations.\n" .
+			" * Imported via apps/gallery-editor/data/animationCatalog.js (and Pro's Albums editor).\n" .
+			" */\n" .
+			"import { __ } from '@wordpress/i18n';\n\n" .
+			'export default ';
+		$footer = ";\n";
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- codegen runs under plain PHP CLI, without WP_Filesystem.
 		return false !== file_put_contents( $path, $header . $body . $footer );
 	}
 
@@ -862,12 +899,15 @@ class Settings_Schema_Exporter {
 	public static function run( $root ) {
 		$root    = rtrim( $root, '/' );
 		$out_dir = $root . '/' . self::SETTINGS_EDITOR_GENERATED_RELATIVE;
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir -- codegen runs under plain PHP CLI, without WP_Filesystem.
 		if ( ! is_dir( $out_dir ) && ! mkdir( $out_dir, 0755, true ) && ! is_dir( $out_dir ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI error message, never rendered as HTML.
 			throw new \RuntimeException( 'Could not create directory: ' . $out_dir );
 		}
 
 		$doc = self::load_v2_document( $root );
 		// Deep copy so export-time filters never mutate Settings_Schema_Document's cached array.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- codegen runs under plain PHP CLI, without WordPress.
 		$encoded = json_encode( $doc, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
 		if ( false === $encoded ) {
 			throw new \RuntimeException( 'Could not encode v2 document for export (json_encode failed).' );
@@ -893,7 +933,7 @@ class Settings_Schema_Exporter {
 		$nav  = isset( $doc['editorNavigation'] ) && is_array( $doc['editorNavigation'] ) ? $doc['editorNavigation'] : array();
 		$cats = isset( $nav['categories'] ) && is_array( $nav['categories'] ) ? $nav['categories'] : array();
 		$gls  = isset( $nav['groupLabels'] ) && is_array( $nav['groupLabels'] ) ? $nav['groupLabels'] : array();
-		$cats = self::merge_sidebar_v2_copy_into_categories( $cats );
+		$cats = self::derive_category_grouped_paths( self::merge_sidebar_v2_copy_into_categories( $cats ) );
 		self::write_editor_structure_js(
 			array(
 				'SETTINGS_EDITOR_CATEGORIES' => $cats,
@@ -901,6 +941,15 @@ class Settings_Schema_Exporter {
 			),
 			$out_dir . '/modula-settings-editor-structure.js'
 		);
+
+		if ( ! self::write_animation_catalog_js( Animation_Catalog::data(), $out_dir . '/modula-animation-catalog.js' ) ) {
+			throw new \RuntimeException( 'Could not write the generated modula-animation-catalog.js.' );
+		}
+
+		// The visitor bundle needs the motion data too, without the editor's labels.
+		if ( ! self::write_json_file( Animation_Catalog::runtime_data(), $root . '/' . self::MOTION_RUNTIME_RELATIVE ) ) {
+			throw new \RuntimeException( 'Could not write the generated modula-motion-runtime.json.' );
+		}
 	}
 
 	/**
@@ -944,6 +993,64 @@ class Settings_Schema_Exporter {
 			}
 		}
 		return $categories;
+	}
+
+	/**
+	 * Apply derive_drill_grouped_paths() to every category's `hubSections`.
+	 *
+	 * @param array<int, mixed> $categories `editorNavigation.categories`.
+	 * @return array<int, mixed>
+	 */
+	public static function derive_category_grouped_paths( array $categories ) {
+		foreach ( $categories as $i => $category ) {
+			if ( is_array( $category ) && isset( $category['hubSections'] ) && is_array( $category['hubSections'] ) ) {
+				$categories[ $i ]['hubSections'] = self::derive_drill_grouped_paths( $category['hubSections'] );
+			}
+		}
+		return $categories;
+	}
+
+	/**
+	 * Give every drill that nests `items` the flat `groupedPaths` the drill-down panel reads:
+	 * its fields and the fields of its nested drills, in navigation order. `items` stay for the
+	 * hub and accordion panel. A drill that already lists `groupedPaths` keeps them.
+	 *
+	 * @param array<int, mixed> $entries Hub sections, submenu items or drill items.
+	 * @return array<int, mixed>
+	 */
+	private static function derive_drill_grouped_paths( array $entries ) {
+		foreach ( $entries as $i => $entry ) {
+			if ( ! is_array( $entry ) || ! isset( $entry['items'] ) || ! is_array( $entry['items'] ) ) {
+				continue;
+			}
+			$entries[ $i ]['items'] = self::derive_drill_grouped_paths( $entry['items'] );
+			$is_drill               = isset( $entry['type'] ) && 'drill' === $entry['type'];
+			if ( $is_drill && empty( $entry['groupedPaths'] ) ) {
+				$entries[ $i ]['groupedPaths'] = self::collect_item_grouped_paths( $entries[ $i ]['items'] );
+			}
+		}
+		return $entries;
+	}
+
+	/**
+	 * @param array<int, mixed> $items Drill items after derive_drill_grouped_paths().
+	 * @return string[]
+	 */
+	private static function collect_item_grouped_paths( array $items ) {
+		$paths = array();
+		foreach ( $items as $item ) {
+			if ( ! is_array( $item ) || ! isset( $item['type'] ) ) {
+				continue;
+			}
+			if ( 'field' === $item['type'] && isset( $item['groupedPath'] ) && is_string( $item['groupedPath'] ) ) {
+				$paths[] = $item['groupedPath'];
+				continue;
+			}
+			if ( 'drill' === $item['type'] && isset( $item['groupedPaths'] ) && is_array( $item['groupedPaths'] ) ) {
+				$paths = array_merge( $paths, $item['groupedPaths'] );
+			}
+		}
+		return array_values( array_unique( $paths ) );
 	}
 
 	/**

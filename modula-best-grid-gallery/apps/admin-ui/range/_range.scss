@@ -23,7 +23,8 @@
 	height: 18px;
 	border: 2px solid var(--modula-admin-ink);
 	border-radius: 50%;
-	background: var(--modula-admin-surface);
+	// Lifted off the track: white in light, lighter than surface in dark.
+	background: var(--modula-admin-surface-raised);
 	box-shadow: var(--modula-admin-shadow-raised);
 	cursor: pointer;
 }
@@ -72,6 +73,32 @@
 	&:disabled {
 		opacity: var(--modula-admin-disabled-opacity);
 		cursor: default;
+	}
+}
+
+// The editor's unit box: the value and its unit menu in a bordered box,
+// as wide as its longest value so the slider does not move.
+.modula-admin-range__box {
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	gap: 1px;
+	box-sizing: border-box;
+	min-width: 72px;
+	height: 32px;
+	padding: 0 3px 0 10px;
+	border: 1px solid var(--modula-admin-border-field);
+	border-radius: var(--modula-admin-radius-sm);
+	background: var(--modula-admin-surface);
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-control);
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+
+	:disabled + &,
+	fieldset:disabled & {
+		opacity: var(--modula-admin-disabled-opacity);
 	}
 }
 

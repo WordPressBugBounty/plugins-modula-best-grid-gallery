@@ -10,6 +10,7 @@ import {
 	PARALLAX_MOTION_PRESET_IDS,
 } from './parallaxMasonryPresets';
 import { sliderSettingsToCarousel } from './sliderSettingsToCarousel';
+import { resolveSliderSlideFileBox } from './sliderSlideFileSize';
 import { storySettingsToCarousel } from './storySettingsToCarousel';
 import { resolveUniformGridTileAspect } from './uniformGridTileAspect';
 import {
@@ -19,7 +20,6 @@ import {
 import { clampUniformGridColumnCount } from './uniformGridColumns';
 import {
 	isGalleryTypeWithoutLightbox,
-	isGalleryTypeWithoutLoadingEffects,
 	DEFAULT_GALLERY_TYPE,
 	DEFAULT_MASONRY_GRID_TYPE,
 } from '../constants/galleryLayoutDefaults';
@@ -38,6 +38,11 @@ import {
 	mergeLegacyJsConfigIntoConfig,
 } from './mergeLegacyJsConfig';
 import { clampMasonryGalleryWidth } from './clampMasonryGalleryWidth';
+import {
+	playsLayoutMotion,
+	playsLoadingEffects,
+	showsInlineSocial,
+} from '../motion/motionRuntime';
 import { normalizeGalleryAlignment } from './resolveGalleryAlignmentCss';
 import { resolveVideoMaxHeightCss } from './resolveVideoMaxHeightCss';
 import { coerceLightboxClickMode } from './resolveGalleryItemLink';
@@ -311,8 +316,9 @@ export function settingsToConfig(settings, opts = {}) {
 		'fit-grid',
 		'polaroid',
 	];
+	const loadingEffectsPlay = playsLoadingEffects(settings);
 	const inView =
-		!isGalleryTypeWithoutLoadingEffects(type) &&
+		loadingEffectsPlay &&
 		(opts.inView ?? !!loadingEffects.inView) &&
 		inViewPermitted.includes(type);
 
@@ -364,7 +370,7 @@ export function settingsToConfig(settings, opts = {}) {
 	const galleryAlignment = normalizeGalleryAlignment(general.alignment);
 
 	const uiConfig = groupedUiSettingsToConfig(settings);
-	if (isGalleryTypeWithoutLoadingEffects(type)) {
+	if (!loadingEffectsPlay) {
 		uiConfig.loadedScale = 100;
 		uiConfig.loadedRotate = 0;
 		uiConfig.loadedHSlide = 0;
@@ -499,7 +505,13 @@ export function settingsToConfig(settings, opts = {}) {
 		),
 		lazyLoad: lazyLoadFlag,
 		randomFactor: parseInt(general.randomFactor ?? 50, 10) / 100,
+		playsLoadingEffects: loadingEffectsPlay,
 		inView,
+		/** Motion → This layout: Justified "Widen on hover", Polaroid "Visitors can move the prints". */
+		widenOnHover: playsLayoutMotion(settings, 'widen'),
+		movePrints: playsLayoutMotion(settings, 'movePrints'),
+		/** Motion → Hover: Social strip shows its icons inline, even when socialDesktopCollapsed folds them. */
+		inlineSocial: showsInlineSocial(settings),
 		email_subject: social.emailSubject || '',
 		email_message: social.emailMessage || '',
 		rowHeight: (() => {
@@ -551,19 +563,21 @@ export function settingsToConfig(settings, opts = {}) {
 							return Math.min(160, Math.max(0, n));
 						})(),
 						centerScale: (() => {
-							const n = Number(showcase.centerScale);
 							/*
-							 * `1` was historically persisted when the range control
-							 * fell back to `min` instead of the schema default — that
-							 * killed the center “showcase” grow. Treat ≤1 as unset.
+							 * A blank value is unset. Galleries that stored `1` (the
+							 * sanitizer once saved decimals as integers) read as the
+							 * schema default through Meta_Sync on the PHP side.
 							 */
-							if (!Number.isFinite(n) || n <= 1) {
+							const raw = showcase.centerScale;
+							const n =
+								raw === null || raw === undefined || raw === ''
+									? NaN
+									: Number(raw);
+							if (!Number.isFinite(n)) {
 								return 1.4;
 							}
 							return Math.min(1.75, Math.max(1.1, n));
 						})(),
-						centerBias:
-							showcase.centerBias === 'left' ? 'left' : 'center',
 						arrowPosition: [
 							'bottom-right',
 							'bottom-left',
@@ -714,6 +728,11 @@ export function settingsToConfig(settings, opts = {}) {
 			(slider.imageCrop === true ||
 				slider.imageCrop === 1 ||
 				slider.imageCrop === '1'),
+		/** Image file size box; each slide's width follows it (scale-down only). */
+		sliderSlideFileBox:
+			type === 'slider'
+				? resolveSliderSlideFileBox(slider, imageSizeDimensions)
+				: null,
 		borderSize:
 			type === 'story' ? 0 : parseInt(style.borderSize ?? 0, 10) || 0,
 		borderRadius:

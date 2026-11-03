@@ -542,7 +542,8 @@ class Modula_Shortcode {
 		$css  = apply_filters( 'modula_shortcode_css', $css, $gallery_id, $settings );
 
 		if ( strlen( $settings['style'] ) ) {
-			$css .= esc_html( $settings['style'] );
+			// Not esc_html(): it turns `>` and quotes into entities, which break selectors and `content`.
+			$css .= Modula_Helper::sanitize_custom_css( $settings['style'] );
 		}
 
 		// Responsive fixes

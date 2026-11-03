@@ -1,6 +1,7 @@
 import {
 	getDeeplinkGalleryIdFromHash,
 	MODERN_VISITOR_ROOT_PENDING_SELECTOR,
+	observeNearViewport,
 } from 'gallery-shared/loader';
 import {
 	BOOTSTRAP_FORCE_GRACE_MS,
@@ -11,8 +12,6 @@ import './loader.scss';
 import { waitForGalleryLoad } from './waitForGalleryLoad';
 import { loadGalleryStylesheet } from './loadGalleryStylesheet';
 import { loadReactDependencies } from './loadReactDependencies';
-
-const ROOT_MARGIN = '200px 0px';
 
 if (
 	typeof window !== 'undefined' &&
@@ -357,61 +356,23 @@ async function performMount(element, attempt) {
 
 /**
  * @param {HTMLElement} element
- * @return {boolean}
- */
-function isElementInViewport(element) {
-	const rect = element.getBoundingClientRect();
-	const margin = 200;
-	return (
-		rect.bottom >= -margin &&
-		rect.top <=
-			(window.innerHeight || document.documentElement.clientHeight) +
-				margin &&
-		rect.right >= 0 &&
-		rect.width > 0
-	);
-}
-
-/**
- * @param {HTMLElement} element
  * @param {() => void}  onVisible
  */
 function observeGallery(element, onVisible) {
 	if (destroyedGalleries.has(element)) {
 		return;
 	}
-	if (isElementInViewport(element)) {
-		onVisible();
-		return;
+	galleryObservers.get(element)?.disconnect();
+	galleryObservers.delete(element);
+	const observer = observeNearViewport(element, () => {
+		galleryObservers.delete(element);
+		if (!destroyedGalleries.has(element)) {
+			onVisible();
+		}
+	});
+	if (observer) {
+		galleryObservers.set(element, observer);
 	}
-	if (!('IntersectionObserver' in window)) {
-		onVisible();
-		return;
-	}
-	const existing = galleryObservers.get(element);
-	if (existing) {
-		existing.disconnect();
-	}
-	const observer = new IntersectionObserver(
-		(entries) => {
-			for (const entry of entries) {
-				if (
-					!entry.isIntersecting ||
-					!isElementInViewport(entry.target)
-				) {
-					continue;
-				}
-				observer.unobserve(entry.target);
-				galleryObservers.delete(entry.target);
-				if (!destroyedGalleries.has(entry.target)) {
-					onVisible();
-				}
-			}
-		},
-		{ rootMargin: ROOT_MARGIN, threshold: 0 }
-	);
-	galleryObservers.set(element, observer);
-	observer.observe(element);
 }
 
 /**

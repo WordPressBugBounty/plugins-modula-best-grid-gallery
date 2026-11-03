@@ -1,10 +1,12 @@
 /**
- * Add split: primary add action + caret menu of grouped add sources.
+ * Add split: primary add action + caret menu of grouped add sources, on
+ * admin-ui's Menu (arrow keys, Escape and focus return come from it).
  * Without a primary action it renders one menu trigger instead (menu-only).
  */
-import { useEffect, useRef, useState } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
 import { Icon, chevronDown, plus } from '@wordpress/icons';
+import { Menu, MenuGroup, MenuItem, PlanBadge } from 'admin-ui';
+import { useRegisterCanvasPrimaryAdd } from './CanvasPrimaryAddContext';
 
 /**
  * @typedef {Object} AddSplitRow
@@ -12,16 +14,16 @@ import { Icon, chevronDown, plus } from '@wordpress/icons';
  * @property {string}                                               label      Visible menu label.
  * @property {import('react').ReactElement}                         icon       Row icon.
  * @property {boolean}                                              actionable False renders the row disabled.
- * @property {{ text: string, hint: string, variant: string }|null} [badge]    Requirement badge for unavailable rows.
+ * @property {{ text: string, hint: string, variant: string }|null} [badge]    Requirement badge for unavailable rows; `pro` draws the PRO pill.
  */
 
 /**
  * @param {Object}                                                    props
  * @param {string}                                                    props.mainLabel   Primary action label (e.g. Add images), or the menu trigger's visible label.
  * @param {() => void}                                                [props.onPrimary] Omit for menu-only mode: one trigger that always opens the menu.
- * @param {string}                                                    props.caretLabel  Accessible name of the caret, or of the menu-only trigger.
+ * @param {string}                                                    props.caretLabel  Accessible name of the caret, or of the menu-only trigger; also the menu's name.
  * @param {Array<{ id: string, label: string, rows: AddSplitRow[] }>} props.menuGroups
- * @param {(row: AddSplitRow) => void}                                props.onSelectRow Called after the menu closes.
+ * @param {(row: AddSplitRow) => void}                                props.onSelectRow Called when a row is chosen; the menu then closes and focus returns to its trigger.
  */
 export default function AddSplit({
 	mainLabel,
@@ -31,170 +33,105 @@ export default function AddSplit({
 	onSelectRow,
 }) {
 	const [menuOpen, setMenuOpen] = useState(false);
-	const wrapRef = useRef(null);
+	// The empty canvas's "Add images" runs the same action.
+	useRegisterCanvasPrimaryAdd(onPrimary);
 
-	useEffect(() => {
-		if (!menuOpen) {
-			return undefined;
-		}
-		const onDoc = (e) => {
-			const el = wrapRef.current;
-			if (el && e.target instanceof Node && !el.contains(e.target)) {
-				setMenuOpen(false);
-			}
-		};
-		const onKey = (e) => {
-			if (e.key === 'Escape') {
-				setMenuOpen(false);
-			}
-		};
-		document.addEventListener('mousedown', onDoc, true);
-		document.addEventListener('keydown', onKey);
-		return () => {
-			document.removeEventListener('mousedown', onDoc, true);
-			document.removeEventListener('keydown', onKey);
-		};
-	}, [menuOpen]);
-
-	const toggleMenu = () => setMenuOpen((o) => !o);
+	const items = (rows) =>
+		rows.map((row) => (
+			<AddSplitMenuItem
+				key={row.id}
+				row={row}
+				onSelect={() => onSelectRow(row)}
+			/>
+		));
 
 	return (
-		<div ref={wrapRef} className="modula-takeover__preview-add-split">
-			<div className="modula-takeover__preview-add-split-inner">
-				{onPrimary ? (
-					<>
-						<button
-							type="button"
-							className="modula-takeover__preview-add-split-main"
-							onClick={onPrimary}
-						>
-							<Icon icon={plus} size={16} />
-							<span>{mainLabel}</span>
-						</button>
+		<div className="modula-takeover__preview-add-split">
+			{onPrimary ? (
+				<button
+					type="button"
+					className="modula-takeover__preview-add-split-main"
+					onClick={onPrimary}
+				>
+					<Icon icon={plus} size={18} />
+					<span>{mainLabel}</span>
+				</button>
+			) : null}
+			<Menu
+				open={menuOpen}
+				onOpenChange={setMenuOpen}
+				label={caretLabel}
+				align="end"
+				trigger={(triggerProps) =>
+					onPrimary ? (
 						<button
 							type="button"
 							className="modula-takeover__preview-add-split-caret"
-							aria-expanded={menuOpen}
-							aria-haspopup="menu"
-							onClick={toggleMenu}
+							aria-label={caretLabel}
+							{...triggerProps}
 						>
-							<Icon icon={chevronDown} size={16} />
-							<span className="screen-reader-text">
-								{caretLabel}
-							</span>
+							<Icon icon={chevronDown} size={18} />
 						</button>
-					</>
-				) : (
-					<button
-						type="button"
-						className="modula-takeover__preview-add-split-main"
-						aria-label={caretLabel}
-						aria-expanded={menuOpen}
-						aria-haspopup="menu"
-						onClick={toggleMenu}
-					>
-						<Icon icon={plus} size={16} />
-						<span>{mainLabel}</span>
-						<Icon icon={chevronDown} size={16} />
-					</button>
-				)}
-			</div>
-			{menuOpen ? (
-				<ul className="modula-takeover__preview-add-menu" role="menu">
-					{menuGroups.map((group) => (
-						<li
-							key={group.id}
-							className="modula-takeover__preview-add-menu-group"
-							role="none"
+					) : (
+						<button
+							type="button"
+							className="modula-takeover__preview-add-split-main"
+							aria-label={caretLabel}
+							{...triggerProps}
 						>
-							{group.label ? (
-								<div
-									className="modula-takeover__preview-add-menu-group-label"
-									role="presentation"
-								>
-									{group.label}
-								</div>
-							) : null}
-							<ul
-								className="modula-takeover__preview-add-menu-group-list"
-								role="group"
-								aria-label={group.label || undefined}
-							>
-								{group.rows.map((row) => (
-									<AddSplitMenuItem
-										key={row.id}
-										row={row}
-										onSelect={() => {
-											setMenuOpen(false);
-											onSelectRow(row);
-										}}
-									/>
-								))}
-							</ul>
-						</li>
-					))}
-				</ul>
-			) : null}
+							<Icon icon={plus} size={18} />
+							<span>{mainLabel}</span>
+							<Icon icon={chevronDown} size={18} />
+						</button>
+					)
+				}
+			>
+				{menuGroups.map((group) =>
+					group.label ? (
+						<MenuGroup key={group.id} label={group.label}>
+							{items(group.rows)}
+						</MenuGroup>
+					) : (
+						items(group.rows)
+					)
+				)}
+			</Menu>
 		</div>
 	);
 }
 
 /**
+ * A disabled row keeps its requirement: the PRO pill or a short note, and
+ * the hint for screen readers.
+ *
  * @param {Object}      props
  * @param {AddSplitRow} props.row
  * @param {() => void}  props.onSelect
  */
 function AddSplitMenuItem({ row, onSelect }) {
 	const { actionable, badge } = row;
-	const ariaHint =
-		!actionable && badge
-			? sprintf(
-					/* translators: 1: action label, 2: requirement note */
-					__('%1$s — %2$s', 'modula-best-grid-gallery'),
-					row.label,
-					badge.hint
-				)
-			: undefined;
+	let badgeNode = null;
+	if (badge?.variant === 'pro') {
+		badgeNode = <PlanBadge plan={badge.text} tone="outline" lock />;
+	} else if (badge) {
+		badgeNode = (
+			<span className="modula-takeover__preview-add-menu-note">
+				{badge.text}
+			</span>
+		);
+	}
 
 	return (
-		<li className="modula-takeover__preview-add-menu-item" role="none">
-			<button
-				type="button"
-				className={
-					actionable
-						? 'modula-takeover__preview-add-menu-btn'
-						: 'modula-takeover__preview-add-menu-btn is-disabled'
-				}
-				role="menuitem"
-				disabled={!actionable}
-				aria-label={ariaHint}
-				title={badge && !actionable ? badge.hint : undefined}
-				onClick={() => {
-					if (actionable) {
-						onSelect();
-					}
-				}}
-			>
-				<span
-					className="modula-takeover__preview-add-menu-icon"
-					aria-hidden="true"
-				>
-					<Icon icon={row.icon} size={15} />
-				</span>
-				<span className="modula-takeover__preview-add-menu-label-wrap">
-					<span className="modula-takeover__preview-add-menu-label">
-						{row.label}
-					</span>
-					{badge ? (
-						<span
-							className={`modula-takeover__preview-add-menu-badge is-${badge.variant}`}
-							aria-hidden="true"
-						>
-							{badge.text}
-						</span>
-					) : null}
-				</span>
-			</button>
-		</li>
+		<MenuItem
+			icon={<Icon icon={row.icon} size={16} />}
+			badge={badgeNode}
+			disabled={!actionable}
+			onSelect={onSelect}
+		>
+			{row.label}
+			{!actionable && badge?.hint ? (
+				<span className="modula-admin-sr-only">{` ${badge.hint}`}</span>
+			) : null}
+		</MenuItem>
 	);
 }

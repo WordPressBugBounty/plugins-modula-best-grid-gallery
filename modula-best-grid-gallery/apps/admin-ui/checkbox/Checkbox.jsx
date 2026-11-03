@@ -1,18 +1,20 @@
-import { useId } from '@wordpress/element';
+import { useEffect, useId, useRef } from '@wordpress/element';
 
 /**
  * Native checkbox drawn as the design's 20px box.
  *
  * Pass `label` for visible text, or `aria-label` when the context names it
  * (a matrix cell, for example). `bordered` draws the outlined chip used for
- * multi-choice rows.
+ * multi-choice rows. `indeterminate` (a select-all with some rows chosen)
+ * draws a dash; the native property makes assistive tech read it as mixed.
  *
  * @param {Object}                    props
  * @param {boolean}                   props.checked
- * @param {Function}                  props.onChange    Receives the next boolean.
+ * @param {Function}                  props.onChange        Receives the next boolean.
  * @param {import('react').ReactNode} [props.label]
  * @param {boolean}                   [props.disabled]
  * @param {boolean}                   [props.bordered]
+ * @param {boolean}                   [props.indeterminate]
  * @param {string}                    [props.id]
  * @param {string}                    [props.className]
  */
@@ -22,24 +24,33 @@ export function Checkbox({
 	label,
 	disabled = false,
 	bordered = false,
+	indeterminate = false,
 	id: idProp,
 	className = '',
 	...rest
 }) {
 	const generatedId = useId();
+	const inputRef = useRef(null);
 	const id = idProp || `modula-admin-checkbox-${generatedId}`;
 	const classes = [
 		'modula-admin-checkbox',
 		bordered ? 'is-bordered' : '',
 		checked ? 'is-checked' : '',
+		indeterminate ? 'is-indeterminate' : '',
 		className,
 	]
 		.filter(Boolean)
 		.join(' ');
 
+	// `indeterminate` exists only as a DOM property, not an attribute.
+	useEffect(() => {
+		inputRef.current.indeterminate = indeterminate;
+	}, [indeterminate]);
+
 	return (
 		<label className={classes} htmlFor={id}>
 			<input
+				ref={inputRef}
 				id={id}
 				type="checkbox"
 				className="modula-admin-checkbox__input"
@@ -59,7 +70,7 @@ export function Checkbox({
 					strokeLinecap="round"
 					strokeLinejoin="round"
 				>
-					<path d="M5 12l5 5 9-10" />
+					<path d={indeterminate ? 'M6 12h12' : 'M5 12l5 5 9-10'} />
 				</svg>
 			</span>
 			{label ? (

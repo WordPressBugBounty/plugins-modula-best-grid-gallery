@@ -1,23 +1,45 @@
 /**
  * Attachment ID via settings; pick/upload through WP Media; preview URL from REST.
  */
-
-import { __ } from '@wordpress/i18n';
-import { Icon, upload, replace, trash } from '@wordpress/icons';
-import { ActionRow, Button, MetaSummary } from 'shared-ui';
+import { __, sprintf } from '@wordpress/i18n';
+import { Button, CloseIcon } from 'admin-ui';
+import { AdminUiScope } from 'editor-shell';
 import { useWpMediaAttachmentQuery } from '../../query/useWpMediaAttachmentQuery';
 import { buildImageMetadataPreviewChips } from '../../utils/imageMetadataPreviewMeta';
 import { bindWpMediaFrameStacking } from '../../utils/wpMediaFrameStacking';
 
 /**
  * @param {Object}              props
+ * @param {string}              [props.id]      Id of the chosen file's group.
+ * @param {string}              [props.label]   Setting name; names the chosen file's group.
  * @param {*}                   props.value
  * @param {Function}            props.onChange
  * @param {boolean}             props.disabled
  * @param {Object}              props.control
- * @param {'default'|'summary'} [props.variant] summary = MetaSummary + ActionRow (Image edit “This file”).
+ * @param {'default'|'summary'} [props.variant] default = the panel row's controls (Choose image, or thumb, name, Change, ×); summary = thumb, name and size line, then the actions (Image edit “This file”).
  */
-export default function MediaAttachmentControl({
+export default function MediaAttachmentControl(props) {
+	// The image edit panel renders the summary outside any settings row.
+	return (
+		<AdminUiScope>
+			<MediaAttachmentControlContent {...props} />
+		</AdminUiScope>
+	);
+}
+
+/**
+ * @param {Object}              props
+ * @param {string}              [props.id]
+ * @param {string}              [props.label]
+ * @param {*}                   props.value
+ * @param {Function}            props.onChange
+ * @param {boolean}             props.disabled
+ * @param {Object}              props.control
+ * @param {'default'|'summary'} [props.variant]
+ */
+function MediaAttachmentControlContent({
+	id,
+	label = '',
 	value,
 	onChange,
 	disabled,
@@ -28,10 +50,10 @@ export default function MediaAttachmentControl({
 		const n = parseInt(value, 10);
 		return Number.isFinite(n) && n > 0 ? n : 0;
 	})();
-
 	const { data: media } = useWpMediaAttachmentQuery(attachmentId, {
 		enabled: Boolean(attachmentId),
 	});
+
 	const previewUrl =
 		media && typeof media.source_url === 'string' ? media.source_url : '';
 	const thumbSrc =
@@ -58,7 +80,6 @@ export default function MediaAttachmentControl({
 
 	const libraryOpts =
 		control.libraryType === 'image' ? { type: 'image' } : {};
-
 	const title =
 		typeof control.mediaFrameTitle === 'string'
 			? control.mediaFrameTitle
@@ -92,91 +113,138 @@ export default function MediaAttachmentControl({
 			if (!att) {
 				return;
 			}
-			const id = parseInt(att.id, 10);
-			onChange(Number.isFinite(id) && id > 0 ? id : 0);
+			const pickedId = parseInt(att.id, 10);
+			onChange(Number.isFinite(pickedId) && pickedId > 0 ? pickedId : 0);
 		});
 		frame.open();
 	};
 
 	if (variant === 'summary') {
+		const summaryMeta = attachmentId
+			? metaLine
+			: __('Optional tile backdrop', 'modula-best-grid-gallery');
 		return (
 			<div className="modula-settings-editor__media-attachment modula-settings-editor__media-attachment--summary">
-				<MetaSummary
-					thumbSrc={attachmentId ? thumbSrc : ''}
-					thumbAlt={chips.filename || ''}
-					title={
-						attachmentId
-							? chips.filename ||
-								__('Image', 'modula-best-grid-gallery')
-							: __(
-									'No background image',
-									'modula-best-grid-gallery'
-								)
-					}
-					meta={
-						attachmentId
-							? metaLine || undefined
-							: __(
-									'Optional tile backdrop',
-									'modula-best-grid-gallery'
-								)
-					}
-				/>
-				<ActionRow>
-					{attachmentId ? (
-						<>
-							<Button
-								variant="ghost"
-								disabled={disabled}
-								onClick={openFrame}
-							>
-								{replaceText}
-							</Button>
-							<Button
-								variant="ghost"
-								className="modula-gallery-item-edit-panel__danger"
-								disabled={disabled}
-								onClick={() => onChange(0)}
-							>
-								{removeText}
-							</Button>
-						</>
+				<div className="modula-settings-editor__media-summary">
+					{attachmentId && thumbSrc ? (
+						<img
+							className="modula-settings-editor__media-summary-thumb"
+							src={thumbSrc}
+							alt={chips.filename || ''}
+							width={72}
+							height={72}
+							decoding="async"
+						/>
 					) : (
-						<Button
-							variant="ghost"
-							disabled={disabled}
-							onClick={openFrame}
-						>
-							{selectText}
-						</Button>
+						<span
+							className="modula-settings-editor__media-summary-thumb is-empty"
+							aria-hidden="true"
+						/>
 					)}
-				</ActionRow>
+					<div className="modula-settings-editor__media-summary-body">
+						<div className="modula-settings-editor__media-summary-title">
+							{attachmentId
+								? chips.filename ||
+									__('Image', 'modula-best-grid-gallery')
+								: __(
+										'No background image',
+										'modula-best-grid-gallery'
+									)}
+						</div>
+						{summaryMeta ? (
+							<div className="modula-settings-editor__media-summary-meta">
+								{summaryMeta}
+							</div>
+						) : null}
+					</div>
+				</div>
+				<div className="modula-settings-editor__media-summary-actions">
+					<Button disabled={disabled} onClick={openFrame}>
+						{attachmentId ? replaceText : selectText}
+					</Button>
+					{attachmentId ? (
+						<Button
+							variant="danger"
+							disabled={disabled}
+							onClick={() => onChange(0)}
+						>
+							{removeText}
+						</Button>
+					) : null}
+				</div>
 			</div>
 		);
 	}
 
-	return (
-		<div className="modula-settings-editor__media-attachment">
-			{previewUrl ? (
-				<div className="modula-settings-editor__media-attachment-preview">
-					<img src={previewUrl} alt="" decoding="async" />
-				</div>
-			) : null}
-			<Button variant="panel" disabled={disabled} onClick={openFrame}>
-				<Icon icon={attachmentId ? replace : upload} size={18} />
-				{attachmentId ? replaceText : selectText}
+	// The panel row (canvas): "Choose image", or thumbnail, name, Change and ×.
+	// No `id` on the button: the row's <label for> would replace its text;
+	// its name carries the setting instead.
+	if (!attachmentId) {
+		const chooseText = __('Choose image', 'modula-best-grid-gallery');
+		return (
+			<Button
+				className="modula-settings-editor__media-attachment"
+				disabled={disabled}
+				onClick={openFrame}
+				aria-label={
+					label
+						? sprintf(
+								/* translators: 1: setting name, e.g. Image file, 2: button text. */
+								__('%1$s: %2$s', 'modula-best-grid-gallery'),
+								label,
+								chooseText
+							)
+						: undefined
+				}
+			>
+				{chooseText}
 			</Button>
-			{attachmentId ? (
-				<button
-					type="button"
-					className="modula-settings-editor__media-attachment-remove"
-					onClick={() => !disabled && onChange(0)}
-					disabled={disabled}
-				>
-					<Icon icon={trash} size={16} />
-					<span>{removeText}</span>
-				</button>
+		);
+	}
+
+	const fileName = chips.filename || __('Image', 'modula-best-grid-gallery');
+	return (
+		<div
+			id={id}
+			role="group"
+			aria-label={label || title}
+			className="modula-settings-editor__media-attachment is-set"
+		>
+			{thumbSrc ? (
+				<img
+					className="modula-settings-editor__media-attachment-thumb"
+					src={thumbSrc}
+					alt=""
+					width={32}
+					height={32}
+					decoding="async"
+				/>
 			) : null}
+			<span className="modula-settings-editor__media-attachment-name">
+				{fileName}
+			</span>
+			<Button
+				variant="link"
+				disabled={disabled}
+				onClick={openFrame}
+				aria-label={sprintf(
+					/* translators: %s: chosen file name. */
+					__('Change %s', 'modula-best-grid-gallery'),
+					fileName
+				)}
+			>
+				{__('Change', 'modula-best-grid-gallery')}
+			</Button>
+			<Button
+				variant="ghost"
+				className="modula-settings-editor__media-attachment-remove"
+				disabled={disabled}
+				onClick={() => onChange(0)}
+				aria-label={removeText}
+				title={removeText}
+			>
+				<CloseIcon size={16} />
+			</Button>
 		</div>
 	);
 }

@@ -1,6 +1,6 @@
 /**
- * Toggle body class so `.modula-gallery-modal` yields to core `wp.media`
- * (see `_gallery-modal.scss` — media frame z-index is below our ~1M shell).
+ * Toggle a body class while core `wp.media` is open, so `useModalEscapeKey`
+ * overlays leave Escape to the media frame.
  */
 
 import { WP_MEDIA_FRAME_BODY_CLASS } from 'editor-shell';
@@ -26,7 +26,7 @@ export function markWpMediaFrameClosed() {
 }
 
 /**
- * Attach open/close markers so gallery builder modals hide while wp.media is up.
+ * Attach the open/close markers to a wp.media frame.
  *
  * @param {Object} frame wp.media frame instance.
  */

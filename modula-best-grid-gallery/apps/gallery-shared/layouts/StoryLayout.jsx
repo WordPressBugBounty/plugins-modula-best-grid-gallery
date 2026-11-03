@@ -65,7 +65,7 @@ export default function StoryLayout() {
 	const itemsRef = useRef(null);
 	const apiRef = useRef(null);
 	const [activeIndex, setActiveIndex] = useState(0);
-	const suppressMotion = shouldSuppressGalleryMotion(config, metadata);
+	const suppressMotion = shouldSuppressGalleryMotion(metadata);
 
 	const defaultStory = useMemo(() => storySettingsToCarousel({}), []);
 

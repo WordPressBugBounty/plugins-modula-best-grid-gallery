@@ -1,14 +1,16 @@
-import { useState } from '@wordpress/element';
+import { useId, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	Button,
+	ChoiceList,
 	Notice,
-	RadioControl,
+	SettingsRow,
 	Spinner,
-	TextareaControl,
-} from '@wordpress/components';
+	Textarea,
+	rowDescriptionId,
+	rowLabelId,
+} from 'admin-ui';
 import { GalleryModal } from 'editor-shell';
-import ImageMetadataAiSparkleIcon from '../image-metadata-modal/ImageMetadataAiSparkleIcon';
 import '../../styles/takeover/preview/_custom-css-ai-modal.scss';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 import { useGenerateCustomCssMutation } from '../../query/useGenerateCustomCssMutation';
@@ -29,6 +31,10 @@ export default function CustomCssAiModal({
 	const editor = useModulaSettingsEditorConfig();
 	const galleryId = Number(editor.galleryId) || 0;
 	const mutation = useGenerateCustomCssMutation(galleryId);
+	const idBase = `modula-custom-css-ai-${useId()}`;
+	const promptId = `${idBase}-prompt`;
+	const codeId = `${idBase}-code`;
+	const applyModeId = `${idBase}-apply-mode`;
 
 	const [prompt, setPrompt] = useState('');
 	const [applyMode, setApplyMode] = useState(
@@ -126,18 +132,17 @@ export default function CustomCssAiModal({
 			onClose={handleClose}
 			size="medium"
 			className="modula-custom-css-ai-modal"
-			panelClassName="modula-custom-css-ai-modal__panel"
 			bodyClassName="modula-custom-css-ai-modal__body"
 			title={__('Generate custom CSS', 'modula-best-grid-gallery')}
 			subtitle={__(
 				'Scoped to this gallery only',
 				'modula-best-grid-gallery'
 			)}
-			iconElement={<ImageMetadataAiSparkleIcon />}
+			closeDisabled={mutation.isPending}
 			footerRight={
 				<>
 					<Button
-						variant="tertiary"
+						variant="ghost"
 						onClick={handleClose}
 						disabled={mutation.isPending}
 					>
@@ -146,10 +151,8 @@ export default function CustomCssAiModal({
 					{preview ? (
 						<>
 							<Button
-								variant="secondary"
 								onClick={handleGenerate}
 								disabled={mutation.isPending}
-								isBusy={mutation.isPending}
 							>
 								{__('Regenerate', 'modula-best-grid-gallery')}
 							</Button>
@@ -166,7 +169,6 @@ export default function CustomCssAiModal({
 								mutation.isPending ||
 								!galleryId
 							}
-							isBusy={mutation.isPending}
 						>
 							{__('Generate', 'modula-best-grid-gallery')}
 						</Button>
@@ -183,32 +185,27 @@ export default function CustomCssAiModal({
 				</p>
 
 				<div className="modula-custom-css-ai__prompt-card">
-					<p
-						id="modula-custom-css-ai-prompt-label"
-						className="modula-custom-css-ai__prompt-label"
-					>
-						{__('What should change?', 'modula-best-grid-gallery')}
-					</p>
-					<p className="modula-custom-css-ai__prompt-hint">
-						{__(
-							'Example: round image corners, softer tile shadow, larger title on hover.',
-							'modula-best-grid-gallery'
-						)}
-					</p>
-					<TextareaControl
-						__next40pxDefaultSize
-						hideLabelFromVision
+					<SettingsRow
 						label={__(
 							'What should change?',
 							'modula-best-grid-gallery'
 						)}
-						aria-labelledby="modula-custom-css-ai-prompt-label"
-						value={prompt}
-						onChange={setPrompt}
-						rows={5}
-						disabled={mutation.isPending}
-						className="modula-custom-css-ai__prompt-input"
-					/>
+						controlId={promptId}
+						description={__(
+							'Example: round image corners, softer tile shadow, larger title on hover.',
+							'modula-best-grid-gallery'
+						)}
+						stacked
+					>
+						<Textarea
+							id={promptId}
+							aria-describedby={rowDescriptionId(promptId)}
+							value={prompt}
+							onChange={setPrompt}
+							rows={5}
+							disabled={mutation.isPending}
+						/>
+					</SettingsRow>
 				</div>
 
 				{mutation.isPending ? (
@@ -227,8 +224,9 @@ export default function CustomCssAiModal({
 					</div>
 				) : null}
 
+				{/* An error interrupts; the warnings below wait their turn. */}
 				{error ? (
-					<Notice status="error" isDismissible={false}>
+					<Notice tone="error" role="alert">
 						{error}
 					</Notice>
 				) : null}
@@ -241,32 +239,40 @@ export default function CustomCssAiModal({
 							</p>
 						) : null}
 						{preview.warnings.length > 0 ? (
-							<Notice status="warning" isDismissible={false}>
+							<Notice tone="warning" role="status">
 								{preview.warnings.join(' ')}
 							</Notice>
 						) : null}
-						<TextareaControl
-							__next40pxDefaultSize
+						<SettingsRow
 							label={__(
 								'Generated CSS',
 								'modula-best-grid-gallery'
 							)}
-							value={preview.code}
-							onChange={(value) =>
-								setPreview((prev) =>
-									prev ? { ...prev, code: value } : prev
-								)
-							}
-							rows={10}
-							className="modula-custom-css-ai__code"
-						/>
-						<div className="modula-custom-css-ai__apply-mode">
-							<RadioControl
-								label={__(
-									'Apply mode',
-									'modula-best-grid-gallery'
-								)}
-								selected={applyMode}
+							controlId={codeId}
+							stacked
+						>
+							<Textarea
+								id={codeId}
+								value={preview.code}
+								onChange={(value) =>
+									setPreview((prev) =>
+										prev ? { ...prev, code: value } : prev
+									)
+								}
+								rows={10}
+								className="modula-custom-css-ai__code"
+							/>
+						</SettingsRow>
+						<SettingsRow
+							label={__('Apply mode', 'modula-best-grid-gallery')}
+							controlId={applyModeId}
+							labelElement="span"
+							stacked
+						>
+							<ChoiceList
+								aria-labelledby={rowLabelId(applyModeId)}
+								className="modula-custom-css-ai__apply-mode"
+								value={applyMode}
 								options={[
 									{
 										label: __(
@@ -291,7 +297,7 @@ export default function CustomCssAiModal({
 									)
 								}
 							/>
-						</div>
+						</SettingsRow>
 					</div>
 				) : null}
 			</div>

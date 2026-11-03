@@ -2,15 +2,11 @@ import PlaceholderPatternControl from '../PlaceholderPatternControl';
 import { isNil } from '../../../logic/isNil';
 
 /**
- * @param {Object}           ctx
- * @param {Object}           ctx.control
- * @param {*}                ctx.value
- * @param {Function}         ctx.onChange
- * @param {boolean}          ctx.disabled
- * @param {string|undefined} ctx.help
+ * @param {import('../fieldControlKinds').FieldControlContext} ctx
  */
 export function renderPlaceholderPatternKind({
 	control,
+	controlId,
 	value,
 	onChange,
 	disabled,
@@ -18,6 +14,7 @@ export function renderPlaceholderPatternKind({
 }) {
 	return (
 		<PlaceholderPatternControl
+			id={controlId}
 			control={control || {}}
 			value={isNil(value) ? '' : value}
 			onChange={onChange}

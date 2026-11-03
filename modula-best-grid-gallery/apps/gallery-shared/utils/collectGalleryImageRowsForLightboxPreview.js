@@ -5,6 +5,7 @@
  */
 
 import { isEmbeddedGalleryItemRow } from './embeddedGalleryItemKinds';
+import { EXIF_ROW_FIELDS } from './exifCaption';
 import { isProbableModulaVideoPlaybackUrl } from '../video/videoGalleryModel';
 
 /**
@@ -54,7 +55,22 @@ function asPosterUrl(value) {
  * @property {string} alt         Image alt text.
  * @property {string} title       Plain title.
  * @property {string} description Plain caption/description.
+ * @property {Record<string, unknown>} exif The row's stored `exif_*` fields.
  */
+
+/**
+ * @param {Record<string, unknown>} row Gallery row.
+ * @return {Record<string, unknown>} Its `exif_*` fields that are set.
+ */
+function pickExifFields(row) {
+	const exif = {};
+	for (const field of EXIF_ROW_FIELDS) {
+		if (row[field] !== undefined) {
+			exif[field] = row[field];
+		}
+	}
+	return exif;
+}
 
 /**
  * @param {unknown} row
@@ -112,6 +128,7 @@ export function galleryRowToLightboxImageRow(row) {
 		alt: alt || title,
 		title,
 		description,
+		exif: pickExifFields(row),
 	};
 }
 

@@ -1,0 +1,1226 @@
+{
+    "presetIds": {
+        "hover": [
+            "none",
+            "none-with-captions",
+            "balanced-reveal",
+            "portfolio-lift",
+            "center-hero",
+            "caption-spotlight",
+            "cinematic-dark",
+            "editorial-corner-left",
+            "editorial-corner-right",
+            "monochrome-frame",
+            "social-strip-bottom",
+            "product-card-clean",
+            "soft-zoom-stack",
+            "accessible-no-motion",
+            "captions",
+            "zoom",
+            "lift",
+            "tilt",
+            "spot",
+            "pan"
+        ],
+        "entrance": [
+            "none",
+            "rise",
+            "develop",
+            "sweep",
+            "darkroom",
+            "flip",
+            "drop",
+            "deal",
+            "aperture",
+            "curtain",
+            "letterbox",
+            "pop"
+        ]
+    },
+    "recommended": {
+        "hover": {
+            "grid": "zoom",
+            "justified-grid": "zoom",
+            "fit-grid": "zoom",
+            "uniform-grid": "tilt",
+            "polaroid": "none",
+            "story": "none",
+            "slider": "none",
+            "creative-gallery": "lift",
+            "bnb": "zoom",
+            "custom-grid": "pan",
+            "video": "none",
+            "showcase": "captions",
+            "parallax-masonry": "zoom",
+            "others": "zoom"
+        },
+        "entrance": {
+            "grid": "develop",
+            "justified-grid": "sweep",
+            "fit-grid": "darkroom",
+            "uniform-grid": "flip",
+            "polaroid": "drop",
+            "story": "rise",
+            "slider": "curtain",
+            "creative-gallery": "deal",
+            "bnb": "curtain",
+            "custom-grid": "aperture",
+            "video": "letterbox",
+            "showcase": "deal",
+            "parallax-masonry": "sweep",
+            "others": "rise"
+        }
+    },
+    "entrances": {
+        "rise": [
+            {
+                "target": "tile",
+                "keyframes": [
+                    {
+                        "opacity": 0,
+                        "transform": "translateY(40px) scale(.96)"
+                    },
+                    {
+                        "opacity": 1,
+                        "transform": "none"
+                    }
+                ],
+                "durationMs": {
+                    "base": 800
+                },
+                "delayMs": {
+                    "index": 80
+                }
+            }
+        ],
+        "develop": [
+            {
+                "target": "tile",
+                "keyframes": [
+                    {
+                        "clipPath": "inset(100% 0 0 0)"
+                    },
+                    {
+                        "clipPath": "inset(0 0 0 0)"
+                    }
+                ],
+                "durationMs": {
+                    "base": 1000
+                },
+                "delayMs": {
+                    "col": 140,
+                    "row": 240
+                },
+                "easing": "cubic-bezier(.7,0,.2,1)"
+            },
+            {
+                "target": "image",
+                "keyframes": [
+                    {
+                        "transform": "scale(1.3)"
+                    },
+                    {
+                        "transform": "none"
+                    }
+                ],
+                "durationMs": {
+                    "base": 1500
+                },
+                "delayMs": {
+                    "col": 140,
+                    "row": 240
+                }
+            }
+        ],
+        "sweep": [
+            {
+                "target": "tile",
+                "keyframes": [
+                    {
+                        "transform": "translateX(-90px)",
+                        "opacity": 0,
+                        "clipPath": "inset(0 100% 0 0)"
+                    },
+                    {
+                        "transform": "none",
+                        "opacity": 1,
+                        "clipPath": "inset(0 0 0 0)"
+                    }
+                ],
+                "alternate": {
+                    "by": "row",
+                    "keyframes": [
+                        {
+                            "transform": "translateX(90px)",
+                            "opacity": 0,
+                            "clipPath": "inset(0 0 0 100%)"
+                        },
+                        {
+                            "transform": "none",
+                            "opacity": 1,
+                            "clipPath": "inset(0 0 0 0)"
+                        }
+                    ]
+                },
+                "durationMs": {
+                    "base": 1100
+                },
+                "delayMs": {
+                    "row": 180,
+                    "col": 50
+                },
+                "easing": "cubic-bezier(.65,0,.2,1)"
+            },
+            {
+                "target": "image",
+                "keyframes": [
+                    {
+                        "transform": "scale(1.25)"
+                    },
+                    {
+                        "transform": "none"
+                    }
+                ],
+                "durationMs": {
+                    "base": 1500
+                },
+                "delayMs": {
+                    "row": 180,
+                    "col": 50
+                }
+            }
+        ],
+        "darkroom": [
+            {
+                "target": "tile",
+                "keyframes": [
+                    {
+                        "filter": "brightness(0) blur(14px)",
+                        "transform": "scale(1.06)"
+                    },
+                    {
+                        "filter": "brightness(1) blur(0)",
+                        "transform": "none"
+                    }
+                ],
+                "durationMs": {
+                    "base": 1300
+                },
+                "delayMs": {
+                    "index": 150
+                },
+                "easing": "cubic-bezier(.4,0,.2,1)"
+            }
+        ],
+        "flip": [
+            {
+                "target": "tile",
+                "keyframes": [
+                    {
+                        "transform": "perspective(900px) rotateY(-90deg)",
+                        "opacity": 0
+                    },
+                    {
+                        "opacity": 1,
+                        "offset": 0.35
+                    },
+                    {
+                        "transform": "perspective(900px) rotateY(0)",
+                        "opacity": 1
+                    }
+                ],
+                "durationMs": {
+                    "base": 900
+                },
+                "delayMs": {
+                    "row": 110,
+                    "col": 110
+                },
+                "easing": "cubic-bezier(.3,1.3,.5,1)"
+            }
+        ],
+        "drop": [
+            {
+                "target": "tile",
+                "keyframes": [
+                    {
+                        "transform": "translateY(-760px) rotate(-26deg)"
+                    },
+                    {
+                        "transform": "none"
+                    }
+                ],
+                "alternate": {
+                    "by": "index",
+                    "keyframes": [
+                        {
+                            "transform": "translateY(-760px) rotate(26deg)"
+                        },
+                        {
+                            "transform": "none"
+                        }
+                    ]
+                },
+                "durationMs": {
+                    "base": 950
+                },
+                "delayMs": {
+                    "index": 100
+                },
+                "easing": "cubic-bezier(.34,1.45,.55,1)"
+            },
+            {
+                "target": "image",
+                "keyframes": [
+                    {
+                        "filter": "sepia(1) brightness(2.3) contrast(.3) saturate(0) blur(3px)"
+                    },
+                    {
+                        "filter": "sepia(.6) brightness(1.4) contrast(.7) saturate(.4) blur(1px)",
+                        "offset": 0.45
+                    },
+                    {
+                        "filter": "none"
+                    }
+                ],
+                "durationMs": {
+                    "base": 2400
+                },
+                "delayMs": {
+                    "base": 700,
+                    "index": 100
+                },
+                "easing": "ease-out"
+            }
+        ],
+        "deal": [
+            {
+                "target": "tile",
+                "keyframes": [
+                    {
+                        "transform": "translate({dx}px, {dy}px) rotate({scatter}deg) scale({fit})",
+                        "zIndex": "{stack}"
+                    },
+                    {
+                        "transform": "translate({dx}px, {dy}px) rotate({scatter}deg) scale({fit})",
+                        "zIndex": "{stack}",
+                        "offset": 0.3
+                    },
+                    {
+                        "transform": "none",
+                        "zIndex": "1"
+                    }
+                ],
+                "durationMs": {
+                    "base": 1500,
+                    "index": 50
+                },
+                "delayMs": {
+                    "index": 40
+                },
+                "easing": "cubic-bezier(.3,1.25,.4,1)"
+            }
+        ],
+        "aperture": [
+            {
+                "target": "tile",
+                "keyframes": [
+                    {
+                        "clipPath": "circle(0% at 50% 50%)"
+                    },
+                    {
+                        "clipPath": "circle(75% at 50% 50%)"
+                    }
+                ],
+                "durationMs": {
+                    "base": 1000
+                },
+                "delayMs": {
+                    "distance": 0.9
+                },
+                "easing": "cubic-bezier(.6,0,.2,1)"
+            },
+            {
+                "target": "image",
+                "keyframes": [
+                    {
+                        "transform": "scale(1.35) rotate(-4deg)"
+                    },
+                    {
+                        "transform": "none"
+                    }
+                ],
+                "durationMs": {
+                    "base": 1400
+                },
+                "delayMs": {
+                    "distance": 0.9
+                }
+            }
+        ],
+        "curtain": [
+            {
+                "target": "tile",
+                "keyframes": [
+                    {
+                        "clipPath": "inset(0 100% 0 0)"
+                    },
+                    {
+                        "clipPath": "inset(0 0 0 0)"
+                    }
+                ],
+                "durationMs": {
+                    "base": 1100
+                },
+                "delayMs": {
+                    "col": 130,
+                    "row": 90
+                },
+                "easing": "cubic-bezier(.77,0,.18,1)"
+            },
+            {
+                "target": "image",
+                "keyframes": [
+                    {
+                        "transform": "scale(1.25)"
+                    },
+                    {
+                        "transform": "none"
+                    }
+                ],
+                "durationMs": {
+                    "base": 1600
+                },
+                "delayMs": {
+                    "col": 130,
+                    "row": 90
+                }
+            }
+        ],
+        "letterbox": [
+            {
+                "target": "tile",
+                "keyframes": [
+                    {
+                        "clipPath": "inset(50% 0 50% 0)"
+                    },
+                    {
+                        "clipPath": "inset(50% 0 50% 0)",
+                        "offset": 0.1
+                    },
+                    {
+                        "clipPath": "inset(0 0 0 0)"
+                    }
+                ],
+                "durationMs": {
+                    "base": 1300
+                },
+                "delayMs": {
+                    "index": 90
+                },
+                "easing": "cubic-bezier(.77,0,.18,1)"
+            },
+            {
+                "target": "image",
+                "keyframes": [
+                    {
+                        "transform": "scale(1.12)"
+                    },
+                    {
+                        "transform": "none"
+                    }
+                ],
+                "durationMs": {
+                    "base": 1800
+                },
+                "delayMs": {
+                    "index": 90
+                }
+            }
+        ],
+        "pop": [
+            {
+                "target": "tile",
+                "keyframes": [
+                    {
+                        "transform": "scale(.5)",
+                        "opacity": 0
+                    },
+                    {
+                        "opacity": 1,
+                        "offset": 0.3
+                    },
+                    {
+                        "transform": "none",
+                        "opacity": 1
+                    }
+                ],
+                "durationMs": {
+                    "base": 700
+                },
+                "delayMs": {
+                    "index": 70
+                },
+                "easing": "cubic-bezier(.34,1.56,.64,1)"
+            }
+        ]
+    },
+    "hoverBuilders": {
+        "none": {
+            "cardTreatment": "none",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": false,
+            "titleEnter": "none",
+            "captionEnter": "none",
+            "socialEnter": "none",
+            "titleVisibility": "hidden",
+            "captionVisibility": "hidden",
+            "socialVisibility": "hidden",
+            "cardEnterDurationMs": 180,
+            "cardEnterDelayMs": 0,
+            "titleEnterDurationMs": 180,
+            "captionEnterDurationMs": 180,
+            "socialEnterDurationMs": 180,
+            "titleEnterDelayMs": 0,
+            "captionEnterDelayMs": 0,
+            "socialEnterDelayMs": 0,
+            "titleEnterStaggerMs": 0,
+            "captionEnterStaggerMs": 0,
+            "socialEnterStaggerMs": 0,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 18
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 50
+                },
+                "social": {
+                    "x": 50,
+                    "y": 82
+                }
+            }
+        },
+        "none-with-captions": {
+            "cardTreatment": "none",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": false,
+            "titleEnter": "none",
+            "captionEnter": "none",
+            "socialEnter": "none",
+            "titleVisibility": "always",
+            "captionVisibility": "always",
+            "socialVisibility": "always",
+            "cardEnterDurationMs": 180,
+            "cardEnterDelayMs": 0,
+            "titleEnterDurationMs": 180,
+            "captionEnterDurationMs": 180,
+            "socialEnterDurationMs": 180,
+            "titleEnterDelayMs": 0,
+            "captionEnterDelayMs": 0,
+            "socialEnterDelayMs": 0,
+            "titleEnterStaggerMs": 0,
+            "captionEnterStaggerMs": 0,
+            "socialEnterStaggerMs": 0,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 18
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 30
+                },
+                "social": {
+                    "x": 50,
+                    "y": 82
+                }
+            }
+        },
+        "balanced-reveal": {
+            "cardTreatment": "zoom",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": true,
+            "titleEnter": "fade",
+            "captionEnter": "fade",
+            "socialEnter": "fade",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 280,
+            "cardEnterDelayMs": 0,
+            "titleEnterDurationMs": 280,
+            "captionEnterDurationMs": 280,
+            "socialEnterDurationMs": 280,
+            "titleEnterDelayMs": 0,
+            "captionEnterDelayMs": 0,
+            "socialEnterDelayMs": 0,
+            "titleEnterStaggerMs": 40,
+            "captionEnterStaggerMs": 40,
+            "socialEnterStaggerMs": 40,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 24
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 36
+                },
+                "social": {
+                    "x": 50,
+                    "y": 78
+                }
+            }
+        },
+        "portfolio-lift": {
+            "cardTreatment": "lift",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": true,
+            "titleEnter": "slide-up",
+            "captionEnter": "slide-up",
+            "socialEnter": "fade",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 320,
+            "cardEnterDelayMs": 25,
+            "titleEnterDurationMs": 320,
+            "captionEnterDurationMs": 320,
+            "socialEnterDurationMs": 320,
+            "titleEnterDelayMs": 25,
+            "captionEnterDelayMs": 25,
+            "socialEnterDelayMs": 25,
+            "titleEnterStaggerMs": 55,
+            "captionEnterStaggerMs": 55,
+            "socialEnterStaggerMs": 55,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 22
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 34
+                },
+                "social": {
+                    "x": 50,
+                    "y": 76
+                }
+            }
+        },
+        "center-hero": {
+            "cardTreatment": "zoom",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": true,
+            "titleEnter": "scale",
+            "captionEnter": "fade",
+            "socialEnter": "fade",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 360,
+            "cardEnterDelayMs": 20,
+            "titleEnterDurationMs": 360,
+            "captionEnterDurationMs": 360,
+            "socialEnterDurationMs": 360,
+            "titleEnterDelayMs": 20,
+            "captionEnterDelayMs": 20,
+            "socialEnterDelayMs": 20,
+            "titleEnterStaggerMs": 60,
+            "captionEnterStaggerMs": 60,
+            "socialEnterStaggerMs": 60,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 40
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 54
+                },
+                "social": {
+                    "x": 50,
+                    "y": 70
+                }
+            }
+        },
+        "caption-spotlight": {
+            "cardTreatment": "none",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": true,
+            "titleEnter": "blur-in",
+            "captionEnter": "slide-up",
+            "socialEnter": "fade",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 340,
+            "cardEnterDelayMs": 40,
+            "titleEnterDurationMs": 340,
+            "captionEnterDurationMs": 340,
+            "socialEnterDurationMs": 340,
+            "titleEnterDelayMs": 40,
+            "captionEnterDelayMs": 40,
+            "socialEnterDelayMs": 40,
+            "titleEnterStaggerMs": 70,
+            "captionEnterStaggerMs": 70,
+            "socialEnterStaggerMs": 70,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 56
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 70
+                },
+                "social": {
+                    "x": 50,
+                    "y": 86
+                }
+            }
+        },
+        "cinematic-dark": {
+            "cardTreatment": "lift",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": true,
+            "titleEnter": "blur-in",
+            "captionEnter": "slide-up",
+            "socialEnter": "slide-up",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 420,
+            "cardEnterDelayMs": 50,
+            "titleEnterDurationMs": 420,
+            "captionEnterDurationMs": 420,
+            "socialEnterDurationMs": 420,
+            "titleEnterDelayMs": 50,
+            "captionEnterDelayMs": 50,
+            "socialEnterDelayMs": 50,
+            "titleEnterStaggerMs": 80,
+            "captionEnterStaggerMs": 80,
+            "socialEnterStaggerMs": 80,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 60
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 74
+                },
+                "social": {
+                    "x": 50,
+                    "y": 88
+                }
+            }
+        },
+        "editorial-corner-left": {
+            "cardTreatment": "none",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": true,
+            "titleEnter": "slide-right",
+            "captionEnter": "slide-right",
+            "socialEnter": "fade",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 280,
+            "cardEnterDelayMs": 10,
+            "titleEnterDurationMs": 280,
+            "captionEnterDurationMs": 280,
+            "socialEnterDurationMs": 280,
+            "titleEnterDelayMs": 10,
+            "captionEnterDelayMs": 10,
+            "socialEnterDelayMs": 10,
+            "titleEnterStaggerMs": 35,
+            "captionEnterStaggerMs": 35,
+            "socialEnterStaggerMs": 35,
+            "slotPositions": {
+                "title": {
+                    "x": 12,
+                    "y": 16
+                },
+                "caption": {
+                    "x": 12,
+                    "y": 30
+                },
+                "social": {
+                    "x": 12,
+                    "y": 46
+                }
+            }
+        },
+        "editorial-corner-right": {
+            "cardTreatment": "none",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": true,
+            "titleEnter": "slide-left",
+            "captionEnter": "slide-left",
+            "socialEnter": "fade",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 280,
+            "cardEnterDelayMs": 10,
+            "titleEnterDurationMs": 280,
+            "captionEnterDurationMs": 280,
+            "socialEnterDurationMs": 280,
+            "titleEnterDelayMs": 10,
+            "captionEnterDelayMs": 10,
+            "socialEnterDelayMs": 10,
+            "titleEnterStaggerMs": 35,
+            "captionEnterStaggerMs": 35,
+            "socialEnterStaggerMs": 35,
+            "slotPositions": {
+                "title": {
+                    "x": 88,
+                    "y": 16
+                },
+                "caption": {
+                    "x": 88,
+                    "y": 30
+                },
+                "social": {
+                    "x": 88,
+                    "y": 46
+                }
+            }
+        },
+        "monochrome-frame": {
+            "cardTreatment": "grayscale",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": true,
+            "titleEnter": "slide-up",
+            "captionEnter": "slide-up",
+            "socialEnter": "fade",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 300,
+            "cardEnterDelayMs": 15,
+            "titleEnterDurationMs": 300,
+            "captionEnterDurationMs": 300,
+            "socialEnterDurationMs": 300,
+            "titleEnterDelayMs": 15,
+            "captionEnterDelayMs": 15,
+            "socialEnterDelayMs": 15,
+            "titleEnterStaggerMs": 45,
+            "captionEnterStaggerMs": 45,
+            "socialEnterStaggerMs": 45,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 24
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 42
+                },
+                "social": {
+                    "x": 50,
+                    "y": 62
+                }
+            }
+        },
+        "social-strip-bottom": {
+            "cardTreatment": "none",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": true,
+            "titleEnter": "slide-down",
+            "captionEnter": "slide-right",
+            "socialEnter": "slide-up",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 300,
+            "cardEnterDelayMs": 25,
+            "titleEnterDurationMs": 300,
+            "captionEnterDurationMs": 300,
+            "socialEnterDurationMs": 300,
+            "titleEnterDelayMs": 25,
+            "captionEnterDelayMs": 25,
+            "socialEnterDelayMs": 25,
+            "titleEnterStaggerMs": 55,
+            "captionEnterStaggerMs": 55,
+            "socialEnterStaggerMs": 55,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 20
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 36
+                },
+                "social": {
+                    "x": 50,
+                    "y": 88
+                }
+            }
+        },
+        "product-card-clean": {
+            "cardTreatment": "none",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": true,
+            "titleEnter": "fade",
+            "captionEnter": "slide-up",
+            "socialEnter": "fade",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 240,
+            "cardEnterDelayMs": 0,
+            "titleEnterDurationMs": 240,
+            "captionEnterDurationMs": 240,
+            "socialEnterDurationMs": 240,
+            "titleEnterDelayMs": 0,
+            "captionEnterDelayMs": 0,
+            "socialEnterDelayMs": 0,
+            "titleEnterStaggerMs": 25,
+            "captionEnterStaggerMs": 25,
+            "socialEnterStaggerMs": 25,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 70
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 82
+                },
+                "social": {
+                    "x": 50,
+                    "y": 92
+                }
+            }
+        },
+        "soft-zoom-stack": {
+            "cardTreatment": "zoom",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": true,
+            "titleEnter": "blur-in",
+            "captionEnter": "slide-up",
+            "socialEnter": "slide-up",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 350,
+            "cardEnterDelayMs": 35,
+            "titleEnterDurationMs": 350,
+            "captionEnterDurationMs": 350,
+            "socialEnterDurationMs": 350,
+            "titleEnterDelayMs": 35,
+            "captionEnterDelayMs": 35,
+            "socialEnterDelayMs": 35,
+            "titleEnterStaggerMs": 65,
+            "captionEnterStaggerMs": 65,
+            "socialEnterStaggerMs": 65,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 60
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 72
+                },
+                "social": {
+                    "x": 50,
+                    "y": 84
+                }
+            }
+        },
+        "accessible-no-motion": {
+            "cardTreatment": "none",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": true,
+            "titleEnter": "none",
+            "captionEnter": "none",
+            "socialEnter": "none",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 180,
+            "cardEnterDelayMs": 0,
+            "titleEnterDurationMs": 180,
+            "captionEnterDurationMs": 180,
+            "socialEnterDurationMs": 180,
+            "titleEnterDelayMs": 0,
+            "captionEnterDelayMs": 0,
+            "socialEnterDelayMs": 0,
+            "titleEnterStaggerMs": 0,
+            "captionEnterStaggerMs": 0,
+            "socialEnterStaggerMs": 0,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 64
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 76
+                },
+                "social": {
+                    "x": 50,
+                    "y": 88
+                }
+            }
+        },
+        "captions": {
+            "cardTreatment": "none",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": false,
+            "titleEnter": "fade",
+            "captionEnter": "fade",
+            "socialEnter": "fade",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 280,
+            "cardEnterDelayMs": 0,
+            "titleEnterDurationMs": 280,
+            "captionEnterDurationMs": 280,
+            "socialEnterDurationMs": 280,
+            "titleEnterDelayMs": 0,
+            "captionEnterDelayMs": 0,
+            "socialEnterDelayMs": 0,
+            "titleEnterStaggerMs": 45,
+            "captionEnterStaggerMs": 45,
+            "socialEnterStaggerMs": 45,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 70
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 84
+                },
+                "social": {
+                    "x": 50,
+                    "y": 94
+                }
+            }
+        },
+        "zoom": {
+            "cardTreatment": "zoom",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": false,
+            "titleEnter": "fade",
+            "captionEnter": "fade",
+            "socialEnter": "fade",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 280,
+            "cardEnterDelayMs": 0,
+            "titleEnterDurationMs": 280,
+            "captionEnterDurationMs": 280,
+            "socialEnterDurationMs": 280,
+            "titleEnterDelayMs": 0,
+            "captionEnterDelayMs": 0,
+            "socialEnterDelayMs": 0,
+            "titleEnterStaggerMs": 45,
+            "captionEnterStaggerMs": 45,
+            "socialEnterStaggerMs": 45,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 70
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 84
+                },
+                "social": {
+                    "x": 50,
+                    "y": 94
+                }
+            }
+        },
+        "lift": {
+            "cardTreatment": "lift",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": false,
+            "titleEnter": "fade",
+            "captionEnter": "fade",
+            "socialEnter": "fade",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 280,
+            "cardEnterDelayMs": 0,
+            "titleEnterDurationMs": 280,
+            "captionEnterDurationMs": 280,
+            "socialEnterDurationMs": 280,
+            "titleEnterDelayMs": 0,
+            "captionEnterDelayMs": 0,
+            "socialEnterDelayMs": 0,
+            "titleEnterStaggerMs": 45,
+            "captionEnterStaggerMs": 45,
+            "socialEnterStaggerMs": 45,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 70
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 84
+                },
+                "social": {
+                    "x": 50,
+                    "y": 94
+                }
+            }
+        },
+        "tilt": {
+            "cardTreatment": "tilt",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": false,
+            "titleEnter": "fade",
+            "captionEnter": "fade",
+            "socialEnter": "fade",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 280,
+            "cardEnterDelayMs": 0,
+            "titleEnterDurationMs": 280,
+            "captionEnterDurationMs": 280,
+            "socialEnterDurationMs": 280,
+            "titleEnterDelayMs": 0,
+            "captionEnterDelayMs": 0,
+            "socialEnterDelayMs": 0,
+            "titleEnterStaggerMs": 45,
+            "captionEnterStaggerMs": 45,
+            "socialEnterStaggerMs": 45,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 70
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 84
+                },
+                "social": {
+                    "x": 50,
+                    "y": 94
+                }
+            }
+        },
+        "spot": {
+            "cardTreatment": "spotlight",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": false,
+            "titleEnter": "fade",
+            "captionEnter": "fade",
+            "socialEnter": "fade",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 280,
+            "cardEnterDelayMs": 0,
+            "titleEnterDurationMs": 280,
+            "captionEnterDurationMs": 280,
+            "socialEnterDurationMs": 280,
+            "titleEnterDelayMs": 0,
+            "captionEnterDelayMs": 0,
+            "socialEnterDelayMs": 0,
+            "titleEnterStaggerMs": 45,
+            "captionEnterStaggerMs": 45,
+            "socialEnterStaggerMs": 45,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 70
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 84
+                },
+                "social": {
+                    "x": 50,
+                    "y": 94
+                }
+            }
+        },
+        "pan": {
+            "cardTreatment": "pan",
+            "graphicElement": "none",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": false,
+            "titleEnter": "fade",
+            "captionEnter": "fade",
+            "socialEnter": "fade",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 280,
+            "cardEnterDelayMs": 0,
+            "titleEnterDurationMs": 280,
+            "captionEnterDurationMs": 280,
+            "socialEnterDurationMs": 280,
+            "titleEnterDelayMs": 0,
+            "captionEnterDelayMs": 0,
+            "socialEnterDelayMs": 0,
+            "titleEnterStaggerMs": 45,
+            "captionEnterStaggerMs": 45,
+            "socialEnterStaggerMs": 45,
+            "slotPositions": {
+                "title": {
+                    "x": 50,
+                    "y": 70
+                },
+                "caption": {
+                    "x": 50,
+                    "y": 84
+                },
+                "social": {
+                    "x": 50,
+                    "y": 94
+                }
+            }
+        }
+    },
+    "storedBuilderKeys": [
+        "dimOverlay",
+        "sourcePresetId"
+    ],
+    "inlineSocialHovers": [
+        "social-strip-bottom"
+    ],
+    "pointerCards": [
+        "tilt",
+        "pan"
+    ],
+    "speeds": {
+        "slow": 1.4,
+        "normal": 1,
+        "fast": 0.65
+    }
+}

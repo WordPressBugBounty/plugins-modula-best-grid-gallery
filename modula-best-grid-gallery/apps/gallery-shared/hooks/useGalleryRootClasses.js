@@ -5,8 +5,12 @@
  *   scrolls into the viewport (defer animation until then).
  * - inView OFF: `modula-loaded-effects` is added immediately so each tile animates
  *   as soon as its image finishes loading.
- * - respectReducedMotion ON (visitor frontend only): `modula-respect-reduced-motion`
- *   so CSS/JS can honor `prefers-reduced-motion` and drop gallery motion.
+ * - Visitor frontend (not the editor preview): `modula-respect-reduced-motion`
+ *   so CSS/JS honor `prefers-reduced-motion` and drop all gallery motion,
+ *   whatever the gallery's reduced-motion setting (utils/reducedMotion.js).
+ * - Motion may not play here (useGalleryMotionAllowed, e.g. a phone with
+ *   Animate on phones off): `modula-motion-held`, so hover moves and the
+ *   loading effects hold still (_hover-v2.scss).
  * - themeInheritControls ON: `modula--theme-inherit-controls` so chrome CSS skips
  *   opinionated pagination/filter control paint.
  *
@@ -16,11 +20,16 @@
 import { useEffect } from '@wordpress/element';
 import { isGalleryTypeWithoutLoadingEffects } from '../constants/galleryLayoutDefaults';
 import { isSettingsEditorPreview } from '../utils/displayContext';
-import { isRespectReducedMotionSettingOn } from '../utils/reducedMotion';
 import {
 	THEME_INHERIT_CONTROLS_ROOT_CLASS,
 	isThemeInheritControlsOn,
 } from '../utils/themeInheritControls';
+
+/** Visitor root: its motion follows `prefers-reduced-motion` (_hover-v2.scss, the lightbox). */
+const REDUCED_MOTION_ROOT_CLASS = 'modula-respect-reduced-motion';
+
+/** Root whose motion holds still here and now (_hover-v2.scss). */
+const MOTION_HELD_ROOT_CLASS = 'modula-motion-held';
 
 /**
  * @param {HTMLElement} host
@@ -37,8 +46,14 @@ function resolveGalleryRoot(host) {
  * @param {import('react').RefObject<HTMLElement|null>} hostRef
  * @param {Object}                                      config
  * @param {{ displayContext?: string }|null|undefined}  [metadata]
+ * @param {boolean}                                     motionAllowed The gallery's motion may play (useGalleryMotionAllowed).
  */
-export function useGalleryRootClasses(hostRef, config, metadata) {
+export function useGalleryRootClasses(
+	hostRef,
+	config,
+	metadata,
+	motionAllowed
+) {
 	useEffect(() => {
 		const host = hostRef.current;
 		if (!host) {
@@ -49,19 +64,28 @@ export function useGalleryRootClasses(hostRef, config, metadata) {
 			return undefined;
 		}
 
-		const applyClass =
-			!isSettingsEditorPreview(metadata) &&
-			isRespectReducedMotionSettingOn(config);
-		if (applyClass) {
-			root.classList.add('modula-respect-reduced-motion');
+		if (isSettingsEditorPreview(metadata)) {
+			root.classList.remove(REDUCED_MOTION_ROOT_CLASS);
 		} else {
-			root.classList.remove('modula-respect-reduced-motion');
+			root.classList.add(REDUCED_MOTION_ROOT_CLASS);
 		}
 
 		return () => {
-			root.classList.remove('modula-respect-reduced-motion');
+			root.classList.remove(REDUCED_MOTION_ROOT_CLASS);
 		};
-	}, [hostRef, config?.respectReducedMotion, metadata?.displayContext]);
+	}, [hostRef, metadata?.displayContext]);
+
+	useEffect(() => {
+		const host = hostRef.current;
+		const root = host ? resolveGalleryRoot(host) : null;
+		if (!root || motionAllowed) {
+			return undefined;
+		}
+		root.classList.add(MOTION_HELD_ROOT_CLASS);
+		return () => {
+			root.classList.remove(MOTION_HELD_ROOT_CLASS);
+		};
+	}, [hostRef, motionAllowed]);
 
 	useEffect(() => {
 		const host = hostRef.current;

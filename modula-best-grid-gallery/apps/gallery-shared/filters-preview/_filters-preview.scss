@@ -1,0 +1,202 @@
+// The filters preview's own chrome, shared by the gallery and Pro albums
+// editors. Mixins: each editor includes them where its canvas body styles
+// the preview, and loads the visitor's filter chrome
+// (`frontend-gallery/gallery-chrome`) itself.
+@use "../../editor-shell/styles/spacing" as *;
+@use "../../editor-shell/styles/radii" as *;
+@use "../../editor-shell/styles/theme" as *;
+
+// The static bar's root: the visitor's class and the marker
+// `FILTERS_PREVIEW_BAR_CLASS` (`FiltersPreviewBar.jsx`).
+$filters-preview-bar: ".filters.modula-gallery-takeover__filters-preview-bar";
+
+// The design's chip inks on the dark stage (`AlbumEditorF.dc.html`, fBar).
+$filters-canvas-chip-ink: rgb(242 242 238 / 72%);
+$filters-canvas-current-ink: #fff;
+$filters-canvas-current-underline: #8f8b80;
+
+// The canvas body while it holds the preview (`FiltersPreviewPanel`): it
+// fills the canvas on the preview background, so the bar reads in both
+// appearances.
+@mixin filters-preview-body {
+	position: relative;
+	flex: 1;
+	min-height: 320px;
+	display: flex;
+	flex-direction: column;
+	overflow: auto;
+	background: var(--mod-se-preview-bg);
+
+	@include filters-preview-bar;
+}
+
+// The panel, its hint and the neutral block the bar sits around, at the
+// stylesheet's root.
+@mixin filters-preview-panel {
+
+	.modula-gallery-takeover__filters-preview {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		min-height: 280px;
+		width: 100%;
+		padding: $mod-space-24 $mod-space-16;
+		box-sizing: border-box;
+	}
+
+	@include filters-preview-hint;
+
+	.modula-gallery-takeover__filters-preview-shell {
+		width: 100%;
+		max-width: min(100%, 720px);
+		margin: 0 auto;
+	}
+
+	.modula-gallery-takeover__filters-preview-gallery-stub {
+		display: flex !important;
+		align-items: center;
+		justify-content: center;
+		flex: 1 1 auto;
+		width: 100%;
+		min-width: 0;
+		min-height: 200px;
+		margin: 0;
+		padding: $mod-space-24;
+		border: 1px dashed rgb(0 0 0 / 12%);
+		border-radius: $mod-radius-4;
+		background: rgb(0 0 0 / 3%);
+		box-sizing: border-box;
+	}
+
+	.modula-gallery-takeover__filters-preview-gallery-stub-label {
+		color: var(--mod-se-preview-ink-muted);
+		font-size: 0.8125rem;
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
+		user-select: none;
+	}
+
+	.modula-takeover__preview-wrap--mobile,
+	.modula-takeover__preview-wrap--tablet {
+
+		.modula-gallery-takeover__filters-preview-gallery-stub {
+			min-height: 160px;
+		}
+	}
+}
+
+// The neutral block in dark appearance, included under the editor's dark
+// root.
+@mixin filters-preview-stub-dark {
+
+	.modula-gallery-takeover__filters-preview-gallery-stub {
+		border-color: rgb(255 255 255 / 14%);
+		background: rgb(255 255 255 / 4%);
+	}
+}
+
+// The static bar (`FiltersPreviewBar`), on the Filters tab or around the
+// canvas tiles, included in the canvas body.
+@mixin filters-preview-bar {
+
+	#{$filters-preview-bar} {
+		visibility: visible !important;
+		opacity: 1 !important;
+
+		// The bar is a preview only: its chips are spans, and its toggle and
+		// dropdown are disabled, drawn as the visitor's enabled ones.
+		.modula_menu__link,
+		.filters__collapse-toggle,
+		.filters__select {
+			cursor: default;
+		}
+
+		// The browser dims a disabled select (opacity 0.7) and WordPress admin
+		// gives it a white text shadow.
+		.filters__collapse-toggle:disabled,
+		.filters__select:disabled {
+			opacity: 1;
+			text-shadow: none;
+		}
+
+		/* All must not keep a selected underline when another chip is current. */
+		.modula_menu__link:not(.selected) {
+			font-weight: inherit;
+			border-bottom-color: transparent !important;
+		}
+	}
+
+	.modula-gallery-takeover__filters-preview-select {
+		width: min(100%, 16rem);
+	}
+}
+
+// The static bar around the canvas tiles, on the dark stage (Lite ticket 96),
+// included in the canvas body. The gallery's dynamic filter CSS doesn't
+// reach the canvas root: the bar carries its alignment and set colours
+// (`canvasFiltersPreviewBarStyle`), and the stage inks stand in for the
+// visitor's default ink, as in the design.
+@mixin filters-preview-canvas-bar {
+
+	.modula-gallery-filter-layout > #{$filters-preview-bar} {
+
+		.modula_menu__list {
+			justify-content: var(--modula-canvas-filters-align, normal);
+		}
+
+		.modula_menu__link {
+			color: var(--modula-canvas-filters-link, #{$filters-canvas-chip-ink});
+		}
+
+		// As the visitor's: the hover colour, else the link colour.
+		.modula_menu__link.selected {
+			color: var(--modula-canvas-filters-current, var(--modula-canvas-filters-link, #{$filters-canvas-current-ink}));
+			border-bottom-color: var(--modula-canvas-filters-current, var(--modula-canvas-filters-link, #{$filters-canvas-current-underline}));
+		}
+
+		.filters__collapse-toggle,
+		.filters__select {
+			border-color: rgb(255 255 255 / 30%);
+			color: var(--modula-canvas-filters-link, var(--modula-takeover-stage-ink, #{$mod-takeover-stage-ink}));
+		}
+
+		.filters__select {
+			background: transparent;
+			color-scheme: dark;
+		}
+	}
+
+	// A side bar stacks its chips: the alignment moves them across.
+	:is(.modula-gallery-filter-layout--left, .modula-gallery-filter-layout--right, .modula-gallery-filter-layout--left-right) > #{$filters-preview-bar} .modula_menu__list {
+		align-items: var(--modula-canvas-filters-align, flex-start);
+	}
+}
+
+// The line above the preview (bar hidden, Collapse on phones).
+@mixin filters-preview-hint {
+
+	.modula-gallery-takeover__filters-preview-hint {
+		box-sizing: border-box;
+		width: 100%;
+		max-width: min(100%, 720px);
+		margin: 0 0 $mod-space-16;
+		padding: 0;
+		color: var(--mod-se-preview-ink-muted);
+		font-size: 0.8125rem;
+		line-height: 1.5;
+		text-align: center;
+	}
+}
+
+// The dropdown on the editor's surface, included in the canvas body.
+@mixin filters-preview-select-surface {
+
+	.modula .filters__select {
+		background: var(--mod-se-surface);
+		color: var(--mod-se-ink);
+		border-color: var(--mod-se-line);
+		color-scheme: inherit;
+	}
+}

@@ -4,13 +4,11 @@
  */
 import { lazy } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Spinner } from '@wordpress/components';
+import { Spinner } from 'admin-ui';
+import { AdminUiScope } from 'editor-shell';
 import { useTakeoverAuxiliaryPanel } from '../../context/TakeoverAuxiliaryPanelContext';
 import LazySettingsEditorBoundary from './LazySettingsEditorBoundary';
 
-const FormFieldAuxiliaryPanel = lazy(
-	() => import('../form-field-auxiliary/FormFieldAuxiliaryPanel')
-);
 const HoverEffectBuilderAuxiliaryPanel = lazy(
 	() => import('../hover-effect-builder/HoverEffectBuilderAuxiliaryPanel')
 );
@@ -20,10 +18,13 @@ function AuxiliaryPanelFallback() {
 		<div
 			className="modula-gallery-takeover__aux-loading"
 			role="status"
+			aria-label={__('Loading…', 'modula-best-grid-gallery')}
 			aria-live="polite"
 			aria-busy="true"
 		>
-			<Spinner />
+			<AdminUiScope>
+				<Spinner />
+			</AdminUiScope>
 		</div>
 	);
 }
@@ -40,23 +41,7 @@ export default function TakeoverAuxiliaryPanelHost({ galleryId: _galleryId }) {
 	if (descriptor.kind === 'hoverEffectBuilder') {
 		return (
 			<LazySettingsEditorBoundary fallback={<AuxiliaryPanelFallback />}>
-				<HoverEffectBuilderAuxiliaryPanel
-					mode={descriptor.mode}
-					showCanvasChrome
-				/>
-			</LazySettingsEditorBoundary>
-		);
-	}
-	if (
-		descriptor.kind === 'formField' &&
-		typeof descriptor.groupedPath === 'string' &&
-		descriptor.groupedPath.trim() !== ''
-	) {
-		return (
-			<LazySettingsEditorBoundary fallback={<AuxiliaryPanelFallback />}>
-				<FormFieldAuxiliaryPanel
-					groupedPath={descriptor.groupedPath.trim()}
-				/>
+				<HoverEffectBuilderAuxiliaryPanel showCanvasChrome />
 			</LazySettingsEditorBoundary>
 		);
 	}

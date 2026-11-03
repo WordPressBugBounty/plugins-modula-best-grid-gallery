@@ -5,17 +5,17 @@
 import { editorCaptionsAreBelowImage } from '../../utils/editorCaptionsAreBelowImage';
 import { useEffect, useId, useMemo, useRef } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { useHoverPointer } from 'gallery-shared/preview';
 import { useHoverEffectBuilder } from '../../context/HoverEffectBuilderContext';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
 import { getHoverBuilderPreviewAspectCss } from '../../utils/getHoverBuilderPreviewAspectCss';
 import HoverBuilderSlotChips from './HoverBuilderSlotChips';
 import {
-	buildCommittedSlotPositions,
-	buildHoverBuilderItemClassName,
-	buildHoverBuilderItemStyle,
+	buildPreviewHoverTile,
 	getHoverBuilderCardState,
 	getSlotOrderFromPositions,
-} from './hoverBuilderCardHelpers';
+} from 'gallery-shared/hover/hoverTile';
+import { buildCommittedSlotPositions } from './hoverBuilderCardHelpers';
 import {
 	chipCaptionPreviewHtml,
 	chipPlainPreviewText,
@@ -76,6 +76,7 @@ export default function HoverEffectBuilderCard({
 	} = useHoverEffectBuilder();
 	const listId = useId();
 	const mediaRef = useRef(/** @type {HTMLDivElement | null} */ (null));
+	const shellRef = useRef(/** @type {HTMLDivElement | null} */ (null));
 
 	const slotLabels = useMemo(
 		() => ({
@@ -88,6 +89,8 @@ export default function HoverEffectBuilderCard({
 
 	const buildMode = builderViewMode === 'build';
 	const previewMode = builderViewMode === 'preview';
+	// Tilt and Pan follow the pointer in Preview, as on the visitor tile.
+	useHoverPointer(shellRef, previewMode);
 
 	return (
 		<form.Subscribe
@@ -110,44 +113,21 @@ export default function HoverEffectBuilderCard({
 								typeof bField.state.value === 'object'
 									? bField.state.value
 									: {};
-							const cardState = getHoverBuilderCardState(builder);
-							const { positions, dimOverlayOn } = cardState;
+							const { positions } =
+								getHoverBuilderCardState(builder);
 							const captionBelowImage =
 								editorCaptionsAreBelowImage(
 									captions,
 									galleryType
 								);
-							const itemClassName =
-								buildHoverBuilderItemClassName({
-									...cardState,
-									captionBelowImage,
-								});
+							// The same classes and vars as the canvas tiles.
+							const hoverTile = buildPreviewHoverTile({
+								builder,
+								hover,
+								captionBelowImage,
+							});
 							const visualSlotOrder =
 								getSlotOrderFromPositions(positions);
-
-							const hoverColorRaw =
-								typeof hover?.hoverColor === 'string'
-									? hover.hoverColor.trim()
-									: '';
-							const hoverColor =
-								hoverColorRaw || 'rgba(0,0,0,.5)';
-							const hoverOpacityNum = Number(hover?.hoverOpacity);
-							const hoverOpacityPct = Number.isFinite(
-								hoverOpacityNum
-							)
-								? Math.min(
-										100,
-										Math.max(0, Math.round(hoverOpacityNum))
-									)
-								: 50;
-							const dimOverlayItemStyle =
-								buildHoverBuilderItemStyle({
-									builder,
-									positions,
-									dimOverlayOn,
-									hoverColor,
-									hoverOpacityPct,
-								});
 							const hideTitle = captions?.hideTitle === true;
 							const hideDesc = captions?.hideDescription === true;
 							const socialOn = social?.enableSocial === true;
@@ -227,6 +207,7 @@ export default function HoverEffectBuilderCard({
 												)}
 									</span>
 									<div
+										ref={shellRef}
 										className={`modula-hover-builder-card-shell${
 											buildMode ? ' is-build-mode' : ''
 										}${
@@ -236,8 +217,8 @@ export default function HoverEffectBuilderCard({
 										}`}
 									>
 										<div
-											className={itemClassName}
-											style={dimOverlayItemStyle}
+											className={hoverTile.className}
+											style={hoverTile.style}
 										>
 											<div className="modula-item-content">
 												<div

@@ -16,6 +16,36 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Modula_Item_Data_Processor {
 
+	/**
+	 * Hover v2 free slots from this Y (% of the tile) can reach the collapsed
+	 * share button's band. Mirrors `HOVER_SLOT_SHARE_BAND_MIN_Y` in the
+	 * editor's `hoverSlotRails.js`.
+	 */
+	const HOVER_SHARE_BAND_MIN_Y = 60;
+
+	/**
+	 * Title and caption on neighbouring rows of the hover v2 text grid, at most
+	 * this far apart (% of the tile height), share one text scrim band (unless
+	 * the text sits at the bottom edge); farther apart, one scrim runs from the
+	 * nearer tile edge. Mirrors
+	 * `HOVER_SCRIM_JOIN_MAX_DY` in the editor's `hoverSlotRails.js`.
+	 */
+	const HOVER_SCRIM_JOIN_MAX_DY = 20;
+
+	/**
+	 * Title and caption farther apart scrim from the top edge while the text
+	 * block's middle is at or above this Y (% of the tile), else from the
+	 * bottom. Mirrors `HOVER_SCRIM_TOP_EDGE_MAX_MID_Y` in `hoverSlotRails.js`.
+	 */
+	const HOVER_SCRIM_TOP_EDGE_MAX_MID_Y = 50;
+
+	/**
+	 * Title or caption at or below this Y (% of the tile) puts the text at the
+	 * bottom edge: one scrim from that edge, however close the two are (the
+	 * simple moves' 70 / 84). Mirrors `HOVER_SCRIM_BOTTOM_EDGE_MIN_Y` in
+	 * `hoverSlotRails.js`.
+	 */
+	const HOVER_SCRIM_BOTTOM_EDGE_MIN_Y = 84;
 
 	/**
 	 * Process item data through all transformation steps
@@ -44,9 +74,43 @@ class Modula_Item_Data_Processor {
 			$item_data = $this->process_srcset_sizes( $item_data, $image, $settings, is_array( $images ) ? count( $images ) : 0 );
 		}
 		$item_data = $this->process_lightbox_and_links( $item_data, $image, $settings );
-		$item_data = $this->process_hover_effects( $item_data, $settings );
+		$item_data = $this->process_hover_effects( $item_data, $this->hover_settings_for_item( $image, $settings ) );
 		$item_data = $this->process_grid_settings( $item_data, $image, $settings );
+		$item_data = $this->process_item_css_classes( $item_data, $image );
 
+		return $item_data;
+	}
+
+	/**
+	 * Gallery settings with the image's own hover effect, when it has one the
+	 * site may use (`Item_Fields::hover_builder_for_item`).
+	 *
+	 * @param array $image    Gallery item row.
+	 * @param array $settings Gallery settings.
+	 * @return array Settings for this item's hover.
+	 */
+	private function hover_settings_for_item( $image, $settings ) {
+		$builder = \Modula\V2\Images\Item_Fields::hover_builder_for_item( $image );
+		if ( null === $builder ) {
+			return $settings;
+		}
+		$settings['hover_builder'] = $builder;
+		return $settings;
+	}
+
+	/**
+	 * Adds the image's own CSS classes to its element.
+	 *
+	 * @param array $item_data Item data.
+	 * @param array $image     Gallery item row.
+	 * @return array Modified item data
+	 */
+	private function process_item_css_classes( $item_data, $image ) {
+		$classes = \Modula\V2\Images\Item_Fields::item_classes( $image );
+		if ( array() === $classes ) {
+			return $item_data;
+		}
+		$item_data['item_classes'] = array_values( array_unique( array_merge( $item_data['item_classes'], $classes ) ) );
 		return $item_data;
 	}
 
@@ -641,6 +705,112 @@ class Modula_Item_Data_Processor {
 	}
 
 	/**
+	 * How many share-button widths a hover v2 free slot gives up while the
+	 * collapsed share button shows in the tile's bottom-right corner.
+	 *
+	 * Only slots in the lower part of the tile (`HOVER_SHARE_BAND_MIN_Y`) can
+	 * reach the button's band; higher slots keep their width. Centred copy narrows on both
+	 * sides, left-anchored copy on its right side. Right-anchored copy ends at
+	 * its x whatever its width, so narrowing would not move it; it keeps its
+	 * width (the presets' right slots sit high, at x 88, y 16–46).
+	 * Mirrored by `getSlotShareInset()` in the editor's `hoverSlotRails.js`.
+	 *
+	 * @param int $x Slot X position (0–100).
+	 * @param int $y Slot Y position (0–100).
+	 * @return int 0, 1 or 2.
+	 */
+	private function hover_slot_share_inset( $x, $y ) {
+		$x = (int) $x;
+		if ( (int) $y < self::HOVER_SHARE_BAND_MIN_Y || $x > 50 ) {
+			return 0;
+		}
+		return 50 === $x ? 2 : 1;
+	}
+
+	/**
+	 * Placement variables for the hover v2 free-slot text stack (`_hover-v2.scss`).
+	 *
+	 * The stack is one grid over the tile: each slot sits on its own row line,
+	 * and the gaps between the lines come from the slot heights in stack order.
+	 * CSS cannot sort, so the sorted heights and each slot's grid row are
+	 * computed here: `--modula-hover-row-y-{1,2,3}` (unitless % of the tile
+	 * height) and `--modula-hover-slot-row-{slot}` (2, 4 or 6; the odd rows are
+	 * the gaps). `--modula-hover-slot-share-inset-{slot}` is
+	 * `hover_slot_share_inset()`. Then `hover_scrim_style()`. Mirrored by
+	 * `buildHoverSlotStackStyleVars()` in the editor's `hoverSlotRails.js`.
+	 *
+	 * @param array<string, array{x: int, y: int}> $pos        Clamped slot positions.
+	 * @param string[]                             $slot_order Slot keys, top to bottom.
+	 * @return string Inline CSS declarations.
+	 */
+	private function hover_slot_stack_style( $pos, $slot_order ) {
+		$style = '';
+		foreach ( $slot_order as $i => $slot_key ) {
+			$style .= sprintf(
+				'--modula-hover-row-y-%1$d:%2$d;--modula-hover-slot-row-%3$s:%4$d;--modula-hover-slot-share-inset-%3$s:%5$d;',
+				$i + 1,
+				$pos[ $slot_key ]['y'],
+				$slot_key,
+				2 + ( 2 * $i ),
+				$this->hover_slot_share_inset( $pos[ $slot_key ]['x'], $pos[ $slot_key ]['y'] )
+			);
+		}
+		return $style . $this->hover_scrim_style( $pos, $slot_order );
+	}
+
+	/**
+	 * Grid rows of the hover v2 text scrim (`_hover-v2.scss`). While both title
+	 * and caption show, the title's band covers both and the caption's is off,
+	 * so the scrim never darkens twice: `--modula-hover-scrim-title-rows`. A
+	 * layer shown alone covers `--modula-hover-scrim-{title,caption}-only-rows`.
+	 *
+	 * Title and caption on neighbouring rows, close together
+	 * (`HOVER_SCRIM_JOIN_MAX_DY`), get a band around their rows. Text at the
+	 * bottom edge (the simple moves' 70 / 84, `HOVER_SCRIM_BOTTOM_EDGE_MIN_Y`)
+	 * or farther apart gets one scrim from the tile edge nearer the text
+	 * block's middle (`1 / …` or `… / -1`), past the farther text row.
+	 * Mirrored by `buildHoverScrimStyleVars()` in `hoverSlotRails.js`.
+	 *
+	 * @param array<string, array{x: int, y: int}> $pos        Clamped slot positions.
+	 * @param string[]                             $slot_order Slot keys, top to bottom.
+	 * @return string Inline CSS declarations.
+	 */
+	private function hover_scrim_style( $pos, $slot_order ) {
+		$title_row   = 2 + ( 2 * (int) array_search( 'title', $slot_order, true ) );
+		$caption_row = 2 + ( 2 * (int) array_search( 'caption', $slot_order, true ) );
+		$title_y     = (int) $pos['title']['y'];
+		$caption_y   = (int) $pos['caption']['y'];
+		$joined      = 2 === abs( $title_row - $caption_row )
+			&& abs( $title_y - $caption_y ) <= self::HOVER_SCRIM_JOIN_MAX_DY;
+		$top_row     = min( $title_row, $caption_row );
+		$bottom_row  = max( $title_row, $caption_row );
+
+		$text_in_top_half = ( $title_y + $caption_y ) / 2 <= self::HOVER_SCRIM_TOP_EDGE_MAX_MID_Y;
+		$at_bottom_edge   = max( $title_y, $caption_y ) >= self::HOVER_SCRIM_BOTTOM_EDGE_MIN_Y;
+
+		if ( $joined && ! $at_bottom_edge ) {
+			$both_rows    = $top_row . ' / ' . ( $bottom_row + 1 );
+			$title_rows   = (string) $title_row;
+			$caption_rows = (string) $caption_row;
+		} elseif ( $text_in_top_half ) {
+			$both_rows    = '1 / ' . ( $bottom_row + 1 );
+			$title_rows   = '1 / ' . ( $title_row + 1 );
+			$caption_rows = '1 / ' . ( $caption_row + 1 );
+		} else {
+			$both_rows    = $top_row . ' / -1';
+			$title_rows   = $title_row . ' / -1';
+			$caption_rows = $caption_row . ' / -1';
+		}
+
+		return sprintf(
+			'--modula-hover-scrim-title-rows:%s;--modula-hover-scrim-title-only-rows:%s;--modula-hover-scrim-caption-only-rows:%s;',
+			$both_rows,
+			$title_rows,
+			$caption_rows
+		);
+	}
+
+	/**
 	 * Process hover effects
 	 *
 	 * @param array $item_data Item data
@@ -676,7 +846,7 @@ class Modula_Item_Data_Processor {
 		}
 		$graphic_raw = isset( $builder['graphicElement'] ) ? $builder['graphicElement'] : 'none';
 		$graphic     = sanitize_key( (string) $graphic_raw );
-		if ( in_array( $graphic, array( 'frame', 'diamond' ), true ) ) {
+		if ( 'none' !== $graphic && in_array( $graphic, \Modula\V2\Motion\Animation_Catalog::builder_field_ids( 'graphicElement' ), true ) ) {
 			$item_data['item_classes'][] = 'modula-hover-graphic--' . $graphic;
 			$graphic_visibility_raw      = isset( $builder['graphicVisibility'] ) ? $builder['graphicVisibility'] : 'on-hover';
 			$graphic_visibility          = sanitize_key( (string) $graphic_visibility_raw );
@@ -805,7 +975,7 @@ class Modula_Item_Data_Processor {
 			$align_title,
 			$align_caption,
 			$align_social
-		);
+		) . $this->hover_slot_stack_style( $pos, $slot_order );
 		if ( isset( $item_data['item_attributes']['style'] ) && is_string( $item_data['item_attributes']['style'] ) && '' !== $item_data['item_attributes']['style'] ) {
 			$item_data['item_attributes']['style'] = rtrim( $item_data['item_attributes']['style'], ';' ) . ';' . $free;
 		} else {

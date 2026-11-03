@@ -148,6 +148,13 @@ export function freeformRectangle(placement, metrics) {
 		height: placement.h * metrics.pitch - metrics.gutterY,
 	};
 }
+/**
+ * @param {Object} metrics Cell metrics.
+ * @return {number} Painted width of the 24 columns, without the trailing gutter.
+ */
+export function freeformSurfaceWidth(metrics) {
+	return FREEFORM_COLUMNS * metrics.pitch - metrics.gutterX;
+}
 export function freeformExtent(composition, metrics) {
 	const rows = Math.max(0, ...composition.map((p) => p.y + p.h));
 	return rows ? rows * metrics.pitch - metrics.gutterY : 0;
@@ -167,7 +174,7 @@ export function freeformPaint(composition, metrics, device) {
 			height: freeformExtent(composition, metrics),
 		};
 	}
-	const width = FREEFORM_COLUMNS * metrics.pitch - metrics.gutterX;
+	const width = freeformSurfaceWidth(metrics);
 	let nextTop = 0;
 	const rectangles = composition.map((p) => {
 		const height = (width * p.h) / p.w;
@@ -182,30 +189,68 @@ export function freeformPaint(composition, metrics, device) {
 }
 
 /**
+ * Cell rectangles overlap when they share area; tiles that only share an edge do not.
+ * @param {Object} a Placement.
+ * @param {Object} b Placement.
+ * @return {boolean} Whether the two paint over each other.
+ */
+function freeformPlacementsOverlap(a, b) {
+	return (
+		a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h
+	);
+}
+
+/**
+ * Rank of the nearest image in paint order, in `direction`, that overlaps the one at `from`.
+ * @param {Object[]} ordered   Placements in paint order.
+ * @param {number}   from      Rank of the target.
+ * @param {number}   direction 1 (above) or -1 (below).
+ * @return {number} That rank, or `from` when no image overlaps in that direction.
+ */
+function nearestOverlappingRank(ordered, from, direction) {
+	for (
+		let rank = from + direction;
+		rank >= 0 && rank < ordered.length;
+		rank += direction
+	) {
+		if (freeformPlacementsOverlap(ordered[rank], ordered[from])) {
+			return rank;
+		}
+	}
+	return from;
+}
+
+/** Target rank per stacking action, given the placements in paint order and the target's rank. */
+const FREEFORM_STACKING_TARGETS = {
+	forward: (ordered, from) => nearestOverlappingRank(ordered, from, 1),
+	backward: (ordered, from) => nearestOverlappingRank(ordered, from, -1),
+	front: (ordered) => ordered.length - 1,
+	back: () => 0,
+};
+
+/**
  * Change paint order only; retain the catalog array and every authored rectangle.
+ * Forward/backward step past the nearest overlapping image (non-overlapping
+ * ones are skipped, as in Figma or Keynote); front/back go to either end.
  * @param {Object[]} composition Authored placements.
  * @param {string}   id          Target occurrence.
  * @param {string}   action      Stacking direction.
- * @return {Object[]} Updated placements.
+ * @return {Object[]} Updated placements; the same array when nothing changes.
  */
 export function changeFreeformStacking(composition, id, action) {
+	if (
+		!Object.prototype.hasOwnProperty.call(FREEFORM_STACKING_TARGETS, action)
+	) {
+		return composition;
+	}
 	const ordered = composition
-		.map((p, index) => ({ id: p.id, z: p.z, index }))
+		.map((p, index) => ({ ...p, index }))
 		.sort((a, b) => a.z - b.z || a.index - b.index);
 	const from = ordered.findIndex((p) => p.id === id);
 	if (from < 0) {
 		return composition;
 	}
-	const targets = {
-		forward: from + 1,
-		backward: from - 1,
-		front: ordered.length - 1,
-		back: 0,
-	};
-	const to = Math.max(
-		0,
-		Math.min(ordered.length - 1, targets[action] ?? from)
-	);
+	const to = FREEFORM_STACKING_TARGETS[action](ordered, from);
 	if (to === from) {
 		return composition;
 	}

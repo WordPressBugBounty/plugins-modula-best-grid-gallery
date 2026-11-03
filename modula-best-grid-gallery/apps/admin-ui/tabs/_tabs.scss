@@ -27,6 +27,8 @@
 
 .modula-admin-tabs__tab {
 	@include mixins.segment-option;
+	// Room between the label and an optional badge.
+	gap: 8px;
 
 	&:hover:not([aria-selected="true"]) {
 		background: var(--modula-admin-surface-hover);

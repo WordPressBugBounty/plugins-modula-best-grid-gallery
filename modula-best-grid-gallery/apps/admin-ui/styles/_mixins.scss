@@ -56,6 +56,19 @@
 	}
 }
 
+// A single-line label in a flex row with an icon beside it (buttons, menu
+// items, pills, the editor top bar). `align-items: center` centres the
+// icon on the label's line box, but Chrome floors the leading above the
+// text to a whole pixel and adds the rest below. With the root's 1.45, the
+// text therefore sits up to 1px above the box's middle, and the icon reads
+// low. With `line-height: 1`, the leading is negative and floors the same
+// way. `normal` adds no leading, so the line box is the font's own height,
+// and Figtree centres that on its capitals. The control's own height comes
+// from `height` or `min-height`, never from the label.
+@mixin control-label {
+	line-height: normal;
+}
+
 // Pill track and its options, shared by Segmented and Tabs so both have one
 // look.
 @mixin segment-track {
@@ -69,6 +82,7 @@
 
 @mixin segment-option {
 	@include button-reset;
+	@include control-label;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -81,7 +95,7 @@
 }
 
 @mixin segment-option-active {
-	background: var(--modula-admin-surface);
+	background: var(--modula-admin-surface-raised);
 	box-shadow: var(--modula-admin-shadow-raised);
 	color: var(--modula-admin-ink);
 	font-weight: 600;

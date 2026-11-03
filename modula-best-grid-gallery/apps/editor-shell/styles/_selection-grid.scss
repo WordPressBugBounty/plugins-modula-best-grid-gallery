@@ -1,0 +1,86 @@
+// Selection mode grid (canvas "1 · Editor"): square checkbox thumbnails on
+// the stage (`SelectionGrid`). It replaces the editor's canvas body inside the
+// artboard, which sits outside the admin-ui scope, so the canvas values are
+// written out. The stage is the same dark in both appearances, on every device.
+$mod-selection-grid-stage: #1c1b19;
+
+.modula-takeover__selection-grid {
+	--modula-selection-grid-gap-ring: #{$mod-selection-grid-stage};
+	--modula-selection-grid-focus: #f2f2ee;
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 16px;
+	max-width: 1000px;
+	margin: 0 auto;
+}
+
+.modula-takeover__preview-wrap--tablet .modula-takeover__selection-grid {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.modula-takeover__preview-wrap--mobile .modula-takeover__selection-grid {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.modula-takeover__selection-thumb {
+	position: relative;
+	display: block;
+	box-sizing: border-box;
+	aspect-ratio: 1 / 1;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	border: none;
+	border-radius: 8px;
+	background: #2e2d2a;
+	cursor: pointer;
+	appearance: none;
+
+	img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	&[aria-checked="true"] {
+		box-shadow:
+			0 0 0 3px var(--modula-selection-grid-gap-ring),
+			0 0 0 6px #8f8b80;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--modula-selection-grid-focus);
+		outline-offset: 8px;
+	}
+}
+
+.modula-takeover__selection-thumb-check {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	border: 2px solid #fff;
+	border-radius: 13px;
+	background: rgba(255, 255, 255, 0.85);
+	color: transparent;
+
+	svg {
+		display: block;
+	}
+
+	[aria-checked="true"] > & {
+		border: none;
+		background: #1f1f1c;
+		color: #fff;
+	}
+}

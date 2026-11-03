@@ -1,6 +1,6 @@
 import { useEffect, useRef } from '@wordpress/element';
 import { useGallerySettingsFormBundle } from '../form/GallerySettingsFormContext';
-import { isModulaSettingsCommandPaletteKeyScope } from '../utils/isModulaSettingsCommandPaletteKeyScope';
+import { isModulaEditorShortcutScope } from '../utils/isModulaEditorShortcutScope';
 
 function isTextEditingTarget(target) {
 	if (!target || typeof target !== 'object') {
@@ -32,7 +32,7 @@ export function useGallerySettingsUndoRedoShortcuts() {
 
 	useEffect(() => {
 		const onKey = (e) => {
-			if (!isModulaSettingsCommandPaletteKeyScope(e.target)) {
+			if (!isModulaEditorShortcutScope(e.target)) {
 				return;
 			}
 			if (isTextEditingTarget(e.target)) {

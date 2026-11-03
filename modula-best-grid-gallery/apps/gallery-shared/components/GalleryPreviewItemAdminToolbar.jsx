@@ -1,12 +1,16 @@
 /**
- * Settings-editor live preview tile chrome: click-to-select, watermark pick, lock badge.
+ * Settings-editor live preview tile chrome: click-to-select (double-click
+ * opens the item's panel when the host offers `openItem`), the selected
+ * tile's toolbar (the host's `SelectedTileToolbar` slot), watermark pick,
+ * lock badge and the "Remove from gallery" trash button.
  * Per-item actions live in the Image sidebar (no ⋮ overflow menu).
+ * Multi-select has its own grid (gallery editor selection mode), not tile chrome.
  *
  * @package
  */
 
-import { useContext } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { useContext, useRef } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 import { Icon, lock } from '@wordpress/icons';
 import { useSelector } from 'react-redux';
 import { GalleryPreviewAdminActionsContext } from '../context/GalleryPreviewAdminActionsContext';
@@ -21,6 +25,49 @@ import {
 	isEmbeddedGalleryItemRow,
 } from '../utils/embeddedGalleryItemKinds';
 import { isGalleryPreviewVideoItem } from '../video/videoGalleryModel';
+import {
+	INITIAL_TILE_PRESSES,
+	isStillDoubleClick,
+	tilePressDown,
+	tilePressUp,
+} from '../utils/tilePresses';
+import TileTrashButton from './TileTrashButton';
+
+/**
+ * @param {Object} itemData
+ * @return {string} Accessible name of the tile's trash button.
+ */
+function removeFromGalleryLabel(itemData) {
+	const title =
+		typeof itemData?.title === 'string'
+			? itemData.title.replace(/<[^>]*>/g, '').trim()
+			: '';
+	if (title === '') {
+		return __('Remove from gallery', 'modula-best-grid-gallery');
+	}
+	return sprintf(
+		/* translators: %s: image title */
+		__('Remove %s from gallery', 'modula-best-grid-gallery'),
+		title
+	);
+}
+
+/**
+ * @param {{ isContentBlock: boolean, isFreeformShortcode: boolean, isVideoItem: boolean }} kind What the tile holds.
+ * @return {string} The gallery's accessible name of the tile's select hit.
+ */
+function selectTileLabel({ isContentBlock, isFreeformShortcode, isVideoItem }) {
+	if (isContentBlock) {
+		return __('Edit content block', 'modula-best-grid-gallery');
+	}
+	if (isFreeformShortcode) {
+		return __('Select shortcode to edit', 'modula-best-grid-gallery');
+	}
+	if (isVideoItem) {
+		return __('Select video to edit', 'modula-best-grid-gallery');
+	}
+	return __('Select image to edit', 'modula-best-grid-gallery');
+}
 
 /**
  * @param {Object} props
@@ -35,6 +82,7 @@ export default function GalleryPreviewItemAdminToolbar({
 	const config = useSelector((s) => s.gallery.config);
 	const items = useSelector((s) => s.items.items);
 	const ctx = useContext(GalleryPreviewAdminActionsContext);
+	const pressesRef = useRef(INITIAL_TILE_PRESSES);
 
 	const isEditorPreviewChrome =
 		metadata?.displayContext === 'settings-editor-preview' ||
@@ -74,16 +122,8 @@ export default function GalleryPreviewItemAdminToolbar({
 		wmSelectActive &&
 		typeof ctx.isWatermarkSelected === 'function' &&
 		ctx.isWatermarkSelected(attachmentId);
-
-	const tileSelectionActive =
-		!wmSelectActive &&
-		!isEmbedded &&
-		!isContentBlock &&
-		Boolean(ctx.tileSelectionActive);
-	const tileSelected =
-		tileSelectionActive &&
-		typeof ctx.isTileSelected === 'function' &&
-		ctx.isTileSelected(storeIndex);
+	const showTrash =
+		!wmSelectActive && !isEmbedded && typeof ctx.removeItem === 'function';
 
 	const stop = (e) => {
 		e.preventDefault();
@@ -99,47 +139,55 @@ export default function GalleryPreviewItemAdminToolbar({
 				wmSelected ? ' is-wm-selected' : ''
 			}`
 		: '';
-	const tileSelectClass = tileSelectionActive
-		? ` modula-gallery-preview-item-admin--tile-select${
-				tileSelected ? ' is-tile-selected' : ''
-			}`
-		: '';
-	const itemEditSelected =
-		!wmSelectActive &&
-		!tileSelectionActive &&
-		(!isEmbedded || isFreeformShortcode) &&
-		typeof ctx.isItemEditSelected === 'function' &&
-		ctx.isItemEditSelected(storeIndex);
-	const editSelectedClass = itemEditSelected ? ' is-item-edit-selected' : '';
-
-	const onSelectTile = (e) => {
-		stop(e);
-		if (tileSelectionActive) {
-			ctx.handleTileSelectionClick?.(storeIndex, e);
-			return;
-		}
-		if (e.shiftKey && typeof ctx.handleTileSelectionClick === 'function') {
-			ctx.handleTileSelectionClick(storeIndex, e);
-			return;
-		}
-		if (isContentBlock && typeof ctx.openEditContentBlock === 'function') {
-			ctx.openEditContentBlock(storeIndex);
-			return;
-		}
-		if (!isEmbedded || isFreeformShortcode) {
-			ctx.openEditMetadata(storeIndex);
-		}
-	};
-
 	const canSelect =
 		!wmSelectActive &&
+		typeof ctx.selectItem === 'function' &&
 		(isContentBlock
 			? typeof ctx.openEditContentBlock === 'function'
 			: !isEmbedded || isFreeformShortcode);
+	const itemSelected =
+		canSelect &&
+		typeof ctx.isItemSelected === 'function' &&
+		ctx.isItemSelected(storeIndex);
+	const selectedClass = itemSelected ? ' is-item-selected' : '';
+	// The editor's toolbar for the selected tile (Edit, Remove); none in other hosts.
+	const SelectedTileToolbar = itemSelected ? ctx.SelectedTileToolbar : null;
+	// A host's labels on every tile (the Albums editor's member kind).
+	const TileLabels = ctx.TileLabels ?? null;
+	// A host's words for the select hit and the trash; the gallery's otherwise.
+	const hostCopy = ctx.tileCopy ? ctx.tileCopy(itemData) : null;
+
+	// A click selects; the selected tile's toolbar opens the item's panel.
+	const onSelectTile = (e) => {
+		stop(e);
+		ctx.selectItem(storeIndex, { shiftKey: e.shiftKey });
+	};
+	// A double-click opens it directly, unless one of its presses dragged or
+	// resized the tile. The presses are only watched; the layout's drag owns them.
+	const pressHandlers = {
+		onPointerDown: (e) => {
+			pressesRef.current = tilePressDown(pressesRef.current, e);
+		},
+		onPointerUp: (e) => {
+			pressesRef.current = tilePressUp(pressesRef.current, e);
+		},
+		onPointerCancel: () => {
+			pressesRef.current = INITIAL_TILE_PRESSES;
+		},
+	};
+	const onOpenTile = (e) => {
+		stop(e);
+		if (
+			typeof ctx.openItem === 'function' &&
+			isStillDoubleClick(pressesRef.current, e)
+		) {
+			ctx.openItem(storeIndex);
+		}
+	};
 
 	return (
 		<div
-			className={`modula-gallery-preview-item-admin${wmClass}${tileSelectClass}${editSelectedClass}`}
+			className={`modula-gallery-preview-item-admin${wmClass}${selectedClass}`}
 		>
 			{wmSelectActive ? (
 				<button
@@ -174,76 +222,30 @@ export default function GalleryPreviewItemAdminToolbar({
 				<button
 					type="button"
 					className="modula-gallery-preview-item-admin__select-hit"
-					aria-pressed={
-						tileSelectionActive ? tileSelected : itemEditSelected
-					}
+					aria-pressed={itemSelected}
 					aria-label={
-						tileSelectionActive
-							? tileSelected
-								? __(
-										'Deselect image',
-										'modula-best-grid-gallery'
-									)
-								: __('Select image', 'modula-best-grid-gallery')
-							: isContentBlock
-								? __(
-										'Edit content block',
-										'modula-best-grid-gallery'
-									)
-								: isFreeformShortcode
-									? __(
-											'Select shortcode to edit',
-											'modula-best-grid-gallery'
-										)
-									: isVideoItem
-										? __(
-												'Select video to edit',
-												'modula-best-grid-gallery'
-											)
-										: __(
-												'Select image to edit',
-												'modula-best-grid-gallery'
-											)
+						hostCopy?.select ??
+						selectTileLabel({
+							isContentBlock,
+							isFreeformShortcode,
+							isVideoItem,
+						})
 					}
+					{...pressHandlers}
 					onClick={onSelectTile}
+					onDoubleClick={onOpenTile}
 				/>
 			) : null}
-			{tileSelectionActive ? (
-				<button
-					type="button"
-					className="modula-gallery-preview-item-admin__pick"
-					aria-pressed={tileSelected}
-					aria-label={
-						tileSelected
-							? __('Deselect image', 'modula-best-grid-gallery')
-							: __('Select image', 'modula-best-grid-gallery')
-					}
-					{...stopPointer}
-					onClick={onSelectTile}
-				>
-					<svg
-						width="11"
-						height="11"
-						viewBox="0 0 24 24"
-						fill="none"
-						aria-hidden="true"
-						focusable="false"
-					>
-						<path
-							d="m20 6-11 11-5-5"
-							stroke="currentColor"
-							strokeWidth="3.2"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-						/>
-					</svg>
-				</button>
+			{TileLabels ? (
+				<TileLabels storeIndex={storeIndex} itemData={itemData} />
 			) : null}
-			<div
-				className="modula-gallery-preview-item-admin__shade"
-				aria-hidden="true"
-			/>
-			{showGridLock && !tileSelectionActive ? (
+			{SelectedTileToolbar ? (
+				<SelectedTileToolbar
+					storeIndex={storeIndex}
+					itemData={itemData}
+				/>
+			) : null}
+			{showGridLock ? (
 				<button
 					type="button"
 					className={`modula-gallery-preview-item-admin__lock-badge${
@@ -276,6 +278,17 @@ export default function GalleryPreviewItemAdminToolbar({
 				>
 					<Icon icon={lock} size={14} />
 				</button>
+			) : null}
+			{showTrash ? (
+				<TileTrashButton
+					className="modula-gallery-preview-item-admin__trash"
+					title={
+						hostCopy?.removeTitle ??
+						__('Remove from gallery', 'modula-best-grid-gallery')
+					}
+					label={hostCopy?.remove ?? removeFromGalleryLabel(itemData)}
+					onRemove={() => ctx.removeItem(storeIndex)}
+				/>
 			) : null}
 		</div>
 	);

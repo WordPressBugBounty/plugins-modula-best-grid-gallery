@@ -13,6 +13,11 @@
 #
 #
 
+// Modula: patched locally for PHP 8.4. blockSetextHeader() and blockTable()
+// take an untyped $Block = null, like blockCode(), because PHP 8.4 deprecates
+// implicitly nullable `array $Block = null` and `?array` needs PHP 7.1, while
+// the plugin still declares PHP 5.6.
+
 class Parsedown {
 	# ~
 
@@ -632,7 +637,7 @@ class Parsedown {
 	#
 	# Setext
 
-	protected function blockSetextHeader( $Line, array $Block = null ) {
+	protected function blockSetextHeader( $Line, $Block = null ) {
 		if ( ! isset( $Block ) or isset( $Block['type'] ) or isset( $Block['interrupted'] ) ) {
 			return;
 		}
@@ -748,7 +753,7 @@ class Parsedown {
 	#
 	# Table
 
-	protected function blockTable( $Line, array $Block = null ) {
+	protected function blockTable( $Line, $Block = null ) {
 		if ( ! isset( $Block ) or isset( $Block['type'] ) or isset( $Block['interrupted'] ) ) {
 			return;
 		}

@@ -24,7 +24,6 @@ export function FreeformSurface({
 	editor = false,
 	onTilePointerDown,
 	onTileClickCapture,
-	tileControls,
 	children,
 }) {
 	const { rectangles, height } = freeformPaint(composition, metrics, device);
@@ -71,7 +70,6 @@ export function FreeformSurface({
 							fillSlot
 							style={{ width: '100%', height: '100%' }}
 						/>
-						{tileControls?.(placement)}
 					</div>
 				);
 			})}

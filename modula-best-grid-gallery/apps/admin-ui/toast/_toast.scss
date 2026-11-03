@@ -1,3 +1,5 @@
+@use '../styles/mixins';
+
 // Fixed to the viewport, above wp-admin content but below its admin bar.
 .modula-admin-toast-region {
 	position: fixed;
@@ -9,6 +11,7 @@
 }
 
 .modula-admin-toast {
+	@include mixins.control-label;
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -20,9 +23,31 @@
 	color: var(--modula-admin-ink-inverse);
 	font-size: var(--modula-admin-text-control);
 
-	// Not in the design: failures use the danger color so they read apart
-	// from confirmations.
+	// Failures use the canvas's red fill, in both themes, so they read
+	// apart from confirmations.
 	&.is-error {
-		background: var(--modula-admin-danger);
+		background: var(--modula-admin-danger-fill);
+		color: var(--modula-admin-danger-fill-ink);
+	}
+}
+
+// Undo: underlined bold text on the toast.
+.modula-admin-toast__action {
+	@include mixins.button-reset;
+	@include mixins.control-label;
+	display: flex;
+	align-items: center;
+	height: 32px;
+	margin: 0 -8px 0 4px;
+	padding: 0 8px;
+	border-radius: var(--modula-admin-radius-sm);
+	color: inherit;
+	font-weight: 600;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+
+	&:focus-visible {
+		outline: 2px solid currentcolor;
+		outline-offset: 0;
 	}
 }

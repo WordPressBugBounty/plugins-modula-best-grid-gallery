@@ -10,14 +10,13 @@ import { useGallerySettingsForm } from '../../form/useGallerySettingsForm';
 import { TakeoverSidebarStackProvider } from '../../context/TakeoverSidebarStackContext';
 import { WatermarkPreviewSelectionProvider } from '../../context/WatermarkPreviewSelectionContext';
 import { GalleryPreviewTileSelectionProvider } from '../../context/GalleryPreviewTileSelectionContext';
-import { GalleryReorderSidebarProvider } from '../../context/GalleryReorderSidebarContext';
 import { GalleryItemEditSidebarProvider } from '../../context/GalleryItemEditSidebarContext';
-import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 import { useGalleryBootstrapQuery } from '../../query/useGalleryBootstrapQuery';
-import GallerySettingsShellRouter from './GallerySettingsShellRouter';
+import GalleryTakeoverMount from './GalleryTakeoverMount';
 import { useGallerySettingsUndoRedoShortcuts } from '../../hooks/useGallerySettingsUndoRedoShortcuts';
 import { useHoverDimOverlaySync } from '../../hooks/useHoverDimOverlaySync';
 import { useHoverColorOpacitySync } from '../../hooks/useHoverColorOpacitySync';
+import { useMotionHoverChoiceSync } from '../../hooks/useMotionHoverChoiceSync';
 import { ProofingModeProvider } from '../../context/ProofingModeContext';
 
 function GallerySettingsUndoRedoShortcutsMount() {
@@ -37,15 +36,19 @@ function HoverColorOpacitySyncMount() {
 	return null;
 }
 
+function MotionHoverChoiceSyncMount() {
+	const { form } = useGallerySettingsFormBundle();
+	useMotionHoverChoiceSync(form);
+	return null;
+}
+
 export default function GallerySettingsEditorLoaded({
 	galleryId,
 	groupedPayload,
 }) {
 	const bundle = useGallerySettingsForm(groupedPayload, galleryId);
-	const { takeover } = useModulaSettingsEditorConfig();
-
 	/* Warm bootstrap cache for takeover as soon as settings load (declarative fetch, no prefetch effect). */
-	useGalleryBootstrapQuery(takeover ? galleryId : null);
+	useGalleryBootstrapQuery(galleryId);
 
 	return (
 		<GallerySettingsFormProvider value={bundle}>
@@ -53,17 +56,14 @@ export default function GallerySettingsEditorLoaded({
 				<GallerySettingsUndoRedoShortcutsMount />
 				<HoverDimOverlaySyncMount />
 				<HoverColorOpacitySyncMount />
+				<MotionHoverChoiceSyncMount />
 				<TakeoverSidebarStackProvider>
 					<GalleryPreviewTileSelectionProvider>
-						<GalleryReorderSidebarProvider>
-							<GalleryItemEditSidebarProvider>
-								<WatermarkPreviewSelectionProvider>
-									<GallerySettingsShellRouter
-										galleryId={galleryId}
-									/>
-								</WatermarkPreviewSelectionProvider>
-							</GalleryItemEditSidebarProvider>
-						</GalleryReorderSidebarProvider>
+						<GalleryItemEditSidebarProvider>
+							<WatermarkPreviewSelectionProvider>
+								<GalleryTakeoverMount />
+							</WatermarkPreviewSelectionProvider>
+						</GalleryItemEditSidebarProvider>
 					</GalleryPreviewTileSelectionProvider>
 				</TakeoverSidebarStackProvider>
 			</ProofingModeProvider>

@@ -17,6 +17,10 @@
 		margin-bottom: 28px;
 	}
 
+	.modula-admin-demo__appearance {
+		margin-top: 14px;
+	}
+
 	.modula-admin-demo__title {
 		margin: 0 0 6px;
 		padding: 0;
@@ -102,6 +106,89 @@
 		.modula-admin-range__input::-moz-range-thumb {
 			@include mixins.focus-ring;
 		}
+
+		// Editor primitives.
+		.modula-admin-color__button,
+		.modula-admin-preset-tiles__tile.is-active,
+		.modula-admin-plan-badge.is-action,
+		.modula-admin-reset {
+			@include mixins.focus-ring;
+		}
+
+		.modula-admin-position-pad__cell.is-chosen {
+			@include mixins.focus-ring;
+			outline-offset: -2px;
+		}
+
+		.modula-admin-unit-input {
+			@include mixins.field-focus;
+		}
+
+		.modula-admin-unit-select {
+			@include mixins.focus-ring;
+			outline-offset: 1px;
+		}
+
+		// The reset dot shows its cross on focus.
+		.modula-admin-reset__dot {
+			display: none;
+		}
+
+		.modula-admin-reset__cross {
+			display: flex;
+		}
+	}
+
+	.modula-admin-demo__group {
+		margin-top: 40px;
+		padding-top: 28px;
+		border-top: 2px solid var(--modula-admin-ink);
+	}
+
+	.modula-admin-demo__accordion {
+		max-width: 400px;
+	}
+
+	.modula-admin-demo__inline-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		font-size: var(--modula-admin-text-control);
+	}
+
+	.modula-admin-demo__chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		max-width: 320px;
+	}
+
+	.modula-admin-demo__reset {
+		display: flex;
+		align-items: center;
+		min-width: 120px;
+	}
+
+	.modula-admin-demo__popover-body {
+		width: 320px;
+		padding: 10px 14px;
+	}
+
+	// Stand-ins for hover effect previews.
+	.modula-admin-demo__hover-preview {
+		width: 60%;
+		height: 60%;
+		border-radius: var(--modula-admin-radius-sm);
+		background: var(--modula-admin-border-field);
+
+		&.is-zoom {
+			transform: scale(1.25);
+		}
+
+		&.is-reveal {
+			box-shadow: inset 0 -10px 0 var(--modula-admin-ink);
+		}
 	}
 
 	.modula-admin-nav__item.is-force-focus {
@@ -175,6 +262,11 @@
 	.modula-admin-demo__toast .modula-admin-toast-region {
 		position: static;
 		transform: none;
+	}
+
+	.modula-admin-demo__dialog-body {
+		margin: 0;
+		padding: 0 32px;
 	}
 
 	.modula-admin-demo__swatches {

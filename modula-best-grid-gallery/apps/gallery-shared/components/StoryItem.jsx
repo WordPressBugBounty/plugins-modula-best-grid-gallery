@@ -101,6 +101,8 @@ export default function StoryItem({
 			imageWrapperClass="modula-story-image-wrapper"
 			afterImage={captionNode}
 			previewAdminToolbar={previewAdminToolbar}
+			/* Every image slide is selected, opened and trashed on the canvas, as a Slider slide (Lite tickets 92, 102). */
+			slideChrome
 			suppressOverlayText
 		/>
 	);

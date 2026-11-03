@@ -3,6 +3,7 @@
  * Loads the canonical v2 settings schema document from PHP (types, defaults, items, metadata).
  * The array lives in includes/v2/settings/data/settings-v2-document.php.
  * Optional default tooltips: settings-v2-editor-field-help.php (merged when editorDescription is empty).
+ * Slider units: settings-v2-editor-field-units.php (merged when editorControl names no unit).
  *
  * @package Modula
  */
@@ -37,8 +38,71 @@ class Settings_Schema_Document {
 		}
 		/** @var array<string, mixed> $loaded */
 		$loaded         = require $data_file;
-		self::$document = is_array( $loaded ) ? self::merge_editor_field_help_strings( $loaded ) : array();
+		self::$document = is_array( $loaded )
+			? self::merge_editor_field_units( self::merge_editor_field_help_strings( $loaded ) )
+			: array();
 		return self::$document;
+	}
+
+	/**
+	 * Split a grouped path (`layout.gutter`) into its group and key.
+	 *
+	 * @param mixed $path Grouped path.
+	 * @return array{0: string, 1: string}|null Group and key, or null when the path is not `group.key`.
+	 */
+	private static function split_grouped_path( $path ) {
+		if ( ! is_string( $path ) ) {
+			return null;
+		}
+		$dot = strpos( $path, '.' );
+		if ( false === $dot ) {
+			return null;
+		}
+		$group = substr( $path, 0, $dot );
+		$key   = substr( $path, $dot + 1 );
+		if ( '' === $group || '' === $key ) {
+			return null;
+		}
+		return array( $group, $key );
+	}
+
+	/**
+	 * Set `editorControl.unit` from settings-v2-editor-field-units.php when the field names no unit.
+	 * Display only: the exporter drops `editorControl` from the REST schema.
+	 *
+	 * @param array<string, mixed> $doc Full v2 document.
+	 * @return array<string, mixed>
+	 */
+	private static function merge_editor_field_units( array $doc ) {
+		$units_file = __DIR__ . '/data/settings-v2-editor-field-units.php';
+		if ( ! is_readable( $units_file ) || ! isset( $doc['settings'] ) || ! is_array( $doc['settings'] ) ) {
+			return $doc;
+		}
+		/** @var array<string, string> $units */
+		$units = require $units_file;
+		if ( ! is_array( $units ) ) {
+			return $doc;
+		}
+		foreach ( $units as $path => $unit ) {
+			$ref = self::split_grouped_path( $path );
+			if ( null === $ref || ! is_string( $unit ) || '' === $unit ) {
+				continue;
+			}
+			list( $group, $key ) = $ref;
+			if ( ! isset( $doc['settings'][ $group ][ $key ] ) || ! is_array( $doc['settings'][ $group ][ $key ] ) ) {
+				continue;
+			}
+			$control = isset( $doc['settings'][ $group ][ $key ]['editorControl'] ) && is_array( $doc['settings'][ $group ][ $key ]['editorControl'] )
+				? $doc['settings'][ $group ][ $key ]['editorControl']
+				: array();
+			if ( isset( $control['unit'] ) ) {
+				continue;
+			}
+			$control['unit'] = $unit;
+
+			$doc['settings'][ $group ][ $key ]['editorControl'] = $control;
+		}
+		return $doc;
 	}
 
 	/**
@@ -61,18 +125,11 @@ class Settings_Schema_Document {
 			return $doc;
 		}
 		foreach ( $flat as $path => $text ) {
-			if ( ! is_string( $path ) || '' === $path || ! is_string( $text ) || '' === $text ) {
+			$ref = self::split_grouped_path( $path );
+			if ( null === $ref || ! is_string( $text ) || '' === $text ) {
 				continue;
 			}
-			$dot = strpos( $path, '.' );
-			if ( false === $dot ) {
-				continue;
-			}
-			$group = substr( $path, 0, $dot );
-			$key   = substr( $path, $dot + 1 );
-			if ( '' === $group || '' === $key ) {
-				continue;
-			}
+			list( $group, $key ) = $ref;
 			if ( ! isset( $doc['settings'][ $group ][ $key ] ) || ! is_array( $doc['settings'][ $group ][ $key ] ) ) {
 				continue;
 			}
@@ -163,6 +220,7 @@ class Settings_Schema_Document {
 					$clean['editorOmitControlInLite'],
 					$clean['editorOmitFromSettingsSidebar'],
 					$clean['editorRequiresExtensionEnabled'],
+					$clean['editorRequiresCompression'],
 					$clean['editorPresentationOnly'],
 					$clean['editorAdvancedOnly'],
 					$clean['editorSidebarNestedPanel'],

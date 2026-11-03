@@ -9,6 +9,8 @@
 
 namespace Modula\V2\Settings;
 
+use Modula\V2\Motion\Animation_Catalog;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -69,7 +71,6 @@ class Sanitizer {
 			$out[ $group ] = self::sanitize_group( $keys, array(), $group );
 		}
 
-		self::sync_social_enable_from_networks( $out );
 		self::hydrate_loading_effects_enables_in_grouped( $out );
 
 		return $out;
@@ -141,30 +142,25 @@ class Sanitizer {
 	}
 
 	/**
-	 * Keep social.enableSocial in sync with any enabled network (editor no longer exposes a master toggle).
+	 * First flat → v2 import: Enable sharing is on exactly when a network is on.
 	 *
-	 * @param array<string, array<string, mixed>> $grouped Sanitized grouped settings (mutated).
+	 * Until editor-qa ticket 13 every v2 write stored enableSocial as the OR of the
+	 * networks, so a classic gallery imported now keeps the sharing it would have
+	 * had. Later saves keep the stored toggle (turning it off keeps the networks).
+	 * Public for Meta_Sync and CLI seam tests. Mutates $social in place.
+	 *
+	 * @param array<string, mixed> $social Sanitized social group.
 	 */
-	private static function sync_social_enable_from_networks( array &$grouped ) {
-		if ( ! isset( $grouped['social'] ) || ! is_array( $grouped['social'] ) ) {
-			$grouped['social'] = array();
-		}
-		$networks = array(
-			'enableTwitter',
-			'enableFacebook',
-			'enableWhatsapp',
-			'enableLinkedin',
-			'enablePinterest',
-			'enableEmail',
-		);
+	public static function hydrate_legacy_social_enable( array &$social ) {
+		$networks = array( 'enableTwitter', 'enableFacebook', 'enableWhatsapp', 'enableLinkedin', 'enablePinterest', 'enableEmail' );
 		$any      = false;
 		foreach ( $networks as $key ) {
-			if ( ! empty( $grouped['social'][ $key ] ) ) {
+			if ( ! empty( $social[ $key ] ) ) {
 				$any = true;
 				break;
 			}
 		}
-		$grouped['social']['enableSocial'] = $any;
+		$social['enableSocial'] = $any;
 	}
 
 	/**
@@ -241,6 +237,13 @@ class Sanitizer {
 					: ( 'direct' === $keys['lightbox'] ? 'fancybox' : $keys['lightbox'] );
 			}
 		}
+		if ( 'showcase' === $group ) {
+			$keys = self::without_legacy_showcase_center_scale( $keys );
+		}
+		if ( 'watermark' === $group ) {
+			// v2 blobs saved before editor-qa ticket 18 hold px; read them as shares once.
+			$keys = Watermark_Scale::migrate_grouped( $keys );
+		}
 		if ( 'layout' === $group && array_key_exists( 'gridImageDimensions', $keys ) ) {
 			$keys['gridImageDimensions'] = Adapter::normalize_width_height_object( $keys['gridImageDimensions'] );
 		}
@@ -306,7 +309,7 @@ class Sanitizer {
 			$builder['cardTreatment'] = 'none';
 			$builder['dimOverlay']    = true;
 		}
-		$allowed_graphics             = array( 'none', 'frame', 'diamond' );
+		$allowed_graphics             = Animation_Catalog::builder_field_ids( 'graphicElement' );
 		$graphic                      = isset( $builder['graphicElement'] ) ? sanitize_key( (string) $builder['graphicElement'] ) : 'none';
 		$builder['graphicElement']    = in_array( $graphic, $allowed_graphics, true ) ? $graphic : 'none';
 		$builder['graphicVisibility'] = ( isset( $builder['graphicVisibility'] ) && 'always' === sanitize_key( (string) $builder['graphicVisibility'] ) ) ? 'always' : 'on-hover';
@@ -446,6 +449,38 @@ class Sanitizer {
 	}
 
 	/**
+	 * A Dim color with another alpha, in the form the gallery stores it. The
+	 * Pro album migration uses it to carry its classic opacity into the Dim
+	 * color's alpha.
+	 *
+	 * @param string $color Hex, `rgb()` or `rgba()` color.
+	 * @param float  $alpha Alpha 0–1.
+	 * @return string|null Compact rgba (`rgba(0,0,0,.5)`); null when the color can't be read.
+	 */
+	public static function color_with_alpha( string $color, float $alpha ) {
+		$parsed = self::parse_css_color( $color );
+		if ( null === $parsed ) {
+			return null;
+		}
+		return self::format_rgba_color( $parsed['r'], $parsed['g'], $parsed['b'], $alpha );
+	}
+
+	/**
+	 * A color without its alpha, as `#rrggbb`. The Pro album's flat copy uses
+	 * it to keep the Dim color as the hex its classic visitor reads.
+	 *
+	 * @param string $color Hex, `rgb()` or `rgba()` color.
+	 * @return string|null Lowercase `#rrggbb`; null when the color can't be read.
+	 */
+	public static function opaque_hex( string $color ) {
+		$parsed = self::parse_css_color( $color );
+		if ( null === $parsed ) {
+			return null;
+		}
+		return sprintf( '#%02x%02x%02x', $parsed['r'], $parsed['g'], $parsed['b'] );
+	}
+
+	/**
 	 * Compact Modula-style rgba string (`rgba(0,0,0,.5)`).
 	 *
 	 * @param int   $r Red 0–255.
@@ -542,7 +577,7 @@ class Sanitizer {
 	 * Sanitize a single value by type.
 	 *
 	 * @param mixed      $value          Raw value.
-	 * @param string     $type           One of: string, integer, boolean, array, object.
+	 * @param string     $type           One of: string, integer, number, boolean, array, object.
 	 * @param array|null $allowed_values Allowed values (for string).
 	 * @param mixed      $fallback       Default if invalid.
 	 * @param array      $def            Full definition (minimum, maximum, etc.).
@@ -554,7 +589,6 @@ class Sanitizer {
 				$out = rest_sanitize_boolean( $value );
 				return $out;
 			case 'integer':
-			case 'number':
 				if ( ! is_numeric( $value ) ) {
 					$out = is_scalar( $fallback ) ? (int) $fallback : 0;
 				} else {
@@ -567,6 +601,8 @@ class Sanitizer {
 					$out = (int) $def['maximum'];
 				}
 				return $out;
+			case 'number':
+				return self::sanitize_number( $value, $fallback, $def );
 			case 'array':
 				if ( ! is_array( $value ) ) {
 					return is_array( $fallback ) ? $fallback : array();
@@ -628,12 +664,69 @@ class Sanitizer {
 				return $out;
 			case 'string':
 			default:
+				// sanitize_text_field() would flatten CSS onto one line.
+				if ( isset( $def['format'] ) && 'css' === $def['format'] ) {
+					return \Modula_Helper::sanitize_custom_css( is_scalar( $value ) ? $value : $fallback );
+				}
 				$out = is_scalar( $value ) ? sanitize_text_field( (string) $value ) : ( is_scalar( $fallback ) ? (string) $fallback : '' );
 				if ( null !== $allowed_values && is_array( $allowed_values ) && ! in_array( $out, $allowed_values, true ) ) {
 					$out = is_scalar( $fallback ) ? (string) $fallback : ( count( $allowed_values ) > 0 ? (string) $allowed_values[0] : '' );
 				}
 				return $out;
 		}
+	}
+
+	/**
+	 * Sanitize a `number` setting: keeps decimals (e.g. showcase.centerScale 1.25)
+	 * and clamps to the schema's float minimum / maximum.
+	 *
+	 * @param mixed $value    Raw value.
+	 * @param mixed $fallback Schema default.
+	 * @param array $def      Field definition (minimum, maximum).
+	 * @return float
+	 */
+	private static function sanitize_number( $value, $fallback, array $def ) {
+		if ( is_numeric( $value ) ) {
+			$out = (float) $value;
+		} elseif ( is_numeric( $fallback ) ) {
+			$out = (float) $fallback;
+		} else {
+			$out = 0.0;
+		}
+		if ( isset( $def['minimum'] ) && $out < (float) $def['minimum'] ) {
+			$out = (float) $def['minimum'];
+		}
+		if ( isset( $def['maximum'] ) && $out > (float) $def['maximum'] ) {
+			$out = (float) $def['maximum'];
+		}
+		return $out;
+	}
+
+	/**
+	 * Replace a showcase.centerScale of 1 or less with the schema default (1.4).
+	 *
+	 * The `number` type used to be saved as an integer, so a gallery that saved any
+	 * center scale between 1.1 and 1.75 stored 1; the visitor showed 1.4 for it.
+	 * The schema minimum is 1.1, so no authored value is 1 or less. Shared by the
+	 * save sanitizer and Meta_Sync's read normalization.
+	 *
+	 * @param array<string, mixed> $showcase Showcase group.
+	 * @return array<string, mixed>
+	 */
+	public static function without_legacy_showcase_center_scale( array $showcase ) {
+		$is_legacy = isset( $showcase['centerScale'] )
+			&& is_numeric( $showcase['centerScale'] )
+			&& (float) $showcase['centerScale'] <= 1.0;
+		if ( ! $is_legacy ) {
+			return $showcase;
+		}
+		$def = Registry::get_key_definition( 'showcase', 'centerScale' );
+		if ( isset( $def['default'] ) ) {
+			$showcase['centerScale'] = (float) $def['default'];
+		} else {
+			unset( $showcase['centerScale'] );
+		}
+		return $showcase;
 	}
 
 	/**

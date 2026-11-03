@@ -2,18 +2,49 @@ import formRules from '../data/form-rules.json';
 import { getModulaSettingsEditorConfig } from '../config/modulaSettingsEditorConfig';
 import { getEffectiveGroupedPathValue } from './effectiveSettingsValue';
 import { resolveProGateLock } from './proGateLock';
+import { getLiveGalleryPhotoCount } from './liveGalleryPhotoCount';
 import { isWpTruthy } from './wpTruthy';
+
+/**
+ * Editor state outside the settings that a rule can test with `fact` instead
+ * of `path`. A fact must be followed by the views that show its fields (see
+ * `useLiveGalleryPhotoCount`).
+ *
+ * @type {Record<string, () => unknown>}
+ */
+const EDITOR_FACTS = {
+	galleryPhotoCount: getLiveGalleryPhotoCount,
+};
+
+/**
+ * @param {{ path?: string, fact?: string }}        when    Leaf condition.
+ * @param {Record<string, Record<string, unknown>>} grouped Current grouped settings.
+ * @return {{ known: boolean, value?: unknown }} The tested value; unknown for an unlisted fact.
+ */
+function resolveConditionValue(when, grouped) {
+	if (when.fact === undefined) {
+		return {
+			known: true,
+			value: getEffectiveGroupedPathValue(grouped, when.path),
+		};
+	}
+	if (!Object.prototype.hasOwnProperty.call(EDITOR_FACTS, when.fact)) {
+		return { known: false };
+	}
+	return { known: true, value: EDITOR_FACTS[when.fact]() };
+}
 
 /**
  * @param {{
  *   path?: string,
+ *   fact?: string,
  *   eq?: string|boolean,
  *   in?: string[],
  *   truthy?: boolean,
  *   neq?: string|boolean,
  *   all?: Array<{ path?: string, eq?: string|boolean, in?: string[], truthy?: boolean, all?: unknown[], any?: unknown[] }>,
  *   any?: Array<{ path?: string, eq?: string|boolean, in?: string[], truthy?: boolean, all?: unknown[], any?: unknown[] }>,
- * }} when Rule condition (`all` = AND, `any` = OR of sub-conditions).
+ * }} when Rule condition (`all` = AND, `any` = OR of sub-conditions; `fact` reads `EDITOR_FACTS`).
  * @param {Record<string, Record<string, unknown>>}                                                                                 grouped Current grouped settings.
  * @return {boolean} Whether the rule’s condition matches the current grouped state (missing/empty paths use schema defaults).
  */
@@ -27,10 +58,14 @@ export function evaluateWhen(when, grouped) {
 	if (Array.isArray(when.any) && when.any.length > 0) {
 		return when.any.some((w) => evaluateWhen(w, grouped));
 	}
-	if (!when.path) {
+	if (!when.path && when.fact === undefined) {
 		return true;
 	}
-	const value = getEffectiveGroupedPathValue(grouped, when.path);
+	const { known, value } = resolveConditionValue(when, grouped);
+	// An unknown fact is a rule typo: fail closed rather than show the field.
+	if (!known) {
+		return false;
+	}
 	const normStr = (v) =>
 		v === null || v === undefined ? '' : String(v).trim();
 	if (when.neq !== undefined) {

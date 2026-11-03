@@ -1,0 +1,221 @@
+@use '../styles/mixins';
+
+// The canvas's picker sets its captions, hex value, opacity value and clear
+// action at 12px, a step under the admin-ui caption and mono sizes.
+$picker-text: 12px;
+
+// The element's `--modula-admin-color-value` painted over a checkerboard, so
+// translucent colours read as such. The checks use the theme's surfaces and
+// follow light and dark. `$fill` is the paint over the checks.
+@mixin color-fill($fill: null) {
+	$color: var(--modula-admin-color-value, transparent);
+	$check: linear-gradient(45deg, var(--modula-admin-border-strong) 25%, transparent 25%, transparent 75%, var(--modula-admin-border-strong) 75%);
+
+	@if not $fill {
+		$fill: linear-gradient($color, $color);
+	}
+	background-color: var(--modula-admin-surface);
+	background-image: $fill, $check, $check;
+	background-position: 0 0, 0 0, 4px 4px;
+	background-size: auto, 8px 8px, 8px 8px;
+}
+
+.modula-admin-color {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	width: var(--modula-admin-field-width);
+	max-width: 100%;
+}
+
+.modula-admin-color__button {
+	@include mixins.button-reset;
+	display: inline-flex;
+	align-items: center;
+	align-self: flex-start;
+	gap: 8px;
+	height: 32px;
+	padding: 0 10px 0 6px;
+	border-radius: var(--modula-admin-radius-sm);
+	background: var(--modula-admin-surface);
+	box-shadow: inset 0 0 0 1px var(--modula-admin-border-field);
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-control);
+	font-variant-numeric: tabular-nums;
+
+	&:focus-visible {
+		@include mixins.focus-ring;
+	}
+
+	&:disabled {
+		opacity: var(--modula-admin-disabled-opacity);
+		cursor: default;
+	}
+
+	.is-open > & {
+		box-shadow: inset 0 0 0 2px var(--modula-admin-ink);
+	}
+}
+
+.modula-admin-color__swatch {
+	@include color-fill;
+	display: block;
+	flex-shrink: 0;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	box-shadow: inset 0 0 0 1px var(--modula-admin-border-strong);
+}
+
+.modula-admin-color__panel {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+
+	&[hidden] {
+		display: none;
+	}
+}
+
+.modula-admin-color__presets {
+	display: grid;
+	grid-template-columns: repeat(10, minmax(0, 1fr));
+	gap: 4px;
+}
+
+.modula-admin-color__preset {
+	@include mixins.button-reset;
+	@include color-fill;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	box-shadow: inset 0 0 0 1px var(--modula-admin-border-strong);
+
+	&[aria-pressed="true"] {
+		box-shadow:
+			inset 0 0 0 1px var(--modula-admin-border-strong),
+			0 0 0 2px var(--modula-admin-surface),
+			0 0 0 4px var(--modula-admin-ink);
+	}
+
+	&:focus-visible {
+		@include mixins.focus-ring;
+		outline-offset: 3px;
+	}
+}
+
+.modula-admin-color__inputs {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.modula-admin-color__caption {
+	color: var(--modula-admin-ink-soft);
+	font-size: $picker-text;
+}
+
+// Sized to its seven characters (canvas 96px), not stretched by the row.
+.modula-admin-color .modula-admin-color__hex {
+	flex: 0 0 auto;
+	width: 96px;
+	height: 32px;
+	border-radius: 3px;
+	font-family: var(--modula-admin-font-mono);
+	font-size: $picker-text;
+	text-transform: uppercase;
+}
+
+// "Custom": the native colour input stretched invisibly over the label, so
+// the browser's picker opens from the design's button.
+.modula-admin-color__custom {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	box-sizing: border-box;
+	height: 32px;
+	margin-left: auto;
+	padding: 0 12px;
+	overflow: hidden;
+	border: 1px solid var(--modula-admin-border-field);
+	border-radius: var(--modula-admin-radius-sm);
+	background: var(--modula-admin-surface);
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-control);
+	font-weight: 500;
+	cursor: pointer;
+
+	&:hover {
+		background: var(--modula-admin-surface-sunken);
+	}
+
+	&:focus-within {
+		@include mixins.focus-ring;
+	}
+
+	input {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		opacity: 0;
+		cursor: pointer;
+	}
+}
+
+// "Inherit" / "No color": a quiet text action under the picker. The canvas
+// draws no such action, so it takes the picker's caption type.
+.modula-admin-color .modula-admin-color__clear {
+	align-self: flex-start;
+	color: var(--modula-admin-ink-soft);
+	font-size: $picker-text;
+
+	&:hover:not(:disabled) {
+		color: var(--modula-admin-ink);
+	}
+}
+
+// Canvas: "Opacity" and its value on one line, the checkerboard-to-colour
+// bar under it, then the slider.
+.modula-admin-color__opacity {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+
+	.modula-admin-range {
+		width: 100%;
+	}
+
+	// The canvas's 24px slider, pulled 2px into the gap on each side.
+	.modula-admin-range__input {
+		height: 24px;
+		margin-block: -2px;
+	}
+
+	// The value reads on the caption line instead.
+	.modula-admin-range__value {
+		display: none;
+	}
+}
+
+.modula-admin-color__opacity-line {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+}
+
+.modula-admin-color__opacity-value {
+	color: var(--modula-admin-ink-secondary);
+	font-size: $picker-text;
+	font-variant-numeric: tabular-nums;
+}
+
+.modula-admin-color__alpha-bar {
+	@include color-fill(linear-gradient(90deg, transparent, var(--modula-admin-color-value)));
+	display: block;
+	height: 8px;
+	border-radius: 4px;
+}

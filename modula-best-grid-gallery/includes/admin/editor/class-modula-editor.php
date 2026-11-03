@@ -62,10 +62,24 @@ class Modula_Editor {
 			wp_die( esc_html__( 'Security check failed.', 'modula-best-grid-gallery' ) );
 		}
 
-		$css_path  = MODULA_URL . 'assets/css/admin/edit.css';
-		$admin_url = admin_url();
+		$this->register_dialog_assets();
+
 		$galleries = Modula_Helper::get_galleries();
+		// get_galleries() leads with a 'none' choice for selects; the dialog lists galleries only.
+		unset( $galleries['none'] );
 		include 'tinymce-galleries.php';
 		wp_die();
+	}
+
+	/**
+	 * Register the dialog's styles and scripts, printed by handle in its standalone document.
+	 *
+	 * The dialog must not link core's concatenation endpoints: WordPress 7.2 removes
+	 * script and style concatenation and both endpoints answer 410 Gone.
+	 */
+	private function register_dialog_assets() {
+		wp_register_style( 'modula-edit-style', MODULA_URL . 'assets/css/admin/edit.css', array( 'buttons', 'wp-admin' ), MODULA_LITE_VERSION );
+		// A core file, so it is versioned with WordPress.
+		wp_register_script( 'modula-tinymce-popup', includes_url( 'js/tinymce/tiny_mce_popup.js' ), array(), get_bloginfo( 'version' ), false );
 	}
 }

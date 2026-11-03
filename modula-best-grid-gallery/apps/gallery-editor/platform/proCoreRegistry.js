@@ -1,12 +1,11 @@
 /**
- * Registry for Pro-core settings-editor UI (filters preview, folder/ZIP import).
+ * Registry for Pro-core settings-editor UI (folder/ZIP import).
  */
 
 /** @typedef {import('react').ComponentType<Record<string, unknown>>} ProCoreSlotComponent */
 
 /**
  * @typedef {{
- *   FiltersPreviewPanel?: ProCoreSlotComponent,
  *   FolderImportModal?: ProCoreSlotComponent,
  *   ZipImporter?: ProCoreSlotComponent,
  *   ZipImportModal?: ProCoreSlotComponent,

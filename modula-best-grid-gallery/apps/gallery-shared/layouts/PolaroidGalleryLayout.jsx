@@ -198,6 +198,10 @@ export default function PolaroidGalleryLayout() {
 				(uniformSize ? ' modula-polaroid-gallery--uniform-size' : '') +
 				(captionInChin
 					? ' modula-polaroid-gallery--caption-in-chin'
+					: '') +
+				// Visitors can move the prints (motion/movePrints.js).
+				(config?.movePrints === true
+					? ' modula-polaroid-gallery--movable'
 					: '')
 			}
 			style={{

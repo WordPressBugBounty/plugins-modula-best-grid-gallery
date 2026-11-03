@@ -558,7 +558,7 @@ class Shortcode {
 			'outputSchema'         => \Modula\V2\Modern_Gallery::OUTPUT_SCHEMA_VERSION,
 			'catalogPaged'         => $effective_catalog,
 			'imageSizeDimensions'  => \Modula_Helper::get_image_sizes( false ),
-			'zoomExtensionActive'  => $this->is_zoom_extension_active(),
+			'zoomExtensionActive'  => \Modula\V2\Modern_Gallery::is_zoom_extension_active(),
 			'freeformAvailable'    => modula_is_compatible_pro(),
 			'blockAlign'           => is_string( $settings['align'] ?? null ) ? (string) $settings['align'] : '',
 		);
@@ -769,6 +769,7 @@ class Shortcode {
 	 * @return array<int, mixed>
 	 */
 	private function build_converted_items_list( $gallery_id, array $flat, array $rows_to_convert, array $full_images, $context = 'public' ) {
+		$flat                           = \Modula\V2\Motion\Motion_Settings::with_played_hover_builder( $flat );
 		$flat['modula_display_context'] = $context;
 		$skip_image_guardian = is_string( $context ) && 'settings_editor' === $context;
 		$items               = array();
@@ -821,6 +822,39 @@ class Shortcode {
 		if ( $skip_image_guardian ) {
 			remove_filter( 'modula_apply_image_guardian_item_data', '__return_false' );
 			$items = $this->apply_settings_editor_media_cache_bust( $items, $flat );
+			$items = $this->add_settings_editor_full_size( $items );
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Give each preview item its attachment's Full size (`fullImageSize`).
+	 *
+	 * A preview item carries the file the saved settings serve. The canvas sizes
+	 * a slider slide from the Image file size being edited, so it needs the
+	 * size every WordPress derivative comes from (editor-only, stripped before
+	 * persistence).
+	 *
+	 * @param array<int, mixed> $items Bootstrap items.
+	 * @return array<int, mixed>
+	 */
+	private function add_settings_editor_full_size( array $items ) {
+		foreach ( $items as $index => $item ) {
+			$attachment_id = is_array( $item ) && isset( $item['id'] ) ? absint( $item['id'] ) : 0;
+			if ( $attachment_id < 1 ) {
+				continue;
+			}
+			$meta   = wp_get_attachment_metadata( $attachment_id );
+			$width  = is_array( $meta ) && isset( $meta['width'] ) ? absint( $meta['width'] ) : 0;
+			$height = is_array( $meta ) && isset( $meta['height'] ) ? absint( $meta['height'] ) : 0;
+			if ( $width < 1 || $height < 1 ) {
+				continue;
+			}
+			$items[ $index ]['fullImageSize'] = array(
+				'width'  => $width,
+				'height' => $height,
+			);
 		}
 
 		return $items;
@@ -864,12 +898,52 @@ class Shortcode {
 
 			if ( $attachment_id > 0 ) {
 				$item['watermarkApplied'] = (bool) get_post_meta( $attachment_id, 'modula_watermark_applied', true );
+				$source_size              = $this->get_watermark_source_size( $attachment_id );
+				if ( null !== $source_size ) {
+					$item['watermarkSourceSize'] = $source_size;
+				}
 			}
 
 			$items[ $index ] = $item;
 		}
 
 		return $items;
+	}
+
+	/**
+	 * Size of the file Pro burns a watermark into (`wp_get_original_image_path()`).
+	 *
+	 * The canvas preview places the mark in this frame, then maps it onto the
+	 * served size, as WordPress derives every size from the burned original.
+	 * The metadata holds the original's size unless WordPress scaled a big
+	 * upload (`original_image`); only then is the original's header read.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @return array{width: int, height: int}|null Null when the size is unknown.
+	 */
+	private function get_watermark_source_size( $attachment_id ) {
+		$meta = wp_get_attachment_metadata( $attachment_id );
+		if ( ! is_array( $meta ) ) {
+			return null;
+		}
+
+		$width  = isset( $meta['width'] ) ? absint( $meta['width'] ) : 0;
+		$height = isset( $meta['height'] ) ? absint( $meta['height'] ) : 0;
+		if ( ! empty( $meta['original_image'] ) ) {
+			$original = wp_get_original_image_path( $attachment_id );
+			$size     = is_string( $original ) && '' !== $original ? wp_getimagesize( $original ) : false;
+			$width    = is_array( $size ) ? absint( $size[0] ) : 0;
+			$height   = is_array( $size ) ? absint( $size[1] ) : 0;
+		}
+
+		if ( $width <= 0 || $height <= 0 ) {
+			return null;
+		}
+
+		return array(
+			'width'  => $width,
+			'height' => $height,
+		);
 	}
 
 	/**
@@ -881,7 +955,8 @@ class Shortcode {
 	private function build_settings_editor_watermark_cache_token( array $flat ) {
 		$payload = array(
 			isset( $flat['watermark_position'] ) ? (string) $flat['watermark_position'] : '',
-			isset( $flat['watermark_margin'] ) ? (string) $flat['watermark_margin'] : '',
+			isset( $flat['watermark_margin_share'] ) ? (string) $flat['watermark_margin_share'] : '',
+			isset( $flat['watermark_text_size_share'] ) ? (string) $flat['watermark_text_size_share'] : '',
 			isset( $flat['watermark_image_dimension_width'] ) ? (string) $flat['watermark_image_dimension_width'] : '',
 			isset( $flat['watermark_image_dimension_height'] ) ? (string) $flat['watermark_image_dimension_height'] : '',
 			isset( $flat['watermark_image'] ) ? (string) $flat['watermark_image'] : '',
@@ -1085,19 +1160,6 @@ class Shortcode {
 			return false;
 		}
 		return (bool) $extensions->extension_enabled( 'modula-image-licensing' );
-	}
-
-	/**
-	 * Whether the visible lightbox zoom master is available to this gallery.
-	 *
-	 * @return bool
-	 */
-	private function is_zoom_extension_active() {
-		if ( ! modula_is_compatible_pro() || ! class_exists( 'Modula_Extensions_Base' ) ) {
-			return false;
-		}
-		$extensions = \Modula_Extensions_Base::get_instance();
-		return method_exists( $extensions, 'extension_enabled' ) && $extensions->extension_enabled( 'modula-zoom' );
 	}
 
 	/**
@@ -1457,12 +1519,17 @@ class Shortcode {
 				}
 			</style>
 		</noscript>
+		<?php
+		// The visitor bundle mounts React into the gallery root, which replaces the root's children, so
+		// the items hooks print around the root to stay on the page (Back to album, schema.org, other
+		// plugins' output). A callback whose output the React tree draws itself (such as Pro's gallery
+		// title and Download all) skips Beta, by the 'beta' display context these pass or by its own check.
+		do_action( 'modula_shortcode_before_items', $settings['flat'], null, $images, 'beta' );
+		?>
 		<div id="modula-<?php echo esc_attr( $gallery_id ); ?>" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" style="<?php echo esc_attr( $shell_style ); ?>" data-modula-lazy-load="<?php echo false === ( $settings['grouped']['performance']['lazyLoad'] ?? true ) ? '0' : '1'; ?>">
-			<?php do_action( 'modula_shortcode_before_items', $settings['flat'] ); ?>
 			<div class="modula-items">
 				<?php $this->render_items( $images, $settings['flat'], $gallery_id ); ?>
 			</div>
-			<?php do_action( 'modula_shortcode_after_items', $settings['flat'], null, $images, 'beta' ); ?>
 		</div>
 		<script type="application/json" data-modula-gallery-id="modula-<?php echo esc_attr( $gallery_id ); ?>" data-modula-gallery>
 			<?php
@@ -1472,12 +1539,15 @@ class Shortcode {
 			?>
 		</script>
 		<?php
+		// After the bootstrap JSON, which stays the root's next sibling (the data loader's lookup for a root without an id).
+		do_action( 'modula_shortcode_after_items', $settings['flat'], null, $images, 'beta' );
 		do_action( 'modula_after_gallery', $settings['flat'] );
 
 		return ob_get_clean();
 	}
 
 	private function render_items( $images, $settings, $gallery_id ) {
+		$settings                           = \Modula\V2\Motion\Motion_Settings::with_played_hover_builder( $settings );
 		$settings['modula_display_context'] = 'public';
 		foreach ( $images as $image ) {
 			if ( is_array( $image ) && \Modula\V2\Images\Adapter::is_embedded_gallery_item( $image ) ) {
@@ -1651,17 +1721,12 @@ class Shortcode {
 			$classes[] = 'align' . esc_attr( $align );
 		}
 
-		$respect_reduced = true;
-		if ( is_array( $grouped ) && isset( $grouped['interaction'] ) && is_array( $grouped['interaction'] ) && array_key_exists( 'respectReducedMotion', $grouped['interaction'] ) ) {
-			$raw             = $grouped['interaction']['respectReducedMotion'];
-			$respect_reduced = ! ( false === $raw || 0 === $raw || '0' === (string) $raw );
-		} elseif ( is_array( $flat ) && array_key_exists( 'respect_reduced_motion', $flat ) ) {
-			$raw             = $flat['respect_reduced_motion'];
-			$respect_reduced = ! ( false === $raw || 0 === $raw || '0' === (string) $raw );
-		}
-		if ( $respect_reduced ) {
-			$classes[] = 'modula-respect-reduced-motion';
-		}
+		/*
+		 * Every visitor gallery stops its motion when the device asks for less,
+		 * whatever `interaction.respectReducedMotion` says (maintainer, Motion
+		 * ticket 05); the editor preview removes the class (useGalleryRootClasses).
+		 */
+		$classes[] = 'modula-respect-reduced-motion';
 
 		$theme_inherit = false;
 		if ( is_array( $grouped ) && isset( $grouped['pagination'] ) && is_array( $grouped['pagination'] ) ) {

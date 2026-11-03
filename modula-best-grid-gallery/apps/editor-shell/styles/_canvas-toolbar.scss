@@ -1,147 +1,142 @@
+@use '../../admin-ui/styles/mixins' as admin;
 @use 'variables' as *;
 
-/* Design: canvas chrome bar is 46px tall. */
-$mod-canvas-toolbar-h: 46px;
+// Canvas toolbar above the stage (canvas "1 · Editor"). It renders inside
+// TakeoverLayout's admin-ui scope, so colours are admin-ui tokens.
+
+// As in the top bar, the row is the content and the border comes below it:
+// inside a border-box 60px the content would be 59px, and 36px controls would
+// centre on half pixels.
+$mod-canvas-toolbar-row-h: 60px;
+$mod-canvas-toolbar-control-h: 36px;
 
 .modula-takeover__canvas-toolbar {
+	position: relative;
+	// Above the stage, so toolbar menus cover the canvas and the device pill.
+	z-index: 6;
 	flex-shrink: 0;
 	display: flex;
 	flex-direction: column;
-	gap: $mod-space-8;
-	min-height: $mod-canvas-toolbar-h;
-	height: $mod-canvas-toolbar-h;
-	padding: 0 $mod-space-18;
-	box-sizing: border-box;
-	/* Secondary chrome under the app topbar — not inside the artboard card. */
-	border-bottom: 1px solid var(--mod-se-line, var(--mod-se-preview-toolbar-border, #{$mod-takeover-preview-toolbar-border}));
-	background: var(--mod-se-chrome, var(--mod-se-preview-toolbar-bg, #{$mod-takeover-preview-toolbar-bg}));
-	color: var(--mod-se-ink-2, var(--mod-se-preview-ink-secondary, #{$mod-takeover-text-base}));
+	padding: 0 24px;
+	border-bottom: 1px solid var(--modula-admin-border);
+	background: var(--modula-admin-surface);
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-body);
 }
 
 .modula-takeover__canvas-toolbar-notice {
 	margin: $mod-space-8 0 0;
 }
 
+// admin-ui's LicenseExpiredBanner under the toolbar while the PRO license has
+// expired (canvas Lite artboard); it draws itself, this only places it.
+.modula-takeover__license-expired {
+	position: relative;
+	z-index: 5;
+	flex-shrink: 0;
+}
+
+// One line of controls. When they need more room than the canvas has, Sort
+// narrows first (`_sort-popover.scss`), then the left group wraps; Add never
+// shrinks under them (ticket 81).
 .modula-takeover__canvas-toolbar-row {
 	display: flex;
 	flex-wrap: nowrap;
 	align-items: center;
 	justify-content: space-between;
-	gap: $mod-space-12 $mod-space-16;
-	min-height: $mod-canvas-toolbar-h;
-	height: 100%;
-	box-sizing: border-box;
+	gap: 20px;
+	min-height: $mod-canvas-toolbar-row-h;
 }
 
 .modula-takeover__canvas-toolbar-left,
 .modula-takeover__canvas-toolbar-right {
 	display: flex;
-	flex-wrap: nowrap;
 	align-items: center;
-	gap: $mod-space-16;
+	gap: 20px;
+}
+
+// On one line, the padding around the controls makes the row's height.
+.modula-takeover__canvas-toolbar-left {
+	flex-wrap: wrap;
+	row-gap: 12px;
 	min-width: 0;
+	padding-block: calc(($mod-canvas-toolbar-row-h - $mod-canvas-toolbar-control-h) / 2);
 }
 
+// Add stays at its width, centred on the first line.
 .modula-takeover__canvas-toolbar-right {
+	flex-shrink: 0;
+	align-self: flex-start;
+	min-height: $mod-canvas-toolbar-row-h;
 	margin-inline-start: auto;
-	gap: $mod-space-12;
 }
 
-/* Quiet icon+label actions — Select all / Bulk edit / Sort (CanvasToolbarActionButton). */
-.modula-takeover__canvas-toolbar-action.modula-ui-button {
-	gap: $mod-space-8;
-	min-height: auto;
-	height: auto;
-	padding: $mod-space-6 $mod-space-8;
-	border: 1px solid transparent;
-	border-radius: 0;
-	background: transparent;
-	box-shadow: none;
-	outline: none;
-	font-size: 13px;
-	font-weight: 500;
-	color: var(--mod-se-ink-2, var(--mod-se-preview-ink-secondary, #{$mod-takeover-text-base}));
+// Quiet icon + label actions (Select multiple, Bulk edit, Sort).
+.modula-takeover__canvas-toolbar-action {
+	@include admin.button-reset;
+	@include admin.control-label;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	height: $mod-canvas-toolbar-control-h;
+	padding: 0 10px;
+	border-radius: var(--modula-admin-radius-lg);
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-body);
+	white-space: nowrap;
 
-	.modula-takeover__canvas-toolbar-action-icon {
-		display: inline-flex;
-		flex-shrink: 0;
-		align-items: center;
-		justify-content: center;
-		line-height: 0;
-		color: inherit;
-
-		svg {
-			display: block;
-			color: inherit;
-		}
+	&:disabled {
+		opacity: var(--modula-admin-disabled-opacity);
+		cursor: default;
 	}
 
-	.modula-takeover__canvas-toolbar-action-label {
-		line-height: 1;
-		color: inherit;
+	// Pressed, or a popover trigger (Sort) while its popover is open.
+	&:hover:not(:disabled),
+	&[aria-pressed="true"],
+	&[aria-expanded="true"] {
+		background: var(--modula-admin-surface-hover);
 	}
+}
 
-	&:hover:not(:disabled):not(.is-disabled),
-	&:focus-visible,
-	&:active:not(:disabled):not(.is-disabled) {
-		background: var(--mod-se-chrome-2, var(--mod-se-hover-overlay, transparent));
-		border-color: var(--mod-se-line, var(--mod-se-preview-toolbar-border, #{$mod-takeover-preview-toolbar-border}));
-		color: var(--mod-se-ink, var(--mod-se-preview-ink, #{$mod-takeover-text-strong}));
-		box-shadow: none;
-		outline: none;
-	}
+.modula-takeover__canvas-toolbar-action-icon {
+	display: inline-flex;
+	flex-shrink: 0;
 
-	&:focus {
-		outline: none;
-		box-shadow: none;
+	svg {
+		display: block;
 	}
+}
+
+// Selection count ("3 images selected · Clear").
+.modula-takeover__canvas-toolbar-count {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-control);
+	white-space: nowrap;
+}
+
+.modula-takeover__canvas-toolbar-count-value {
+	font-variant-numeric: tabular-nums;
+}
+
+.modula-takeover__canvas-toolbar-count-clear {
+	@include admin.button-reset;
+	@include admin.control-label;
+	display: inline-flex;
+	align-items: center;
+	min-height: 32px;
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-control);
+	text-decoration: underline;
+	text-underline-offset: 3px;
 }
 
 .modula-takeover__canvas-toolbar-uploading {
 	display: inline-flex;
 	align-items: center;
 	gap: $mod-space-8;
-	font-size: 12px;
-	color: var(--mod-se-ink-3, var(--mod-se-preview-ink-muted, #{$mod-takeover-text-muted}));
-}
-
-.modula-takeover__canvas-toolbar-viewport {
-	display: inline-flex;
-	align-items: stretch;
-	border: 1px solid var(--mod-se-line, var(--mod-se-preview-toolbar-border, #{$mod-takeover-preview-toolbar-border}));
-	border-radius: 0;
-	overflow: hidden;
-	background: var(--mod-se-surface, var(--mod-se-preview-bg, #{$mod-takeover-surface-raised}));
-}
-
-.modula-takeover__canvas-toolbar-viewport-btn.modula-ui-icon-button {
-	width: $mod-space-32;
-	min-width: $mod-space-32;
-	height: $mod-space-32;
-	border-radius: 0 !important;
-	border: none;
-	border-inline-end: 1px solid var(--mod-se-line, var(--mod-se-preview-toolbar-border, #{$mod-takeover-preview-toolbar-border}));
-	color: var(--mod-se-ink-2, var(--mod-se-preview-ink-secondary, #{$mod-takeover-text-base}));
-
-	&:last-child {
-		border-inline-end: none;
-	}
-
-	&:hover:not(:disabled) {
-		background: var(--mod-se-chrome-2, var(--mod-se-preview-segment-hover-bg, transparent));
-		color: var(--mod-se-ink, var(--mod-se-preview-ink, #{$mod-takeover-text-strong}));
-	}
-
-	&.is-active {
-		background: var(--mod-se-chrome-2, var(--mod-se-preview-segment-active-bg, #{$mod-takeover-preview-segment-active-bg}));
-		color: var(--mod-se-ink, var(--mod-se-preview-segment-btn-ink-active, #{$mod-takeover-preview-segment-btn-ink-active}));
-	}
-}
-
-.modula-takeover__canvas-toolbar-divider {
-	display: inline-block;
-	width: 1px;
-	height: $mod-space-24;
-	flex-shrink: 0;
-	background: var(--mod-se-line, var(--mod-se-preview-toolbar-border, #{$mod-takeover-preview-toolbar-border}));
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-help);
 }

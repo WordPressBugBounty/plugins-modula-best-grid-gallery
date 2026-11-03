@@ -1,0 +1,31 @@
+.modula-admin-tooltip-anchor {
+	display: inline-flex;
+}
+
+// Inverted like the toast: ink fill, so it reads apart from the panel in
+// both themes.
+.modula-admin-tooltip {
+	position: fixed;
+	z-index: 100000;
+	box-sizing: border-box;
+	width: max-content;
+	max-width: min(260px, calc(100vw - 16px));
+	padding: 7px 10px;
+	border-radius: var(--modula-admin-radius-md);
+	background: var(--modula-admin-surface-toast);
+	box-shadow: var(--modula-admin-shadow-popover);
+	color: var(--modula-admin-ink-inverse);
+	font-size: var(--modula-admin-text-caption);
+	font-weight: 400;
+	line-height: 1.45;
+	text-align: start;
+	text-transform: none;
+	letter-spacing: normal;
+	white-space: normal;
+	overflow-wrap: break-word;
+	pointer-events: none;
+
+	&[hidden] {
+		display: none;
+	}
+}

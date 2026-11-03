@@ -131,6 +131,16 @@ function resolveSlideContext(fancybox, container) {
 		if (fromContent instanceof HTMLImageElement) {
 			image = fromContent;
 		}
+	} else if (slide?.el instanceof HTMLElement) {
+		// Fancybox v6 sets neither imageEl nor contentEl. Its slide element is
+		// the reliable scope: on Carousel.change `.is-selected` still marks the
+		// previous slide, and the container holds the neighbours' images too.
+		const fromSlide = slide.el.querySelector(
+			'img.f-panzoom__content:not(.is-clone)'
+		);
+		if (fromSlide instanceof HTMLImageElement) {
+			image = fromSlide;
+		}
 	}
 
 	if (!image) {

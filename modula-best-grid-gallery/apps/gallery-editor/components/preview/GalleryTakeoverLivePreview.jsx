@@ -2,29 +2,38 @@
  * Live gallery preview: items from React Query bootstrap; settings from TanStack Form (reactive).
  */
 import {
+	CanvasFiltersPreviewBar,
 	EAGER_LAYOUTS,
+	FILTERS_PREVIEW_BAR_CLASS,
 	Gallery,
 	GalleryPreviewAdminActionsContext,
 	GalleryPreviewEagerLayoutsContext,
+	GalleryPreviewFilterBarContext,
+	GalleryPreviewHoverTileContext,
+	buildFilteringFromSettings,
 	isEmbeddedGalleryItemRow,
+	resolveGalleryHoverBuilder,
 } from 'gallery-shared/preview';
 import FreeformEditorLayout from './FreeformEditorLayout';
+import { WatermarkPreviewProvider } from './WatermarkPreviewProvider';
 import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import '../../styles/takeover/preview/_hover-effect-builder.scss';
 import { __, sprintf } from '@wordpress/i18n';
-import { Notice, Spinner } from '@wordpress/components';
+import { Notice, Spinner } from 'admin-ui';
+import { AdminUiScope } from 'editor-shell';
 import { Provider } from 'react-redux';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
 import { useGalleryBootstrapQuery } from '../../query/useGalleryBootstrapQuery';
 import { useWatermarkPreviewSelection } from '../../context/WatermarkPreviewSelectionContext';
 import { useGalleryPreviewTileSelection } from '../../context/GalleryPreviewTileSelectionContext';
-import GalleryTakeoverPreviewChrome from './GalleryTakeoverPreviewChrome';
 import GalleryTakeoverPreviewEmptyState from './GalleryTakeoverPreviewEmptyState';
+import GallerySelectionGrid from './selection-grid/GallerySelectionGrid';
 import { galleryHasPreviewContent } from './galleryPreviewContent';
-import GalleryTakeoverPreviewUploadDropZone from './GalleryTakeoverPreviewUploadDropZone';
 import { useGalleryTakeoverLivePreviewController } from '../../hooks/useGalleryTakeoverLivePreviewController';
 import { PreviewItemPersistProvider } from '../../context/PreviewItemPersistContext';
 import HoverEffectBuilderCard from '../hover-effect-builder/HoverEffectBuilderCard';
+import { buildPreviewHoverTile } from 'gallery-shared/hover/hoverTile';
+import { editorCaptionsAreBelowImage } from '../../utils/editorCaptionsAreBelowImage';
 import HoverBuilderBelowImageNotice from '../hover-effect-builder/HoverBuilderBelowImageNotice';
 import LightboxPreviewPanelLazy from '../lightbox-preview/LightboxPreviewPanelLazy';
 import FiltersPreviewPanel from './filters-preview/FiltersPreviewPanel';
@@ -33,6 +42,25 @@ import { usePaginationRegistration } from '../../hooks/usePaginationRegistration
 import { captionToPlainString } from '../../utils/captionToPlainString';
 import { setGalleryPreviewAdminActions } from '../../utils/previewAdminActionsRef';
 import { notifyPreviewAdminActionsListeners } from '../../hooks/useGalleryPreviewAdminActionsOptional';
+import { useGalleryItemEditSidebar } from '../../context/GalleryItemEditSidebarContext';
+
+/**
+ * Clicks on these keep the tile selection: tiles, their chrome, the static
+ * filter bar and any control.
+ */
+const KEEPS_ITEM_SELECTION = [
+	'.modula-gallery-preview-item-admin',
+	'.modula-tile-toolbar',
+	'.modula-freeform-selection',
+	'[data-modula-freeform-item]',
+	`.${FILTERS_PREVIEW_BAR_CLASS}`,
+	'button',
+	'a',
+	'input',
+	'select',
+	'textarea',
+	'label',
+].join(', ');
 
 const EDITOR_LAYOUTS = { ...EAGER_LAYOUTS, freeform: FreeformEditorLayout };
 
@@ -46,7 +74,6 @@ const EDITOR_LAYOUTS = { ...EAGER_LAYOUTS, freeform: FreeformEditorLayout };
  *   filtersPreviewActive?: boolean,
  *   paginationPreviewActive?: boolean,
  *   postTitle?: string,
- *   showChrome?: boolean,
  * }} props
  */
 export default function GalleryTakeoverLivePreview({
@@ -58,7 +85,6 @@ export default function GalleryTakeoverLivePreview({
 	filtersPreviewActive = false,
 	paginationPreviewActive = false,
 	postTitle = '',
-	showChrome = true,
 }) {
 	const {
 		data: bootstrap,
@@ -71,12 +97,14 @@ export default function GalleryTakeoverLivePreview({
 	if (!galleryId) {
 		return (
 			<div className="modula-gallery-takeover__preview-error">
-				<Notice status="warning" isDismissible={false}>
-					{__(
-						'Save the gallery first to load the preview.',
-						'modula-best-grid-gallery'
-					)}
-				</Notice>
+				<AdminUiScope>
+					<Notice>
+						{__(
+							'Save the gallery first to load the preview.',
+							'modula-best-grid-gallery'
+						)}
+					</Notice>
+				</AdminUiScope>
 			</div>
 		);
 	}
@@ -89,7 +117,9 @@ export default function GalleryTakeoverLivePreview({
 				aria-live="polite"
 				aria-busy="true"
 			>
-				<Spinner />
+				<AdminUiScope>
+					<Spinner />
+				</AdminUiScope>
 				<span>
 					{__('Loading preview…', 'modula-best-grid-gallery')}
 				</span>
@@ -104,9 +134,11 @@ export default function GalleryTakeoverLivePreview({
 			__('Could not load gallery preview.', 'modula-best-grid-gallery');
 		return (
 			<div className="modula-gallery-takeover__preview-error">
-				<Notice status="error" isDismissible={false}>
-					{msg}
-				</Notice>
+				<AdminUiScope>
+					<Notice tone="error" role="alert">
+						{msg}
+					</Notice>
+				</AdminUiScope>
 			</div>
 		);
 	}
@@ -125,7 +157,6 @@ export default function GalleryTakeoverLivePreview({
 					filtersPreviewActive={filtersPreviewActive}
 					paginationPreviewActive={paginationPreviewActive}
 					postTitle={postTitle}
-					showChrome={showChrome}
 				/>
 			)}
 		</form.Subscribe>
@@ -144,7 +175,6 @@ export default function GalleryTakeoverLivePreview({
  *   filtersPreviewActive: boolean,
  *   paginationPreviewActive: boolean,
  *   postTitle: string,
- *   showChrome: boolean,
  * }} props
  */
 function GalleryTakeoverLivePreviewMounted({
@@ -158,7 +188,6 @@ function GalleryTakeoverLivePreviewMounted({
 	filtersPreviewActive,
 	paginationPreviewActive,
 	postTitle,
-	showChrome,
 }) {
 	const previewBodyRef = useRef(/** @type {HTMLDivElement|null} */ (null));
 	const [artboardInnerWidth, setArtboardInnerWidth] = useState(0);
@@ -191,13 +220,6 @@ function GalleryTakeoverLivePreviewMounted({
 		galleryWidthOverflow,
 		previewItemPersistApi,
 		previewAdminValue,
-		dropZoneError,
-		dismissDropZoneError,
-		startZoneDisplay,
-		endZoneDisplay,
-		dropZoneInteractive,
-		handleDropZoneFiles,
-		runPreviewItemMutation,
 	} = useGalleryTakeoverLivePreviewController({
 		galleryId,
 		bootstrap,
@@ -207,8 +229,53 @@ function GalleryTakeoverLivePreviewMounted({
 		artboardInnerWidth,
 	});
 
+	const itemEdit = useGalleryItemEditSidebar();
+	const hasSelectedItem = Number.isInteger(itemEdit?.selectedIndex);
+	const clearItemSelection = itemEdit?.close;
+	// A click on the empty canvas deselects (Escape is the keyboard way).
+	useEffect(() => {
+		const body = previewBodyRef.current;
+		if (!body || !hasSelectedItem || !clearItemSelection) {
+			return undefined;
+		}
+		const onClick = (event) => {
+			if (
+				event.target instanceof Element &&
+				!event.target.closest(KEEPS_ITEM_SELECTION)
+			) {
+				clearItemSelection();
+			}
+		};
+		body.addEventListener('click', onClick);
+		return () => body.removeEventListener('click', onClick);
+	}, [hasSelectedItem, clearItemSelection]);
+
 	const watermarkSelection = useWatermarkPreviewSelection();
 	const tileSelection = useGalleryPreviewTileSelection();
+	const isSelectingTiles = Boolean(tileSelection?.modeActive);
+	// The bootstrap rows carry the saved hover classes; the tiles take these
+	// live ones so the preview hover follows every edit, and plays what the
+	// Motion hover choice plays, as the visitor items do.
+	const hoverSettings = groupedSettings?.hover;
+	const motionSettings = groupedSettings?.motion;
+	const captionSettings = groupedSettings?.captions;
+	const galleryTypeSetting = groupedSettings?.general?.type;
+	const hoverTile = useMemo(
+		() =>
+			buildPreviewHoverTile({
+				builder: resolveGalleryHoverBuilder({
+					hover: hoverSettings,
+					motion: motionSettings,
+					general: { type: galleryTypeSetting },
+				}),
+				hover: hoverSettings,
+				captionBelowImage: editorCaptionsAreBelowImage(
+					captionSettings,
+					galleryTypeSetting
+				),
+			}),
+		[hoverSettings, motionSettings, captionSettings, galleryTypeSetting]
+	);
 	const previewAdminValueWithExtras = useMemo(() => {
 		if (!previewAdminValue) {
 			return previewAdminValue;
@@ -222,26 +289,8 @@ function GalleryTakeoverLivePreviewMounted({
 				toggleWatermarkSelection: watermarkSelection.toggle,
 			};
 		}
-		if (tileSelection) {
-			next = {
-				...next,
-				tileSelectionActive: tileSelection.modeActive,
-				isTileSelected: tileSelection.isSelected,
-				handleTileSelectionClick: (storeIndex, event) => {
-					const shiftKey = Boolean(event?.shiftKey);
-					tileSelection.handleTileClick(storeIndex, {
-						shiftKey,
-						anchorOverride:
-							shiftKey && !tileSelection.modeActive
-								? (previewAdminValue?.selectedEditStoreIndex ??
-									null)
-								: undefined,
-					});
-				},
-			};
-		}
 		return next;
-	}, [previewAdminValue, watermarkSelection, tileSelection, previewViewport]);
+	}, [previewAdminValue, watermarkSelection, previewViewport]);
 
 	useEffect(() => {
 		setGalleryPreviewAdminActions(previewAdminValueWithExtras || null);
@@ -255,7 +304,11 @@ function GalleryTakeoverLivePreviewMounted({
 	const isHoverBuilderPreview =
 		hoverEffectBuilderActive || activeCategory === 'hover';
 	const isLightboxPreview = lightboxPreviewActive;
-	const isFiltersPreview = filtersPreviewActive;
+	// Without filter names there is no bar to preview: the Filters tab keeps
+	// the gallery on the artboard, as the canvas does.
+	const isFiltersPreview =
+		filtersPreviewActive &&
+		buildFilteringFromSettings(groupedSettings).availableFilters.length > 0;
 	const isPaginationPreview = paginationPreviewActive;
 	const lightboxClickMode = normalizeLightboxClickMode(
 		groupedSettings?.lightbox?.lightbox
@@ -272,14 +325,6 @@ function GalleryTakeoverLivePreviewMounted({
 
 	return (
 		<div className="modula-gallery-takeover__live-preview modula modula-gallery modula-gallery-modern modula-gallery-initialized modula-gallery-chrome-ready">
-			{showChrome ? (
-				<GalleryTakeoverPreviewChrome
-					galleryType={galleryType}
-					galleryId={galleryId}
-					previewViewport={previewViewport}
-					runPreviewItemMutation={runPreviewItemMutation}
-				/>
-			) : null}
 			<GalleryPreviewAdminActionsContext.Provider
 				value={previewAdminValueWithExtras}
 			>
@@ -307,17 +352,9 @@ function GalleryTakeoverLivePreviewMounted({
 							: ''
 					}`}
 				>
-					{dropZoneError ? (
-						<Notice
-							className="modula-gallery-takeover__live-preview-dropzone-notice"
-							status="error"
-							isDismissible
-							onRemove={dismissDropZoneError}
-						>
-							{dropZoneError}
-						</Notice>
-					) : null}
-					{isHoverBuilderPreview ? (
+					{isSelectingTiles && hasPreviewContent ? (
+						<GallerySelectionGrid />
+					) : isHoverBuilderPreview ? (
 						<>
 							<HoverBuilderBelowImageNotice
 								captions={groupedSettings?.captions}
@@ -358,44 +395,30 @@ function GalleryTakeoverLivePreviewMounted({
 					) : !hasPreviewContent ? (
 						<GalleryTakeoverPreviewEmptyState
 							galleryType={galleryType}
-							status={startZoneDisplay.status}
-							uploadCurrent={startZoneDisplay.current}
-							uploadTotal={startZoneDisplay.total}
-							interactive={dropZoneInteractive}
-							onFilesSelected={(files) =>
-								void handleDropZoneFiles('start', files)
-							}
 						/>
 					) : (
 						<>
-							{showChrome ? (
-								<GalleryTakeoverPreviewUploadDropZone
-									placement="start"
-									status={startZoneDisplay.status}
-									uploadCurrent={startZoneDisplay.current}
-									uploadTotal={startZoneDisplay.total}
-									interactive={dropZoneInteractive}
-									onFilesSelected={(files) =>
-										void handleDropZoneFiles('start', files)
-									}
-								/>
-							) : null}
 							{galleryWidthOverflow ? (
-								<Notice
-									className="modula-gallery-takeover__live-preview-width-overflow-notice"
-									status="warning"
-									isDismissible={false}
-								>
-									{sprintf(
-										/* translators: 1: gallery width in px, 2: preview frame width in px */
-										__(
-											'This gallery is set to %1$spx wide, but the preview frame is only %2$spx. Scroll horizontally to see the full layout. On the site, the gallery still uses your set width (%1$spx), not this frame.',
-											'modula-best-grid-gallery'
-										),
-										String(galleryWidthOverflow.galleryPx),
-										String(galleryWidthOverflow.artboardPx)
-									)}
-								</Notice>
+								<AdminUiScope>
+									<Notice
+										className="modula-gallery-takeover__live-preview-width-overflow-notice"
+										role="status"
+									>
+										{sprintf(
+											/* translators: 1: gallery width in px, 2: preview frame width in px */
+											__(
+												'This gallery is set to %1$spx wide, but the preview frame is only %2$spx. Scroll horizontally to see the full layout. On the site, the gallery still uses your set width (%1$spx), not this frame.',
+												'modula-best-grid-gallery'
+											),
+											String(
+												galleryWidthOverflow.galleryPx
+											),
+											String(
+												galleryWidthOverflow.artboardPx
+											)
+										)}
+									</Notice>
+								</AdminUiScope>
 							) : null}
 							<div
 								className={`modula-gallery-takeover__live-preview-gallery-scroll${
@@ -416,24 +439,28 @@ function GalleryTakeoverLivePreviewMounted({
 												className="modula modula-gallery-takeover__live-preview-gallery-shell"
 												style={previewGalleryShellStyle}
 											>
-												<Gallery />
+												<GalleryPreviewHoverTileContext.Provider
+													value={hoverTile}
+												>
+													<GalleryPreviewFilterBarContext.Provider
+														value={
+															CanvasFiltersPreviewBar
+														}
+													>
+														<WatermarkPreviewProvider
+															watermarkSettings={
+																groupedSettings?.watermark
+															}
+														>
+															<Gallery />
+														</WatermarkPreviewProvider>
+													</GalleryPreviewFilterBarContext.Provider>
+												</GalleryPreviewHoverTileContext.Provider>
 											</div>
 										</GalleryPreviewEagerLayoutsContext.Provider>
 									</Provider>
 								</PreviewItemPersistProvider>
 							</div>
-							{showChrome ? (
-								<GalleryTakeoverPreviewUploadDropZone
-									placement="end"
-									status={endZoneDisplay.status}
-									uploadCurrent={endZoneDisplay.current}
-									uploadTotal={endZoneDisplay.total}
-									interactive={dropZoneInteractive}
-									onFilesSelected={(files) =>
-										void handleDropZoneFiles('end', files)
-									}
-								/>
-							) : null}
 						</>
 					)}
 				</div>

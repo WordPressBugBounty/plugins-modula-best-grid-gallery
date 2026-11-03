@@ -70,6 +70,12 @@ export default function InteractionGridGuide({ metrics, gesture, rectangle }) {
 	} = metrics;
 	const pitchX = columnWidth + gutterX;
 	const pitchY = rowHeight + gutterY;
+	/*
+	 * The editor's canvas selection token, as on the Freeform selection frame.
+	 * It is defined on the editor app root; both hosts render inside it.
+	 */
+	const gridLineColor =
+		'color-mix(in srgb, var(--mod-se-selection) 27%, transparent)';
 	return (
 		<div
 			ref={guideRef}
@@ -86,10 +92,9 @@ export default function InteractionGridGuide({ metrics, gesture, rectangle }) {
 				style={{
 					position: 'absolute',
 					inset: 0,
-					borderBottom: '1px solid #2271b144',
+					borderBottom: `1px solid ${gridLineColor}`,
 					boxSizing: 'border-box',
-					backgroundImage:
-						'linear-gradient(to right, #2271b144 1px, transparent 1px), linear-gradient(to bottom, #2271b144 1px, transparent 1px)',
+					backgroundImage: `linear-gradient(to right, ${gridLineColor} 1px, transparent 1px), linear-gradient(to bottom, ${gridLineColor} 1px, transparent 1px)`,
 					backgroundSize: `${pitchX}px ${pitchY}px`,
 					backgroundPosition: `${paddingX}px ${paddingY}px`,
 				}}
@@ -101,7 +106,7 @@ export default function InteractionGridGuide({ metrics, gesture, rectangle }) {
 					top: paddingY + rectangle.y * pitchY,
 					width: rectangle.w * pitchX - gutterX,
 					height: rectangle.h * pitchY - gutterY,
-					border: '2px dashed #2271b1',
+					border: '2px dashed var(--mod-se-selection)',
 					boxSizing: 'border-box',
 					zIndex: 10000,
 				}}
@@ -112,11 +117,13 @@ export default function InteractionGridGuide({ metrics, gesture, rectangle }) {
 						position: 'absolute',
 						top: 0,
 						left: 0,
-						padding: '2px 6px',
-						borderRadius: 3,
-						color: '#fff',
-						background: '#2271b1',
-						fontSize: 12,
+						// The Freeform size badge's look (`_freeform-selection.scss`).
+						padding: '2px 7px',
+						borderRadius: 4,
+						color: 'var(--mod-se-selection-ink)',
+						background: 'var(--mod-se-selection)',
+						fontFamily: 'var(--mod-se-font-mono)',
+						fontSize: 11.5,
 						whiteSpace: 'nowrap',
 					}}
 				>

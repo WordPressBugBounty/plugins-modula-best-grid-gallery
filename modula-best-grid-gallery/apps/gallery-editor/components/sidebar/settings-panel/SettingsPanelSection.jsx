@@ -1,7 +1,6 @@
 /**
  * Redesign settings panel — section heading (STRUCTURE, CONTENT, …).
  */
-import { SectionHeading } from 'shared-ui';
 
 /**
  * @param {Object}                    props
@@ -17,9 +16,9 @@ export default function SettingsPanelSection({ label, children }) {
 	return (
 		<section className="modula-settings-panel__section">
 			{heading ? (
-				<SectionHeading className="modula-settings-panel__section-heading">
+				<h3 className="modula-settings-panel__section-heading">
 					{heading}
-				</SectionHeading>
+				</h3>
 			) : null}
 			<div className="modula-settings-panel__section-body">
 				{children}

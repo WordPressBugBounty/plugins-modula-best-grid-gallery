@@ -1,22 +1,18 @@
 import { TEMPLATE_DEFINITIONS } from 'gallery-shared/preview';
 import { __ } from '@wordpress/i18n';
-import { MenuSelect } from 'shared-ui';
+import { SelectMenuControl } from 'editor-shell';
 import { getModulaSettingsEditorConfig } from '../../../config/modulaSettingsEditorConfig';
 import { gateLockHint, resolveProGateLock } from '../../../logic/proGateLock';
 import { TemplateLayoutPreviewIcon } from '../TemplateLayoutPreviewIcon';
+import { ControlHelp } from './ControlHelp';
 
 /**
- * @param {Object}           ctx
- * @param {Object}           ctx.field
- * @param {Object}           ctx.control
- * @param {*}                ctx.value
- * @param {Function}         ctx.onChange
- * @param {boolean}          ctx.disabled
- * @param {string|undefined} ctx.help
+ * @param {import('../fieldControlKinds').FieldControlContext} ctx
  */
 export function renderTemplateLayoutSelectKind({
-	field,
 	control,
+	controlId,
+	label: settingLabel,
 	value,
 	onChange,
 	disabled,
@@ -55,7 +51,7 @@ export function renderTemplateLayoutSelectKind({
 		}
 	}
 
-	/** @type {import('shared-ui').MenuSelectGroup[]} */
+	/** @type {import('editor-shell/fields/SelectMenuControl').SelectMenuGroup[]} */
 	const groups = [];
 	if (liteOptions.length) {
 		groups.push({
@@ -73,18 +69,26 @@ export function renderTemplateLayoutSelectKind({
 	}
 
 	return (
-		<MenuSelect
-			value={value === null || value === undefined ? '' : String(value)}
-			onChange={onChange}
-			disabled={disabled}
-			help={help}
-			groups={groups}
-			listLabel={__('Select template layout', 'modula-best-grid-gallery')}
-			placeholder={__(
-				'Select template layout…',
-				'modula-best-grid-gallery'
-			)}
-			className="modula-template-layout-select"
-		/>
+		<>
+			<SelectMenuControl
+				id={controlId}
+				label={
+					settingLabel ||
+					__('Template layout', 'modula-best-grid-gallery')
+				}
+				value={
+					value === null || value === undefined ? '' : String(value)
+				}
+				onChange={onChange}
+				disabled={disabled}
+				groups={groups}
+				placeholder={__(
+					'Select template layout…',
+					'modula-best-grid-gallery'
+				)}
+				className="modula-template-layout-select"
+			/>
+			<ControlHelp help={help} controlId={controlId} />
+		</>
 	);
 }

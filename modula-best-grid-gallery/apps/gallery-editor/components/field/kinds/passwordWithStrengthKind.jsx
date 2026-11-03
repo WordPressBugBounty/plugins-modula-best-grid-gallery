@@ -1,20 +1,18 @@
 import { useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon, seen, unseen } from '@wordpress/icons';
-import { IconButton, TextInput } from 'shared-ui';
+import { Button, TextInput } from 'admin-ui';
 import { isNil } from '../../../logic/isNil';
 import { getPasswordStrengthMeta } from '../../../utils/passwordStrengthMeter';
+import { ControlHelp, describedByHelp } from './ControlHelp';
 
 /**
  * Gallery password field with optional reveal + WP password strength meter.
  *
- * @param {Object}           props
- * @param {*}                props.value
- * @param {Function}         props.onChange
- * @param {boolean}          props.disabled
- * @param {string|undefined} props.help
+ * @param {import('../fieldControlKinds').FieldControlContext} ctx
  */
 export function renderPasswordWithStrengthKind({
+	controlId,
 	value,
 	onChange,
 	disabled,
@@ -22,6 +20,7 @@ export function renderPasswordWithStrengthKind({
 }) {
 	return (
 		<PasswordWithStrengthControl
+			controlId={controlId}
 			value={value}
 			onChange={onChange}
 			disabled={disabled}
@@ -32,12 +31,19 @@ export function renderPasswordWithStrengthKind({
 
 /**
  * @param {Object}           props
+ * @param {string}           props.controlId
  * @param {*}                props.value
  * @param {Function}         props.onChange
  * @param {boolean}          props.disabled
  * @param {string|undefined} props.help
  */
-function PasswordWithStrengthControl({ value, onChange, disabled, help }) {
+function PasswordWithStrengthControl({
+	controlId,
+	value,
+	onChange,
+	disabled,
+	help,
+}) {
 	const [revealed, setRevealed] = useState(false);
 	const text = isNil(value) ? '' : String(value);
 	const strength = useMemo(() => getPasswordStrengthMeta(text), [text]);
@@ -49,22 +55,27 @@ function PasswordWithStrengthControl({ value, onChange, disabled, help }) {
 		<div className="modula-settings-editor__password-with-strength">
 			<div className="modula-settings-editor__password-with-strength-input">
 				<TextInput
+					id={controlId}
+					width="full"
 					type={revealed ? 'text' : 'password'}
 					value={text}
 					onChange={onChange}
 					disabled={disabled}
 					autoComplete="new-password"
 					spellCheck={false}
+					aria-describedby={describedByHelp(controlId, help)}
 				/>
-				<IconButton
-					label={revealLabel}
+				<Button
+					variant="ghost"
 					disabled={disabled}
 					className="modula-settings-editor__password-visibility-toggle"
+					aria-label={revealLabel}
+					title={revealLabel}
 					aria-pressed={revealed}
 					onClick={() => setRevealed((prev) => !prev)}
 				>
 					<Icon icon={revealed ? unseen : seen} size={20} />
-				</IconButton>
+				</Button>
 			</div>
 			{strength.level !== 'empty' ? (
 				<div
@@ -75,11 +86,7 @@ function PasswordWithStrengthControl({ value, onChange, disabled, help }) {
 					{strength.label}
 				</div>
 			) : null}
-			{help ? (
-				<p className="modula-settings-editor__password-with-strength-help">
-					{help}
-				</p>
-			) : null}
+			<ControlHelp help={help} controlId={controlId} />
 		</div>
 	);
 }

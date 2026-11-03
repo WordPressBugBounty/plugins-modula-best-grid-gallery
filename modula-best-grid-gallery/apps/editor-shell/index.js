@@ -12,22 +12,47 @@ export { default as TakeoverSidebar } from './sidebar/TakeoverSidebar';
 export { default as SidebarRailNav } from './sidebar/SidebarRailNav';
 export { default as SidebarRailFooter } from './sidebar/SidebarRailFooter';
 export { default as SettingsPanelHeader } from './sidebar/SettingsPanelHeader';
-export { default as SettingsPanelExitRow } from './sidebar/SettingsPanelExitRow';
-export { default as HubDrillRow } from './sidebar/HubDrillRow';
-export { default as CanvasToolbar } from './canvas/CanvasToolbar';
+export { default as ItemEditPanelHeader } from './sidebar/ItemEditPanelHeader';
+export { default as ItemEditCard } from './sidebar/ItemEditCard';
+export {
+	default as CanvasToolbar,
+	focusCanvasToolbarFirstAction,
+} from './canvas/CanvasToolbar';
 export { default as CanvasToolbarActionButton } from './canvas/CanvasToolbarActionButton';
 export { default as AddSplit } from './canvas/AddSplit';
 export { default as CanvasEmptyState } from './canvas/CanvasEmptyState';
+export { default as CanvasToolbarSelectionCount } from './canvas/CanvasToolbarSelectionCount';
+export { default as SelectionGrid } from './canvas/SelectionGrid';
 export { default as InsertPositionSegment } from './canvas/InsertPositionSegment';
-export { default as StatusBar } from './status-bar/StatusBar';
-export { default as DesktopOnlyNotice } from './notice/DesktopOnlyNotice';
-export { default as AppearanceToggle } from './appearance/AppearanceToggle';
 export {
-	default as GalleryModal,
-	GalleryModalHeader,
-	GalleryModalBody,
-	GalleryModalFooter,
-} from './modal/GalleryModal';
+	default as CanvasSortPopover,
+	useCanvasSortPopover,
+} from './canvas/CanvasSortPopover';
+export { default as CanvasReorderDialog } from './canvas/CanvasReorderDialog';
+export { useReorderDraft } from './canvas/useReorderDraft';
+export {
+	MediaPickerFooter,
+	MediaPickerGrid,
+	MediaPickerSearch,
+	MediaPickerToolbar,
+} from './media-picker/MediaPicker';
+export { default as SelectMenuControl } from './fields/SelectMenuControl';
+export { default as MotionChoicePicker } from './fields/MotionChoicePicker';
+export { default as FilterNameListControl } from './fields/FilterNameListControl';
+export { default as DefaultActiveFilterSelect } from './fields/DefaultActiveFilterSelect';
+export { default as FilterChipsEditor } from './fields/FilterChipsEditor';
+export { default as SettingSearch } from './sidebar/SettingSearch';
+export {
+	default as DependentRowIcon,
+	DependentRowContext,
+} from './sidebar/DependentRowIcon';
+export { useRevealSettingRow } from './hooks/useRevealSettingRow';
+export { useDebouncedValue } from './hooks/useDebouncedValue';
+export { default as DesktopOnlyNotice } from './notice/DesktopOnlyNotice';
+export { useTakeoverToast } from './toast/TakeoverToast';
+export { useUndoToastOffer } from './toast/useUndoToastOffer';
+export { default as AdminUiScope } from './appearance/AdminUiScope';
+export { default as GalleryModal } from './modal/GalleryModal';
 export { default as SettingsEditorErrorBoundary } from './app/SettingsEditorErrorBoundary';
 export { default as SettingsEditorShellFallback } from './app/SettingsEditorShellFallback';
 export { getSidebarRailNavLabel } from './sidebar/sidebarRailLabels';
@@ -39,6 +64,10 @@ export {
 	useModalEscapeKey,
 	WP_MEDIA_FRAME_BODY_CLASS,
 } from './hooks/useModalEscapeKey';
+export {
+	isEventInOpenDialog,
+	isEventInPopover,
+} from './hooks/isEventInOpenDialog';
 export {
 	TakeoverSaveStatusProvider,
 	useTakeoverSaveStatus,

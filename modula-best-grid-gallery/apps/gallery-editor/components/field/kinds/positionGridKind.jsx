@@ -1,5 +1,7 @@
 import { __ } from '@wordpress/i18n';
+import { PositionPad } from 'admin-ui';
 import { isNil } from '../../../logic/isNil';
+import { ControlHelp, describedByHelp } from './ControlHelp';
 
 const WATERMARK_CELLS = [
 	'top_left',
@@ -14,42 +16,30 @@ const WATERMARK_CELLS = [
 ];
 
 /**
- * 3×3 slots around a gallery: edge singles + dual top/bottom and left/right.
- *
- * @type {Array<{ value: string|null, placeholder?: boolean, dual?: 'vertical'|'horizontal' }>}
+ * @param {Object} control
+ * @return {string} Name of the position group.
  */
-const EDGE_SLOTS = [
-	{ value: 'top_bottom', dual: 'vertical' },
-	{ value: 'top' },
-	{ value: 'left_right', dual: 'horizontal' },
-	{ value: 'left' },
-	{ value: null, placeholder: true },
-	{ value: 'right' },
-	{ value: null },
-	{ value: 'bottom' },
-	{ value: null },
-];
+function positionGroupLabel(control) {
+	if (
+		typeof control.ariaLabel === 'string' &&
+		control.ariaLabel.trim() !== ''
+	) {
+		return control.ariaLabel.trim();
+	}
 
-/**
- * @param {string[]} options
- * @return {boolean}
- */
-function isWatermarkOptions(options) {
-	return options.some((key) => WATERMARK_CELLS.includes(key));
+	return __('Watermark position', 'modula-best-grid-gallery');
 }
 
 /**
- * 3×3 position matrix for watermark / overlay / filter-bar placement.
+ * 3×3 position matrix for watermark placement. The nine image places are
+ * admin-ui's PositionPad; a set missing some places keeps its own grid with
+ * those places off. (The filter bar's place is a menu select.)
  *
- * @param {Object}           ctx
- * @param {Object}           ctx.control
- * @param {*}                ctx.value
- * @param {Function}         ctx.onChange
- * @param {boolean}          ctx.disabled
- * @param {string|undefined} ctx.help
+ * @param {import('../fieldControlKinds').FieldControlContext} ctx
  */
 export function renderPositionGridKind({
 	control,
+	controlId,
 	value,
 	onChange,
 	disabled,
@@ -59,71 +49,53 @@ export function renderPositionGridKind({
 	const options = Array.isArray(control.options)
 		? control.options.map(String)
 		: WATERMARK_CELLS;
-	const watermarkLayout = isWatermarkOptions(options);
-	const slots = watermarkLayout
-		? WATERMARK_CELLS.map((key) => ({ value: key }))
-		: EDGE_SLOTS;
 	const available = new Set(options);
-	const fallback = watermarkLayout
-		? String(options[0] ?? 'bottom_left')
-		: String(options[0] ?? 'top');
+	const fallback = String(options[0] ?? 'bottom_left');
 	const current = isNil(value) || value === '' ? fallback : String(value);
-	const groupLabel =
-		typeof control.ariaLabel === 'string' && control.ariaLabel.trim() !== ''
-			? control.ariaLabel.trim()
-			: watermarkLayout
-				? __('Watermark position', 'modula-best-grid-gallery')
-				: __('Where the bar sits', 'modula-best-grid-gallery');
+	const groupLabel = positionGroupLabel(control);
+
+	// PositionPad draws exactly the nine places, none of them off.
+	if (WATERMARK_CELLS.every((key) => available.has(key))) {
+		return (
+			<div className="modula-settings-editor__position-grid">
+				<PositionPad
+					id={controlId}
+					aria-label={groupLabel}
+					aria-describedby={describedByHelp(controlId, help)}
+					positions={WATERMARK_CELLS.map((key) => ({
+						value: key,
+						label: labels[key] || key,
+					}))}
+					value={current}
+					onChange={onChange}
+					disabled={disabled}
+				/>
+				<ControlHelp help={help} controlId={controlId} />
+			</div>
+		);
+	}
 
 	return (
 		<div className="modula-settings-editor__position-grid">
 			<div
-				className={`modula-settings-editor__position-grid-matrix${
-					watermarkLayout ? '' : ' is-edges'
-				}`}
+				className="modula-settings-editor__position-grid-matrix"
 				role="radiogroup"
 				aria-label={groupLabel}
 			>
-				{slots.map((slot, index) => {
-					if (slot.placeholder) {
-						return (
-							<span
-								key={`ph-${index}`}
-								className="modula-settings-editor__position-grid-cell is-placeholder"
-								aria-hidden="true"
-							/>
-						);
-					}
-					if (!slot.value) {
-						return (
-							<span
-								key={`empty-${index}`}
-								className="modula-settings-editor__position-grid-cell is-empty"
-								aria-hidden="true"
-							/>
-						);
-					}
-					const key = slot.value;
+				{WATERMARK_CELLS.map((key) => {
 					const isAvailable = available.has(key);
 					const active = isAvailable && current === key;
-					const rawLabel = labels[key] || key;
-					const dualClass =
-						slot.dual === 'vertical'
-							? ' is-dual is-dual-vertical'
-							: slot.dual === 'horizontal'
-								? ' is-dual is-dual-horizontal'
-								: '';
 					return (
 						<button
 							key={key}
 							type="button"
 							role="radio"
 							aria-checked={active}
-							aria-label={rawLabel}
+							aria-label={labels[key] || key}
 							disabled={disabled || !isAvailable}
 							className={`modula-settings-editor__position-grid-cell${
 								active ? ' is-active' : ''
-							}${!isAvailable ? ' is-unavailable' : ''}${dualClass}`}
+							}${!isAvailable ? ' is-unavailable' : ''}`}
 							onClick={() => {
 								if (!disabled && isAvailable) {
 									onChange(key);
@@ -133,9 +105,7 @@ export function renderPositionGridKind({
 					);
 				})}
 			</div>
-			{help ? (
-				<p className="modula-settings-editor__field-help">{help}</p>
-			) : null}
+			<ControlHelp help={help} controlId={controlId} />
 		</div>
 	);
 }

@@ -17,6 +17,7 @@ import { useGalleryPreviewTileSelection } from './GalleryPreviewTileSelectionCon
 /**
  * @type {import('react').Context<{
  *   active: boolean,
+ *   scope: string,
  *   selectedIds: number[],
  *   isSelected: (id: number) => boolean,
  *   toggle: (id: number) => void,
@@ -25,8 +26,11 @@ import { useGalleryPreviewTileSelection } from './GalleryPreviewTileSelectionCon
 export const WatermarkPreviewSelectionContext = createContext(null);
 
 /**
+ * `scope` is Apply's `watermarkApplyScope` (`all` or `selected`).
+ *
  * @return {{
  *   active: boolean,
+ *   scope: string,
  *   selectedIds: number[],
  *   isSelected: (id: number) => boolean,
  *   toggle: (id: number) => void,
@@ -127,12 +131,13 @@ export function WatermarkPreviewSelectionProvider({ children }) {
 	const value = useMemo(
 		() => ({
 			active,
+			scope,
 			selectedIds,
 			isSelected,
 			toggle,
 			clear,
 		}),
-		[active, selectedIds, isSelected, toggle, clear]
+		[active, scope, selectedIds, isSelected, toggle, clear]
 	);
 
 	return (

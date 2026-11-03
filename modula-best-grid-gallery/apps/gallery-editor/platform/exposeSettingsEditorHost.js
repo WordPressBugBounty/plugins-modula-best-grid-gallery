@@ -20,7 +20,6 @@ import {
 	normalizeFilterBarEntry,
 	paginationFromGroupedSettings,
 	resolveFilterBarCollapsibleActionText,
-	resolveFilterBarDefaultActiveKey,
 	resolveFilterBarPlacements,
 	resolveFilterLayoutShellClass,
 	resolveFilterPositioning,
@@ -62,10 +61,8 @@ import { normalizeGroupedDefaults } from '../logic/groupedSettingsNormalize';
 import { useWatermarkPreviewSelection } from '../context/WatermarkPreviewSelectionContext';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-	AppearanceToggle,
+	AdminUiScope,
 	GalleryModal,
-	SettingsEditorErrorBoundary,
-	SidebarRailFooter,
 	useTakeoverSaveStatus,
 } from 'editor-shell';
 import { stripRestPostMeta } from 'editor-shell/logic';
@@ -74,40 +71,12 @@ import {
 	useGalleryBootstrapQuery,
 } from '../query/useGalleryBootstrapQuery';
 
-import GalleryTakeoverTopBar from '../components/shell/GalleryTakeoverTopBar';
-import SchemaCollapsibleFieldGroup from '../components/schema/SchemaCollapsibleFieldGroup';
-import SchemaCompositeRow from '../components/schema/SchemaCompositeRow';
-import SchemaFieldRow from '../components/schema/SchemaFieldRow';
-import TakeoverSettingsAutosave from '../components/shell/TakeoverSettingsAutosave';
 import { useGallerySettingsFormBundle } from '../form/GallerySettingsFormContext';
 import { useModulaSettingsEditorConfig } from '../hooks/useModulaSettingsEditorConfig';
-import { useTakeoverPostMeta } from '../hooks/useTakeoverPostMeta';
-import {
-	getDisplayBucketsForFields,
-	getEnrichedFieldsForGroup,
-} from '../data/formSchema';
-import { isFieldVisible } from '../logic/fieldVisibility';
-import {
-	clampProofingSelectionToGallery,
-	toProofingSelectionCount,
-} from '../logic/proofingSelectionCoupling';
 import {
 	applyGroupedFieldWrite,
 	resetGroupedFieldWrite,
 } from '../logic/groupedFieldWrite';
-import { getGalleryListUrl } from '../utils/galleryAdminUrls';
-import {
-	ActionRow,
-	Button,
-	FieldStack,
-	FiltersTokenField,
-	IconButton,
-	Select,
-	StatePill,
-	Tabs,
-	TextInput,
-	Textarea,
-} from 'shared-ui';
 
 /**
  * Attach host API to `window.modula.settingsEditorHost` (idempotent).
@@ -120,17 +89,10 @@ export function exposeSettingsEditorHost() {
 	window.modula = window.modula || {};
 	window.modula.settingsEditorHost = window.modula.settingsEditorHost || {
 		useModulaSettingsEditorConfig,
-		useTakeoverPostMeta,
 		useGallerySettingsFormBundle,
 		useGalleryBootstrapQuery,
-		getDisplayBucketsForFields,
-		getEnrichedFieldsForGroup,
-		isFieldVisible,
-		clampProofingSelectionToGallery,
-		toProofingSelectionCount,
 		applyGroupedFieldWrite,
 		resetGroupedFieldWrite,
-		getGalleryListUrl,
 		buildPaginationDynamicCss,
 		galleryRootSelector,
 		paginationFromGroupedSettings,
@@ -139,14 +101,6 @@ export function exposeSettingsEditorHost() {
 		buildPaginationPageButtonClassName,
 		buildPaginationEdgeButtonClassName,
 		resolvePaginationNumber,
-		AppearanceToggle,
-		GalleryTakeoverTopBar,
-		SidebarRailFooter,
-		SchemaFieldRow,
-		SchemaCompositeRow,
-		SchemaCollapsibleFieldGroup,
-		TakeoverSettingsAutosave,
-		SettingsEditorErrorBoundary,
 		useExtensionImportHost,
 		createTakeoverImportModal,
 		TakeoverImportDialogShell,
@@ -188,20 +142,12 @@ export function exposeSettingsEditorHost() {
 		shouldUseFilterDropdown,
 		shouldUseCollapsibleFilterBar,
 		resolveFilterBarCollapsibleActionText,
-		resolveFilterBarDefaultActiveKey,
 		galleryUploadPost,
 		parseUploadAttachmentId,
 		runFoldersToGalleryPipeline,
 		runZipAttachmentPipeline,
+		/* No controls: Pro compiles its own admin-ui and takes the scope here. */
 		GalleryModal,
-		ActionRow,
-		Button,
-		FieldStack,
-		IconButton,
-		Select,
-		StatePill,
-		Tabs,
-		TextInput,
-		Textarea,
+		AdminUiScope,
 	};
 }

@@ -5,11 +5,20 @@ import { __ } from '@wordpress/i18n';
  */
 
 /**
+ * @typedef {Object} PageTab
+ * @property {string}                    slug    Matched against `current`; passed to `onSelect`.
+ * @property {string}                    label   Tab text.
+ * @property {string}                    [href]  A link to another page; without it the tab is a button that calls `onSelect`.
+ * @property {number|null}               [count] Shown after the label, as "(24)".
+ * @property {import('react').ReactNode} [badge] After the label (a `PlanBadge` without `onClick`).
+ */
+
+/**
  * The four Modula pages the tab row joins, in order. Their URLs predate the
  * redesign (bookmarks and the onboarding redirect use them) and are relative
  * to wp-admin, where every admin page lives.
  *
- * @return {{ slug: PageTabSlug, label: string, href: string }[]} Pages.
+ * @return {PageTab[]} Pages.
  */
 function modulaPages() {
 	return [
@@ -37,35 +46,80 @@ function modulaPages() {
 }
 
 /**
- * Tab row under the page header that links the Getting Started, About us,
- * Partners and Extensions pages. The tabs are ordinary links with full page
- * loads, not the in-page WAI-ARIA `Tabs`; the current page is marked with
- * `aria-current="page"`.
+ * Tab row under the page header. By default it links the Getting Started,
+ * About us, Partners and Extensions pages. A page with its own sections (the
+ * Content page) passes `tabs`: a tab with `href` is a link, one without is a
+ * button that calls `onSelect` and switches the view in place. They are not
+ * the in-page WAI-ARIA `Tabs`, which own their panels; the current one is
+ * marked with `aria-current="page"`.
  *
- * @param {Object}      props
- * @param {PageTabSlug} props.current The page being shown.
+ * @param {Object}                 props
+ * @param {string}                 props.current    The tab shown (a `PageTabSlug` for the default pages).
+ * @param {PageTab[]}              [props.tabs]     Own tabs, in place of the four pages.
+ * @param {string}                 [props.label]    Names the row; "Modula pages" by default.
+ * @param {(slug: string) => void} [props.onSelect] A tab without `href` was chosen.
  */
-export function PageTabs({ current }) {
+export function PageTabs({ current, tabs, label, onSelect }) {
 	return (
 		<nav
 			className="modula-admin-page-tabs"
-			aria-label={__('Modula pages', 'modula-best-grid-gallery')}
+			aria-label={label || __('Modula pages', 'modula-best-grid-gallery')}
 		>
 			<ul className="modula-admin-page-tabs__list">
-				{modulaPages().map((page) => (
-					<li key={page.slug}>
-						<a
-							className="modula-admin-page-tabs__tab"
-							href={page.href}
-							aria-current={
-								current === page.slug ? 'page' : undefined
-							}
-						>
-							{page.label}
-						</a>
+				{(tabs || modulaPages()).map((tab) => (
+					<li key={tab.slug}>
+						<PageTabItem
+							tab={tab}
+							isCurrent={current === tab.slug}
+							onSelect={onSelect}
+						/>
 					</li>
 				))}
 			</ul>
 		</nav>
+	);
+}
+
+/**
+ * @param {Object}                 props
+ * @param {PageTab}                props.tab
+ * @param {boolean}                props.isCurrent
+ * @param {(slug: string) => void} [props.onSelect]
+ */
+function PageTabItem({ tab, isCurrent, onSelect }) {
+	const content = (
+		<>
+			{tab.label}
+			{tab.badge || null}
+			{Number.isInteger(tab.count) ? (
+				<span className="modula-admin-page-tabs__count">
+					({tab.count})
+				</span>
+			) : null}
+		</>
+	);
+	const ariaCurrent = isCurrent ? 'page' : undefined;
+
+	if (tab.href) {
+		return (
+			<a
+				className="modula-admin-page-tabs__tab"
+				href={tab.href}
+				aria-current={ariaCurrent}
+			>
+				{content}
+			</a>
+		);
+	}
+
+	return (
+		<button
+			type="button"
+			className="modula-admin-page-tabs__tab"
+			aria-current={ariaCurrent}
+			onClick={() => onSelect?.(tab.slug)}
+		>
+			{content}
+		</button>
 	);
 }

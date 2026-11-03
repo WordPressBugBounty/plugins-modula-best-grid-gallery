@@ -2,8 +2,9 @@
  * Warn when title/caption use below-image placement — hover builder preview cannot show them.
  */
 import { useState } from '@wordpress/element';
-import { Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { Button, Notice } from 'admin-ui';
+import { AdminUiScope } from 'editor-shell';
 import { shouldShowHoverBuilderBelowImageNotice } from '../../utils/editorCaptionsAreBelowImage';
 
 const DISMISS_SESSION_KEY = 'modulaHoverBuilderBelowImageNoticeDismissed';
@@ -51,29 +52,37 @@ export default function HoverBuilderBelowImageNotice({
 				'modula-best-grid-gallery'
 			);
 
+	const dismiss = () => {
+		setDismissed(true);
+		try {
+			window.sessionStorage?.setItem(DISMISS_SESSION_KEY, '1');
+		} catch {
+			/* ignore quota / private mode */
+		}
+	};
+
+	// The canvas copy renders outside any admin-ui scope; in the builder
+	// column the scope is already there and this adds nothing.
 	return (
-		<Notice
-			status="warning"
-			isDismissible
-			className={[
-				'modula-gallery-takeover__hover-builder-below-image-notice',
-				compact
-					? 'modula-gallery-takeover__hover-builder-below-image-notice--compact'
-					: '',
-				className,
-			]
-				.filter(Boolean)
-				.join(' ')}
-			onRemove={() => {
-				setDismissed(true);
-				try {
-					window.sessionStorage?.setItem(DISMISS_SESSION_KEY, '1');
-				} catch {
-					/* ignore quota / private mode */
-				}
-			}}
-		>
-			{message}
-		</Notice>
+		<AdminUiScope>
+			{/* `status`: announced when it appears, as WP's Notice did. */}
+			<Notice
+				tone="warning"
+				role="status"
+				className={[
+					'modula-gallery-takeover__hover-builder-below-image-notice',
+					className,
+				]
+					.filter(Boolean)
+					.join(' ')}
+			>
+				<p className="modula-gallery-takeover__hover-builder-below-image-notice-text">
+					{message}
+				</p>
+				<Button variant="link" onClick={dismiss}>
+					{__('Dismiss', 'modula-best-grid-gallery')}
+				</Button>
+			</Notice>
+		</AdminUiScope>
 	);
 }

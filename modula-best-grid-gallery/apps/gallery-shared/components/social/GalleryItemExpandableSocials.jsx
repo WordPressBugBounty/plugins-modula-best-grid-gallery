@@ -10,6 +10,13 @@ import GalleryItemSocialLinks from './GalleryItemSocialLinks';
 import { useExpandableSocials } from '../../hooks/useExpandableSocials';
 
 /**
+ * The share button and its network icons while open. The compact caption
+ * popover keeps clear of them.
+ */
+export const SHARE_CONTROLS_SELECTOR =
+	'.modula-social-expandable, .modula-social-expandable-icons.modula-show-socials';
+
+/**
  * @param {Object}                                               props
  * @param {string|number}                                        props.itemId
  * @param {Array<{ type: string, label: string, url?: string }>} props.socials

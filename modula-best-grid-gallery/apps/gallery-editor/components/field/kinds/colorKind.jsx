@@ -1,36 +1,30 @@
-import CompactColorControl from '../CompactColorControl';
+import SettingsColorControl from '../SettingsColorControl';
+import { ControlHelp } from './ControlHelp';
 
 /**
- * @param {Object}           ctx
- * @param {Object}           [ctx.control]
- * @param {*}                ctx.value
- * @param {Function}         ctx.onChange
- * @param {boolean}          ctx.disabled
- * @param {string|undefined} ctx.help
+ * @param {import('../fieldControlKinds').FieldControlContext} ctx
  */
-export function renderColorKind({ control, value, onChange, disabled, help }) {
-	const enableAlpha = Boolean(control?.acceptAlpha);
-	const clearable = Boolean(control?.clearable);
+export function renderColorKind({
+	control,
+	controlId,
+	label,
+	value,
+	onChange,
+	disabled,
+	help,
+}) {
 	return (
-		<div
-			className={`modula-settings-editor__color-picker modula-settings-editor__color-picker--swatch${
-				disabled ? ' is-disabled' : ''
-			}`}
-			aria-disabled={disabled || undefined}
-		>
-			<CompactColorControl
+		<div className="modula-settings-editor__color-picker modula-settings-editor__color-picker--swatch">
+			<SettingsColorControl
+				id={controlId}
+				label={label}
 				value={value}
 				onChange={onChange}
 				disabled={disabled}
-				enableAlpha={enableAlpha}
-				clearable={clearable}
-				variant="swatch"
+				acceptAlpha={Boolean(control?.acceptAlpha)}
+				clearable={Boolean(control?.clearable)}
 			/>
-			{help ? (
-				<p className="modula-settings-editor__color-picker-help">
-					{help}
-				</p>
-			) : null}
+			<ControlHelp help={help} controlId={controlId} />
 		</div>
 	);
 }

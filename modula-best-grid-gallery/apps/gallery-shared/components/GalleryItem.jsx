@@ -5,12 +5,15 @@
  * @package
  */
 
-import { memo } from '@wordpress/element';
+import { memo, useContext } from '@wordpress/element';
 import { useSelector } from 'react-redux';
+import { GalleryPreviewHoverTileContext } from '../context/GalleryPreviewHoverTileContext';
+import { GalleryItemChromeContext } from '../context/GalleryItemChromeContext';
+import { GalleryItemContentContext } from '../context/GalleryItemContentContext';
 import { getGalleryItemViewModel } from '../utils/galleryItemViewModel';
 import { useSlotDimensions } from '../hooks/useSlotDimensions';
 import { isEmbeddedGalleryItemRow } from '../utils/embeddedGalleryItemKinds';
-import { isGalleryItemHiddenFromLightbox } from '../utils/prepareItemData';
+import { listDeeplinkItems } from '../lightbox/modulaDeeplinkFromHash';
 import GalleryPreviewAdminToolbarSlot from './GalleryPreviewAdminToolbarSlot';
 import GalleryItemMarkup from './GalleryItemMarkup';
 import GalleryItemVideoPreview from './GalleryItemVideoPreview';
@@ -25,38 +28,6 @@ import VideoGalleryPlayIcon, {
 	resolveVideoPlayIconAttachmentId,
 	resolveVideoPlayIconCustomSrc,
 } from '../video/VideoGalleryPlayIcon';
-
-/**
- * @param {unknown[]} items
- * @param {Object}    itemData
- * @param {Object}    [config]
- * @return {number}
- */
-function resolveDeeplinkIndex(items, itemData, config) {
-	if (!Array.isArray(items) || !itemData) {
-		return -1;
-	}
-	const lightboxItems = items.filter((row) => {
-		if (!row || isEmbeddedGalleryItemRow(row)) {
-			return false;
-		}
-		if (isGalleryItemHiddenFromLightbox(row)) {
-			return false;
-		}
-		const mode =
-			typeof row.lightbox === 'string' && row.lightbox.trim() !== ''
-				? row.lightbox
-				: config?.lightbox || 'fancybox';
-		return mode === 'fancybox';
-	});
-	const rowId = itemData.id;
-	return lightboxItems.findIndex((row) => {
-		if (rowId !== undefined && rowId !== null && row.id === rowId) {
-			return true;
-		}
-		return false;
-	});
-}
 
 function GalleryItem({
 	itemData,
@@ -76,16 +47,26 @@ function GalleryItem({
 			isStaticStoryPreview(s.gallery.metadata)
 	);
 	const metadata = useSelector((s) => s.gallery.metadata || {});
+	const previewHoverTile = useContext(GalleryPreviewHoverTileContext);
+	const renderItemChrome = useContext(GalleryItemChromeContext);
+	const renderItemContent = useContext(GalleryItemContentContext);
 	/*
 	 * Primitive deeplink index — avoid selecting the full items array so
 	 * unrelated content-block patches do not re-render every image tile.
+	 * Counted over the unfiltered gallery so a shared link names the same
+	 * image whichever filter is active.
 	 */
 	const deeplinkIndex = useSelector((s) => {
-		if (!itemData || isEmbeddedGalleryItemRow(itemData)) {
+		const hasItemId = itemData?.id !== undefined && itemData?.id !== null;
+		if (!hasItemId || isEmbeddedGalleryItemRow(itemData)) {
 			return -1;
 		}
-		const displayItems = s.items?.filteredItems ?? s.items?.items ?? [];
-		return resolveDeeplinkIndex(displayItems, itemData, config);
+		const catalogItems = s.items?.originalItems?.length
+			? s.items.originalItems
+			: s.items?.items;
+		return listDeeplinkItems(catalogItems, config).findIndex(
+			(row) => row.id === itemData.id
+		);
 	});
 
 	if (isEmbeddedGalleryItemRow(itemData)) {
@@ -128,6 +109,7 @@ function GalleryItem({
 		renderLinks: linkRender.renderLinks,
 		forceLinkNewTab: linkRender.forceLinkNewTab,
 		stripHoverBuilderClasses: isPreviewContext,
+		hoverTile: previewHoverTile,
 		deeplinkIndex: deeplinkIndex >= 0 ? deeplinkIndex : undefined,
 	});
 
@@ -179,6 +161,8 @@ function GalleryItem({
 			vm={vm}
 			imageWrapperClass={imageWrapperClass}
 			previewAdminToolbar={previewAdminToolbar}
+			itemChrome={renderItemChrome ? renderItemChrome(itemData) : null}
+			renderItemContent={renderItemContent}
 			slotMeasureRef={needsSlotMeasure ? slotRef : undefined}
 			videoPlayOverlay={videoPlayOverlay}
 			videoPreviewNode={videoPreviewNode}

@@ -1,6 +1,6 @@
 <?php
 /**
- * Hover Builder nested policy: five free presets stay writable; premium presets and
+ * Hover Builder nested policy: the catalog's free presets stay writable; premium presets and
  * customization follow Compatible Pro. Effective configuration is authoritative.
  *
  * @package Modula
@@ -8,11 +8,12 @@
 
 namespace Modula\V2\Abilities;
 
+use Modula\V2\Motion\Animation_Catalog;
+
 defined( 'ABSPATH' ) || exit;
 
 final class Hover_Builder_Policy {
-	public const FREE_PRESET_COUNT = 5;
-	public const FEATURE           = 'hover-builder';
+	public const FEATURE = 'hover-builder';
 
 	/**
 	 * @param array<int,array<string,mixed>> $blockers Existing blockers for the patch.
@@ -41,10 +42,12 @@ final class Hover_Builder_Policy {
 	}
 
 	/**
+	 * Hover presets the catalog does not mark Pro, in catalog order.
+	 *
 	 * @return array<int,string>
 	 */
 	public static function free_ids(): array {
-		return array_slice( array_keys( self::presets() ), 0, self::FREE_PRESET_COUNT );
+		return array_values( array_diff( array_keys( Animation_Catalog::presets( 'hover' ) ), Animation_Catalog::pro_preset_ids( 'hover' ) ) );
 	}
 
 	/**
@@ -53,7 +56,7 @@ final class Hover_Builder_Policy {
 	 * @return array<string,mixed>|null
 	 */
 	public static function applied_builder( string $id ): ?array {
-		$presets = self::presets();
+		$presets = Animation_Catalog::hover_builders();
 		if ( ! isset( $presets[ $id ] ) ) {
 			return null;
 		}
@@ -66,14 +69,39 @@ final class Hover_Builder_Policy {
 		return $builder;
 	}
 
+	/**
+	 * Whether the editor lets this site pick the preset: the free presets, or
+	 * every preset with Compatible Pro (the catalog's `pro` flag, the
+	 * editor's `isHoverPresetLocked`). An image's own hover follows the same
+	 * rule on the frontend (`Images\Item_Fields::hover_builder_for_item`).
+	 */
+	public static function preset_available_in_editor( string $id ): bool {
+		return in_array( $id, self::free_ids(), true ) || modula_is_compatible_pro();
+	}
+
 	public static function matching_preset_id( array $builder ): string {
-		$current = self::fingerprint( $builder );
-		foreach ( self::presets() as $id => $preset ) {
-			if ( $current === self::fingerprint( $preset ) ) {
-				return $id;
-			}
-		}
-		return '';
+		return self::preset_id_with_fingerprint( $builder, array( __CLASS__, 'fingerprint' ) );
+	}
+
+	/**
+	 * The catalog preset a builder plays, as the Motion hover choice sees it:
+	 * `dimOverlay` is left out, because Darken on hover owns it.
+	 *
+	 * @param array<string,mixed> $builder `hover.builder`.
+	 * @return string Preset id, or '' when the builder is the owner's own.
+	 */
+	public static function matching_motion_preset_id( array $builder ): string {
+		return self::preset_id_with_fingerprint( $builder, array( __CLASS__, 'motion_fingerprint' ) );
+	}
+
+	/**
+	 * Whether two builders play the same hover, ignoring `dimOverlay` (Darken on hover).
+	 *
+	 * @param array<string,mixed> $a `hover.builder`.
+	 * @param array<string,mixed> $b `hover.builder`.
+	 */
+	public static function same_motion( array $a, array $b ): bool {
+		return self::motion_fingerprint( $a ) === self::motion_fingerprint( $b );
 	}
 
 	/**
@@ -118,7 +146,7 @@ final class Hover_Builder_Policy {
 			'cardTreatment'          => $enter( $builder['cardTreatment'] ?? null, 'none' ),
 			'graphicElement'         => $enter( $builder['graphicElement'] ?? null, 'none' ),
 			'graphicVisibility'      => ( isset( $builder['graphicVisibility'] ) && 'always' === $builder['graphicVisibility'] ) ? 'always' : 'on-hover',
-			'dimOverlay'             => true === $builder['dimOverlay'] || 1 === $builder['dimOverlay'] || '1' === ( $builder['dimOverlay'] ?? null ),
+			'dimOverlay'             => in_array( $builder['dimOverlay'] ?? null, array( true, 1, '1' ), true ),
 			'titleEnter'             => $enter( $builder['titleEnter'] ?? null, 'fade' ),
 			'captionEnter'           => $enter( $builder['captionEnter'] ?? null, 'fade' ),
 			'socialEnter'            => $enter( $builder['socialEnter'] ?? null, 'fade' ),
@@ -154,374 +182,29 @@ final class Hover_Builder_Policy {
 	}
 
 	/**
-	 * Catalog order matches the editor's HOVER_BUILDER_PRESETS list. The first five are free.
-	 *
-	 * @return array<string,array<string,mixed>>
+	 * @param array<string,mixed> $builder     `hover.builder`.
+	 * @param callable            $fingerprint Builder → comparable array.
+	 * @return string The first catalog preset with the builder's fingerprint,
+	 *                then the first played at its older slot positions, or ''.
 	 */
-	private static function presets(): array {
-		$slot = static function ( int $tx, int $ty, int $cx, int $cy, int $sx, int $sy ): array {
-			return array(
-				'title'   => array(
-					'x' => $tx,
-					'y' => $ty,
-				),
-				'caption' => array(
-					'x' => $cx,
-					'y' => $cy,
-				),
-				'social'  => array(
-					'x' => $sx,
-					'y' => $sy,
-				),
-			);
-		};
-		$row  = static function ( array $fields, array $slots ) {
-			return array_merge(
-				array(
-					'graphicElement'    => 'none',
-					'graphicVisibility' => 'on-hover',
-				),
-				$fields,
-				array( 'slotPositions' => $slots )
-			);
-		};
-		return array(
-			'none'                   => $row(
-				array(
-					'cardTreatment'          => 'none',
-					'dimOverlay'             => false,
-					'titleEnter'             => 'none',
-					'captionEnter'           => 'none',
-					'socialEnter'            => 'none',
-					'titleVisibility'        => 'hidden',
-					'captionVisibility'      => 'hidden',
-					'socialVisibility'       => 'hidden',
-					'cardEnterDurationMs'    => 180,
-					'cardEnterDelayMs'       => 0,
-					'titleEnterDurationMs'   => 180,
-					'captionEnterDurationMs' => 180,
-					'socialEnterDurationMs'  => 180,
-					'titleEnterDelayMs'      => 0,
-					'captionEnterDelayMs'    => 0,
-					'socialEnterDelayMs'     => 0,
-					'titleEnterStaggerMs'    => 0,
-					'captionEnterStaggerMs'  => 0,
-					'socialEnterStaggerMs'   => 0,
-				),
-				$slot( 50, 18, 50, 50, 50, 82 )
-			),
-			'none-with-captions'     => $row(
-				array(
-					'cardTreatment'          => 'none',
-					'dimOverlay'             => false,
-					'titleEnter'             => 'none',
-					'captionEnter'           => 'none',
-					'socialEnter'            => 'none',
-					'titleVisibility'        => 'always',
-					'captionVisibility'      => 'always',
-					'socialVisibility'       => 'always',
-					'cardEnterDurationMs'    => 180,
-					'cardEnterDelayMs'       => 0,
-					'titleEnterDurationMs'   => 180,
-					'captionEnterDurationMs' => 180,
-					'socialEnterDurationMs'  => 180,
-					'titleEnterDelayMs'      => 0,
-					'captionEnterDelayMs'    => 0,
-					'socialEnterDelayMs'     => 0,
-					'titleEnterStaggerMs'    => 0,
-					'captionEnterStaggerMs'  => 0,
-					'socialEnterStaggerMs'   => 0,
-				),
-				$slot( 50, 18, 50, 30, 50, 82 )
-			),
-			'balanced-reveal'        => $row(
-				array(
-					'cardTreatment'          => 'zoom',
-					'dimOverlay'             => true,
-					'titleEnter'             => 'fade',
-					'captionEnter'           => 'fade',
-					'socialEnter'            => 'fade',
-					'titleVisibility'        => 'on-hover',
-					'captionVisibility'      => 'on-hover',
-					'socialVisibility'       => 'on-hover',
-					'cardEnterDurationMs'    => 280,
-					'cardEnterDelayMs'       => 0,
-					'titleEnterDurationMs'   => 280,
-					'captionEnterDurationMs' => 280,
-					'socialEnterDurationMs'  => 280,
-					'titleEnterDelayMs'      => 0,
-					'captionEnterDelayMs'    => 0,
-					'socialEnterDelayMs'     => 0,
-					'titleEnterStaggerMs'    => 40,
-					'captionEnterStaggerMs'  => 40,
-					'socialEnterStaggerMs'   => 40,
-				),
-				$slot( 50, 24, 50, 36, 50, 78 )
-			),
-			'portfolio-lift'         => $row(
-				array(
-					'cardTreatment'          => 'lift',
-					'dimOverlay'             => true,
-					'titleEnter'             => 'slide-up',
-					'captionEnter'           => 'slide-up',
-					'socialEnter'            => 'fade',
-					'titleVisibility'        => 'on-hover',
-					'captionVisibility'      => 'on-hover',
-					'socialVisibility'       => 'on-hover',
-					'cardEnterDurationMs'    => 320,
-					'cardEnterDelayMs'       => 25,
-					'titleEnterDurationMs'   => 320,
-					'captionEnterDurationMs' => 320,
-					'socialEnterDurationMs'  => 320,
-					'titleEnterDelayMs'      => 25,
-					'captionEnterDelayMs'    => 25,
-					'socialEnterDelayMs'     => 25,
-					'titleEnterStaggerMs'    => 55,
-					'captionEnterStaggerMs'  => 55,
-					'socialEnterStaggerMs'   => 55,
-				),
-				$slot( 50, 22, 50, 34, 50, 76 )
-			),
-			'center-hero'            => $row(
-				array(
-					'cardTreatment'          => 'zoom',
-					'dimOverlay'             => true,
-					'titleEnter'             => 'scale',
-					'captionEnter'           => 'fade',
-					'socialEnter'            => 'fade',
-					'titleVisibility'        => 'on-hover',
-					'captionVisibility'      => 'on-hover',
-					'socialVisibility'       => 'on-hover',
-					'cardEnterDurationMs'    => 360,
-					'cardEnterDelayMs'       => 20,
-					'titleEnterDurationMs'   => 360,
-					'captionEnterDurationMs' => 360,
-					'socialEnterDurationMs'  => 360,
-					'titleEnterDelayMs'      => 20,
-					'captionEnterDelayMs'    => 20,
-					'socialEnterDelayMs'     => 20,
-					'titleEnterStaggerMs'    => 60,
-					'captionEnterStaggerMs'  => 60,
-					'socialEnterStaggerMs'   => 60,
-				),
-				$slot( 50, 40, 50, 54, 50, 70 )
-			),
-			'caption-spotlight'      => $row(
-				array(
-					'cardTreatment'          => 'none',
-					'dimOverlay'             => true,
-					'titleEnter'             => 'blur-in',
-					'captionEnter'           => 'slide-up',
-					'socialEnter'            => 'fade',
-					'titleVisibility'        => 'on-hover',
-					'captionVisibility'      => 'on-hover',
-					'socialVisibility'       => 'on-hover',
-					'cardEnterDurationMs'    => 340,
-					'cardEnterDelayMs'       => 40,
-					'titleEnterDurationMs'   => 340,
-					'captionEnterDurationMs' => 340,
-					'socialEnterDurationMs'  => 340,
-					'titleEnterDelayMs'      => 40,
-					'captionEnterDelayMs'    => 40,
-					'socialEnterDelayMs'     => 40,
-					'titleEnterStaggerMs'    => 70,
-					'captionEnterStaggerMs'  => 70,
-					'socialEnterStaggerMs'   => 70,
-				),
-				$slot( 50, 56, 50, 70, 50, 86 )
-			),
-			'cinematic-dark'         => $row(
-				array(
-					'cardTreatment'          => 'lift',
-					'dimOverlay'             => true,
-					'titleEnter'             => 'blur-in',
-					'captionEnter'           => 'slide-up',
-					'socialEnter'            => 'slide-up',
-					'titleVisibility'        => 'on-hover',
-					'captionVisibility'      => 'on-hover',
-					'socialVisibility'       => 'on-hover',
-					'cardEnterDurationMs'    => 420,
-					'cardEnterDelayMs'       => 50,
-					'titleEnterDurationMs'   => 420,
-					'captionEnterDurationMs' => 420,
-					'socialEnterDurationMs'  => 420,
-					'titleEnterDelayMs'      => 50,
-					'captionEnterDelayMs'    => 50,
-					'socialEnterDelayMs'     => 50,
-					'titleEnterStaggerMs'    => 80,
-					'captionEnterStaggerMs'  => 80,
-					'socialEnterStaggerMs'   => 80,
-				),
-				$slot( 50, 60, 50, 74, 50, 88 )
-			),
-			'editorial-corner-left'  => $row(
-				array(
-					'cardTreatment'          => 'none',
-					'dimOverlay'             => true,
-					'titleEnter'             => 'slide-right',
-					'captionEnter'           => 'slide-right',
-					'socialEnter'            => 'fade',
-					'titleVisibility'        => 'on-hover',
-					'captionVisibility'      => 'on-hover',
-					'socialVisibility'       => 'on-hover',
-					'cardEnterDurationMs'    => 280,
-					'cardEnterDelayMs'       => 10,
-					'titleEnterDurationMs'   => 280,
-					'captionEnterDurationMs' => 280,
-					'socialEnterDurationMs'  => 280,
-					'titleEnterDelayMs'      => 10,
-					'captionEnterDelayMs'    => 10,
-					'socialEnterDelayMs'     => 10,
-					'titleEnterStaggerMs'    => 35,
-					'captionEnterStaggerMs'  => 35,
-					'socialEnterStaggerMs'   => 35,
-				),
-				$slot( 12, 16, 12, 30, 12, 46 )
-			),
-			'editorial-corner-right' => $row(
-				array(
-					'cardTreatment'          => 'none',
-					'dimOverlay'             => true,
-					'titleEnter'             => 'slide-left',
-					'captionEnter'           => 'slide-left',
-					'socialEnter'            => 'fade',
-					'titleVisibility'        => 'on-hover',
-					'captionVisibility'      => 'on-hover',
-					'socialVisibility'       => 'on-hover',
-					'cardEnterDurationMs'    => 280,
-					'cardEnterDelayMs'       => 10,
-					'titleEnterDurationMs'   => 280,
-					'captionEnterDurationMs' => 280,
-					'socialEnterDurationMs'  => 280,
-					'titleEnterDelayMs'      => 10,
-					'captionEnterDelayMs'    => 10,
-					'socialEnterDelayMs'     => 10,
-					'titleEnterStaggerMs'    => 35,
-					'captionEnterStaggerMs'  => 35,
-					'socialEnterStaggerMs'   => 35,
-				),
-				$slot( 88, 16, 88, 30, 88, 46 )
-			),
-			'monochrome-frame'       => $row(
-				array(
-					'cardTreatment'          => 'grayscale',
-					'dimOverlay'             => true,
-					'titleEnter'             => 'slide-up',
-					'captionEnter'           => 'slide-up',
-					'socialEnter'            => 'fade',
-					'titleVisibility'        => 'on-hover',
-					'captionVisibility'      => 'on-hover',
-					'socialVisibility'       => 'on-hover',
-					'cardEnterDurationMs'    => 300,
-					'cardEnterDelayMs'       => 15,
-					'titleEnterDurationMs'   => 300,
-					'captionEnterDurationMs' => 300,
-					'socialEnterDurationMs'  => 300,
-					'titleEnterDelayMs'      => 15,
-					'captionEnterDelayMs'    => 15,
-					'socialEnterDelayMs'     => 15,
-					'titleEnterStaggerMs'    => 45,
-					'captionEnterStaggerMs'  => 45,
-					'socialEnterStaggerMs'   => 45,
-				),
-				$slot( 50, 24, 50, 42, 50, 62 )
-			),
-			'social-strip-bottom'    => $row(
-				array(
-					'cardTreatment'          => 'none',
-					'dimOverlay'             => true,
-					'titleEnter'             => 'slide-down',
-					'captionEnter'           => 'slide-right',
-					'socialEnter'            => 'slide-up',
-					'titleVisibility'        => 'on-hover',
-					'captionVisibility'      => 'on-hover',
-					'socialVisibility'       => 'on-hover',
-					'cardEnterDurationMs'    => 300,
-					'cardEnterDelayMs'       => 25,
-					'titleEnterDurationMs'   => 300,
-					'captionEnterDurationMs' => 300,
-					'socialEnterDurationMs'  => 300,
-					'titleEnterDelayMs'      => 25,
-					'captionEnterDelayMs'    => 25,
-					'socialEnterDelayMs'     => 25,
-					'titleEnterStaggerMs'    => 55,
-					'captionEnterStaggerMs'  => 55,
-					'socialEnterStaggerMs'   => 55,
-				),
-				$slot( 50, 20, 50, 36, 50, 88 )
-			),
-			'product-card-clean'     => $row(
-				array(
-					'cardTreatment'          => 'none',
-					'dimOverlay'             => true,
-					'titleEnter'             => 'fade',
-					'captionEnter'           => 'slide-up',
-					'socialEnter'            => 'fade',
-					'titleVisibility'        => 'on-hover',
-					'captionVisibility'      => 'on-hover',
-					'socialVisibility'       => 'on-hover',
-					'cardEnterDurationMs'    => 240,
-					'cardEnterDelayMs'       => 0,
-					'titleEnterDurationMs'   => 240,
-					'captionEnterDurationMs' => 240,
-					'socialEnterDurationMs'  => 240,
-					'titleEnterDelayMs'      => 0,
-					'captionEnterDelayMs'    => 0,
-					'socialEnterDelayMs'     => 0,
-					'titleEnterStaggerMs'    => 25,
-					'captionEnterStaggerMs'  => 25,
-					'socialEnterStaggerMs'   => 25,
-				),
-				$slot( 50, 70, 50, 82, 50, 92 )
-			),
-			'soft-zoom-stack'        => $row(
-				array(
-					'cardTreatment'          => 'zoom',
-					'dimOverlay'             => true,
-					'titleEnter'             => 'blur-in',
-					'captionEnter'           => 'slide-up',
-					'socialEnter'            => 'slide-up',
-					'titleVisibility'        => 'on-hover',
-					'captionVisibility'      => 'on-hover',
-					'socialVisibility'       => 'on-hover',
-					'cardEnterDurationMs'    => 350,
-					'cardEnterDelayMs'       => 35,
-					'titleEnterDurationMs'   => 350,
-					'captionEnterDurationMs' => 350,
-					'socialEnterDurationMs'  => 350,
-					'titleEnterDelayMs'      => 35,
-					'captionEnterDelayMs'    => 35,
-					'socialEnterDelayMs'     => 35,
-					'titleEnterStaggerMs'    => 65,
-					'captionEnterStaggerMs'  => 65,
-					'socialEnterStaggerMs'   => 65,
-				),
-				$slot( 50, 60, 50, 72, 50, 84 )
-			),
-			'accessible-no-motion'   => $row(
-				array(
-					'cardTreatment'          => 'none',
-					'dimOverlay'             => true,
-					'titleEnter'             => 'none',
-					'captionEnter'           => 'none',
-					'socialEnter'            => 'none',
-					'titleVisibility'        => 'on-hover',
-					'captionVisibility'      => 'on-hover',
-					'socialVisibility'       => 'on-hover',
-					'cardEnterDurationMs'    => 180,
-					'cardEnterDelayMs'       => 0,
-					'titleEnterDurationMs'   => 180,
-					'captionEnterDurationMs' => 180,
-					'socialEnterDurationMs'  => 180,
-					'titleEnterDelayMs'      => 0,
-					'captionEnterDelayMs'    => 0,
-					'socialEnterDelayMs'     => 0,
-					'titleEnterStaggerMs'    => 0,
-					'captionEnterStaggerMs'  => 0,
-					'socialEnterStaggerMs'   => 0,
-				),
-				$slot( 50, 64, 50, 76, 50, 88 )
-			),
-		);
+	private static function preset_id_with_fingerprint( array $builder, callable $fingerprint ): string {
+		$current = $fingerprint( $builder );
+		foreach ( array( Animation_Catalog::hover_builders(), Animation_Catalog::legacy_hover_builders() ) as $presets ) {
+			foreach ( $presets as $id => $preset ) {
+				if ( $fingerprint( $preset ) === $current ) {
+					return $id;
+				}
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * @return array<string,mixed>
+	 */
+	private static function motion_fingerprint( array $builder ): array {
+		$fingerprint = self::fingerprint( $builder );
+		unset( $fingerprint['dimOverlay'] );
+		return $fingerprint;
 	}
 }

@@ -1,83 +1,106 @@
 import { __ } from '@wordpress/i18n';
-import { Flex, FlexItem, TextControl } from '@wordpress/components';
+import { TextInput } from 'admin-ui';
 import { isNil } from '../../../logic/isNil';
 
 /**
- * @param {Object}   ctx
- * @param {Object}   ctx.control
- * @param {*}        ctx.value
- * @param {Function} ctx.onChange
- * @param {boolean}  ctx.disabled
+ * @param {string} key
+ * @return {string} Visible name of one dimension.
  */
-export function renderDimensionsKind({ control, value, onChange, disabled }) {
-	const fieldMin = Number.isFinite(control.fieldMin)
-		? control.fieldMin
-		: null;
-	const fieldMax = Number.isFinite(control.fieldMax)
-		? control.fieldMax
-		: null;
-	const fields = Array.isArray(control.fields)
+function dimensionLabel(key) {
+	if (key === 'width') {
+		return __('Width', 'modula-best-grid-gallery');
+	}
+	if (key === 'height') {
+		return __('Height', 'modula-best-grid-gallery');
+	}
+	return key;
+}
+
+/**
+ * Typed text to the stored number: clamped when the schema bounds both
+ * ends (an empty field stays ''), else a plain integer (0 when empty or
+ * not a number).
+ *
+ * @param {string}      text
+ * @param {number|null} min
+ * @param {number|null} max
+ * @return {number|string} Stored value.
+ */
+function parseDimension(text, min, max) {
+	if (min !== null && max !== null) {
+		if (text === '') {
+			return '';
+		}
+		const parsed = parseInt(text, 10);
+		return Number.isFinite(parsed)
+			? Math.min(max, Math.max(min, parsed))
+			: min;
+	}
+	const parsed = text === '' ? '' : parseInt(text, 10);
+
+	return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/**
+ * Width × height as a pair of number fields (admin-ui has no dimensions
+ * control; TextInput pairs cover it).
+ *
+ * @param {import('../fieldControlKinds').FieldControlContext} ctx
+ */
+export function renderDimensionsKind({
+	control,
+	controlId,
+	value,
+	onChange,
+	disabled,
+}) {
+	const min = Number.isFinite(control.fieldMin) ? control.fieldMin : null;
+	const max = Number.isFinite(control.fieldMax) ? control.fieldMax : null;
+	const keys = Array.isArray(control.fields)
 		? control.fields
 		: ['width', 'height'];
 	const obj =
 		value && typeof value === 'object' && !Array.isArray(value)
 			? value
 			: {};
-	const dimLabel = (dk) => {
-		if (dk === 'width') {
-			return __('Width', 'modula-best-grid-gallery');
-		}
-		if (dk === 'height') {
-			return __('Height', 'modula-best-grid-gallery');
-		}
-		return dk;
-	};
+
 	return (
-		<Flex
-			gap={3}
-			justify="flex-start"
-			className="modula-settings-editor__dimensions-flex"
-		>
-			{fields.map((dk) => (
-				<FlexItem key={dk}>
-					<TextControl
-						__next40pxDefaultSize
-						__nextHasNoMarginBottom
-						label={dimLabel(dk)}
-						type="number"
-						min={fieldMin !== null ? fieldMin : undefined}
-						max={fieldMax !== null ? fieldMax : undefined}
-						value={
-							isNil(obj[dk]) || obj[dk] === ''
-								? ''
-								: String(obj[dk])
-						}
-						disabled={disabled}
-						onChange={(v) => {
-							if (fieldMin !== null && fieldMax !== null) {
-								if (v === '') {
-									onChange({ ...obj, [dk]: '' });
-									return;
-								}
-								const parsed = parseInt(v, 10);
-								const n = Number.isFinite(parsed)
-									? Math.min(
-											fieldMax,
-											Math.max(fieldMin, parsed)
-										)
-									: fieldMin;
-								onChange({ ...obj, [dk]: n });
-								return;
+		<div className="modula-settings-editor__dimensions">
+			{keys.map((key, index) => {
+				// The first input takes the row label's id.
+				const inputId = index === 0 ? controlId : `${controlId}-${key}`;
+				return (
+					<div
+						key={key}
+						className="modula-settings-editor__dimensions-item"
+					>
+						<label
+							className="modula-settings-editor__dimensions-label"
+							htmlFor={inputId}
+						>
+							{dimensionLabel(key)}
+						</label>
+						<TextInput
+							id={inputId}
+							type="number"
+							min={min !== null ? min : undefined}
+							max={max !== null ? max : undefined}
+							value={
+								isNil(obj[key]) || obj[key] === ''
+									? ''
+									: String(obj[key])
 							}
-							const parsed = v === '' ? '' : parseInt(v, 10);
-							onChange({
-								...obj,
-								[dk]: Number.isFinite(parsed) ? parsed : 0,
-							});
-						}}
-					/>
-				</FlexItem>
-			))}
-		</Flex>
+							disabled={disabled}
+							onChange={(text) => {
+								onChange({
+									...obj,
+									[key]: parseDimension(text, min, max),
+								});
+							}}
+						/>
+					</div>
+				);
+			})}
+		</div>
 	);
 }

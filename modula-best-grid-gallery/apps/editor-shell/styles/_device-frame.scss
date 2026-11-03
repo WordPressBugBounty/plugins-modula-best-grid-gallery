@@ -1,0 +1,18 @@
+// The tablet and phone device frames around the canvas. Mixin and selector
+// list only: this file emits no CSS. Each editor includes
+// `device-canvas-on-stage` in its shell styles.
+$device-preview-wraps: ".modula-takeover__preview-wrap--tablet, .modula-takeover__preview-wrap--mobile";
+
+// Tablet and phone draw the editor's canvas on the stage at the device width,
+// as desktop does (the design has no paper around it): the artboard card
+// drops its surface once `$canvas` renders inside a device frame. Content
+// styled for the light frame (`$paper-states`, such as the empty state and
+// the Lightbox preview) keeps the card. Each editor passes its own canvas and
+// paper states and clears its own canvas body.
+@mixin device-canvas-on-stage($canvas, $paper-states) {
+	.modula-takeover__preview-card:has(:is(#{$device-preview-wraps}) #{$canvas}):not(:has(#{$paper-states})) {
+		background: transparent;
+		border-color: transparent;
+		box-shadow: none;
+	}
+}

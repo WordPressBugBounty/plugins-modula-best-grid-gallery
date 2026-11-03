@@ -10,6 +10,7 @@ import {
 	useMemo,
 	useState,
 } from '@wordpress/element';
+import { isEventInOpenDialog, isEventInPopover } from 'editor-shell';
 import { getGalleryItemEditKind } from '../utils/galleryItemEditNavigation';
 import { getGalleryPreviewReduxStore } from '../utils/previewReduxStoreRef';
 
@@ -271,7 +272,12 @@ export function GalleryPreviewTileSelectionProvider({ children }) {
 			return undefined;
 		}
 		const onKey = (e) => {
-			if (e.key !== 'Escape') {
+			// Escape in a popover (Sort) or a dialog closes that only.
+			if (
+				e.key !== 'Escape' ||
+				isEventInPopover(e) ||
+				isEventInOpenDialog(e)
+			) {
 				return;
 			}
 			e.preventDefault();

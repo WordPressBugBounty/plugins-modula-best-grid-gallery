@@ -1,9 +1,22 @@
 /**
  * Takeover layout: top bar, then sidebar beside the canvas column (toolbar,
- * stage with optional auxiliary panel + artboard, status bar).
+ * then the dark stage with an optional auxiliary panel, the artboard and the
+ * floating device pill).
+ *
+ * The sidebar, the toolbar and the pill each sit in an admin-ui scope; the
+ * artboard does not, so the frontend gallery render inherits nothing from
+ * admin-ui.
+ *
+ * The layout also hosts the editor toast (`useTakeoverToast`) and the
+ * canvas's primary Add action (`AddSplit` registers it, `CanvasEmptyState`
+ * runs it) for its regions.
  */
 import { __ } from '@wordpress/i18n';
-import { AuxiliaryPanel } from 'shared-ui';
+import AdminUiScope from '../appearance/AdminUiScope';
+import CanvasDevicePill from '../canvas/CanvasDevicePill';
+import { CanvasPrimaryAddProvider } from '../canvas/CanvasPrimaryAddContext';
+import { TakeoverToastProvider } from '../toast/TakeoverToast';
+import { AuxiliaryPanel } from './AuxiliaryPanel';
 
 const PREVIEW_WRAP_MODIFIERS = {
 	desktop: '',
@@ -12,25 +25,38 @@ const PREVIEW_WRAP_MODIFIERS = {
 };
 
 /**
- * @param {Object}                      props
- * @param {import('react').ReactNode}   props.topBar
- * @param {import('react').ReactNode}   props.sidebar
- * @param {import('react').ReactNode}   props.toolbar         Canvas toolbar chrome (and any bars under it).
- * @param {import('react').ReactNode}   [props.auxiliary]     Optional tools column beside the artboard.
- * @param {import('react').ReactNode}   props.canvas          Artboard body.
- * @param {import('react').ReactNode}   props.statusBar
- * @param {'desktop'|'tablet'|'mobile'} props.previewViewport
- * @param {import('react').ReactNode}   [props.children]      Non-visual helpers (autosave, listeners).
- * @param {string}                      [props.className]     Editor-specific root classes.
+ * @param {Object}                                          props
+ * @param {import('react').ReactNode}                       props.topBar
+ * @param {import('react').ReactNode}                       props.sidebar
+ * @param {import('react').ReactNode}                       props.toolbar                   Canvas toolbar chrome (and any bars under it).
+ * @param {import('react').ReactNode}                       [props.auxiliary]               Optional tools column beside the artboard.
+ * @param {import('react').ReactNode}                       props.canvas                    Artboard body.
+ * @param {'desktop'|'tablet'|'mobile'}                     props.previewViewport
+ * @param {(viewport: 'desktop'|'tablet'|'mobile') => void} [props.onPreviewViewportChange] Shows the device pill.
+ * @param {import('react').ReactNode}                       [props.children]                Non-visual helpers (autosave, listeners).
+ * @param {string}                                          [props.className]               Editor-specific root classes.
  */
-export default function TakeoverLayout({
+export default function TakeoverLayout(props) {
+	return (
+		<TakeoverToastProvider>
+			<CanvasPrimaryAddProvider>
+				<TakeoverLayoutFrame {...props} />
+			</CanvasPrimaryAddProvider>
+		</TakeoverToastProvider>
+	);
+}
+
+/**
+ * @param {Parameters<typeof TakeoverLayout>[0]} props
+ */
+function TakeoverLayoutFrame({
 	topBar,
 	sidebar,
 	toolbar,
 	auxiliary = null,
 	canvas,
-	statusBar,
 	previewViewport,
+	onPreviewViewportChange,
 	children = null,
 	className = '',
 }) {
@@ -51,11 +77,11 @@ export default function TakeoverLayout({
 			<div className="modula-takeover__workspace">
 				{sidebar}
 				<div className="modula-takeover__canvas-column">
-					{toolbar}
+					<AdminUiScope>{toolbar}</AdminUiScope>
 					<div className="modula-takeover__redesign-stage">
 						{auxiliary ? (
 							<AuxiliaryPanel
-								aria-label={__(
+								label={__(
 									'Additional tools',
 									'modula-best-grid-gallery'
 								)}
@@ -78,9 +104,18 @@ export default function TakeoverLayout({
 									</div>
 								</div>
 							</main>
+							{onPreviewViewportChange ? (
+								<AdminUiScope>
+									<CanvasDevicePill
+										previewViewport={previewViewport}
+										onPreviewViewportChange={
+											onPreviewViewportChange
+										}
+									/>
+								</AdminUiScope>
+							) : null}
 						</div>
 					</div>
-					{statusBar}
 				</div>
 			</div>
 		</div>

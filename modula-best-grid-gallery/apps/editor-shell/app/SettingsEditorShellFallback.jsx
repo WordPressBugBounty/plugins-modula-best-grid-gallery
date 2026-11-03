@@ -1,9 +1,12 @@
 /**
  * Shared Suspense fallback while a settings-editor shell chunk loads.
  * Each editor passes its own loading class (default: the gallery editor's).
+ * It shows the same Modula logo as the pre-React boot shell; the message is
+ * for screen readers only.
  */
 import { __ } from '@wordpress/i18n';
-import { Spinner } from '@wordpress/components';
+import { BrandLoader } from 'admin-ui';
+import AdminUiScope from '../appearance/AdminUiScope';
 import { resolveEditorAppearance, readStoredPreference } from '../logic';
 
 /**
@@ -23,10 +26,14 @@ export default function SettingsEditorShellFallback({
 			aria-live="polite"
 			aria-busy="true"
 		>
-			<Spinner />
-			<span>
-				{message || __('Loading editor…', 'modula-best-grid-gallery')}
-			</span>
+			<AdminUiScope>
+				<BrandLoader
+					label={
+						message ||
+						__('Loading editor…', 'modula-best-grid-gallery')
+					}
+				/>
+			</AdminUiScope>
 		</div>
 	);
 }

@@ -1,49 +1,103 @@
-import { Select, MenuSelect } from 'shared-ui';
+/**
+ * Select settings render as the menu select, whatever their option count:
+ * every select in the panel shares one look (canvas, ticket 21).
+ */
+import { __ } from '@wordpress/i18n';
+import { PlanBadge } from 'admin-ui';
+import { SelectMenuControl } from 'editor-shell';
 import { getModulaSettingsEditorConfig } from '../../../config/modulaSettingsEditorConfig';
+import { useOpenLiteUpsell } from '../../../context/LiteUpsellContext';
 import { useGallerySettingsFormBundle } from '../../../form/GallerySettingsFormContext';
+import {
+	resolveLiteUpsell,
+	resolveLockedOptionUpsell,
+} from '../../../logic/liteUpsell';
 import { gateLockHint, resolveProGateLock } from '../../../logic/proGateLock';
 import { isNil } from '../../../logic/isNil';
-
-/** Option count above which selects use MenuSelect (and panel rows stack the label). */
-export const MENU_SELECT_OPTION_THRESHOLD = 4;
+import { ControlHelp, describedByHelp } from './ControlHelp';
 
 /**
- * Single policy: MenuSelect for gallery type and for long option lists.
- *
  * @param {Object} [field]
- * @return {boolean}
+ * @param {Object} control
+ * @return {string} Name of the menu: the setting's label, the schema's aria label, or a generic one.
  */
-export function shouldUseMenuSelect(field) {
-	if (field?.groupedPath === 'general.type') {
-		return true;
+function selectListLabel(field, control) {
+	const names = [field?.editorLabel, control.ariaLabel];
+	for (const name of names) {
+		if (typeof name === 'string' && name.trim() !== '') {
+			return name.trim();
+		}
 	}
-	if (field?.groupedPath === 'template.templateLayout') {
-		return true;
-	}
-	const options = field?.control?.options;
-	return (
-		Array.isArray(options) && options.length > MENU_SELECT_OPTION_THRESHOLD
-	);
+
+	return __('Select option', 'modula-best-grid-gallery');
 }
 
 /**
- * @param {Object}           ctx
- * @param {Object}           [ctx.field]
- * @param {Object}           ctx.control
- * @param {*}                ctx.value
- * @param {Function}         ctx.onChange
- * @param {boolean}          ctx.disabled
- * @param {string|undefined} ctx.help
- * @param {string|undefined} ctx.galleryType
+ * Lite: the options its plan locks move to a "Needs PRO" group at the end,
+ * marked PRO and choosable, so choosing one can open the upsell.
+ *
+ * @param {import('editor-shell/fields/SelectMenuControl').SelectMenuGroup[]} groups
+ * @return {{ groups: import('editor-shell/fields/SelectMenuControl').SelectMenuGroup[], locked: Map<string, import('editor-shell/fields/SelectMenuControl').SelectMenuOption> }|null} The regrouped menu and its locked options; null when none is locked.
+ */
+function splitNeedsProOptions(groups) {
+	const locked = new Map();
+	const freeGroups = [];
+	for (const group of groups) {
+		const free = [];
+		for (const option of group.options) {
+			if (option.disabled === true) {
+				locked.set(option.value, option);
+			} else {
+				free.push(option);
+			}
+		}
+		if (free.length > 0) {
+			freeGroups.push({ ...group, options: free });
+		}
+	}
+	if (locked.size === 0) {
+		return null;
+	}
+	const needsPro = {
+		id: 'needs-pro',
+		label: __('Needs PRO', 'modula-best-grid-gallery'),
+		options: [...locked.values()].map((option) => ({
+			...option,
+			disabled: false,
+			badge: (
+				<PlanBadge
+					tone="outline"
+					lock
+					plan={__('PRO', 'modula-best-grid-gallery')}
+				/>
+			),
+		})),
+	};
+	return { groups: [...freeGroups, needsPro], locked };
+}
+
+/**
+ * @param {Object}                                                 ctx
+ * @param {Object}                                                 [ctx.field]
+ * @param {Object}                                                 ctx.control
+ * @param {string}                                                 ctx.controlId
+ * @param {*}                                                      ctx.value
+ * @param {Function}                                               ctx.onChange
+ * @param {boolean}                                                ctx.disabled
+ * @param {string|undefined}                                       ctx.help
+ * @param {string|undefined}                                       ctx.galleryType
+ * @param {((upsell: import('../../../logic/liteUpsell').LiteUpsell, anchor: HTMLElement|null) => void)|null} ctx.openLiteUpsell The takeover's upsell popover, opened next to the menu button; null in the metabox.
  */
 function renderSelectControl({
 	field,
 	control,
+	controlId,
 	value,
 	onChange,
 	disabled,
 	help,
 	galleryType,
+	openLiteUpsell,
 }) {
 	const labels = control.optionLabels || {};
 	const gates = control.optionGates || {};
@@ -147,39 +201,44 @@ function renderSelectControl({
 		}
 	}
 
-	const listLabel =
-		typeof field?.editorLabel === 'string' && field.editorLabel.trim()
-			? field.editorLabel.trim()
-			: typeof control.ariaLabel === 'string' && control.ariaLabel.trim()
-				? control.ariaLabel.trim()
-				: 'Select option';
-
-	if (shouldUseMenuSelect(field)) {
-		return (
-			<MenuSelect
-				value={v}
-				options={opts}
-				groups={menuGroups}
-				onChange={onChange}
-				disabled={disabled}
-				help={help}
-				listLabel={listLabel}
-			/>
-		);
-	}
+	const groups = menuGroups ?? [{ id: 'default', options: opts }];
+	const upsell = openLiteUpsell
+		? resolveLiteUpsell(field?.schema, editor)
+		: null;
+	const liteLock = upsell ? splitNeedsProOptions(groups) : null;
 
 	return (
-		<Select
-			value={v}
-			options={opts.map((opt) => ({
-				value: opt.value,
-				label: opt.badge ? `${opt.label} — ${opt.badge}` : opt.label,
-				disabled: opt.disabled,
-			}))}
-			onChange={onChange}
-			disabled={disabled}
-			help={help}
-		/>
+		<>
+			<SelectMenuControl
+				id={controlId}
+				label={selectListLabel(field, control)}
+				value={v}
+				groups={liteLock ? liteLock.groups : groups}
+				onChange={
+					liteLock
+						? (next) => {
+								const locked = liteLock.locked.get(next);
+								if (!locked) {
+									onChange(next);
+									return;
+								}
+								openLiteUpsell(
+									resolveLockedOptionUpsell(
+										upsell,
+										field,
+										locked,
+										editor
+									),
+									document.getElementById(controlId)
+								);
+							}
+						: onChange
+				}
+				disabled={disabled}
+				describedBy={describedByHelp(controlId, help)}
+			/>
+			<ControlHelp help={help} controlId={controlId} />
+		</>
 	);
 }
 
@@ -188,9 +247,12 @@ function renderSelectControl({
  */
 function SelectFieldKind(props) {
 	const { form } = useGallerySettingsFormBundle();
+	const openLiteUpsell = useOpenLiteUpsell();
 	return (
 		<form.Subscribe selector={(s) => s.values.general?.type}>
-			{(galleryType) => renderSelectControl({ ...props, galleryType })}
+			{(galleryType) =>
+				renderSelectControl({ ...props, galleryType, openLiteUpsell })
+			}
 		</form.Subscribe>
 	);
 }

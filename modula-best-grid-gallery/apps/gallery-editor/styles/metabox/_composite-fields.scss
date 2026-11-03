@@ -2,7 +2,7 @@
 
 .modula-settings-editor__advanced-toggle {
 	padding: $mod-space-4 0 $mod-space-8;
-	border-bottom: 1px solid #f0f0f1;
+	border-bottom: 1px solid var(--modula-admin-border-divider);
 	margin-bottom: $mod-space-4;
 
 	&--global {
@@ -62,7 +62,7 @@
 	font-size: 13px;
 	font-weight: 600;
 	line-height: 1.35;
-	color: var(--mod-se-ink, #1d2327);
+	color: var(--modula-admin-ink);
 }
 
 .modula-settings-editor__composite-stack-heading-row {
@@ -87,7 +87,7 @@
 .modula-settings-editor__field-row--composite-divider-before {
 	padding-top: $mod-space-16;
 	margin-top: $mod-space-8;
-	border-top: 1px solid #f0f0f1;
+	border-top: 1px solid var(--modula-admin-border-divider);
 }
 
 .modula-settings-editor__dimensions-flex {

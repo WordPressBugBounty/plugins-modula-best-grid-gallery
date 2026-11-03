@@ -1,0 +1,9 @@
+// The editor's toast (TakeoverToast): admin-ui's Toast, moved from the
+// viewport's bottom centre to the canvas's bottom right, as in the canvas
+// "1 · Editor". The bottom centre belongs to the device pill.
+.modula-takeover__toast .modula-admin-toast-region {
+	right: 32px;
+	bottom: 56px;
+	left: auto;
+	transform: none;
+}

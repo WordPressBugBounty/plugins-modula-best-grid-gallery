@@ -17,12 +17,29 @@ const TINYMCE_OPTIONS = {
 		'body{background:transparent;color:inherit;}a[data-mce-selected]{box-shadow:none!important;background-color:transparent!important;}',
 };
 
+/** The admin-ui root; it carries `is-dark` in the dark appearance (ADR 0050). */
+const ADMIN_UI_SCOPE_SELECTOR = '.modula-admin-ui';
+
 /**
+ * The editor page's colours: the tokens of the admin-ui scope the editor sits
+ * in (image panel, Bulk edit), else the legacy settings editor's.
+ *
+ * @param {Element|null} anchor The editor's textarea.
  * @return {{ background: string, color: string }|null}
  */
-function readEditorAppearanceColors() {
+function readEditorAppearanceColors(anchor) {
 	if (typeof document === 'undefined') {
 		return null;
+	}
+	const scope = anchor?.closest(ADMIN_UI_SCOPE_SELECTOR);
+	if (scope) {
+		const scopeStyles = window.getComputedStyle(scope);
+		return {
+			background: scopeStyles
+				.getPropertyValue('--modula-admin-surface')
+				.trim(),
+			color: scopeStyles.getPropertyValue('--modula-admin-ink').trim(),
+		};
 	}
 	const app = document.querySelector('.modula-settings-editor__app');
 	if (!(app instanceof HTMLElement)) {
@@ -38,9 +55,10 @@ function readEditorAppearanceColors() {
 
 /**
  * @param {{ getBody?: () => HTMLElement|null, getDoc?: () => Document|null }} editor
+ * @param {Element|null}                                                       anchor The editor's textarea.
  */
-function applyTinyMceAppearanceColors(editor) {
-	const colors = readEditorAppearanceColors();
+function applyTinyMceAppearanceColors(editor, anchor) {
+	const colors = readEditorAppearanceColors(anchor);
 	if (!colors) {
 		return;
 	}
@@ -61,6 +79,25 @@ function applyTinyMceAppearanceColors(editor) {
 	} catch {
 		// Non-fatal: iframe may not be ready yet.
 	}
+}
+
+/**
+ * Calls `onChange` when the admin-ui scope around `anchor` switches
+ * appearance. The editor's iframe inherits no CSS from the page, so the
+ * colours painted at init go stale (dark text on the dark surface).
+ *
+ * @param {Element}    anchor   The editor's textarea.
+ * @param {() => void} onChange
+ * @return {() => void} Stops watching.
+ */
+function watchAdminUiAppearance(anchor, onChange) {
+	const scope = anchor.closest(ADMIN_UI_SCOPE_SELECTOR);
+	if (!scope || typeof MutationObserver === 'undefined') {
+		return () => {};
+	}
+	const observer = new MutationObserver(onChange);
+	observer.observe(scope, { attributes: true, attributeFilter: ['class'] });
+	return () => observer.disconnect();
 }
 
 /** Stable fallback — never use `tinymceOptions = {}` in props (new object every render). */
@@ -232,6 +269,12 @@ export default function WpClassicCaptionEditor({
 
 		textarea.addEventListener('input', onQuickTagsInput);
 		textarea.addEventListener('keydown', onTextareaEscape);
+		const stopWatchingAppearance = watchAdminUiAppearance(textarea, () => {
+			const editor = window.tinymce?.get(editorId);
+			if (editor && !editor.removed) {
+				applyTinyMceAppearanceColors(editor, textarea);
+			}
+		});
 
 		const extraOptions = { ...tinymceOptionsRef.current };
 		const parentSetup =
@@ -253,7 +296,7 @@ export default function WpClassicCaptionEditor({
 								? valueRef.current
 								: '';
 						setEditorContentSilently(editor, html);
-						applyTinyMceAppearanceColors(editor);
+						applyTinyMceAppearanceColors(editor, textarea);
 						if (disabledRef.current) {
 							setTinyMceReadOnly(editor, true);
 						}
@@ -303,6 +346,7 @@ export default function WpClassicCaptionEditor({
 		return () => {
 			textarea.removeEventListener('input', onQuickTagsInput);
 			textarea.removeEventListener('keydown', onTextareaEscape);
+			stopWatchingAppearance();
 			if (window.wp?.oldEditor) {
 				window.wp.oldEditor.remove(editorId);
 			}

@@ -1,0 +1,494 @@
+@use "variables" as *;
+@use "tile-trash" as *;
+
+// Custom grid resize handle hit target (`.modula-custom-grid__rgl` below).
+$mod-rgl-handle-size: 24px;
+
+// The settings-editor tile chrome both editor canvases draw over the visitor
+// tiles (gallery-shared `GalleryPreviewItemAdminToolbar`): the select hit and
+// its outline, the lock chip and the trash, and the Custom grid's drag and
+// resize handles. Include it inside the canvas's preview body.
+@mixin preview-tile-admin {
+
+	/*
+	 * Keep default front overflow (hidden on .modula-item). overflow:visible was breaking
+	 * masonry / absolute-layout math and caused tile overlap. Toolbar stays inside the tile:
+	 * __actions no longer uses translateY negative (which clipped against hidden overflow).
+	 */
+
+	.modula-item .modula-item-content {
+		pointer-events: none;
+	}
+
+	.modula-video-item .modula-item-content,
+	.modula-video-main-item .modula-video-main-item-content {
+		pointer-events: none;
+	}
+
+	.modula-video-item .modula-video-list-overlay {
+		pointer-events: auto;
+	}
+
+	/* Decorative layers must not steal hover from the tile — visibility is driven by .modula-item:hover */
+	.modula-item .modula-item-overlay {
+		pointer-events: none;
+	}
+
+	/*
+	 * Mount is decorative (shade + toolbar positioning). Do not capture pointer events
+	 * on the full tile — custom grid resize handles and RGL drag live on the same node.
+	 */
+	.modula-item-preview-admin-mount {
+		position: absolute;
+		inset: 0;
+		z-index: 120;
+		pointer-events: none;
+	}
+
+	.modula-item-preview-admin-mount__inner {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+	}
+
+	/*
+	 * Slider outside captions (settings editor): admin shade is scoped to the image
+	 * shell so hover dim does not cover top_outside / bot_outside caption metadata.
+	 */
+	.modula-slider-slide-media {
+		position: relative;
+		flex: 0 0 auto;
+		width: 100%;
+		overflow: hidden;
+
+		.modula-item-preview-admin-mount {
+			position: absolute;
+			inset: 0;
+			z-index: 120;
+		}
+	}
+
+	.modula-gallery-preview-item-admin {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		font-size: clamp(12px, 2.5vw, 16px);
+		line-height: 1;
+
+		/* WP <Icon> SVG — inherit color, avoid gallery .modula img { width:100% } on icons */
+		svg {
+			display: block;
+			flex-shrink: 0;
+			fill: currentColor;
+		}
+
+		/* Lock chip — locked always visible; unlocked appears on tile hover. */
+		&__lock-badge {
+			position: absolute;
+			top: $mod-space-8;
+			left: $mod-space-8;
+			z-index: 2;
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+			width: 1.75em;
+			height: 1.75em;
+			min-width: 28px;
+			min-height: 28px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			border: none;
+			border-radius: 999px;
+			cursor: pointer;
+			pointer-events: auto;
+			background: var(--mod-se-selection);
+			color: var(--mod-se-selection-ink);
+			box-shadow:
+				0 1px 2px rgb(0 0 0 / 28%),
+				0 0 0 1px rgb(255 255 255 / 18%);
+			-webkit-font-smoothing: antialiased;
+
+			&:focus {
+				outline: none;
+			}
+
+			&:focus-visible {
+				box-shadow:
+					0 1px 2px rgb(0 0 0 / 28%),
+					0 0 0 2px $mod-takeover-focus-ring-neutral;
+			}
+
+			&--inactive {
+				opacity: 0;
+				background: $mod-takeover-admin-trigger-surface;
+				color: $mod-takeover-admin-trigger-ink;
+				box-shadow: $mod-takeover-admin-trigger-shadow;
+				backdrop-filter: blur(6px);
+				-webkit-backdrop-filter: blur(6px);
+				transition: opacity 0.18s ease;
+			}
+		}
+
+		&__select-hit {
+			position: absolute;
+			inset: 0;
+			z-index: 1;
+			margin: 0;
+			padding: 0;
+			border: 0;
+			border-radius: 0;
+			background: transparent;
+			/* The visitor's tile link cursor (GalleryDynamicStyle). */
+			cursor: var(--modula-preview-tile-cursor, pointer);
+			pointer-events: auto;
+
+			&:focus {
+				outline: none;
+			}
+
+			/* Selection chrome is `.is-item-selected` only — no focus ring that mimics it. */
+			&:focus-visible {
+				outline: none;
+			}
+		}
+
+		/*
+		 * The selected tile (a click selects; Edit opens its panel): the canvas
+		 * selection outline, the same token
+		 * as the Freeform selection frame. Drawn inside the tile (negative
+		 * offset) because most tiles clip their content. No dim: the canvas
+		 * has none.
+		 */
+		&.is-item-selected {
+			.modula-gallery-preview-item-admin__select-hit {
+				outline: var(--mod-se-selection-outline);
+				outline-offset: -2px;
+			}
+
+			.modula-gallery-preview-item-admin__lock-badge--inactive {
+				opacity: 1;
+			}
+		}
+
+		/* "Remove from gallery": top right, shown on tile hover or keyboard focus. */
+		&__trash {
+			@include tile-trash;
+		}
+
+		/* Slides (slider, showcase, story) are not `.modula-item`; their tile
+		 * hover reaches this layer through the select hit. */
+		&:hover .modula-gallery-preview-item-admin__trash,
+		&:focus-within .modula-gallery-preview-item-admin__trash {
+			opacity: 1;
+		}
+	}
+
+	/*
+	 * Show the lock chip and trash when the tile is hovered or a control inside
+	 * has focus. The tile's own hover effect (dim, zoom, preset) is the gallery's:
+	 * the editor adds no shade.
+	 * Do not rely only on :hover on .modula-gallery-preview-item-admin — the pointer often
+	 * hits the image / link under the transparent layer, so that selector never matches.
+	 */
+	.modula-item:hover .modula-gallery-preview-item-admin__lock-badge--inactive,
+	.modula-item:focus-within .modula-gallery-preview-item-admin__lock-badge--inactive,
+	.modula-video-item:hover .modula-gallery-preview-item-admin__lock-badge--inactive,
+	.modula-video-item:focus-within .modula-gallery-preview-item-admin__lock-badge--inactive,
+	.modula-video-main-item:hover .modula-gallery-preview-item-admin__lock-badge--inactive,
+	.modula-video-main-item:focus-within .modula-gallery-preview-item-admin__lock-badge--inactive,
+	.modula-item:hover .modula-gallery-preview-item-admin__trash,
+	.modula-item:focus-within .modula-gallery-preview-item-admin__trash,
+	.modula-video-item:hover .modula-gallery-preview-item-admin__trash,
+	.modula-video-item:focus-within .modula-gallery-preview-item-admin__trash,
+	.modula-video-main-item:hover .modula-gallery-preview-item-admin__trash,
+	.modula-video-main-item:focus-within .modula-gallery-preview-item-admin__trash {
+		opacity: 1;
+	}
+
+	/* Optional narrower RGL width (preview zoom): center in the measured column */
+	.modula-custom-grid__preview-scale-outer {
+		display: flex;
+		justify-content: center;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.modula-custom-grid__preview-scale-inner {
+		flex: 0 0 auto;
+		max-width: 100%;
+	}
+
+	/*
+	 * Tile interaction shared by Custom grid (react-grid-layout) and the
+	 * Freeform editor surface, whose tiles carry `react-grid-item` too.
+	 */
+	.modula-custom-grid__rgl,
+	.modula-freeform--editor {
+
+		/*
+		 * RGL vendor CSS is webpack-scoped under `.modula-best-grid-gallery`, but the
+		 * takeover live preview only has `.modula`. Without position:relative on each
+		 * page grid, drag offsetParent walks up past page breaks and the tile jumps
+		 * far below the cursor (Y includes pages above).
+		 */
+		.react-grid-layout {
+			position: relative;
+			transition: height 200ms ease;
+		}
+
+		/* Keep the dragging tile above the next page section / divider. */
+		&:has(.react-draggable-dragging),
+		&:has(.resizing) {
+			position: relative;
+			z-index: 5;
+		}
+
+		/*
+		 * RGL base rules are bundled under `.modula-best-grid-gallery` (645.css); takeover
+		 * preview uses `.modula` only — restore drag-friendly hit testing here.
+		 */
+		.react-grid-item img {
+			pointer-events: none;
+			user-select: none;
+		}
+
+		.react-grid-item.react-draggable:not(.static) {
+			cursor: grab;
+		}
+
+		.react-grid-item.static {
+			cursor: default;
+		}
+
+		.react-grid-item.react-draggable-dragging {
+			cursor: grabbing;
+		}
+
+		/*
+		 * Locked and hover rings: the canvas selection colour, softened so a
+		 * locked tile never reads as the selected one (full strength).
+		 */
+		.react-grid-item.static .modula-item--grid-locked {
+			box-shadow: inset 0 0 0 2px color-mix(in srgb,
+				var(--mod-se-selection) 70%,
+				transparent);
+		}
+
+		.react-grid-item.static:hover .modula-item--grid-locked {
+			box-shadow: inset 0 0 0 2px color-mix(in srgb,
+				var(--mod-se-selection) 85%,
+				transparent);
+		}
+
+		.react-grid-item {
+			transition: box-shadow 0.18s ease;
+		}
+
+		.react-grid-item:hover {
+			box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+			inset 0 0 0 1px color-mix(in srgb,
+				var(--mod-se-selection) 22%,
+				transparent);
+		}
+	}
+
+	/*
+	 * Custom grid resize handles: the Freeform selection handles' look
+	 * (`_freeform-selection.scss`, canvas `data-cvh`), centred on the tile's
+	 * corners and edges. They still show on hover; each keeps its 24px hit
+	 * target inside the tile. RGL's default ::after (right/bottom inset, dark
+	 * L-borders) is reset so it cannot stack with the marks.
+	 * The root below only nests rules, so it cannot undercut the `:has()` rules
+	 * above; Stylelint still compares the bare selector.
+	 */
+	/* stylelint-disable-next-line no-descending-specificity -- nests only */
+	.modula-custom-grid__rgl {
+
+		/*
+		 * RGL handle layout lives in frontend bundle CSS under `.modula-best-grid-gallery`
+		 * (see apps/frontend-gallery). Takeover preview only has `.modula`, so handles
+		 * stay `position: static` and collapse to 0×0 — resize never starts.
+		 */
+		.react-grid-item>.react-resizable-handle {
+			position: absolute;
+			z-index: 140;
+			width: $mod-rgl-handle-size;
+			height: $mod-rgl-handle-size;
+			opacity: 0;
+			/* Invisible handles must not block tile drag (24px hit targets cover edges). */
+			pointer-events: none;
+			transition: opacity 0.16s ease;
+			/*
+			 * react-resizable/styles.css paints a corner SVG on .react-resizable-handle
+			 * (background-image + padding). RGL only overrides ::after, so the SVG stayed
+			 * visible — on “n” the handle is rotated 225° and reads as a stray chevron.
+			 */
+			background: none;
+			padding: 0;
+			// react-resizable rotates each handle so one corner glyph serves all eight.
+			transform: none;
+
+			// A 12px round corner mark (Freeform `.modula-freeform-selection__handle`).
+			&::after {
+				content: "";
+				position: absolute;
+				inset: auto;
+				box-sizing: border-box;
+				width: 12px;
+				height: 12px;
+				margin: 0;
+				border: 2px solid var(--mod-se-selection);
+				border-radius: 50%;
+				background: var(--mod-se-selection-ink);
+				pointer-events: none;
+			}
+
+			&.react-resizable-handle-nw::after {
+				top: -6px;
+				left: -6px;
+			}
+
+			&.react-resizable-handle-ne::after {
+				top: -6px;
+				right: -6px;
+			}
+
+			&.react-resizable-handle-sw::after {
+				bottom: -6px;
+				left: -6px;
+			}
+
+			&.react-resizable-handle-se::after {
+				right: -6px;
+				bottom: -6px;
+			}
+
+			// 20 × 8 edge pills, centred in the 24px hit target.
+			&.react-resizable-handle-n::after,
+			&.react-resizable-handle-s::after {
+				left: 2px;
+				width: 20px;
+				height: 8px;
+				border-radius: 4px;
+			}
+
+			&.react-resizable-handle-n::after {
+				top: -4px;
+			}
+
+			&.react-resizable-handle-s::after {
+				bottom: -4px;
+			}
+
+			&.react-resizable-handle-w::after,
+			&.react-resizable-handle-e::after {
+				top: 2px;
+				width: 8px;
+				height: 20px;
+				border-radius: 4px;
+			}
+
+			&.react-resizable-handle-w::after {
+				left: -4px;
+			}
+
+			&.react-resizable-handle-e::after {
+				right: -4px;
+			}
+		}
+
+		.react-grid-item:hover>.react-resizable-handle,
+		.react-grid-item.resizing>.react-resizable-handle,
+		.react-grid-item.react-draggable-dragging>.react-resizable-handle {
+			opacity: 1;
+			pointer-events: auto;
+		}
+
+		/*
+		 * Placement (mirrors react-grid-layout/css/styles.css; 24px hit targets),
+		 * with the Freeform handles' cursors.
+		 */
+		.react-grid-item>.react-resizable-handle.react-resizable-handle-sw {
+			bottom: 0;
+			left: 0;
+			cursor: nesw-resize;
+		}
+
+		.react-grid-item>.react-resizable-handle.react-resizable-handle-se {
+			bottom: 0;
+			right: 0;
+			cursor: nwse-resize;
+		}
+
+		.react-grid-item>.react-resizable-handle.react-resizable-handle-nw {
+			top: 0;
+			left: 0;
+			cursor: nwse-resize;
+		}
+
+		.react-grid-item>.react-resizable-handle.react-resizable-handle-ne {
+			top: 0;
+			right: 0;
+			cursor: nesw-resize;
+		}
+
+		.react-grid-item>.react-resizable-handle.react-resizable-handle-w,
+		.react-grid-item>.react-resizable-handle.react-resizable-handle-e {
+			top: 50%;
+			margin-top: -12px;
+			cursor: ew-resize;
+		}
+
+		.react-grid-item>.react-resizable-handle.react-resizable-handle-w {
+			left: 0;
+		}
+
+		.react-grid-item>.react-resizable-handle.react-resizable-handle-e {
+			right: 0;
+		}
+
+		.react-grid-item>.react-resizable-handle.react-resizable-handle-n,
+		.react-grid-item>.react-resizable-handle.react-resizable-handle-s {
+			left: 50%;
+			margin-left: -12px;
+			cursor: ns-resize;
+		}
+
+		.react-grid-item>.react-resizable-handle.react-resizable-handle-n {
+			top: 0;
+		}
+
+		.react-grid-item>.react-resizable-handle.react-resizable-handle-s {
+			bottom: 0;
+		}
+
+		.react-grid-item.react-draggable.cssTransforms {
+			overflow: hidden;
+
+			&:hover,
+			&.resizing,
+			&.react-draggable-dragging {
+				overflow: visible;
+			}
+		}
+
+		.react-grid-item.react-draggable-dragging,
+		.react-grid-item.resizing {
+			z-index: 140;
+		}
+
+		/* RGL default is `background: red`; the drop target wears the selection colour. */
+		.react-grid-item.react-grid-placeholder {
+			background: color-mix(in srgb,
+				var(--mod-se-selection) 28%,
+				$mod-takeover-surface-raised);
+			border: 1px dashed color-mix(in srgb,
+				var(--mod-se-selection) 45%,
+				$mod-takeover-border-dashed);
+			opacity: 1;
+			border-radius: $mod-radius-4;
+			box-sizing: border-box;
+		}
+	}
+}

@@ -29,6 +29,29 @@ import {
 	addMenuZipArchiveIcon,
 } from './addNewMenuIcons';
 
+/**
+ * Takeover rows that open the Add media dialog, and the tab each opens.
+ *
+ * @type {Readonly<Record<string, import('../context/addMediaDialogStore').AddMediaTab>>}
+ */
+export const ADD_MEDIA_DIALOG_TAB_BY_ROW = Object.freeze({
+	upload: 'upload',
+	library: 'library',
+});
+
+/**
+ * @param {{ id?: string }} row
+ * @return {import('../context/addMediaDialogStore').AddMediaTab|null} The dialog tab the row opens, or null.
+ */
+export function getAddMediaDialogTab(row) {
+	return Object.prototype.hasOwnProperty.call(
+		ADD_MEDIA_DIALOG_TAB_BY_ROW,
+		row?.id
+	)
+		? ADD_MEDIA_DIALOG_TAB_BY_ROW[row.id]
+		: null;
+}
+
 const EXT_VIDEO = 'modula-video';
 const EXT_CONTENT_GALLERIES = 'modula-content-galleries';
 const EXT_INSTAGRAM = 'modula-instagram';
@@ -291,15 +314,9 @@ export function getAddNewRowActionable(row, editor) {
 			);
 		}
 	}
-	if (editor.takeover && row.id === 'upload') {
+	// The Add media dialog uploads and lists media over REST.
+	if (editor.takeover && getAddMediaDialogTab(row)) {
 		return Number(editor.galleryId) > 0;
-	}
-	if (editor.takeover && row.id === 'library') {
-		return (
-			Number(editor.galleryId) > 0 &&
-			typeof window !== 'undefined' &&
-			Boolean(window.wp?.media)
-		);
 	}
 	if (editor.takeover) {
 		return false;
@@ -334,7 +351,8 @@ function addNewMenuBadgeDisplay(reason) {
 	switch (reason) {
 		case 'needs_pro':
 			return {
-				text: __('Pro', 'modula-best-grid-gallery'),
+				// The canvas's PRO pill (AddSplit draws `pro` as admin-ui's PlanBadge).
+				text: __('PRO', 'modula-best-grid-gallery'),
 				variant: 'pro',
 			};
 		case 'needs_plan_upgrade':
@@ -421,16 +439,6 @@ export function getAddNewRowDisabledBadge(row, editor) {
 				variant: 'muted',
 				hint: __(
 					'Save the gallery before adding images from the library.',
-					'modula-best-grid-gallery'
-				),
-			};
-		}
-		if (!(typeof window !== 'undefined' && window.wp?.media)) {
-			return {
-				text: __('Unavailable', 'modula-best-grid-gallery'),
-				variant: 'muted',
-				hint: __(
-					'WordPress media library is not available on this screen.',
 					'modula-best-grid-gallery'
 				),
 			};

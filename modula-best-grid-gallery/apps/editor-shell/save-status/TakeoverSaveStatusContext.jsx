@@ -1,6 +1,7 @@
 /**
- * Takeover save status: one "Saved / Saving… / Unsaved changes / error" state for
- * every write an editor makes (settings autosave, items or members, title, status).
+ * Takeover save status: one "Saved / Saving… / Unsaved changes / error" state, plus
+ * the time of the latest success, for every write an editor makes (settings
+ * autosave, items or members, title, status).
  * The rules live in `saveStatusModel`; this provider serializes writes and
  * re-renders on change.
  */
@@ -44,7 +45,8 @@ export function TakeoverSaveStatusProvider({ children }) {
 		setView((prev) =>
 			prev.status === next.status &&
 			prev.errorMessage === next.errorMessage &&
-			prev.saveErrorMessage === next.saveErrorMessage
+			prev.saveErrorMessage === next.saveErrorMessage &&
+			prev.savedAt === next.savedAt
 				? prev
 				: next
 		);

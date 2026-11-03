@@ -1,5 +1,8 @@
+import { useId } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { ActionRow, Button, SettingsRow, Switch } from 'shared-ui';
+import { Button, Chip, SettingsRow, Toggle, rowHelpId } from 'admin-ui';
+import { ItemEditCard, SelectMenuControl } from 'editor-shell';
+import LiteUpsellCard from '../upsell/LiteUpsellCard';
 import HoverBuilderMotionSection from './HoverBuilderMotionSection';
 import HoverBuilderPresetJsonSection from './HoverBuilderPresetJsonSection';
 
@@ -8,8 +11,7 @@ const OVERLAY_SLOT_IDS = ['title', 'caption', 'social'];
 /**
  * @param {{
  *   form: import('../../form/GallerySettingsFormContext').GallerySettingsForm,
- *   isPro: boolean,
- *   upgradeUrl: string,
+ *   liteUpsell: import('../../logic/liteUpsell').LiteUpsell|null,
  *   buildMode: boolean,
  *   selectedTarget: string,
  *   selectedTargetLabel: string,
@@ -33,8 +35,7 @@ const OVERLAY_SLOT_IDS = ['title', 'caption', 'social'];
  */
 export default function HoverBuilderCustomizePanel({
 	form,
-	isPro,
-	upgradeUrl,
+	liteUpsell,
 	buildMode,
 	selectedTarget,
 	selectedTargetLabel,
@@ -55,47 +56,48 @@ export default function HoverBuilderCustomizePanel({
 	currentHoverColor,
 	currentHoverOpacity,
 }) {
-	if (!isPro) {
+	const linkIdPrefix = useId();
+	const layerFieldId = useId();
+	const linkToggleId = (slotId) => `${linkIdPrefix}-link-${slotId}`;
+
+	// Lite: the upsell stands in for the builder (`resolveProCoreUpsell` has none in Pro).
+	if (liteUpsell) {
 		return (
-			<section className="modula-gallery-takeover__reorder-setup-block">
-				<h3 className="modula-gallery-takeover__reorder-setup-title">
-					{__('Customize', 'modula-best-grid-gallery')}
-				</h3>
-				<div className="modula-gallery-takeover__reorder-setup-body">
-					<div className="modula-settings-editor__editor-upsell">
-						<h3 className="modula-settings-editor__editor-upsell-heading">
-							{__(
-								'Customize requires Modula Pro',
-								'modula-best-grid-gallery'
-							)}
-						</h3>
-						<p className="modula-settings-editor__editor-upsell-text">
-							{__(
-								'Install and activate Modula Pro to unlock full hover customization and advanced controls.',
-								'modula-best-grid-gallery'
-							)}
-						</p>
-						<div className="modula-settings-editor__editor-upsell-actions">
-							<Button
-								variant="primary"
-								href={upgradeUrl}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="modula-settings-editor__editor-upsell-btn modula-settings-editor__editor-upsell-btn--primary"
-							>
-								{__('Get Pro', 'modula-best-grid-gallery')}
-							</Button>
-						</div>
-					</div>
-				</div>
-			</section>
+			<ItemEditCard title={__('Customize', 'modula-best-grid-gallery')}>
+				<LiteUpsellCard upsell={liteUpsell} variant="section" />
+			</ItemEditCard>
 		);
 	}
+
+	/**
+	 * A layer the tile does not show (hidden title, caption below the
+	 * image, social off) cannot be picked.
+	 *
+	 * @param {{ id: string, disabled?: boolean }} row
+	 * @return {boolean} True when the layer is unavailable.
+	 */
+	const isLayerUnavailable = (row) =>
+		row.disabled === true ||
+		(row.id === 'title' && !showTitleSlot) ||
+		(row.id === 'caption' && !showCaptionSlot) ||
+		(row.id === 'social' && !showSocialSlot);
+
+	// The badge says why a layer is off; which layers are linked shows on the
+	// Move together switches.
+	const layerOptions = targetRows.map((row) => {
+		const unavailable = isLayerUnavailable(row);
+		return {
+			value: row.id,
+			label: row.label,
+			disabled: unavailable,
+			badge: unavailable ? row.hint : undefined,
+		};
+	});
 
 	return (
 		<>
 			{captionBelowImage ? (
-				<p className="modula-gallery-takeover__hover-builder-canvas-hint">
+				<p className="modula-gallery-takeover__hover-builder-hint">
 					{__(
 						'Titles and captions are currently displayed below the image. Text layers are disabled in the hover builder.',
 						'modula-best-grid-gallery'
@@ -104,162 +106,88 @@ export default function HoverBuilderCustomizePanel({
 			) : null}
 			{buildMode ? (
 				<>
-					<section className="modula-gallery-takeover__reorder-setup-block">
-						<h3 className="modula-gallery-takeover__reorder-setup-title">
-							{__('Layer', 'modula-best-grid-gallery')}
-						</h3>
-						<div className="modula-gallery-takeover__reorder-setup-body">
-							<p className="modula-gallery-takeover__hover-builder-layer-help">
-								{__(
-									'Select a layer, then choose its entrance animation below.',
-									'modula-best-grid-gallery'
-								)}
-							</p>
-							<ul
-								className="modula-gallery-takeover__reorder-setup-sort-list modula-gallery-takeover__hover-builder-layer-list"
-								aria-label={__(
-									'Hover layer',
-									'modula-best-grid-gallery'
-								)}
-							>
-								{targetRows.map((row) => {
-									const disabled =
-										row.disabled === true ||
-										(row.id === 'title' &&
-											!showTitleSlot) ||
-										(row.id === 'caption' &&
-											!showCaptionSlot) ||
-										(row.id === 'social' &&
-											!showSocialSlot);
-									const isSel = selectedTarget === row.id;
-									return (
-										<li key={row.id}>
-											<button
-												type="button"
-												className={`modula-gallery-takeover__reorder-setup-sort-btn${
-													isSel ? ' is-selected' : ''
-												}${
-													disabled
-														? ' is-disabled'
-														: ''
-												}`}
-												disabled={disabled}
-												title={
-													disabled
-														? row.hint
-														: undefined
-												}
-												aria-pressed={isSel}
-												aria-label={
-													disabled && row.hint
-														? `${row.label} — ${row.hint}`
-														: row.label
-												}
-												onClick={() => {
-													if (!disabled) {
-														setSelectedTarget(
-															row.id
-														);
-													}
-												}}
-											>
-												<span className="modula-gallery-takeover__reorder-setup-sort-row">
-													<span className="modula-gallery-takeover__reorder-setup-sort-label">
-														{row.label}
-													</span>
-													{row.id !== 'card' &&
-													isSlotLinked(row.id) ? (
-														<span className="modula-gallery-takeover__hover-builder-inline-badge modula-gallery-takeover__hover-builder-inline-badge--subtle">
-															{__(
-																'linked',
-																'modula-best-grid-gallery'
-															)}
-														</span>
-													) : null}
-												</span>
-											</button>
-										</li>
+					<ItemEditCard>
+						<SettingsRow
+							label={__('Layer', 'modula-best-grid-gallery')}
+							controlId={layerFieldId}
+							labelElement="span"
+							help={__(
+								'Select a layer, then choose its entrance animation below.',
+								'modula-best-grid-gallery'
+							)}
+						>
+							<SelectMenuControl
+								id={layerFieldId}
+								label={__('Layer', 'modula-best-grid-gallery')}
+								describedBy={rowHelpId(layerFieldId)}
+								value={selectedTarget}
+								groups={[
+									{ id: 'default', options: layerOptions },
+								]}
+								onChange={(nextId) => {
+									const row = targetRows.find(
+										(r) => r.id === nextId
 									);
-								})}
-							</ul>
-						</div>
-					</section>
+									if (row && !isLayerUnavailable(row)) {
+										setSelectedTarget(row.id);
+									}
+								}}
+							/>
+						</SettingsRow>
+					</ItemEditCard>
 
-					<section className="modula-gallery-takeover__reorder-setup-block">
-						<h3 className="modula-gallery-takeover__reorder-setup-title">
-							{__('Move together', 'modula-best-grid-gallery')}
-						</h3>
-						<div className="modula-gallery-takeover__reorder-setup-body">
-							<p className="modula-gallery-takeover__hover-builder-layer-help">
-								{__(
-									'Choose 2 or 3 layers. Dragging one selected layer moves the whole group on both axes.',
-									'modula-best-grid-gallery'
-								)}
-							</p>
+					<ItemEditCard
+						title={__('Move together', 'modula-best-grid-gallery')}
+					>
+						<p className="modula-gallery-takeover__hover-builder-help">
+							{__(
+								'Choose 2 or 3 layers. Dragging one selected layer moves the whole group on both axes.',
+								'modula-best-grid-gallery'
+							)}
+						</p>
+						<div className="modula-gallery-takeover__hover-builder-link-actions">
+							<Button
+								variant="link"
+								onClick={selectAllLinkedSlots}
+							>
+								{__('Select all', 'modula-best-grid-gallery')}
+							</Button>
+							<Button
+								variant="link"
+								onClick={clearLinkedSlots}
+								disabled={linkedOverlaySlots.length === 0}
+							>
+								{__('Clear all', 'modula-best-grid-gallery')}
+							</Button>
 							{linkedOverlaySlotIds.length > 1 ? (
-								<div className="modula-gallery-takeover__hover-builder-link-overlay-actions">
-									<span className="modula-gallery-takeover__hover-builder-inline-badge">
-										{sprintf(
-											/* translators: %d: number of linked layers */
-											__(
-												'%d linked',
-												'modula-best-grid-gallery'
-											),
-											linkedOverlaySlotIds.length
-										)}
-									</span>
-								</div>
+								<Chip>
+									{sprintf(
+										/* translators: %d: number of linked layers */
+										__(
+											'%d linked',
+											'modula-best-grid-gallery'
+										),
+										linkedOverlaySlotIds.length
+									)}
+								</Chip>
 							) : null}
-							<div className="modula-gallery-takeover__hover-builder-link-overlay-actions">
-								<ActionRow>
-									<Button
-										type="button"
-										variant="plain"
-										onClick={selectAllLinkedSlots}
-									>
-										{__(
-											'Select all',
-											'modula-best-grid-gallery'
-										)}
-									</Button>
-									<Button
-										type="button"
-										variant="plain"
-										onClick={clearLinkedSlots}
-										disabled={
-											linkedOverlaySlots.length === 0
-										}
-									>
-										{__(
-											'Clear all',
-											'modula-best-grid-gallery'
-										)}
-									</Button>
-								</ActionRow>
-							</div>
-							<div className="modula-gallery-takeover__hover-builder-link-fields">
-								{OVERLAY_SLOT_IDS.map((slotId) => (
-									<SettingsRow
-										key={slotId}
-										className="modula-gallery-takeover__hover-builder-link-row"
-										label={slotLabels[slotId]}
-										end={
-											<Switch
-												checked={isSlotLinked(slotId)}
-												showStatus
-												onChange={(next) =>
-													toggleLinkedSlot(
-														slotId,
-														!!next
-													)
-												}
-											/>
-										}
-									/>
-								))}
-							</div>
 						</div>
-					</section>
+						{OVERLAY_SLOT_IDS.map((slotId) => (
+							<SettingsRow
+								key={slotId}
+								label={slotLabels[slotId]}
+								controlId={linkToggleId(slotId)}
+							>
+								<Toggle
+									id={linkToggleId(slotId)}
+									checked={isSlotLinked(slotId)}
+									onChange={(next) =>
+										toggleLinkedSlot(slotId, next)
+									}
+								/>
+							</SettingsRow>
+						))}
+					</ItemEditCard>
 
 					<HoverBuilderMotionSection
 						form={form}

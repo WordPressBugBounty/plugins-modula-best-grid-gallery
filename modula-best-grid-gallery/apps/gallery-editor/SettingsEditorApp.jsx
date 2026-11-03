@@ -1,10 +1,11 @@
 /**
- * Gallery settings v2 — app entry: loading/error states and WordPress component shell.
+ * Gallery settings v2 — app entry: loading/error states and the editor shell.
  */
 import { __ } from '@wordpress/i18n';
-import { Spinner, Notice } from '@wordpress/components';
 import { useMemo, useLayoutEffect } from '@wordpress/element';
+import { BrandLoader, Notice } from 'admin-ui';
 import {
+	AdminUiScope,
 	DesktopOnlyNotice,
 	SettingsEditorAppearanceProvider,
 	SettingsEditorErrorBoundary,
@@ -34,10 +35,7 @@ function SettingsEditorAppInner() {
 		() => resolveGalleryAdminPostId(config),
 		[config]
 	);
-	const isTakeover = Boolean(config.takeover);
 	const isDesktopEditor = useMatchMedia(DESKTOP_EDITOR_MEDIA_QUERY);
-	const canLoadEditor = !isTakeover || isDesktopEditor;
-	const showRestDebug = Boolean(config.showRestDebug);
 
 	useLayoutEffect(() => {
 		if (galleryId > 0) {
@@ -46,9 +44,9 @@ function SettingsEditorAppInner() {
 	}, [galleryId]);
 
 	const { data, error, isPending, isError, isSuccess } =
-		useGallerySettingsV2Query(canLoadEditor ? galleryId : 0);
+		useGallerySettingsV2Query(isDesktopEditor ? galleryId : 0);
 
-	if (isTakeover && !isDesktopEditor) {
+	if (!isDesktopEditor) {
 		return (
 			<div
 				className="modula-settings-editor__app modula-takeover__app"
@@ -67,12 +65,14 @@ function SettingsEditorAppInner() {
 
 	if (!galleryId) {
 		return (
-			<Notice status="warning" isDismissible={false}>
-				{__(
-					'Save the gallery first to load settings (v2).',
-					'modula-best-grid-gallery'
-				)}
-			</Notice>
+			<AdminUiScope>
+				<Notice>
+					{__(
+						'Save the gallery first to load settings (v2).',
+						'modula-best-grid-gallery'
+					)}
+				</Notice>
+			</AdminUiScope>
 		);
 	}
 
@@ -92,40 +92,28 @@ function SettingsEditorAppInner() {
 						aria-live="polite"
 						aria-busy="true"
 					>
-						<Spinner />
-						<span>
-							{__(
-								'Loading settings…',
-								'modula-best-grid-gallery'
-							)}
-						</span>
+						<AdminUiScope>
+							<BrandLoader
+								label={__(
+									'Loading settings…',
+									'modula-best-grid-gallery'
+								)}
+							/>
+						</AdminUiScope>
 					</div>
 				)}
 				{isError && (
-					<Notice status="error" isDismissible={false}>
-						{errorMessage}
-					</Notice>
+					<AdminUiScope>
+						<Notice tone="error" role="alert">
+							{errorMessage}
+						</Notice>
+					</AdminUiScope>
 				)}
 				{isSuccess && data && (
-					<>
-						<GallerySettingsEditorLoaded
-							galleryId={galleryId}
-							groupedPayload={data}
-						/>
-						{!isTakeover && showRestDebug && (
-							<details className="modula-settings-editor__raw">
-								<summary>
-									{__(
-										'Raw REST payload (debug)',
-										'modula-best-grid-gallery'
-									)}
-								</summary>
-								<pre className="modula-settings-editor__raw-pre">
-									{JSON.stringify(data, null, 2)}
-								</pre>
-							</details>
-						)}
-					</>
+					<GallerySettingsEditorLoaded
+						galleryId={galleryId}
+						groupedPayload={data}
+					/>
 				)}
 			</SettingsEditorErrorBoundary>
 		</div>

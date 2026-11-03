@@ -1,0 +1,196 @@
+@use '../../admin-ui/styles/mixins' as admin;
+
+// The Add media dialog's picker (canvas "1 · Editor", the Add dialog), shared
+// by the gallery's media library and the Albums member picker. It renders in
+// an admin-ui Dialog, so colours are admin-ui tokens; sizes follow the
+// canvas. Rules sit under `.modula-admin-ui`, like admin-ui's own, so they
+// outrank the component rules they adjust (button margin).
+
+.modula-admin-ui {
+
+	.modula-media-picker__toolbar {
+		// The scope makes fields full width; here they sit in one row.
+		--modula-admin-field-width: 180px;
+		// The canvas filters are compact: 32px controls at the control text size.
+		--modula-admin-control-height: 32px;
+		--modula-admin-text-body: var(--modula-admin-text-control);
+		display: flex;
+		flex-shrink: 0;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px;
+		padding: 0 32px 16px;
+	}
+
+	// WP 7.1's forms.css gives selects a 40px min-height.
+	.modula-media-picker__toolbar .modula-admin-select {
+		min-height: 0;
+	}
+
+	// The canvas's `.hf-find` field, scoped like the Setting search: 32px with
+	// 3px corners (SearchField draws its corners with the lg radius token).
+	.modula-media-picker__search {
+		--modula-admin-search-height: 32px;
+		--modula-admin-radius-lg: 3px;
+		width: 340px;
+		max-width: 100%;
+	}
+
+	.modula-media-picker__count {
+		margin-left: auto;
+		color: var(--modula-admin-ink-muted);
+		font-size: var(--modula-admin-text-help);
+	}
+
+	.modula-media-picker__scroll {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow-y: auto;
+		padding: 4px 32px 24px;
+	}
+
+	.modula-media-picker__empty {
+		margin: 0;
+		padding: 80px 0;
+		color: var(--modula-admin-ink-muted);
+		font-size: var(--modula-admin-text-body);
+		text-align: center;
+	}
+
+	// Seven columns at the canvas's 1240px; fewer on smaller windows.
+	.modula-media-picker__grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+		gap: 20px 16px;
+	}
+
+	.modula-media-picker__item {
+		@include admin.button-reset;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		min-width: 0;
+		text-align: left;
+
+		&[aria-disabled="true"] {
+			cursor: default;
+		}
+
+		// The ring goes on the thumbnail (below).
+		&:focus-visible {
+			outline: none;
+		}
+	}
+
+	.modula-media-picker__thumb {
+		position: relative;
+		display: block;
+		aspect-ratio: 1 / 1;
+		overflow: hidden;
+		border-radius: var(--modula-admin-radius-sm);
+		background: var(--modula-admin-surface-hover);
+
+		img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+
+	.modula-media-picker__item[aria-checked="true"] .modula-media-picker__thumb {
+		box-shadow: 0 0 0 3px var(--modula-admin-ink);
+	}
+
+	.modula-media-picker__item[aria-disabled="true"] .modula-media-picker__thumb {
+		opacity: var(--modula-admin-disabled-opacity);
+	}
+
+	.modula-media-picker__item:focus-visible .modula-media-picker__thumb {
+		@include admin.focus-ring;
+	}
+
+	.modula-media-picker__check {
+		position: absolute;
+		top: 8px;
+		left: 8px;
+		box-sizing: border-box;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 22px;
+		height: 22px;
+		border: 1.5px solid var(--modula-admin-border-field);
+		border-radius: var(--modula-admin-radius-pill);
+		background: var(--modula-admin-surface-raised);
+		color: transparent;
+	}
+
+	.modula-media-picker__item[aria-checked="true"] .modula-media-picker__check {
+		border-color: var(--modula-admin-ink);
+		background: var(--modula-admin-ink);
+		color: var(--modula-admin-ink-inverse);
+	}
+
+	.modula-media-picker__name {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		min-width: 0;
+		font-size: 13px;
+	}
+
+	.modula-media-picker__name-text {
+		overflow: hidden;
+		color: var(--modula-admin-ink);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.modula-media-picker__note {
+		flex-shrink: 0;
+		color: var(--modula-admin-ink-muted);
+		font-size: 12px;
+	}
+
+	.modula-media-picker__detail {
+		overflow: hidden;
+		color: var(--modula-admin-ink-muted);
+		font-size: 12px;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.modula-media-picker__more {
+		display: flex;
+		justify-content: center;
+		padding-top: 24px;
+	}
+
+	// Add sits at the right. The selection takes the free space rather than
+	// the button a left margin: admin-ui's button reset may load after this
+	// sheet (the Albums editor's chunk order) and would zero that margin.
+	.modula-media-picker__footer {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 16px;
+		padding: 18px 32px;
+		border-top: 1px solid var(--modula-admin-border);
+	}
+
+	.modula-media-picker__selection {
+		display: flex;
+		flex: 1 1 auto;
+		align-items: center;
+		gap: 16px;
+		min-width: 0;
+	}
+
+	.modula-media-picker__selected {
+		color: var(--modula-admin-ink);
+		font-size: var(--modula-admin-text-control);
+		font-variant-numeric: tabular-nums;
+	}
+}

@@ -77,6 +77,8 @@ class Adapter {
 		'blockBodyHtmlRendered',
 		'shortcodeHtml',
 		'watermarkApplied',
+		'watermarkSourceSize',
+		'fullImageSize',
 	);
 
 	/**
@@ -721,6 +723,7 @@ class Adapter {
 		if ( function_exists( 'modula_repair_video_custom_grid_spans' ) ) {
 			$out = modula_repair_video_custom_grid_spans( $out );
 		}
-		return $out;
+		// The image's own hover and CSS class; merged saves skip the item whitelist.
+		return Item_Fields::sanitize_row( $out );
 	}
 }

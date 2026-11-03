@@ -1,6 +1,6 @@
 import { useState } from '@wordpress/element';
+import { Chip } from '../chip/Chip';
 import { joinIds } from '../field/Field';
-import { CloseIcon } from '../icons/icons';
 
 /**
  * @typedef {{ value: string|number, label: string }} TokenOption
@@ -117,16 +117,13 @@ export function TokenPicker({
 							key={token.value}
 							className="modula-admin-token-picker__token"
 						>
-							<span>{token.label}</span>
-							<button
-								type="button"
-								className="modula-admin-token-picker__remove"
-								aria-label={removeLabel(token.label)}
+							<Chip
+								removeLabel={removeLabel(token.label)}
 								disabled={disabled}
-								onClick={() => onRemove?.(token.value)}
+								onRemove={() => onRemove?.(token.value)}
 							>
-								<CloseIcon />
-							</button>
+								{token.label}
+							</Chip>
 						</li>
 					))}
 				</ul>

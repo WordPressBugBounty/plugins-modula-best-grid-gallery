@@ -73,36 +73,13 @@ export function filterBulkEditRowsByStoreIndices(rows, storeIndices) {
 	return rows.filter((row) => allowed.has(row.__storeIndex));
 }
 
-/**
- * @param {unknown} filters
- * @return {string[]}
- */
-export function parseFiltersField(filters) {
-	if (Array.isArray(filters)) {
-		return filters.map((t) => String(t).trim()).filter(Boolean);
-	}
-	if (typeof filters === 'string') {
-		return filters
-			.split(',')
-			.map((t) => t.trim())
-			.filter(Boolean);
-	}
-	return [];
-}
-
-/**
- * @param {unknown} filters
- * @return {string}
- */
-export function filtersFieldToString(filters) {
-	if (Array.isArray(filters)) {
-		return filters
-			.map((t) => String(t).trim())
-			.filter(Boolean)
-			.join(',');
-	}
-	return typeof filters === 'string' ? filters : '';
-}
+// An image's filter tags and the gallery's filter names: editor-shell's
+// rules, shared with the Albums editor's members.
+export {
+	parseFilterTags as parseFiltersField,
+	formatFilterTags as filtersFieldToString,
+	filterListNames as galleryFilterSuggestions,
+} from 'editor-shell/logic';
 
 /**
  * @param {Record<string, unknown>} editor
@@ -113,14 +90,38 @@ export function hasBulkEditFiltersColumn(editor) {
 }
 
 /**
- * Gallery-level filter name suggestions for FormTokenField.
+ * Watermark (an extension) is offered when it is active and Pro has
+ * registered its action button.
  *
- * @param {unknown} filtersArr `filters.filters` from form values.
- * @return {string[]}
+ * @param {Record<string, unknown>} editor
+ * @param {{ ActionButton?: unknown }|null} watermarkRegistration
+ * @return {boolean}
  */
-export function galleryFilterSuggestions(filtersArr) {
-	const raw = Array.isArray(filtersArr) ? filtersArr : [];
-	return raw.map((t) => String(t).trim()).filter(Boolean);
+export function hasBulkEditWatermarkAction(editor, watermarkRegistration) {
+	return (
+		resolveProGateLock(
+			{ kind: 'requiresExtension', extensionSlug: 'modula-watermark' },
+			editor
+		).allowed && Boolean(watermarkRegistration?.ActionButton)
+	);
+}
+
+/**
+ * Attachments the watermark action applies to: the ticked rows, or every
+ * row in the dialog when none is ticked (the dialog then holds the canvas
+ * selection it opened with, or the whole gallery).
+ *
+ * @param {Object[]} rows        Rows shown in the dialog.
+ * @param {string[]} selectedIds Ticked row keys.
+ * @return {number[]} Unique attachment ids, in row order.
+ */
+export function bulkEditWatermarkTargetIds(rows, selectedIds) {
+	const ticked = new Set(selectedIds);
+	const targets = ticked.size
+		? rows.filter((row) => ticked.has(bulkEditRowKey(row)))
+		: rows;
+	const ids = targets.map(bulkEditNumericAttachmentId).filter((id) => id > 0);
+	return [...new Set(ids)];
 }
 
 /**

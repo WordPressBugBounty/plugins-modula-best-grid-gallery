@@ -7,6 +7,7 @@ import { useEffect, useRef } from '@wordpress/element';
 import {
 	matchDeeplinkHashForGallery,
 	resolveDeeplinkStartIndex,
+	resolveDeeplinkTargetItemId,
 	resolveGalleryIdFromRoot,
 } from './modulaDeeplinkFromHash';
 import {
@@ -79,7 +80,8 @@ async function resolveDeeplinkSourceItems(items, resolveItems) {
  * @param {unknown[]}                          items
  * @param {() => Promise<unknown[]>|unknown[]} [resolveItems]
  * @param {string}                             [hash]
- * @return {Promise<boolean>}
+ * @param {unknown[]}                          [catalogItems] All gallery rows, unfiltered.
+ * @return {Promise<boolean>} Whether the lightbox opened.
  */
 async function openGalleryFromDeeplinkHash(
 	rootEl,
@@ -87,7 +89,8 @@ async function openGalleryFromDeeplinkHash(
 	settings,
 	items,
 	resolveItems,
-	hash
+	hash,
+	catalogItems
 ) {
 	const matched = matchDeeplinkHashForGallery(rootEl, settings, config, hash);
 	if (!matched) {
@@ -97,15 +100,35 @@ async function openGalleryFromDeeplinkHash(
 		return false;
 	}
 
-	return openModulaGalleryLightboxAtRoot(
+	// The hash index counts the full gallery, not the filtered view.
+	const targetItemId = resolveDeeplinkTargetItemId(
+		matched.imageRef,
+		catalogItems,
+		config
+	);
+	const startIndex = (slides) =>
+		resolveDeeplinkStartIndex(matched.imageRef, slides, targetItemId);
+
+	const openedInView = await openModulaGalleryLightboxAtRoot(
 		rootEl,
 		config,
-		(slides) => resolveDeeplinkStartIndex(matched.imageRef, slides),
+		startIndex,
 		{
 			resolveItems: () => resolveDeeplinkSourceItems(items, resolveItems),
 			settings,
+			catalogItems,
 		}
 	);
+	if (openedInView || !targetItemId) {
+		return openedInView;
+	}
+
+	// The active filter hides the linked image: show it over the whole gallery.
+	return openModulaGalleryLightboxAtRoot(rootEl, config, startIndex, {
+		resolveItems: () => catalogItems,
+		settings,
+		catalogItems,
+	});
 }
 
 /**
@@ -118,17 +141,20 @@ async function openGalleryFromDeeplinkHash(
  * @param {unknown[]}                                   [options.items]
  * @param {Object}                                      [options.settings]
  * @param {() => Promise<unknown[]>|unknown[]}          [options.resolveItems]
+ * @param {unknown[]}                                   [options.catalogItems] All gallery rows, unfiltered.
  */
 export function useModulaGalleryDeeplink(hostRef, config, options = {}) {
 	const enabled = options.enabled !== false;
 	const itemsRef = useRef(options.items);
 	const settingsRef = useRef(options.settings);
 	const resolveItemsRef = useRef(options.resolveItems);
+	const catalogItemsRef = useRef(options.catalogItems);
 	const configRef = useRef(config);
 
 	itemsRef.current = options.items;
 	settingsRef.current = options.settings;
 	resolveItemsRef.current = options.resolveItems;
+	catalogItemsRef.current = options.catalogItems;
 	configRef.current = config;
 
 	useEffect(() => {
@@ -158,7 +184,8 @@ export function useModulaGalleryDeeplink(hostRef, config, options = {}) {
 					settingsRef.current,
 					itemsRef.current,
 					resolveItemsRef.current,
-					hash
+					hash,
+					catalogItemsRef.current
 				);
 			} finally {
 				opening = false;
@@ -170,13 +197,23 @@ export function useModulaGalleryDeeplink(hostRef, config, options = {}) {
 			void tryOpen();
 		});
 
+		/*
+		 * Open after the other hashchange listeners. Fancybox's Hash plugin also
+		 * listens, and when it finds a lightbox already open it moves to the hash
+		 * number as a position in the opened (possibly filtered) slides.
+		 */
+		let hashChangeTimer = 0;
 		const onHashChange = () => {
-			void tryOpen();
+			clearTimeout(hashChangeTimer);
+			hashChangeTimer = setTimeout(() => {
+				void tryOpen();
+			}, 0);
 		};
 		window.addEventListener('hashchange', onHashChange);
 
 		return () => {
 			cancelAnimationFrame(frame);
+			clearTimeout(hashChangeTimer);
 			window.removeEventListener('hashchange', onHashChange);
 			cancelModulaGalleryLightboxOpen(rootEl);
 		};
@@ -189,5 +226,6 @@ export function useModulaGalleryDeeplink(hostRef, config, options = {}) {
 		options.items,
 		options.settings,
 		options.resolveItems,
+		options.catalogItems,
 	]);
 }

@@ -175,7 +175,29 @@ class Meta_Sync {
 	}
 
 	/**
-	 * Ensure defaults exist, then stamp create-only theme-inherit ON (new Beta galleries).
+	 * New Beta gallery create: the Motion choices start at their schema defaults (`auto`).
+	 *
+	 * Reading a gallery without them migrates it to explicit values (what it played
+	 * before the Motion settings), so a create path has to store the defaults. The
+	 * shared writer stores the flat copy too, so a later flat → v2 sync keeps them.
+	 * Call only from create paths — never from Convert to beta or Try the beta duplicate.
+	 *
+	 * @param int $post_id Gallery post ID.
+	 * @return array<string, array<string, mixed>>|\WP_Error Saved grouped settings.
+	 */
+	public static function stamp_motion_create_defaults( $post_id ) {
+		$defaults = array_map(
+			static function ( array $definition ) {
+				return $definition['default'];
+			},
+			Settings\Registry::get_schema()['motion']
+		);
+		return Settings\Writer::patch( $post_id, array( 'motion' => $defaults ) );
+	}
+
+	/**
+	 * Ensure defaults exist, then stamp the create-only defaults (new Beta galleries):
+	 * theme-inherit ON and the Motion choices on `auto`.
 	 *
 	 * @param int $post_id Gallery post ID.
 	 * @return void
@@ -190,6 +212,8 @@ class Meta_Sync {
 		}
 		self::ensure_default_settings( $post_id );
 		self::stamp_theme_inherit_controls_create_default( $post_id );
+		// Writer::patch fails only for a non-gallery post (ruled out above) or a malformed patch (the schema defaults are not).
+		self::stamp_motion_create_defaults( $post_id );
 	}
 
 	/** Targets whose canonical grouped/items state is already owned by a domain write. */
@@ -347,6 +371,9 @@ class Meta_Sync {
 
 		$grouped   = Settings\Adapter::to_grouped( $flat, $options );
 		$sanitized = Settings\Sanitizer::sanitize_grouped( $grouped );
+		if ( ! empty( $options['legacy_import'] ) ) {
+			Settings\Sanitizer::hydrate_legacy_social_enable( $sanitized['social'] );
+		}
 
 		/*
 		 * Schema sanitize maps empty filter arrays to default `['']`. Preserve an
@@ -1109,7 +1136,15 @@ class Meta_Sync {
 				unset( $v2['customizations'] );
 			}
 		}
-		return $v2;
+		if ( isset( $v2['showcase'] ) && is_array( $v2['showcase'] ) ) {
+			$v2['showcase'] = Settings\Sanitizer::without_legacy_showcase_center_scale( $v2['showcase'] );
+		}
+		// Watermark px saved before editor-qa ticket 18 read as shares (same as Sanitizer); the next save stores them.
+		if ( isset( $v2['watermark'] ) && is_array( $v2['watermark'] ) ) {
+			$v2['watermark'] = Settings\Watermark_Scale::migrate_grouped( $v2['watermark'] );
+		}
+		// Galleries saved before the Motion settings keep what they play; the next save stores it.
+		return Motion\Motion_Settings::with_existing_gallery_values( $v2 );
 	}
 
 	/**

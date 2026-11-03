@@ -1,6 +1,5 @@
 /**
  * Modula gallery edit — full-screen takeover (hides WP admin chrome).
- * Loaded only when modula_gallery_takeover_ui is enabled.
  *
  * The pre-React boot shell (mount, spinner, desktop-only notice) is shared with
  * the Albums editor: see takeover-boot.css.

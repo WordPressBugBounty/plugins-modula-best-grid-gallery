@@ -3,7 +3,9 @@
  * Loads a webpack chunk only when `openFlow` is set and the user is entitled.
  */
 import { lazy, useMemo } from '@wordpress/element';
-import { Spinner } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { Spinner } from 'admin-ui';
+import { AdminUiScope } from 'editor-shell';
 import {
 	getExtensionImportEntryByReactFlow,
 	isExtensionImportEntitled,
@@ -48,9 +50,12 @@ export default function TakeoverExtensionImportModals({
 				<div
 					className="modula-import-dialog__spinner-wrap modula-import-dialog__lazy-fallback"
 					role="status"
+					aria-label={__('Loading…', 'modula-best-grid-gallery')}
 					aria-live="polite"
 				>
-					<Spinner />
+					<AdminUiScope>
+						<Spinner />
+					</AdminUiScope>
 				</div>
 			}
 		>

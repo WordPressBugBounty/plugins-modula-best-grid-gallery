@@ -7,6 +7,8 @@
 
 namespace Modula\V2\Rest;
 
+use Modula\V2\Images\Adapter;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -33,40 +35,56 @@ class Listing_Gallery_Item_Counts {
 	}
 
 	/**
-	 * Count image vs video rows in a catalog (rows without `id` are ignored).
+	 * Count catalog rows by kind (rows without `id` are ignored). Content blocks and
+	 * shortcodes are their own kinds, never images.
 	 *
 	 * @param array<int, mixed> $images Catalog rows.
-	 * @return array{images: int, videos: int, galleries: int, total: int}
+	 * @return array{images: int, videos: int, blocks: int, shortcodes: int, galleries: int, total: int}
 	 */
 	public static function count_rows( $images ) {
+		$counts = array(
+			'images'     => 0,
+			'videos'     => 0,
+			'blocks'     => 0,
+			'shortcodes' => 0,
+			'galleries'  => 0,
+			'total'      => 0,
+		);
 		if ( ! is_array( $images ) ) {
-			return array(
-				'images'    => 0,
-				'videos'    => 0,
-				'galleries' => 0,
-				'total'     => 0,
-			);
+			return $counts;
 		}
 
-		$image_count = 0;
-		$video_count = 0;
 		foreach ( $images as $row ) {
 			if ( ! is_array( $row ) || ! isset( $row['id'] ) ) {
 				continue;
 			}
-			$id = (string) $row['id'];
-			if ( 0 === strpos( $id, 'video_' ) ) {
-				++$video_count;
-			} else {
-				++$image_count;
-			}
+			++$counts[ self::row_count_key( $row ) ];
+			++$counts['total'];
 		}
 
-		return array(
-			'images'    => $image_count,
-			'videos'    => $video_count,
-			'galleries' => 0,
-			'total'     => $image_count + $video_count,
-		);
+		return $counts;
+	}
+
+	/**
+	 * The count a catalog row adds to.
+	 *
+	 * Video rows (`video_*` ids) are checked first: their non-numeric id would
+	 * otherwise read as an embedded row.
+	 *
+	 * @param array<string, mixed> $row Catalog row with an `id`.
+	 * @return string One of images, videos, blocks, shortcodes.
+	 */
+	public static function row_count_key( array $row ) {
+		if ( 0 === strpos( (string) $row['id'], 'video_' ) ) {
+			return 'videos';
+		}
+		$kind = Adapter::get_item_kind( $row );
+		if ( Adapter::ITEM_KIND_CONTENT_BLOCK === $kind ) {
+			return 'blocks';
+		}
+		if ( Adapter::ITEM_KIND_SHORTCODE === $kind ) {
+			return 'shortcodes';
+		}
+		return 'images';
 	}
 }

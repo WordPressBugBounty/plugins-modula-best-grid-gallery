@@ -15,6 +15,7 @@ import { galleryUsesFancyboxLightbox } from '../utils/resolveGalleryItemLink';
  * @param {unknown[]}                          [options.items]        Display items from Redux (filtered or full).
  * @param {Object}                             [options.settings]     Grouped gallery settings.
  * @param {() => Promise<unknown[]>|unknown[]} [options.resolveItems] Async lightbox catalog resolver.
+ * @param {unknown[]}                          [options.catalogItems] All gallery rows, unfiltered.
  * @return {import('react').RefObject<HTMLDivElement|null>}
  */
 export function useModulaGalleryLightbox(config, options = {}) {
@@ -23,10 +24,12 @@ export function useModulaGalleryLightbox(config, options = {}) {
 	const itemsRef = useRef(options.items);
 	const settingsRef = useRef(options.settings);
 	const resolveItemsRef = useRef(options.resolveItems);
+	const catalogItemsRef = useRef(options.catalogItems);
 	configRef.current = config;
 	itemsRef.current = options.items;
 	settingsRef.current = options.settings;
 	resolveItemsRef.current = options.resolveItems;
+	catalogItemsRef.current = options.catalogItems;
 	const enabled = options.enabled !== false;
 
 	useEffect(() => {
@@ -45,6 +48,7 @@ export function useModulaGalleryLightbox(config, options = {}) {
 			items: itemsRef.current,
 			settings: settingsRef.current,
 			resolveItems: resolveItemsRef.current,
+			catalogItems: catalogItemsRef.current,
 		}));
 	}, [
 		enabled,
@@ -61,6 +65,7 @@ export function useModulaGalleryLightbox(config, options = {}) {
 		options.items,
 		options.settings,
 		options.resolveItems,
+		options.catalogItems,
 	]);
 
 	return hostRef;

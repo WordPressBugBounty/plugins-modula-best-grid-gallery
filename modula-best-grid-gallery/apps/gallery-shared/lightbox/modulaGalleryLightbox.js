@@ -11,7 +11,9 @@ import {
 	requestModulaLightboxOpen,
 } from './lightboxSessionLifecycle';
 import { releaseModulaGalleryItemPointerFocus } from './releaseModulaGalleryItemPointerFocus';
+import { bindModulaLightboxActivation } from './bindModulaLightboxActivation';
 import { buildModulaLightboxSlidesFromItems } from './buildModulaLightboxSlidesFromItems';
+import { withDeeplinkHashes } from './modulaDeeplinkFromHash';
 import {
 	buildLicenseCaptionHtml,
 	getLicenseEntry,
@@ -498,12 +500,17 @@ export async function openModulaGalleryLightboxAtRoot(
 	}
 	return requestModulaLightboxOpen(rootEl, async () => {
 		const items = await resolveLightboxSourceItems(context);
-		const slides = resolveModulaLightboxSlides({
-			items,
-			settings: context.settings,
-			config,
-			rootEl,
-		});
+		const slides = withDeeplinkHashes(
+			resolveModulaLightboxSlides({
+				items,
+				settings: context.settings,
+				config,
+				rootEl,
+			}),
+			context.catalogItems,
+			context.settings,
+			config
+		);
 		if (slides.length === 0) {
 			return null;
 		}
@@ -537,6 +544,7 @@ export async function openModulaGalleryLightboxAtRoot(
  *   items?: unknown[],
  *   settings?: object,
  *   resolveItems?: () => Promise<unknown[]>|unknown[],
+ *   catalogItems?: unknown[],
  *   openedViaKeyboard?: boolean,
  * }} args
  * @return {Promise<boolean>}
@@ -548,6 +556,7 @@ export async function openModulaGalleryLightboxFromClick({
 	items,
 	settings,
 	resolveItems,
+	catalogItems,
 	openedViaKeyboard = false,
 }) {
 	if (
@@ -566,12 +575,17 @@ export async function openModulaGalleryLightboxFromClick({
 			items,
 			resolveItems,
 		});
-		const slides = resolveModulaLightboxSlides({
-			items: sourceItems,
+		const slides = withDeeplinkHashes(
+			resolveModulaLightboxSlides({
+				items: sourceItems,
+				settings,
+				config,
+				rootEl,
+			}),
+			catalogItems,
 			settings,
-			config,
-			rootEl,
-		});
+			config
+		);
 		if (slides.length === 0) {
 			return null;
 		}
@@ -604,37 +618,6 @@ export async function openModulaGalleryLightboxFromClick({
 }
 
 /**
- * @param {Object} config
- * @return {boolean}
- */
-function isDoubleClickToOpenEnabled(config) {
-	const raw = config?.doubleClick ?? config?.mobileDoubleClick;
-	return raw === true || raw === 1 || raw === '1';
-}
-
-/**
- * Touch / coarse-pointer events need a wider double-tap window than OS mouse double-clicks.
- *
- * @param {Event} event
- * @return {boolean}
- */
-function isTouchLikeActivateEvent(event) {
-	if (!event || typeof event !== 'object') {
-		return false;
-	}
-	if (event.type === 'touchend' || event.type === 'touchstart') {
-		return true;
-	}
-	if (event.pointerType === 'touch' || event.pointerType === 'pen') {
-		return true;
-	}
-	if (event.sourceCapabilities && event.sourceCapabilities.firesTouchEvents) {
-		return true;
-	}
-	return false;
-}
-
-/**
  * @param {HTMLElement}           hostEl
  * @param {object|(() => object)} contextOrGetter Store context or legacy flat config getter.
  * @return {() => void}
@@ -651,6 +634,7 @@ export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 				items: value.items,
 				settings: value.settings,
 				resolveItems: value.resolveItems,
+				catalogItems: value.catalogItems,
 			};
 		}
 		return {
@@ -658,6 +642,7 @@ export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 			items: undefined,
 			settings: undefined,
 			resolveItems: undefined,
+			catalogItems: undefined,
 		};
 	};
 	const initialContext = resolveContext();
@@ -668,219 +653,25 @@ export function bindModulaGalleryLightbox(hostEl, contextOrGetter) {
 		return () => {};
 	}
 
-	/** @type {{ link: HTMLElement, at: number }|null} */
-	let pendingDoubleOpen = null;
-	/** Ignore the compatibility mouse click that follows a handled touchend. */
-	let suppressClickUntil = 0;
-	const DOUBLE_OPEN_MS_MOUSE = 350;
-	const DOUBLE_OPEN_MS_TOUCH = 500;
-
-	function clearPendingDoubleOpen() {
-		pendingDoubleOpen = null;
-	}
-
-	/**
-	 * @param {HTMLElement}         link
-	 * @param {{ touch?: boolean }} [options]
-	 * @return {boolean} True when this activation should open the lightbox.
-	 */
-	function consumeDoubleClickGate(link, options = {}) {
-		const config = resolveContext().config;
-		if (!isDoubleClickToOpenEnabled(config)) {
-			clearPendingDoubleOpen();
-			return true;
-		}
-		const touch = Boolean(options.touch);
-		const windowMs = touch ? DOUBLE_OPEN_MS_TOUCH : DOUBLE_OPEN_MS_MOUSE;
-		const now =
-			typeof performance !== 'undefined' ? performance.now() : Date.now();
-		if (
-			pendingDoubleOpen &&
-			pendingDoubleOpen.link === link &&
-			now - pendingDoubleOpen.at <= windowMs
-		) {
-			clearPendingDoubleOpen();
-			return true;
-		}
-		pendingDoubleOpen = { link, at: now };
-		window.setTimeout(() => {
-			if (pendingDoubleOpen?.link === link) {
-				clearPendingDoubleOpen();
-			}
-		}, windowMs + 50);
-		return false;
-	}
-
-	/**
-	 * @param {Event}       event
-	 * @param {HTMLElement} link
-	 * @return {boolean}
-	 */
-	function shouldOpenFromPointerEvent(event, link) {
-		const config = resolveContext().config;
-		if (!isDoubleClickToOpenEnabled(config)) {
-			return true;
-		}
-		const touch = isTouchLikeActivateEvent(event);
-		/*
-		 * Mouse: prefer native click.detail (2 on the second click of a double-click).
-		 * Touch: detail is always 1 — use a timed double-tap gate with a wider window.
-		 */
-		if (!touch && typeof event.detail === 'number' && event.detail > 0) {
-			clearPendingDoubleOpen();
-			return event.detail >= 2;
-		}
-		return consumeDoubleClickGate(link, { touch });
-	}
-
-	function onMouseDown(event) {
-		if (event.button !== 0) {
-			return;
-		}
-		/*
-		 * preventDefault on touch-derived mousedown often swallows the following
-		 * click on mobile — keep it mouse-only (focus-within hover cleanup).
-		 */
-		if (isTouchLikeActivateEvent(event)) {
-			return;
-		}
-		const link = resolveModulaLightboxClickLink(event, hostEl);
-		if (!link) {
-			return;
-		}
-		if (!galleryUsesFancyboxLightbox(resolveContext().config?.lightbox)) {
-			return;
-		}
-		event.preventDefault();
-	}
-
-	/**
-	 * @param {Event}                                                event
-	 * @param {{ fromTouchEnd?: boolean, skipDoubleGate?: boolean }} [options]
-	 */
-	function onActivate(event, options = {}) {
-		const target = event.target;
-		if (
-			target instanceof Element &&
-			target.closest('.modula-selection-handle')
-		) {
-			return;
-		}
-		const link = resolveModulaLightboxClickLink(event, hostEl);
-		if (!link) {
-			return;
-		}
-		event.preventDefault();
-
-		const openedViaKeyboard = event.type === 'keydown';
-		// Keyboard must open on first Enter/Space (a11y). Double-click gate is pointer-only.
-		if (
-			!openedViaKeyboard &&
-			!options.skipDoubleGate &&
-			!shouldOpenFromPointerEvent(event, link)
-		) {
-			return;
-		}
-
-		const context = resolveContext();
-		if (options.fromTouchEnd) {
-			suppressClickUntil =
-				(typeof performance !== 'undefined'
-					? performance.now()
-					: Date.now()) + 700;
-		}
-		openModulaGalleryLightboxFromClick({
-			rootEl: hostEl,
-			clickedLink: link,
-			config: context.config,
-			items: context.items,
-			settings: context.settings,
-			resolveItems: context.resolveItems,
-			openedViaKeyboard,
-		});
-	}
-
-	function onClick(event) {
-		const now =
-			typeof performance !== 'undefined' ? performance.now() : Date.now();
-		if (now < suppressClickUntil) {
-			event.preventDefault();
-			event.stopPropagation();
-			return;
-		}
-		/*
-		 * When double-tap mode is on, touchend owns the gesture so the
-		 * compatibility click does not reset / fight the pending tap state.
-		 */
-		if (
-			isTouchLikeActivateEvent(event) &&
-			isDoubleClickToOpenEnabled(resolveContext().config)
-		) {
-			event.preventDefault();
-			return;
-		}
-		onActivate(event);
-	}
-
-	function onTouchEnd(event) {
-		if (!isDoubleClickToOpenEnabled(resolveContext().config)) {
-			return;
-		}
-		// Multi-touch / remaining fingers — ignore.
-		if (event.touches && event.touches.length > 0) {
-			return;
-		}
-		const target = event.target;
-		if (
-			target instanceof Element &&
-			target.closest('.modula-selection-handle')
-		) {
-			return;
-		}
-		const link = resolveModulaLightboxClickLink(event, hostEl);
-		if (!link) {
-			return;
-		}
-		if (!galleryUsesFancyboxLightbox(resolveContext().config?.lightbox)) {
-			return;
-		}
-
-		/*
-		 * Claim the gesture so the browser does not zoom / synthesize a late
-		 * click that would look like a new first tap.
-		 */
-		if (event.cancelable) {
-			event.preventDefault();
-		}
-
-		if (!consumeDoubleClickGate(link, { touch: true })) {
-			suppressClickUntil =
-				(typeof performance !== 'undefined'
-					? performance.now()
-					: Date.now()) + 700;
-			return;
-		}
-
-		onActivate(event, { fromTouchEnd: true, skipDoubleGate: true });
-	}
-
-	function onKeyDown(event) {
-		if (event.key !== 'Enter' && event.key !== ' ') {
-			return;
-		}
-		onActivate(event);
-	}
-
-	hostEl.addEventListener('mousedown', onMouseDown);
-	hostEl.addEventListener('click', onClick);
-	hostEl.addEventListener('touchend', onTouchEnd, { passive: false });
-	hostEl.addEventListener('keydown', onKeyDown);
+	const unbindActivation = bindModulaLightboxActivation(hostEl, {
+		config: () => resolveContext().config,
+		resolveLink: (event) => resolveModulaLightboxClickLink(event, hostEl),
+		activate: (link, { openedViaKeyboard }) => {
+			const context = resolveContext();
+			openModulaGalleryLightboxFromClick({
+				rootEl: hostEl,
+				clickedLink: link,
+				config: context.config,
+				items: context.items,
+				settings: context.settings,
+				resolveItems: context.resolveItems,
+				catalogItems: context.catalogItems,
+				openedViaKeyboard,
+			});
+		},
+	});
 	return () => {
 		cancelModulaGalleryLightboxOpen(hostEl);
-		clearPendingDoubleOpen();
-		hostEl.removeEventListener('mousedown', onMouseDown);
-		hostEl.removeEventListener('click', onClick);
-		hostEl.removeEventListener('touchend', onTouchEnd);
-		hostEl.removeEventListener('keydown', onKeyDown);
+		unbindActivation();
 	};
 }

@@ -71,32 +71,10 @@ final class Gallery_Css_Generator {
 		}
 		$code = isset( $data['code'] ) ? trim( $data['code'] ) : '';
 		if ( '' !== $code ) {
-			$data['code'] = self::sanitize_generated_css( $code );
+			// The same rule the settings save applies to Custom CSS.
+			$data['code'] = trim( \Modula_Helper::sanitize_custom_css( $code ) );
 		}
 
 		return $data;
-	}
-
-	/**
-	 * Strip obviously unsafe CSS constructs before returning to the editor.
-	 *
-	 * @param string $css Generated CSS.
-	 * @return string
-	 */
-	private static function sanitize_generated_css( $css ) {
-		$patterns = array(
-			'/@import\b[^;]+;?/i',
-			'/expression\s*\([^)]*\)/i',
-			'/javascript\s*:/i',
-			'/behavior\s*:\s*[^;]+;?/i',
-			'/<\s*script\b[^>]*>.*?<\s*\/\s*script\s*>/is',
-		);
-
-		$clean = (string) $css;
-		foreach ( $patterns as $pattern ) {
-			$clean = preg_replace( $pattern, '', $clean );
-		}
-
-		return trim( $clean );
 	}
 }

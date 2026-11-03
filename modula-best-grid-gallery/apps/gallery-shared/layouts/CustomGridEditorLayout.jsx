@@ -20,12 +20,13 @@ import EditorPreviewPageBreakDivider from '../components/EditorPreviewPageBreakD
 import {
 	buildCustomGridRglLayout,
 	chunkHasMixedExplicitAndImplicit,
-	computeCellSize,
 	getItemPixelDimensions,
-	getResponsiveForCustomGrid,
 	isGridItemLocked,
 } from '../utils/customGridLayout';
-import { galleryItemRowKey } from '../utils/galleryItemIdentity';
+import {
+	buildCustomGridEditorSections,
+	customGridGestureLayoutSignature,
+} from '../utils/customGridEditorSections';
 import { splitCustomGridDisplayChunks } from '../utils/customGridDisplayChunks';
 import { getCustomGridEditorDragCancelSelector } from '../utils/customGridEditorDrag';
 import { applyCustomGridLayoutSectionToStore } from '../utils/applyCustomGridLayoutSectionToStore';
@@ -105,6 +106,10 @@ function CustomGridEditorRglLayout({
 	const [guide, setGuide] = useState(null);
 	const [gestureEpoch, setGestureEpoch] = useState(0);
 	const previewAdmin = useContext(GalleryPreviewAdminActionsContext);
+	// Cancel reads the latest actions without changing identity: its listeners
+	// and the cancel-on-layout-change effect must not re-run on a new context value.
+	const previewAdminRef = useRef(previewAdmin);
+	previewAdminRef.current = previewAdmin;
 	const { scale: customGridPreviewScale } =
 		useGalleryPreviewCustomGridScale();
 	/**
@@ -208,15 +213,14 @@ function CustomGridEditorRglLayout({
 				sectionIndex: null,
 				layout: null,
 			};
-			if (!gridEditable) {
-				return;
-			}
 			const finalLayout = Array.isArray(layout) ? layout : buffered;
-			if (Array.isArray(finalLayout)) {
+			if (gridEditable && Array.isArray(finalLayout)) {
 				commitSectionLayout(sectionIndex, finalLayout, kind);
 			}
+			// After the commit, so the held save includes the gesture's result.
+			previewAdmin?.onCustomGridLayoutInteractionEnd?.();
 		},
-		[gridEditable, commitSectionLayout]
+		[gridEditable, commitSectionLayout, previewAdmin]
 	);
 
 	const cancelInteraction = useCallback(() => {
@@ -231,7 +235,10 @@ function CustomGridEditorRglLayout({
 		setGuide(null);
 		// RGL owns its live layout; remount from the unchanged committed catalog.
 		setGestureEpoch((value) => value + 1);
+		previewAdminRef.current?.onCustomGridLayoutInteractionEnd?.();
 	}, []);
+	// Unmounting mid-gesture (e.g. a viewport switch) must not keep saves held.
+	useEffect(() => cancelInteraction, [cancelInteraction]);
 	useEffect(() => {
 		const onKey = (event) => {
 			if (event.key === 'Escape') {
@@ -248,9 +255,6 @@ function CustomGridEditorRglLayout({
 			window.removeEventListener('pointercancel', cancelInteraction);
 		};
 	}, [cancelInteraction]);
-	useLayoutEffect(() => {
-		cancelInteraction();
-	}, [gridLayoutWidth, gridEditable, config, chunks, cancelInteraction]);
 	const updateGuide = (sectionIndex, layout, item, columns) => {
 		if (!interactionRef.current.kind) {
 			return;
@@ -266,46 +270,24 @@ function CustomGridEditorRglLayout({
 		});
 	};
 
-	const pageSections = useMemo(() => {
-		if (gridLayoutWidth <= 0) {
-			return [];
-		}
-		const { columns, gutter, enableResponsive } =
-			getResponsiveForCustomGrid(config);
-		const cellSize = computeCellSize(gridLayoutWidth, columns, gutter);
-		return chunks.map((chunk, si) => {
-			if (!chunk.length) {
-				return {
-					chunk,
-					layout: [],
-					gridConfig: null,
-					cellSize: 0,
-					columns,
-					gutter,
-					enableResponsive,
-					rglKey: `empty-${si}`,
-				};
-			}
-			const { layout, gridConfig } = buildCustomGridRglLayout(
-				chunk,
+	const pageSections = useMemo(
+		() => buildCustomGridEditorSections(chunks, gridLayoutWidth, config),
+		[chunks, gridLayoutWidth, config]
+	);
+	// By value: a save response recreates config and chunks with the same
+	// values, and must not cancel the drag or resize in progress (ticket 75).
+	const gestureLayoutSignature = useMemo(
+		() =>
+			customGridGestureLayoutSignature(
 				gridLayoutWidth,
-				config
-			);
-			return {
-				chunk,
-				layout,
-				gridConfig,
-				cellSize,
-				columns,
-				gutter,
-				enableResponsive,
-				/** Remount RGL when page membership changes — stale key positions leave gaps. */
-				rglKey: chunk
-					.map((item, idx) => galleryItemRowKey(item, idx))
-					.join('|'),
-			};
-		});
-	}, [chunks, gridLayoutWidth, config]);
+				gridEditable,
+				pageSections
+			),
+		[gridLayoutWidth, gridEditable, pageSections]
+	);
+	useLayoutEffect(() => {
+		cancelInteraction();
+	}, [gestureLayoutSignature, cancelInteraction]);
 
 	useLayoutEffect(() => {
 		if (!gridEditable || gridLayoutWidth <= 0) {

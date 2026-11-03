@@ -9,6 +9,7 @@ import { commitPreviewCatalog } from '../utils/previewItemsCommit';
 import { getGalleryPreviewReduxStore } from '../utils/previewReduxStoreRef';
 import { saveMergedGalleryItems } from '../api/galleryUploadApi';
 import {
+	getAddMediaDialogTab,
 	getAddNewMenuDefinition,
 	getTakeoverAddNewMenuDefinition,
 	getTakeoverVideoGalleryAddNewMenuDefinition,
@@ -18,8 +19,6 @@ import {
 	filterAddNewRowsForBoundGallery,
 	getBoundGallerySummaryFromEditor,
 } from '../utils/boundGalleryChromePolicy';
-import { getTakeoverPreviewLibraryAttachmentIds } from '../utils/getTakeoverPreviewLibraryAttachmentIds';
-import { openTakeoverMediaLibrary } from '../utils/openTakeoverMediaLibrary';
 import { openTakeoverVideoMediaLibrary } from '../utils/openTakeoverVideoMediaLibrary';
 import { resolveTakeoverPrimaryAddNewAction } from '../utils/resolveTakeoverPrimaryAddNewAction';
 
@@ -40,19 +39,19 @@ const PREVIEW_IMPORT_REACT_FLOWS = new Set([
  *   galleryId: number,
  *   uploadPosition: 'start' | 'end',
  *   onOpenPreviewImport?: (reactFlow: 'folder' | 'zip' | 'content-galleries' | 'instagram' | 'video' | 'video-playlist') => void,
- *   onTakeoverOpenUpload?: () => void,
+ *   onOpenAddMedia?: (tab: 'upload' | 'library') => void,
  *   onLibraryAdded?: () => void,
  *   onLibraryError?: (msg: string) => void,
  *   runPersistTask?: (fn: () => void | Promise<void>) => Promise<void>,
  *   galleryType?: string,
- * }} args
+ * }} args `onOpenAddMedia` opens the Add media dialog (takeover only).
  */
 export function useTakeoverPreviewAddNewMenu({
 	editor,
 	galleryId,
 	uploadPosition,
 	onOpenPreviewImport,
-	onTakeoverOpenUpload,
+	onOpenAddMedia,
 	onLibraryAdded,
 	onLibraryError,
 	runPersistTask,
@@ -83,20 +82,6 @@ export function useTakeoverPreviewAddNewMenu({
 			galleryId,
 			uploadPosition,
 			runPersistTask,
-			onSuccess: () => onLibraryAdded?.(),
-			onError: (msg) => onLibraryError?.(msg),
-		});
-	};
-
-	const openImageLibraryPicker = () => {
-		if (!galleryId) {
-			return;
-		}
-		openTakeoverMediaLibrary({
-			galleryId,
-			uploadPosition,
-			runPersistTask,
-			existingAttachmentIds: getTakeoverPreviewLibraryAttachmentIds(),
 			onSuccess: () => onLibraryAdded?.(),
 			onError: (msg) => onLibraryError?.(msg),
 		});
@@ -149,7 +134,7 @@ export function useTakeoverPreviewAddNewMenu({
 			openVideoLibraryPicker();
 			return;
 		}
-		openImageLibraryPicker();
+		onOpenAddMedia?.('library');
 	};
 
 	const handleRowAction = (row) => {
@@ -169,17 +154,9 @@ export function useTakeoverPreviewAddNewMenu({
 			);
 			return;
 		}
-		if (
-			editor.takeover &&
-			row.id === 'upload' &&
-			galleryId &&
-			typeof onTakeoverOpenUpload === 'function'
-		) {
-			onTakeoverOpenUpload();
-			return;
-		}
-		if (editor.takeover && row.id === 'library' && galleryId) {
-			openImageLibraryPicker();
+		const addMediaTab = getAddMediaDialogTab(row);
+		if (editor.takeover && addMediaTab && galleryId) {
+			onOpenAddMedia?.(addMediaTab);
 			return;
 		}
 		if (editor.takeover && row.reactFlow === 'content-block' && galleryId) {

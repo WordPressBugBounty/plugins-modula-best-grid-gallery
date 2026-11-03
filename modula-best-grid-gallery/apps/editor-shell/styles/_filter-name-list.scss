@@ -1,0 +1,88 @@
+// The filter name list (`fields/FilterNameListControl.jsx`): filter names as
+// chips, then a "New filter" field and Add (canvas: 6px gaps). Mixins only:
+// this file emits no CSS. Each editor includes `filter-name-list` with its
+// panel styles and `filter-name-list-admin-ui` with its admin-ui field
+// styles, which load later.
+@use 'spacing' as *;
+
+@mixin filter-name-list {
+
+	.modula-settings-editor__filter-name-list {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: $mod-space-8;
+		max-width: 100%;
+	}
+
+	.modula-settings-editor__filter-name-list-chips {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: $mod-space-6;
+	}
+
+	.modula-settings-editor__filter-name-list-add {
+		display: flex;
+		gap: $mod-space-6;
+
+		.modula-admin-field {
+			flex: 1 1 auto;
+			min-width: 0;
+		}
+	}
+
+	.modula-settings-editor__filter-name-list-chip-wrap {
+		display: inline-flex;
+		max-width: 100%;
+	}
+
+	.modula-settings-editor__filter-name-list-chip-edit {
+		display: inline-flex;
+		min-width: 120px;
+		max-width: 220px;
+	}
+
+	.modula-settings-editor__filter-name-list-help {
+		margin: 0;
+		font-size: 12px;
+		line-height: 1.45;
+		color: var(--mod-se-ink-3, #8b8b93);
+	}
+}
+
+@mixin filter-name-list-admin-ui {
+
+	// Add takes the fields' look instead of the 40px page button: 32px, field
+	// border, 4px corners (canvas).
+	.modula-admin-ui .modula-settings-editor__filter-name-list-add .modula-admin-button {
+		height: var(--modula-admin-control-height);
+		padding: 0 14px;
+		border-color: var(--modula-admin-border-field);
+		border-radius: var(--modula-admin-radius-sm);
+		font-weight: 500;
+	}
+
+	// Filter chips: the name renames, the cross removes.
+	.modula-admin-ui .modula-settings-editor__filter-name-list-chip-edit {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: inherit;
+		font: inherit;
+		cursor: pointer;
+
+		&:disabled {
+			cursor: default;
+		}
+	}
+
+	.modula-admin-ui .modula-settings-editor__filter-name-list-chip-count {
+		color: var(--modula-admin-ink-muted);
+		font-variant-numeric: tabular-nums;
+	}
+}

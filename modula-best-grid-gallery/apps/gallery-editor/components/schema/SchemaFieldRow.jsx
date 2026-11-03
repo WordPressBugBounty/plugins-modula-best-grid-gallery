@@ -2,6 +2,13 @@
  * Single schema field bound to TanStack Form via dotted name (group.key).
  */
 
+import {
+	AdminUiScope,
+	DependentRowIcon,
+	fieldControlId,
+	fieldRowLayout,
+	hostRowReset,
+} from 'editor-shell';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
 import { validateFieldValue } from '../../logic/validateFieldValue';
 import { resolveFieldRowLabel } from '../../logic/fieldRowLabel';
@@ -10,16 +17,12 @@ import { useGalleryTypeChangeContext } from '../../context/GalleryTypeChangeCont
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 import FieldControl from '../field/FieldControl';
 import EditorUpsellBlurb from '../upsell/EditorUpsellBlurb';
-import SpeedupHelpBlurb from '../upsell/SpeedupHelpBlurb';
 import GalleryTypeChangeConfirmModal from '../modals/GalleryTypeChangeConfirmModal';
 import FieldHelpInfoTip from './FieldHelpInfoTip';
 import SchemaFieldDirtyChrome from './SchemaFieldDirtyChrome';
 import SchemaFieldRowToggleGrid from './SchemaFieldRowToggleGrid';
 import SchemaFieldRowToggleWithNestedGrid from './SchemaFieldRowToggleWithNestedGrid';
-import ExifResultPreview from '../field/ExifResultPreview';
-import DeeplinkUrlPreview from '../field/DeeplinkUrlPreview';
-import GalleryDefaultsShellField from '../field/GalleryDefaultsShellField';
-import InstagramAccountSlot from '../field/InstagramAccountSlot';
+import { getSchemaRowRenderer } from './schemaRowKinds';
 import {
 	getLightboxUpsellExtensionSlugs,
 	resolveExtensionUpsellBarrier,
@@ -32,22 +35,43 @@ import {
 	resetSettingsFieldValue,
 } from '../../logic/settingsFieldDefault';
 import { isEditorDisabledWhen } from '../../logic/fieldVisibility';
-import HoverEffectPresetRow from '../hover-effect-builder/HoverEffectPresetRow';
+import { isCompressionFieldUnavailable } from '../../logic/compressionAvailability';
 
 /**
  * @param {Object}                                     props
  * @param {string}                                     props.groupKey
  * @param {Object}                                     props.field
  * @param {boolean}                                    props.disabled
- * @param {'default'|'inline'|'controlOnly'|'stacked'} [props.variant]            inline = cell inside a composite row; controlOnly = control without label (device tabs); stacked = label above control
+ * @param {'default'|'inline'|'controlOnly'|'stacked'} [props.variant]            inline = cell inside a composite row; controlOnly = control without label (device tabs); stacked = settings panel row, laid out by `fieldRowLayout`
  * @param {boolean}                                    [props.hierarchicalIndent] Child field under a collapsible group
+ * @param {Object}                                     [props.dependentsReset]    Reset of the headless box under this field (settings panel)
  */
-export default function SchemaFieldRow({
+export default function SchemaFieldRow(props) {
+	// Rows also render outside the settings panel (metabox editor, modals),
+	// so each brings the admin-ui tokens its reset dot and controls need.
+	return (
+		<AdminUiScope>
+			<SchemaFieldRowContent {...props} />
+		</AdminUiScope>
+	);
+}
+
+/**
+ * @param {Object}                                     props
+ * @param {string}                                     props.groupKey
+ * @param {Object}                                     props.field
+ * @param {boolean}                                    props.disabled
+ * @param {'default'|'inline'|'controlOnly'|'stacked'} [props.variant]
+ * @param {boolean}                                    [props.hierarchicalIndent]
+ * @param {Object}                                     [props.dependentsReset]    Reset of the headless box under this field (settings panel); the row's reset covers it.
+ */
+function SchemaFieldRowContent({
 	groupKey,
 	field,
 	disabled,
 	variant = 'default',
 	hierarchicalIndent = false,
+	dependentsReset,
 }) {
 	const { form } = useGallerySettingsFormBundle();
 	const sharedGalleryTypeConfirm = useGalleryTypeChangeContext();
@@ -104,207 +128,21 @@ export default function SchemaFieldRow({
 	/** Whole-group Lite read-only — dims the row (`--locked`). Not used for per-field `editorDisabledInLite`. */
 	const rowLocked = disabled;
 	const controlDisabled =
-		disabled || disabledByLiteSchema || omitControlInLite;
+		disabled ||
+		disabledByLiteSchema ||
+		omitControlInLite ||
+		isCompressionFieldUnavailable(schemaObj, editor);
 
-	if (field.control?.kind === 'hoverEffectBuilder') {
+	const RowKind = getSchemaRowRenderer(field.control?.kind);
+	if (RowKind) {
 		return (
-			<HoverEffectPresetRow
+			<RowKind
 				field={field}
-				labelId={`modula-settings-field-${String(field.groupedPath || 'hover.effectBuilder').replace(/[^a-z0-9.-]/gi, '-')}`}
+				fieldName={fieldName}
+				label={label}
+				rowLocked={rowLocked}
+				omitControlInLite={omitControlInLite}
 			/>
-		);
-	}
-
-	if (field.control?.kind === 'heading') {
-		const compactHeading = Boolean(field.editorUi?.compactHeading);
-		const baseClass = `modula-settings-editor__field-row modula-settings-editor__field-row--section-heading${
-			compactHeading
-				? ' modula-settings-editor__field-row--compact-heading'
-				: ''
-		}${rowLocked ? ' modula-settings-editor__field-row--locked' : ''}`;
-		const headingInner = (
-			<form.Field name={fieldName}>
-				{() => (
-					<div className="modula-settings-editor__section-heading-inner">
-						<span className="modula-settings-editor__section-heading-label">
-							{label}
-						</span>
-						<FieldHelpInfoTip
-							field={field}
-							path={field.groupedPath}
-						/>
-					</div>
-				)}
-			</form.Field>
-		);
-		if (
-			schemaObj?.editorDisabledWhen &&
-			typeof schemaObj.editorDisabledWhen === 'object'
-		) {
-			return (
-				<form.Subscribe selector={(s) => s.values}>
-					{(values) => (
-						<div
-							className={`${baseClass}${
-								isEditorDisabledWhen(schemaObj, values)
-									? ' modula-settings-editor__field-row--disabled-when'
-									: ''
-							}`}
-						>
-							{headingInner}
-						</div>
-					)}
-				</form.Subscribe>
-			);
-		}
-		return <div className={baseClass}>{headingInner}</div>;
-	}
-
-	if (field.control?.kind === 'infoCallout') {
-		const calloutText =
-			typeof field.editorDescription === 'string' &&
-			field.editorDescription.trim() !== ''
-				? field.editorDescription.trim()
-				: label;
-		const baseClass = `modula-settings-editor__field-row modula-settings-editor__field-row--info-callout${
-			rowLocked ? ' modula-settings-editor__field-row--locked' : ''
-		}`;
-		const calloutInner = (
-			<form.Field name={fieldName}>
-				{() => (
-					<p className="modula-settings-editor__info-callout">
-						<span
-							className="modula-settings-editor__info-callout-icon"
-							aria-hidden="true"
-						>
-							i
-						</span>
-						<span className="modula-settings-editor__info-callout-text">
-							{calloutText}
-						</span>
-					</p>
-				)}
-			</form.Field>
-		);
-		if (
-			schemaObj?.editorDisabledWhen &&
-			typeof schemaObj.editorDisabledWhen === 'object'
-		) {
-			return (
-				<form.Subscribe selector={(s) => s.values}>
-					{(values) => (
-						<div
-							className={`${baseClass}${
-								isEditorDisabledWhen(schemaObj, values)
-									? ' modula-settings-editor__field-row--disabled-when'
-									: ''
-							}`}
-						>
-							{calloutInner}
-						</div>
-					)}
-				</form.Subscribe>
-			);
-		}
-		return <div className={baseClass}>{calloutInner}</div>;
-	}
-
-	if (field.control?.kind === 'speedupHelp') {
-		return (
-			<div className="modula-settings-editor__field-row modula-settings-editor__field-row--help-only">
-				<SpeedupHelpBlurb />
-			</div>
-		);
-	}
-
-	if (field.control?.kind === 'exifResultPreview') {
-		const baseClass =
-			'modula-settings-editor__field-row modula-settings-editor__field-row--exif-result';
-		const previewInner = (
-			<form.Field name={fieldName}>
-				{() => <ExifResultPreview />}
-			</form.Field>
-		);
-		if (
-			schemaObj?.editorDisabledWhen &&
-			typeof schemaObj.editorDisabledWhen === 'object'
-		) {
-			return (
-				<form.Subscribe selector={(s) => s.values}>
-					{(values) => (
-						<div
-							className={`${baseClass}${
-								isEditorDisabledWhen(schemaObj, values)
-									? ' modula-settings-editor__field-row--disabled-when'
-									: ''
-							}`}
-						>
-							{previewInner}
-						</div>
-					)}
-				</form.Subscribe>
-			);
-		}
-		return <div className={baseClass}>{previewInner}</div>;
-	}
-
-	if (field.control?.kind === 'deeplinkUrlPreview') {
-		const baseClass =
-			'modula-settings-editor__field-row modula-settings-editor__field-row--deeplink-url';
-		const previewInner = (
-			<form.Field name={fieldName}>
-				{() => <DeeplinkUrlPreview />}
-			</form.Field>
-		);
-		if (
-			schemaObj?.editorDisabledWhen &&
-			typeof schemaObj.editorDisabledWhen === 'object'
-		) {
-			return (
-				<form.Subscribe selector={(s) => s.values}>
-					{(values) => (
-						<div
-							className={`${baseClass}${
-								isEditorDisabledWhen(schemaObj, values)
-									? ' modula-settings-editor__field-row--disabled-when'
-									: ''
-							}`}
-						>
-							{previewInner}
-						</div>
-					)}
-				</form.Subscribe>
-			);
-		}
-		return <div className={baseClass}>{previewInner}</div>;
-	}
-
-	if (field.control?.kind === 'galleryDefaultsShell') {
-		if (omitControlInLite) {
-			return (
-				<div className="modula-settings-editor__field-row modula-settings-editor__field-row--gallery-defaults-shell">
-					<form.Field name={fieldName}>
-						{() => <EditorUpsellBlurb field={field} />}
-					</form.Field>
-				</div>
-			);
-		}
-		return (
-			<div className="modula-settings-editor__field-row modula-settings-editor__field-row--gallery-defaults-shell">
-				<form.Field name={fieldName}>
-					{() => <GalleryDefaultsShellField />}
-				</form.Field>
-			</div>
-		);
-	}
-
-	if (field.control?.kind === 'instagramAccount') {
-		return (
-			<div className="modula-settings-editor__field-row modula-settings-editor__field-row--instagram-account">
-				<form.Field name={fieldName}>
-					{() => <InstagramAccountSlot />}
-				</form.Field>
-			</div>
 		);
 	}
 
@@ -469,6 +307,7 @@ export default function SchemaFieldRow({
 						>
 							<div className="modula-settings-editor__inline-field-label-line">
 								<SchemaFieldDirtyChrome
+									label={label}
 									dirty={
 										!isSettingsValueAtDefault(
 											getByPath(
@@ -490,7 +329,9 @@ export default function SchemaFieldRow({
 									<span className="modula-settings-editor__field-label-with-tip">
 										<label
 											className="modula-settings-editor__inline-field-label"
-											htmlFor={`modula-field-${field.groupedPath}`}
+											htmlFor={fieldControlId(
+												field.groupedPath
+											)}
 										>
 											{label}
 										</label>
@@ -558,12 +399,29 @@ export default function SchemaFieldRow({
 				const disabledByWhen = disabledWhenRule
 					? isEditorDisabledWhen(schemaObj, values)
 					: false;
+				const rowReset = hostRowReset(
+					{
+						isDirty: !isSettingsValueAtDefault(
+							getByPath(values, field.groupedPath),
+							field.schema
+						),
+						reset: () => {
+							resetSettingsFieldValue(
+								form,
+								fieldName,
+								field.schema,
+								field.groupedPath
+							);
+						},
+					},
+					dependentsReset
+				);
 				return (
 					<>
 						<div
 							className={`modula-settings-editor__field-row${
 								variant === 'stacked'
-									? ' modula-settings-editor__field-row--stacked'
+									? ` modula-settings-editor__field-row--stacked modula-settings-editor__field-row--layout-${fieldRowLayout(field)}`
 									: ''
 							}${
 								rowLocked
@@ -581,29 +439,21 @@ export default function SchemaFieldRow({
 						>
 							<div className="modula-settings-editor__field-label-col">
 								<div className="modula-settings-editor__field-label-line">
+									<DependentRowIcon />
 									<SchemaFieldDirtyChrome
-										dirty={
-											!isSettingsValueAtDefault(
-												getByPath(
-													values,
-													field.groupedPath
-												),
-												field.schema
-											)
-										}
-										onReset={() => {
-											resetSettingsFieldValue(
-												form,
-												fieldName,
-												field.schema,
-												field.groupedPath
-											);
-										}}
+										label={label}
+										withDependents={Boolean(
+											dependentsReset
+										)}
+										dirty={rowReset.isDirty}
+										onReset={rowReset.reset}
 									>
 										<span className="modula-settings-editor__field-label-with-tip">
 											<label
 												className="modula-settings-editor__field-label"
-												htmlFor={`modula-field-${field.groupedPath}`}
+												htmlFor={fieldControlId(
+													field.groupedPath
+												)}
 											>
 												{label}
 											</label>

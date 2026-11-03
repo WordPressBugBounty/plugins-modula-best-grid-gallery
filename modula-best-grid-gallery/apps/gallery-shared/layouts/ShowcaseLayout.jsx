@@ -18,6 +18,7 @@ import {
 	resolveShowcaseActiveMarginX,
 	resolveShowcaseTrackBoxes,
 	resolveShowcaseTrackHeight,
+	resolveShowcaseVisibleCount,
 } from './showcase/showcaseModel';
 import { useShowcaseCarousel } from './showcase/useShowcaseCarousel';
 import ShowcaseSlide from './showcase/ShowcaseSlide';
@@ -91,7 +92,6 @@ export default function ShowcaseLayout() {
 
 	const mobileSimplify = showcase.mobileSimplify !== false;
 	const simplify = isMobile && mobileSimplify;
-	const visibleCount = simplify ? 1 : showcase.visibleCount || 3;
 	const gap = Number.isFinite(showcase.gap) ? showcase.gap : DEFAULT_GAP;
 	const rawCenterScale = Number(showcase.centerScale);
 	const centerScale = simplify
@@ -99,8 +99,6 @@ export default function ShowcaseLayout() {
 		: Number.isFinite(rawCenterScale) && rawCenterScale > 1
 			? Math.max(1.1, rawCenterScale)
 			: DEFAULT_CENTER_SCALE;
-	const centerBias =
-		list.length >= 2 || showcase.centerBias !== 'left' ? 'center' : 'left';
 	const arrowPosition = showcase.arrowPosition || 'bottom-right';
 
 	const slideKeys = useMemo(
@@ -128,13 +126,11 @@ export default function ShowcaseLayout() {
 		[list, slideKeys, measuredAr, config]
 	);
 
-	const loopWindowSize = useMemo(() => {
-		if (simplify || list.length <= 1) {
-			return 1;
-		}
-		const requested = Math.max(3, Math.round(Number(visibleCount) || 3));
-		return requested % 2 === 0 ? requested + 1 : requested;
-	}, [simplify, list.length, visibleCount]);
+	const visibleCount = resolveShowcaseVisibleCount({
+		visibleCount: showcase.visibleCount,
+		itemCount: list.length,
+		simplify,
+	});
 
 	/*
 	 * Height is stable for the gallery (worst-case window with scaled center),
@@ -146,7 +142,7 @@ export default function ShowcaseLayout() {
 		centerScale,
 		mobile: simplify,
 		aspectRatios,
-		windowSize: loopWindowSize,
+		visibleCount,
 	});
 
 	const copies = infinite ? 3 : 1;
@@ -169,7 +165,6 @@ export default function ShowcaseLayout() {
 		viewportWidth: viewportWidth || 960,
 		gap,
 		centerScale,
-		centerBias,
 	});
 	const translateX = baseTranslate + (isDragging ? dragOffset : 0);
 	const animateTransform = !isDragging && !suppressTransition;
@@ -214,6 +209,8 @@ export default function ShowcaseLayout() {
 			<div
 				ref={viewportRef}
 				className="modula-showcase__viewport"
+				// The entrance plays once on the shown slides; clones slide in as they are.
+				data-modula-entrance-strip=""
 				tabIndex={0}
 				role="region"
 				aria-roledescription="carousel"

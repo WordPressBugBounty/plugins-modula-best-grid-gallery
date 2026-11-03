@@ -1,0 +1,1460 @@
+@use "../admin-ui/styles";
+@use "../admin-ui/styles/mixins";
+
+#wpcontent {
+	padding-left: 0;
+}
+
+.modula-content-page-wrap {
+	margin: 0;
+}
+
+/* The root keeps its old id: Pro's bulk editor and presets detect the page by it. */
+#modula-gallery-listing-root {
+	min-height: 60vh;
+}
+
+@mixin listing-control-tokens {
+	/* Listing colour tokens (the listing is outside the gallery editor chrome). */
+	--mod-ui-accent: #2271b1;
+	--mod-ui-accent-ink: #135e96;
+	--mod-ui-accent-soft: rgba(34, 113, 177, 0.18);
+	--mod-ui-ink: #1e1e1e;
+	--mod-ui-ink-2: #50575e;
+	--mod-ui-ink-3: #757575;
+	--mod-ui-line: #c3c4c7;
+	--mod-ui-chrome-2: #f0f0f1;
+	--mod-ui-shadow-sm: 0 1px 1px rgba(0, 0, 0, 0.04);
+	--mod-ui-duration-fast: 0.12s;
+
+	/* Unified toolbar control chrome */
+	--listing-control-height: 40px;
+	--listing-control-radius: 10px;
+	--listing-control-border: #c3c4c7;
+	--listing-control-focus-border: var(--mod-ui-accent);
+	--listing-control-focus-ring: 0 0 0 1px var(--mod-ui-accent);
+
+}
+
+.modula-content-page {
+
+	@include listing-control-tokens;
+}
+
+/* The header and section tabs span the page, as on the design boards. */
+.modula-admin-ui.modula-content-page__chrome {
+	background: var(--modula-admin-surface);
+}
+
+/* New album and New gallery sit closer together than the bell (board: 10px). */
+.modula-content-page__create {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+/* A section upsell in place of the list (board 6: 88px 40px around it). */
+.modula-content-page__upsell {
+	display: flex;
+	justify-content: center;
+	padding: 88px var(--modula-admin-page-gutter);
+}
+
+/* The list: toolbar, table and footer inside the page gutter. */
+.modula-content-page__list {
+	padding: 0 var(--modula-admin-page-gutter) 40px;
+}
+
+.modula-content-page__notice {
+	margin-top: 20px;
+}
+
+/* Above the toolbar, in the list's gutter like the notices. */
+.modula-content-page__license-banner {
+	margin-top: 20px;
+}
+
+/* Board: a 76px row; search 340px, the segments, then Sort at the end. */
+.modula-content-page__toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 16px;
+	min-height: 76px;
+	padding: 17px 0;
+	box-sizing: border-box;
+}
+
+.modula-content-page__search {
+	position: relative;
+	flex: 0 1 340px;
+	min-width: 200px;
+}
+
+/* Clear trash and the bulk bar's Move to trash / Delete permanently. */
+.modula-admin-ui .modula-content-page__clear-trash,
+.modula-admin-ui .modula-content-page__bulk-bar-action.is-destructive {
+	color: var(--modula-admin-danger);
+}
+
+.modula-content-page__bulk-bar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+/* Sort: the label and a menu select, pushed to the end of the toolbar. */
+.modula-content-page__sort {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-inline-start: auto;
+	color: var(--modula-admin-ink-soft);
+	font-size: var(--modula-admin-text-control);
+}
+
+.modula-content-page__sort-trigger {
+	@include mixins.button-reset;
+	display: inline-flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	box-sizing: border-box;
+	min-width: 170px;
+	height: 42px;
+	padding: 0 12px;
+	border: 1px solid var(--modula-admin-border-field);
+	border-radius: var(--modula-admin-radius-sm);
+	background: var(--modula-admin-surface);
+	color: var(--modula-admin-ink);
+
+	&:hover {
+		border-color: var(--modula-admin-ink);
+	}
+
+	&:focus-visible {
+		@include mixins.focus-ring;
+	}
+}
+
+.modula-content-page__search-icon-wrap {
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	color: var(--modula-admin-ink-soft);
+	pointer-events: none;
+	z-index: 1;
+
+	svg {
+		display: block;
+		width: 16px;
+		height: 16px;
+		fill: currentColor;
+	}
+}
+
+// Board: 42px, the segment grey at rest, white with an ink border on focus.
+// wp-admin `#wpbody-content input[type=search]` overrides border-radius and padding.
+.modula-content-page-wrap .modula-content-page input.modula-content-page__search-input {
+	box-sizing: border-box;
+	display: block;
+	width: 100%;
+	min-height: 42px;
+	height: 42px;
+	margin: 0;
+	padding: 0 36px 0 38px !important;
+	border: 1px solid transparent !important;
+	border-radius: var(--modula-admin-radius-sm) !important;
+	background: var(--modula-admin-surface-segment) !important;
+	background-image: none !important;
+	color: var(--modula-admin-ink) !important;
+	font: inherit;
+	font-size: var(--modula-admin-text-control);
+	line-height: 20px;
+	appearance: none;
+	-webkit-appearance: none;
+	box-shadow: none !important;
+
+	&::placeholder {
+		color: var(--modula-admin-ink-muted);
+		opacity: 1;
+	}
+
+	&:hover {
+		background: var(--modula-admin-surface-hover) !important;
+	}
+
+	&:focus,
+	&:focus-visible {
+		border-color: var(--modula-admin-ink) !important;
+		outline: none !important;
+		background: var(--modula-admin-surface) !important;
+	}
+
+	&::-webkit-search-cancel-button {
+		-webkit-appearance: none;
+	}
+}
+
+.modula-content-page__search-clear {
+	@include mixins.button-reset;
+	position: absolute;
+	right: 4px;
+	top: 50%;
+	transform: translateY(-50%);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: var(--modula-admin-radius-sm);
+	color: var(--modula-admin-ink-muted);
+
+	svg {
+		fill: currentColor;
+	}
+
+	&:hover {
+		color: var(--modula-admin-ink);
+	}
+
+	&:focus-visible {
+		@include mixins.focus-ring;
+	}
+}
+
+.modula-content-page__search-summary {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding-bottom: 14px;
+}
+
+.modula-content-page__search-summary-main {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+
+.modula-content-page__search-summary-icon {
+	flex-shrink: 0;
+	color: var(--modula-admin-ink-muted);
+	fill: currentColor;
+}
+
+.modula-content-page__search-summary-text {
+	margin: 0;
+	color: var(--modula-admin-ink-soft);
+	font-size: var(--modula-admin-text-control);
+}
+
+.modula-content-page__search-summary-query {
+	font-weight: 600;
+	color: var(--modula-admin-ink);
+}
+
+/* Narrow windows scroll the table, not the page. */
+.modula-content-page__table {
+	min-width: 0;
+	overflow-x: auto;
+}
+
+/* Gallery cell: 64×48 cover, then the title line and the reserved line. */
+.modula-content-page__gallery-cell {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	min-width: 0;
+}
+
+.modula-content-page__cover {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	box-sizing: border-box;
+	width: 64px;
+	height: 48px;
+	overflow: hidden;
+	border-radius: var(--modula-admin-radius-sm);
+	background: var(--modula-admin-surface-segment);
+
+	img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	&.is-empty {
+		border: 1px dashed var(--modula-admin-border-strong);
+		background: var(--modula-admin-surface-sunken);
+		color: var(--modula-admin-border-strong);
+
+		svg {
+			fill: currentColor;
+		}
+	}
+
+	&.is-video {
+		background: var(--modula-admin-code-surface);
+		color: #fff;
+	}
+
+	&.is-trash img,
+	&.is-trash .modula-content-page__miniature {
+		opacity: 0.5;
+		filter: grayscale(0.6);
+	}
+}
+
+// Layout miniature of a gallery made of content blocks (cover and row preview).
+.modula-content-page__miniature {
+	display: block;
+	width: 100%;
+	height: 100%;
+
+	.is-unknown {
+		fill: var(--modula-admin-border-strong);
+	}
+}
+
+// The play mark sits on the video's cover image, or alone on the dark tile.
+.modula-content-page__cover-play {
+	position: absolute;
+	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+
+.modula-content-page__gallery-meta {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	min-width: 0;
+}
+
+.modula-content-page__title-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+}
+
+.modula-content-page__title {
+	overflow: hidden;
+	color: var(--modula-admin-ink);
+	font-size: 15px;
+	font-weight: 500;
+	line-height: 24px;
+	text-decoration: none;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	&:hover {
+		color: var(--modula-admin-ink);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+
+	&:focus-visible {
+		@include mixins.focus-ring;
+	}
+
+	&.is-trash {
+		color: var(--modula-admin-ink-soft);
+	}
+}
+
+.modula-content-page__badges {
+	display: inline-flex;
+	flex-shrink: 0;
+	gap: 6px;
+}
+
+/* Board: 22px pills, 12px semibold. */
+.modula-content-page__badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	box-sizing: border-box;
+	height: 22px;
+	padding: 0 9px;
+	border-radius: var(--modula-admin-radius-pill);
+	background: var(--modula-admin-surface-segment);
+	color: var(--modula-admin-ink-soft);
+	font-size: 12px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.modula-content-page__badge-icon {
+	flex-shrink: 0;
+	fill: currentColor;
+}
+
+.modula-content-page__badge--beta {
+	border: 1px solid var(--modula-admin-border);
+	background: var(--modula-admin-surface);
+}
+
+.modula-content-page__row-preview-trigger,
+.modula-content-page__gallery-cell > .modula-admin-popover-anchor {
+	display: inline-flex;
+	flex-shrink: 0;
+}
+
+/* The shortcuts in the reserved line, split by bars. */
+.modula-content-page__row-hover-actions {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 13px;
+}
+
+.modula-content-page__row-hover-sep {
+	color: var(--modula-admin-border-strong);
+}
+
+.modula-content-page__row-hover-action {
+	@include mixins.button-reset;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	min-height: 24px;
+	color: var(--modula-admin-ink);
+
+	svg {
+		width: 11px;
+		height: 11px;
+		color: var(--modula-admin-ink-muted);
+	}
+
+	&:hover {
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+
+	&:focus-visible {
+		@include mixins.focus-ring;
+	}
+
+	&.is-destructive {
+		color: var(--modula-admin-danger);
+	}
+}
+
+/* Type: the product name; as a button it filters the list to that type. */
+.modula-content-page__type {
+	display: block;
+	overflow: hidden;
+	color: var(--modula-admin-ink-secondary);
+	line-height: 24px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	&.is-filter {
+		@include mixins.button-reset;
+		max-width: 100%;
+		text-align: start;
+
+		&:hover {
+			color: var(--modula-admin-ink);
+			text-decoration: underline;
+			text-underline-offset: 3px;
+		}
+
+		&:focus-visible {
+			@include mixins.focus-ring;
+		}
+	}
+}
+
+.modula-content-page__password-hint {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+
+	svg {
+		width: 12px;
+		height: 12px;
+	}
+}
+
+// Without hover, the shortcuts take the reserved line for good.
+@media (hover: none),
+(pointer: coarse) {
+
+	.modula-content-page .modula-admin-table__hover-actions {
+		opacity: 1;
+	}
+
+	.modula-content-page .modula-admin-table__hover-rest {
+		visibility: hidden;
+	}
+
+	.modula-content-page__row-hover-action {
+		min-height: 44px;
+	}
+}
+
+/*
+ * Quick edit: a card in the Table's expansion row. Board: 112×84 cover,
+ * then Title and Status on one line and Link under them; Cancel and Save
+ * changes after a divider.
+ */
+.modula-content-page__quick-edit {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	box-sizing: border-box;
+	padding: 20px 24px 18px;
+	border: 1px solid var(--modula-admin-border-divider);
+	border-radius: var(--modula-admin-radius-md);
+	background: var(--modula-admin-surface);
+	box-shadow: 0 8px 24px rgba(31, 31, 28, 0.07);
+}
+
+.modula-content-page__quick-edit-body {
+	display: flex;
+	align-items: flex-start;
+	gap: 24px;
+}
+
+.modula-content-page__quick-edit-cover .modula-content-page__cover {
+	width: 112px;
+	height: 84px;
+	border-radius: 6px;
+}
+
+.modula-content-page__quick-edit-fields {
+	display: grid;
+	flex-grow: 1;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 16px 24px;
+	min-width: 0;
+}
+
+.modula-content-page__quick-edit-field {
+	display: flex;
+	flex-direction: column;
+	gap: 7px;
+	min-width: 0;
+
+	> label,
+	> span:first-child {
+		color: var(--modula-admin-ink-secondary);
+		font-size: var(--modula-admin-text-control);
+		font-weight: 500;
+	}
+
+	&.is-wide {
+		grid-column: 1 / -1;
+	}
+}
+
+.modula-content-page__quick-edit-hint {
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-caption);
+}
+
+// The status menu select, as tall as the text fields beside it.
+.modula-content-page__quick-edit-status {
+	display: inline-flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	box-sizing: border-box;
+	min-width: 160px;
+	height: 44px;
+	padding: 0 12px;
+	border: 1px solid var(--modula-admin-border-field);
+	border-radius: var(--modula-admin-radius-sm);
+	background: var(--modula-admin-surface);
+	color: var(--modula-admin-ink);
+	font: inherit;
+	font-size: var(--modula-admin-text-body);
+	cursor: pointer;
+
+	&:focus-visible {
+
+		@include mixins.focus-ring;
+	}
+
+	&:disabled {
+		opacity: 0.6;
+		cursor: default;
+	}
+}
+
+// Link: the site's permalink prefix, then the editable slug, in one field.
+.modula-content-page__quick-edit-link {
+	display: flex;
+	align-items: center;
+	box-sizing: border-box;
+	height: 44px;
+	overflow: hidden;
+	border: 1px solid var(--modula-admin-border-field);
+	border-radius: var(--modula-admin-radius-sm);
+	background: var(--modula-admin-surface);
+
+	&:focus-within {
+
+		@include mixins.field-focus;
+	}
+
+	input[type="text"] {
+		flex-grow: 1;
+		min-width: 0;
+		height: 100%;
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0 12px 0 2px;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+		box-shadow: none;
+		color: var(--modula-admin-ink);
+		font: inherit;
+		font-size: var(--modula-admin-text-body);
+		outline: none;
+	}
+}
+
+.modula-content-page__quick-edit-prefix {
+	display: flex;
+	align-items: center;
+	height: 100%;
+	padding: 0 4px 0 12px;
+	background: var(--modula-admin-surface-sunken);
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-control);
+	white-space: nowrap;
+}
+
+.modula-content-page__quick-edit-footer {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 10px;
+	padding-top: 16px;
+	border-top: 1px solid var(--modula-admin-border-divider);
+}
+
+@media (max-width: 600px) {
+
+	.modula-content-page__quick-edit-body {
+		flex-direction: column;
+	}
+
+	.modula-content-page__quick-edit-fields {
+		grid-template-columns: minmax(0, 1fr);
+		width: 100%;
+	}
+
+	.modula-content-page__quick-edit-cover {
+		display: none;
+	}
+}
+
+/* The row preview: an admin-ui Popover laid out edge to edge. */
+.modula-admin-popover.modula-content-page-row-preview__popover {
+	--mod-ui-accent: #2271b1;
+	--mod-ui-accent-ink: #135e96;
+	--mod-ui-ink: #1e1e1e;
+	--mod-ui-ink-2: #50575e;
+	--mod-ui-ink-3: #757575;
+	min-width: 280px;
+	max-width: 320px;
+	padding: 0;
+}
+
+.modula-content-page-row-preview {
+	background: #fff;
+	color: var(--mod-ui-ink, #1e1e1e);
+}
+
+.modula-content-page-row-preview__header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 14px;
+	border-bottom: 1px solid #f0f0f0;
+}
+
+.modula-content-page-row-preview__header-icon {
+	display: inline-flex;
+	color: var(--mod-ui-accent, #2271b1);
+}
+
+.modula-content-page-row-preview__header-title {
+	flex: 1 1 auto;
+	min-width: 0;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.3;
+}
+
+.modula-content-page-row-preview__header-count {
+	flex-shrink: 0;
+	font-size: 13px;
+	color: var(--mod-ui-ink-3, #757575);
+}
+
+.modula-content-page-row-preview__loading,
+.modula-content-page-row-preview__error,
+.modula-content-page-row-preview__empty {
+	margin: 0;
+	padding: 16px 14px;
+	font-size: 13px;
+	color: var(--mod-ui-ink-3, #757575);
+}
+
+.modula-content-page-row-preview__error {
+	color: #b32d2e;
+}
+
+.modula-content-page-row-preview__member-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	max-height: 280px;
+	overflow: auto;
+}
+
+.modula-content-page-row-preview__member {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 14px;
+	border-bottom: 1px solid #f0f0f0;
+}
+
+.modula-content-page-row-preview__member:last-child {
+	border-bottom: 0;
+}
+
+.modula-content-page-row-preview__member-thumb {
+	flex: 0 0 36px;
+	width: 36px;
+	height: 36px;
+	border-radius: 6px;
+	object-fit: cover;
+	background: #f0f0f1;
+}
+
+.modula-content-page-row-preview__member-thumb.is-empty {
+	display: block;
+}
+
+.modula-content-page-row-preview__member-text {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.modula-content-page-row-preview__member-title {
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.3;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.modula-content-page-row-preview__member-meta {
+	font-size: 12px;
+	color: var(--mod-ui-ink-3, #757575);
+}
+
+.modula-content-page-row-preview__member-link {
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 4px;
+	background: transparent;
+	color: #8c8f94;
+	cursor: pointer;
+	text-decoration: none;
+	outline: none;
+	-webkit-tap-highlight-color: transparent;
+
+	&:hover {
+		color: var(--mod-ui-accent, #2271b1);
+		background: #f0f6fc;
+	}
+
+	&:focus {
+		outline: none;
+		box-shadow: none;
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--mod-ui-accent, #2271b1);
+		outline-offset: 1px;
+	}
+
+	&:active {
+		background: #e7f2fa;
+	}
+}
+
+.modula-content-page-row-preview__thumbs {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 6px;
+	padding: 12px 14px;
+}
+
+.modula-content-page-row-preview__thumb {
+	display: block;
+	width: 100%;
+	aspect-ratio: 1;
+	border-radius: 6px;
+	object-fit: cover;
+	background: #f0f0f1;
+}
+
+.modula-content-page-row-preview__thumb.is-empty {
+	background: #f0f0f1;
+}
+
+.modula-content-page-row-preview__miniature {
+	height: 160px;
+	margin: 12px 14px;
+	padding: 8px;
+	box-sizing: border-box;
+	border-radius: 6px;
+	background: #f0f0f1;
+}
+
+.modula-content-page-row-preview__footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	width: 100%;
+	margin: 0;
+	padding: 12px 14px;
+	border: 0;
+	border-top: 1px solid #f0f0f0;
+	background: transparent;
+	font-family: inherit;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--mod-ui-accent, #2271b1);
+	text-align: left;
+	text-decoration: none;
+	cursor: pointer;
+	outline: none;
+	-webkit-tap-highlight-color: transparent;
+
+	&:hover {
+		color: var(--mod-ui-accent-ink, #135e96);
+		background: #f6f7f7;
+	}
+
+	&:focus {
+		outline: none;
+		box-shadow: none;
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--mod-ui-accent, #2271b1);
+		outline-offset: -2px;
+	}
+
+	&:active {
+		color: var(--mod-ui-accent-ink, #135e96);
+		background: #f0f6fc;
+	}
+}
+
+/* Board: Proofing is green with its icon, Draft the warm tint. */
+.modula-content-page__badge--proofing {
+	padding-inline-start: 7px;
+	background: var(--modula-admin-success-surface);
+	color: var(--modula-admin-success-ink);
+}
+
+.modula-content-page__badge--draft {
+	background: var(--modula-admin-plan-surface);
+	color: var(--modula-admin-plan-ink);
+}
+
+/* PRO expired: the license expired banner's warning colours and lock. */
+.modula-content-page__badge--proExpired {
+	padding-inline-start: 7px;
+	border: 1px solid var(--modula-admin-warning-border);
+	background: var(--modula-admin-warning-surface);
+	color: var(--modula-admin-warning-ink);
+
+	.modula-content-page__badge-icon {
+		display: inline-flex;
+	}
+}
+
+.modula-content-page__shortcode-cell {
+	position: relative;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+/* Board: the code as plain mono text, then a bare 28px copy button. */
+.modula-content-page__shortcode {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+/* Narrow column: icon-only copy (and chevron when extras exist). */
+.modula-content-page__shortcode-cell.is-compact .modula-content-page__shortcode {
+	gap: 2px;
+	width: auto;
+}
+
+.modula-content-page__shortcode-cell.is-compact .modula-content-page__shortcode-text,
+.modula-content-page__shortcode-cell.is-compact .modula-content-page__shortcode-sep {
+	display: none;
+}
+
+.modula-content-page__shortcode-text {
+	min-width: 0;
+	overflow: hidden;
+	padding: 0;
+	background: transparent;
+	color: var(--modula-admin-ink-soft);
+	font-family: var(--modula-admin-font-mono);
+	font-size: 12.5px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.modula-content-page__shortcode-sep {
+	width: 1px;
+	align-self: stretch;
+	margin: 4px 0;
+	background: var(--modula-admin-border);
+}
+
+.modula-content-page__shortcode-icon-btn {
+	@include mixins.button-reset;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 28px;
+	height: 28px;
+	border-radius: var(--modula-admin-radius-sm);
+	color: var(--modula-admin-ink);
+
+	svg {
+		fill: currentColor;
+	}
+
+	&:hover {
+		background: var(--modula-admin-surface-hover);
+	}
+
+	&:focus-visible {
+		@include mixins.focus-ring;
+	}
+
+	&.is-copied {
+		color: var(--modula-admin-success);
+	}
+}
+
+.modula-content-page__shortcode-chevron.is-open {
+	transform: rotate(180deg);
+}
+
+.modula-content-page__shortcode-menu {
+	min-width: 260px;
+	max-width: 360px;
+	padding: 2px 8px;
+}
+
+.modula-content-page__shortcode-menu-row+.modula-content-page__shortcode-menu-row {
+	margin-top: 10px;
+	padding-top: 10px;
+	border-top: 1px solid #f0f0f0;
+}
+
+.modula-content-page__shortcode-menu-label {
+	margin-bottom: 4px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #1e1e1e;
+}
+
+.modula-content-page__shortcode-menu-field {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 6px 4px 8px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+}
+
+.modula-content-page__shortcode-menu-code {
+	flex: 1;
+	min-width: 0;
+	font-size: 12px;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	color: #2c3338;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	background: transparent;
+}
+
+/* Select-all chooser: a small admin-ui Dialog, its answers laid out like a confirm. */
+.modula-content-page__select-all-chooser-copy {
+	margin: 0;
+	color: var(--modula-admin-ink-secondary);
+	font-size: var(--modula-admin-text-body);
+	line-height: 1.5;
+}
+
+.modula-content-page__select-all-chooser-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+/* The ⋮ sits at the row's end, in its own narrow column. */
+.modula-content-page__row-actions {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.modula-content-page__row-actions-toggle {
+	@include mixins.button-reset;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: var(--modula-admin-radius-sm);
+	color: var(--modula-admin-ink-muted);
+
+	&:hover,
+	&[aria-expanded="true"] {
+		background: var(--modula-admin-surface-hover);
+		color: var(--modula-admin-ink);
+	}
+}
+
+/* No rows in any status: the create-only empty state in place of the list. */
+.modula-content-page__empty {
+	padding: 80px 24px;
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-body);
+	text-align: center;
+}
+
+.modula-content-page__empty p {
+	margin: 0 0 16px;
+}
+
+.modula-content-page__empty-actions {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.modula-content-page__error {
+	margin: 20px 0 0;
+	color: var(--modula-admin-danger);
+}
+
+/* New gallery editor choice — portals to body. */
+.modula-editor-choice-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+}
+
+.modula-editor-choice-modal__backdrop {
+	position: absolute;
+	inset: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: rgba(0, 0, 0, 0.45);
+	cursor: pointer;
+}
+
+.modula-editor-choice-modal__dialog {
+	position: relative;
+	z-index: 1;
+	box-sizing: border-box;
+	width: min(920px, 100%);
+	max-height: calc(100vh - 48px);
+	overflow: auto;
+	padding: 28px 32px 24px;
+	border-radius: 12px;
+	background: #fff;
+	box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+	color: #1e1e1e;
+}
+
+.modula-editor-choice-modal__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.modula-editor-choice-modal__header-main {
+	min-width: 0;
+}
+
+.modula-editor-choice-modal__eyebrow {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 14px;
+}
+
+.modula-editor-choice-modal__badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 4px 8px;
+	border-radius: 4px;
+	background: #1e1e1e;
+	color: #fff;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.modula-editor-choice-modal__subtitle {
+	font-size: 13px;
+	line-height: 1.4;
+	color: #757575;
+}
+
+.modula-editor-choice-modal__title {
+	margin: 0 0 10px;
+	font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', Palatino, serif;
+	font-size: clamp(1.75rem, 3vw, 2.125rem);
+	font-weight: 700;
+	line-height: 1.15;
+	letter-spacing: -0.02em;
+	color: #1e1e1e;
+}
+
+.modula-editor-choice-modal__lede {
+	max-width: 640px;
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.55;
+	color: #757575;
+}
+
+.modula-editor-choice-modal__close {
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	color: #757575;
+	cursor: pointer;
+
+	&:hover {
+		background: #f6f7f7;
+		color: #1e1e1e;
+	}
+
+	&:focus {
+		outline: none;
+		box-shadow: none;
+	}
+
+	&:focus-visible {
+		outline: 2px solid #2271b1;
+		outline-offset: 1px;
+	}
+}
+
+.modula-editor-choice-modal__hero {
+	overflow: hidden;
+	margin: 0 -32px;
+	padding: 28px 32px 0;
+	border-radius: 0;
+	background: #f4f1eb;
+	line-height: 0;
+
+	&.is-placeholder {
+		min-height: 240px;
+		padding-bottom: 28px;
+		background: linear-gradient(180deg, #f4f1eb 0%, #ebe6de 100%);
+	}
+}
+
+.modula-editor-choice-modal__hero-image {
+	display: block;
+	width: 100%;
+	height: auto;
+	margin: 0;
+	border-radius: 8px 8px 0 0;
+}
+
+.modula-editor-choice-modal__features {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0;
+	margin: 0 0 24px;
+	padding-top: 28px;
+}
+
+.modula-editor-choice-modal__feature {
+	padding: 0 20px;
+
+	&:first-child {
+		padding-left: 0;
+	}
+
+	&:last-child {
+		padding-right: 0;
+	}
+
+	&+& {
+		border-left: 1px solid #e0e0e0;
+	}
+}
+
+.modula-editor-choice-modal__feature-number {
+	display: block;
+	margin-bottom: 10px;
+	font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', Palatino, serif;
+	font-size: 15px;
+	line-height: 1;
+	color: #b0b0b0;
+}
+
+.modula-editor-choice-modal__feature-title {
+	margin: 0 0 8px;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: #1e1e1e;
+}
+
+.modula-editor-choice-modal__feature-text {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.5;
+	color: #757575;
+}
+
+.modula-editor-choice-modal__footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding-top: 18px;
+	border-top: 1px solid #ececec;
+}
+
+.modula-editor-choice-modal__disclaimer {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.45;
+	color: #757575;
+}
+
+.modula-editor-choice-modal__actions {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	gap: 10px;
+}
+
+.modula-editor-choice-modal__button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-height: 40px;
+	margin: 0;
+	padding: 0 18px;
+	border-radius: 8px;
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1;
+	cursor: pointer;
+	outline: none;
+	-webkit-tap-highlight-color: transparent;
+
+	&:focus {
+		outline: none;
+		box-shadow: none;
+	}
+
+	&:focus-visible {
+		outline: 2px solid #2271b1;
+		outline-offset: 2px;
+	}
+}
+
+.modula-editor-choice-modal__button--secondary {
+	border: 1px solid #c3c4c7;
+	background: #fff;
+	color: #1e1e1e;
+
+	&:hover {
+		background: #f6f7f7;
+		border-color: #8c8f94;
+	}
+}
+
+.modula-editor-choice-modal__button--primary {
+	border: 1px solid #1e1e1e;
+	background: #1e1e1e;
+	color: #fff;
+
+	&:hover {
+		background: #2c2c2c;
+		border-color: #2c2c2c;
+	}
+}
+
+/* New from preset: main part + arrow read as one button. */
+.modula-editor-choice-modal__split {
+	display: inline-flex;
+}
+
+.modula-editor-choice-modal__split-main.modula-editor-choice-modal__button {
+	border-start-end-radius: 0;
+	border-end-end-radius: 0;
+}
+
+.modula-editor-choice-modal__split-arrow.modula-editor-choice-modal__button {
+	padding: 0 10px;
+	border-inline-start-width: 0;
+	border-start-start-radius: 0;
+	border-end-start-radius: 0;
+
+	&.modula-editor-choice-modal__button--primary {
+		border-inline-start: 1px solid rgba(255, 255, 255, 0.25);
+	}
+}
+
+.modula-editor-choice-modal__footer-text {
+	display: grid;
+	gap: 4px;
+	min-width: 0;
+}
+
+.modula-editor-choice-modal__start-hint {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.45;
+	color: #1e1e1e;
+}
+
+/* The arrow's AdminUiRoot and Popover anchor stretch it to the main button's height. */
+.modula-editor-choice-modal__start,
+.modula-editor-choice-modal__start > .modula-admin-popover-anchor {
+	display: flex;
+}
+
+@media (max-width: 782px) {
+	.modula-editor-choice-modal {
+		padding: 12px;
+	}
+
+	.modula-editor-choice-modal__dialog {
+		padding: 20px 18px 18px;
+	}
+
+	.modula-editor-choice-modal__hero {
+		margin-inline: -18px;
+		padding: 20px 18px 0;
+
+		&.is-placeholder {
+			min-height: 220px;
+			padding-bottom: 20px;
+		}
+	}
+
+	.modula-editor-choice-modal__features {
+		grid-template-columns: 1fr;
+		gap: 18px;
+	}
+
+	.modula-editor-choice-modal__feature {
+		padding: 0;
+
+		&+& {
+			border-left: 0;
+			padding-top: 18px;
+			border-top: 1px solid #e0e0e0;
+		}
+	}
+
+	.modula-editor-choice-modal__footer {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.modula-editor-choice-modal__actions {
+		flex-direction: column-reverse;
+		width: 100%;
+	}
+
+	.modula-editor-choice-modal__button {
+		width: 100%;
+	}
+
+	.modula-editor-choice-modal__split {
+		width: 100%;
+	}
+
+	.modula-editor-choice-modal__split-arrow.modula-editor-choice-modal__button {
+		flex-shrink: 0;
+		width: auto;
+	}
+}

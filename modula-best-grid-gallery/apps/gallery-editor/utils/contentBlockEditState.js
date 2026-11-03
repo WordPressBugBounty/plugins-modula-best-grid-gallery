@@ -38,7 +38,7 @@ export const CONTENT_BLOCK_BODY_TINYMCE_OPTIONS = Object.freeze({
 });
 
 /**
- * Compose CompactColorControl value from stored color + overlay opacity.
+ * Compose the tile background colour control's value from stored color + overlay opacity.
  * Always RGBA-capable; when a background image is set and the stored color is
  * opaque, picker alpha mirrors `blockBackgroundOverlayOpacity`.
  *

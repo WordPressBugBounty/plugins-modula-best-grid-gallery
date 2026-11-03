@@ -7,6 +7,14 @@
  * @package Modula
  */
 
+// One upsell for the lightbox hub and the Pro lightbox settings Lite shows locked (ticket 37).
+$modula_lightbox_lite_upsell = array(
+	'needsProMessage'    => 'Modula Pro unlocks the rest of the lightbox—open rules, titles and captions, toolbar controls, transitions and animations, thumbnails, fullscreen, appearance, social sharing, and more. Lite still includes basic prev/next arrows and touch navigation.',
+	'compareUrl'         => 'https://wp-modula.com/free-vs-pro/?utm_source=modula-lite&utm_medium=settings-editor-lightbox&utm_campaign=upsell&utm_term=lite-vs-pro&utm_content=v3',
+	'freeVsPremiumLabel' => 'Free vs Premium',
+	'getPremiumLabel'    => 'Get Premium!',
+);
+
 return array(
 	'$schema'                      => 'https://json-schema.org/draft/2020-12/schema',
 	'$id'                          => 'modula-gallery-settings-v2',
@@ -39,7 +47,7 @@ return array(
 					14 => 'freeform',
 				),
 				'default'                 => 'grid',
-				'editorLabel'             => 'How the gallery is arranged',
+				'editorLabel'             => 'Type',
 				'enumOptionLabels'        =>
 				array(
 					'grid'             => 'Masonry',
@@ -152,8 +160,12 @@ return array(
 			array(
 				'type'              => 'string',
 				'default'           => '100%',
-				'editorLabel'       => 'How wide the gallery is',
+				'editorLabel'       => 'Gallery width',
 				'editorDescription' => 'How wide the gallery is on the page. Common values are 100% (full width of the content area) or a fixed width such as 1200px.',
+				'editorControl'     =>
+				array(
+					'kind' => 'cssLength',
+				),
 			),
 			'alignment'      =>
 			array(
@@ -212,7 +224,7 @@ return array(
 			array(
 				'type'              => 'boolean',
 				'default'           => false,
-				'editorLabel'       => 'Different order on every visit',
+				'editorLabel'       => 'Randomize images',
 				'editorDescription' => 'Shows images in a random order every time someone loads the page.',
 			),
 		),
@@ -480,7 +492,7 @@ return array(
 					2 => 'dynamic',
 				),
 				'default'           => 'balanced',
-				'editorLabel'       => 'How strong the scroll effect is',
+				'editorLabel'       => 'Scroll effect',
 				'editorDescription' => 'Controls drift intensity and speed profile for parallax columns.',
 				'enumOptionLabels'  =>
 				array(
@@ -504,7 +516,7 @@ return array(
 					3 => 'lightbox-prefer-url',
 				),
 				'default'                  => 'fancybox',
-				'editorLabel'              => 'What happens when an image is clicked',
+				'editorLabel'              => 'On click',
 				'editorDescription'        => 'Per-image Redirect to URL skips the lightbox on that tile even when Open in lightbox is selected. An empty address follows the gallery setting.',
 				'description'              => 'Further lightbox options apply when click behavior opens the lightbox.',
 				'enumOptionLabels'         =>
@@ -514,13 +526,7 @@ return array(
 					'fancybox'            => 'Open in lightbox',
 					'lightbox-prefer-url' => 'Lightbox, or link when set',
 				),
-				'editorLightboxLiteUpsell' =>
-				array(
-					'needsProMessage'    => 'Modula Pro unlocks the rest of the lightbox—open rules, titles and captions, toolbar controls, transitions and animations, thumbnails, fullscreen, appearance, social sharing, and more. Lite still includes basic prev/next arrows and touch navigation.',
-					'compareUrl'         => 'https://wp-modula.com/free-vs-pro/?utm_source=modula-lite&utm_medium=settings-editor-lightbox&utm_campaign=upsell&utm_term=lite-vs-pro&utm_content=v3',
-					'freeVsPremiumLabel' => 'Free vs Premium',
-					'getPremiumLabel'    => 'Get Premium!',
-				),
+				'editorLightboxLiteUpsell' => $modula_lightbox_lite_upsell,
 			),
 			'clickNotLightboxHint' =>
 			array(
@@ -545,19 +551,21 @@ return array(
 			),
 			'openOn'               =>
 			array(
-				'editorShowInLite' => false,
-				'type'             => 'string',
-				'enum'             =>
+				'editorShowInLite'         => true,
+				'editorOmitControlInLite'  => true,
+				'editorLightboxLiteUpsell' => $modula_lightbox_lite_upsell,
+				'type'                     => 'string',
+				'enum'                     =>
 				array(
 					0 => 'both',
 					1 => 'desktop',
 					2 => 'mobile',
 				),
-				'default'          => 'both',
-				'editorLabel'      => 'Open lightbox on',
-				'enumOptionLabels' =>
+				'default'                  => 'both',
+				'editorLabel'              => 'Open lightbox on',
+				'enumOptionLabels'         =>
 				array(
-					'both'    => 'Desktop and mobile',
+					'both'    => 'All devices',
 					'desktop' => 'Desktop only',
 					'mobile'  => 'Mobile only',
 				),
@@ -584,24 +592,30 @@ return array(
 			),
 			'loop'                 =>
 			array(
-				'editorShowInLite' => false,
-				'type'             => 'boolean',
-				'default'          => false,
-				'editorLabel'      => 'After the last image, go back to the first',
+				'editorShowInLite'         => true,
+				'editorOmitControlInLite'  => true,
+				'editorLightboxLiteUpsell' => $modula_lightbox_lite_upsell,
+				'type'                     => 'boolean',
+				'default'                  => false,
+				'editorLabel'              => 'Loop images',
 			),
 			'showTitle'            =>
 			array(
-				'editorShowInLite' => false,
-				'type'             => 'boolean',
-				'default'          => false,
-				'editorLabel'      => 'Show title',
+				'editorShowInLite'         => true,
+				'editorOmitControlInLite'  => true,
+				'editorLightboxLiteUpsell' => $modula_lightbox_lite_upsell,
+				'type'                     => 'boolean',
+				'default'                  => false,
+				'editorLabel'              => 'Show title',
 			),
 			'showCaption'          =>
 			array(
-				'editorShowInLite' => false,
-				'type'             => 'boolean',
-				'default'          => true,
-				'editorLabel'      => 'Show caption',
+				'editorShowInLite'         => true,
+				'editorOmitControlInLite'  => true,
+				'editorLightboxLiteUpsell' => $modula_lightbox_lite_upsell,
+				'type'                     => 'boolean',
+				'default'                  => true,
+				'editorLabel'              => 'Show caption',
 			),
 			'captionPosition'      =>
 			array(
@@ -615,7 +629,7 @@ return array(
 				),
 				'default'          => 'left',
 				'description'      => 'Applies when the lightbox shows the title, the caption, or both.',
-				'editorLabel'      => 'Where title and caption sit',
+				'editorLabel'      => 'Position',
 				'enumOptionLabels' =>
 				array(
 					'left'   => 'Left',
@@ -798,7 +812,7 @@ return array(
 					3 => 'zoom-in-out',
 				),
 				'default'          => 'false',
-				'editorLabel'      => 'Open and close motion',
+				'editorLabel'      => 'Animation',
 				'enumOptionLabels' =>
 				array(
 					'false'       => 'None',
@@ -821,25 +835,27 @@ return array(
 			),
 			'transitionEffect'     =>
 			array(
-				'editorShowInLite' => false,
-				'type'             => 'string',
-				'enum'             =>
+				'editorShowInLite'         => true,
+				'editorOmitControlInLite'  => true,
+				'editorLightboxLiteUpsell' => $modula_lightbox_lite_upsell,
+				'type'                     => 'string',
+				'enum'                     =>
 				array(
 					0 => 'fade',
 					1 => 'crossfade',
 					2 => 'slide',
 					3 => 'classic',
 				),
-				'default'          => 'fade',
-				'editorLabel'      => 'How one image becomes the next',
-				'enumOptionLabels' =>
+				'default'                  => 'fade',
+				'editorLabel'              => 'How one image becomes the next',
+				'enumOptionLabels'         =>
 				array(
 					'fade'      => 'Fade',
 					'crossfade' => 'Crossfade',
 					'slide'     => 'Slide',
 					'classic'   => 'Classic',
 				),
-				'editorControl'    =>
+				'editorControl'            =>
 				array(
 					'kind' => 'segmentedEnum',
 				),
@@ -861,19 +877,23 @@ return array(
 			),
 			'showThumbnails'       =>
 			array(
-				'editorShowInLite' => false,
-				'type'             => 'boolean',
-				'default'          => false,
-				'description'      => 'Show the thumbnail strip when the lightbox opens (legacy key: thumbsAutoStart).',
-				'editorLabel'      => 'Show thumbnail strip',
+				'editorShowInLite'         => true,
+				'editorOmitControlInLite'  => true,
+				'editorLightboxLiteUpsell' => $modula_lightbox_lite_upsell,
+				'type'                     => 'boolean',
+				'default'                  => false,
+				'description'              => 'Show the thumbnail strip when the lightbox opens (legacy key: thumbsAutoStart).',
+				'editorLabel'              => 'Show thumbnail strip',
 			),
 			'backgroundColor'      =>
 			array(
-				'editorShowInLite'  => false,
-				'type'              => 'string',
-				'default'           => 'rgba(30,30,30,.9)',
-				'editorLabel'       => 'Color behind the image',
-				'editorDescription' => 'Solid color behind the image in the lightbox. Use transparency to control how much of the page shows through.',
+				'editorShowInLite'         => true,
+				'editorOmitControlInLite'  => true,
+				'editorLightboxLiteUpsell' => $modula_lightbox_lite_upsell,
+				'type'                     => 'string',
+				'default'                  => 'rgba(30,30,30,.9)',
+				'editorLabel'              => 'Background color',
+				'editorDescription'        => 'Solid color behind the image in the lightbox. Use transparency to control how much of the page shows through.',
 			),
 			'thumbsPosition'       =>
 			array(
@@ -887,7 +907,7 @@ return array(
 				),
 				'default'          => 'bottom',
 				'description'      => 'Thumbnail strip position when thumbnails are visible.',
-				'editorLabel'      => 'Where thumbnails sit',
+				'editorLabel'      => 'Position',
 				'enumOptionLabels' =>
 				array(
 					'left'   => 'Left',
@@ -1053,7 +1073,7 @@ return array(
 				'minimum'       => 80,
 				'maximum'       => 480,
 				'default'       => 240,
-				'editorLabel'   => 'Use bubble when smaller than',
+				'editorLabel'   => 'When smaller than',
 				'editorControl' =>
 				array(
 					'kind' => 'range',
@@ -1317,7 +1337,7 @@ return array(
 				'type'                    => 'string',
 				'default'                 => '',
 				'editorLabel'             => 'Sharing style',
-				'editorDescription'       => 'No network is on, so there is no bar to style.',
+				'editorDescription'       => 'Choose at least one network above. Until then the gallery shows no share buttons.',
 				'editorControl'           =>
 				array(
 					'kind' => 'infoCallout',
@@ -1329,7 +1349,7 @@ return array(
 			array(
 				'type'                    => 'string',
 				'default'                 => '',
-				'editorLabel'             => 'Color',
+				'editorLabel'             => 'Icon color',
 				'editorSidebarNestedOnly' => true,
 				'editorControl'           =>
 				array(
@@ -1451,7 +1471,7 @@ return array(
 			array(
 				'type'                    => 'boolean',
 				'default'                 => true,
-				'editorLabel'             => 'Keep the bar folded until hover',
+				'editorLabel'             => 'Collapse on desktop',
 				'editorSidebarNestedOnly' => true,
 				'editorDisabledWhen'      =>
 				array(
@@ -1614,30 +1634,6 @@ return array(
 		),
 		'hover'           =>
 		array(
-			'effectBuilder'  =>
-			array(
-				'type'                    => 'string',
-				'default'                 => '',
-				'editorLabel'             => 'Hover effect',
-				'editorControl'           =>
-				array(
-					'kind' => 'hoverEffectBuilder',
-				),
-				'editorPresentationOnly'  => true,
-				'editorSidebarNestedOnly' => true,
-			),
-			'sectionPresets' =>
-			array(
-				'type'                    => 'string',
-				'default'                 => '',
-				'editorLabel'             => 'Presets',
-				'editorControl'           =>
-				array(
-					'kind' => 'heading',
-				),
-				'editorPresentationOnly'  => true,
-				'editorSidebarNestedOnly' => true,
-			),
 			'sectionCursor'  =>
 			array(
 				'type'                    => 'string',
@@ -1668,29 +1664,19 @@ return array(
 				'editorLabel'                   => 'Hover layout and motion',
 				'editorOmitFromSettingsSidebar' => true,
 				'description'                   => 'Composable hover: card treatment and per-slot entrance animations. Use the Hover section preview and inspector.',
+				// Primitive ids (cardTreatment, graphicElement, *Enter) come from the animation catalog.
 				'properties'                    =>
 				array(
 					'cardTreatment'          =>
 					array(
 						'type'    => 'string',
-						'enum'    =>
-						array(
-							0 => 'none',
-							1 => 'zoom',
-							2 => 'grayscale',
-							3 => 'lift',
-						),
+						'enum'    => \Modula\V2\Motion\Animation_Catalog::builder_field_ids( 'cardTreatment' ),
 						'default' => 'none',
 					),
 					'graphicElement'         =>
 					array(
 						'type'    => 'string',
-						'enum'    =>
-						array(
-							0 => 'none',
-							1 => 'frame',
-							2 => 'diamond',
-						),
+						'enum'    => \Modula\V2\Motion\Animation_Catalog::builder_field_ids( 'graphicElement' ),
 						'default' => 'none',
 					),
 					'graphicVisibility'      =>
@@ -1712,49 +1698,19 @@ return array(
 					'titleEnter'             =>
 					array(
 						'type'    => 'string',
-						'enum'    =>
-						array(
-							0 => 'none',
-							1 => 'fade',
-							2 => 'slide-up',
-							3 => 'slide-down',
-							4 => 'slide-left',
-							5 => 'slide-right',
-							6 => 'blur-in',
-							7 => 'scale',
-						),
+						'enum'    => \Modula\V2\Motion\Animation_Catalog::builder_field_ids( 'titleEnter' ),
 						'default' => 'fade',
 					),
 					'captionEnter'           =>
 					array(
 						'type'    => 'string',
-						'enum'    =>
-						array(
-							0 => 'none',
-							1 => 'fade',
-							2 => 'slide-up',
-							3 => 'slide-down',
-							4 => 'slide-left',
-							5 => 'slide-right',
-							6 => 'blur-in',
-							7 => 'scale',
-						),
+						'enum'    => \Modula\V2\Motion\Animation_Catalog::builder_field_ids( 'captionEnter' ),
 						'default' => 'fade',
 					),
 					'socialEnter'            =>
 					array(
 						'type'    => 'string',
-						'enum'    =>
-						array(
-							0 => 'none',
-							1 => 'fade',
-							2 => 'slide-up',
-							3 => 'slide-down',
-							4 => 'slide-left',
-							5 => 'slide-right',
-							6 => 'blur-in',
-							7 => 'scale',
-						),
+						'enum'    => \Modula\V2\Motion\Animation_Catalog::builder_field_ids( 'socialEnter' ),
 						'default' => 'fade',
 					),
 					'titleVisibility'        =>
@@ -2029,7 +1985,7 @@ return array(
 					7 => 'custom',
 				),
 				'default'          => 'zoom-in',
-				'editorLabel'      => 'Cursor icon',
+				'editorLabel'      => 'Cursor',
 				'enumOptionLabels' =>
 				array(
 					'pointer'     => 'Pointer',
@@ -2067,7 +2023,7 @@ return array(
 			array(
 				'type'              => 'boolean',
 				'default'           => false,
-				'editorLabel'       => 'Apply overlay',
+				'editorLabel'       => 'Darken on hover',
 				'editorDescription' => 'When enabled, darkens the image on hover using the dim color below.',
 			),
 			'hoverColor'     =>
@@ -2090,6 +2046,85 @@ return array(
 				'default'                       => 50,
 				'editorLabel'                   => 'How strong the dim is',
 				'editorOmitFromSettingsSidebar' => true,
+			),
+		),
+		/*
+		 * The Motion tab's choices. Entrance and hover values come from the
+		 * animation catalog (Motion_Settings::choices): `auto` plays the
+		 * catalog's recommendation for the gallery type, `custom` the
+		 * gallery's own loading effects or hover builder. Galleries saved
+		 * before this group keep explicit values (Motion_Settings::with_existing_gallery_values).
+		 */
+		'motion'          =>
+		array(
+			'entrance'   =>
+			array(
+				'type'              => 'string',
+				'enum'              => \Modula\V2\Motion\Motion_Settings::choices( 'entrance' ),
+				'default'           => \Modula\V2\Motion\Motion_Settings::AUTO,
+				'editorLabel'       => 'Entrance',
+				'editorDescription' => 'How images appear as visitors scroll to them. Recommended follows the gallery type.',
+				'editorControl'     =>
+				array(
+					'kind'       => 'motionChoice',
+					'motionKind' => 'entrance',
+				),
+			),
+			'speed'      =>
+			array(
+				'type'              => 'string',
+				'enum'              => array_keys( \Modula\V2\Motion\Animation_Catalog::speeds() ),
+				'default'           => 'normal',
+				'editorLabel'       => 'Speed',
+				'editorDescription' => 'Pace of the entrance, and of hover motion where it applies.',
+				'enumOptionLabels'  =>
+				array(
+					'slow'   => 'Slow',
+					'normal' => 'Normal',
+					'fast'   => 'Fast',
+				),
+				'editorControl'     =>
+				array(
+					'kind' => 'segmentedEnum',
+				),
+			),
+			'hover'      =>
+			array(
+				'type'              => 'string',
+				'enum'              => \Modula\V2\Motion\Motion_Settings::choices( 'hover' ),
+				'default'           => \Modula\V2\Motion\Motion_Settings::AUTO,
+				'editorLabel'       => 'Hover',
+				'editorDescription' => 'What happens when a visitor points at an image. Recommended follows the gallery type; Custom is your own hover effect.',
+				'proEnhancements'   =>
+				array(
+					'base' => \Modula\V2\Motion\Animation_Catalog::pro_preset_ids( 'hover' ),
+				),
+				'editorControl'     =>
+				array(
+					'kind'       => 'motionChoice',
+					'motionKind' => 'hover',
+				),
+			),
+			'phones'     =>
+			array(
+				'type'              => 'boolean',
+				'default'           => true,
+				'editorLabel'       => 'Animate on phones',
+				'editorDescription' => 'When off, phones show the gallery without entrance or hover motion.',
+			),
+			'widen'      =>
+			array(
+				'type'              => 'boolean',
+				'default'           => true,
+				'editorLabel'       => 'Widen on hover',
+				'editorDescription' => 'Justified galleries: the image under the pointer grows wider in its row.',
+			),
+			'movePrints' =>
+			array(
+				'type'              => 'boolean',
+				'default'           => false,
+				'editorLabel'       => 'Visitors can move the prints',
+				'editorDescription' => 'Polaroid galleries: visitors can drag the prints around.',
 			),
 		),
 		'interaction'     =>
@@ -2178,6 +2213,7 @@ return array(
 			'customCss'        =>
 			array(
 				'type'              => 'string',
+				'format'            => 'css',
 				'default'           => '',
 				'editorLabel'       => 'Custom CSS',
 				'editorDescription' => 'Only for people who write CSS. Everything here affects this gallery alone.',
@@ -2250,6 +2286,7 @@ return array(
 				'editorLabel'                    => 'Use smaller modern image files',
 				'editorShowInLite'               => false,
 				'editorRequiresExtensionEnabled' => 'modula-speedup',
+				'editorRequiresCompression'      => true,
 			),
 			'thumbnailOptimization' =>
 			array(
@@ -2274,6 +2311,7 @@ return array(
 				'editorLabel'                    => 'Thumbnail compression',
 				'editorShowInLite'               => false,
 				'editorRequiresExtensionEnabled' => 'modula-speedup',
+				'editorRequiresCompression'      => true,
 			),
 			'lightboxOptimization'  =>
 			array(
@@ -2298,6 +2336,7 @@ return array(
 				'editorLabel'                    => 'Lightbox compression',
 				'editorShowInLite'               => false,
 				'editorRequiresExtensionEnabled' => 'modula-speedup',
+				'editorRequiresCompression'      => true,
 			),
 			'modulaSpeedHelp'       =>
 			array(
@@ -2331,7 +2370,7 @@ return array(
 			array(
 				'type'                     => 'boolean',
 				'default'                  => true,
-				'editorLabel'              => 'Adapt to screen size',
+				'editorLabel'              => 'Responsive',
 				'description'              => 'Different column counts on smaller screens for grids, or slide counts for sliders.',
 				'editorSidebarNestedPanel' =>
 				array(
@@ -2410,7 +2449,7 @@ return array(
 				'minimum'     => 0,
 				'maximum'     => 100,
 				'default'     => 50,
-				'editorLabel' => 'How messy it looks',
+				'editorLabel' => 'Randomness factor',
 			),
 			'rotationMax'    =>
 			array(
@@ -2418,7 +2457,7 @@ return array(
 				'minimum'           => 0,
 				'maximum'           => 14,
 				'default'           => 7,
-				'editorLabel'       => 'How much prints can tilt',
+				'editorLabel'       => 'Tilt ratio',
 				'editorDescription' => 'Each print tilts left or right up to this amount (stable per image, not random on every refresh).',
 			),
 			'scatterMax'     =>
@@ -2459,7 +2498,7 @@ return array(
 			array(
 				'type'              => 'boolean',
 				'default'           => true,
-				'editorLabel'       => 'Same size for every print',
+				'editorLabel'       => 'Same size for each',
 				'editorDescription' => 'Use equal portrait slots in a simple grid instead of variable packery tiles (same print size for every image).',
 			),
 			'uniformColumns' =>
@@ -2881,7 +2920,7 @@ return array(
 				'maximum'           => 5,
 				'default'           => 3,
 				'editorLabel'       => 'How many photos show at once',
-				'editorDescription' => 'Approximate number of photos visible in the viewport on desktop. Neighbors always peek past the edges.',
+				'editorDescription' => 'Photos across the gallery width, centre photo included. 3 and 5 show that many whole photos. 2 and 4 show one whole photo fewer plus half a photo at each edge (4 = 3 whole + 2 halves). Phones with Simplify on phones show one.',
 			),
 			'gap'              =>
 			array(
@@ -2913,23 +2952,6 @@ return array(
 					'min'  => 1.1,
 					'max'  => 1.75,
 					'step' => 0.05,
-				),
-			),
-			'centerBias'       =>
-			array(
-				'type'              => 'string',
-				'enum'              =>
-				array(
-					0 => 'center',
-					1 => 'left',
-				),
-				'default'           => 'center',
-				'editorLabel'       => 'Where the active photo sits',
-				'editorDescription' => 'Infinite showcase always keeps the focus centered. This applies only when a single photo is shown.',
-				'enumOptionLabels'  =>
-				array(
-					'center' => 'Dead center',
-					'left'   => 'Slightly left',
 				),
 			),
 			'arrowPosition'    =>
@@ -3144,7 +3166,7 @@ return array(
 			array(
 				'type'                     => 'boolean',
 				'default'                  => false,
-				'editorLabel'              => 'Split into pages',
+				'editorLabel'              => 'Pagination',
 				'editorShowInLite'         => true,
 				'editorOmitControlInLite'  => true,
 				// Nested options open via hub drill (see settings-v2-editor-navigation.php),
@@ -3164,7 +3186,7 @@ return array(
 			array(
 				'type'                    => 'boolean',
 				'default'                 => true,
-				'editorLabel'             => 'Load more as you scroll',
+				'editorLabel'             => 'Infinite scroll',
 				'editorShowInLite'        => false,
 				'editorSidebarNestedOnly' => true,
 			),
@@ -3214,7 +3236,7 @@ return array(
 					1 => 'center',
 					2 => 'right',
 				),
-				'editorLabel'             => 'Where the controls sit',
+				'editorLabel'             => 'Controls position',
 				'editorShowInLite'        => false,
 				'editorSidebarNestedOnly' => true,
 				'enumOptionLabels'        =>
@@ -3271,8 +3293,7 @@ return array(
 				),
 				'editorControl'            =>
 				array(
-					'kind'         => 'filterNameList',
-					'hideRowLabel' => true,
+					'kind' => 'filterNameList',
 				),
 				'editorLabel'              => 'Filters',
 				'editorDescription'        => 'The number is how many images carry that filter. Empty filters will not show up in the bar.',
@@ -3335,11 +3356,10 @@ return array(
 				'editorShowInLite' => false,
 				'type'             => 'string',
 				'default'          => 'All',
-				'editorLabel'      => 'Label for “show everything”',
+				'editorLabel'      => '“All” label',
 				'editorControl'    =>
 				array(
-					'kind'         => 'text',
-					'hideRowLabel' => true,
+					'kind' => 'text',
 				),
 			),
 			'filterLinkColor'             =>
@@ -3393,8 +3413,7 @@ return array(
 				),
 				'editorControl'    =>
 				array(
-					'kind'      => 'positionGrid',
-					'ariaLabel' => 'Where the filter bar sits',
+					'kind' => 'select',
 				),
 			),
 			'filterTextAlignment'         =>
@@ -3436,7 +3455,7 @@ return array(
 				'editorShowInLite' => false,
 				'type'             => 'string',
 				'default'          => 'Filter by',
-				'editorLabel'      => 'Collapse button text',
+				'editorLabel'      => 'Button text',
 			),
 			'enableMobileDropdownFilters' =>
 			array(
@@ -3452,7 +3471,7 @@ return array(
 			array(
 				'type'                     => 'boolean',
 				'default'                  => false,
-				'editorLabel'              => 'Link to one image',
+				'editorLabel'              => 'Give each photo its own link',
 				'editorShowInLite'         => true,
 				'editorOmitControlInLite'  => true,
 				'editorLightboxLiteUpsell' =>
@@ -3483,7 +3502,7 @@ return array(
 			array(
 				'type'                    => 'string',
 				'default'                 => 'modulagallery',
-				'editorLabel'             => 'Name used in the address',
+				'editorLabel'             => 'Link slug',
 				'editorDescription'       => 'Lowercase letters, digits and dashes. Changing it breaks links you have already shared.',
 				'editorShowInLite'        => false,
 				'editorSidebarNestedOnly' => true,
@@ -3692,7 +3711,7 @@ return array(
 			array(
 				'type'          => 'boolean',
 				'default'       => false,
-				'editorLabel'   => 'Start playing on open',
+				'editorLabel'   => 'Autoplay in lightbox',
 				'editorTooltip' => 'On iOS, autoplay is limited: self-hosted video and muted playback per Apple/Web policy.',
 			),
 			'loopVideos'            =>
@@ -3828,7 +3847,7 @@ return array(
 				'minimum'            => 1,
 				'maximum'            => 30,
 				'default'            => 3,
-				'editorLabel'        => 'Stop after',
+				'editorLabel'        => 'Preview length',
 				'editorDescription'  => 'Seconds. The tile goes back to its poster image afterwards.',
 				'editorControl'      =>
 				array(
@@ -3894,7 +3913,7 @@ return array(
 			array(
 				'type'                           => 'string',
 				'default'                        => '',
-				'editorLabel'                    => 'Message shown instead',
+				'editorLabel'                    => 'Blocked message',
 				'editorDescription'              => 'Small notice when someone tries to right-click. Leave empty for the default: “This content is protected.”',
 				'editorShowInLite'               => false,
 				'editorSidebarNestedOnly'        => true,
@@ -4009,7 +4028,7 @@ return array(
 			array(
 				'type'                    => 'string',
 				'default'                 => 'thumbnail',
-				'editorLabel'             => 'How big the download is',
+				'editorLabel'             => 'Download size',
 				'editorControl'           =>
 				array(
 					'allowsCustomImageSize' => false,
@@ -4141,7 +4160,7 @@ return array(
 			array(
 				'type'                    => 'string',
 				'default'                 => '%%gallery_title%%',
-				'editorLabel'             => 'Built from',
+				'editorLabel'             => 'Zip file name',
 				'editorDescription'       => 'Type anything you like between the tokens — dashes, underscores, plain words.',
 				'editorControl'           =>
 				array(
@@ -4449,7 +4468,7 @@ return array(
 				'type'                     => 'boolean',
 				'default'                  => false,
 				'editorLabel'              => 'Watermark',
-				'editorDescription'        => 'Technical flag set when watermarking is applied. Not shown as a toggle in the takeover editor.',
+				'editorDescription'        => 'Turns watermarking on for this gallery. Images can be watermarked only while it is on.',
 				'editorShowInLite'         => true,
 				'editorOmitControlInLite'  => true,
 				'editorLightboxLiteUpsell' =>
@@ -4520,19 +4539,21 @@ return array(
 					'neq'  => 'text',
 				),
 			),
-			'watermarkTextSize'              =>
+			'watermarkTextSizeShare'         =>
 			array(
-				'type'                    => 'integer',
-				'default'                 => 18,
-				'minimum'                 => 8,
-				'maximum'                 => 120,
+				'type'                    => 'number',
+				'default'                 => 1.8,
+				'minimum'                 => 0.5,
+				'maximum'                 => 12,
 				'editorLabel'             => 'Size',
+				'editorDescription'       => 'Text size as a share of the image width, so the words keep their proportion on every photo and thumbnail.',
 				'editorControl'           =>
 				array(
 					'kind' => 'range',
-					'min'  => 8,
-					'max'  => 120,
-					'step' => 1,
+					'min'  => 0.5,
+					'max'  => 12,
+					'step' => 0.1,
+					'unit' => '%',
 				),
 				'editorShowInLite'        => false,
 				'editorSidebarNestedOnly' => true,
@@ -4564,7 +4585,7 @@ return array(
 				'type'                    => 'string',
 				'default'                 => '',
 				'editorLabel'             => 'Text type hint',
-				'editorDescription'       => 'Switch the type to Text to use these.',
+				'editorDescription'       => 'Words, Size and Colour work only with the Text type.',
 				'editorControl'           =>
 				array(
 					'kind' => 'infoCallout',
@@ -4635,7 +4656,7 @@ return array(
 				'type'                    => 'string',
 				'default'                 => '',
 				'editorLabel'             => 'Image type hint',
-				'editorDescription'       => 'Switch the type to Image to use these.',
+				'editorDescription'       => 'File and Width work only with the Image type.',
 				'editorControl'           =>
 				array(
 					'kind' => 'infoCallout',
@@ -4705,20 +4726,21 @@ return array(
 					'eq'   => 'none',
 				),
 			),
-			'watermarkMargin'                =>
+			'watermarkMarginShare'           =>
 			array(
-				'type'                    => 'integer',
-				'default'                 => 10,
+				'type'                    => 'number',
+				'default'                 => 1,
 				'minimum'                 => 0,
-				'maximum'                 => 100,
+				'maximum'                 => 10,
 				'editorLabel'             => 'Distance from the edge',
-				'description'             => 'Space from the edge of the image (px).',
+				'description'             => 'Space from the edge as a share of the image width, the same on every photo size.',
 				'editorControl'           =>
 				array(
 					'kind' => 'range',
 					'min'  => 0,
-					'max'  => 100,
-					'step' => 1,
+					'max'  => 10,
+					'step' => 0.1,
+					'unit' => '%',
 				),
 				'editorShowInLite'        => false,
 				'editorSidebarNestedOnly' => true,
@@ -4820,9 +4842,11 @@ return array(
 				'editorLabel'             => 'Watermark images',
 				'editorControl'           =>
 				array(
-					'kind'        => 'actionButton',
-					'action'      => 'apply_watermark',
-					'buttonLabel' => 'Watermark images',
+					'kind'         => 'actionButton',
+					'action'       => 'apply_watermark',
+					'buttonLabel'  => 'Watermark images',
+					// The button repeats the label, so it names the row alone.
+					'hideRowLabel' => true,
 				),
 				'editorShowInLite'        => false,
 				'editorSidebarNestedOnly' => true,
@@ -4840,9 +4864,11 @@ return array(
 				'editorLabel'             => 'Remove watermark',
 				'editorControl'           =>
 				array(
-					'kind'        => 'actionButton',
-					'action'      => 'remove_watermark',
-					'buttonLabel' => 'Remove watermark',
+					'kind'         => 'actionButton',
+					'action'       => 'remove_watermark',
+					'buttonLabel'  => 'Remove watermark',
+					// The button repeats the label, so it names the row alone.
+					'hideRowLabel' => true,
 				),
 				'editorShowInLite'        => false,
 				'editorSidebarNestedOnly' => true,
@@ -5178,7 +5204,7 @@ return array(
 			array(
 				'type'                    => 'boolean',
 				'default'                 => true,
-				'editorLabel'             => 'Show comments toggle',
+				'editorLabel'             => 'Comments',
 				'editorShowInLite'        => false,
 				'editorSidebarNestedOnly' => true,
 			),
@@ -5219,6 +5245,10 @@ return array(
 				'default'          => 0,
 				'editorLabel'      => 'Minimum selection',
 				'editorShowInLite' => false,
+				'editorControl'    =>
+				array(
+					'kind' => 'proofingSelectionRange',
+				),
 			),
 			'maxSelection'          =>
 			array(
@@ -5228,12 +5258,16 @@ return array(
 				'default'          => 0,
 				'editorLabel'      => 'Maximum selection',
 				'editorShowInLite' => false,
+				'editorControl'    =>
+				array(
+					'kind' => 'proofingSelectionRange',
+				),
 			),
 			'notificationEmail'     =>
 			array(
 				'type'              => 'string',
 				'default'           => '',
-				'editorLabel'       => 'Photographer notification email',
+				'editorLabel'       => 'Notify email',
 				'editorDescription' => 'Where to send the email when a client submits their final selection. Defaults to the gallery owner email.',
 				'editorShowInLite'  => false,
 				'editorControl'     =>
@@ -5246,7 +5280,7 @@ return array(
 			array(
 				'type'             => 'string',
 				'default'          => '',
-				'editorLabel'      => 'Login required message',
+				'editorLabel'      => 'Login message',
 				'editorShowInLite' => false,
 			),
 			'showLoginLink'         =>
@@ -5260,7 +5294,7 @@ return array(
 			array(
 				'type'             => 'string',
 				'default'          => '',
-				'editorLabel'      => 'Gallery closed message',
+				'editorLabel'      => 'Closed message',
 				'editorShowInLite' => false,
 			),
 			'expireLinkToPage'      =>
@@ -5276,6 +5310,22 @@ return array(
 				'default'          => '',
 				'editorLabel'      => 'Redirect URL',
 				'editorShowInLite' => false,
+			),
+			'manageProofing'        =>
+			array(
+				'type'                    => 'string',
+				'default'                 => '',
+				'editorLabel'             => 'Proofing manager',
+				'editorControl'           =>
+				array(
+					'kind'         => 'actionButton',
+					'action'       => 'proofing_manage',
+					'buttonLabel'  => 'Open proofing',
+					'hideRowLabel' => true,
+				),
+				'editorPresentationOnly'  => true,
+				'editorSidebarNestedOnly' => true,
+				'editorShowInLite'        => false,
 			),
 		),
 		'instagram'       =>
@@ -5319,9 +5369,11 @@ return array(
 				'editorLabel'             => 'Manage photos',
 				'editorControl'           =>
 				array(
-					'kind'        => 'actionButton',
-					'action'      => 'instagram_manage_photos',
-					'buttonLabel' => 'Manage photos',
+					'kind'         => 'actionButton',
+					'action'       => 'instagram_manage_photos',
+					'buttonLabel'  => 'Manage photos',
+					// The button repeats the label, so it names the row alone.
+					'hideRowLabel' => true,
 				),
 				'editorPresentationOnly'  => true,
 				'editorSidebarNestedOnly' => true,

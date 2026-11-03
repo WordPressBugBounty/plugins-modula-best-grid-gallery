@@ -44,6 +44,19 @@ function matchesFilterBarPhoneMedia() {
 }
 
 /**
+ * Whether a previewed device gets the filter bar's "on phones" modes. The
+ * tablet canvas (768px) counts, as a visitor at 782px and below does (Lite
+ * ticket 106). Kept apart from `resolveFilterLayoutPreviewViewport`: the bar's
+ * mode and the side bars' stacking follow different visitor rules.
+ *
+ * @param {'desktop'|'tablet'|'mobile'} previewViewport The previewed device.
+ * @return {boolean} Whether the bar is phone-sized there.
+ */
+export function isFilterBarPhoneDevice(previewViewport) {
+	return previewViewport === 'tablet' || previewViewport === 'mobile';
+}
+
+/**
  * Phone vs not, for filter-bar mobile modes. Editor preview uses the forced
  * viewport (canvas device), not the admin window width.
  *
@@ -59,9 +72,25 @@ export function isFilterBarPhoneViewport(config, previewViewport) {
 			? previewViewport
 			: getForcedPreviewViewport(config);
 	if (forced) {
-		return forced === 'mobile';
+		return isFilterBarPhoneDevice(forced);
 	}
 	return matchesFilterBarPhoneMedia();
+}
+
+/**
+ * The device a settings-editor preview marks its filter layout with
+ * (`data-preview-viewport`). The admin window stays wider than the visitor's
+ * stacking query (782px and below), so the tablet and phone canvas stack side
+ * bars by this mark (Lite ticket 101). None on desktop, where the canvas keeps
+ * the visitor's markup.
+ *
+ * @param {'desktop'|'tablet'|'mobile'|null|undefined} previewViewport The previewed device.
+ * @return {'tablet'|'mobile'|undefined} The mark, or none.
+ */
+export function resolveFilterLayoutPreviewViewport(previewViewport) {
+	return previewViewport === 'tablet' || previewViewport === 'mobile'
+		? previewViewport
+		: undefined;
 }
 
 /**
@@ -227,6 +256,21 @@ export function isFilterBarAllCurrent({ activeFilters, defaultActive }) {
 }
 
 /**
+ * @param {Array}  activeFilters The applied filters (`{ key, value }`).
+ * @param {string} key           Filter key, e.g. `category`.
+ * @param {string} [value]       Omitted: any value of `key`.
+ * @return {boolean} Whether that filter is applied.
+ */
+export function isFilterBarFilterApplied(activeFilters, key, value) {
+	if (!Array.isArray(activeFilters)) {
+		return false;
+	}
+	return activeFilters.some(
+		(f) => f.key === key && (value === undefined || f.value === value)
+	);
+}
+
+/**
  * @param {{
  *   entry: { key?: string, value?: string, label?: string },
  *   activeFilters?: Array,
@@ -248,38 +292,38 @@ export function isFilterBarEntryCurrent({
 }
 
 /**
- * Preview / initial chip key (`all` or `key:value`).
+ * The filters the visitor's bar opens with: the listed filter the saved
+ * default names, else none (All, or no chip when All is hidden).
  *
- * @param {{
- *   availableFilters?: Array,
- *   defaultActive?: unknown,
- *   hideAllFilter?: boolean,
- * }} args
- * @return {string}
+ * @param {{ availableFilters?: Array, defaultActive?: unknown }} args
+ * @return {Array<{ key: string, value: string }>} One filter, or none.
  */
-export function resolveFilterBarDefaultActiveKey({
+export function resolveFilterBarInitialActiveFilters({
 	availableFilters,
 	defaultActive,
-	hideAllFilter,
 }) {
 	const list = Array.isArray(availableFilters) ? availableFilters : [];
-	if (!isFilterBarDefaultAll(defaultActive)) {
-		for (let i = 0; i < list.length; i++) {
-			const entry = normalizeFilterBarEntry(list[i], i);
-			if (filterEntryMatchesDefaultActive(entry, defaultActive)) {
-				return `${entry.key}:${entry.value ?? ''}`;
-			}
-		}
-		const fallbackName = String(defaultActive).trim();
-		if (fallbackName) {
-			return `category:${fallbackName}`;
-		}
-	}
-	if (hideAllFilter && list.length > 0) {
-		const first = normalizeFilterBarEntry(list[0], 0);
-		return `${first.key}:${first.value ?? ''}`;
-	}
-	return 'all';
+	const defaultEntry = list
+		.map(normalizeFilterBarEntry)
+		.find((entry) => filterEntryMatchesDefaultActive(entry, defaultActive));
+	return defaultEntry
+		? [{ key: defaultEntry.key, value: defaultEntry.value }]
+		: [];
+}
+
+/**
+ * Hidden All still needs an honest dropdown label when no filter is applied.
+ *
+ * @param {{ hideAllFilter?: boolean, activeFilters?: Array }} args
+ * @return {boolean} Whether the dropdown shows "Select a filter".
+ */
+export function shouldShowFilterSelectPlaceholder({
+	hideAllFilter,
+	activeFilters,
+}) {
+	const hasActiveFilter =
+		Array.isArray(activeFilters) && activeFilters.length > 0;
+	return !!hideAllFilter && !hasActiveFilter;
 }
 
 /**

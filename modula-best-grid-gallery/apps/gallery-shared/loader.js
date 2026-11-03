@@ -7,3 +7,4 @@
 
 export { getDeeplinkGalleryIdFromHash } from './lightbox/modulaDeeplinkFromHash';
 export { MODERN_VISITOR_ROOT_PENDING_SELECTOR } from './utils/visitorRootClassification';
+export { observeNearViewport } from './utils/nearViewport';

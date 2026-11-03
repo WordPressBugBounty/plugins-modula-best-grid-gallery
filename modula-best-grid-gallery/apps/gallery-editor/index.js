@@ -47,31 +47,14 @@ if (localized.nonce) {
 	);
 }
 
-/**
- * Load shell CSS for the active editor mode before first paint.
- *
- * @param {boolean} takeover
- * @return {Promise<void>}
- */
-async function loadSettingsEditorShellStyles(takeover) {
-	if (takeover) {
-		await import('./styles/takeover.scss');
-		return;
-	}
-	await import('./styles/metabox.scss');
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-	const cfg = getModulaSettingsEditorConfig();
-	const mountId = cfg.takeover
-		? 'modula-gallery-takeover-root'
-		: 'modula-settings-editor-root';
-	const el = document.getElementById(mountId);
+	const el = document.getElementById('modula-gallery-takeover-root');
 	if (!el) {
 		return;
 	}
 
-	void loadSettingsEditorShellStyles(Boolean(cfg.takeover)).then(() => {
+	// Shell CSS loads before the first paint.
+	void import('./styles/takeover.scss').then(() => {
 		const root = createRoot(el);
 		root.render(
 			<QueryClientProvider client={queryClient}>

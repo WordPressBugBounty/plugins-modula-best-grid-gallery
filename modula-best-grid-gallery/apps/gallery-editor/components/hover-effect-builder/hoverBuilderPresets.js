@@ -1,567 +1,53 @@
-import { __ } from '@wordpress/i18n';
+import { getAnimationPresets } from '../../data/animationCatalog';
 
-export const HOVER_BUILDER_PRESETS = [
-	{
-		id: 'none',
-		label: __('None', 'modula-best-grid-gallery'),
-		description: __(
-			'Pure photos only: no hover motion, overlay, or on-image title, caption, or social icons.',
-			'modula-best-grid-gallery'
-		),
+/**
+ * The animation catalog's hover presets, in the shape the builder applies:
+ * `builder` is `hover.builder` (without `sourcePresetId`), `hover` the overlay
+ * keys beside it. Catalog order is the preset menu order.
+ */
+export const HOVER_BUILDER_PRESETS = getAnimationPresets('hover').map(
+	(preset) => ({
+		id: preset.id,
+		label: preset.label,
+		description: preset.description,
+		pro: preset.pro,
+		builder: preset.composition.builder,
+		hover: preset.composition.hover,
+	})
+);
+
+/**
+ * The hover presets a builder also plays at older slot positions
+ * (`composition.legacySlotPositions`: the simple moves, at the default
+ * builder's slots before they moved to the bottom), as
+ * `Animation_Catalog::legacy_hover_builders()` in PHP.
+ */
+const LEGACY_HOVER_BUILDER_PRESETS = getAnimationPresets('hover')
+	.filter((preset) => preset.composition.legacySlotPositions)
+	.map((preset) => ({
+		id: preset.id,
 		builder: {
-			cardTreatment: 'none',
-			graphicElement: 'none',
-			graphicVisibility: 'on-hover',
-			dimOverlay: false,
-			titleEnter: 'none',
-			captionEnter: 'none',
-			socialEnter: 'none',
-			titleVisibility: 'hidden',
-			captionVisibility: 'hidden',
-			socialVisibility: 'hidden',
-			cardEnterDurationMs: 180,
-			cardEnterDelayMs: 0,
-			titleEnterDurationMs: 180,
-			captionEnterDurationMs: 180,
-			socialEnterDurationMs: 180,
-			titleEnterDelayMs: 0,
-			captionEnterDelayMs: 0,
-			socialEnterDelayMs: 0,
-			titleEnterStaggerMs: 0,
-			captionEnterStaggerMs: 0,
-			socialEnterStaggerMs: 0,
-			slotPositions: {
-				title: { x: 50, y: 18 },
-				caption: { x: 50, y: 50 },
-				social: { x: 50, y: 82 },
-			},
+			...preset.composition.builder,
+			slotPositions: preset.composition.legacySlotPositions,
 		},
-		hover: {
-			hoverColor: 'rgba(0,0,0,0)',
-			hoverOpacity: 0,
-		},
-	},
-	{
-		id: 'none-with-captions',
-		label: __('None - with captions', 'modula-best-grid-gallery'),
-		description: __(
-			'No hover effects, but title, caption, and social stay visible on the image.',
-			'modula-best-grid-gallery'
-		),
-		builder: {
-			cardTreatment: 'none',
-			graphicElement: 'none',
-			graphicVisibility: 'on-hover',
-			dimOverlay: false,
-			titleEnter: 'none',
-			captionEnter: 'none',
-			socialEnter: 'none',
-			titleVisibility: 'always',
-			captionVisibility: 'always',
-			socialVisibility: 'always',
-			cardEnterDurationMs: 180,
-			cardEnterDelayMs: 0,
-			titleEnterDurationMs: 180,
-			captionEnterDurationMs: 180,
-			socialEnterDurationMs: 180,
-			titleEnterDelayMs: 0,
-			captionEnterDelayMs: 0,
-			socialEnterDelayMs: 0,
-			titleEnterStaggerMs: 0,
-			captionEnterStaggerMs: 0,
-			socialEnterStaggerMs: 0,
-			slotPositions: {
-				title: { x: 50, y: 18 },
-				caption: { x: 50, y: 30 },
-				social: { x: 50, y: 82 },
-			},
-		},
-		hover: {
-			hoverColor: 'rgba(0,0,0,0)',
-			hoverOpacity: 0,
-		},
-	},
-	{
-		id: 'balanced-reveal',
-		label: __('Balanced reveal', 'modula-best-grid-gallery'),
-		description: __(
-			'General-purpose hover: soft zoom, readable overlay, all content revealed without drama.',
-			'modula-best-grid-gallery'
-		),
-		builder: {
-			cardTreatment: 'zoom',
-			graphicElement: 'none',
-			graphicVisibility: 'on-hover',
-			dimOverlay: true,
-			titleEnter: 'fade',
-			captionEnter: 'fade',
-			socialEnter: 'fade',
-			titleVisibility: 'on-hover',
-			captionVisibility: 'on-hover',
-			socialVisibility: 'on-hover',
-			cardEnterDurationMs: 280,
-			cardEnterDelayMs: 0,
-			titleEnterDurationMs: 280,
-			captionEnterDurationMs: 280,
-			socialEnterDurationMs: 280,
-			titleEnterDelayMs: 0,
-			captionEnterDelayMs: 0,
-			socialEnterDelayMs: 0,
-			titleEnterStaggerMs: 40,
-			captionEnterStaggerMs: 40,
-			socialEnterStaggerMs: 40,
-			slotPositions: {
-				title: { x: 50, y: 24 },
-				caption: { x: 50, y: 36 },
-				social: { x: 50, y: 78 },
-			},
-		},
-		hover: {
-			hoverColor: 'rgba(17,17,17,.46)',
-			hoverOpacity: 46,
-		},
-	},
-	{
-		id: 'portfolio-lift',
-		label: __('Portfolio lift', 'modula-best-grid-gallery'),
-		description: __(
-			'A polished portfolio card with a small lift and upward content entrance.',
-			'modula-best-grid-gallery'
-		),
-		builder: {
-			cardTreatment: 'lift',
-			graphicElement: 'none',
-			graphicVisibility: 'on-hover',
-			dimOverlay: true,
-			titleEnter: 'slide-up',
-			captionEnter: 'slide-up',
-			socialEnter: 'fade',
-			titleVisibility: 'on-hover',
-			captionVisibility: 'on-hover',
-			socialVisibility: 'on-hover',
-			cardEnterDurationMs: 320,
-			cardEnterDelayMs: 25,
-			titleEnterDurationMs: 320,
-			captionEnterDurationMs: 320,
-			socialEnterDurationMs: 320,
-			titleEnterDelayMs: 25,
-			captionEnterDelayMs: 25,
-			socialEnterDelayMs: 25,
-			titleEnterStaggerMs: 55,
-			captionEnterStaggerMs: 55,
-			socialEnterStaggerMs: 55,
-			slotPositions: {
-				title: { x: 50, y: 22 },
-				caption: { x: 50, y: 34 },
-				social: { x: 50, y: 76 },
-			},
-		},
-		hover: {
-			hoverColor: 'rgba(15,23,42,.54)',
-			hoverOpacity: 54,
-		},
-	},
-	{
-		id: 'center-hero',
-		label: __('Center hero', 'modula-best-grid-gallery'),
-		description: __(
-			'Hero-style hover with centered copy, stronger title emphasis, and balanced timing.',
-			'modula-best-grid-gallery'
-		),
-		builder: {
-			cardTreatment: 'zoom',
-			graphicElement: 'none',
-			graphicVisibility: 'on-hover',
-			dimOverlay: true,
-			titleEnter: 'scale',
-			captionEnter: 'fade',
-			socialEnter: 'fade',
-			titleVisibility: 'on-hover',
-			captionVisibility: 'on-hover',
-			socialVisibility: 'on-hover',
-			cardEnterDurationMs: 360,
-			cardEnterDelayMs: 20,
-			titleEnterDurationMs: 360,
-			captionEnterDurationMs: 360,
-			socialEnterDurationMs: 360,
-			titleEnterDelayMs: 20,
-			captionEnterDelayMs: 20,
-			socialEnterDelayMs: 20,
-			titleEnterStaggerMs: 60,
-			captionEnterStaggerMs: 60,
-			socialEnterStaggerMs: 60,
-			slotPositions: {
-				title: { x: 50, y: 40 },
-				caption: { x: 50, y: 54 },
-				social: { x: 50, y: 70 },
-			},
-		},
-		hover: {
-			hoverColor: 'rgba(31,41,55,.52)',
-			hoverOpacity: 52,
-		},
-	},
-	{
-		id: 'caption-spotlight',
-		label: __('Caption spotlight', 'modula-best-grid-gallery'),
-		description: __(
-			'For storytelling galleries where the caption is the main content layer.',
-			'modula-best-grid-gallery'
-		),
-		builder: {
-			cardTreatment: 'none',
-			graphicElement: 'none',
-			graphicVisibility: 'on-hover',
-			dimOverlay: true,
-			titleEnter: 'blur-in',
-			captionEnter: 'slide-up',
-			socialEnter: 'fade',
-			titleVisibility: 'on-hover',
-			captionVisibility: 'on-hover',
-			socialVisibility: 'on-hover',
-			cardEnterDurationMs: 340,
-			cardEnterDelayMs: 40,
-			titleEnterDurationMs: 340,
-			captionEnterDurationMs: 340,
-			socialEnterDurationMs: 340,
-			titleEnterDelayMs: 40,
-			captionEnterDelayMs: 40,
-			socialEnterDelayMs: 40,
-			titleEnterStaggerMs: 70,
-			captionEnterStaggerMs: 70,
-			socialEnterStaggerMs: 70,
-			slotPositions: {
-				title: { x: 50, y: 56 },
-				caption: { x: 50, y: 70 },
-				social: { x: 50, y: 86 },
-			},
-		},
-		hover: {
-			hoverColor: 'rgba(17,24,39,.64)',
-			hoverOpacity: 64,
-		},
-	},
-	{
-		id: 'cinematic-dark',
-		label: __('Cinematic dark', 'modula-best-grid-gallery'),
-		description: __(
-			'Darker, slower, dramatic reveal for large photography tiles.',
-			'modula-best-grid-gallery'
-		),
-		builder: {
-			cardTreatment: 'lift',
-			graphicElement: 'none',
-			graphicVisibility: 'on-hover',
-			dimOverlay: true,
-			titleEnter: 'blur-in',
-			captionEnter: 'slide-up',
-			socialEnter: 'slide-up',
-			titleVisibility: 'on-hover',
-			captionVisibility: 'on-hover',
-			socialVisibility: 'on-hover',
-			cardEnterDurationMs: 420,
-			cardEnterDelayMs: 50,
-			titleEnterDurationMs: 420,
-			captionEnterDurationMs: 420,
-			socialEnterDurationMs: 420,
-			titleEnterDelayMs: 50,
-			captionEnterDelayMs: 50,
-			socialEnterDelayMs: 50,
-			titleEnterStaggerMs: 80,
-			captionEnterStaggerMs: 80,
-			socialEnterStaggerMs: 80,
-			slotPositions: {
-				title: { x: 50, y: 60 },
-				caption: { x: 50, y: 74 },
-				social: { x: 50, y: 88 },
-			},
-		},
-		hover: {
-			hoverColor: 'rgba(2,6,23,.72)',
-			hoverOpacity: 72,
-		},
-	},
-	{
-		id: 'editorial-corner-left',
-		label: __('Editorial corner left', 'modula-best-grid-gallery'),
-		description: __(
-			'Magazine-like top-left stack: copy reveals together on hover.',
-			'modula-best-grid-gallery'
-		),
-		builder: {
-			cardTreatment: 'none',
-			graphicElement: 'none',
-			graphicVisibility: 'on-hover',
-			dimOverlay: true,
-			titleEnter: 'slide-right',
-			captionEnter: 'slide-right',
-			socialEnter: 'fade',
-			titleVisibility: 'on-hover',
-			captionVisibility: 'on-hover',
-			socialVisibility: 'on-hover',
-			cardEnterDurationMs: 280,
-			cardEnterDelayMs: 10,
-			titleEnterDurationMs: 280,
-			captionEnterDurationMs: 280,
-			socialEnterDurationMs: 280,
-			titleEnterDelayMs: 10,
-			captionEnterDelayMs: 10,
-			socialEnterDelayMs: 10,
-			titleEnterStaggerMs: 35,
-			captionEnterStaggerMs: 35,
-			socialEnterStaggerMs: 35,
-			slotPositions: {
-				title: { x: 12, y: 16 },
-				caption: { x: 12, y: 30 },
-				social: { x: 12, y: 46 },
-			},
-		},
-		hover: {
-			hoverColor: 'rgba(16,24,39,.3)',
-			hoverOpacity: 30,
-		},
-	},
-	{
-		id: 'editorial-corner-right',
-		label: __('Editorial corner right', 'modula-best-grid-gallery'),
-		description: __(
-			'Clean top-right editorial layout: stacked copy reveals on hover.',
-			'modula-best-grid-gallery'
-		),
-		builder: {
-			cardTreatment: 'none',
-			graphicElement: 'none',
-			graphicVisibility: 'on-hover',
-			dimOverlay: true,
-			titleEnter: 'slide-left',
-			captionEnter: 'slide-left',
-			socialEnter: 'fade',
-			titleVisibility: 'on-hover',
-			captionVisibility: 'on-hover',
-			socialVisibility: 'on-hover',
-			cardEnterDurationMs: 280,
-			cardEnterDelayMs: 10,
-			titleEnterDurationMs: 280,
-			captionEnterDurationMs: 280,
-			socialEnterDurationMs: 280,
-			titleEnterDelayMs: 10,
-			captionEnterDelayMs: 10,
-			socialEnterDelayMs: 10,
-			titleEnterStaggerMs: 35,
-			captionEnterStaggerMs: 35,
-			socialEnterStaggerMs: 35,
-			slotPositions: {
-				title: { x: 88, y: 16 },
-				caption: { x: 88, y: 30 },
-				social: { x: 88, y: 46 },
-			},
-		},
-		hover: {
-			hoverColor: 'rgba(15,23,42,.34)',
-			hoverOpacity: 34,
-		},
-	},
-	{
-		id: 'monochrome-frame',
-		label: __('Monochrome', 'modula-best-grid-gallery'),
-		description: __(
-			'Grayscale editorial hover with compact stacked content.',
-			'modula-best-grid-gallery'
-		),
-		builder: {
-			cardTreatment: 'grayscale',
-			graphicElement: 'none',
-			graphicVisibility: 'on-hover',
-			dimOverlay: true,
-			titleEnter: 'slide-up',
-			captionEnter: 'slide-up',
-			socialEnter: 'fade',
-			titleVisibility: 'on-hover',
-			captionVisibility: 'on-hover',
-			socialVisibility: 'on-hover',
-			cardEnterDurationMs: 300,
-			cardEnterDelayMs: 15,
-			titleEnterDurationMs: 300,
-			captionEnterDurationMs: 300,
-			socialEnterDurationMs: 300,
-			titleEnterDelayMs: 15,
-			captionEnterDelayMs: 15,
-			socialEnterDelayMs: 15,
-			titleEnterStaggerMs: 45,
-			captionEnterStaggerMs: 45,
-			socialEnterStaggerMs: 45,
-			slotPositions: {
-				title: { x: 50, y: 24 },
-				caption: { x: 50, y: 42 },
-				social: { x: 50, y: 62 },
-			},
-		},
-		hover: {
-			hoverColor: 'rgba(15,17,21,.36)',
-			hoverOpacity: 36,
-		},
-	},
-	{
-		id: 'social-strip-bottom',
-		label: __('Social strip bottom', 'modula-best-grid-gallery'),
-		description: __(
-			'Keeps social actions predictable at the bottom while text enters above.',
-			'modula-best-grid-gallery'
-		),
-		builder: {
-			cardTreatment: 'none',
-			graphicElement: 'none',
-			graphicVisibility: 'on-hover',
-			dimOverlay: true,
-			titleEnter: 'slide-down',
-			captionEnter: 'slide-right',
-			socialEnter: 'slide-up',
-			titleVisibility: 'on-hover',
-			captionVisibility: 'on-hover',
-			socialVisibility: 'on-hover',
-			cardEnterDurationMs: 300,
-			cardEnterDelayMs: 25,
-			titleEnterDurationMs: 300,
-			captionEnterDurationMs: 300,
-			socialEnterDurationMs: 300,
-			titleEnterDelayMs: 25,
-			captionEnterDelayMs: 25,
-			socialEnterDelayMs: 25,
-			titleEnterStaggerMs: 55,
-			captionEnterStaggerMs: 55,
-			socialEnterStaggerMs: 55,
-			slotPositions: {
-				title: { x: 50, y: 20 },
-				caption: { x: 50, y: 36 },
-				social: { x: 50, y: 88 },
-			},
-		},
-		hover: {
-			hoverColor: 'rgba(11,18,32,.56)',
-			hoverOpacity: 56,
-		},
-	},
-	{
-		id: 'product-card-clean',
-		label: __('Product card clean', 'modula-best-grid-gallery'),
-		description: __(
-			'A restrained product/gallery hover: no tile motion, low overlay, bottom-stacked content.',
-			'modula-best-grid-gallery'
-		),
-		builder: {
-			cardTreatment: 'none',
-			graphicElement: 'none',
-			graphicVisibility: 'on-hover',
-			dimOverlay: true,
-			titleEnter: 'fade',
-			captionEnter: 'slide-up',
-			socialEnter: 'fade',
-			titleVisibility: 'on-hover',
-			captionVisibility: 'on-hover',
-			socialVisibility: 'on-hover',
-			cardEnterDurationMs: 240,
-			cardEnterDelayMs: 0,
-			titleEnterDurationMs: 240,
-			captionEnterDurationMs: 240,
-			socialEnterDurationMs: 240,
-			titleEnterDelayMs: 0,
-			captionEnterDelayMs: 0,
-			socialEnterDelayMs: 0,
-			titleEnterStaggerMs: 25,
-			captionEnterStaggerMs: 25,
-			socialEnterStaggerMs: 25,
-			slotPositions: {
-				title: { x: 50, y: 70 },
-				caption: { x: 50, y: 82 },
-				social: { x: 50, y: 92 },
-			},
-		},
-		hover: {
-			hoverColor: 'rgba(0,0,0,.24)',
-			hoverOpacity: 24,
-		},
-	},
-	{
-		id: 'soft-zoom-stack',
-		label: __('Soft zoom stack', 'modula-best-grid-gallery'),
-		description: __(
-			'Friendly modern preset with soft zoom and bottom stacked metadata.',
-			'modula-best-grid-gallery'
-		),
-		builder: {
-			cardTreatment: 'zoom',
-			graphicElement: 'none',
-			graphicVisibility: 'on-hover',
-			dimOverlay: true,
-			titleEnter: 'blur-in',
-			captionEnter: 'slide-up',
-			socialEnter: 'slide-up',
-			titleVisibility: 'on-hover',
-			captionVisibility: 'on-hover',
-			socialVisibility: 'on-hover',
-			cardEnterDurationMs: 350,
-			cardEnterDelayMs: 35,
-			titleEnterDurationMs: 350,
-			captionEnterDurationMs: 350,
-			socialEnterDurationMs: 350,
-			titleEnterDelayMs: 35,
-			captionEnterDelayMs: 35,
-			socialEnterDelayMs: 35,
-			titleEnterStaggerMs: 65,
-			captionEnterStaggerMs: 65,
-			socialEnterStaggerMs: 65,
-			slotPositions: {
-				title: { x: 50, y: 60 },
-				caption: { x: 50, y: 72 },
-				social: { x: 50, y: 84 },
-			},
-		},
-		hover: {
-			hoverColor: 'rgba(15,23,42,.6)',
-			hoverOpacity: 60,
-		},
-	},
-	{
-		id: 'accessible-no-motion',
-		label: __('Accessible no motion', 'modula-best-grid-gallery'),
-		description: __(
-			'No animation preset: content appears on hover without movement or scaling.',
-			'modula-best-grid-gallery'
-		),
-		builder: {
-			cardTreatment: 'none',
-			graphicElement: 'none',
-			graphicVisibility: 'on-hover',
-			dimOverlay: true,
-			titleEnter: 'none',
-			captionEnter: 'none',
-			socialEnter: 'none',
-			titleVisibility: 'on-hover',
-			captionVisibility: 'on-hover',
-			socialVisibility: 'on-hover',
-			cardEnterDurationMs: 180,
-			cardEnterDelayMs: 0,
-			titleEnterDurationMs: 180,
-			captionEnterDurationMs: 180,
-			socialEnterDurationMs: 180,
-			titleEnterDelayMs: 0,
-			captionEnterDelayMs: 0,
-			socialEnterDelayMs: 0,
-			titleEnterStaggerMs: 0,
-			captionEnterStaggerMs: 0,
-			socialEnterStaggerMs: 0,
-			slotPositions: {
-				title: { x: 50, y: 64 },
-				caption: { x: 50, y: 76 },
-				social: { x: 50, y: 88 },
-			},
-		},
-		hover: {
-			hoverColor: 'rgba(0,0,0,.42)',
-			hoverOpacity: 42,
-		},
-	},
-];
+	}));
+
+/**
+ * @param {unknown}                                   builder `hover.builder`.
+ * @param {(current: Object, preset: Object) => boolean} matches Compares the normalized builder with a normalized preset builder.
+ * @return {string} The first preset the builder plays, then the first it
+ * plays at older slot positions (as PHP `Hover_Builder_Policy`); empty for none.
+ */
+function findPresetIdPlayedBy(builder, matches) {
+	const current = normalizeBuilderForPresetCompare(builder);
+	const matched = [
+		...HOVER_BUILDER_PRESETS,
+		...LEGACY_HOVER_BUILDER_PRESETS,
+	].find((preset) =>
+		matches(current, normalizeBuilderForPresetCompare(preset.builder))
+	);
+	return matched ? matched.id : '';
+}
 
 function normalizeBuilderForPresetCompare(builder) {
 	const slotPositions =
@@ -699,44 +185,92 @@ function normalizeBuilderForPresetCompare(builder) {
 }
 
 export function getMatchingPresetId(builder) {
-	const current = normalizeBuilderForPresetCompare(builder);
-	const matched = HOVER_BUILDER_PRESETS.find((preset) => {
-		const candidate = normalizeBuilderForPresetCompare(preset.builder);
-		return (
-			current.cardTreatment === candidate.cardTreatment &&
-			current.graphicElement === candidate.graphicElement &&
-			current.graphicVisibility === candidate.graphicVisibility &&
-			current.dimOverlay === candidate.dimOverlay &&
-			current.titleEnter === candidate.titleEnter &&
-			current.captionEnter === candidate.captionEnter &&
-			current.socialEnter === candidate.socialEnter &&
-			current.titleVisibility === candidate.titleVisibility &&
-			current.captionVisibility === candidate.captionVisibility &&
-			current.socialVisibility === candidate.socialVisibility &&
-			current.cardEnterDurationMs === candidate.cardEnterDurationMs &&
-			current.cardEnterDelayMs === candidate.cardEnterDelayMs &&
-			current.titleEnterDurationMs === candidate.titleEnterDurationMs &&
-			current.captionEnterDurationMs ===
-				candidate.captionEnterDurationMs &&
-			current.socialEnterDurationMs === candidate.socialEnterDurationMs &&
-			current.titleEnterDelayMs === candidate.titleEnterDelayMs &&
-			current.captionEnterDelayMs === candidate.captionEnterDelayMs &&
-			current.socialEnterDelayMs === candidate.socialEnterDelayMs &&
-			current.titleEnterStaggerMs === candidate.titleEnterStaggerMs &&
-			current.captionEnterStaggerMs === candidate.captionEnterStaggerMs &&
-			current.socialEnterStaggerMs === candidate.socialEnterStaggerMs &&
-			current.slotPositions.title.x === candidate.slotPositions.title.x &&
-			current.slotPositions.title.y === candidate.slotPositions.title.y &&
-			current.slotPositions.caption.x ===
-				candidate.slotPositions.caption.x &&
-			current.slotPositions.caption.y ===
-				candidate.slotPositions.caption.y &&
-			current.slotPositions.social.x ===
-				candidate.slotPositions.social.x &&
-			current.slotPositions.social.y === candidate.slotPositions.social.y
-		);
-	});
-	return matched ? matched.id : '';
+	return findPresetIdPlayedBy(
+		builder,
+		(current, candidate) =>
+			sameNormalizedMotion(current, candidate) &&
+			current.dimOverlay === candidate.dimOverlay
+	);
+}
+
+/**
+ * The preset a builder plays, leaving `dimOverlay` out because Darken on
+ * hover owns it (`Hover_Builder_Policy::matching_motion_preset_id()` in PHP).
+ *
+ * @param {unknown} builder `hover.builder`.
+ * @return {string} Preset id; empty when the builder plays none of them.
+ */
+export function getMatchingMotionPresetId(builder) {
+	return findPresetIdPlayedBy(builder, sameNormalizedMotion);
+}
+
+/**
+ * @param {unknown} a `hover.builder`.
+ * @param {unknown} b `hover.builder`.
+ * @return {boolean} Both play the same hover, `dimOverlay` aside (`Hover_Builder_Policy::same_motion()`).
+ */
+export function sameHoverMotion(a, b) {
+	return sameNormalizedMotion(
+		normalizeBuilderForPresetCompare(a),
+		normalizeBuilderForPresetCompare(b)
+	);
+}
+
+/**
+ * @param {Object} current   A normalized builder.
+ * @param {Object} candidate A normalized builder.
+ * @return {boolean} Both play the same hover, `dimOverlay` aside.
+ */
+function sameNormalizedMotion(current, candidate) {
+	return (
+		current.cardTreatment === candidate.cardTreatment &&
+		current.graphicElement === candidate.graphicElement &&
+		current.graphicVisibility === candidate.graphicVisibility &&
+		current.titleEnter === candidate.titleEnter &&
+		current.captionEnter === candidate.captionEnter &&
+		current.socialEnter === candidate.socialEnter &&
+		current.titleVisibility === candidate.titleVisibility &&
+		current.captionVisibility === candidate.captionVisibility &&
+		current.socialVisibility === candidate.socialVisibility &&
+		current.cardEnterDurationMs === candidate.cardEnterDurationMs &&
+		current.cardEnterDelayMs === candidate.cardEnterDelayMs &&
+		current.titleEnterDurationMs === candidate.titleEnterDurationMs &&
+		current.captionEnterDurationMs === candidate.captionEnterDurationMs &&
+		current.socialEnterDurationMs === candidate.socialEnterDurationMs &&
+		current.titleEnterDelayMs === candidate.titleEnterDelayMs &&
+		current.captionEnterDelayMs === candidate.captionEnterDelayMs &&
+		current.socialEnterDelayMs === candidate.socialEnterDelayMs &&
+		current.titleEnterStaggerMs === candidate.titleEnterStaggerMs &&
+		current.captionEnterStaggerMs === candidate.captionEnterStaggerMs &&
+		current.socialEnterStaggerMs === candidate.socialEnterStaggerMs &&
+		current.slotPositions.title.x === candidate.slotPositions.title.x &&
+		current.slotPositions.title.y === candidate.slotPositions.title.y &&
+		current.slotPositions.caption.x === candidate.slotPositions.caption.x &&
+		current.slotPositions.caption.y === candidate.slotPositions.caption.y &&
+		current.slotPositions.social.x === candidate.slotPositions.social.x &&
+		current.slotPositions.social.y === candidate.slotPositions.social.y
+	);
+}
+
+/**
+ * Writes a preset into the form: the builder, Darken on hover from the
+ * builder, and the preset's overlay colour and opacity.
+ *
+ * @param {import('@tanstack/react-form').FormApi} form
+ * @param {Object}                                 preset A `HOVER_BUILDER_PRESETS` entry.
+ */
+export function applyHoverPresetToForm(form, preset) {
+	const current = form.getFieldValue('hover.builder');
+	const nextBuilder = applyHoverPreset(
+		current && typeof current === 'object' ? current : {},
+		preset
+	);
+	form.setFieldValue('hover.builder', nextBuilder);
+	form.setFieldValue('hover.dimOverlay', !!nextBuilder.dimOverlay);
+	if (preset.hover) {
+		form.setFieldValue('hover.hoverColor', preset.hover.hoverColor);
+		form.setFieldValue('hover.hoverOpacity', preset.hover.hoverOpacity);
+	}
 }
 
 export function applyHoverPreset(baseBuilder, preset) {

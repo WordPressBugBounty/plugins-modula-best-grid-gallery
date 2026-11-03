@@ -10,18 +10,18 @@
 const DEPRECATED_V2_CATEGORY_SLUGS = {
 	gallery: 'layout',
 	appearance: 'layout',
-	hover: 'layout',
+	hover: 'motion',
 	pagination: 'layout',
 	playback: 'lightbox',
-	performance: 'advanced',
-	privacy: 'advanced',
-	proofing: 'advanced',
+	performance: 'layout',
+	privacy: 'layout',
 	social: 'interaction',
 	download: 'interaction',
 	imageGuardian: 'protection',
 	imageLicensing: 'protection',
-	/** Custom CSS moved under Layout → Style; old deep links open Layout. */
-	custom: 'layout',
+	custom: 'css',
+	/** Advanced was split up: Speed Up and Presets moved to Layout → More settings. */
+	advanced: 'layout',
 };
 
 /**
@@ -34,25 +34,25 @@ const LEGACY_HASH_TO_CATEGORY = {
 	'modula-filters': 'filters',
 	'modula-captions': 'layout',
 	'modula-social': 'interaction',
-	'modula-image-loaded-effects': 'layout',
+	'modula-image-loaded-effects': 'motion',
 	'modula-image_licensing': 'protection',
-	'modula-hover-effect': 'layout',
+	'modula-hover-effect': 'motion',
 	'modula-video': 'video',
 	'modula-style': 'layout',
-	'modula-speedup': 'advanced',
-	'modula-exif': 'advanced',
+	'modula-speedup': 'layout',
+	'modula-exif': 'lightbox',
 	'modula-download': 'interaction',
-	'modula-zoom': 'interaction',
+	'modula-zoom': 'lightbox',
 	'modula-responsive': 'layout',
 	'modula-misc': 'protection',
 	'modula-slideshow': 'lightbox',
 	'modula-password_protect': 'protection',
 	'modula-watermark': 'protection',
-	'modula-customizations': 'layout',
+	'modula-customizations': 'css',
 	'modula-comments': 'interaction',
 	'modula-pagination': 'layout',
-	'modula-proofing': 'advanced',
-	'modula-instagram': 'advanced',
+	'modula-proofing': 'proofing',
+	'modula-instagram': 'instagram',
 };
 
 /**

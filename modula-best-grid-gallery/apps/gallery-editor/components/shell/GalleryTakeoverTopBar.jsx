@@ -1,49 +1,44 @@
 /**
- * Gallery editor top bar: gallery copy, shortcodes and save state for the shared takeover top bar.
- *
- * Also exposed to Pro (proofing takeover) through the settings-editor host; keep the props stable.
+ * Gallery editor top bar: gallery copy, settings history, embed rows and save
+ * state for the shared takeover top bar.
  */
 import { __ } from '@wordpress/i18n';
 import { TakeoverTopBar, useTakeoverSaveStatus } from 'editor-shell';
 import { getModulaSettingsEditorConfig } from '../../config/modulaSettingsEditorConfig';
-import BoundGalleryBadge from './BoundGalleryBadge';
+import { buildGalleryEmbedRows } from '../../utils/galleryEmbedRows';
 
 const LABELS = {
-	back: __('Galleries', 'modula-best-grid-gallery'),
+	back: __('Back', 'modula-best-grid-gallery'),
 	backAriaLabel: __('Back to Galleries', 'modula-best-grid-gallery'),
 	titlePlaceholder: __('Untitled gallery', 'modula-best-grid-gallery'),
 	titleAriaLabel: __('Gallery title', 'modula-best-grid-gallery'),
-	editTitleLabel: __('Edit gallery title', 'modula-best-grid-gallery'),
+	editTitleLabel: __('Rename gallery', 'modula-best-grid-gallery'),
+};
+
+const HISTORY_LABELS = {
+	heading: __('Settings history', 'modula-best-grid-gallery'),
+	clearConfirmMessage: __(
+		'Past and future steps are removed. Your current settings stay as they are.',
+		'modula-best-grid-gallery'
+	),
 };
 
 /**
- * Primary `[modula id]` chip plus the extra rows PHP provides (Pro).
- *
  * @param {number} galleryId
- * @return {Object|null} `TopBarShortcodes` props, or null without a gallery.
+ * @return {Object|null} Embed input, or null without a gallery.
  */
-function getGalleryShortcodes(galleryId) {
-	const id = Number(galleryId);
-	if (!id) {
+function getGalleryEmbed(galleryId) {
+	const rows = buildGalleryEmbedRows(
+		galleryId,
+		getModulaSettingsEditorConfig()?.galleryShortcodes?.rows
+	);
+	if (rows.length === 0) {
 		return null;
 	}
 
-	const raw = getModulaSettingsEditorConfig()?.galleryShortcodes;
-	const rows = Array.isArray(raw?.rows) ? raw.rows : [];
-	const primary = rows[0];
-	const primaryCodeFromPhp = primary?.code ? String(primary.code) : '';
-
 	return {
-		primaryCode: primaryCodeFromPhp || `[modula id="${id}"]`,
-		primaryLabel:
-			primary?.label || __('Embed gallery', 'modula-best-grid-gallery'),
-		copyLabel: __('Copy gallery shortcode', 'modula-best-grid-gallery'),
-		extraRows: rows.slice(1),
-		extrasHeading: __('Use this gallery', 'modula-best-grid-gallery'),
-		extrasTabsLabel: __(
-			'Gallery links and shortcodes',
-			'modula-best-grid-gallery'
-		),
+		heading: __('Embed this gallery', 'modula-best-grid-gallery'),
+		rows,
 	};
 }
 
@@ -52,10 +47,11 @@ function getGalleryShortcodes(galleryId) {
  * @param {number}                                    props.galleryId
  * @param {string}                                    props.postTitle
  * @param {(title: string) => void}                   props.onPostTitleChange
- * @param {(value?: string) => void}                  props.onPostTitleCommit
- * @param {boolean}                                   props.titleDisabled
+ * @param {(value?: string) => void}                  [props.onPostTitleCommit]
+ * @param {boolean}                                   [props.titleDisabled]
  * @param {string}                                    props.adminUrl
- * @param {import('react').ReactNode}                 [props.undoRedoControls]
+ * @param {string}                                    [props.newGalleryUrl]          New gallery in the new editor; empty hides the "+".
+ * @param {Object}                                    [props.history]                Settings undo stack (`undoRedo` of the form bundle); without it only the save state shows.
  * @param {string}                                    [props.documentStatus]
  * @param {string}                                    [props.documentStatusLabel]
  * @param {Array<{ value?: string, label?: string }>} [props.documentStatusChoices]
@@ -70,7 +66,8 @@ export default function GalleryTakeoverTopBar({
 	onPostTitleCommit,
 	titleDisabled = false,
 	adminUrl,
-	undoRedoControls = null,
+	newGalleryUrl = '',
+	history = null,
 	documentStatus = '',
 	documentStatusLabel = '',
 	documentStatusChoices = [],
@@ -92,9 +89,9 @@ export default function GalleryTakeoverTopBar({
 			onTitleCommit={onPostTitleCommit}
 			titleDisabled={titleDisabled}
 			saveStatus={{ status, errorMessage: saveErrorMessage }}
-			afterSaveStatus={<BoundGalleryBadge />}
-			undoRedoControls={undoRedoControls}
-			shortcodes={getGalleryShortcodes(galleryId)}
+			history={history}
+			historyLabels={history ? HISTORY_LABELS : null}
+			embed={getGalleryEmbed(galleryId)}
 			documentStatus={
 				showDocumentStatus
 					? {
@@ -103,6 +100,17 @@ export default function GalleryTakeoverTopBar({
 							choices: documentStatusChoices,
 							onChange: onDocumentStatusChange,
 							busy: documentStatusBusy,
+						}
+					: null
+			}
+			addNew={
+				newGalleryUrl
+					? {
+							href: newGalleryUrl,
+							label: __(
+								'New gallery',
+								'modula-best-grid-gallery'
+							),
 						}
 					: null
 			}

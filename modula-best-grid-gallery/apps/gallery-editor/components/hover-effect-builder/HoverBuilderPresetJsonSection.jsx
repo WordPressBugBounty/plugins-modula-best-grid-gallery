@@ -1,6 +1,7 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Button } from 'shared-ui';
+import { Button } from 'admin-ui';
+import { ItemEditCard } from 'editor-shell';
 import HoverBuilderPresetJsonModal from './HoverBuilderPresetJsonModal';
 
 /**
@@ -19,26 +20,19 @@ export default function HoverBuilderPresetJsonSection({
 	const [isPresetJsonModalOpen, setIsPresetJsonModalOpen] = useState(false);
 
 	return (
-		<section className="modula-gallery-takeover__reorder-setup-block">
-			<h3 className="modula-gallery-takeover__reorder-setup-title">
-				{__('Preset JSON', 'modula-best-grid-gallery')}
-			</h3>
-			<div className="modula-gallery-takeover__reorder-setup-body">
-				<p className="modula-gallery-takeover__hover-builder-layer-help">
-					{__(
-						'Import or export hover preset options as JSON.',
-						'modula-best-grid-gallery'
-					)}
-				</p>
-				<Button
-					type="button"
-					variant="ghost"
-					className="modula-gallery-takeover__hover-builder-preset-json-btn"
-					onClick={() => setIsPresetJsonModalOpen(true)}
-				>
-					{__('Open import / export', 'modula-best-grid-gallery')}
-				</Button>
-			</div>
+		<ItemEditCard title={__('Preset JSON', 'modula-best-grid-gallery')}>
+			<p className="modula-gallery-takeover__hover-builder-help">
+				{__(
+					'Import or export hover preset options as JSON.',
+					'modula-best-grid-gallery'
+				)}
+			</p>
+			<Button
+				className="modula-gallery-takeover__hover-builder-preset-json-btn"
+				onClick={() => setIsPresetJsonModalOpen(true)}
+			>
+				{__('Open import / export', 'modula-best-grid-gallery')}
+			</Button>
 			<HoverBuilderPresetJsonModal
 				isOpen={isPresetJsonModalOpen}
 				onClose={() => setIsPresetJsonModalOpen(false)}
@@ -65,6 +59,6 @@ export default function HoverBuilderPresetJsonSection({
 					}
 				}}
 			/>
-		</section>
+		</ItemEditCard>
 	);
 }

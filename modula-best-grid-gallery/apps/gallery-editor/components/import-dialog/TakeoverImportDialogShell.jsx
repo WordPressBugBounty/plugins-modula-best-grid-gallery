@@ -1,5 +1,5 @@
 import '../../styles/takeover/preview/_import-dialog-shell.scss';
-import { GalleryModal, GalleryModalFooter } from 'editor-shell';
+import { GalleryModal } from 'editor-shell';
 
 const BASE_CLASS = 'modula-import-dialog';
 
@@ -44,23 +44,20 @@ export default function TakeoverImportDialogShell({
 		.filter(Boolean)
 		.join(' ');
 
-	const handleClose = busy ? () => {} : onRequestClose;
 	const modalSize = variant === 'fullscreen' ? 'xlarge' : 'medium';
 
 	return (
 		<GalleryModal
 			isOpen={isOpen}
-			onClose={handleClose}
+			onClose={onRequestClose}
 			size={modalSize}
 			title={title}
-			subtitle={subtitle || undefined}
+			subtitle={subtitle}
 			className={shellClassName}
 			bodyClassName={innerClasses}
 			bodyOverflow="auto"
-			closeOnBackdropClick={!busy}
-			closeOnEscape={!busy}
-			showClose={!busy}
-			footer={footer ? <GalleryModalFooter right={footer} /> : null}
+			closeDisabled={busy}
+			footerRight={footer}
 		>
 			{toolbar ? (
 				<div className={`${BASE_CLASS}__toolbar`}>{toolbar}</div>

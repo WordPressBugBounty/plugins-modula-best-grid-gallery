@@ -1,0 +1,10 @@
+// Loaded under `.modula-admin-ui`; the spin keyframes live in root.
+
+.modula-admin-spinner {
+	display: inline-block;
+	flex-shrink: 0;
+	border: 2px solid var(--modula-admin-border-strong);
+	border-top-color: var(--modula-admin-ink);
+	border-radius: 50%;
+	animation: modula-admin-spinner-spin 0.8s linear infinite;
+}

@@ -168,33 +168,6 @@ export function getSidebarV2CategoryNavHelp(
 }
 
 /**
- * @param {string} categoryName
- * @param {string} [fallbackDescription]
- * @return {string}
- */
-export function getSidebarV2CategoryPanelDesc(
-	categoryName,
-	fallbackDescription = ''
-) {
-	const cat = findCategoryByName(categoryName);
-	if (
-		cat &&
-		typeof cat.panelDescription === 'string' &&
-		cat.panelDescription.trim() !== ''
-	) {
-		return cat.panelDescription.trim();
-	}
-	if (
-		cat &&
-		typeof cat.description === 'string' &&
-		cat.description.trim() !== ''
-	) {
-		return cat.description.trim();
-	}
-	return fallbackDescription || '';
-}
-
-/**
  * Nested drill panel description — prefers `hubHelp` stamped on the drill in structure JS.
  *
  * @param {string} drillTitle         Frame title / nav drill label.

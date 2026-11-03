@@ -1,22 +1,11 @@
 /**
- * Editor appearance preference for the settings editor (localStorage, default system).
+ * Shares the editor appearance (stored preference and resolved appearance)
+ * with every surface of the settings editor.
  */
 
-import {
-	createContext,
-	useCallback,
-	useContext,
-	useMemo,
-	useState,
-} from '@wordpress/element';
-import {
-	APPEARANCE_DARK,
-	APPEARANCE_LIGHT,
-	readStoredPreference,
-	resolveEditorAppearance,
-	syncResolvedDocumentAppearance,
-	writeStoredPreference,
-} from './settingsEditorAppearance';
+import { createContext, useContext, useMemo } from '@wordpress/element';
+import { APPEARANCE_DARK, APPEARANCE_LIGHT } from './settingsEditorAppearance';
+import { useEditorAppearancePreference } from './useEditorAppearancePreference';
 
 /** @type {import('react').Context<null | Record<string, unknown>>} */
 const SettingsEditorAppearanceContext = createContext(null);
@@ -26,18 +15,8 @@ const SettingsEditorAppearanceContext = createContext(null);
  * @param {import('react').ReactNode} props.children
  */
 export function SettingsEditorAppearanceProvider({ children }) {
-	const [preference, setPreferenceState] = useState(() => {
-		const initial = readStoredPreference();
-		syncResolvedDocumentAppearance(initial);
-		return initial;
-	});
-
-	const appearance = resolveEditorAppearance(preference);
-
-	const setPreference = useCallback((next) => {
-		setPreferenceState(next);
-		writeStoredPreference(next);
-	}, []);
+	const { preference, appearance, setPreference } =
+		useEditorAppearancePreference();
 
 	const value = useMemo(
 		() => ({

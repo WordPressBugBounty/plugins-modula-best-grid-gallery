@@ -55,6 +55,43 @@ class Modula_Extension_Catalog {
 	);
 
 	/**
+	 * Plan of the Pro features outside an extension (Filters, the lightbox,
+	 * the Pro gallery types): any license covers them (`has_plan()` in Pro),
+	 * so the cheapest plan.
+	 *
+	 * @var string
+	 */
+	const CORE_PLAN = 'starter';
+
+	/**
+	 * What the Lite paywall says about plans (editor redesign ticket 36): no
+	 * prices, which live on the pricing page.
+	 *
+	 * @return array{plans:array<string,string>,extensionPlans:array<string,string>,extensionNames:array<string,string>,corePlan:string,guarantee:string}
+	 *         Plan names from the cheapest, each extension's cheapest plan and name,
+	 *         Pro core's plan and the money-back guarantee line.
+	 */
+	public static function paywall() {
+		$extension_plans = array();
+		foreach ( self::PLANS as $plan => $slugs ) {
+			$extension_plans += array_fill_keys( $slugs, $plan );
+		}
+
+		return array(
+			'plans'          => self::plan_labels(),
+			'extensionPlans' => $extension_plans,
+			'extensionNames' => array_map(
+				function ( $copy ) {
+					return $copy['name'];
+				},
+				self::copy()
+			),
+			'corePlan'       => self::CORE_PLAN,
+			'guarantee'      => __( '14-day money-back guarantee', 'modula-best-grid-gallery' ),
+		);
+	}
+
+	/**
 	 * Extensions each plan includes: its own and every cheaper plan's.
 	 *
 	 * @return array<string,string[]> Plan => extension slugs, in display order.

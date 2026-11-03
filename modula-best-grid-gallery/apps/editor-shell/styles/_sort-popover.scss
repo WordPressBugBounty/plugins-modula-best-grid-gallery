@@ -1,0 +1,120 @@
+// The canvas toolbar's Sort button and its popover, canvas "1 · Editor"
+// (Sort by, New items go to the, Open drag-and-drop reorder), for
+// `CanvasSortPopover`. Colours are admin-ui tokens, so it follows the
+// editor's light or dark appearance.
+
+// Holds the button and its popover without a box of its own, so the toolbar
+// lays out the popover's anchor (sized below) as one of its controls.
+.modula-takeover__sort {
+	display: contents;
+}
+
+// Short of room, the toolbar's Sort gives way first: it narrows to "Sort ⌄",
+// and only then wraps (ticket 81). The zero basis breaks the line on that
+// narrow form; growing to `max-content` brings the mode back where it fits.
+.modula-takeover__sort > .modula-admin-popover-anchor {
+	flex: 1 1 0;
+	max-width: max-content;
+}
+
+// The button fills the anchor as it grows.
+.modula-takeover__sort-trigger {
+	flex-grow: 1;
+}
+
+// "Sort · Custom order ⌄": the mode muted after the label.
+.modula-takeover__sort-trigger .modula-takeover__canvas-toolbar-action-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+
+	// The mode's track has no minimum, so the button's narrowest form leaves
+	// the mode out, and a cut mode ends in an ellipsis. Before the mode loads
+	// the label stays a flex row of "Sort ⌄".
+	&:has(> .modula-takeover__sort-trigger-mode) {
+		display: grid;
+		grid-template-columns: auto minmax(0, max-content) auto;
+	}
+}
+
+.modula-takeover__sort-trigger-mode {
+	overflow: hidden;
+	color: var(--modula-admin-ink-muted);
+	text-overflow: ellipsis;
+}
+
+.modula-takeover__sort-trigger-chevron {
+	display: flex;
+	color: var(--modula-admin-ink-muted);
+	transition: transform var(--modula-admin-transition);
+
+	[aria-expanded="true"] > * > & {
+		transform: rotate(180deg);
+	}
+}
+
+.modula-takeover__sort-popover.modula-admin-popover {
+	display: flex;
+	flex-direction: column;
+	width: 340px;
+	max-width: min(340px, calc(100vw - 32px));
+	padding: 6px;
+	border-radius: var(--modula-admin-radius-lg);
+	color: var(--modula-admin-ink-secondary);
+
+	// In a short window the panel scrolls; its parts keep their height.
+	> * {
+		flex-shrink: 0;
+	}
+}
+
+.modula-takeover__sort-popover-notice {
+	margin: 4px 4px 6px;
+}
+
+.modula-takeover__sort-popover-heading {
+	padding: 8px 10px 4px;
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-caption);
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+// The Start/End row on one compact line under a rule; the admin-ui row
+// takes its spacing from these properties.
+.modula-takeover__sort-popover-insert {
+	--modula-admin-row-min-height: 0;
+	--modula-admin-row-padding-x: 10px;
+	--modula-admin-row-padding-y: 4px;
+	--modula-admin-row-gap: 12px;
+	--modula-admin-segment-height: 28px;
+	margin: 6px 4px 0;
+	padding: 6px 0 4px;
+	border-top: 1px solid var(--modula-admin-border-divider);
+
+	.modula-admin-row__main {
+		padding-right: 6px;
+		padding-left: 6px;
+	}
+
+	.modula-admin-row__label {
+		font-size: var(--modula-admin-text-control);
+		font-weight: 400;
+	}
+
+	.modula-admin-segmented__option {
+		min-width: 72px;
+	}
+}
+
+// The canvas draws this ink button 32px tall with 3px corners.
+.modula-takeover__sort-popover-reorder {
+	--modula-admin-button-height: 32px;
+	padding: 4px;
+
+	.modula-admin-button {
+		width: 100%;
+		border-radius: 3px;
+	}
+}

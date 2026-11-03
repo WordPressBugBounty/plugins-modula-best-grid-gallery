@@ -7,9 +7,12 @@
  *
  * @package
  */
-import DOMPurify from 'dompurify';
 import { Fancybox } from '@fancyapps/ui/dist/fancybox/fancybox.js';
 import { Hash } from '@fancyapps/ui/dist/fancybox/fancybox.hash.js';
+import {
+	clearDeeplinkHashAfterClose,
+	syncDeeplinkHashToSlide,
+} from './modulaDeeplinkHashSync';
 import {
 	dispatchModulaCarouselSelectSlide,
 	dispatchModulaFancyboxBeforeOpen,
@@ -28,6 +31,7 @@ import {
 	wireModulaLightboxShareToolbarClick,
 } from './prepareModulaLightboxV6';
 import { normalizeLightboxCaptionHtml } from '../utils/lightboxCaptionExtra';
+import { sanitizeCaptionHtml } from '../utils/sanitizeCaptionHtml';
 import {
 	attachModulaLightboxCompactToolbar,
 	detachModulaLightboxCompactToolbar,
@@ -212,6 +216,38 @@ function applyModulaVideoSlideAttrs(fancybox) {
 	}
 }
 
+/** Fancybox's `CarouselState.Ready`; the const enum is not exported at runtime. */
+const CAROUSEL_STATE_READY = 1;
+
+/**
+ * Whether a slide whose content just became ready is the one on show. Before
+ * the carousel is ready, `Carousel.ready` sets up the opening slide itself.
+ *
+ * @param {Object} carousel Fancybox v6 Carousel instance.
+ * @param {Object} slide    Carousel slide.
+ * @return {boolean} True for the current slide of a ready carousel.
+ */
+function isCurrentSlideOfReadyCarousel(carousel, slide) {
+	return (
+		carousel?.getState?.() === CAROUSEL_STATE_READY &&
+		slide?.index === carousel.getPageIndex?.()
+	);
+}
+
+/**
+ * Re-apply zoom, image protection and video attributes to the current slide.
+ *
+ * @param {Object} fancybox
+ * @param {Object} context
+ */
+function refreshModulaCurrentSlide(fancybox, context) {
+	if (!context.editorPreview) {
+		refreshModulaNativeLightboxZoom(fancybox);
+		refreshModulaLightboxImageProtection(fancybox);
+	}
+	applyModulaVideoSlideAttrs(fancybox);
+}
+
 /**
  * Pause autoplay only while the pointer is over the current image (legacy Modula).
  * Fancybox v6 built-in pauseOnHover is left off — it targets the full carousel.
@@ -361,18 +397,7 @@ function sanitizeSlides(links) {
 		}
 		if (typeof link.opts?.caption !== 'undefined') {
 			link.caption = normalizeLightboxCaptionHtml(
-				DOMPurify.sanitize(String(link.opts.caption), {
-					ADD_TAGS: ['svg', 'path'],
-					ADD_ATTR: [
-						'target',
-						'viewBox',
-						'xmlns',
-						'width',
-						'height',
-						'fill',
-						'd',
-					],
-				})
+				sanitizeCaptionHtml(link.opts.caption)
 			);
 			link.opts = {
 				...(link.opts || {}),
@@ -437,6 +462,7 @@ function buildEventHandlers(v6Opts, context, userOn = {}, modulaSlides = []) {
 			if (context.editorPreview) {
 				attachModulaLightboxPreviewDecorativeToolbar(container);
 			}
+			syncDeeplinkHashToSlide(fancybox);
 			dispatchModulaFancyboxEvent('ready', fancybox);
 			if (typeof userOn.ready === 'function') {
 				userOn.ready(fancybox);
@@ -464,21 +490,26 @@ function buildEventHandlers(v6Opts, context, userOn = {}, modulaSlides = []) {
 			}
 			activeGalleryHostEl = null;
 			releaseModulaGalleryItemPointerFocusFromContext(context);
+			clearDeeplinkHashAfterClose(fancybox);
 			dispatchModulaFancyboxEvent('close', fancybox);
 			dispatchModulaFancyboxEvent('destroy', fancybox);
 			if (typeof userOn.destroy === 'function') {
 				userOn.destroy(fancybox);
 			}
 		},
-		reveal: (fancybox) => {
-			if (!context.editorPreview) {
-				refreshModulaNativeLightboxZoom(fancybox);
-				refreshModulaLightboxImageProtection(fancybox);
+		/*
+		 * Fancybox v6 has no `reveal`; a slide's content (a lazily loaded image,
+		 * a video) is ready once per slide, current or preloaded. Only the slide
+		 * on show is refreshed, so a neighbour preloading leaves its zoom alone.
+		 * The document event keeps v5's name for extension listeners.
+		 */
+		'Carousel.contentReady': (fancybox, carousel, slide) => {
+			if (isCurrentSlideOfReadyCarousel(carousel, slide)) {
+				refreshModulaCurrentSlide(fancybox, context);
 			}
-			applyModulaVideoSlideAttrs(fancybox);
-			dispatchModulaFancyboxEvent('Carousel_reveal', fancybox);
-			if (typeof userOn.reveal === 'function') {
-				userOn.reveal(fancybox);
+			dispatchModulaFancyboxEvent('Carousel_reveal', fancybox, slide);
+			if (typeof userOn['Carousel.contentReady'] === 'function') {
+				userOn['Carousel.contentReady'](fancybox, carousel, slide);
 			}
 		},
 		'Carousel.ready': (fancybox) => {
@@ -507,11 +538,8 @@ function buildEventHandlers(v6Opts, context, userOn = {}, modulaSlides = []) {
 		},
 		'Carousel.change': (fancybox) => {
 			attachPauseOnHover(fancybox);
-			if (!context.editorPreview) {
-				refreshModulaNativeLightboxZoom(fancybox);
-				refreshModulaLightboxImageProtection(fancybox);
-			}
-			applyModulaVideoSlideAttrs(fancybox);
+			refreshModulaCurrentSlide(fancybox, context);
+			syncDeeplinkHashToSlide(fancybox);
 			const index = fancybox.getCarousel()?.getPageIndex?.() ?? 0;
 			dispatchModulaFancyboxEvent('Carousel_change', fancybox);
 			dispatchModulaCarouselSelectSlide(fancybox, index, v6Opts);

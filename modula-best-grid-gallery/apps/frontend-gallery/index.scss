@@ -1,7 +1,8 @@
-@use '../shared-styles/spacing' as *;
-@use '../shared-styles/radii' as *;
+@use 'spacing' as *;
+@use 'radii' as *;
 @use 'gallery-shell';
 @use 'hover-v2';
+@use 'layout-motion';
 @use 'social';
 @use 'caption-below-image';
 @use 'caption-compact-popover';
@@ -482,8 +483,9 @@
 	}
 
 	/*
-	 * Named / default image size: keep intrinsic width (never upscale a thumbnail
-	 * to gallery width). Custom + crop fills the track.
+	 * Named / default image size: the slide shows at the chosen file's size
+	 * (SliderItem's file variables), capped by the track; never upscaled to the
+	 * gallery width. Custom + crop fills the track.
 	 */
 	&.modula-slider--adaptive-height.modula-slider--scale-down .modula-items.f-carousel .f-carousel__slide .modula-item-picture-stack {
 		display: flex;
@@ -492,9 +494,10 @@
 	}
 
 	&.modula-slider--adaptive-height.modula-slider--scale-down .modula-items.f-carousel .f-carousel__slide .modula-item-picture:not(.modula-item-picture--focal-crop) img {
-		width: auto;
+		width: var(--modula-slider-file-width, auto);
 		max-width: 100%;
 		height: auto;
+		aspect-ratio: var(--modula-slider-file-aspect, auto);
 		display: block;
 		margin-inline: auto;
 	}
@@ -1511,18 +1514,22 @@ html body .modula .modula-slider {
 }
 
 /*
- * Adaptive height + named/default image size: do not upscale past the served
- * file’s intrinsic width. Custom + crop fills width (below via fill-crop class
- * on the shell — this block only targets scale-down).
+ * Adaptive height + named/default image size: the chosen file's size, never
+ * upscaled past it. An explicit width, because with `width: auto` the browser
+ * sizes the image from `sizes` (300px for an unresolved `sizes="auto"`), not
+ * from the file. The canvas may draw a larger file than the chosen size, so
+ * `cover` crops it to that size's shape. Custom + crop fills width (below via
+ * fill-crop class on the shell — this block only targets scale-down).
  */
 html body .modula .modula-slider.modula-slider--scale-down.modula-slider--adaptive-height {
 
 	.modula-items.f-carousel .f-carousel__slide .modula-item-picture:not(.modula-item-picture--focal-crop) img,
 	.modula-items.f-carousel .f-carousel__slide img.pic:not(.modula-item-img--focal-crop):not(.modula-item-img--focal-point) {
-		width: auto !important;
+		width: var(--modula-slider-file-width, auto) !important;
 		max-width: 100% !important;
 		height: auto !important;
-		object-fit: fill !important;
+		aspect-ratio: var(--modula-slider-file-aspect, auto);
+		object-fit: cover !important;
 		margin-inline: auto;
 	}
 }

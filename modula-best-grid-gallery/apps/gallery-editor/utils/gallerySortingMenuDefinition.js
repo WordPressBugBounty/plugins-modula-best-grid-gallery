@@ -1,15 +1,18 @@
 /**
- * Labels for gallery sort modes (preview chrome + reorder panel).
+ * Labels for gallery sort modes (the canvas toolbar's Sort popover).
  */
 import { __ } from '@wordpress/i18n';
 
 /**
- * @type {{ id: string, label: string }[] | null}
+ * `label` names the mode in the Sort by list; `toolbarLabel` is the shorter
+ * name the Sort button shows after "Sort ·".
+ *
+ * @type {{ id: string, label: string, toolbarLabel: string }[] | null}
  */
 let sortingMenuDefinitionCache = null;
 
 /**
- * @return {{ id: string, label: string }[]}
+ * @return {{ id: string, label: string, toolbarLabel: string }[]}
  */
 export function getSortingMenuDefinition() {
 	if (!sortingMenuDefinitionCache) {
@@ -17,11 +20,16 @@ export function getSortingMenuDefinition() {
 			{
 				id: 'manual',
 				label: __('Drag and drop reorder', 'modula-best-grid-gallery'),
+				toolbarLabel: __('Custom order', 'modula-best-grid-gallery'),
 			},
 			{
 				id: 'dateCreatedNew',
 				label: __(
 					'Date created — newest first',
+					'modula-best-grid-gallery'
+				),
+				toolbarLabel: __(
+					'Date created, newest first',
 					'modula-best-grid-gallery'
 				),
 			},
@@ -31,11 +39,19 @@ export function getSortingMenuDefinition() {
 					'Date created — oldest first',
 					'modula-best-grid-gallery'
 				),
+				toolbarLabel: __(
+					'Date created, oldest first',
+					'modula-best-grid-gallery'
+				),
 			},
 			{
 				id: 'dateModifiedFirst',
 				label: __(
 					'Date modified — most recent first',
+					'modula-best-grid-gallery'
+				),
+				toolbarLabel: __(
+					'Date modified, most recent first',
 					'modula-best-grid-gallery'
 				),
 			},
@@ -45,30 +61,27 @@ export function getSortingMenuDefinition() {
 					'Date modified — most recent last',
 					'modula-best-grid-gallery'
 				),
+				toolbarLabel: __(
+					'Date modified, most recent last',
+					'modula-best-grid-gallery'
+				),
 			},
 			{
 				id: 'titleAZ',
 				label: __('Title A–Z', 'modula-best-grid-gallery'),
+				toolbarLabel: __('Title A–Z', 'modula-best-grid-gallery'),
 			},
 			{
 				id: 'titleZA',
 				label: __('Title Z–A', 'modula-best-grid-gallery'),
+				toolbarLabel: __('Title Z–A', 'modula-best-grid-gallery'),
 			},
 			{
 				id: 'random',
 				label: __('Random', 'modula-best-grid-gallery'),
+				toolbarLabel: __('Random', 'modula-best-grid-gallery'),
 			},
 		];
 	}
 	return sortingMenuDefinitionCache;
-}
-
-/**
- * @param {string} mode
- * @return {string}
- */
-export function getSortingModeLabel(mode) {
-	const rows = getSortingMenuDefinition();
-	const found = rows.find((r) => r.id === mode);
-	return found ? found.label : __('Sorting', 'modula-best-grid-gallery');
 }

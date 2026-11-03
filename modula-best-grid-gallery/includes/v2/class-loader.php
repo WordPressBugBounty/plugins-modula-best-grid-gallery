@@ -31,6 +31,9 @@ class Loader {
 		Modern_Gallery::class;
 
 		class_alias( Settings\Adapter::class, 'Modula_V2_Settings_Adapter' );
+		// Former names of the content page classes (ADR 0055); public since 3.0.0.
+		class_alias( Admin\Content_Page_Admin::class, 'Modula\V2\Admin\Gallery_Listing_Admin' );
+		class_alias( Rest\Content_Page_Controller::class, 'Modula\V2\Rest\Listing_Controller' );
 
 		Modern_Gallery::init();
 
@@ -39,6 +42,9 @@ class Loader {
 		// When modula-settings / modula-images are saved, also save modula_settings_v2 and modula_images_v2.
 		Meta_Sync::init();
 
+		// Per-image hover effect and CSS class join the item whitelist.
+		Images\Item_Fields::init();
+
 		// Optional native automation surface; normal Modula boot has no API dependency.
 		Abilities\Integration::init();
 
@@ -46,14 +52,14 @@ class Loader {
 		Admin\Gallery_Takeover_Admin::init();
 		Admin\Settings_Editor_Metabox::init();
 		Admin\Beta_Gallery_Admin::init();
-		Admin\Gallery_Listing_Admin::init();
+		Admin\Content_Page_Admin::init();
 		// SCRIPT_DEBUG only: hidden page that shows every admin-ui control (ADR 0046).
 		Admin\Admin_Ui_Demo::init();
 
 		// REST: GET gallery settings v2 / images v2 (optional filter by group or key).
 		Rest\Settings_Controller::init();
-		// REST: gallery listing index.
-		Rest\Listing_Controller::init();
+		// REST: content page index.
+		Rest\Content_Page_Controller::init();
 		// REST: folder/ZIP import helpers (gallery upload browser — no admin-ajax).
 		Rest\Gallery_Upload_Controller::init();
 		// REST: AI-assisted custom CSS generation.

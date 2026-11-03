@@ -1,5 +1,7 @@
 /**
- * Settings-editor: which gallery item is open in the Image sidebar panel.
+ * Settings-editor: which preview item is selected, and which one is open in
+ * the Image sidebar panel. A tile click selects; "Edit" opens the panel
+ * (`itemSelectionState.js` holds the rules).
  */
 import {
 	createContext,
@@ -7,25 +9,39 @@ import {
 	useContext,
 	useEffect,
 	useMemo,
-	useState,
+	useReducer,
 } from '@wordpress/element';
+import { isEventInOpenDialog, isEventInPopover } from 'editor-shell';
 import { useTakeoverSidebarStack } from './TakeoverSidebarStackContext';
 import { useGalleryPreviewTileSelection } from './GalleryPreviewTileSelectionContext';
-import { useGalleryReorderSidebar } from './GalleryReorderSidebarContext';
+import {
+	INITIAL_ITEM_SELECTION,
+	itemSelectionReducer,
+} from './itemSelectionState';
 
-/** @typedef {'edit'|'focus'} GalleryItemEditView */
+/** @typedef {import('./itemSelectionState').GalleryItemEditView} GalleryItemEditView */
 
 /**
- * @type {import('react').Context<{
+ * @typedef {{
  *   storeIndex: number | null,
+ *   selectedIndex: number | null,
  *   view: GalleryItemEditView,
+ *   select: (storeIndex: number) => void,
  *   open: (storeIndex: number) => void,
  *   openFocus: (storeIndex: number) => void,
  *   closeFocus: () => void,
+ *   back: () => void,
  *   close: () => void,
  *   isOpen: boolean,
-  } | null>} */
+ * }} GalleryItemEditSidebarValue
+ * `storeIndex` is the item open in the panel; `back` leaves the panel and
+ * keeps the selection; `close` drops both (store indices may have shifted).
+ */
+
+/** @type {import('react').Context<GalleryItemEditSidebarValue | null>} */
 export const GalleryItemEditSidebarContext = createContext(null);
+
+const LIVE_PREVIEW_SELECTOR = '.modula-gallery-takeover__live-preview';
 
 /**
  * Clear keyboard focus on preview tile select-hit so Escape does not leave a
@@ -50,15 +66,25 @@ function blurPreviewItemSelectHit() {
 }
 
 /**
- * @return {{
- *   storeIndex: number | null,
- *   view: GalleryItemEditView,
- *   open: (storeIndex: number) => void,
- *   openFocus: (storeIndex: number) => void,
- *   closeFocus: () => void,
- *   close: () => void,
- *   isOpen: boolean,
- * } | null}
+ * With only a selection (no panel), Escape belongs to the preview: a key in a
+ * settings field or menu must keep its own Escape.
+ *
+ * @param {KeyboardEvent} event
+ * @return {boolean} Whether the key was pressed in the preview or on the page body.
+ */
+function isPreviewKey(event) {
+	const target = event.target;
+	if (!(target instanceof Element)) {
+		return true;
+	}
+	return (
+		target === target.ownerDocument.body ||
+		Boolean(target.closest(LIVE_PREVIEW_SELECTOR))
+	);
+}
+
+/**
+ * @return {GalleryItemEditSidebarValue | null} Selection and panel state.
  */
 export function useGalleryItemEditSidebar() {
 	return useContext(GalleryItemEditSidebarContext);
@@ -70,100 +96,111 @@ export function useGalleryItemEditSidebar() {
 export function GalleryItemEditSidebarProvider({ children }) {
 	const { clearStack } = useTakeoverSidebarStack();
 	const tileSelection = useGalleryPreviewTileSelection();
-	const reorderSidebar = useGalleryReorderSidebar();
-	const [storeIndex, setStoreIndex] = useState(
-		/** @type {number | null} */ (null)
+	const [state, dispatch] = useReducer(
+		itemSelectionReducer,
+		INITIAL_ITEM_SELECTION
 	);
-	const [view, setView] = useState(
-		/** @type {GalleryItemEditView} */ ('edit')
-	);
+	const { selectedIndex, editIndex, view } = state;
 
-	const open = useCallback(
-		(idx) => {
-			const n = Number(idx);
-			if (!Number.isFinite(n) || n < 0) {
+	const select = useCallback((idx) => {
+		dispatch({ type: 'select', index: Number(idx) });
+	}, []);
+
+	const showPanel = useCallback(
+		(type, idx) => {
+			const index = Number(idx);
+			if (!Number.isInteger(index) || index < 0) {
 				return;
 			}
-			reorderSidebar?.close();
 			clearStack();
-			setView('edit');
-			setStoreIndex(n);
+			dispatch({ type, index });
 		},
-		[clearStack, reorderSidebar]
+		[clearStack]
 	);
-
+	const open = useCallback((idx) => showPanel('open', idx), [showPanel]);
 	const openFocus = useCallback(
-		(idx) => {
-			const n = Number(idx);
-			if (!Number.isFinite(n) || n < 0) {
-				return;
-			}
-			reorderSidebar?.close();
-			clearStack();
-			setStoreIndex(n);
-			setView('focus');
-		},
-		[clearStack, reorderSidebar]
+		(idx) => showPanel('openFocus', idx),
+		[showPanel]
 	);
 
 	const closeFocus = useCallback(() => {
-		setView('edit');
+		dispatch({ type: 'closeFocus' });
+	}, []);
+
+	const back = useCallback(() => {
+		dispatch({ type: 'back' });
 	}, []);
 
 	const close = useCallback(() => {
-		setStoreIndex(null);
-		setView('edit');
+		dispatch({ type: 'clear' });
 		blurPreviewItemSelectHit();
 	}, []);
 
+	const hasSelection = selectedIndex !== null || editIndex !== null;
+
 	/*
-	 * Multi-select mode replaces the Image edit form:
-	 * close the sidebar so the previous category tab shows again.
+	 * Multi-select mode replaces the Image edit form and the tile selection:
+	 * clear both so the previous category tab shows again.
 	 */
 	useEffect(() => {
-		if (!tileSelection?.modeActive || storeIndex === null) {
+		if (!tileSelection?.modeActive || !hasSelection) {
 			return;
 		}
 		close();
-	}, [tileSelection?.modeActive, storeIndex, close]);
+	}, [tileSelection?.modeActive, hasSelection, close]);
 
 	useEffect(() => {
-		if (storeIndex === null) {
+		if (!hasSelection) {
 			return undefined;
 		}
 		const onKey = (e) => {
-			if (e.key !== 'Escape') {
+			// Escape in a popover (Sort) or a dialog closes that only.
+			if (
+				e.key !== 'Escape' ||
+				isEventInPopover(e) ||
+				isEventInOpenDialog(e)
+			) {
 				return;
 			}
 			/* Tile multi-select owns Escape while mode is active. */
 			if (tileSelection?.modeActive) {
 				return;
 			}
-			e.preventDefault();
-			e.stopPropagation();
-			if (view === 'focus') {
-				setView('edit');
+			if (editIndex === null && !isPreviewKey(e)) {
 				return;
 			}
-			setStoreIndex(null);
-			setView('edit');
-			blurPreviewItemSelectHit();
+			e.preventDefault();
+			e.stopPropagation();
+			dispatch({ type: 'escape' });
 		};
 		window.addEventListener('keydown', onKey, true);
 		return () => window.removeEventListener('keydown', onKey, true);
-	}, [storeIndex, view, tileSelection?.modeActive]);
+	}, [hasSelection, editIndex, tileSelection?.modeActive]);
 
 	const value = useMemo(
 		() => ({
-			storeIndex,
+			storeIndex: editIndex,
+			selectedIndex,
 			view,
+			select,
 			open,
 			openFocus,
 			closeFocus,
+			back,
 			close,
-			isOpen: storeIndex !== null,
+			isOpen: editIndex !== null,
 		}),
-		[storeIndex, view, open, openFocus, closeFocus, close]
+		[
+			editIndex,
+			selectedIndex,
+			view,
+			select,
+			open,
+			openFocus,
+			closeFocus,
+			back,
+			close,
+		]
 	);
 
 	return (

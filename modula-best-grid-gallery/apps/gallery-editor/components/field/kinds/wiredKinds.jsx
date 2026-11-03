@@ -4,11 +4,7 @@ import MediaUrlControl from '../MediaUrlControl';
 import DefaultActiveFilterSelectControl from '../DefaultActiveFilterSelectControl';
 
 /**
- * @param {Object}           ctx
- * @param {*}                ctx.value
- * @param {Function}         ctx.onChange
- * @param {boolean}          ctx.disabled
- * @param {string|undefined} ctx.help
+ * @param {import('../fieldControlKinds').FieldControlContext} ctx
  */
 export function renderFilterNameListKind({ value, onChange, disabled, help }) {
 	return (
@@ -22,13 +18,11 @@ export function renderFilterNameListKind({ value, onChange, disabled, help }) {
 }
 
 /**
- * @param {Object}   ctx
- * @param {Object}   ctx.control
- * @param {*}        ctx.value
- * @param {Function} ctx.onChange
- * @param {boolean}  ctx.disabled
+ * @param {import('../fieldControlKinds').FieldControlContext} ctx
  */
 export function renderMediaAttachmentKind({
+	controlId,
+	label,
 	value,
 	onChange,
 	disabled,
@@ -36,6 +30,8 @@ export function renderMediaAttachmentKind({
 }) {
 	return (
 		<MediaAttachmentControl
+			id={controlId}
+			label={label}
 			value={value}
 			onChange={onChange}
 			disabled={disabled}
@@ -45,14 +41,10 @@ export function renderMediaAttachmentKind({
 }
 
 /**
- * @param {Object}           ctx
- * @param {Object}           ctx.control
- * @param {*}                ctx.value
- * @param {Function}         ctx.onChange
- * @param {boolean}          ctx.disabled
- * @param {string|undefined} ctx.help
+ * @param {import('../fieldControlKinds').FieldControlContext} ctx
  */
 export function renderMediaUrlKind({
+	controlId,
 	value,
 	onChange,
 	disabled,
@@ -61,6 +53,7 @@ export function renderMediaUrlKind({
 }) {
 	return (
 		<MediaUrlControl
+			id={controlId}
 			value={value}
 			onChange={onChange}
 			disabled={disabled}
@@ -71,13 +64,11 @@ export function renderMediaUrlKind({
 }
 
 /**
- * @param {Object}           ctx
- * @param {*}                ctx.value
- * @param {Function}         ctx.onChange
- * @param {boolean}          ctx.disabled
- * @param {string|undefined} ctx.help
+ * @param {import('../fieldControlKinds').FieldControlContext} ctx
  */
 export function renderDefaultActiveFilterKind({
+	controlId,
+	label,
 	value,
 	onChange,
 	disabled,
@@ -85,6 +76,8 @@ export function renderDefaultActiveFilterKind({
 }) {
 	return (
 		<DefaultActiveFilterSelectControl
+			id={controlId}
+			label={label}
 			value={value}
 			onChange={onChange}
 			disabled={disabled}

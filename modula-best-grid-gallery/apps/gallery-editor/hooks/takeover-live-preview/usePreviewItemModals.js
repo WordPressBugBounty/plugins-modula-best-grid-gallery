@@ -60,9 +60,6 @@ export function usePreviewItemModals({
 	}, [previewGalleryWidth, artboardInnerWidth]);
 
 	const previewGalleryShellStyle = useMemo(() => {
-		if (galleryType === 'custom-grid') {
-			return undefined;
-		}
 		const style = {
 			width: previewGalleryWidth,
 			boxSizing: 'border-box',
@@ -73,7 +70,7 @@ export function usePreviewItemModals({
 			style.maxWidth = '100%';
 		}
 		return style;
-	}, [galleryType, previewGalleryWidth, galleryWidthOverflow]);
+	}, [previewGalleryWidth, galleryWidthOverflow]);
 
 	return {
 		metaModalStoreIndex,

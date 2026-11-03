@@ -1,0 +1,105 @@
+@use 'variables' as *;
+@use '../../admin-ui/styles/mixins' as admin;
+
+// Setting search ("Find a setting…") at the top of the settings panel, and
+// its results (canvas `#he-find`, `find.items`). The field is admin-ui's
+// SearchField at the canvas's editor size.
+
+// The panel's 24px gutter: the scroll's 8px inset plus the rows' 16px.
+$setting-search-gutter: $mod-space-8 + $mod-se-gut;
+
+.modula-setting-search {
+	--modula-admin-search-height: 32px;
+	// The canvas field (`#he-find`) is squarer than the Settings page's and
+	// uses the panel's control text size.
+	--modula-admin-radius-lg: 3px;
+	--modula-admin-text-body: var(--modula-admin-text-control);
+	flex-shrink: 0;
+	padding: 14px $setting-search-gutter;
+}
+
+.modula-setting-search__count {
+	margin: 0;
+	padding: $mod-space-20 $mod-se-gut $mod-space-12;
+	color: var(--modula-admin-ink);
+	font-size: 17px;
+	font-weight: 600;
+	line-height: 1;
+}
+
+.modula-setting-search__box {
+	display: flex;
+	flex-direction: column;
+	margin: 0 $mod-se-gut;
+	padding: 0;
+	overflow: hidden;
+	border: 1px solid var(--modula-admin-border);
+	border-radius: var(--modula-admin-radius-md);
+	background: var(--modula-admin-surface);
+	list-style: none;
+}
+
+.modula-setting-search__result {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 3px;
+	box-sizing: border-box;
+	min-height: 52px;
+	margin: 0;
+	padding: $mod-space-8 $mod-se-gut;
+	border-bottom: 1px solid var(--modula-admin-border-divider);
+	cursor: pointer;
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	&:hover,
+	&.is-active {
+		background: var(--modula-admin-surface-hover);
+	}
+}
+
+.modula-setting-search__label {
+	@include admin.control-label;
+	display: flex;
+	align-items: center;
+	gap: $mod-space-8;
+	color: var(--modula-admin-ink);
+	font-weight: 500;
+}
+
+.modula-setting-search__where {
+	color: var(--modula-admin-ink-muted);
+	font-size: 12px;
+}
+
+.modula-setting-search__empty {
+	margin: 0;
+	padding: $mod-space-16;
+	color: var(--modula-admin-ink-muted);
+	line-height: 1.5;
+}
+
+// The row a result landed on, highlighted while it fades.
+[data-setting-search-hit] {
+	animation: modula-setting-search-hit 1.6s ease-out;
+}
+
+@keyframes modula-setting-search-hit {
+	from {
+		background-color: var(--modula-admin-warning-surface);
+	}
+
+	to {
+		background-color: transparent;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-setting-search-hit] {
+		animation: none;
+		background-color: var(--modula-admin-warning-surface);
+	}
+}

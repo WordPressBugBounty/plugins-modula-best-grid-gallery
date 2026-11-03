@@ -12,7 +12,7 @@ import {
 	extractYouTubeVideoId,
 	formatVideoPlaybackUrl,
 	getItemVideoUrl,
-	resolveItemAutoplayThumbnail,
+	resolveTileAutoplayThumbnail,
 } from '../video/videoGalleryModel';
 
 /**
@@ -28,10 +28,8 @@ export default function GalleryItemVideoPreview({
 }) {
 	const videoSettings = config?.video || {};
 	const previewOn = !!videoSettings.previewVideo;
-	const autoplayThumb = resolveItemAutoplayThumbnail(
-		itemData,
-		!!videoSettings.autoplayThumbnail
-	);
+	// Autoplay belongs to the hover preview: it is never on while preview is off.
+	const autoplayThumb = resolveTileAutoplayThumbnail(itemData, videoSettings);
 	const durationSec = Math.max(
 		1,
 		Math.min(30, Number(videoSettings.previewVideoDuration) || 3)
@@ -47,7 +45,7 @@ export default function GalleryItemVideoPreview({
 	const loopTimer = useRef(null);
 
 	useEffect(() => {
-		if (skipEditor || (!previewOn && !autoplayThumb) || !playbackUrl) {
+		if (skipEditor || !previewOn || !playbackUrl) {
 			return undefined;
 		}
 		if (kind !== 'html5') {
@@ -63,7 +61,7 @@ export default function GalleryItemVideoPreview({
 		if (play && typeof play.catch === 'function') {
 			play.catch(() => {});
 		}
-		if (previewOn && !autoplayThumb) {
+		if (!autoplayThumb) {
 			loopTimer.current = window.setInterval(() => {
 				try {
 					el.currentTime = 0;
@@ -106,17 +104,12 @@ export default function GalleryItemVideoPreview({
 		};
 	}, []);
 
-	if (
-		skipEditor ||
-		config?.type === 'video' ||
-		(!previewOn && !autoplayThumb) ||
-		!playbackUrl
-	) {
+	if (skipEditor || config?.type === 'video' || !previewOn || !playbackUrl) {
 		return null;
 	}
 
 	const onEnter = () => {
-		if (autoplayThumb || !previewOn) {
+		if (autoplayThumb) {
 			return;
 		}
 		hoverTimer.current = window.setTimeout(() => setActive(true), 200);

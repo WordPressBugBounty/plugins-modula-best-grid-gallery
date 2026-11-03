@@ -7,14 +7,16 @@ import {
 	getTakeoverAddNewMenuGroups,
 } from '../../utils/takeoverAddNewMenuModel';
 import { getModulaSettingsEditorConfig } from '../../config/modulaSettingsEditorConfig';
+import { openAddMedia } from '../../context/addMediaDialogStore';
 import { useTakeoverPreviewAddNewMenu } from '../../hooks/useTakeoverPreviewAddNewMenu';
 
 /**
  * Gallery Add split: image/video/import sources for the shared Add split frame.
+ * The primary action, Upload files and Media library open the Add media
+ * dialog; the other rows keep their own flows.
  *
  * @param {{
  *   onOpenPreviewImport?: (reactFlow: 'folder' | 'zip' | 'content-galleries' | 'instagram' | 'video' | 'video-playlist') => void,
- *   onTakeoverOpenUpload?: () => void,
  *   galleryId?: number,
  *   galleryType?: string,
  *   uploadPosition?: string,
@@ -26,7 +28,6 @@ import { useTakeoverPreviewAddNewMenu } from '../../hooks/useTakeoverPreviewAddN
  */
 export default function PreviewAddNewSplit({
 	onOpenPreviewImport,
-	onTakeoverOpenUpload,
 	galleryId = 0,
 	galleryType = '',
 	uploadPosition = 'end',
@@ -43,7 +44,7 @@ export default function PreviewAddNewSplit({
 			galleryType,
 			uploadPosition,
 			onOpenPreviewImport,
-			onTakeoverOpenUpload,
+			onOpenAddMedia: openAddMedia,
 			onLibraryAdded,
 			onLibraryError,
 			runPersistTask,

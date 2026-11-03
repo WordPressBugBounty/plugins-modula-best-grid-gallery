@@ -1,10 +1,7 @@
 @use "../../variables" as *;
 
-.modula-gallery-modal.modula-custom-css-ai-modal {
-	padding: $mod-space-16;
-}
-
-.modula-gallery-modal__panel.modula-custom-css-ai-modal__panel {
+// 520px: between the shell's small and medium sizes.
+.modula-admin-ui .modula-admin-dialog.modula-gallery-modal.modula-custom-css-ai-modal {
 	width: min(520px, calc(100vw - 32px));
 	min-height: 320px;
 	max-height: calc(100vh - 64px);
@@ -14,65 +11,56 @@
 	padding: $mod-space-16 $mod-space-20 $mod-space-20;
 }
 
+// The rows sit flush in the body, spaced by its gap: no inset, padding or
+// divider, and the panel's 14px label.
 .modula-custom-css-ai {
+	--modula-admin-row-padding-x: 0;
 	display: flex;
 	flex-direction: column;
 	gap: $mod-space-14;
 	min-width: 0;
+
+	.modula-admin-row.is-stacked > .modula-admin-row__main {
+		padding-block: 0;
+	}
+
+	.modula-admin-row + .modula-admin-row::before {
+		display: none;
+	}
+
+	.modula-admin-row .modula-admin-row__label {
+		font-size: var(--modula-admin-text-control);
+	}
 }
 
 .modula-custom-css-ai__intro {
 	margin: 0;
-	font-size: 13px;
+	color: var(--modula-admin-ink-secondary);
+	font-size: var(--modula-admin-text-control);
 	line-height: 1.55;
-	color: #50575e;
+}
+
+// The prompt, the loading line and the summary sit on the sunken surface.
+.modula-custom-css-ai__prompt-card,
+.modula-custom-css-ai__loading,
+.modula-custom-css-ai__summary {
+	border: 1px solid var(--modula-admin-border);
+	border-radius: var(--modula-admin-radius-lg);
+	background: var(--modula-admin-surface-sunken);
+	color: var(--modula-admin-ink);
 }
 
 .modula-custom-css-ai__prompt-card {
-	display: flex;
-	flex-direction: column;
-	gap: $mod-space-8;
 	padding: $mod-space-14;
-	border: 1px solid #dcdcde;
-	border-radius: 10px;
-	background: #f6f7f7;
-}
-
-.modula-custom-css-ai__prompt-label {
-	margin: 0;
-	font-size: 13px;
-	font-weight: 600;
-	line-height: 1.4;
-	color: #1d2327;
-}
-
-.modula-custom-css-ai__prompt-hint {
-	margin: 0;
-	font-size: 12px;
-	line-height: 1.45;
-	color: #646970;
-}
-
-.modula-custom-css-ai__prompt-input.components-textarea-control__input,
-.modula-custom-css-ai__prompt-input textarea {
-	min-height: 112px;
-	font-size: 13px;
-	line-height: 1.5;
-	border-radius: 8px;
 }
 
 .modula-custom-css-ai__loading {
 	display: flex;
 	align-items: center;
 	gap: $mod-space-10;
-	margin: 0;
 	padding: $mod-space-11 $mod-space-14;
-	border-radius: 10px;
-	background: linear-gradient(145deg, #f0f6fc 0%, #f4f4f5 100%);
-	border: 1px solid color-mix(in srgb, var(--modula-takeover-accent, #{$modula-takeover-accent}) 28%, #c3c4c7);
-	font-size: 13px;
+	font-size: var(--modula-admin-text-control);
 	line-height: 1.45;
-	color: #1d2327;
 }
 
 .modula-custom-css-ai__preview {
@@ -84,49 +72,22 @@
 .modula-custom-css-ai__summary {
 	margin: 0;
 	padding: $mod-space-10 $mod-space-12;
-	border-radius: 8px;
-	background: #f0f6fc;
-	border: 1px solid #c5d9ed;
-	font-size: 13px;
+	font-size: var(--modula-admin-text-control);
 	line-height: 1.5;
-	color: #1d2327;
 }
 
-.modula-custom-css-ai__code textarea {
+// Three classes: the admin-ui field look is scoped under `.modula-admin-ui`.
+.modula-custom-css-ai .modula-admin-textarea.modula-custom-css-ai__code {
 	min-height: 180px;
-	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-	font-size: 12px;
+	font-family: var(--modula-admin-font-mono);
+	font-size: var(--modula-admin-text-mono);
 	line-height: 1.55;
-	border-radius: 8px;
 }
 
+// The rows read as one bordered list; they take this inset, not the card's.
 .modula-custom-css-ai__apply-mode {
-	padding-top: $mod-space-4;
-
-	.components-base-control__label,
-	.components-radio-control__label {
-		text-transform: none;
-		font-size: 13px;
-		font-weight: 600;
-	}
-
-	.components-radio-control__option label {
-		text-transform: none;
-		font-size: 13px;
-	}
-}
-
-.modula-custom-css-ai-modal {
-	.components-notice {
-		margin: 0;
-	}
-
-	.components-base-control__label,
-	.components-textarea-control__label,
-	.components-input-control__label {
-		text-transform: none;
-		font-size: 13px;
-		font-weight: 600;
-		letter-spacing: normal;
-	}
+	--modula-admin-row-padding-x: #{$mod-space-12};
+	overflow: hidden;
+	border: 1px solid var(--modula-admin-border);
+	border-radius: var(--modula-admin-radius-lg);
 }

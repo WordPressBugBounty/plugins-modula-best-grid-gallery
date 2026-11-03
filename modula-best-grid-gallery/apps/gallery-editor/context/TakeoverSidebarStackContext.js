@@ -147,7 +147,7 @@ export function TakeoverSidebarStackProvider({ children }) {
  *   pushFrame: (frame: SidebarNestedFrame) => void,
  *   popFrame: () => void,
  *   clearStack: () => void,
- *   setTopFrameAuxiliaryPanel: (descriptor: { kind: string, groupedPath?: string, mode?: string } | null) => void,
+ *   setTopFrameAuxiliaryPanel: (descriptor: { kind: string, groupedPath?: string } | null) => void,
  * }}
  */
 export function useTakeoverSidebarStack() {

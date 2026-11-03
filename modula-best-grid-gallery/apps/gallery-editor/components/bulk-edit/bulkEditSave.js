@@ -2,6 +2,7 @@
  * Persist bulk-edit drafts via v2 REST (no Backbone).
  */
 import { asGalleryItemList } from 'gallery-shared/preview';
+import { mergeFilterTagsIntoList } from 'editor-shell/logic';
 import { saveMergedGalleryItems } from '../../api/galleryUploadApi';
 import {
 	isEmbeddedGalleryItemRow,
@@ -9,6 +10,10 @@ import {
 	reanchorEmbeddedRowsInMergedList,
 } from '../../utils/embeddedGalleryItems';
 import { commitPreviewCatalog } from '../../utils/previewItemsCommit';
+import {
+	ITEM_CSS_CLASS_KEY,
+	sanitizeItemCssClass,
+} from '../../utils/galleryItemFields';
 import {
 	bulkEditRowKey,
 	filtersFieldToString,
@@ -105,10 +110,17 @@ export function bulkEditRowIsModified(row, localChanges) {
 }
 
 /**
+ * The draft as the item save expects it: filters comma-separated, CSS
+ * classes as valid space-separated tokens.
+ *
  * @param {Record<string, unknown>} changes
+ * @return {Record<string, unknown>} Normalized draft fields.
  */
-function normalizeDraftFields(changes) {
+export function normalizeDraftFields(changes) {
 	const out = { ...changes };
+	if (Object.prototype.hasOwnProperty.call(out, ITEM_CSS_CLASS_KEY)) {
+		out[ITEM_CSS_CLASS_KEY] = sanitizeItemCssClass(out[ITEM_CSS_CLASS_KEY]);
+	}
 	if (Object.prototype.hasOwnProperty.call(out, 'filters')) {
 		if (Array.isArray(out.filters)) {
 			out.filters = out.filters
@@ -190,20 +202,11 @@ export function collectNewFilterTagsFromDraft(items, localChanges) {
  * @param {string[]}                                            newTags
  */
 export function mergeTagsIntoGalleryFilterSettings(form, newTags) {
-	if (!newTags.length) {
-		return;
-	}
-	const current = form.state.values?.filters?.filters;
-	const list = Array.isArray(current) ? [...current] : [];
-	let changed = false;
-	for (const tag of newTags) {
-		const t = String(tag).trim();
-		if (t && !list.includes(t)) {
-			list.push(t);
-			changed = true;
-		}
-	}
-	if (changed) {
+	const list = mergeFilterTagsIntoList(
+		form.state.values?.filters?.filters,
+		newTags
+	);
+	if (list) {
 		form.setFieldValue(['filters', 'filters'], list);
 	}
 }

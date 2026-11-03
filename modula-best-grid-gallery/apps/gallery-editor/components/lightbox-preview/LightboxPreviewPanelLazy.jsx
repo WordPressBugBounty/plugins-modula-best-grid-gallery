@@ -2,16 +2,22 @@
  * Code-split entry for the Lightbox category Fancybox preview.
  */
 import { lazy } from '@wordpress/element';
-import { Spinner } from '@wordpress/components';
+import { Spinner } from 'admin-ui';
+import { AdminUiScope } from 'editor-shell';
 import { __ } from '@wordpress/i18n';
 import LazySettingsEditorBoundary from '../shell/LazySettingsEditorBoundary';
+import { getModulaSettingsEditorConfig } from '../../config/modulaSettingsEditorConfig';
+import '../../styles/takeover/preview/_lightbox-preview.scss';
 
-const LightboxPreviewPanel = lazy(() => import('./LightboxPreviewPanel'));
+const LightboxPreviewPanel = lazy(
+	() => import('gallery-shared/lightbox/LightboxPreviewPanel')
+);
 
 /**
- * @param {React.ComponentProps<typeof LightboxPreviewPanel>} props
+ * @param {Omit<React.ComponentProps<typeof LightboxPreviewPanel>, 'shareButtons'|'exifCaption'>} props
  */
 export default function LightboxPreviewPanelLazy(props) {
+	const editorConfig = getModulaSettingsEditorConfig();
 	return (
 		<LazySettingsEditorBoundary
 			fallback={
@@ -21,7 +27,9 @@ export default function LightboxPreviewPanelLazy(props) {
 					aria-live="polite"
 					aria-busy="true"
 				>
-					<Spinner />
+					<AdminUiScope>
+						<Spinner />
+					</AdminUiScope>
 					<span>
 						{__(
 							'Loading lightbox preview…',
@@ -31,7 +39,11 @@ export default function LightboxPreviewPanelLazy(props) {
 				</div>
 			}
 		>
-			<LightboxPreviewPanel {...props} />
+			<LightboxPreviewPanel
+				{...props}
+				shareButtons={editorConfig.lightboxShareButtons}
+				exifCaption={editorConfig.exifCaption}
+			/>
 		</LazySettingsEditorBoundary>
 	);
 }

@@ -4,7 +4,9 @@
  *
  * Hides default WP admin chrome and renders the React app in a fixed root (see admin_footer).
  *
- * Disable via: `add_filter( 'modula_gallery_takeover_ui', '__return_false' );`
+ * The takeover is the only React gallery editor. The `modula_gallery_takeover_ui`
+ * filter, which switched it to an in-page metabox shell, is no longer read:
+ * adding it has no effect.
  *
  * @package Modula
  */
@@ -135,10 +137,6 @@ class Gallery_Takeover_Admin {
 			return false;
 		}
 
-		if ( ! apply_filters( 'modula_gallery_takeover_ui', true ) ) {
-			return false;
-		}
-
 		return self::is_modula_gallery_edit_screen();
 	}
 
@@ -201,7 +199,7 @@ class Gallery_Takeover_Admin {
 			array(
 				'id'              => 'modula-gallery-takeover-root',
 				'class'           => 'modula-gallery-takeover__mount modula-settings-editor-mount',
-				'back_url'        => \Modula\V2\Rest\Listing_Controller::admin_url(),
+				'back_url'        => \Modula\V2\Rest\Content_Page_Controller::admin_url(),
 				'desktop_message' => __( 'The gallery editor is a desktop experience. Open this page on a computer to continue.', 'modula-best-grid-gallery' ),
 			)
 		);

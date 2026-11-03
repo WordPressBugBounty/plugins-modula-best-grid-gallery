@@ -878,6 +878,17 @@ class Modula_Settings {
 	}
 
 	/**
+	 * Whether image compression can run on this site: production only, unless
+	 * {@see 'modula_speedup_run_local_compression'} says otherwise. The Settings
+	 * page and the gallery editor both read it, so their Speed Up controls agree.
+	 *
+	 * @return bool
+	 */
+	public static function compression_available() {
+		return (bool) apply_filters( 'modula_speedup_run_local_compression', 'production' === wp_get_environment_type() );
+	}
+
+	/**
 	 * Get compression settings configuration
 	 *
 	 * @return array Compression settings configuration
@@ -885,7 +896,7 @@ class Modula_Settings {
 	 * @since 2.11.0
 	 */
 	private function get_compression() {
-		$run_compression = apply_filters( 'modula_speedup_run_local_compression', 'production' === wp_get_environment_type() );
+		$run_compression = self::compression_available();
 
 		$compression         = $this->get_option_value( self::OPTION_COMPRESSION );
 		$compression_options = $this->get_compression_options();
@@ -1767,7 +1778,10 @@ class Modula_Settings {
 				);
 			}
 
-			if ( ! in_array( $key, array( 'editor', 'author' ), true ) ) {
+			// Pro's Roles save applies Upload Files to these roles only. Other
+			// roles keep the capability WordPress or their plugin gave them, so
+			// their Upload cell shows as not applicable.
+			if ( in_array( $key, array( 'subscriber', 'contributor' ), true ) ) {
 				$role_array['fields'][] = $this->build_toggle_field(
 					$key . '.upload_files',
 					__( 'Upload Files', 'modula-best-grid-gallery' ),

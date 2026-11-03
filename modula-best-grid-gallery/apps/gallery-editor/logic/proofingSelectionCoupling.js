@@ -16,21 +16,27 @@ export function toProofingSelectionCount(raw) {
 }
 
 /**
- * @param {number} min
- * @param {number} max
- * @param {number} itemCount
- * @return {{ min: number, max: number }}
+ * Upper end of the minimum or maximum selection slider. A client cannot pick
+ * more images than the gallery holds, and the minimum cannot pass a finite
+ * maximum (`maxSelection === 0` means unlimited, so only the gallery caps it).
+ *
+ * @param {string}  groupedPath  `proofing.minSelection` or `proofing.maxSelection`.
+ * @param {number}  imageCount   Images in the gallery.
+ * @param {unknown} maxSelection Current stored maximum.
+ * @return {number} Highest value the slider offers.
  */
-export function clampProofingSelectionToGallery(min, max, itemCount) {
-	const galleryCap = Math.max(0, itemCount);
-	let nextMin = Math.min(Math.max(0, min), galleryCap);
-	const nextMax = Math.min(Math.max(0, max), galleryCap);
-
-	if (nextMax > 0 && nextMin > nextMax) {
-		nextMin = nextMax;
+export function proofingSelectionSliderMax(
+	groupedPath,
+	imageCount,
+	maxSelection
+) {
+	const galleryCap = toProofingSelectionCount(imageCount);
+	if (groupedPath !== 'proofing.minSelection') {
+		return galleryCap;
 	}
 
-	return { min: nextMin, max: nextMax };
+	const max = Math.min(toProofingSelectionCount(maxSelection), galleryCap);
+	return max > 0 ? max : galleryCap;
 }
 
 /**

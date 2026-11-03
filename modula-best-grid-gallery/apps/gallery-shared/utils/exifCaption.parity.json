@@ -1,0 +1,94 @@
+{
+	"description": "Cases for the lightbox EXIF line. Lite's exifCaption.test.js runs them through buildExifCaptionHtml() and Pro's includes/extensions/exif/scripts/test-exif-caption.php through modula_build_exif_caption_html(), so the editor preview and the visitor build the same HTML. `fields` lists the row fields whose toggle is on (all when missing); `showExif: false` turns Show shooting data off; `{icon}` in `expected` stands for the line's camera icon.",
+	"months": [
+		"Jan",
+		"Feb",
+		"Mar",
+		"Apr",
+		"May",
+		"Jun",
+		"Jul",
+		"Aug",
+		"Sep",
+		"Oct",
+		"Nov",
+		"Dec"
+	],
+	"cases": [
+		{
+			"name": "every field, in the toggle order, joined by a middle dot",
+			"row": {
+				"exif_camera": "FUJIFILM X-T5",
+				"exif_lens": "XF 23mm F1.4",
+				"exif_focal_length": "23mm",
+				"exif_shutter_speed": "1/250",
+				"exif_aperture": "f/2.8",
+				"exif_iso": "ISO 200",
+				"exif_date": "2026-03-12 14:30"
+			},
+			"expected": "<div class=\"modula-exif\">{icon}<span>FUJIFILM X-T5 · XF 23mm F1.4 · 1/250s · f/2.8 · 23mm · ISO 200 · 12 Mar 2026</span></div>"
+		},
+		{
+			"name": "recognised shapes are normalised",
+			"row": {
+				"exif_shutter_speed": "0.5 sec",
+				"exif_iso": "400",
+				"exif_date": "2026-04-03"
+			},
+			"expected": "<div class=\"modula-exif\">{icon}<span>0.5s · ISO 400 · 3 Apr 2026</span></div>"
+		},
+		{
+			"name": "other text shows as stored, trimmed",
+			"row": {
+				"exif_shutter_speed": "1/250s",
+				"exif_aperture": "  f/4  ",
+				"exif_iso": "Auto",
+				"exif_date": "2026-13-01 10:00"
+			},
+			"expected": "<div class=\"modula-exif\">{icon}<span>1/250s · f/4 · Auto · 2026-13-01 10:00</span></div>"
+		},
+		{
+			"name": "an integer value is read as text",
+			"row": { "exif_iso": 200 },
+			"expected": "<div class=\"modula-exif\">{icon}<span>ISO 200</span></div>"
+		},
+		{
+			"name": "fields that are off or hold no data are left out",
+			"row": {
+				"exif_camera": "Canon EOS R5",
+				"exif_lens": "N/A",
+				"exif_focal_length": "50mm",
+				"exif_shutter_speed": "sec",
+				"exif_aperture": "f/2.8",
+				"exif_iso": "",
+				"exif_date": "0"
+			},
+			"fields": [
+				"exif_camera",
+				"exif_lens",
+				"exif_focal_length",
+				"exif_shutter_speed",
+				"exif_iso",
+				"exif_date"
+			],
+			"expected": "<div class=\"modula-exif\">{icon}<span>Canon EOS R5 · 50mm</span></div>"
+		},
+		{
+			"name": "no line and no icon when no field is left",
+			"row": { "exif_camera": "N/A", "exif_lens": "Summilux 28mm" },
+			"fields": ["exif_camera"],
+			"expected": ""
+		},
+		{
+			"name": "no line while Show shooting data is off",
+			"row": { "exif_camera": "Leica Q2" },
+			"showExif": false,
+			"expected": ""
+		},
+		{
+			"name": "values are escaped",
+			"row": { "exif_camera": "<b>Nikon</b> & \"Z\" 'II'" },
+			"expected": "<div class=\"modula-exif\">{icon}<span>&lt;b&gt;Nikon&lt;/b&gt; &amp; &quot;Z&quot; &#039;II&#039;</span></div>"
+		}
+	]
+}

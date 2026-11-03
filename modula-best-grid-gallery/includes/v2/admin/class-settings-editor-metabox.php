@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Experimental React settings editor: dedicated metabox and assets.
+ * React gallery editor (takeover): assets and localized config.
  *
  * Gated by {@see 'modula_enable_modern_settings_editor'} (second argument: gallery post ID).
  *
@@ -16,9 +16,6 @@ defined( 'ABSPATH' ) || exit;
  * Class Settings_Editor_Metabox
  */
 class Settings_Editor_Metabox {
-
-
-	public const META_BOX_ID = 'modula-settings-editor-v2';
 
 	/**
 	 * Extension slug => [ 'available' => bool, 'enabled' => bool ] for Pro plan vs toggle state (Extensions::get_extensions).
@@ -174,6 +171,37 @@ class Settings_Editor_Metabox {
 	}
 
 	/**
+	 * The Lite paywall's plan data (`Modula_Extension_Catalog::paywall()`)
+	 * and where "I already have a license key" goes.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private static function lite_paywall_for_editor() {
+		require_once MODULA_PATH . 'includes/admin/rest-api/class-modula-extension-catalog.php';
+
+		return array_merge(
+			\Modula_Extension_Catalog::paywall(),
+			array( 'licenseKeyUrl' => self::license_key_url() )
+		);
+	}
+
+	/**
+	 * Settings › License when Compatible Pro has it (a key to type in, e.g. an
+	 * expired license); otherwise the store account, where the key and the
+	 * Modula Pro download are.
+	 *
+	 * @return string Unescaped URL.
+	 */
+	private static function license_key_url() {
+		$license_settings = '\Modula_Pro\Admin\License_Settings';
+		if ( modula_is_compatible_pro() && class_exists( $license_settings ) && $license_settings::can_open() ) {
+			return $license_settings::url();
+		}
+
+		return MODULA_PRO_STORE_ACCOUNT_URL;
+	}
+
+	/**
 	 * Hook admin UI for the settings editor.
 	 *
 	 * @return void
@@ -183,8 +211,6 @@ class Settings_Editor_Metabox {
 			return;
 		}
 
-		// After core Modula metaboxes (Gallery, Settings) so this sits below classic Settings.
-		add_action( 'add_meta_boxes_modula-gallery', array( __CLASS__, 'register_metabox' ), 12 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ), 20 );
 		add_action( 'current_screen', array( __CLASS__, 'redirect_post_new_to_edit_screen' ) );
 	}
@@ -241,35 +267,6 @@ class Settings_Editor_Metabox {
 
 		wp_safe_redirect( $redirect );
 		exit;
-	}
-
-	/**
-	 * @return void
-	 */
-	public static function register_metabox() {
-		if ( ! apply_filters( 'modula_enable_modern_settings_editor', false, \Modula\V2\Beta_Settings::current_gallery_id() ) ) {
-			return;
-		}
-
-		if ( Gallery_Takeover_Admin::should_use_takeover() ) {
-			return;
-		}
-
-		add_meta_box(
-			self::META_BOX_ID,
-			__( 'Gallery settings (v2 preview)', 'modula-best-grid-gallery' ),
-			array( __CLASS__, 'render_metabox' ),
-			'modula-gallery',
-			'normal',
-			'high'
-		);
-	}
-
-	/**
-	 * @return void
-	 */
-	public static function render_metabox() {
-		echo '<div id="modula-settings-editor-root" class="modula-settings-editor-mount"></div>';
 	}
 
 	/**
@@ -347,9 +344,7 @@ class Settings_Editor_Metabox {
 			array_keys( \Modula_Frontend_Adapter::content_block_google_font_registry() )
 		);
 
-		if ( Gallery_Takeover_Admin::should_use_takeover() ) {
-			Gallery_Takeover_Admin::enqueue_takeover_styles( $scripts );
-		}
+		Gallery_Takeover_Admin::enqueue_takeover_styles( $scripts );
 
 		// Live preview mounts gallery-shared layouts; needs loader shell + full layout CSS.
 		$gallery_loader_css_rel = 'assets/css/front/modula-gallery.css';
@@ -408,8 +403,6 @@ class Settings_Editor_Metabox {
 			)
 		);
 
-		$takeover = Gallery_Takeover_Admin::should_use_takeover();
-
 		$form_ui       = \Modula\V2\Settings\Settings_Editor_Presenter::get_form_ui_for_localize();
 		$group_upsells = \Modula\V2\Settings\Settings_Editor_Presenter::get_group_upsells_for_localize();
 
@@ -465,14 +458,6 @@ class Settings_Editor_Metabox {
 	$view_permalink = $post_id ? get_permalink( $post_id ) : false;
 		$view_url       = $view_permalink ? (string) $view_permalink : '';
 
-		$show_rest_debug = ( defined( 'WP_DEBUG' ) && WP_DEBUG && current_user_can( 'manage_options' ) );
-		/**
-		 * Whether the metabox settings editor shows the collapsible raw REST payload block (debug aid).
-		 *
-		 * @param bool $show_rest_debug Default: true when {@see WP_DEBUG} and user can `manage_options`.
-		 */
-		$show_rest_debug = (bool) apply_filters( 'modula_settings_editor_show_rest_debug', $show_rest_debug );
-
 		$locked_for_proofing = false;
 		if ( $post_id > 0 ) {
 			$locked_for_proofing = (bool) get_post_meta( $post_id, '_modula_locked_for_proofing', true );
@@ -499,13 +484,21 @@ class Settings_Editor_Metabox {
 			'activeExtensionSlugs'         => $active_extension_slugs,
 			'extensionEntitlements'        => $extension_entitlements,
 			'upgradeUrl'                   => defined( 'MODULA_PRO_STORE_UPGRADE_URL' ) ? MODULA_PRO_STORE_UPGRADE_URL : 'https://wp-modula.com/pricing',
+			// The license card's state (renewal grace included): the canvas shows a banner once it expired.
+			'licenseState'                 => class_exists( 'Modula_License_Card' ) ? \Modula_License_Card::current_state() : 'none',
+			'litePaywall'                  => self::lite_paywall_for_editor(),
+			// Speed Up fields are disabled where the Settings page disables compression.
+			'compressionAvailable'         => \Modula_Settings::compression_available(),
 			'extensionsAdminUrl'           => admin_url( 'edit.php?post_type=modula-gallery&page=modula-addons' ),
 			'gridImageSizes'               => $grid_image_labels,
 			'sliderImageSizes'             => $slider_image_size_labels,
 			'sliderSyncingNavSizes'        => $slider_syncing_nav_size_labels,
 			'imageSizeDimensions'          => \Modula_Helper::get_image_sizes( false ),
-			'takeover'                     => $takeover,
-			'listUrl'                      => \Modula\V2\Rest\Listing_Controller::admin_url(),
+			// Always true: the takeover is the only React editor. The add-new menu model still reads it.
+			'takeover'                     => true,
+			'listUrl'                      => \Modula\V2\Rest\Content_Page_Controller::admin_url(),
+			// Empty without the create capability: the header hides its "+".
+			'newGalleryUrl'                => Beta_Gallery_Admin::new_editor_create_url( 'modula-gallery' ),
 			'adminUrl'                     => admin_url( 'index.php' ),
 			'postTitle'                    => $post_id ? get_the_title( $post_id ) : '',
 			'postStatus'                   => $post_status,
@@ -523,7 +516,6 @@ class Settings_Editor_Metabox {
 			'formUi'                       => $form_ui,
 			'groupUpsells'                 => $group_upsells,
 			'folderBrowseRoot'             => $folder_browse_root,
-			'showRestDebug'                => $show_rest_debug,
 			'galleryShortcodes'            => array(
 				'rows' => self::get_gallery_shortcode_rows_for_editor( $post_id ),
 			),
@@ -531,10 +523,6 @@ class Settings_Editor_Metabox {
 			'imageProofingExtensionActive' => $image_proofing_extension_active,
 			'imageProofingRestNamespace'   => 'modula-image-proofing/v1',
 			'lightboxShareButtons'         => \Modula_Helper::render_lightbox_share_template(),
-			'hoverBuilderEntitlements'     => array(
-				'freePresetCount'     => 5,
-				'customizeTabEnabled' => modula_is_compatible_pro(),
-			),
 			'addNewEntitlements'           => array(
 				'folderImport' => modula_is_compatible_pro(),
 				'zipImport'    => modula_is_compatible_pro(),

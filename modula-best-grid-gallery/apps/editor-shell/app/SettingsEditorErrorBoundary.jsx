@@ -6,7 +6,8 @@
  */
 import { Component, Fragment } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Button, Notice } from '@wordpress/components';
+import { Button, Notice } from 'admin-ui';
+import AdminUiScope from '../appearance/AdminUiScope';
 
 export default class SettingsEditorErrorBoundary extends Component {
 	constructor(props) {
@@ -44,45 +45,53 @@ export default class SettingsEditorErrorBoundary extends Component {
 					? error.message
 					: String(error);
 			return (
-				<div className={`${classBlock}__error-boundary`}>
-					<Notice status="error" isDismissible={false}>
-						<p className={`${classBlock}__error-boundary-text`}>
-							{__(
-								'Something went wrong while rendering the settings. You can reload the page to try again.',
-								'modula-best-grid-gallery'
-							)}
-						</p>
-						{msg ? (
-							<details
-								className={`${classBlock}__error-boundary-details`}
+				<AdminUiScope>
+					<div className={`${classBlock}__error-boundary`}>
+						<Notice tone="error" role="alert">
+							<p className={`${classBlock}__error-boundary-text`}>
+								{__(
+									'Something went wrong while rendering the settings. You can reload the page to try again.',
+									'modula-best-grid-gallery'
+								)}
+							</p>
+							{msg ? (
+								<details
+									className={`${classBlock}__error-boundary-details`}
+								>
+									<summary>
+										{__(
+											'Technical details',
+											'modula-best-grid-gallery'
+										)}
+									</summary>
+									<pre>{msg}</pre>
+								</details>
+							) : null}
+							<div
+								className={`${classBlock}__error-boundary-actions`}
 							>
-								<summary>
+								<Button
+									variant="primary"
+									onClick={this.handleReload}
+								>
 									{__(
-										'Technical details',
+										'Reload page',
 										'modula-best-grid-gallery'
 									)}
-								</summary>
-								<pre>{msg}</pre>
-							</details>
-						) : null}
-						<div
-							className={`${classBlock}__error-boundary-actions`}
-						>
-							<Button
-								variant="primary"
-								onClick={this.handleReload}
-							>
-								{__('Reload page', 'modula-best-grid-gallery')}
-							</Button>
-							<Button
-								variant="secondary"
-								onClick={this.handleDismiss}
-							>
-								{__('Try again', 'modula-best-grid-gallery')}
-							</Button>
-						</div>
-					</Notice>
-				</div>
+								</Button>
+								<Button
+									variant="secondary"
+									onClick={this.handleDismiss}
+								>
+									{__(
+										'Try again',
+										'modula-best-grid-gallery'
+									)}
+								</Button>
+							</div>
+						</Notice>
+					</div>
+				</AdminUiScope>
 			);
 		}
 

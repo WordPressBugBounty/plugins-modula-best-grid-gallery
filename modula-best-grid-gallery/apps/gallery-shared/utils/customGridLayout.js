@@ -665,6 +665,15 @@ function overlaps(a, b, gutter) {
 }
 
 /**
+ * Slack (px) on the packer's right-edge fit check. Tile widths are exact floats
+ * and a candidate's left is a sum of width + gutter steps, so a row that fits
+ * exactly can land a hair over the container (1000.0000000000001 for six 2×2
+ * tiles at 1000px, gutter 10) and would wrap its last tile. A real overflow is
+ * at least one more column plus a gutter, far more than half a pixel.
+ */
+const PACK_FIT_TOLERANCE_PX = 0.5;
+
+/**
  * Place one block at the first valid position (top-left preference).
  *
  * @param {number}                              w              - Block width
@@ -697,7 +706,7 @@ function findPosition(w, h, placed, containerWidth, gutter) {
 	for (const pos of candidates) {
 		const left = pos.left;
 		const top = pos.top;
-		if (left + w > containerWidth) {
+		if (left + w > containerWidth + PACK_FIT_TOLERANCE_PX) {
 			continue;
 		}
 		const candidate = {

@@ -2,36 +2,30 @@
  * Hover effect builder body for the takeover auxiliary column.
  * Shell chrome (`AuxiliaryPanel`) is provided by the host; this is domain content only.
  * No duplicate panel head — nested sidebar already titles “Hover effect”.
- *
- * When `mode === 'customizeOnly'` (opened from panel Customize), skip Presets tab.
+ * It opens on Customize (the panel's preset select picks presets).
  */
 import { editorCaptionsAreBelowImage } from '../../utils/editorCaptionsAreBelowImage';
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useMemo } from '@wordpress/element';
 import '../../styles/takeover/preview/_hover-effect-builder.scss';
 import { __ } from '@wordpress/i18n';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
 import { useHoverEffectBuilder } from '../../context/HoverEffectBuilderContext';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
-import { getHoverBuilderEntitlements } from '../../utils/hoverBuilderEntitlements';
-import HoverBuilderTabNav from './HoverBuilderTabNav';
 import HoverBuilderCanvasModeNav from './HoverBuilderCanvasModeNav';
-import HoverBuilderPresetsPanel from './HoverBuilderPresetsPanel';
 import HoverBuilderCustomizePanel from './HoverBuilderCustomizePanel';
 import HoverBuilderBelowImageNotice from './HoverBuilderBelowImageNotice';
-import { appendQuery, withV3Utm } from 'gallery-shared/utils/withV3Utm';
+import { AdminUiScope } from 'editor-shell';
+import { resolveProCoreUpsell } from '../../logic/liteUpsell';
 
 const OVERLAY_SLOT_IDS = ['title', 'caption', 'social'];
 
 /**
- * @param {Object}          props
- * @param {boolean}         [props.showCanvasChrome] Build/Preview tabs (needs live preview card).
- * @param {'customizeOnly'} [props.mode]
+ * @param {Object}  props
+ * @param {boolean} [props.showCanvasChrome] Build/Preview tabs (needs live preview card).
  */
 export default function HoverEffectBuilderAuxiliaryPanel({
 	showCanvasChrome = false,
-	mode,
 }) {
-	const customizeOnly = mode === 'customizeOnly';
 	const { form } = useGallerySettingsFormBundle();
 	const config = useModulaSettingsEditorConfig();
 	const {
@@ -64,31 +58,11 @@ export default function HoverEffectBuilderAuxiliaryPanel({
 	const selectAllLinkedSlots = () =>
 		setLinkedOverlaySlots([...OVERLAY_SLOT_IDS]);
 	const clearLinkedSlots = () => setLinkedOverlaySlots([]);
-	const [activeTab, setActiveTab] = useState(
-		customizeOnly ? 'customize' : 'presets'
-	);
 
+	// The canvas opens on Build each time the builder opens.
 	useEffect(() => {
-		if (customizeOnly) {
-			setActiveTab('customize');
-			setBuilderViewMode('build');
-		}
-	}, [customizeOnly, setBuilderViewMode]);
-
-	useEffect(() => {
-		if (customizeOnly) {
-			return;
-		}
-		if (!showCanvasChrome) {
-			if (activeTab === 'customize') {
-				setBuilderViewMode('build');
-			}
-			return;
-		}
-		if (activeTab === 'presets') {
-			setBuilderViewMode('preview');
-		}
-	}, [activeTab, showCanvasChrome, setBuilderViewMode, customizeOnly]);
+		setBuilderViewMode('build');
+	}, [setBuilderViewMode]);
 
 	const slotLabels = useMemo(
 		() => ({
@@ -148,19 +122,18 @@ export default function HoverEffectBuilderAuxiliaryPanel({
 		[slotLabels]
 	);
 
-	const isPro = Boolean(config?.isPro);
-	const { customizeTabEnabled } = getHoverBuilderEntitlements(config);
-	const upgradeUrl = withV3Utm(
-		typeof config?.upgradeUrl === 'string' && config.upgradeUrl !== ''
-			? appendQuery(
-					config.upgradeUrl,
-					'utm_source=upsell&utm_medium=gallery-editor&utm_campaign=hover-effects'
-				)
-			: 'https://wp-modula.com/pricing/?utm_source=upsell&utm_medium=gallery-editor&utm_campaign=hover-effects'
+	const liteUpsell = resolveProCoreUpsell(
+		{
+			needsProMessage: __(
+				'Install and activate Modula Pro to unlock full hover customization and advanced controls.',
+				'modula-best-grid-gallery'
+			),
+			ctaLabel: __('Get Pro', 'modula-best-grid-gallery'),
+			pricingQuery:
+				'utm_source=upsell&utm_medium=gallery-editor&utm_campaign=hover-effects',
+		},
+		config
 	);
-
-	const showCustomizeContent = customizeOnly || activeTab === 'customize';
-	const showPresetsContent = !customizeOnly && activeTab === 'presets';
 
 	return (
 		<form.Subscribe
@@ -195,70 +168,46 @@ export default function HoverEffectBuilderAuxiliaryPanel({
 					? Number(hover.hoverOpacity)
 					: 50;
 
+				// One admin-ui scope for the whole column: the auxiliary column
+				// sits outside the sidebar's, and the cards take its tokens.
 				return (
-					<div
-						className="modula-gallery-takeover__reorder-panel modula-gallery-takeover__reorder-panel--setup modula-gallery-takeover__reorder-panel--hover-builder"
-						role="region"
-						aria-label={__(
-							'Hover effect builder',
-							'modula-best-grid-gallery'
-						)}
-					>
-						<div className="modula-gallery-takeover__reorder-body modula-gallery-takeover__reorder-body--setup">
-							<HoverBuilderBelowImageNotice
-								captions={captions}
-								galleryType={galleryType}
-								compact
-								className="modula-gallery-takeover__hover-builder-below-image-notice--sidebar"
-							/>
-							{!customizeOnly ? (
-								<HoverBuilderTabNav
-									activeTab={activeTab}
-									customizeTabEnabled={customizeTabEnabled}
-									onSelectPresets={() => {
-										setActiveTab('presets');
-										if (showCanvasChrome) {
-											setBuilderViewMode('preview');
-										}
-									}}
-									onSelectCustomize={() => {
-										if (customizeTabEnabled) {
-											setActiveTab('customize');
-											setBuilderViewMode('build');
-										}
-									}}
+					<AdminUiScope>
+						<div
+							className="modula-gallery-takeover__reorder-panel modula-gallery-takeover__reorder-panel--hover-builder"
+							role="region"
+							aria-label={__(
+								'Hover effect builder',
+								'modula-best-grid-gallery'
+							)}
+						>
+							<div className="modula-gallery-takeover__reorder-body modula-gallery-takeover__hover-builder-body">
+								<HoverBuilderBelowImageNotice
+									captions={captions}
+									galleryType={galleryType}
+									compact
+									className="modula-gallery-takeover__hover-builder-below-image-notice--sidebar"
 								/>
-							) : null}
-							{showCanvasChrome &&
-							showCustomizeContent &&
-							(customizeOnly || customizeTabEnabled) ? (
-								<>
-									<HoverBuilderCanvasModeNav
-										buildMode={buildMode}
-										previewMode={previewMode}
-										setBuilderViewMode={setBuilderViewMode}
-									/>
-									{previewMode ? (
-										<p className="modula-gallery-takeover__hover-builder-canvas-hint">
-											{__(
-												'Switch to Build to edit layers, motion, and preset import.',
-												'modula-best-grid-gallery'
-											)}
-										</p>
-									) : null}
-								</>
-							) : null}
-							{showPresetsContent ? (
-								<HoverBuilderPresetsPanel
-									form={form}
-									isPro={isPro}
-								/>
-							) : null}
-							{showCustomizeContent ? (
+								{showCanvasChrome ? (
+									<>
+										<HoverBuilderCanvasModeNav
+											previewMode={previewMode}
+											setBuilderViewMode={
+												setBuilderViewMode
+											}
+										/>
+										{previewMode ? (
+											<p className="modula-gallery-takeover__hover-builder-hint">
+												{__(
+													'Switch to Build to edit layers, motion, and preset import.',
+													'modula-best-grid-gallery'
+												)}
+											</p>
+										) : null}
+									</>
+								) : null}
 								<HoverBuilderCustomizePanel
 									form={form}
-									isPro={isPro}
-									upgradeUrl={upgradeUrl}
+									liteUpsell={liteUpsell}
 									buildMode={buildMode}
 									selectedTarget={selectedTarget}
 									selectedTargetLabel={selectedTargetLabel}
@@ -297,9 +246,9 @@ export default function HoverEffectBuilderAuxiliaryPanel({
 									currentHoverColor={currentHoverColor}
 									currentHoverOpacity={currentHoverOpacity}
 								/>
-							) : null}
+							</div>
 						</div>
-					</div>
+					</AdminUiScope>
 				);
 			}}
 		</form.Subscribe>

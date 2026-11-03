@@ -1,0 +1,59 @@
+/*
+ * Motion → This layout (gallery-shared hooks/useLayoutMotion.js), in the
+ * visitor gallery and the editor preview. The runtimes set the custom
+ * properties; these rules turn them into motion.
+ */
+
+/*
+ * Justified "Widen on hover" (motion/widenOnHover.js): `--modula-widen` is
+ * the px a tile gains or gives up, and the layout's width is
+ * `calc(<slot> + var(--modula-widen))`. Registered so the variable itself
+ * animates: the width eases while widening, and a re-layout on resize stays
+ * instant.
+ */
+@property --modula-widen {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 0px; /* stylelint-disable-line length-zero-no-unit -- @property needs a unit */
+}
+
+.modula .modula-justified-grid--widen .modula-justified-tile {
+	// The transition names the registered property, not its value.
+	// stylelint-disable-next-line custom-property-no-missing-var-function
+	transition: --modula-widen var(--modula-widen-duration, 450ms) cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/*
+ * Polaroid "Visitors can move the prints" (motion/movePrints.js): the print
+ * is offset by `--modula-print-x/-y`, lifts while held, and a moved print
+ * stays above the others, the last one moved on top (the layout sets an
+ * inline `z-index: 0`).
+ */
+.modula .modula-polaroid-gallery--movable .modula-polaroid-slot {
+	translate: var(--modula-print-x, 0) var(--modula-print-y, 0);
+	-webkit-user-select: none;
+	user-select: none;
+
+	.modula-polaroid-frame {
+		transition:
+			scale 160ms cubic-bezier(0.2, 0.8, 0.2, 1),
+			filter 160ms ease-out;
+	}
+
+	&[data-modula-print] {
+		z-index: var(--modula-print-layer, 1) !important;
+	}
+
+	&[data-modula-print="held"] {
+
+		&,
+		* {
+			cursor: grabbing !important;
+		}
+
+		.modula-polaroid-frame {
+			scale: 1.04;
+			filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.28));
+		}
+	}
+}

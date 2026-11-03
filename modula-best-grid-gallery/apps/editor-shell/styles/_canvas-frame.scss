@@ -1,3 +1,4 @@
+@use '../../admin-ui/styles/mixins' as admin;
 @use 'variables' as *;
 
 .modula-takeover__main {
@@ -10,7 +11,7 @@
 	outline: none;
 
 	&:focus-visible {
-		box-shadow: inset 0 0 0 2px var(--modula-takeover-accent, #{$modula-takeover-accent});
+		box-shadow: inset 0 0 0 2px var(--modula-takeover-stage-ink, #{$mod-takeover-stage-ink});
 	}
 }
 
@@ -50,5 +51,48 @@
 @media (prefers-reduced-motion: reduce) {
 	.modula-takeover__preview-card {
 		transition: none;
+	}
+}
+
+// Device pill ("Preview on"), floating at the bottom centre of the canvas:
+// admin-ui's segment track and options, as icon buttons. It renders in its
+// own admin-ui scope. The canvas floats it with a stronger shadow than a
+// popover's, since it sits on the dark stage.
+.modula-takeover__canvas-device-pill {
+	@include admin.segment-track;
+	position: absolute;
+	z-index: 5;
+	bottom: 20px;
+	left: 50%;
+	flex-wrap: nowrap;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+	transform: translateX(-50%);
+}
+
+.modula-takeover__canvas-device-pill-group {
+	display: flex;
+	gap: 2px;
+}
+
+.modula-takeover__canvas-device-pill-btn {
+	@include admin.segment-option;
+	width: 40px;
+	padding: 0;
+	color: var(--modula-admin-ink-muted);
+
+	&:hover {
+		color: var(--modula-admin-ink);
+	}
+
+	// The canvas fills the active device with the page surface: white in
+	// light, and in dark #1b1a18, darker than the pill (not the raised grey).
+	&.is-active {
+		@include admin.segment-option-active;
+		background: var(--modula-admin-surface);
+	}
+
+	svg {
+		display: block;
+		flex-shrink: 0;
 	}
 }

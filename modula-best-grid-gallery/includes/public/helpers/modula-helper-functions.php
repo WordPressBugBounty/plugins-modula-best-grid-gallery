@@ -389,8 +389,10 @@ function modula_check_hover_effect( $item_data, $item, $settings ) {
 	// v2 settings use hover.builder; legacy flat `effect` may be absent after migration.
 	$effect = isset( $settings['effect'] ) ? (string) $settings['effect'] : 'none';
 
-	// Hover Effect Builder owns chrome when stamped with slot positions (not CPT defaults fill-in).
-	$uses_hover_builder = modula_settings_use_hover_builder( $settings );
+	// Hover Effect Builder owns chrome when stamped with slot positions (not CPT defaults fill-in),
+	// or when the image has its own hover effect (`Item_Fields::hover_builder_for_item`).
+	$uses_hover_builder = modula_settings_use_hover_builder( $settings )
+		|| ( is_array( $item ) && null !== \Modula\V2\Images\Item_Fields::hover_builder_for_item( $item ) );
 	$captions_below     = isset( $settings['contentPlacement'] )
 		&& 'below-image' === $settings['contentPlacement'];
 

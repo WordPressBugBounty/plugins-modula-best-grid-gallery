@@ -22,6 +22,7 @@
  * @property {Map<unknown,string>}  failures  Owner → last failure message.
  * @property {Set<unknown>}         recovered Owners whose latest write succeeded while still dirty.
  * @property {Set<unknown>}         dismissed Owners whose failure notice was dismissed.
+ * @property {number|null}          savedAt   When the latest write succeeded (ms), or null before the first.
  */
 
 /**
@@ -35,6 +36,7 @@ export function createSaveStatusState() {
 		failures: new Map(),
 		recovered: new Set(),
 		dismissed: new Set(),
+		savedAt: null,
 	};
 }
 
@@ -78,8 +80,10 @@ export function startWrite(state) {
 /**
  * @param {SaveStatusState} state
  * @param {unknown}         owner
+ * @param {number}          [at]  Time of the acknowledgement (ms).
  */
-export function writeSucceeded(state, owner) {
+export function writeSucceeded(state, owner, at = Date.now()) {
+	state.savedAt = at;
 	state.recovered.add(owner);
 	if (!state.dirty.get(owner)) {
 		clearFailure(state, owner);
@@ -118,9 +122,9 @@ export function dismissSaveFailures(state) {
 
 /**
  * @param {SaveStatusState} state
- * @return {{ status: TakeoverSaveUiStatus, errorMessage: string, saveErrorMessage: string }}
+ * @return {{ status: TakeoverSaveUiStatus, errorMessage: string, saveErrorMessage: string, savedAt: number|null }}
  *   `saveErrorMessage` is the first failure (save indicator); `errorMessage` the
- *   first undismissed one (dismissible notices).
+ *   first undismissed one (dismissible notices); `savedAt` the latest success.
  */
 export function deriveSaveStatus(state) {
 	const saveErrorMessage = state.failures.values().next().value || '';
@@ -128,11 +132,12 @@ export function deriveSaveStatus(state) {
 		([owner]) => !state.dismissed.has(owner)
 	);
 	const errorMessage = notice?.[1] || '';
+	const { savedAt } = state;
 	if (state.failures.size > 0) {
-		return { status: 'error', errorMessage, saveErrorMessage };
+		return { status: 'error', errorMessage, saveErrorMessage, savedAt };
 	}
 	if (state.active > 0) {
-		return { status: 'saving', errorMessage, saveErrorMessage };
+		return { status: 'saving', errorMessage, saveErrorMessage, savedAt };
 	}
 	const hasPending =
 		state.pending > 0 || Array.from(state.dirty.values()).some(Boolean);
@@ -140,5 +145,6 @@ export function deriveSaveStatus(state) {
 		status: hasPending ? 'unsaved' : 'saved',
 		errorMessage,
 		saveErrorMessage,
+		savedAt,
 	};
 }

@@ -27,7 +27,7 @@ class Modula_Grid {
 		add_filter( 'modula_gallery_settings', array( $this, 'js_grid_config' ), 10, 2 );
 
 		// Action for adding grid sizer
-		add_action( 'modula_shortcode_before_items', array( $this, 'modula_grid_sizer' ), 10 );
+		add_action( 'modula_shortcode_before_items', array( $this, 'modula_grid_sizer' ), 10, 4 );
 
 		// Filter for $css
 		add_filter( 'modula_shortcode_css', array( $this, 'generate_grid_css' ), 10, 3 );
@@ -115,13 +115,21 @@ class Modula_Grid {
 	/**
 	 * Grid sizer for columns
 	 *
-	 * @param $settings
+	 * @param array  $settings        Gallery settings.
+	 * @param mixed  $item_data       Unused.
+	 * @param array  $images          Unused.
+	 * @param string $display_context 'beta' when the v2 shortcode prints the hook.
 	 *
 	 * @return mixed
 	 *
 	 * @since 2.3.0
 	 */
-	public function modula_grid_sizer( $settings ) {
+	public function modula_grid_sizer( $settings, $item_data = null, $images = array(), $display_context = 'classic' ) {
+		// The sizer serves the classic column script; Beta lays its columns out in React.
+		if ( 'beta' === $display_context ) {
+			return;
+		}
+
 		if ( 'grid' === $settings['type'] && 'automatic' !== $settings['grid_type'] ) {
 			echo '<div class="modula-grid-sizer"> </div>';
 		}

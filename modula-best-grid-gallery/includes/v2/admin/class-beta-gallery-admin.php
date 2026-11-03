@@ -16,6 +16,12 @@ class Beta_Gallery_Admin {
 
 	public const QUERY_ARG = 'modula_editor';
 
+	/** Nonce action of a create-choice URL, by post type. */
+	public const CREATE_CHOICE_NONCE_ACTIONS = array(
+		'modula-gallery' => 'modula-gallery-create-choice',
+		'modula-album'   => 'modula-album-create-choice',
+	);
+
 	/** New from preset arg on a new-editor create: a preset ID or `blank`. */
 	public const PRESET_QUERY_ARG = 'modula_preset';
 
@@ -453,7 +459,7 @@ class Beta_Gallery_Admin {
 			return;
 		}
 
-		$nonce_action = $is_album ? 'modula-album-create-choice' : 'modula-gallery-create-choice';
+		$nonce_action = self::CREATE_CHOICE_NONCE_ACTIONS[ $type ];
 		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), $nonce_action ) ) {
 			return;
 		}
@@ -571,17 +577,15 @@ class Beta_Gallery_Admin {
 	/**
 	 * Whether Albums editor takeover may be offered site-wide.
 	 *
-	 * Same filters as Pro Album_Takeover_Admin::is_takeover_ui_available()
-	 * (`modula_enable_modern_settings_editor` + `modula_album_takeover_ui`).
-	 * Default force-OFF until albums beta launch.
+	 * Pro owns albums and the rule (Album_Takeover_Admin::is_takeover_ui_available():
+	 * on by default, off when `modula_enable_modern_settings_editor` is false, as for
+	 * galleries). Without Pro there are no albums.
 	 *
 	 * @return bool
 	 */
 	public static function is_album_takeover_available() {
-		if ( ! apply_filters( 'modula_enable_modern_settings_editor', false, 0 ) ) {
-			return false;
-		}
-		return (bool) apply_filters( 'modula_album_takeover_ui', false );
+		return class_exists( '\Modula_Pro\Extensions\Albums\V2\Admin\Album_Takeover_Admin' )
+			&& \Modula_Pro\Extensions\Albums\V2\Admin\Album_Takeover_Admin::is_takeover_ui_available();
 	}
 
 	/**
@@ -608,13 +612,10 @@ class Beta_Gallery_Admin {
 			if ( \Modula\V2\Beta_Settings::is_beta_album( \Modula\V2\Beta_Settings::current_album_id() ) ) {
 				return false;
 			}
-			$nonce_action = 'modula-album-create-choice';
-		} else {
-			if ( \Modula\V2\Beta_Settings::is_beta_gallery( \Modula\V2\Beta_Settings::current_gallery_id() ) ) {
-				return false;
-			}
-			$nonce_action = 'modula-gallery-create-choice';
+		} elseif ( \Modula\V2\Beta_Settings::is_beta_gallery( \Modula\V2\Beta_Settings::current_gallery_id() ) ) {
+			return false;
 		}
+		$nonce_action = self::CREATE_CHOICE_NONCE_ACTIONS[ $screen->post_type ];
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- create-choice query routing; nonce verified below when present.
 		$choice = isset( $_GET[ self::QUERY_ARG ] ) ? sanitize_key( wp_unslash( $_GET[ self::QUERY_ARG ] ) ) : '';
@@ -680,16 +681,14 @@ class Beta_Gallery_Admin {
 			'modulaBetaGalleryCreate',
 			array(
 				'awaitingChoice' => self::is_awaiting_editor_choice(),
-				'listUrl'        => \Modula\V2\Rest\Listing_Controller::admin_url(),
+				'listUrl'        => \Modula\V2\Rest\Content_Page_Controller::admin_url(),
 				'postNewBase'    => admin_url(
 					$is_album
 						? 'post-new.php?post_type=modula-album'
 						: 'post-new.php?post_type=modula-gallery'
 				),
 				'queryArg'       => self::QUERY_ARG,
-				'createNonce'    => wp_create_nonce(
-					$is_album ? 'modula-album-create-choice' : 'modula-gallery-create-choice'
-				),
+				'createNonce'    => wp_create_nonce( self::CREATE_CHOICE_NONCE_ACTIONS[ $screen->post_type ] ),
 				'choiceUrl'      => $choice_url,
 				'convertConfirm' => $is_album
 					? __( 'Convert this album to the new editor? Its shortcode and URL stay the same.', 'modula-best-grid-gallery' )
@@ -699,16 +698,35 @@ class Beta_Gallery_Admin {
 	}
 
 	/**
+	 * Whether this screen needs the editor choice dialog.
+	 *
+	 * Galleries: the listing's create links and post-new. Albums: only a post-new
+	 * that awaits the choice, which otherwise stays a blank Add New Album screen.
+	 *
+	 * @return bool
+	 */
+	private static function is_create_modal_screen() {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen ) {
+			return false;
+		}
+		if ( 'modula-album' === $screen->post_type ) {
+			return self::is_awaiting_editor_choice();
+		}
+		return 'modula-gallery' === $screen->post_type
+			&& ( 'edit' === $screen->base || 'post' === $screen->base );
+	}
+
+	/**
 	 * @return void
 	 */
 	public static function render_create_modal() {
-		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( ! $screen || 'modula-gallery' !== $screen->post_type ) {
+		if ( ! self::is_create_modal_screen() ) {
 			return;
 		}
-		if ( 'edit' !== $screen->base && 'post' !== $screen->base ) {
-			return;
-		}
+		$intro = ( 'modula-album' === get_current_screen()->post_type )
+			? __( 'Use the new editor for the modern album experience, or the classic editor.', 'modula-best-grid-gallery' )
+			: __( 'Use the new editor for the modern gallery experience, or the classic editor.', 'modula-best-grid-gallery' );
 		?>
 		<div id="modula-beta-create-modal" class="modula-beta-create-modal" hidden>
 			<div class="modula-beta-create-modal__backdrop" data-modula-beta-dismiss></div>
@@ -717,7 +735,7 @@ class Beta_Gallery_Admin {
 					<span aria-hidden="true">&times;</span>
 				</button>
 				<h2 id="modula-beta-create-modal-title"><?php esc_html_e( 'Choose an editor', 'modula-best-grid-gallery' ); ?></h2>
-				<p><?php esc_html_e( 'Use the new editor for the modern gallery experience, or the classic editor.', 'modula-best-grid-gallery' ); ?></p>
+				<p><?php echo esc_html( $intro ); ?></p>
 				<p class="modula-beta-create-modal__actions">
 					<button type="button" class="button button-primary" data-modula-beta-choice="beta"><?php esc_html_e( 'Use the new editor', 'modula-best-grid-gallery' ); ?></button>
 					<button type="button" class="button" data-modula-beta-choice="classic"><?php esc_html_e( 'Use the classic editor', 'modula-best-grid-gallery' ); ?></button>
@@ -809,6 +827,32 @@ class Beta_Gallery_Admin {
 		return wp_nonce_url(
 			admin_url( 'admin.php?action=modula_try_beta_gallery&post=' . $post_id ),
 			'try-beta-gallery_' . $post_id
+		);
+	}
+
+	/**
+	 * Add New URL that skips the editor choice and opens the new editor, as
+	 * the listing's "Use the new editor" choice does.
+	 *
+	 * @param string $post_type `modula-gallery` or `modula-album`.
+	 * @return string Empty when the post type is missing or the user cannot create it.
+	 */
+	public static function new_editor_create_url( $post_type ) {
+		if ( ! isset( self::CREATE_CHOICE_NONCE_ACTIONS[ $post_type ] ) ) {
+			return '';
+		}
+
+		$post_type_object = get_post_type_object( $post_type );
+		if ( ! $post_type_object || ! current_user_can( $post_type_object->cap->create_posts ) ) {
+			return '';
+		}
+
+		return add_query_arg(
+			array(
+				self::QUERY_ARG => 'beta',
+				'_wpnonce'      => wp_create_nonce( self::CREATE_CHOICE_NONCE_ACTIONS[ $post_type ] ),
+			),
+			admin_url( 'post-new.php?post_type=' . $post_type )
 		);
 	}
 

@@ -1,18 +1,18 @@
-// Live preview: always-visible chrome (toolbar, dropzones, hidden file input, aux panel shell).
+// Live preview: always-visible chrome (canvas frame, toolbar, tile chrome, aux panel shell).
 @use '../../../editor-shell/styles/canvas-frame';
 @use 'preview/shell';
 @use 'preview/reorder-panel';
-@use 'preview/reorder-setup';
 @use 'preview/live-preview-region';
 @use '../../../editor-shell/styles/empty-state';
-@use 'preview/preview-chrome';
 @use '../../../editor-shell/styles/insert-position-segment';
 @use '../../../editor-shell/styles/add-split';
 @use '../../../editor-shell/styles/canvas-toolbar';
-@use 'preview/selection-bar';
-@use '../../../editor-shell/styles/status-bar';
+@use '../../../editor-shell/styles/sort-popover';
+@use '../../../editor-shell/styles/toast';
+@use '../../../editor-shell/styles/selection-grid';
 @use 'preview/live-preview-pagebreak-admin';
-@use 'preview/upload-surface';
+@use 'preview/tile-toolbar';
+@use 'preview/freeform-selection';
 @use 'preview/filters-preview';
 @use 'preview/content-block-preview-surface';
 @use '../../../frontend-gallery/polaroid-caption-chin';

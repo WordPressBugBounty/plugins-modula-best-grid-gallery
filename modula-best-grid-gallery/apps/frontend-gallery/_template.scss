@@ -4,8 +4,8 @@
  * @package
  */
 
-@use '../shared-styles/spacing' as *;
-@use '../shared-styles/radii' as *;
+@use 'spacing' as *;
+@use 'radii' as *;
 
 .modula .modula-items.modula-template {
 	--modula-template-gap: #{$mod-space-16};

@@ -124,6 +124,7 @@ export default function SchemaFieldRowToggleWithNestedGrid({
 						<div className="modula-settings-editor__field-label-col modula-settings-editor__field-label-col--toggle-nested-z">
 							<div className="modula-settings-editor__field-label-line modula-settings-editor__field-label-line--toggle-nested-pass-through">
 								<SchemaFieldDirtyChrome
+									label={label}
 									dirty={
 										!isSettingsValueAtDefault(
 											fieldApi.state.value,

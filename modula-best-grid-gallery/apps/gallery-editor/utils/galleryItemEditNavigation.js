@@ -1,6 +1,7 @@
 /**
  * Prev/next navigation helpers for the unified gallery item edit modal.
  */
+import { getItemEditPager } from 'editor-shell/logic';
 import {
 	isContentBlockGalleryItemRow,
 	isEmbeddedGalleryItemRow,
@@ -40,6 +41,40 @@ export function getEditableGalleryItemIndices(reduxItems) {
 		}
 	}
 	return out;
+}
+
+/**
+ * @typedef {Object} GalleryItemEditPager
+ * @property {number}      position      1-based place among the editable items.
+ * @property {number}      total         Editable items in the gallery.
+ * @property {number|null} previousIndex Store index of the previous item; wraps to the last. Null when the item is alone.
+ * @property {number|null} nextIndex     Store index of the next item; wraps to the first. Null when the item is alone.
+ * @property {boolean}     onlyImages    No content block is counted, so the place can read "Image X of N".
+ */
+
+/**
+ * "Image X of N" and the previous/next items of the item edit panel, in
+ * gallery order over images and content blocks (as the canvas does).
+ *
+ * @param {Object[]|undefined|null} reduxItems
+ * @param {number}                  storeIndex Item open in the panel.
+ * @return {GalleryItemEditPager|null} Null when `storeIndex` is not an editable item.
+ */
+export function getGalleryItemEditPager(reduxItems, storeIndex) {
+	const indices = getEditableGalleryItemIndices(reduxItems);
+	const pager = getItemEditPager(indices, storeIndex);
+	if (!pager) {
+		return null;
+	}
+	return {
+		position: pager.position,
+		total: pager.total,
+		previousIndex: pager.previous,
+		nextIndex: pager.next,
+		onlyImages: indices.every(
+			(index) => getGalleryItemEditKind(reduxItems[index]) === 'image'
+		),
+	};
 }
 
 /**

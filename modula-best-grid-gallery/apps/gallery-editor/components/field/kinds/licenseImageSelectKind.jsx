@@ -1,10 +1,12 @@
 /**
- * Settings-editor adapter: schema `licenseImageSelect` → shared-ui ImageSelect.
+ * Settings-editor adapter: schema `licenseImageSelect` → admin-ui PresetTiles,
+ * each license with its badge image.
  */
 import { __ } from '@wordpress/i18n';
-import { ImageSelect } from 'shared-ui';
+import { PresetTiles } from 'admin-ui';
 import { resolveModulaPluginAssetUrl } from '../../../utils/resolveModulaPluginAssetUrl';
 import { isNil } from '../../../logic/isNil';
+import { ControlHelp, describedByHelp } from './ControlHelp';
 
 /**
  * @param {Record<string, unknown>|undefined} optionImages
@@ -23,15 +25,12 @@ function thumbForOption(optionImages, key) {
 }
 
 /**
- * @param {Object}           ctx
- * @param {Object}           ctx.control
- * @param {*}                ctx.value
- * @param {Function}         ctx.onChange
- * @param {boolean}          ctx.disabled
- * @param {string|undefined} ctx.help
+ * @param {import('../fieldControlKinds').FieldControlContext} ctx
  */
 export function renderLicenseImageSelectKind({
 	control,
+	controlId,
+	label: settingLabel,
 	value,
 	onChange,
 	disabled,
@@ -56,21 +55,29 @@ export function renderLicenseImageSelectKind({
 		return {
 			value: key,
 			label,
-			...(imageUrl ? { imageUrl } : {}),
+			...(imageUrl ? { preview: <img src={imageUrl} alt="" /> } : {}),
 		};
 	});
 
 	const current = isNil(value) || value === '' ? 'none' : String(value);
 
 	return (
-		<ImageSelect
-			value={current}
-			options={options}
-			onChange={onChange}
-			disabled={disabled}
-			help={help}
-			listLabel={__('Select license type', 'modula-best-grid-gallery')}
-			placeholder={__('Select…', 'modula-best-grid-gallery')}
-		/>
+		<>
+			<PresetTiles
+				id={controlId}
+				className="modula-settings-editor__license-tiles"
+				aria-label={
+					settingLabel ||
+					__('License type', 'modula-best-grid-gallery')
+				}
+				aria-describedby={describedByHelp(controlId, help)}
+				columns={2}
+				options={options}
+				value={current}
+				onChange={onChange}
+				disabled={disabled}
+			/>
+			<ControlHelp help={help} controlId={controlId} />
+		</>
 	);
 }

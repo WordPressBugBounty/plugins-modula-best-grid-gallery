@@ -33,6 +33,7 @@ import {
 	isSliderCaptionInside,
 	isSliderCaptionTop,
 } from '../utils/sliderCaptionPosition';
+import { SliderSlideCaptionScrim } from './SliderSlideCaption';
 import GalleryItemSocialLinks from './social/GalleryItemSocialLinks';
 import GalleryItemExpandableSocials from './social/GalleryItemExpandableSocials';
 import {
@@ -198,6 +199,9 @@ export function GalleryItemTextContent({
  * @param {import('react').ReactNode} [props.sliderCaptionNode]          - &lt;figcaption&gt; for slider image info.
  * @param {string}                    [props.sliderCaptionDescribedById] - `aria-describedby` target on slide image.
  * @param {import('react').ReactNode} [props.previewAdminToolbar]        - Settings-editor hover actions above overlays.
+ * @param {boolean}                   [props.slideChrome]                - Draw the settings-editor actions on a carousel slide whose caption is not a slider outside caption (inside its image wrapper); a slider slide with an outside caption always draws them on its media. Slider and Story image slides ask for it (Lite tickets 92, 102).
+ * @param {import('react').ReactNode} [props.itemChrome]                 - A host's chrome above the image (GalleryItemChromeContext).
+ * @param {Function|null}             [props.renderItemContent]          - A host's content for a tile whose text sits on the image (GalleryItemContentContext).
  * @param {boolean}                   [props.suppressOverlayText]        - Hide overlay title/caption (story/slider own caption chrome).
  * @param {import('react').ReactNode} [props.videoPlayOverlay]           - Play icon for mixed-gallery video tiles.
  * @param {import('react').ReactNode} [props.videoPreviewNode]           - Hover / autoplay video preview layer.
@@ -213,6 +217,9 @@ export default function GalleryItemMarkup({
 	sliderCaptionNode = null,
 	sliderCaptionDescribedById = undefined,
 	previewAdminToolbar = null,
+	slideChrome = false,
+	itemChrome = null,
+	renderItemContent = null,
 	slotMeasureRef = undefined,
 	suppressOverlayText = false,
 	eagerImageMount = false,
@@ -243,6 +250,7 @@ export default function GalleryItemMarkup({
 		belowImagePadding = 0,
 		polaroidCaptionInChin = false,
 		stripHoverBuilderClasses = false,
+		hasLiveHoverTile = false,
 	} = vm;
 	const showTitle = !item.hideTitle && String(item.title || '').trim() !== '';
 	const showDescription =
@@ -252,8 +260,6 @@ export default function GalleryItemMarkup({
 		hideDescription: item.hideDescription,
 	});
 	// Slider / story own caption chrome — skip compact popover there.
-	// Settings-editor preview keeps the admin toolbar but still uses the same
-	// compact-tile hover/long-press popover as the frontend (below-image parity).
 	const compactCaptionEnabled =
 		compactCaptionPopover &&
 		hasCaptionCopy &&
@@ -276,7 +282,8 @@ export default function GalleryItemMarkup({
 		showDescription,
 		suppressOverlayText,
 		useCaptionPopover,
-		stripHoverBuilderClasses,
+		// The live preview hover brings the overlay slots back, as on the frontend.
+		stripHoverBuilderClasses: stripHoverBuilderClasses && !hasLiveHoverTile,
 		previewAdminToolbar: Boolean(previewAdminToolbar),
 	});
 	const hasBelowText = hasBelowTitle || hasBelowDescription;
@@ -296,6 +303,11 @@ export default function GalleryItemMarkup({
 		/>
 	) : null;
 	const lightboxLinkLabel = resolveLightboxLinkLabel(item, imgAttrs?.alt);
+	/** The tile link's props but its label, wherever the tile draws it (or a host does). */
+	const tileLinkProps = {
+		...mergeReactClassNameProps(linkAttrs, linkClasses),
+		href: linkHref || '#',
+	};
 	const rootInlineStyle = parseInlineStyle(itemAttrs?.style);
 	const itemFillsParentSlot = style?.height === '100%';
 	if (captionBelowImage && !itemFillsParentSlot) {
@@ -313,15 +325,19 @@ export default function GalleryItemMarkup({
 		compactCaptionEnabled ? compactMeasureRef : null
 	);
 
-	const captionPopover =
-		useCaptionPopover && compactCaptionEnabled ? (
-			<GalleryItemCaptionPopover
-				title={item.title}
-				descriptionHtml={item.description}
-				showTitle={showTitle}
-				showDescription={showDescription}
-			/>
-		) : null;
+	// The settings-editor preview measures compact tiles like the frontend
+	// (same tile layout) but draws no popover: the canvas tile hover shows
+	// only the admin trash.
+	const drawsCaptionPopover =
+		useCaptionPopover && compactCaptionEnabled && !previewAdminToolbar;
+	const captionPopover = drawsCaptionPopover ? (
+		<GalleryItemCaptionPopover
+			title={item.title}
+			descriptionHtml={item.description}
+			showTitle={showTitle}
+			showDescription={showDescription}
+		/>
+	) : null;
 
 	const pictureClassName = [
 		'modula-item-picture',
@@ -406,7 +422,7 @@ export default function GalleryItemMarkup({
 	const insideCaptionBlock =
 		captionInside && sliderCaptionNode ? (
 			<>
-				<div className="slider-image-info__scrim" aria-hidden="true" />
+				<SliderSlideCaptionScrim />
 				{sliderCaptionNode}
 			</>
 		) : null;
@@ -420,6 +436,8 @@ export default function GalleryItemMarkup({
 			? sliderCaptionNode
 			: afterImage;
 
+	// Outside `.modula-item-hover-media` on tiles: "Zoom on hover" scales that
+	// shell, and the selection outline and trash must not scale with it.
 	const previewAdminMount = previewAdminToolbar ? (
 		<div className="modula-item-preview-admin-mount">
 			<div className="modula-item-preview-admin-mount__inner">
@@ -466,11 +484,7 @@ export default function GalleryItemMarkup({
 	);
 	const sliderLinkBlock =
 		showLink && hoistSliderChromeIntoMedia ? (
-			<a
-				{...mergeReactClassNameProps(linkAttrs, linkClasses)}
-				href={linkHref || '#'}
-				aria-label={lightboxLinkLabel}
-			/>
+			<a {...tileLinkProps} aria-label={lightboxLinkLabel} />
 		) : null;
 
 	const sliderMediaChildren = (
@@ -487,6 +501,12 @@ export default function GalleryItemMarkup({
 			{videoPreviewNode}
 			{videoPlayOverlay}
 			{insideCaptionBlock}
+			{/* Above the caption on the image, as a tile's chrome sits above its text. */}
+			{!hoistSliderChromeIntoMedia && slideChrome
+				? previewAdminMount
+				: null}
+			{/* A slide draws a host's chrome on its image; a tile draws it outside the media shell. */}
+			{isCarouselSlide ? itemChrome : null}
 		</>
 	);
 
@@ -570,18 +590,10 @@ export default function GalleryItemMarkup({
 					ref={imageAreaRef}
 				>
 					{showLink && (
-						<a
-							{...mergeReactClassNameProps(
-								linkAttrs,
-								linkClasses
-							)}
-							href={linkHref || '#'}
-							aria-label={lightboxLinkLabel}
-						/>
+						<a {...tileLinkProps} aria-label={lightboxLinkLabel} />
 					)}
 					<div className="modula-item-hover-media">
 						{imageBlock}
-						{previewAdminMount}
 						<div
 							className="modula-item-overlay"
 							style={{ position: 'absolute', inset: 0 }}
@@ -609,6 +621,8 @@ export default function GalleryItemMarkup({
 							</div>
 						) : null}
 					</div>
+					{itemChrome}
+					{previewAdminMount}
 					{expandableSocials}
 				</div>
 				{captionPopover}
@@ -650,6 +664,36 @@ export default function GalleryItemMarkup({
 	]
 		.filter(Boolean)
 		.join(' ');
+	const overlayRootStyle = {
+		...rootInlineStyle,
+		position: 'relative',
+		...(isCarouselSlide ? {} : { width: '100%' }),
+		...style,
+	};
+
+	// Slides keep their carousel chrome; a host draws tiles only.
+	const hostLink = showLink
+		? { ...tileLinkProps, 'aria-label': lightboxLinkLabel }
+		: null;
+	const hostContent =
+		renderItemContent && !isCarouselSlide
+			? renderItemContent(item, { link: hostLink })
+			: null;
+	if (hostContent) {
+		return (
+			<div
+				ref={imageAreaRef}
+				{...itemAttrsSansStyle}
+				className={overlayRootClass}
+				data-modula-image-id={item.id}
+				style={overlayRootStyle}
+			>
+				{hostContent}
+				{itemChrome}
+				{previewAdminMount}
+			</div>
+		);
+	}
 
 	return (
 		<div
@@ -657,26 +701,14 @@ export default function GalleryItemMarkup({
 			{...itemAttrsSansStyle}
 			className={overlayRootClass}
 			data-modula-image-id={item.id}
-			style={{
-				...rootInlineStyle,
-				position: 'relative',
-				...(isCarouselSlide ? {} : { width: '100%' }),
-				...style,
-			}}
+			style={overlayRootStyle}
 		>
 			{!hoistSliderChromeIntoMedia && showLink ? (
-				<a
-					{...mergeReactClassNameProps(linkAttrs, linkClasses)}
-					href={linkHref || '#'}
-					aria-label={lightboxLinkLabel}
-				/>
+				<a {...tileLinkProps} aria-label={lightboxLinkLabel} />
 			) : null}
 			{isCarouselSlide ? null : (
 				<div className="modula-item-hover-media">
 					{imageBlock}
-					{!hoistSliderChromeIntoMedia && previewAdminMount
-						? previewAdminMount
-						: null}
 					{!hoistSliderChromeIntoMedia ? (
 						<>
 							{sliderOverlayBlock}
@@ -685,6 +717,8 @@ export default function GalleryItemMarkup({
 					) : null}
 				</div>
 			)}
+			{isCarouselSlide ? null : itemChrome}
+			{isCarouselSlide ? null : previewAdminMount}
 			{captionPopover}
 			{/*
 			 * Expandable FAB is absolute; keep before carousel imageBlock so Fancyapps

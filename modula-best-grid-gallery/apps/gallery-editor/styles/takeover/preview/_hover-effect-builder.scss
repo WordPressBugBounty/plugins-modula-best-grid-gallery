@@ -1,8 +1,8 @@
 @use '../../variables' as *;
-@use '../../../../editor-shell/styles/mixins' as *;
-@use '../../../../editor-shell/styles/range-control-layout' as range-layout;
+@use '../panel-mixins' as *;
 @use '../../../../frontend-gallery/hover-v2';
 
+// admin-ui Notice with its Dismiss link under the message.
 .modula-gallery-takeover__hover-builder-below-image-notice {
 	flex: 0 0 auto;
 	width: 100%;
@@ -10,22 +10,17 @@
 	margin: 0 auto $mod-space-12;
 	box-sizing: border-box;
 
+	.modula-admin-button.is-link {
+		min-height: 0;
+		margin-top: $mod-space-4;
+		color: inherit;
+	}
+
 	&.modula-gallery-takeover__hover-builder-below-image-notice--sidebar {
 		max-width: none;
-		margin: 0 0 $mod-space-12;
-	}
-
-	&.modula-gallery-takeover__hover-builder-below-image-notice--compact {
-		.components-notice__content {
-			font-size: 12px;
-			line-height: 1.45;
-		}
-	}
-}
-
-.modula-gallery-takeover__live-preview-body--hover-builder {
-	>.modula-gallery-takeover__hover-builder-below-image-notice {
-		padding: 0 $mod-space-16;
+		margin: 0 $mod-se-gut $mod-space-12;
+		width: auto;
+		font-size: var(--modula-admin-text-help);
 	}
 }
 
@@ -55,335 +50,105 @@
 }
 
 /*
- * Hover aux panel: same chrome as Sort & order (`reorder-panel--setup`).
- * Cap list height so both sections fit smaller viewports.
+ * Hover builder column (canvas "Edit image" language): the item edit
+ * panel's bordered cards (`ItemEditCard`) on the column's chrome, admin-ui
+ * rows inside them, the panel's 32px controls.
  */
 .modula-gallery-takeover__reorder-panel--hover-builder {
-	@include modula-sidebar-v2-flat-form-controls;
-	// Match sidebar V2: no extra wrapper padding — thumb bleeds into setup block padding
-	// (8px wrapper padding + overflow-x:hidden on reorder-body clipped the knob).
-	@include range-layout.modula-sidebar-v2-range-control-inline-layout;
+	--modula-admin-control-height: 32px;
 
-	.modula-gallery-takeover__reorder-body--setup {
-		display: flex;
-		flex-direction: column;
-		gap: $mod-space-28;
-		padding: $mod-space-16 0 $mod-space-20;
-		min-height: 0;
-		flex: 1;
-		/* Keep x clipped (range thumbs); y must scroll — Customize is taller than the aux column. */
-		overflow-x: hidden;
-		overflow-y: auto;
-	}
-
-	.modula-gallery-takeover__reorder-setup-block {
-		padding: 0;
-	}
-
-	.modula-gallery-takeover__reorder-setup-title {
-		margin-bottom: $mod-space-8;
-	}
-
-	.modula-gallery-takeover__hover-builder-layer-help {
-		margin: 0 0 $mod-space-12;
-		line-height: 1.5;
-	}
-
-	.modula-gallery-takeover__hover-builder-mode-nav {
-		box-sizing: border-box;
-		padding-inline: $mod-space-16;
-		margin-bottom: $mod-space-12;
-	}
-
-	.modula-gallery-takeover__hover-builder-mode-nav--canvas {
-		margin-top: $mod-space-4;
-		margin-bottom: $mod-space-8;
-	}
-
-	.modula-gallery-takeover__hover-builder-canvas-hint {
-		box-sizing: border-box;
-		padding-inline: $mod-space-16;
-		margin: $mod-space-4 0 $mod-space-16;
-		line-height: 1.5;
-	}
-
-	.modula-gallery-takeover__hover-builder-layer-list {
-		gap: 0;
-	}
-
-	.modula-gallery-takeover__reorder-setup-sort-btn {
-		padding: $mod-space-12 $mod-space-12;
-		min-height: $mod-space-40;
-	}
-
-	.modula-gallery-takeover__hover-builder-layer-list,
-	.modula-gallery-takeover__hover-builder-motion-list {
-		max-height: min(38vh, 320px);
-		overflow: auto;
-	}
-
-	.modula-gallery-takeover__hover-builder-link-overlay-actions {
-		margin: 0 0 $mod-space-12;
-	}
-
-	.modula-gallery-takeover__hover-builder-link-fields {
-		display: flex;
-		flex-direction: column;
-		gap: 0;
-		margin: 0 0 $mod-space-4;
-		margin-inline: -$mod-space-16;
-		width: calc(100% + #{$mod-space-16 * 2});
-	}
-
-	.modula-gallery-takeover__hover-builder-link-row {
-		padding-left: $mod-space-16;
-		padding-right: $mod-space-16;
-		min-height: 44px;
-		border-bottom-color: var(--mod-se-line-soft, var(--mod-ui-line-soft));
-
-		&:last-child {
-			border-bottom: none;
-		}
-
-		.modula-ui-settings-row__end {
-			width: auto;
-			min-width: 40px;
-			height: auto;
-			justify-content: flex-end;
-		}
-
-		.modula-ui-switch {
-			display: inline-flex;
-			flex-direction: row;
-			align-items: center;
-		}
-	}
-
-	.modula-gallery-takeover__hover-builder-link-overlay-help {
-		margin: $mod-space-12 0 0;
-		font-size: 12px;
-		line-height: 1.5;
-		color: var(--mod-se-ink-3, var(--mod-se-aux-ink-muted, #{$mod-takeover-text-muted}));
-	}
-
-	.modula-gallery-takeover__hover-builder-motion-head {
-		margin-bottom: $mod-space-4;
-
-		.modula-gallery-takeover__reorder-setup-title {
-			margin-bottom: 0;
-		}
-	}
-
-	.modula-gallery-takeover__hover-builder-motion-badge-wrap {
-		margin: 0 0 $mod-space-8;
-	}
-
-	.modula-gallery-takeover__hover-builder-motion {
-		display: flex;
-		flex-direction: column;
-		gap: $mod-space-12;
-
-		.modula-ui-field-stack__label {
-			font-size: 11px;
-			font-weight: 700;
-			letter-spacing: 0.04em;
-			text-transform: uppercase;
-			color: var(--mod-se-ink-3, var(--mod-se-aux-ink-muted, #{$mod-takeover-text-muted}));
-		}
-	}
-
-	.modula-gallery-takeover__hover-builder-presets-panel {
-		.modula-gallery-takeover__hover-builder-layer-help {
-			margin-bottom: $mod-space-12;
-		}
-	}
-
-	.modula-gallery-takeover__hover-builder-presets {
-		gap: $mod-space-4;
-	}
-
-	.modula-gallery-takeover__hover-builder-preset-btn {
-		padding: $mod-space-12;
-	}
-
-	.modula-gallery-takeover__hover-builder-preset-json-btn {
-		margin-top: $mod-space-4;
-	}
+	@include column-admin-rows;
 }
 
-.modula-gallery-takeover__hover-builder-link-overlay-actions {
-	display: flex;
-	flex-wrap: wrap;
-	gap: $mod-space-8;
-}
-
-.modula-gallery-takeover__hover-builder-link-overlay-title,
-.modula-gallery-takeover__hover-builder-motion-head {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	flex-wrap: wrap;
-	gap: $mod-space-8;
-}
-
-.modula-gallery-takeover__hover-builder-motion-badge-wrap {
-	display: flex;
-	justify-content: flex-start;
-}
-
-.modula-gallery-takeover__hover-builder-inline-badge {
-	display: inline-flex;
-	align-items: center;
-	padding: $mod-space-2 $mod-space-8;
-	border-radius: 0;
-	border: 1px solid var(--mod-se-accent);
-	background: var(--mod-se-accent-soft);
-	color: var(--mod-se-accent-ink);
-	font-size: 11px;
-	font-weight: 600;
-	line-height: 1.2;
-	white-space: nowrap;
-}
-
-.modula-gallery-takeover__hover-builder-inline-badge--subtle {
-	background: var(--mod-se-accent-soft);
-	border-color: color-mix(in srgb, var(--mod-se-accent) 35%, transparent);
-	font-size: 10px;
-	padding: $mod-space-2 $mod-space-4;
-}
-
-.modula-gallery-takeover__hover-builder-layer-help {
-	margin: 0 0 $mod-space-8;
-	font-size: 12px;
-	line-height: 1.45;
-	color: var(--mod-se-aux-ink-muted, #{$mod-takeover-text-muted});
-}
-
-.modula-gallery-takeover__hover-builder-presets-panel {
-	margin: 0;
-	padding: 0;
+// The cards bring their own 16px sides.
+.modula-gallery-takeover__hover-builder-body {
 	display: flex;
 	flex-direction: column;
-	min-height: 0;
-	flex: 1 1 auto;
+	padding: $mod-space-16 0 $mod-space-20;
 }
 
+// A line of help in a card, or over the cards.
+.modula-gallery-takeover__hover-builder-help,
+.modula-gallery-takeover__hover-builder-hint {
+	margin: 0;
+	padding: $mod-space-4 $mod-se-gut $mod-space-8;
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-help);
+	line-height: 1.45;
+}
+
+.modula-gallery-takeover__hover-builder-hint {
+	padding-top: 0;
+	padding-bottom: $mod-space-12;
+}
+
+// A field's validation error (FieldValidationError), under its row.
+.modula-gallery-takeover__hover-builder-error {
+	margin: 0;
+	padding: 0 $mod-se-gut $mod-space-8;
+	color: var(--modula-admin-danger);
+	font-size: var(--modula-admin-text-help);
+	line-height: 1.45;
+}
+
+// The cards' rows are 252px wide inside: admin-ui's 200px label basis would
+// push the switch or select under its label (as on the item edit panel's
+// hover row).
+.modula-gallery-takeover__reorder-panel--hover-builder .modula-admin-row__label {
+	flex-basis: auto;
+}
+
+// Select all / Clear all and the linked count, at the rows' 16px.
+.modula-gallery-takeover__hover-builder-link-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: $mod-space-16;
+	padding: 0 $mod-se-gut;
+}
+
+.modula-gallery-takeover__hover-builder-chips {
+	display: flex;
+	padding: 0 $mod-se-gut $mod-space-8;
+}
+
+// A timing slider as the panel draws one: label and value box on one line,
+// the slider under them. The row's control steps aside so the slider's
+// parts join the row's grid.
+.modula-gallery-takeover__hover-builder-range-row {
+
+	.modula-admin-row__main {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		column-gap: 0;
+		row-gap: $mod-space-8;
+		padding-block: $mod-space-12;
+	}
+
+	.modula-admin-row__label {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	.modula-admin-row__control {
+		display: contents;
+	}
+
+	@include panel-slider-parts(2);
+}
+
+.modula-gallery-takeover__hover-builder-preset-json-btn.modula-admin-button {
+	margin: $mod-space-4 $mod-se-gut $mod-space-10;
+}
+
+// Build / Preview over the cards.
 .modula-gallery-takeover__hover-builder-mode-nav {
 	flex-shrink: 0;
 	box-sizing: border-box;
 	margin: 0 0 $mod-space-12;
-	padding-inline: $mod-space-16;
+	padding-inline: $mod-se-gut;
 	width: 100%;
-
-	&.modula-gallery-takeover__hover-builder-mode-nav--canvas {
-		margin-top: $mod-space-4;
-		margin-bottom: $mod-space-8;
-	}
-}
-
-.modula-gallery-takeover__hover-builder-canvas-hint {
-	box-sizing: border-box;
-	margin: $mod-space-4 0 $mod-space-16;
-	padding-inline: $mod-space-16;
-	font-size: 12px;
-	line-height: 1.45;
-	color: var(--mod-se-ink-3, var(--mod-se-aux-ink-muted, #{$mod-takeover-text-muted}));
-}
-
-.modula-gallery-takeover__hover-builder-presets {
-	display: flex;
-	flex-direction: column;
-	gap: $mod-space-4;
-	min-height: 0;
-	flex: 1 1 auto;
-	overflow-x: hidden;
-	overflow-y: auto;
-}
-
-.modula-gallery-takeover__hover-builder-preset-btn {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	gap: $mod-space-4;
-	width: 100%;
-	box-sizing: border-box;
-	margin: 0;
-	padding: $mod-space-12 $mod-space-8;
-	border-radius: 0;
-	border: none;
-	background: transparent;
-	color: var(--mod-se-ink, var(--mod-se-aux-ink, #{$mod-takeover-text-strong}));
-	text-align: left;
-	cursor: pointer;
-	transition: background var(--mod-se-duration-fast, 0.12s) ease;
-
-	&:hover:not(:disabled):not(.is-active) {
-		background: var(--mod-se-chrome-2);
-	}
-
-	&.is-active {
-		background: var(--mod-se-accent-soft);
-		box-shadow: none;
-
-		.modula-gallery-takeover__hover-builder-preset-label {
-			color: var(--mod-se-accent-ink);
-			font-weight: 600;
-		}
-
-		.modula-gallery-takeover__hover-builder-preset-description {
-			color: color-mix(in srgb,
-					var(--mod-se-accent-ink) 72%,
-					transparent);
-		}
-	}
-
-	&.is-locked,
-	&:disabled {
-		cursor: not-allowed;
-		opacity: 0.45;
-		background: transparent;
-		box-shadow: none;
-	}
-
-	&.is-locked:hover,
-	&:disabled:hover {
-		background: transparent;
-	}
-
-	&:focus {
-		outline: none;
-	}
-
-	&:focus-visible {
-		box-shadow: 0 0 0 3px var(--mod-se-accent-soft);
-	}
-}
-
-.modula-gallery-takeover__hover-builder-preset-label-row {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: $mod-space-8;
-	width: 100%;
-}
-
-.modula-gallery-takeover__hover-builder-preset-label {
-	font-size: 13px;
-	font-weight: 600;
-	line-height: 1.35;
-	color: var(--mod-se-ink, var(--mod-se-aux-ink, #{$mod-takeover-text-strong}));
-}
-
-.modula-gallery-takeover__hover-builder-inline-badge--pro {
-	background: var(--mod-se-accent-soft);
-	border-color: color-mix(in srgb, var(--mod-se-accent) 40%, transparent);
-	color: var(--mod-se-accent-ink);
-}
-
-.modula-gallery-takeover__hover-builder-preset-description {
-	font-size: 12px;
-	line-height: 1.4;
-	color: var(--mod-se-ink-3, var(--mod-se-aux-ink-muted, #{$mod-takeover-text-muted}));
 }
 
 .modula-hover-builder-card-wrap {
@@ -419,6 +184,13 @@
 	.modula-hover-v2.modula-hover-card--lift.modula-item {
 		transform: none !important;
 		box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35) !important;
+		transition: none !important;
+	}
+
+	.modula-hover-v2.modula-hover-card--tilt.modula-item,
+	.modula-hover-v2.modula-hover-card--spotlight.modula-item,
+	.modula-hover-v2.modula-hover-card--pan .modula-hover-builder-card__media img {
+		transform: none !important;
 		transition: none !important;
 	}
 
@@ -832,6 +604,45 @@
 		transform: scale(1);
 	}
 
+	/*
+	 * Tilt, Spotlight and Pan as on the visitor tile (_hover-v2.scss); the card
+	 * follows the pointer through useHoverPointer. One card has no others to dim.
+	 */
+	.modula-item.modula-hover-v2.modula-hover-card--tilt {
+		transition:
+			transform var(--modula-hover-card-enter-duration, 250ms) ease-out,
+			box-shadow var(--modula-hover-card-enter-duration, 250ms) ease;
+	}
+
+	.modula-item.modula-hover-v2.modula-hover-card--tilt:is(:hover, .is-forced-hover) {
+		transform:
+			perspective(700px)
+			rotateY(calc(var(--modula-hover-pointer-x, 0) * 20deg))
+			rotateX(calc(var(--modula-hover-pointer-y, 0) * -20deg))
+			scale(1.03);
+		box-shadow: 0 18px 40px rgba(17, 21, 24, 0.28);
+	}
+
+	.modula-item.modula-hover-v2.modula-hover-card--spotlight {
+		transition: transform var(--modula-hover-card-enter-duration, 300ms) ease;
+	}
+
+	.modula-item.modula-hover-v2.modula-hover-card--spotlight:is(:hover, .is-forced-hover) {
+		transform: scale(1.03);
+	}
+
+	.modula-item.modula-hover-v2.modula-hover-card--pan .modula-hover-builder-card__media img {
+		transition: transform var(--modula-hover-card-enter-duration, 500ms) cubic-bezier(0.2, 0.8, 0.2, 1);
+		transform: none;
+	}
+
+	.modula-item.modula-hover-v2.modula-hover-card--pan:is(:hover, .is-forced-hover) .modula-hover-builder-card__media img {
+		transform:
+			translateX(calc(var(--modula-hover-pointer-x, 0) * -14px))
+			translateY(calc(var(--modula-hover-pointer-y, 0) * -14px))
+			scale(1.1);
+	}
+
 	.modula-item.modula-hover-v2.modula-hover-card--zoom:is(:hover, .is-forced-hover) .modula-hover-builder-card__media img,
 	.modula-item.modula-hover-v2.modula-hover-card--zoom:focus-within:has(:focus-visible) .modula-hover-builder-card__media img {
 		transform: scale(1.06);
@@ -1195,85 +1006,5 @@
 		opacity: 0;
 		transform: scale(0.94);
 		transition-delay: 0ms;
-	}
-}
-
-.modula-settings-editor__app[data-appearance='dark'] {
-	.modula-gallery-takeover__reorder-panel--hover-builder {
-		color-scheme: dark;
-
-		@include modula-takeover-range-control-appearance;
-
-		.components-base-control__label,
-		.components-input-control__label,
-		.components-toggle-control__label {
-			color: var(--mod-se-aux-ink, #{$mod-takeover-ink-on-dark-strong});
-		}
-
-		.components-base-control__help,
-		.components-form-toggle__help {
-			color: var(--mod-se-aux-ink-muted, #{$mod-takeover-ink-on-dark-muted});
-		}
-
-		.components-range-control__wrapper {
-			color: var(--mod-se-aux-ink-muted, #{$mod-takeover-ink-on-dark-muted});
-		}
-
-		.components-select-control {
-			color: rgba(255, 255, 255, 0.88) !important;
-		}
-
-		.components-select-control .components-input-control__suffix {
-			color: rgba(255, 255, 255, 0.88) !important;
-		}
-
-		.components-select-control .components-input-control__suffix svg path {
-			fill: rgba(255, 255, 255, 0.78) !important;
-		}
-
-		.components-input-control__suffix svg path,
-		.components-input-control__prefix svg path {
-			fill: rgba(255, 255, 255, 0.78) !important;
-		}
-
-		.components-range-control__number input,
-		.components-range-control__number .components-input-control__input {
-			color: rgba(255, 255, 255, 0.92) !important;
-			background: transparent !important;
-			border: none !important;
-		}
-
-		.modula-gallery-takeover__hover-builder-link-fields {
-			.components-checkbox-control__label {
-				color: rgba(255, 255, 255, 0.88);
-			}
-
-			.components-checkbox-control__input[type='checkbox'] {
-				background: var(--mod-se-control-bg, #1e1e1e);
-				border-color: var(--mod-se-control-border, #50575e);
-				box-shadow: none;
-			}
-
-			.components-checkbox-control__input[type='checkbox']:checked {
-				background: var(--wp-admin-theme-color, #2271b1);
-				border-color: var(--wp-admin-theme-color, #2271b1);
-			}
-
-			.components-checkbox-control__input[type='checkbox']:focus {
-				border-color: var(--wp-admin-theme-color, #2271b1);
-				box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #2271b1);
-				outline: none;
-			}
-		}
-
-		.modula-gallery-takeover__hover-builder-link-overlay-actions {
-			.components-button.is-tertiary {
-				color: rgba(255, 255, 255, 0.78);
-
-				&:hover:not(:disabled) {
-					color: rgba(255, 255, 255, 0.95);
-				}
-			}
-		}
 	}
 }

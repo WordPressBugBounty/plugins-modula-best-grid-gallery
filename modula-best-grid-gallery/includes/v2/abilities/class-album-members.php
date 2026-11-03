@@ -44,6 +44,10 @@ final class Album_Members {
 			'type'    => 'integer',
 			'minimum' => 1,
 		);
+		$filters     = array(
+			'type'        => 'string',
+			'description' => 'Album filters the member carries, stored as a gallery image\'s: comma-separated names; a comma inside a name is written &#44;.',
+		);
 		$member      = Contract::object(
 			array(
 				'id'       => $id,
@@ -71,6 +75,7 @@ final class Album_Members {
 					'minimum' => 0,
 					'maximum' => 100000,
 				),
+				'filters'  => $filters,
 			),
 			array( 'id', 'itemType' )
 		);
@@ -82,6 +87,7 @@ final class Album_Members {
 				'height'   => array( 'type' => array( 'integer', 'string' ) ),
 				'gridX'    => array( 'type' => array( 'integer', 'string' ) ),
 				'gridY'    => array( 'type' => array( 'integer', 'string' ) ),
+				'filters'  => $filters,
 			),
 			array( 'id', 'itemType' )
 		);

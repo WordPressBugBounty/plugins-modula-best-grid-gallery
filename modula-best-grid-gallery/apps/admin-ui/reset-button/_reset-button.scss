@@ -1,0 +1,45 @@
+@use '../styles/mixins';
+
+.modula-admin-reset {
+	@include mixins.button-reset;
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	color: var(--modula-admin-ink);
+
+	&:focus-visible {
+		@include mixins.focus-ring;
+		outline-offset: 0;
+	}
+
+	&:disabled {
+		opacity: var(--modula-admin-disabled-opacity);
+		cursor: default;
+	}
+}
+
+.modula-admin-reset__dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: currentcolor;
+}
+
+.modula-admin-reset__cross {
+	display: none;
+}
+
+// The cross says what a click does; the dot only marks the change.
+.modula-admin-reset:is(:hover, :focus-visible):not(:disabled) {
+	.modula-admin-reset__dot {
+		display: none;
+	}
+
+	.modula-admin-reset__cross {
+		display: flex;
+	}
+}

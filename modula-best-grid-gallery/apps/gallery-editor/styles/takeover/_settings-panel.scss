@@ -1,15 +1,20 @@
 @use '../variables' as *;
+@use 'panel-mixins' as *;
+@use '../../../editor-shell/styles/settings-panel-rows' as *;
+@use '../../../editor-shell/styles/motion-picker' as *;
 
-// Redesign settings panel column (300) — section headings + drill / exit rows.
+// Redesign settings panel column (400) — hub rows, then "More settings"
+// accordion sections (admin-ui Accordion).
 .modula-settings-panel {
 	display: flex;
 	flex-direction: column;
 	flex: 1;
 	min-height: 0;
 	height: 100%;
-	/* Panel chrome-2: header + inter-section gaps read as grey, not empty white rows. */
-	background: var(--mod-se-chrome-2);
-	color: var(--mod-se-ink);
+	/* The panel sits in the sidebar's admin-ui scope (canvas: a white panel). */
+	--modula-admin-control-height: 32px;
+	background: var(--modula-admin-surface);
+	color: var(--modula-admin-ink);
 
 	/*
 	 * Compact tip cluster (option B): label text wraps; ⓘ stays first-line,
@@ -25,56 +30,68 @@
 		flex: 1 1 auto;
 	}
 
+	/* The ⓘ follows the label's text; the row's free space stays after it. */
 	.modula-settings-editor__field-label-with-tip>.modula-settings-editor__field-label {
-		flex: 1 1 auto;
+		flex: 0 1 auto;
 		min-width: 0;
 	}
 
-	.modula-settings-editor__field-label-with-tip>.modula-settings-editor__field-path-tip {
+	// The tooltip's anchor wraps the ⓘ (inside the admin-ui scope's
+	// `display: contents` root).
+	.modula-settings-editor__field-label-with-tip .modula-admin-tooltip-anchor {
 		flex: 0 0 auto;
 		align-self: flex-start;
 	}
 
-	/* Compact density: field labels step down from the 14px settings-row default. */
-	.modula-settings-editor__field-label,
-	.modula-settings-editor__inline-field-label,
-	.modula-ui-settings-row__label {
-		overflow-wrap: anywhere;
-		hyphens: auto;
-		font-size: 13px;
-		font-weight: 500;
-		line-height: 1.4;
+	/*
+	 * A column row has no control beside its label, so the reset dot follows
+	 * the label and its ⓘ instead of the row's far edge. Other rows keep it
+	 * at the end of the label, beside their control.
+	 */
+	.modula-settings-editor__field-row--layout-column,
+	.modula-settings-panel__field-row.is-column {
+
+		.modula-settings-editor__field-label-with-tip {
+			width: auto;
+			flex: 0 1 auto;
+		}
+
+		.modula-settings-editor__field-reset {
+			margin-left: 0;
+		}
 	}
 
 	/*
-	 * Reserve the switch/end column: base SettingsRow uses a 32px end track,
-	 * but status toggles are wider — use auto so labels cannot paint over them.
-	 * Keep align-items: center here so DirtyMark (top: 50%) stays on the label
-	 * midline for drill rows; toggles opt into start below.
+	 * Row labels, per-device row titles included: the panel's 14px text in
+	 * regular weight (canvas `lblStyle`). Row layouts below set no label type.
 	 */
-	.modula-ui-settings-row {
-		grid-template-columns: minmax(0, 1fr) auto;
+	.modula-settings-editor__field-label,
+	.modula-settings-editor__inline-field-label,
+	.modula-settings-editor__composite-stack-heading,
+	.modula-settings-panel__toggle-upsell-label {
+		overflow-wrap: anywhere;
+		hyphens: auto;
+		font-size: var(--modula-admin-text-control);
+		font-weight: 400;
+		line-height: 1.35;
 	}
 
-	.modula-ui-settings-row__copy {
-		flex-wrap: nowrap;
-		min-width: 0;
+	// The locked toggle's own label.
+	.modula-settings-panel__toggle-upsell-label {
+		margin: 0;
+		color: var(--modula-admin-ink);
 	}
+}
 
-	.modula-ui-settings-row__label-cluster {
-		flex: 1 1 auto;
-		min-width: 0;
-		width: 100%;
-	}
+/*
+ * 24px gutter (canvas): the scroll keeps 8px each side and rows, headings and
+ * boxes add their own 16px, so row hover and highlight backgrounds stop 8px
+ * short of the panel edge.
+ */
+$settings-panel-scroll-inset: $mod-space-8;
 
-	.modula-ui-settings-row__label {
-		min-width: 0;
-		max-width: 100%;
-	}
-
-	.modula-ui-settings-row__end {
-		flex-shrink: 0;
-	}
+.modula-settings-panel > .modula-settings-panel__header {
+	padding-inline: $settings-panel-scroll-inset + $mod-se-gut;
 }
 
 .modula-settings-panel__scroll {
@@ -82,7 +99,7 @@
 	min-height: 0;
 	overflow-y: auto;
 	scrollbar-width: thin;
-	padding-bottom: $mod-space-28;
+	padding: 0 $settings-panel-scroll-inset $mod-space-32;
 }
 
 .modula-settings-editor__composite-stack-heading-row {
@@ -93,103 +110,107 @@
 	min-width: 0;
 }
 
+// The first row starts right under the search's 14px bottom padding (canvas).
 .modula-settings-panel__body {
 	display: flex;
 	flex-direction: column;
-	padding: 0;
 }
 
-.modula-settings-panel__body--nested {
-	padding: 0;
-	/*
-	 * Same chrome-2 stage as the hub panel: gaps above section strips read as
-	 * grey, not white “dungi” between white rows and chrome headings.
-	 */
-	background: var(--mod-se-chrome-2);
+// A labelled hub submenu (Interact › Share): a heading inside the hub.
+.modula-settings-panel__hub-heading {
+	margin: 0;
+	padding: 22px $mod-se-gut $mod-space-6;
+	color: var(--modula-admin-ink);
+	font-size: 16px;
+	font-weight: 600;
+	// The canvas's 1.3, rounded to whole pixels.
+	line-height: 20px;
 }
 
-.modula-settings-panel__nested {
+// A section inside the hub or inside another section: its own bordered box.
+.modula-settings-panel__box {
+	margin: $mod-space-6 $mod-se-gut $mod-space-12;
+}
+
+// A headless box (dependents that only repeat their toggle's name): the
+// accordion's frame and panel padding, without a header.
+.modula-settings-panel__dependents {
 	display: flex;
 	flex-direction: column;
+	padding: $mod-space-6 0 $mod-space-10;
+	border: 1px solid var(--modula-admin-border);
+	border-radius: var(--modula-admin-radius-lg);
+	background: var(--modula-admin-surface);
+}
+
+.modula-settings-panel__more-title {
 	margin: 0;
-	padding: 0;
-
-	.modula-settings-panel__section-body {
-		.modula-settings-editor__proofing-lock-placeholder {
-			box-sizing: border-box;
-			margin: 0;
-			padding: $mod-space-16 $mod-se-gut $mod-space-16;
-		}
-	}
-
-	.modula-settings-editor__proofing-lock-placeholder-btn {
-		width: 100%;
-		justify-content: center;
-	}
-
-	.modula-settings-editor__proofing-lock-hint {
-		margin: $mod-space-8 0 0;
-		font-size: 12px;
-		line-height: 1.45;
-		color: var(--mod-se-ink-3, var(--mod-se-sidebar-settings-ink-muted, #{$mod-takeover-text-muted}));
-	}
+	padding: $mod-space-24 $mod-se-gut $mod-space-8;
+	color: var(--modula-admin-ink);
+	font-size: 17px;
+	font-weight: 500;
+	line-height: 1;
 }
 
-.modula-settings-panel__nested-upsell {
+.modula-settings-panel__more-sections {
+	margin: 0 $mod-se-gut $mod-space-16;
+}
+
+/*
+ * Section panels hold full-width rows that bring their own 16px padding, so
+ * the accordion panel adds only the canvas's 6/10px above and below.
+ */
+.modula-settings-panel .modula-admin-accordion__panel {
+	gap: 0;
+	padding: $mod-space-6 0 $mod-space-10;
+}
+
+.modula-settings-panel__section-upsell {
 	box-sizing: border-box;
-	padding: $mod-space-16 $mod-se-gut;
-	border-bottom: 1px solid var(--mod-se-line-soft);
-	background: var(--mod-se-surface);
+	padding: $mod-space-10 $mod-se-gut;
 }
 
-.modula-settings-panel__nested-fields {
+// A hub toggle row (`.modula-settings-panel__field-row`, below): the 44px
+// hit target overhangs it, so the row stays 52px with the 22px track
+// centred, as in the schema rows' toggles. Kept ahead of those rules, which
+// select their toggles more specifically.
+.modula-settings-panel__field-row .modula-admin-toggle {
+	margin-block: -11px;
+}
+
+/*
+ * Schema rows in the hub and in sections sit on the panel or box surface
+ * without dividers (canvas), with their own 16px side padding.
+ */
+.modula-settings-panel__hub,
+.modula-settings-panel__section-fields {
 	display: flex;
 	flex-direction: column;
 	gap: 0;
-	/*
-	 * No top/side padding on the stage — section strips are full-bleed chrome.
-	 * Field rows paint their own surface + horizontal gut (like hub section-body).
-	 */
-	padding: 0 0 $mod-space-20;
+	padding: 0;
 	background: transparent;
-
-	/* Nested panels that start with a field (not a section strip) need top air. */
-	>.modula-settings-editor__field-row:first-child:not(.modula-settings-editor__field-row--section-heading) {
-		margin-top: $mod-space-12;
-	}
-
-	/*
-	 * Content rows = white section-body. Headings stay chrome-2 on the stage so
-	 * inter-section margin is grey (hub rhythm), never a white stripe.
-	 */
-	>.modula-settings-editor__field-row:not(.modula-settings-editor__field-row--section-heading) {
-		background: var(--mod-se-surface);
-	}
 
 	.modula-settings-editor__field-row--disabled-when {
 		opacity: 0.45;
 		pointer-events: none;
 	}
 
-	/* Mockup section strips (What shows / Placement / …) — full-bleed chrome. */
+	/*
+	 * Schema headings inside a section (What they can take, Placement, …): a
+	 * quiet label over the rows that follow. The canvas drops them; they stay
+	 * because they group long sections.
+	 */
 	.modula-settings-editor__field-row--section-heading {
 		box-sizing: border-box;
 		grid-template-columns: 1fr;
 		align-items: center;
-		margin-left: 0;
-		margin-right: 0;
-		/* Hub `.modula-settings-panel__section + &` gap — grey on chrome-2 stage. */
-		margin-top: $mod-space-20;
-		padding: $mod-space-8 $mod-se-gut;
+		margin: 0;
+		padding: $mod-space-16 $mod-se-gut $mod-space-4;
 		border-bottom: none;
-		background: var(--mod-se-chrome-2);
+		background: transparent;
 
-		/*
-		 * Same 28px “above strip” as hub `.modula-settings-panel__section:first-child`
-		 * — grey on the chrome-2 nested stage (not a white dungă).
-		 */
 		&:first-child {
-			margin-top: $mod-space-20;
+			padding-top: $mod-space-6;
 		}
 
 		.modula-settings-editor__section-heading-label {
@@ -197,32 +218,22 @@
 			font-weight: 600;
 			letter-spacing: 0.1em;
 			text-transform: uppercase;
-			color: var(--mod-se-ink-3);
+			color: var(--modula-admin-ink-muted);
 		}
 	}
 
-	/* Soft divider on the row above a strip doubles as a white hairline — drop it. */
-	.modula-settings-editor__field-row:has(+ .modula-settings-editor__field-row--section-heading) {
-		border-bottom: none;
-	}
-
-	/* Stacked label → control → help (override metabox 2-col grid). */
-	.modula-settings-editor__field-row--stacked:not(.modula-settings-editor__field-row--toggle):not(.modula-settings-editor__field-row--toggle-nested):not(.modula-settings-editor__field-row--section-heading) {
+	/*
+	 * Rows follow `fieldRowLayout` (the `--layout-*` class). A column puts
+	 * the label above the control (overrides the metabox 2-col grid).
+	 */
+	.modula-settings-editor__field-row--layout-column:not(.modula-settings-editor__field-row--toggle):not(.modula-settings-editor__field-row--toggle-nested) {
 		grid-template-columns: 1fr;
 		grid-template-rows: auto;
 		gap: $mod-space-8;
 		align-items: stretch;
 		/* Match hub row rhythm — was 20/16 and read as “labartat”. */
 		padding: $mod-space-12 $mod-se-gut;
-		border-bottom: 1px solid var(--mod-se-line-soft);
-
-		&:first-child {
-			padding-top: $mod-space-12;
-		}
-
-		&:last-child {
-			border-bottom: none;
-		}
+		border-bottom: none;
 
 		.modula-settings-editor__field-label-col {
 			width: 100%;
@@ -239,16 +250,13 @@
 		}
 
 		.modula-settings-editor__field-label {
-			font-size: 13px;
-			font-weight: 500;
-			line-height: 1.4;
-			color: var(--mod-se-ink);
+			color: var(--modula-admin-ink);
 		}
 	}
 
 	/*
-	 * Toggle: label left, switch right — same display:contents bridge pattern as
-	 * sidebar-settings-layout (redesign panel is not under that scope).
+	 * Toggle: label left, switch right — the bridge steps aside
+	 * (display: contents) so its children join the row grid.
 	 */
 	.modula-settings-editor__field-toggle-grid-bridge {
 		display: contents;
@@ -260,27 +268,25 @@
 		grid-template-rows: auto;
 		column-gap: $mod-space-16;
 		row-gap: 0;
-		align-items: start;
-		/* Match hub `.modula-ui-settings-row` — 52px / 12×20, not the airy 20/16 stack. */
+		/* The canvas's 52px row (`HE_ROW`): label and switch centred in it. */
+		align-items: center;
 		box-sizing: border-box;
 		min-height: 52px;
-		padding: $mod-space-12 $mod-se-gut;
-		border-bottom: 1px solid var(--mod-se-line-soft);
+		padding: 0 $mod-se-gut;
+		border-bottom: none;
 
-		&:has(.modula-ui-switch__help),
+		// Help or a foot under the label: both lines start at the top.
+		&:has(.modula-settings-editor__field-help),
 		&:has(.modula-settings-editor__field-toggle-foot) {
 			grid-template-rows: auto auto;
 			row-gap: $mod-space-8;
-		}
-
-		&:last-child {
-			border-bottom: none;
+			align-items: start;
+			padding-block: $mod-space-12;
 		}
 
 		>.modula-settings-editor__field-label-col {
 			grid-column: 1;
 			grid-row: 1;
-			align-self: start;
 			min-width: 0;
 			width: auto;
 			max-width: none;
@@ -292,19 +298,20 @@
 		 */
 		.modula-settings-editor__field-control-col--toggle-inline,
 		.modula-settings-editor__field-control-col--toggle-inline>[id^='modula-field-'],
-		.modula-settings-editor__toggle-end,
-		.modula-ui-switch {
+		.modula-settings-editor__toggle-end {
 			display: contents;
 		}
 
-		.modula-ui-switch__control-wrap {
+		// The 44px hit target overhangs the row so the row places the 22px
+		// track, as it places the label.
+		.modula-admin-toggle {
 			grid-column: 2;
 			grid-row: 1;
 			justify-self: end;
-			align-self: start;
+			margin-block: -11px;
 		}
 
-		.modula-ui-switch__help {
+		.modula-settings-editor__field-help {
 			grid-column: 1 / -1;
 			grid-row: 2;
 			margin: 0;
@@ -320,21 +327,14 @@
 		}
 
 		.modula-settings-editor__field-label {
-			font-size: 13px;
-			font-weight: 500;
-			line-height: 1.4;
-			color: var(--mod-se-ink);
+			color: var(--modula-admin-ink);
 		}
 	}
 
 	.modula-settings-editor__field-row--composite,
 	.modula-settings-editor__field-row--device-tabs {
 		padding: $mod-space-12 $mod-se-gut;
-		border-bottom: 1px solid var(--mod-se-line-soft);
-
-		&:last-child {
-			border-bottom: none;
-		}
+		border-bottom: none;
 	}
 
 	/*
@@ -352,18 +352,23 @@
 	}
 
 	.modula-settings-editor__field-row--composite-divider-before {
-		border-top-color: var(--mod-se-line-soft);
+		border-top-color: var(--modula-admin-border-divider);
 	}
 
-	/* Color swatches: label | chip — same 52px row as hub toggles. */
-	.modula-settings-editor__field-row--stacked:has(.modula-settings-editor__color-picker--swatch):not(.modula-settings-editor__field-row--toggle):not(.modula-settings-editor__field-row--toggle-nested) {
+	/*
+	 * A row: label left, control right, on one 52px line (select, colour,
+	 * text, position). Selects are 150–190px wide, text boxes 150px (canvas);
+	 * a text box narrows before its label wraps (`text-row`, below).
+	 */
+	.modula-settings-editor__field-row--layout-row:not(.modula-settings-editor__field-row--toggle):not(.modula-settings-editor__field-row--toggle-nested) {
 		grid-template-columns: minmax(0, 1fr) auto;
 		align-items: center;
-		column-gap: $mod-space-16;
-		row-gap: 0;
+		column-gap: $mod-space-10;
+		row-gap: $mod-space-8;
 		box-sizing: border-box;
 		min-height: 52px;
-		padding: $mod-space-12 $mod-se-gut;
+		padding: $mod-space-10 $mod-se-gut;
+		border-bottom: none;
 
 		.modula-settings-editor__field-label-col {
 			grid-column: 1;
@@ -376,57 +381,158 @@
 		.modula-settings-editor__field-control-col {
 			grid-column: 2;
 			grid-row: 1;
-			width: auto;
 			justify-self: end;
+			width: auto;
 			min-width: 0;
 		}
 
-		/* Help under the chip must not collapse the label column. */
-		.modula-settings-editor__color-picker--swatch {
+		.modula-admin-field,
+		.modula-settings-editor__select-menu {
+			width: auto;
+			min-width: 150px;
+			max-width: 190px;
+		}
+
+		// The colour picker's hex box keeps its own width.
+		.modula-admin-text-input:not(.modula-admin-color__hex) {
+			width: 150px;
+		}
+
+		// The unit box ("100 %") is the canvas's 86px value box.
+		.modula-admin-field:has(> .modula-settings-editor__css-length) {
+			width: 86px;
+			min-width: 0;
+		}
+
+		// Gallery width's number box, then its px / % toggle on the same line.
+		.modula-settings-editor__css-length-toggle {
 			display: flex;
-			flex-direction: column;
-			align-items: flex-end;
-			gap: 0;
-		}
+			align-items: center;
+			gap: $mod-space-8;
 
-		.modula-settings-editor__color-picker-help {
-			display: none;
-		}
-	}
+			.modula-admin-text-input.modula-settings-editor__css-length {
+				width: 100%;
+			}
 
-	/* Position grid: label left | 3×3 matrix right (watermark Placement). */
-	.modula-settings-editor__field-row--stacked:has(.modula-settings-editor__position-grid):not(.modula-settings-editor__field-row--toggle):not(.modula-settings-editor__field-row--toggle-nested) {
-		grid-template-columns: minmax(0, 1fr) auto;
-		align-items: center;
-		column-gap: $mod-space-16;
-		row-gap: 0;
-		box-sizing: border-box;
-		min-height: 52px;
-		padding: $mod-space-12 $mod-se-gut;
-
-		.modula-settings-editor__field-label-col {
-			grid-column: 1;
-			grid-row: 1;
-			width: auto;
-			max-width: none;
-			min-width: 0;
-		}
-
-		.modula-settings-editor__field-control-col {
-			grid-column: 2;
-			grid-row: 1;
-			width: auto;
-			justify-self: end;
-			min-width: 0;
+			// Two short labels: 36px options in the 2px-inset track, so the
+			// number box and the toggle stay inside the 190px control column.
+			.modula-admin-segmented {
+				flex: none;
+				width: 76px;
+			}
 		}
 
 		.modula-settings-editor__position-grid {
 			align-items: flex-end;
 		}
 
-		.modula-settings-editor__field-help {
-			display: none;
+		@include open-color-joins-row(".modula-settings-editor__field-control-col");
+
+		.modula-admin-color.is-open > .modula-admin-color__button {
+			grid-column: 2;
+			grid-row: 1;
+			justify-self: end;
 		}
+
+		.modula-admin-color.is-open > .modula-admin-color__panel,
+		.modula-admin-color.is-open ~ * {
+			grid-column: 1 / -1;
+		}
+	}
+
+	/*
+	 * A slider: label, device switch and value box on one line, the slider
+	 * under them (canvas range and `dev` rows). The control's wrappers step
+	 * aside (`display: contents`) so its parts join the row's grid; anything
+	 * else in the control column (upsell, error) spans the row.
+	 */
+	.modula-settings-editor__field-row--layout-slider:not(.modula-settings-editor__field-row--device-tabs) {
+		grid-template-columns: minmax(0, 1fr) auto auto;
+		align-items: center;
+		column-gap: 0;
+		row-gap: $mod-space-8;
+		padding: $mod-space-12 $mod-se-gut;
+		border-bottom: none;
+
+		.modula-settings-editor__field-label-col {
+			grid-column: 1;
+			grid-row: 1;
+			width: auto;
+			min-width: 0;
+		}
+
+		.modula-settings-editor__field-control-col,
+		.modula-settings-editor__field-control-col > [id^="modula-field-"],
+		.modula-settings-editor__tuple3-device-tabs {
+			display: contents;
+		}
+
+		.modula-settings-editor__field-control-col > :not([id^="modula-field-"]) {
+			grid-column: 1 / -1;
+		}
+
+		.modula-settings-editor__device-switch {
+			grid-column: 2;
+			grid-row: 1;
+			margin: 0 0 0 $mod-space-10;
+		}
+
+		@include panel-slider-parts(3);
+
+		// Custom CSS: the selector chip on the label line, the code field
+		// and the AI button under it.
+		.modula-custom-css-field {
+			display: contents;
+		}
+
+		.modula-custom-css-field__scope {
+			grid-column: 3;
+			grid-row: 1;
+		}
+
+		.modula-custom-css-field__editor,
+		.modula-custom-css-field__toolbar,
+		.modula-custom-css-field .modula-settings-editor__field-help {
+			grid-column: 1 / -1;
+		}
+	}
+
+	// A per-device row: the title line (title, reset, device switch), the
+	// value box beside it and the slider under them.
+	.modula-settings-editor__field-row--device-tabs .modula-settings-editor__composite-with-heading-inner {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		row-gap: $mod-space-8;
+
+		> .modula-settings-editor__composite-stack-heading-row {
+			grid-column: 1;
+			grid-row: 1;
+		}
+
+		.modula-settings-editor__device-switch {
+			margin: 0 0 0 auto;
+		}
+
+		> .modula-settings-editor__field-row--control-only,
+		> .modula-settings-editor__field-row--control-only > .modula-settings-editor__field-control-col,
+		.modula-settings-editor__field-control-col > [id^="modula-field-"] {
+			display: contents;
+		}
+
+		.modula-settings-editor__field-control-col > :not([id^="modula-field-"]) {
+			grid-column: 1 / -1;
+		}
+
+		// A per-device number (Images per page) is typed in the value box.
+		.modula-admin-field {
+			grid-column: 2;
+			grid-row: 1;
+			width: 86px;
+			margin-left: $mod-space-10;
+		}
+
+		@include panel-slider-parts(2);
 	}
 
 	/* Color pair under a composite heading (Page button colors). */
@@ -486,55 +592,21 @@
 		padding: $mod-space-12 $mod-se-gut $mod-space-16;
 	}
 
+	/* A per-device row's title reads like any row label (canvas). */
 	.modula-settings-editor__composite-stack-heading {
-		color: var(--mod-se-ink);
+		color: var(--modula-admin-ink);
 	}
 
-	.modula-ui-tabs {
+	.modula-settings-editor__device-switch {
 		margin-bottom: $mod-space-4;
 	}
 
-	/*
-	 * Nested field chrome: height only on the control element — never on wrappers
-	 * that also hold help text (clips help onto the next row label).
-	 */
-	.modula-ui-text-input,
-	.modula-ui-select,
-	.modula-ui-slider,
-	.modula-settings-editor__tuple3-device-tabs {
-		height: auto;
-		min-height: 0;
-		max-height: none;
-		overflow: visible;
-	}
-
-	.modula-ui-slider__number,
-	.modula-ui-text-input__field,
-	.modula-ui-select__field {
-		min-height: 28px;
-		height: 28px;
-		border-color: var(--mod-se-line) !important;
-		background: var(--mod-se-surface) !important;
-		color: var(--mod-se-ink) !important;
-	}
-
-	.modula-settings-editor__tuple3-device-tabs {
-		.modula-ui-tabs {
-			margin-bottom: 0;
-		}
-	}
-
 	.modula-settings-editor__inline-field-label {
-		color: var(--mod-se-ink);
+		color: var(--modula-admin-ink);
 	}
-}
 
-.modula-settings-panel__nested-empty {
-	margin: 0;
-	padding: $mod-space-16 $mod-se-gut;
-	font-size: 13px;
-	line-height: 1.45;
-	color: var(--mod-se-ink-3);
+	@include dependent-row("modula-settings-editor");
+	@include text-row("modula-settings-editor");
 }
 
 .modula-settings-panel__section {
@@ -558,8 +630,13 @@
 	width: 100%;
 	margin: 0;
 	padding: $mod-space-8 $mod-se-gut;
-	background: var(--mod-se-chrome-2);
-	color: var(--mod-se-ink-3);
+	background: var(--modula-admin-surface-sunken);
+	color: var(--modula-admin-ink-muted);
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	line-height: 1.3;
+	text-transform: uppercase;
 }
 
 .modula-settings-panel__section-body {
@@ -567,14 +644,13 @@
 	flex-direction: column;
 	margin: 0;
 	padding: 0;
-	/* White (light) / raised surface (dark) for rows — contrasts with chrome-2 panel gaps. */
-	background: var(--mod-se-surface);
+	/* Rows sit on the admin-ui surface, like the rest of the panel. */
+	background: var(--modula-admin-surface);
 
 	/* Last row must not keep a divider — that reads as an empty row before the next section. */
 	> :last-child {
 		border-bottom: none;
 
-		.modula-ui-settings-row,
 		.modula-settings-panel__exit-row {
 			border-bottom: none;
 		}
@@ -586,226 +662,78 @@
 	padding: $mod-space-12 $mod-se-gut $mod-space-16;
 	font-size: 12px;
 	line-height: 1.45;
-	color: var(--mod-se-ink-3);
+	color: var(--modula-admin-ink-muted);
 }
 
-.modula-settings-panel__drill-row {
-	/* shared-ui SettingsRow; panel just scopes if needed */
-	padding-left: $mod-se-gut;
-	padding-right: $mod-se-gut;
-
-	/*
-	 * SettingsRow copy defaults to baseline — fine for text-only values, but a
-	 * color swatch in the Style summary sits above the label midline.
-	 */
-	.modula-ui-settings-row__copy {
-		align-items: center;
-	}
-
-	.modula-ui-settings-row__value {
-		display: inline-flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: flex-end;
-		gap: 0;
-		min-width: 0;
-	}
-}
-
-.modula-settings-panel__drill-summary {
-	display: inline-flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: flex-end;
-	flex-wrap: nowrap;
-	gap: 0;
-	min-width: 0;
-	max-width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.modula-settings-panel__drill-summary-swatch {
-	display: inline-block;
-	flex: 0 0 auto;
-	box-sizing: border-box;
-	width: $mod-space-20;
-	height: $mod-space-20;
-	margin-right: $mod-space-4;
-	border: 1px solid var(--mod-se-line);
-	border-radius: 0;
-	vertical-align: middle;
-}
-
-.modula-settings-panel__drill-summary-sep,
-.modula-settings-panel__drill-summary-text {
-	flex: 0 1 auto;
-	min-width: 0;
-	margin-left: $mod-space-2;
-}
-
-.modula-settings-panel__embedded {
+/*
+ * Hub field row (SettingsPanelFieldRow, the gallery type row), laid out by
+ * `fieldRowLayout` as the canvas draws it (`HE_ROW` / `HE_ROWCOL`): a row
+ * keeps the control right of the label on one 52px line; a column puts it
+ * under the label.
+ */
+.modula-settings-panel__field-row {
 	box-sizing: border-box;
 	display: flex;
-	flex-direction: column;
-	gap: $mod-space-8;
-	margin: 0;
-	padding: $mod-space-16 $mod-se-gut $mod-space-12;
-	border: none;
-	border-radius: 0;
-	background: transparent;
-}
+	flex-wrap: wrap;
+	align-items: center;
+	column-gap: $mod-space-10;
+	row-gap: $mod-space-8;
+	min-height: 52px;
+	padding: $mod-space-10 $mod-se-gut;
+	color: var(--modula-admin-ink);
 
-.modula-settings-panel__embedded-label {
-	font-size: 13px;
-	font-weight: 500;
-	line-height: 1.4;
-	color: var(--mod-se-ink);
-}
-
-.modula-settings-panel__embedded-help {
-	margin: 0;
-	font-size: 12px;
-	font-weight: 400;
-	line-height: 1.5;
-	color: var(--mod-se-ink-3);
-	max-width: 64ch;
-}
-
-.modula-settings-panel__embedded-control {
-	width: 100%;
-	min-width: 0;
-
-	.components-base-control,
-	.components-base-control__field {
-		margin-bottom: 0;
-	}
-
-	.modula-ui-select {
-		width: 100%;
-	}
-
-	.modula-ui-menu-select {
-		width: 100%;
-	}
-
-	.modula-ui-select__field {
-		width: 100%;
-		max-width: 100%;
-		height: $mod-space-34 !important;
-		min-height: $mod-space-34 !important;
-		line-height: #{$mod-space-34 - $mod-space-2} !important;
-		padding: 0 36px 0 12px !important;
-		font-size: 13px !important;
-		border-color: var(--mod-se-line) !important;
-		background: var(--mod-se-surface) !important;
-		color: var(--mod-se-ink) !important;
-	}
-
-	.modula-ui-select__caret {
-		border-color: var(--mod-se-ink-3);
-	}
-}
-
-.modula-settings-panel__toggle-row {
-	padding-left: $mod-se-gut;
-	padding-right: $mod-se-gut;
-	align-items: start;
-
-	/* First-line dirty: row is start-aligned, so 50% would sit below the label. */
-	.modula-ui-settings-row__dirty {
-		top: calc(#{$mod-space-12} + 0.7em);
-		margin-top: 0;
-		transform: translateY(-50%);
-	}
-
-	.modula-ui-settings-row__copy {
-		align-items: flex-start;
-	}
-
-	.modula-ui-settings-row__label-cluster {
-		align-items: flex-start;
+	&.is-column,
+	&.is-slider {
+		flex-direction: column;
+		align-items: stretch;
+		padding-block: $mod-space-12;
 	}
 
 	/* Beat `__app[data-appearance=dark] .field-label` (metabox secondary ink). */
 	.modula-settings-editor__app[data-appearance] & .modula-settings-editor__field-label {
 		color: inherit;
-		font-size: inherit;
-		font-weight: inherit;
-		line-height: inherit;
 	}
+}
 
-	.modula-ui-settings-row__end {
+.modula-settings-panel__field-label-line {
+	display: flex;
+	flex: 1 1 0;
+	align-items: center;
+	gap: $mod-space-4;
+	min-width: 0;
+}
+
+.modula-settings-panel__field-control {
+	flex: 0 1 auto;
+	min-width: 0;
+
+	// Canvas: selects 150–190px wide, beside the label.
+	.is-row > & .modula-admin-field,
+	.is-row > & .modula-settings-editor__select-menu {
 		width: auto;
-		min-width: 40px;
-		height: auto;
-		justify-content: flex-end;
-		gap: 0;
-		flex-shrink: 0;
-		align-self: start;
+		min-width: 150px;
+		max-width: 190px;
 	}
 
-	.modula-settings-panel__switch {
-		display: inline-flex;
-		flex-direction: row;
-		align-items: center;
+	.is-column > &,
+	.is-slider > & {
+		width: 100%;
 	}
+}
 
-	.modula-ui-switch.has-status .modula-ui-switch__control-wrap {
-		gap: $mod-space-8;
-	}
+.modula-settings-panel__field-row.is-row {
 
-	.modula-ui-switch__help {
-		display: none;
-	}
+	@include open-color-joins-row(".modula-settings-panel__field-control");
 
-	&.modula-settings-panel__toggle-row--has-help {
-		align-items: start;
-
-		.modula-ui-settings-row__end {
-			/* Keep On/Off + switch on the label row, not centered against help. */
-			margin-top: 2px;
-		}
-
-		.modula-ui-settings-row__help {
-			display: flex;
-			align-items: flex-start;
-			gap: $mod-space-8;
-			margin-top: $mod-space-2;
-			color: var(--mod-se-ink-3);
-
-			&::before {
-				content: 'i';
-				display: inline-flex;
-				align-items: center;
-				justify-content: center;
-				flex-shrink: 0;
-				box-sizing: border-box;
-				width: 14px;
-				height: 14px;
-				margin-top: 2px;
-				border: 1px solid currentColor;
-				border-radius: 50%;
-				font-size: 10px;
-				font-weight: 600;
-				font-style: italic;
-				line-height: 1;
-			}
-		}
+	.modula-admin-color.is-open > .modula-admin-color__panel,
+	.modula-admin-color.is-open ~ * {
+		flex-basis: 100%;
 	}
 }
 
 .modula-settings-panel__color-row {
 	padding-left: $mod-se-gut;
 	padding-right: $mod-se-gut;
-
-	.modula-ui-settings-row__end {
-		width: auto;
-		min-width: 0;
-		height: auto;
-		justify-content: flex-end;
-	}
 
 	.modula-settings-editor__color-swatch-btn--chip {
 		max-width: 100%;
@@ -815,18 +743,6 @@
 .modula-settings-panel__segmented-row {
 	padding-left: $mod-se-gut;
 	padding-right: $mod-se-gut;
-
-	.modula-ui-settings-row__end {
-		width: auto;
-		min-width: 0;
-		height: auto;
-		justify-content: flex-end;
-		flex: 1 1 auto;
-	}
-
-	.modula-ui-segmented {
-		max-width: 100%;
-	}
 }
 
 .modula-settings-panel__segmented-row--stacked {
@@ -835,25 +751,7 @@
 	align-items: stretch;
 	gap: $mod-space-8;
 	padding: $mod-space-12 $mod-se-gut;
-	border-bottom: 1px solid var(--mod-se-line);
-
-	.modula-ui-segmented {
-		width: 100%;
-	}
-}
-
-.modula-settings-panel__position-grid-row {
-	padding: $mod-space-12 $mod-se-gut;
-	border-bottom: 1px solid var(--mod-se-line);
-
-	.modula-settings-editor__position-grid {
-		width: 100%;
-		align-items: flex-start;
-	}
-
-	.modula-settings-editor__field-help {
-		display: none;
-	}
+	border-bottom: 1px solid var(--modula-admin-border);
 }
 
 .modula-settings-panel__segmented-row-label {
@@ -861,25 +759,12 @@
 	font-size: 13px;
 	font-weight: 500;
 	line-height: 1.35;
-	color: var(--mod-se-ink);
+	color: var(--modula-admin-ink);
 }
 
 .modula-settings-panel__select-row {
 	padding-left: $mod-se-gut;
 	padding-right: $mod-se-gut;
-
-	.modula-ui-settings-row__end {
-		width: auto;
-		min-width: 0;
-		max-width: 60%;
-		height: auto;
-		justify-content: flex-end;
-	}
-
-	.modula-ui-select {
-		width: 100%;
-		min-width: 140px;
-	}
 }
 
 .modula-settings-panel__select-row--stacked {
@@ -888,39 +773,20 @@
 	align-items: stretch;
 	gap: $mod-space-8;
 	padding: $mod-space-12 $mod-se-gut;
-	border-bottom: 1px solid var(--mod-se-line);
-
-	.modula-ui-menu-select {
-		width: 100%;
-	}
+	border-bottom: 1px solid var(--modula-admin-border);
 }
 
-.modula-settings-panel__hover-preset-block {
-
-	/* Prefer stacked field-row chrome (surface on chrome-2 stage); keep Customize under the Select. */
-	&.modula-settings-editor__field-row--stacked {
-		display: flex;
-		flex-direction: column;
-		align-items: stretch;
-		gap: $mod-space-8;
-	}
-
-	.modula-settings-panel__hover-preset-actions {
-		display: flex;
-		justify-content: flex-end;
-		margin: 0;
-		padding: 0;
-		border: none;
-	}
+// The hover preset row is a `--layout-row` select row; Customize takes the
+// line under it, ending under the select. Customize is hidden for now
+// (useHoverBuilderPanel); the rule stays for when it returns.
+.modula-settings-panel__hover-preset-actions {
+	grid-column: 1 / -1;
+	grid-row: 2;
+	justify-self: end;
 }
 
-.modula-settings-panel__select-row-label {
-	margin: 0;
-	font-size: 13px;
-	font-weight: 500;
-	line-height: 1.35;
-	color: var(--mod-se-ink);
-}
+// The Entrance menu and its replay button (editor-shell's Motion picker).
+@include motion-picker('modula-settings-editor');
 
 .modula-settings-editor__info-callout {
 	display: flex;
@@ -932,7 +798,7 @@
 	padding: $mod-space-12 $mod-se-gut $mod-space-16;
 	font-size: 12px;
 	line-height: 1.45;
-	color: var(--mod-se-ink-2);
+	color: var(--modula-admin-ink-muted);
 }
 
 .modula-settings-editor__info-callout-icon {
@@ -943,13 +809,13 @@
 	width: 16px;
 	height: 16px;
 	margin-top: 1px;
-	border: 1px solid var(--mod-se-ink-3);
+	border: 1px solid var(--modula-admin-ink-muted);
 	border-radius: 50%;
 	font-size: 11px;
 	font-weight: 600;
 	font-style: italic;
 	line-height: 1;
-	color: var(--mod-se-ink-3);
+	color: var(--modula-admin-ink-muted);
 }
 
 .modula-settings-editor__info-callout-text {
@@ -978,18 +844,18 @@
 	box-sizing: border-box;
 	margin: 0;
 	padding: $mod-space-4 $mod-space-8;
-	border: 1px solid var(--mod-se-line);
+	border: 1px solid var(--modula-admin-border);
 	border-radius: 0;
-	background: var(--mod-se-chrome-2);
-	color: var(--mod-se-ink-2);
+	background: var(--modula-admin-surface-sunken);
+	color: var(--modula-admin-ink-muted);
 	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 	font-size: 12px;
 	line-height: 1.35;
 	cursor: pointer;
 
 	&:hover:not(:disabled) {
-		background: var(--mod-se-surface);
-		color: var(--mod-se-ink);
+		background: var(--modula-admin-surface);
+		color: var(--modula-admin-ink);
 	}
 
 	&:disabled {
@@ -1001,15 +867,15 @@
 .modula-settings-editor__placeholder-pattern-preview {
 	box-sizing: border-box;
 	padding: $mod-space-8 $mod-space-12;
-	border: 1px solid var(--mod-se-line-soft);
-	background: var(--mod-se-chrome-2);
+	border: 1px solid var(--modula-admin-border-divider);
+	background: var(--modula-admin-surface-sunken);
 }
 
 .modula-settings-editor__placeholder-pattern-preview-name {
 	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 	font-size: 12px;
 	line-height: 1.4;
-	color: var(--mod-se-accent-ink, var(--mod-se-ink-2));
+	color: var(--modula-admin-ink);
 	word-break: break-all;
 }
 
@@ -1017,7 +883,7 @@
 	margin: 0;
 	font-size: 12px;
 	line-height: 1.45;
-	color: var(--mod-se-ink-3);
+	color: var(--modula-admin-ink-muted);
 }
 
 .modula-settings-editor__field-row--info-callout {
@@ -1029,7 +895,7 @@
 .modula-settings-editor__field-row--help-only {
 	grid-template-columns: 1fr;
 	padding: $mod-space-12 $mod-se-gut $mod-space-16;
-	border-bottom: 1px solid var(--mod-se-line-soft);
+	border-bottom: 1px solid var(--modula-admin-border-divider);
 }
 
 .modula-settings-editor__field-row--exif-result,
@@ -1040,13 +906,11 @@
 	border-bottom: 0;
 }
 
-.modula-settings-panel__section-body,
-.modula-settings-panel__nested-fields {
-	.modula-settings-editor__gallery-defaults-shell {
-		box-sizing: border-box;
-		margin: 0;
-		padding: $mod-space-16 $mod-se-gut;
-	}
+.modula-settings-panel__hub .modula-settings-editor__gallery-defaults-shell,
+.modula-settings-panel__section-fields .modula-settings-editor__gallery-defaults-shell {
+	box-sizing: border-box;
+	margin: 0;
+	padding: $mod-space-16 $mod-se-gut;
 }
 
 .modula-settings-editor__field-row--exif-result,
@@ -1066,13 +930,13 @@
 	font-size: 13px;
 	font-weight: 600;
 	line-height: 1.4;
-	color: var(--mod-se-ink);
+	color: var(--modula-admin-ink);
 }
 
 .modula-settings-editor__settings-preview-box {
 	box-sizing: border-box;
 	padding: $mod-space-12 $mod-space-14;
-	border: 1px solid var(--mod-se-line, rgba(148, 163, 184, 0.28));
+	border: 1px solid var(--modula-admin-border);
 	border-radius: 6px;
 	background: transparent;
 }
@@ -1081,7 +945,7 @@
 	margin: 0;
 	font-size: 13px;
 	line-height: 1.55;
-	color: var(--mod-se-ink-2);
+	color: var(--modula-admin-ink-muted);
 	word-break: break-word;
 }
 
@@ -1089,7 +953,7 @@
 	margin: 0;
 	font-size: 12px;
 	line-height: 1.45;
-	color: var(--mod-se-ink-3);
+	color: var(--modula-admin-ink-muted);
 }
 
 .modula-settings-editor__deeplink-url-preview-url {
@@ -1100,11 +964,11 @@
 }
 
 .modula-settings-editor__deeplink-url-preview-base {
-	color: var(--mod-se-ink-3);
+	color: var(--modula-admin-ink-muted);
 }
 
 .modula-settings-editor__deeplink-url-preview-hash {
-	color: var(--mod-se-accent-ink, var(--mod-se-accent, #2271b1));
+	color: var(--modula-admin-ink);
 	font-weight: 600;
 }
 
@@ -1113,14 +977,14 @@
 	font-size: 13px;
 	font-weight: 500;
 	line-height: 1.4;
-	color: var(--mod-se-ink);
+	color: var(--modula-admin-ink);
 }
 
 .modula-settings-editor__instagram-account-hint {
 	margin: 0 0 $mod-space-10;
 	font-size: 12px;
 	line-height: 1.45;
-	color: var(--mod-se-ink-3);
+	color: var(--modula-admin-ink-muted);
 }
 
 .modula-settings-panel__toggle-upsell {
@@ -1129,12 +993,181 @@
 	gap: $mod-space-8;
 	box-sizing: border-box;
 	padding: $mod-space-12 $mod-se-gut;
-	border-bottom: 1px solid var(--mod-se-line-soft);
+	border-bottom: 1px solid var(--modula-admin-border-divider);
 }
 
-.modula-settings-panel__toggle-upsell-label {
-	font-size: 13px;
+// Lite: a locked setting is its muted label and the dark PRO pill (canvas).
+.modula-settings-panel__locked-row {
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	gap: $mod-space-10;
+	min-height: 52px;
+	padding: $mod-space-10 $mod-se-gut;
+}
+
+// A locked single dependent row keeps the ↳ row's inset; the row's gap
+// already spaces the ↳ from the label.
+.modula-settings-panel__dependent-row .modula-settings-panel__locked-row {
+	padding-inline-start: $mod-space-28;
+
+	.modula-settings-panel__dependent-icon {
+		margin-inline-end: 0;
+	}
+}
+
+.modula-settings-panel__locked-row-label {
+	flex-grow: 1;
+	line-height: 1.35;
+	color: var(--modula-admin-ink-muted);
+}
+
+// Lite upsell cards: a locked section's mini card, a locked tab's card.
+.modula-lite-upsell {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	box-sizing: border-box;
+	padding: $mod-se-gut;
+
+	&.is-tab {
+		gap: 16px;
+		margin: $mod-space-8 $mod-se-gut 0;
+		padding: 24px;
+		border: 1px solid var(--modula-admin-border);
+		border-radius: var(--modula-admin-radius-lg);
+		background: var(--modula-admin-surface);
+	}
+
+	// A schema upsell (EditorUpsellBlurb): its row or section wrapper pads it.
+	&.is-blurb {
+		gap: 10px;
+		padding: 0;
+	}
+}
+
+.modula-lite-upsell__badge {
+	display: flex;
+}
+
+.modula-lite-upsell__heading {
+	margin: 0;
+	font-size: var(--modula-admin-text-group-title);
 	font-weight: 500;
+	line-height: 1.35;
+	color: var(--modula-admin-ink);
+}
+
+.modula-lite-upsell__title {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 500;
+	line-height: 1.3;
+	color: var(--modula-admin-ink);
+}
+
+.modula-lite-upsell__message {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.5;
+	white-space: pre-line;
+	color: var(--modula-admin-ink-soft);
+
+	.is-tab & {
+		font-size: 14.5px;
+	}
+}
+
+.modula-lite-upsell__points {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.modula-lite-upsell__point {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin: 0;
+	font-size: 14.5px;
 	line-height: 1.4;
-	color: var(--mod-se-ink);
+	color: var(--modula-admin-ink);
+}
+
+.modula-lite-upsell__check {
+	display: flex;
+	flex-shrink: 0;
+	margin-top: 2px;
+	color: var(--modula-admin-success);
+}
+
+.modula-lite-upsell__point-label {
+	flex-grow: 1;
+}
+
+.modula-lite-upsell__point-tag {
+	font-size: 12.5px;
+	white-space: nowrap;
+	color: var(--modula-admin-ink-muted);
+}
+
+.modula-lite-upsell__plan {
+	font-size: 13.5px;
+	color: var(--modula-admin-ink-secondary);
+}
+
+// The call to action, then the guarantee and the license key link under it.
+.modula-lite-upsell__actions {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+
+	.is-section & {
+		gap: 14px;
+	}
+}
+
+.modula-lite-upsell__cta {
+	justify-content: center;
+	height: 40px;
+
+	.is-tab & {
+		height: 44px;
+	}
+
+	// Schema labels can be long: they wrap instead of overflowing.
+	.is-blurb & {
+		height: auto;
+		min-height: 40px;
+		white-space: normal;
+		text-align: center;
+	}
+}
+
+.modula-lite-upsell__guarantee {
+	align-self: center;
+	font-size: 13px;
+	color: var(--modula-admin-ink-muted);
+}
+
+.modula-lite-upsell__license {
+	align-self: center;
+	padding: 4px;
+	font-size: 14px;
+	color: var(--modula-admin-ink-soft);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+
+	&:hover {
+		color: var(--modula-admin-ink);
+	}
+
+	// admin-ui's focus ring.
+	&:focus-visible {
+		outline: 2px solid var(--modula-admin-ink);
+		outline-offset: 2px;
+	}
 }

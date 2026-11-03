@@ -1,5 +1,4 @@
 @use '../variables' as *;
-@use '../../../editor-shell/styles/range-control-layout' as range-layout;
 
 .modula-settings-editor__field-control-col--span-all {
 	grid-column: 1 / -1;
@@ -34,22 +33,12 @@
 	margin: 0;
 	font-weight: 600;
 	font-size: 13px;
-	color: var(--mod-se-ink, #1d2327);
+	color: var(--modula-admin-ink);
 }
 
 .modula-settings-editor__inline-field-control {
 	width: 100%;
 	min-width: 0;
-}
-
-@include range-layout.modula-settings-range-control-inline-layout;
-
-.modula-settings-editor__tuple3-flex {
-	flex-wrap: nowrap !important;
-
-	@media (max-width: 600px) {
-		flex-wrap: wrap !important;
-	}
 }
 
 .modula-settings-editor__tuple3-device-tabs {
@@ -58,60 +47,6 @@
 	gap: $mod-space-8;
 	width: 100%;
 	min-width: 0;
-
-	.modula-ui-tabs {
-		margin-bottom: 0;
-	}
-}
-
-.modula-settings-editor__hover-effect-control {
-	width: 100%;
-	min-width: 0;
-}
-
-.modula-settings-editor__hover-effect-extra {
-	margin-top: $mod-space-8;
-}
-
-.modula-settings-editor__hover-effect-hint {
-	margin: 0 0 $mod-space-8;
-	font-size: 12px;
-	line-height: 1.45;
-	color: #646970;
-}
-
-.modula-settings-editor__hover-effect-badges {
-	display: flex;
-	flex-wrap: wrap;
-	gap: $mod-space-6;
-	margin: 0 0 $mod-space-8;
-	padding: 0;
-	list-style: none;
-
-	li {
-		margin: 0;
-		padding: $mod-space-2 $mod-space-8;
-		font-size: 11px;
-		line-height: 1.4;
-		color: #1d2327;
-		background: #f0f0f1;
-		border-radius: $mod-space-2;
-	}
-}
-
-.modula-settings-editor__media-attachment-preview {
-	max-width: 220px;
-	margin-bottom: $mod-space-10;
-	border: 1px solid var(--mod-se-line, #ddd);
-	border-radius: $mod-space-2;
-	padding: $mod-space-4;
-	background: var(--mod-se-surface, #fff);
-
-	img {
-		display: block;
-		max-width: 100%;
-		height: auto;
-	}
 }
 
 .modula-settings-editor__media-attachment {
@@ -120,57 +55,6 @@
 	align-items: stretch;
 	gap: $mod-space-8;
 	width: 100%;
-}
-
-.modula-settings-editor__media-attachment-pick {
-	/* Prefer shared-ui Button variant="panel". Alias kept for Pro bundles mid-rollout. */
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: $mod-space-8;
-	box-sizing: border-box;
-	width: 100%;
-	min-height: 28px;
-	margin: 0;
-	padding: $mod-space-12 $mod-space-14;
-	border: 1px solid var(--mod-se-line, #c3c4c7);
-	border-radius: 0;
-	background: transparent;
-	color: var(--mod-se-accent-ink, var(--mod-se-accent, #2271b1));
-	font-family: inherit;
-	font-size: 13px;
-	font-weight: 500;
-	line-height: 1.25;
-	text-align: center;
-	text-decoration: none;
-	cursor: pointer;
-	box-shadow: none;
-
-	&:hover:not(:disabled) {
-		color: var(--mod-se-ink, #1d2327);
-		background: var(--mod-se-chrome-2, rgba(0, 0, 0, 0.04));
-		border-color: var(--mod-se-ink-3, #8c8f94);
-	}
-
-	&:focus {
-		outline: none;
-		border-color: var(--mod-se-accent, #2271b1);
-		box-shadow: 0 0 0 2px var(--mod-se-accent-soft, rgba(34, 113, 177, 0.25));
-	}
-
-	&:disabled {
-		opacity: 0.45;
-		cursor: not-allowed;
-	}
-}
-
-.modula-settings-editor__media-attachment-pick-icon {
-	flex: 0 0 auto;
-	fill: currentColor;
-}
-
-.modula-settings-editor__media-attachment-pick-label {
-	min-width: 0;
 }
 
 .modula-settings-editor__media-attachment-remove {
@@ -183,7 +67,7 @@
 	padding: 0;
 	border: none;
 	background: transparent;
-	color: var(--mod-se-ink-3, #646970);
+	color: var(--modula-admin-ink-muted);
 	font-family: inherit;
 	font-size: 12px;
 	font-weight: 500;
@@ -192,7 +76,7 @@
 	box-shadow: none;
 
 	&:hover:not(:disabled) {
-		color: #b32d2e;
+		color: var(--modula-admin-danger);
 	}
 
 	&:disabled {
@@ -204,7 +88,7 @@
 .modula-settings-editor__media-attachment-fallback {
 	margin: 0;
 	font-size: 13px;
-	color: #d63638;
+	color: var(--modula-admin-danger);
 }
 
 .modula-settings-editor__media-url {
@@ -234,10 +118,10 @@
 
 .modula-settings-editor__media-url-preview {
 	max-width: 160px;
-	border: 1px solid #ddd;
+	border: 1px solid var(--modula-admin-border);
 	border-radius: $mod-space-2;
 	padding: $mod-space-4;
-	background: #fff;
+	background: var(--modula-admin-surface);
 
 	img {
 		display: block;
@@ -249,7 +133,7 @@
 .modula-settings-editor__media-url-fallback {
 	margin: $mod-space-8 0 0;
 	font-size: 12px;
-	color: #646970;
+	color: var(--modula-admin-ink-muted);
 }
 
 .modula-settings-editor__toggle-end {
@@ -264,9 +148,9 @@
 	padding: $mod-space-10 $mod-space-12;
 	font-size: 12px;
 	line-height: 1.5;
-	color: var(--mod-se-ink-2, #646970);
-	background: var(--mod-se-chrome-2, #f6f7f7);
-	border: 1px solid var(--mod-se-line, #dcdcde);
+	color: var(--modula-admin-ink-muted);
+	background: var(--modula-admin-surface-sunken);
+	border: 1px solid var(--modula-admin-border);
 	border-radius: $mod-space-2;
 }
 
@@ -287,15 +171,6 @@
 	min-width: 0;
 }
 
-/* Sit in the 20px gutter — labels stay flush with help text. */
-.modula-settings-editor__field-dirty-mark {
-	position: absolute;
-	left: -13px;
-	top: 50%;
-	z-index: 1;
-	margin-top: -3px;
-}
-
 .modula-settings-editor__field-label-with-tip .modula-settings-editor__field-label {
 	margin: 0;
 }
@@ -304,7 +179,7 @@
 	display: inline;
 	font-weight: 600;
 	font-size: 13px;
-	color: var(--mod-se-ink, #1d2327);
+	color: var(--modula-admin-ink);
 }
 
 .modula-settings-editor__section-heading-inner {
@@ -322,7 +197,7 @@
 	line-height: 1.3;
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
-	color: var(--mod-se-ink-3, #8b8b93);
+	color: var(--modula-admin-ink-muted);
 }
 
 button.modula-settings-editor__field-path-tip {
@@ -336,9 +211,9 @@ button.modula-settings-editor__field-path-tip {
 	margin: 0;
 	padding: 0;
 	border: none;
-	border-radius: $mod-space-2;
+	border-radius: var(--modula-admin-radius-sm);
 	background: transparent;
-	color: #787c82;
+	color: var(--modula-admin-ink-muted);
 	cursor: help;
 	line-height: 0;
 
@@ -347,11 +222,12 @@ button.modula-settings-editor__field-path-tip {
 		fill: currentColor;
 	}
 
+	// FieldHelpInfoTip renders in the admin-ui scope: its tokens and the
+	// root's focus ring apply.
 	&:hover,
 	&:focus-visible {
-		color: #1d2327;
-		background: rgba(0, 0, 0, 0.06);
-		outline: none;
+		color: var(--modula-admin-ink);
+		background: var(--modula-admin-surface-hover);
 	}
 }
 
@@ -378,14 +254,14 @@ button.modula-settings-editor__field-path-tip {
 
 .modula-settings-editor__field-hierarchy-summary-text {
 	font-size: 12px;
-	color: #646970;
+	color: var(--modula-admin-ink-muted);
 	line-height: 1.4;
 }
 
 .modula-settings-editor__field-hierarchy-children {
 	padding-left: $mod-space-14;
 	margin: 0 0 $mod-space-14 $mod-space-4;
-	border-left: $mod-space-2 solid #dcdcde;
+	border-left: $mod-space-2 solid var(--modula-admin-border);
 }
 
 .modula-settings-editor__field-control-col {
@@ -395,7 +271,7 @@ button.modula-settings-editor__field-path-tip {
 .modula-settings-editor__field-error {
 	margin: $mod-space-6 0 0;
 	font-size: 12px;
-	color: #b32d2e;
+	color: var(--modula-admin-danger);
 }
 
 .modula-settings-editor__color-picker.is-disabled {
@@ -403,119 +279,9 @@ button.modula-settings-editor__field-path-tip {
 	opacity: 0.55;
 }
 
-.modula-settings-editor__color-picker-help {
-	margin: $mod-space-8 0 0;
-	font-size: 12px;
-	line-height: 1.5;
-	color: var(--mod-se-ink-3, #8b8b93);
-}
-
 .modula-settings-editor__color-picker {
 	position: relative;
 	z-index: 1;
-}
-
-.modula-settings-editor__color-compact-wrap {
-	width: 100%;
-	max-width: 100%;
-}
-
-.modula-settings-editor__color-compact {
-	width: 100%;
-	max-width: 420px;
-	flex-wrap: nowrap;
-}
-
-.modula-settings-editor__color-swatch-btn.modula-settings-editor__color-swatch-btn {
-	min-width: $mod-space-36;
-	width: $mod-space-36;
-	height: $mod-space-36;
-	padding: $mod-space-3;
-	box-sizing: border-box;
-}
-
-/* Chip: bordered rect with square swatch + hex (click opens picker). */
-.modula-settings-editor__color-swatch-btn--chip.modula-settings-editor__color-swatch-btn--chip {
-	display: inline-flex;
-	align-items: center;
-	gap: $mod-space-8;
-	min-width: 0;
-	width: auto;
-	height: 34px;
-	padding: $mod-space-4 $mod-space-10 $mod-space-4 $mod-space-4;
-	border: 1px solid var(--mod-se-line, #dcdcde) !important;
-	border-radius: $mod-space-4 !important;
-	background: var(--mod-se-surface, #fff) !important;
-	box-shadow: none !important;
-	color: var(--mod-se-ink-2, #646970);
-
-	&:hover:not(:disabled) {
-		background: var(--mod-se-surface, #fff) !important;
-		border-color: var(--mod-se-ink-3, #8c8f94) !important;
-		box-shadow: none !important;
-	}
-
-	&:focus-visible {
-		box-shadow: 0 0 0 2px var(--modula-takeover-accent, #2271b1) !important;
-	}
-}
-
-.modula-settings-editor__color-swatch {
-	display: block;
-	width: 100%;
-	height: 100%;
-	min-height: $mod-space-24;
-	border-radius: $mod-space-2;
-	border: 1px solid rgba(0, 0, 0, 0.2);
-	box-sizing: border-box;
-}
-
-.modula-settings-editor__color-swatch-btn--chip .modula-settings-editor__color-swatch {
-	flex-shrink: 0;
-	width: 18px;
-	height: 18px;
-	min-height: 0;
-	border-radius: $mod-space-2;
-	border: 1px solid rgb(0 0 0 / 14%);
-	box-shadow: none;
-}
-
-.modula-settings-editor__color-swatch--inherit {
-	position: relative;
-	background:
-		linear-gradient(to top right,
-			transparent calc(50% - 0.5px),
-			#c00 0,
-			#c00 calc(50% + 0.5px),
-			transparent 0),
-		#fff;
-}
-
-.modula-settings-editor__color-clear {
-	display: block;
-	margin: $mod-space-8 0 0;
-	width: 100%;
-	justify-content: center;
-}
-
-.modula-settings-editor__color-swatch-hex {
-	font-size: 12px;
-	font-weight: 500;
-	line-height: 1.2;
-	letter-spacing: 0.02em;
-	font-variant-numeric: tabular-nums;
-	color: var(--mod-se-ink-2, #646970);
-	user-select: none;
-}
-
-.modula-settings-editor__color-compact-wrap--swatch {
-	width: auto;
-	max-width: none;
-}
-
-.modula-settings-editor__color-dropdown-hex {
-	margin-top: $mod-space-8;
-	min-width: 10rem;
 }
 
 // Global Colors–style rows: label left, circular swatch right.
@@ -553,20 +319,6 @@ button.modula-settings-editor__field-path-tip {
 	}
 }
 
-.modula-settings-editor__color-dropdown-inner {
-	padding: $mod-space-8;
-	min-width: 0;
-}
-
-.modula-settings-editor__color-dropdown.components-dropdown__content {
-	// Portaled to body; must sit above gallery modals (z-index: 1000000).
-	z-index: 1000001;
-}
-
-.modula-settings-editor__color-dropdown .components-popover__content {
-	min-width: 0;
-}
-
 .modula-settings-editor__action-button-wrap {
 	display: flex;
 	flex-direction: column;
@@ -587,14 +339,14 @@ button.modula-settings-editor__field-path-tip {
 	margin: 0;
 	font-size: 12px;
 	line-height: 1.45;
-	color: var(--mod-se-ink-3, #646970);
+	color: var(--modula-admin-ink-muted);
 }
 
 .modula-settings-editor__watermark-action-error {
 	margin: 0;
 	font-size: 12px;
 	line-height: 1.45;
-	color: #b32d2e;
+	color: var(--modula-admin-danger);
 }
 
 .modula-settings-editor__action-button-hint {
@@ -602,11 +354,11 @@ button.modula-settings-editor__field-path-tip {
 	max-width: 42em;
 	font-size: 12px;
 	line-height: 1.45;
-	color: #646970;
+	color: var(--modula-admin-ink-muted);
 }
 
 .modula-settings-editor__action-button-hint--error {
-	color: #b32d2e;
+	color: var(--modula-admin-danger);
 }
 
 .modula-custom-css-field {
@@ -629,38 +381,6 @@ button.modula-settings-editor__field-path-tip {
 	}
 }
 
-.modula-custom-css-field__help {
-	margin: 0;
-	font-size: 12px;
-	line-height: 1.5;
-	color: var(--mod-se-ink-3, #8b8b93);
-}
-
-.modula-custom-css-ai__loading {
-	display: flex;
-	align-items: center;
-	gap: $mod-space-8;
-	margin: $mod-space-8 0;
-}
-
-.modula-custom-css-ai__summary {
-	margin: 0 0 $mod-space-8;
-	color: #1d2327;
-}
-
-.modula-custom-css-ai__preview {
-	display: flex;
-	flex-direction: column;
-	gap: $mod-space-8;
-	margin-top: $mod-space-8;
-}
-
-.modula-custom-css-ai__code textarea {
-	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-	font-size: 12px;
-	line-height: 1.5;
-}
-
 .modula-settings-editor__password-with-strength {
 	display: flex;
 	flex-direction: column;
@@ -676,15 +396,9 @@ button.modula-settings-editor__field-path-tip {
 	width: 100%;
 	min-width: 0;
 
-	.modula-ui-text-input {
+	.modula-admin-field {
 		flex: 1 1 auto;
 		min-width: 0;
-	}
-
-	.components-base-control {
-		flex: 1 1 auto;
-		min-width: 0;
-		margin-bottom: 0;
 	}
 }
 
@@ -697,20 +411,8 @@ button.modula-settings-editor__field-path-tip {
 	min-height: 34px;
 }
 
-.modula-settings-editor__password-visibility-toggle.components-button {
-	flex: 0 0 auto;
-	min-height: 40px;
-	padding-left: $mod-space-8;
-	padding-right: $mod-space-8;
-}
-
-.modula-settings-editor__password-with-strength-help {
-	margin: 0;
-	font-size: 12px;
-	line-height: 1.5;
-	color: var(--mod-se-ink-3, #8b8b93);
-}
-
+// The meter renders in the settings row's admin-ui scope, so it takes the
+// notice tones (WP core's pastel meter colours did not follow dark mode).
 .modula-settings-editor__password-strength {
 	display: block;
 	padding: $mod-space-8 $mod-space-12;
@@ -719,28 +421,32 @@ button.modula-settings-editor__field-path-tip {
 	font-weight: 600;
 	line-height: 1.4;
 	text-align: center;
-	color: #1d2327;
-	background: #f0f0f1;
+	color: var(--modula-admin-ink);
+	background: var(--modula-admin-surface-sunken);
 
 	&--short {
-		background: #f1adad;
+		color: var(--modula-admin-danger);
+		background: var(--modula-admin-danger-surface);
 	}
 
 	&--bad {
-		background: #fbc5a9;
+		color: var(--modula-admin-warning-ink);
+		background: var(--modula-admin-warning-surface);
 	}
 
+	// Between the warning and the success tone, as WP's yellow sat between
+	// orange and green.
 	&--good {
-		background: #ffe399;
+		background: color-mix(in srgb, var(--modula-admin-warning-surface), var(--modula-admin-success-surface));
 	}
 
 	&--strong {
-		background: #c1e1b9;
+		color: var(--modula-admin-success-ink);
+		background: var(--modula-admin-success-surface);
 	}
 
 	&--unknown {
-		background: #f0f0f1;
-		color: #646970;
+		color: var(--modula-admin-ink-muted);
 	}
 }
 
@@ -749,18 +455,6 @@ button.modula-settings-editor__field-path-tip {
 	flex-direction: column;
 	gap: $mod-space-8;
 	width: 100%;
-}
-
-.modula-settings-editor__segmented-enum-track {
-	display: flex;
-	width: 100%;
-}
-
-.modula-settings-editor__segmented-enum-hint {
-	margin: 0;
-	font-size: 12px;
-	line-height: 1.45;
-	color: #646970;
 }
 
 .modula-settings-editor__position-grid {
@@ -779,103 +473,35 @@ button.modula-settings-editor__field-path-tip {
 	box-sizing: border-box;
 	width: fit-content;
 	padding: 3px;
-	border: 1px solid var(--mod-se-line, #c3c4c7);
-	background: var(--mod-se-surface, #fff);
+	border: 1px solid var(--modula-admin-border);
+	background: var(--modula-admin-surface);
 }
 
+// Fallback for fewer than 9 cells (the full grid is admin-ui `PositionPad`):
+// ink marks the active cell, as in the pad.
 .modula-settings-editor__position-grid-cell {
 	box-sizing: border-box;
 	width: 22px;
 	height: 22px;
 	padding: 0;
-	border: 1px solid var(--mod-se-line, #c3c4c7);
+	border: 1px solid var(--modula-admin-border);
 	border-radius: 0;
-	background: var(--mod-se-chrome-2, #f6f7f7);
+	background: var(--modula-admin-surface-sunken);
 	cursor: pointer;
 
 	&:hover:not(:disabled):not(.is-active) {
-		border-color: var(--mod-se-accent, #2271b1);
+		border-color: var(--modula-admin-ink);
 	}
 
 	&.is-active {
-		border-color: var(--mod-se-accent, #2271b1);
-		background: var(--mod-se-accent, #2271b1);
+		border-color: var(--modula-admin-ink);
+		background: var(--modula-admin-ink);
 	}
 
 	&:disabled,
 	&.is-unavailable {
 		opacity: 0.35;
 		cursor: not-allowed;
-	}
-
-	&.is-placeholder {
-		opacity: 0.55;
-		cursor: default;
-		pointer-events: none;
-		background: transparent;
-		border-style: dashed;
-	}
-
-	&.is-empty {
-		visibility: hidden;
-		pointer-events: none;
-		border: none;
-		background: transparent;
-	}
-
-	// Dual placements (top+bottom / left+right): two ticks inside the cell.
-	&.is-dual {
-		position: relative;
-		background: var(--mod-se-chrome-2, #f6f7f7);
-
-		&::before,
-		&::after {
-			content: '';
-			position: absolute;
-			background: var(--mod-se-ink-muted, #646970);
-			pointer-events: none;
-		}
-
-		&.is-active::before,
-		&.is-active::after {
-			background: var(--mod-se-surface, #fff);
-		}
-	}
-
-	&.is-dual-vertical {
-
-		&::before,
-		&::after {
-			left: 4px;
-			right: 4px;
-			height: 3px;
-		}
-
-		&::before {
-			top: 4px;
-		}
-
-		&::after {
-			bottom: 4px;
-		}
-	}
-
-	&.is-dual-horizontal {
-
-		&::before,
-		&::after {
-			top: 4px;
-			bottom: 4px;
-			width: 3px;
-		}
-
-		&::before {
-			left: 4px;
-		}
-
-		&::after {
-			right: 4px;
-		}
 	}
 }
 
@@ -895,9 +521,10 @@ button.modula-settings-editor__field-path-tip {
 		cursor: pointer;
 	}
 
+	// A tile picked for the watermark wears the canvas selection colour.
 	&.is-wm-selected .modula-gallery-preview-item-admin__wm-select-btn {
-		border-color: var(--mod-se-accent, #2271b1);
-		box-shadow: inset 0 0 0 2px var(--mod-se-accent, #2271b1);
+		border-color: var(--mod-se-selection);
+		box-shadow: inset 0 0 0 2px var(--mod-se-selection);
 	}
 
 	.modula-gallery-preview-item-admin__wm-select-check {
@@ -916,7 +543,7 @@ button.modula-settings-editor__field-path-tip {
 	}
 
 	&.is-wm-selected .modula-gallery-preview-item-admin__wm-select-check {
-		background: var(--mod-se-accent, #2271b1);
-		border-color: #fff;
+		background: var(--mod-se-selection);
+		border-color: var(--mod-se-selection-ink);
 	}
 }

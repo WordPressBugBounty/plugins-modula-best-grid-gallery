@@ -13,7 +13,6 @@ import {
 import { normalizeCaptionsBelowImageDefaults } from './captionsBelowImageDefaults';
 import { hydrateEmptyGroupedPathsFromSchemaDefaults } from './effectiveSettingsValue';
 import { normalizeLoadingEffectsEnables } from './loadingEffectsEnableSideEffects';
-import { normalizeSocialEnableFromNetworks } from './socialEnableSideEffects';
 import { getModulaSettingsEditorConfig } from '../config/modulaSettingsEditorConfig';
 
 /**
@@ -120,11 +119,6 @@ export function normalizeGroupedDefaults(grouped) {
 		grouped.loadingEffects = {};
 	}
 	normalizeLoadingEffectsEnables(grouped.loadingEffects);
-
-	if (!grouped.social || typeof grouped.social !== 'object') {
-		grouped.social = {};
-	}
-	normalizeSocialEnableFromNetworks(grouped.social);
 
 	if (!grouped.licensing || typeof grouped.licensing !== 'object') {
 		grouped.licensing = {};

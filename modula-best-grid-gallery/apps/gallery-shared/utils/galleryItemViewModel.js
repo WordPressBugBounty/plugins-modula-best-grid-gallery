@@ -67,6 +67,7 @@ import {
  * @property {boolean}     [renderLinks]              - Output tile link overlay on the public frontend.
  * @property {boolean}     [forceLinkNewTab]          - Force target=_blank on simple links (visitor hosts may set).
  * @property {boolean}     [stripHoverBuilderClasses] - Remove hover-builder runtime classes from tile.
+ * @property {import('../context/GalleryPreviewHoverTileContext').GalleryPreviewHoverTile|null} [hoverTile] - Settings-editor preview: live hover classes and vars that replace the stripped ones; ignored unless stripHoverBuilderClasses is true.
  * @property {number}      [deeplinkIndex]            - 0-based index among lightbox slides for social deeplink URLs.
  */
 
@@ -88,6 +89,7 @@ export function getGalleryItemViewModel(itemData, config, options = {}) {
 		renderLinks = false,
 		forceLinkNewTab = false,
 		stripHoverBuilderClasses = false,
+		hoverTile = null,
 		deeplinkIndex,
 	} = options;
 
@@ -273,6 +275,14 @@ export function getGalleryItemViewModel(itemData, config, options = {}) {
 			cls !== 'modula-caption-below-image' &&
 			cls !== 'modula-caption-below-image--fixed-tile'
 	);
+	const liveHoverTile = stripHoverBuilderClasses ? hoverTile : null;
+	if (liveHoverTile) {
+		liveHoverTile.className.split(' ').forEach((cls) => {
+			if (cls && !cleanedItemClasses.includes(cls)) {
+				cleanedItemClasses.push(cls);
+			}
+		});
+	}
 	if (captionBelowImage) {
 		cleanedItemClasses.push('modula-caption-below-image');
 		if (tileHasFixedHeight) {
@@ -418,6 +428,7 @@ export function getGalleryItemViewModel(itemData, config, options = {}) {
 	const hasSlotDimensions = Number(slotWidth) > 0 && Number(slotHeight) > 0;
 	let mergedStyle = {
 		...(style || {}),
+		...(liveHoverTile ? liveHoverTile.style : {}),
 	};
 	if (
 		galleryType === 'parallax-masonry' &&
@@ -481,6 +492,7 @@ export function getGalleryItemViewModel(itemData, config, options = {}) {
 		slotWidth: Number(slotWidth) > 0 ? Number(slotWidth) : 0,
 		slotHeight: Number(slotHeight) > 0 ? Number(slotHeight) : 0,
 		stripHoverBuilderClasses,
+		hasLiveHoverTile: Boolean(liveHoverTile),
 	};
 }
 

@@ -1,6 +1,7 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, desktop } from '@wordpress/icons';
-import { Button } from 'shared-ui';
+import { Button } from 'admin-ui';
+import AdminUiScope from '../appearance/AdminUiScope';
 
 /**
  * Full-screen gate shown when the takeover editor is opened on a phone or tablet.
@@ -30,9 +31,11 @@ export default function DesktopOnlyNotice({ backUrl, message }) {
 					{__('Desktop only', 'modula-best-grid-gallery')}
 				</h1>
 				<p className="modula-takeover__desktop-only-body">{message}</p>
-				<Button variant="primary" href={backUrl}>
-					{__('Back', 'modula-best-grid-gallery')}
-				</Button>
+				<AdminUiScope>
+					<Button variant="primary" href={backUrl}>
+						{__('Back', 'modula-best-grid-gallery')}
+					</Button>
+				</AdminUiScope>
 			</div>
 		</div>
 	);

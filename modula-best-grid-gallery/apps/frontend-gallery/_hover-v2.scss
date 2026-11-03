@@ -1,5 +1,7 @@
 /* Composable hover (v2): classes from PHP Modula_Item_Data_Processor::process_hover_effects */
 
+@use "text-scrim" as *;
+
 .modula .modula-items .modula-item.modula-hover-v2 .figc-inner {
 	display: flex;
 	flex-direction: column;
@@ -76,6 +78,99 @@
 	transition-delay: var(--modula-hover-card-enter-delay, 0ms);
 	transform: translateY(-4px);
 	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+}
+
+/*
+ * Tilt and Pan follow the pointer: the gallery runtime
+ * (apps/gallery-shared/motion/hoverPointer.js) sets --modula-hover-pointer-x / -y,
+ * the pointer's offset from the item's centre (-0.5 to 0.5), while it moves
+ * over the item. Without it (keyboard focus) they hold their centred pose.
+ */
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--tilt {
+	transition:
+		transform var(--modula-hover-card-enter-duration, 250ms) ease-out,
+		box-shadow var(--modula-hover-card-enter-duration, 250ms) ease;
+	transition-delay: 0ms;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--tilt:hover,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--tilt:focus-within:has(:focus-visible) {
+	z-index: 3;
+	transition-delay: var(--modula-hover-card-enter-delay, 0ms);
+	transform:
+		perspective(700px)
+		rotateY(calc(var(--modula-hover-pointer-x, 0) * 20deg))
+		rotateX(calc(var(--modula-hover-pointer-y, 0) * -20deg))
+		scale(1.03);
+	box-shadow: 0 18px 40px rgba(17, 21, 24, 0.28);
+}
+
+/* Spotlight: the item under the pointer grows a little while the others dim. */
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--spotlight {
+	transition:
+		transform var(--modula-hover-card-enter-duration, 300ms) ease,
+		filter var(--modula-hover-card-enter-duration, 300ms) ease;
+	transition-delay: 0ms;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--spotlight:hover,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--spotlight:focus-within:has(:focus-visible) {
+	z-index: 3;
+	transition-delay: var(--modula-hover-card-enter-delay, 0ms);
+	transform: scale(1.03);
+}
+
+.modula .modula-items:has(.modula-item.modula-hover-v2.modula-hover-card--spotlight:hover) .modula-item.modula-hover-v2.modula-hover-card--spotlight:not(:hover) {
+	filter: brightness(0.45) saturate(0.5);
+}
+
+/*
+ * Pan moves the photo only, inside the media shell's clip: the overlay is a
+ * flat tint, and the copy stays put so long lines are not cut at the edge.
+ */
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--pan .modula-item-hover-media .modula-item-picture-stack,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--pan .modula-showcase__hover-media .modula-showcase__img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--pan:not(:has(.modula-item-hover-media)):not(:has(.modula-showcase__hover-media)) .modula-item-content img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--pan:not(:has(.modula-item-hover-media)):not(:has(.modula-showcase__hover-media)) .modula-item-picture img {
+	transition: transform var(--modula-hover-card-enter-duration, 500ms) cubic-bezier(0.2, 0.8, 0.2, 1);
+	transition-delay: 0ms;
+	transform: none;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--pan:hover .modula-showcase__hover-media .modula-showcase__img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--pan:focus-within:has(:focus-visible) .modula-showcase__hover-media .modula-showcase__img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--pan:hover:not(:has(.modula-item-hover-media)):not(:has(.modula-showcase__hover-media)) .modula-item-content img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--pan:hover:not(:has(.modula-item-hover-media)):not(:has(.modula-showcase__hover-media)) .modula-item-picture img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--pan:focus-within:has(:focus-visible):not(:has(.modula-item-hover-media)):not(:has(.modula-showcase__hover-media)) .modula-item-content img,
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--pan:focus-within:has(:focus-visible):not(:has(.modula-item-hover-media)):not(:has(.modula-showcase__hover-media)) .modula-item-picture img {
+	transition-delay: var(--modula-hover-card-enter-delay, 0ms);
+	transform:
+		translateX(calc(var(--modula-hover-pointer-x, 0) * -14px))
+		translateY(calc(var(--modula-hover-pointer-y, 0) * -14px))
+		scale(1.1);
+}
+
+/*
+ * The Custom loading effect animates the same picture stack with
+ * `animation-fill-mode: forwards` (GalleryDynamicStyle `modulaScaling`), which
+ * holds its last transform over normal declarations, so Pan needs `!important`.
+ * `:where()` keeps it less specific than held motion (`hover-held`, also
+ * `!important`), which must still win.
+ */
+:where(.modula .modula-items) .modula-item.modula-hover-v2.modula-hover-card--pan:is(:hover, :focus-within:has(:focus-visible)) :where(.modula-item-hover-media) .modula-item-picture-stack {
+	transition-delay: var(--modula-hover-card-enter-delay, 0ms);
+	transform:
+		translateX(calc(var(--modula-hover-pointer-x, 0) * -14px))
+		translateY(calc(var(--modula-hover-pointer-y, 0) * -14px))
+		scale(1.1) !important;
+}
+
+/*
+ * `_showcase.scss` turns every transition off on the showcase image (the
+ * global `img` transition fights its size), so Pan restores its own.
+ */
+.modula .modula-items .modula-item.modula-hover-v2.modula-hover-card--pan .modula-showcase__hover-media .modula-showcase__img {
+	transition: transform var(--modula-hover-card-enter-duration, 500ms) cubic-bezier(0.2, 0.8, 0.2, 1) !important;
 }
 
 /*
@@ -304,7 +399,7 @@
 	transform: scale(1);
 }
 
-/* Free-position slots (percent anchors on the tile). */
+/* Free-position slots (percent positions on the tile). */
 .modula .modula-items .modula-item.modula-hover-v2--free-slots .modula-item-content {
 	position: relative;
 }
@@ -317,16 +412,62 @@
 	z-index: 2;
 	pointer-events: none;
 	overflow: hidden;
-	/* Diamond graphic: square sized from min(tile width, tile height). */
+
+	/*
+	 * Size container: the Diamond graphic (a square sized from min(tile width,
+	 * tile height)), the text grid's `cqh` rows and its line-clamp queries.
+	 */
 	container-type: size;
 }
 
+/*
+ * The text block: one grid over the tile, so a scrim can sit behind it. Each
+ * slot's first line is centred on its own row line. PHP sets the sorted line
+ * heights (`--modula-hover-row-y-*`) and each slot's grid row
+ * (`--modula-hover-slot-row-*`). The tracks between the lines are as tall as
+ * the slot positions say, so short copy sits exactly where the preset puts it.
+ * Longer copy grows its row and the grid takes the room from the tallest gaps
+ * first, so the copy pushes the other slots instead of running into them. A
+ * gap only shrinks to about one line (unless its slots share a line).
+ */
 .modula .modula-items .modula-item.modula-hover-v2--free-slots .figc-inner {
+	--modula-hover-gap-min: calc(1lh + 0.35em);
 	position: relative;
-	display: block;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-rows:
+		minmax(0, calc(var(--modula-hover-row-y-1, 18) * 1cqh))
+		auto
+		minmax(min(calc((var(--modula-hover-row-y-2, 50) - var(--modula-hover-row-y-1, 18)) * 1cqh), var(--modula-hover-gap-min)), calc((var(--modula-hover-row-y-2, 50) - var(--modula-hover-row-y-1, 18)) * 1cqh))
+		auto
+		minmax(min(calc((var(--modula-hover-row-y-3, 82) - var(--modula-hover-row-y-2, 50)) * 1cqh), var(--modula-hover-gap-min)), calc((var(--modula-hover-row-y-3, 82) - var(--modula-hover-row-y-2, 50)) * 1cqh))
+		auto
+		minmax(0, calc((100 - var(--modula-hover-row-y-3, 82)) * 1cqh));
+	align-content: start;
+	gap: 0;
 	width: 100%;
 	height: 100%;
 	pointer-events: none;
+}
+
+/*
+ * The collapsed share button sits in the bottom-right corner (10px inset, about
+ * 40px round, `_social.scss`). While it shows, the copy keeps out of its
+ * column: each slot narrows by `--modula-hover-slot-share-inset-*` times this
+ * width (PHP `hover_slot_share_inset`), so short copy does not move. It shows
+ * when collapsed on desktop, and always at 992px and below.
+ */
+$hover-share-clearance: 58px;
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots:has(.modula-social-expandable.modula-social-desktop-collapsed) .figc-inner {
+	--modula-hover-share-clearance: #{$hover-share-clearance};
+}
+
+@media (max-width: 992px) {
+
+	.modula .modula-items .modula-item.modula-hover-v2--free-slots:has(.modula-social-expandable) .figc-inner {
+		--modula-hover-share-clearance: #{$hover-share-clearance};
+	}
 }
 
 .modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--frame .figc::before,
@@ -382,8 +523,10 @@
 .modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .modula-title,
 .modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .jtg-description,
 .modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .modula-social {
-	position: absolute;
-	pointer-events: auto;
+	position: relative;
+	grid-column: 1;
+	align-self: start;
+	justify-self: start;
 	box-sizing: border-box;
 	min-width: 0;
 	width: max-content;
@@ -393,38 +536,187 @@
 	z-index: 3;
 }
 
+/*
+ * Title and caption: half a line of negative margin on each side, so a single
+ * line takes no room in its row and is centred on the row line. Each extra line
+ * adds one line of height to the row. Long copy is clamped to what the tile
+ * height can hold (`.figc` is the size container; see the queries below).
+ */
+.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .modula-title,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .jtg-description {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	margin-block: -0.5lh;
+}
+
 .modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .jtg-description p {
 	margin: 0;
 }
 
+/*
+ * Horizontal anchor: the slot's x is the left edge, centre or right edge of the
+ * copy (PHP `hover_slot_anchor_percent`). It lives in `translate`, so the
+ * layer enter and exit motions own `transform`.
+ */
 .modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .modula-title {
+	-webkit-line-clamp: 2;
+	grid-row: var(--modula-hover-slot-row-title, 2);
 	left: var(--modula-hover-slot-title-x, 50%);
-	top: var(--modula-hover-slot-title-y, 18%);
-	--modula-hover-slot-anchor: var(--modula-hover-slot-anchor-title, 0%);
-	max-width: min(var(--modula-hover-slot-max-width-title, 50%),
-			calc(100% - 0.75rem));
+	max-width: min(calc(100% - 0.75rem), calc(var(--modula-hover-slot-max-width-title, 50%) - var(--modula-hover-slot-share-inset-title, 0) * var(--modula-hover-share-clearance, 0px)));
 	text-align: var(--modula-hover-slot-text-align-title, left);
-	transform: translate(var(--modula-hover-slot-anchor-title, 0%), -50%);
+	translate: var(--modula-hover-slot-anchor-title, 0%) 0;
 }
 
 .modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .jtg-description {
+	-webkit-line-clamp: 2;
+	grid-row: var(--modula-hover-slot-row-caption, 4);
 	left: var(--modula-hover-slot-caption-x, 50%);
-	top: var(--modula-hover-slot-caption-y, 50%);
-	--modula-hover-slot-anchor: var(--modula-hover-slot-anchor-caption, 0%);
-	max-width: min(var(--modula-hover-slot-max-width-caption, 50%),
-			calc(100% - 0.75rem));
+	max-width: min(calc(100% - 0.75rem), calc(var(--modula-hover-slot-max-width-caption, 50%) - var(--modula-hover-slot-share-inset-caption, 0) * var(--modula-hover-share-clearance, 0px)));
 	text-align: var(--modula-hover-slot-text-align-caption, left);
-	transform: translate(var(--modula-hover-slot-anchor-caption, 0%), -50%);
+	translate: var(--modula-hover-slot-anchor-caption, 0%) 0;
 }
 
+/*
+ * The social row is icons, not lines of text: it gets no height, so its icons
+ * are centred on the row line (`align-content` centres the wrapped flex lines).
+ *
+ * The hover shell sits above the tile link (`index.scss`), so the title and
+ * caption keep the inherited `pointer-events: none`: a click on the text opens
+ * what the tile opens. The social row is the slots' only control and takes the
+ * pointer back here (`index.scss` re-enables only its links in this shell);
+ * a link inside the caption re-enables itself there too.
+ */
 .modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .modula-social {
+	pointer-events: auto;
+	align-content: center;
+	height: 0;
+	grid-row: var(--modula-hover-slot-row-social, 6);
 	left: var(--modula-hover-slot-social-x, 50%);
-	top: var(--modula-hover-slot-social-y, 82%);
-	--modula-hover-slot-anchor: var(--modula-hover-slot-anchor-social, 0%);
-	max-width: min(var(--modula-hover-slot-max-width-social, 50%),
-			calc(100% - 0.75rem));
+	max-width: min(calc(100% - 0.75rem), calc(var(--modula-hover-slot-max-width-social, 50%) - var(--modula-hover-slot-share-inset-social, 0) * var(--modula-hover-share-clearance, 0px)));
 	text-align: var(--modula-hover-slot-text-align-social, left);
-	transform: translate(var(--modula-hover-slot-anchor-social, 0%), -50%);
+	translate: var(--modula-hover-slot-anchor-social, 0%) 0;
+}
+
+@container (min-height: 260px) {
+
+	.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .modula-title {
+		-webkit-line-clamp: 3;
+	}
+
+	.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .jtg-description {
+		-webkit-line-clamp: 4;
+	}
+}
+
+@container (min-height: 420px) {
+
+	.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .modula-title {
+		-webkit-line-clamp: 4;
+	}
+
+	.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .jtg-description {
+		-webkit-line-clamp: 6;
+	}
+}
+
+/*
+ * Text scrim (Motion ticket 11): a soft dark band behind the text rows of the
+ * grid, so white copy stays readable over bright photos while the rest of the
+ * photo stays bright. `.figc-inner::before` is the title's band and `::after`
+ * the caption's: each exists while its layer is on the photo (not below it)
+ * and not hidden, and fades in and out with that layer's own visibility and
+ * timing. The social row is icons and gets none.
+ *
+ * With both layers shown, the title's band covers both and the caption's is
+ * off, so nothing darkens twice. The rows come from PHP `hover_scrim_style`
+ * (`--modula-hover-scrim-title-rows`, and `-{title,caption}-only-rows` for a
+ * layer shown alone). Close title and caption get a band around their rows.
+ * Text at the bottom edge (the simple moves' 70 / 84, editor-qa 2026-10-29
+ * ticket 15) or far apart gets one scrim from the tile edge nearer the text
+ * to past the farther text row: its edge-side fade lies outside the tile,
+ * clipped by `.figc`, so it reads as one gradient from the edge, not a band
+ * per line.
+ *
+ * Darken on hover: while the dim shows, a band only tops it up to the scrim's
+ * own strength (`(strength - dim) / (1 - dim)`), so behind the text the tile
+ * is as dark as the stronger of the two, never both stacked; from a dim at
+ * the strength up the band disappears. `--modula-hover-scrim-under` follows
+ * the dim with the overlay's own timing. Reduced motion and held motion drop
+ * these transitions with every other (`*::before` / `*::after` rules below).
+ */
+@property --modula-hover-scrim-under {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: 0;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots:where(:not(.modula-caption-below-image)):where(:has(.figc .modula-title):not(.modula-hover-visibility--title--hidden)) .figc-inner::before,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots:where(:not(.modula-caption-below-image)):where(:has(.figc .jtg-description):not(.modula-hover-visibility--caption--hidden)) .figc-inner::after {
+	--modula-hover-scrim-alpha: max(0, calc((#{$hover-scrim-strength} - var(--modula-hover-scrim-under, 0)) / max(0.01, 1 - var(--modula-hover-scrim-under, 0))));
+	content: "";
+	grid-column: 1;
+	align-self: stretch;
+
+	/* Past the outer half line of its first and last text line, then the fade. */
+	margin-block: calc(-0.5lh - #{$hover-scrim-fade});
+	pointer-events: none;
+	background: linear-gradient(to bottom, $hover-scrim-fade-in, $hover-scrim-fade-out);
+	opacity: 0;
+
+	/* Names the registered property; `var()` would read its value instead. */
+	/* stylelint-disable-next-line custom-property-no-missing-var-function */
+	transition-property: opacity, --modula-hover-scrim-under;
+	transition-duration: var(--modula-hover-scrim-duration), var(--modula-hover-card-enter-duration, 300ms);
+	transition-timing-function: ease;
+	transition-delay: var(--modula-hover-scrim-delay), 0ms;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc-inner::before {
+	--modula-hover-scrim-duration: var(--modula-hover-enter-duration-title, 280ms);
+	--modula-hover-scrim-delay: var(--modula-hover-enter-delay-title, 0ms);
+	grid-row: var(--modula-hover-scrim-title-only-rows, var(--modula-hover-slot-row-title, 2));
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots .figc-inner::after {
+	--modula-hover-scrim-duration: var(--modula-hover-enter-duration-caption, 280ms);
+	--modula-hover-scrim-delay: var(--modula-hover-enter-delay-caption, 0ms);
+	grid-row: var(--modula-hover-scrim-caption-only-rows, var(--modula-hover-slot-row-caption, 4));
+}
+
+/* Both layers shown: the title's band covers both, the caption's is off. */
+.modula .modula-items .modula-item.modula-hover-v2--free-slots:where(:has(.figc .modula-title):not(.modula-hover-visibility--title--hidden)):where(:has(.figc .jtg-description):not(.modula-hover-visibility--caption--hidden)) .figc-inner::before {
+	grid-row: var(--modula-hover-scrim-title-rows, var(--modula-hover-slot-row-title, 2));
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots:where(:has(.figc .modula-title):not(.modula-hover-visibility--title--hidden)):where(:has(.figc .jtg-description):not(.modula-hover-visibility--caption--hidden)) .figc-inner::after {
+	display: none;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots:where(.modula-hover-card--dim, .modula-hover-card--dim-addon):where(:hover, :focus-within:has(:focus-visible)) .figc-inner::before,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots:where(.modula-hover-card--dim, .modula-hover-card--dim-addon):where(:hover, :focus-within:has(:focus-visible)) .figc-inner::after {
+	--modula-hover-scrim-under: var(--modula-hover-dim-active-opacity, 0.55);
+	transition-delay: var(--modula-hover-scrim-delay), var(--modula-hover-card-enter-delay, 0ms);
+}
+
+/*
+ * Each band shows while its layer shows. The rules share one specificity, so
+ * the later state wins: at rest, then hovered (none), then hovered with a
+ * layer that shows on hover.
+ */
+.modula .modula-items .modula-item.modula-hover-v2--free-slots:where(.modula-hover-visibility--title--always, .modula-hover-visibility--title--hide-on-hover) .figc-inner::before,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots:where(.modula-hover-visibility--caption--always, .modula-hover-visibility--caption--hide-on-hover) .figc-inner::after {
+	opacity: 1;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots:where(:hover, :focus-within:has(:focus-visible)) .figc-inner::before,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots:where(:hover, :focus-within:has(:focus-visible)) .figc-inner::after {
+	opacity: 0;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots:where(:hover, :focus-within:has(:focus-visible)):where(.modula-hover-visibility--title--always, .modula-hover-visibility--title--on-hover) .figc-inner::before,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots:where(:hover, :focus-within:has(:focus-visible)):where(.modula-hover-visibility--caption--always, .modula-hover-visibility--caption--on-hover) .figc-inner::after {
+	opacity: 1;
 }
 
 /* Show on hover: keep layers hidden until the tile is hovered or keyboard-focused. */
@@ -442,7 +734,6 @@
 .modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--social--on-hover:hover .figc .modula-social,
 .modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--social--on-hover:focus-within:has(:focus-visible) .figc .modula-social {
 	opacity: 1;
-	pointer-events: auto;
 }
 
 .modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-visibility--title--always .figc .modula-title,
@@ -492,7 +783,7 @@
 .modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-up:hover .figc .modula-social,
 .modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-up:focus-within:has(:focus-visible) .figc .modula-social {
 	opacity: 0;
-	transform: translate(var(--modula-hover-slot-anchor, 0%), calc(-50% - 12px));
+	transform: translateY(-12px);
 	transition-delay: 0ms;
 }
 
@@ -503,7 +794,7 @@
 .modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-down:hover .figc .modula-social,
 .modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-down:focus-within:has(:focus-visible) .figc .modula-social {
 	opacity: 0;
-	transform: translate(var(--modula-hover-slot-anchor, 0%), calc(-50% + 12px));
+	transform: translateY(12px);
 	transition-delay: 0ms;
 }
 
@@ -514,7 +805,7 @@
 .modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-left:hover .figc .modula-social,
 .modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-left:focus-within:has(:focus-visible) .figc .modula-social {
 	opacity: 0;
-	transform: translate(calc(var(--modula-hover-slot-anchor, 0%) - 16px), -50%);
+	transform: translateX(-16px);
 	transition-delay: 0ms;
 }
 
@@ -525,7 +816,7 @@
 .modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-right:hover .figc .modula-social,
 .modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--slide-right:focus-within:has(:focus-visible) .figc .modula-social {
 	opacity: 0;
-	transform: translate(calc(var(--modula-hover-slot-anchor, 0%) + 16px), -50%);
+	transform: translateX(16px);
 	transition-delay: 0ms;
 }
 
@@ -547,192 +838,40 @@
 .modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--scale:hover .figc .modula-social,
 .modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-exit--social--scale:focus-within:has(:focus-visible) .figc .modula-social {
 	opacity: 0;
-	transform: translate(var(--modula-hover-slot-anchor, 0%), -50%) scale(0.94);
+	transform: scale(0.94);
 	transition-delay: 0ms;
 }
 
-/* Entrance + anchor: combine centering with motion (higher specificity than rules above). */
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--fade .figc .modula-title,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--fade .figc .jtg-description,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--fade .figc .modula-social {
-	opacity: 0;
-	transform: translate(var(--modula-hover-slot-anchor, 0%), -50%);
-}
+/*
+ * Hover motion holds still: no layer transitions, and the card treatments
+ * show no zoom, lift, tilt, spotlight or pan. Copy, graphics and Darken on
+ * hover still change on hover, instantly; layer slots keep their anchors.
+ */
+@mixin hover-held {
 
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--fade:hover .figc .modula-title,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--fade:focus-within:has(:focus-visible) .figc .modula-title,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--fade:hover .figc .jtg-description,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--fade:focus-within:has(:focus-visible) .figc .jtg-description,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--fade:hover .figc .modula-social,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--fade:focus-within:has(:focus-visible) .figc .modula-social {
-	opacity: 1;
-	transform: translate(var(--modula-hover-slot-anchor, 0%), -50%);
-}
+	.modula-items .modula-item.modula-hover-v2,
+	.modula-items .modula-item.modula-hover-v2 .modula-item-content img,
+	.modula-items .modula-item.modula-hover-v2 .modula-item-picture img,
+	.modula-items .modula-item.modula-hover-v2 .modula-item-overlay,
+	.modula-items .modula-item.modula-hover-v2 .figc .modula-title,
+	.modula-items .modula-item.modula-hover-v2 .figc .jtg-description,
+	.modula-items .modula-item.modula-hover-v2 .figc .modula-social {
+		transition: none !important;
+		animation: none !important;
+	}
 
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-up .figc .modula-title {
-	opacity: 0;
-	transform: translate(var(--modula-hover-slot-anchor-title, 0%),
-			calc(-50% + 12px));
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-up:hover .figc .modula-title,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-up:focus-within:has(:focus-visible) .figc .modula-title {
-	opacity: 1;
-	transform: translate(var(--modula-hover-slot-anchor-title, 0%), -50%);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-up .figc .jtg-description {
-	opacity: 0;
-	transform: translate(var(--modula-hover-slot-anchor-caption, 0%),
-			calc(-50% + 12px));
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-up:hover .figc .jtg-description,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-up:focus-within:has(:focus-visible) .figc .jtg-description {
-	opacity: 1;
-	transform: translate(var(--modula-hover-slot-anchor-caption, 0%), -50%);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-up .figc .modula-social {
-	opacity: 0;
-	transform: translate(var(--modula-hover-slot-anchor-social, 0%),
-			calc(-50% + 12px));
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-up:hover .figc .modula-social,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-up:focus-within:has(:focus-visible) .figc .modula-social {
-	opacity: 1;
-	transform: translate(var(--modula-hover-slot-anchor-social, 0%), -50%);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-down .figc .modula-title {
-	opacity: 0;
-	transform: translate(var(--modula-hover-slot-anchor-title, 0%),
-			calc(-50% - 12px));
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-down:hover .figc .modula-title,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-down:focus-within:has(:focus-visible) .figc .modula-title {
-	opacity: 1;
-	transform: translate(var(--modula-hover-slot-anchor-title, 0%), -50%);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-down .figc .jtg-description {
-	opacity: 0;
-	transform: translate(var(--modula-hover-slot-anchor-caption, 0%),
-			calc(-50% - 12px));
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-down:hover .figc .jtg-description,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-down:focus-within:has(:focus-visible) .figc .jtg-description {
-	opacity: 1;
-	transform: translate(var(--modula-hover-slot-anchor-caption, 0%), -50%);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-down .figc .modula-social {
-	opacity: 0;
-	transform: translate(var(--modula-hover-slot-anchor-social, 0%),
-			calc(-50% - 12px));
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-down:hover .figc .modula-social,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-down:focus-within:has(:focus-visible) .figc .modula-social {
-	opacity: 1;
-	transform: translate(var(--modula-hover-slot-anchor-social, 0%), -50%);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-left .figc .modula-title,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-left .figc .jtg-description,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-left .figc .modula-social {
-	opacity: 0;
-	transform: translate(calc(var(--modula-hover-slot-anchor, 0%) + 16px),
-			-50%);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-left:hover .figc .modula-title,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-left:focus-within:has(:focus-visible) .figc .modula-title,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-left:hover .figc .jtg-description,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-left:focus-within:has(:focus-visible) .figc .jtg-description,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-left:hover .figc .modula-social,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-left:focus-within:has(:focus-visible) .figc .modula-social {
-	opacity: 1;
-	transform: translate(var(--modula-hover-slot-anchor, 0%), -50%);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-right .figc .modula-title,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-right .figc .jtg-description,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-right .figc .modula-social {
-	opacity: 0;
-	transform: translate(calc(var(--modula-hover-slot-anchor, 0%) - 16px),
-			-50%);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-right:hover .figc .modula-title,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--slide-right:focus-within:has(:focus-visible) .figc .modula-title,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-right:hover .figc .jtg-description,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--slide-right:focus-within:has(:focus-visible) .figc .jtg-description,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-right:hover .figc .modula-social,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--slide-right:focus-within:has(:focus-visible) .figc .modula-social {
-	opacity: 1;
-	transform: translate(var(--modula-hover-slot-anchor, 0%), -50%);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--blur-in .figc .modula-title,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--blur-in .figc .jtg-description,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--blur-in .figc .modula-social {
-	opacity: 0;
-	transform: translate(var(--modula-hover-slot-anchor, 0%), -50%);
-	filter: blur(5px);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--blur-in:hover .figc .modula-title,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--blur-in:focus-within:has(:focus-visible) .figc .modula-title,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--blur-in:hover .figc .jtg-description,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--blur-in:focus-within:has(:focus-visible) .figc .jtg-description,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--blur-in:hover .figc .modula-social,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--blur-in:focus-within:has(:focus-visible) .figc .modula-social {
-	opacity: 1;
-	transform: translate(var(--modula-hover-slot-anchor, 0%), -50%);
-	filter: blur(0);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--scale .figc .modula-title {
-	opacity: 0;
-	transform: translate(var(--modula-hover-slot-anchor-title, 0%), -50%) scale(0.94);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--scale:hover .figc .modula-title,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--title--scale:focus-within:has(:focus-visible) .figc .modula-title {
-	opacity: 1;
-	transform: translate(var(--modula-hover-slot-anchor-title, 0%), -50%) scale(1);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--scale .figc .jtg-description {
-	opacity: 0;
-	transform: translate(var(--modula-hover-slot-anchor-caption, 0%), -50%) scale(0.94);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--scale:hover .figc .jtg-description,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--caption--scale:focus-within:has(:focus-visible) .figc .jtg-description {
-	opacity: 1;
-	transform: translate(var(--modula-hover-slot-anchor-caption, 0%), -50%) scale(1);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--scale .figc .modula-social {
-	opacity: 0;
-	transform: translate(var(--modula-hover-slot-anchor-social, 0%), -50%) scale(0.94);
-}
-
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--scale:hover .figc .modula-social,
-.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-enter--social--scale:focus-within:has(:focus-visible) .figc .modula-social {
-	opacity: 1;
-	transform: translate(var(--modula-hover-slot-anchor-social, 0%), -50%) scale(1);
+	.modula-items .modula-item.modula-hover-v2:is(.modula-hover-card--lift, .modula-hover-card--tilt, .modula-hover-card--spotlight):is(:hover, :focus-within),
+	.modula-items .modula-item.modula-hover-v2:is(.modula-hover-card--zoom, .modula-hover-card--pan):is(:hover, :focus-within) :is(.modula-item-hover-media, .modula-showcase__hover-media, .modula-item-picture-stack, .modula-showcase__img, .modula-item-content img, .modula-item-picture img) {
+		transform: none !important;
+	}
 }
 
 /*
- * Interaction → “No animation for people who ask for less” (visitor frontend only).
- * Root gets `.modula-respect-reduced-motion` when the setting is On (not in editor preview).
- * When the OS also asks for less motion, drop all gallery animations/transitions.
+ * Reduced motion (visitor frontend only). Every visitor root gets
+ * `.modula-respect-reduced-motion`, whatever the gallery's "No animation for
+ * people who ask for less" setting (maintainer, Motion ticket 05); the editor
+ * preview does not. When the OS asks for less motion, drop all gallery
+ * animations, transitions and hover movement.
  */
 .modula.modula-gallery.modula-respect-reduced-motion {
 	@media (prefers-reduced-motion: reduce) {
@@ -748,15 +887,26 @@
 			scroll-behavior: auto !important;
 		}
 
-		.modula-items .modula-item.modula-hover-v2,
-		.modula-items .modula-item.modula-hover-v2 .modula-item-content img,
-		.modula-items .modula-item.modula-hover-v2 .modula-item-picture img,
-		.modula-items .modula-item.modula-hover-v2 .modula-item-overlay,
-		.modula-items .modula-item.modula-hover-v2 .figc .modula-title,
-		.modula-items .modula-item.modula-hover-v2 .figc .jtg-description,
-		.modula-items .modula-item.modula-hover-v2 .figc .modula-social {
-			transition: none !important;
-			animation: none !important;
-		}
+		@include hover-held;
+	}
+}
+
+/*
+ * Motion held here and now (gallery-shared useGalleryMotionAllowed: a phone
+ * while Animate on phones is off), in the visitor gallery and the editor
+ * preview's Phone viewport: hover moves, the legacy hover effects
+ * (`effect-*`, no transitions) and the loading effects (the entrance's
+ * Custom choice) hold still. Captions and Darken on hover still show on tap.
+ */
+.modula-motion-held {
+
+	@include hover-held;
+
+	.modula-items,
+	.modula-items *,
+	.modula-items *::before,
+	.modula-items *::after {
+		animation: none !important;
+		transition: none !important;
 	}
 }

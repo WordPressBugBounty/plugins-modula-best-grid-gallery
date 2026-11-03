@@ -1,7 +1,7 @@
 /**
  * Opens the Instagram import/manage modal from the Advanced drill.
  */
-import { Button } from 'shared-ui';
+import { Button } from 'admin-ui';
 import { __ } from '@wordpress/i18n';
 import { requestExtensionImportOpen } from '../../platform/extensionImportRegistry';
 
@@ -23,7 +23,6 @@ export default function InstagramManagePhotosButton({
 	return (
 		<div className="modula-settings-editor__action-button-wrap">
 			<Button
-				variant="panel"
 				disabled={disabled}
 				onClick={() => requestExtensionImportOpen('instagram')}
 			>

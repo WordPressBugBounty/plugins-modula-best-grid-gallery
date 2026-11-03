@@ -4,7 +4,7 @@ Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPres
 Requires at least: 5.3
 Tested up to: 7.1
 Requires PHP: 5.6
-Stable tag: 3.0.16
+Stable tag: 3.0.17
 
 License: GNU General Public License v3.0 or later  
 
@@ -325,6 +325,24 @@ The simplest way to install is to click on 'Plugins' then 'Add' and type 'Modula
 4. Mobile Responsive Image Galleries - Galleries automatically adapt to smartphone and tablet screen sizes
 
 == Changelog ==
+
+= 3.0.17 - 22.10.2026 =
+Improved: The new gallery editor has a cleaner layout, with settings grouped into tabs, a setting search, and a preview that shows hover effects as visitors will see them.
+Improved: In the new gallery editor, clicking an image selects it, and Edit image opens its settings.
+Improved: Sort opens a menu under the toolbar, and drag-and-drop reorder opens as a grid of thumbnails.
+Added: A + button in the new gallery editor creates a new gallery without leaving the editor.
+Added: Gallery width can be set in px or %.
+Fixed: Custom CSS keeps its line breaks and indentation when saved, the cursor no longer jumps while you type, and Tab indents.
+Improved: The notice shown when SiteGround Optimizer or Avada lazy loading is active now explains that they load your gallery images.
+Added: A Motion tab in the new gallery editor, with entrance animations, hover effects and an Animate on phones switch, previewed on the canvas.
+Improved: The tablet and phone previews show the gallery as visitors on those devices see it.
+Fixed: The lightbox's thumbnail strip on the right sits at the edge of the screen again.
+Fixed: Saving while dragging or resizing an image in a Custom Grid no longer undoes the change, and a full row keeps its last image.
+Fixed: Custom Grid galleries show the Gallery width setting.
+Fixed: Galleries that used the classic "Under Image" style keep their title and caption under the image.
+Fixed: Content that other plugins print around a gallery, such as schema data, stays on the page.
+Fixed: The Classic Editor's gallery dialog works on WordPress 7.2.
+Fixed: No more PHP 8.4 deprecation notices on admin pages with debugging on.
 
 = 3.0.16 - 22.10.2026 =
 Fixed: Copy shortcode works on sites that are not served over HTTPS.

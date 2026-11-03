@@ -1,6 +1,12 @@
+@use '../styles/mixins';
+
 .modula-admin-plan-badge {
+	@include mixins.control-label;
 	display: inline-flex;
+	flex-shrink: 0;
 	align-items: center;
+	gap: 4px;
+	box-sizing: border-box;
 	height: 24px;
 	padding: 0 10px;
 	border-radius: var(--modula-admin-radius-pill);
@@ -8,6 +14,48 @@
 	color: var(--modula-admin-plan-ink);
 	font-size: var(--modula-admin-text-badge);
 	font-weight: 500;
+	white-space: nowrap;
+
+	// A button pill (opens the upsell). Only the button chrome that the
+	// tones below do not set is reset, so they keep their fill and padding.
+	&.is-action {
+		margin: 0;
+		border: 0;
+		box-shadow: none;
+		font-family: inherit;
+		cursor: pointer;
+
+		&:focus-visible {
+			@include mixins.focus-ring;
+		}
+	}
+
+	// The editor's PRO pills: tracked caps.
+	&.is-outline,
+	&.is-solid {
+		font-size: var(--modula-admin-text-pill);
+		font-weight: 600;
+		letter-spacing: 0.05em;
+	}
+
+	&.is-outline {
+		height: 20px;
+		padding: 0 8px;
+		border: 1px solid var(--modula-admin-border-strong);
+		background: transparent;
+		color: var(--modula-admin-ink-soft);
+	}
+
+	&.is-solid {
+		height: 26px;
+		padding: 0 9px 0 7px;
+		background: var(--modula-admin-ink);
+		color: var(--modula-admin-ink-inverse);
+	}
+
+	&.is-solid.is-action:hover {
+		background: var(--modula-admin-ink-hover);
+	}
 }
 
 .modula-admin-locked__fieldset {

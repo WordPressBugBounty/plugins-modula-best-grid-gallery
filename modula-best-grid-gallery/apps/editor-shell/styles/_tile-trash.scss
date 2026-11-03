@@ -1,0 +1,52 @@
+@use 'variables' as *;
+
+// The canvas tile's trash ("Remove from gallery" / "Remove from album",
+// canvas "1 · Editor" `.hf-trash`): a round button at the tile's top right.
+// Mixin only: this file emits no CSS. Each editor includes it in its trash
+// rule and shows the button (opacity 1) on tile hover or keyboard focus.
+// The canvas values are written out: the canvas sits outside the admin-ui
+// scope, so its tokens do not reach here. The hover red is admin-ui's danger
+// fill.
+@mixin tile-trash {
+	position: absolute;
+	top: $mod-space-8;
+	right: $mod-space-8;
+	z-index: 3;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: 16px;
+	background: rgba(28, 27, 25, 0.72);
+	color: #fff;
+	opacity: 0;
+	cursor: pointer;
+	pointer-events: auto;
+	appearance: none;
+	transition:
+		opacity 0.12s ease,
+		background-color 0.12s ease;
+
+	svg {
+		/* Stroke icon: do not take the fill above. */
+		fill: none;
+	}
+
+	&:hover {
+		background: #a3261b;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		outline: 2px solid #fff;
+		outline-offset: 2px;
+	}
+}

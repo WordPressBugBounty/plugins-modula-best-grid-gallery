@@ -14,10 +14,17 @@
 	overflow: visible;
 }
 
-/* Fixed tooltip next to the pointer (rendered via portal on body). */
+/*
+ * Fixed tooltip next to the pointer (portaled on body, shown in the top layer
+ * as a manual popover). JS sets left/top, so the UA popover box is reset:
+ * its inset: 0 + margin: auto would centre the panel in the viewport.
+ */
 .modula-caption-popover__panel {
 	position: fixed;
 	z-index: 100000;
+	inset: auto;
+	margin: 0;
+	border: 0;
 	width: max-content;
 	max-width: min(280px, calc(100vw - 16px));
 	max-height: min(200px, 40vh);
@@ -63,5 +70,28 @@
 		&:last-child {
 			margin-bottom: 0;
 		}
+	}
+}
+
+/*
+ * Hover: the panel follows the cursor and cannot be scrolled, so long copy is
+ * clamped instead of cut mid-line by max-height.
+ */
+.modula-caption-popover__panel--hover {
+	overflow: hidden;
+
+	.modula-caption-popover__title,
+	.modula-caption-popover__description {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.modula-caption-popover__title {
+		-webkit-line-clamp: 2;
+	}
+
+	.modula-caption-popover__description {
+		-webkit-line-clamp: 4;
 	}
 }

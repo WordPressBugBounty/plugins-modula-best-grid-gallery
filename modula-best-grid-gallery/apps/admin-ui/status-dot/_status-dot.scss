@@ -1,0 +1,40 @@
+// The design's 8px status dot, with its label and an optional hint line
+// that starts under the dot.
+.modula-admin-status-dot {
+	display: inline-grid;
+	grid-template-columns: 8px auto;
+	align-items: center;
+	gap: 2px 8px;
+	color: var(--modula-admin-ink);
+	font-size: var(--modula-admin-text-control);
+}
+
+.modula-admin-status-dot__dot {
+	box-sizing: border-box;
+	width: 8px;
+	height: 8px;
+	border-radius: var(--modula-admin-radius-pill);
+	background: var(--modula-admin-ink-disabled);
+
+	.is-publish > & {
+		background: var(--modula-admin-success);
+	}
+
+	.is-draft > & {
+		border: 1.5px dashed var(--modula-admin-border-field);
+		background: none;
+	}
+
+	.is-private > & {
+		background: var(--modula-admin-ink-muted);
+	}
+}
+
+.modula-admin-status-dot__hint {
+	display: flex;
+	grid-column: 1 / -1;
+	align-items: center;
+	gap: 6px;
+	color: var(--modula-admin-ink-muted);
+	font-size: var(--modula-admin-text-caption);
+}

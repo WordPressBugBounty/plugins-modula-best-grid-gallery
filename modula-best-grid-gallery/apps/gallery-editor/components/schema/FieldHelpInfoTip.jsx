@@ -4,9 +4,10 @@
  * Under-control help is intentionally empty in the compact settings panel.
  */
 
-import { Tooltip } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Icon, info } from '@wordpress/icons';
+import { Tooltip } from 'admin-ui';
+import { AdminUiScope } from 'editor-shell';
 import { resolveFieldHelpTipText } from '../field/fieldControlHelp';
 
 /**
@@ -21,14 +22,20 @@ export default function FieldHelpInfoTip({ field }) {
 	}
 	const tipName = __('More information', 'modula-best-grid-gallery');
 	return (
-		<Tooltip text={tipText} delay={0} hideOnClick={false}>
-			<button
-				type="button"
-				className="modula-settings-editor__field-path-tip"
-				aria-label={tipName}
-			>
-				<Icon icon={info} size={16} />
-			</button>
-		</Tooltip>
+		<AdminUiScope>
+			<Tooltip
+				text={tipText}
+				trigger={(triggerProps) => (
+					<button
+						type="button"
+						className="modula-settings-editor__field-path-tip"
+						aria-label={tipName}
+						{...triggerProps}
+					>
+						<Icon icon={info} size={16} />
+					</button>
+				)}
+			/>
+		</AdminUiScope>
 	);
 }

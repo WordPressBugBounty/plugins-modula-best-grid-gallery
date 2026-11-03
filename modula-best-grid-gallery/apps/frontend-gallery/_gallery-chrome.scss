@@ -4,7 +4,7 @@
  *
  * @package
  */
-@use '../shared-styles/radii' as *;
+@use 'radii' as *;
 
 .modula .filters {
 	margin-bottom: 1rem;
@@ -259,78 +259,55 @@
 	gap: 0.65rem;
 }
 
-.modula-gallery-filter-layout--left>.modula-items,
-.modula-gallery-filter-layout--right>.modula-items,
-.modula-gallery-filter-layout--left-right>.modula-items {
+/* A shell whose bars sit beside the layout. */
+$side-filter-shells: ":is(.modula-gallery-filter-layout--left, .modula-gallery-filter-layout--right, .modula-gallery-filter-layout--left-right)";
+
+/*
+ * The layout's root, whatever its class: Grid's is
+ * `.modula-masonry-react-host`, not `.modula-items`. A bar's loading
+ * placeholder is not the layout.
+ */
+$side-filter-layout-child: ":not(.filters, .modula-gallery__chunk-loading)";
+
+/*
+ * The layout fills the row between the bars, which keep the DOM order the
+ * gallery renders them in: before and/or after the layout.
+ */
+#{$side-filter-shells}>#{$side-filter-layout-child} {
 	flex: 1 1 auto;
 	min-width: 0;
 }
 
-.modula-gallery-filter-layout--right>.filters {
-	order: 2;
-}
+// Side bars stacked above the layout, full width, their chips in a row.
+@mixin side-filters-stacked($shells) {
+	#{$shells} {
+		flex-direction: column;
+	}
 
-.modula-gallery-filter-layout--right>.modula-items {
-	order: 1;
-}
+	#{$shells}>.filters {
+		max-width: none;
+		width: 100%;
+	}
 
-.modula-gallery-filter-layout--left-right>.filters:first-of-type {
-	order: 1;
-}
+	#{$shells}>.filters .modula_menu__list {
+		flex-direction: row;
+		flex-wrap: wrap;
+	}
 
-.modula-gallery-filter-layout--left-right>.modula-items {
-	order: 2;
-}
-
-.modula-gallery-filter-layout--left-right>.filters:last-of-type {
-	order: 3;
+	/* Stacked, every bar sits above the tiles. */
+	#{$shells}>#{$side-filter-layout-child} {
+		order: 1;
+	}
 }
 
 @media screen and (max-width: 782px) {
 
-	.modula-gallery-filter-layout--left,
-	.modula-gallery-filter-layout--right,
-	.modula-gallery-filter-layout--left-right {
-		flex-direction: column;
-	}
-
-	.modula-gallery-filter-layout--left>.filters,
-	.modula-gallery-filter-layout--right>.filters,
-	.modula-gallery-filter-layout--left-right>.filters {
-		max-width: none;
-		width: 100%;
-		order: 0;
-	}
-
-	.modula-gallery-filter-layout--left>.filters .modula_menu__list,
-	.modula-gallery-filter-layout--right>.filters .modula_menu__list,
-	.modula-gallery-filter-layout--left-right>.filters .modula_menu__list {
-		flex-direction: row;
-		flex-wrap: wrap;
-	}
+	@include side-filters-stacked($side-filter-shells);
 }
 
-/* Settings-editor phone canvas: window is still desktop-wide. */
-.modula[data-preview-viewport='mobile'] {
-
-	.modula-gallery-filter-layout--left,
-	.modula-gallery-filter-layout--right,
-	.modula-gallery-filter-layout--left-right {
-		flex-direction: column;
-	}
-
-	.modula-gallery-filter-layout--left>.filters,
-	.modula-gallery-filter-layout--right>.filters,
-	.modula-gallery-filter-layout--left-right>.filters {
-		max-width: none;
-		width: 100%;
-		order: 0;
-	}
-
-	.modula-gallery-filter-layout--left>.filters .modula_menu__list,
-	.modula-gallery-filter-layout--right>.filters .modula_menu__list,
-	.modula-gallery-filter-layout--left-right>.filters .modula_menu__list {
-		flex-direction: row;
-		flex-wrap: wrap;
-	}
-}
+/*
+ * The settings editor's tablet (768px) and phone (390px) canvas: the admin
+ * window stays wider than the query above, so the shell carries the device
+ * the canvas previews (Lite ticket 101).
+ */
+@include side-filters-stacked("#{$side-filter-shells}:is([data-preview-viewport='tablet'], [data-preview-viewport='mobile'])");

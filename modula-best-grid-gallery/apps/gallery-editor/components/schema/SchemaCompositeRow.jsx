@@ -4,11 +4,16 @@
 
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Tabs } from 'shared-ui';
+import {
+	AdminUiScope,
+	DEVICE_ROW_LAYOUT,
+	DependentRowIcon,
+} from 'editor-shell';
 import { getGroupKeyFromGroupedPath } from '../../data/formSchema';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
 import { getByPath } from '../../logic/getByPath';
 import { resetSettingsFieldValue } from '../../logic/settingsFieldDefault';
+import DeviceSwitch, { deviceLabel } from '../field/DeviceSwitch';
 import SchemaFieldRow from './SchemaFieldRow';
 import SchemaFieldDirtyChrome from './SchemaFieldDirtyChrome';
 
@@ -48,7 +53,21 @@ function differsFromDefault(current, defaultValue) {
  * @param {Object[]} props.fields   Enriched schema fields sharing the same `editorUi.row`.
  * @param {boolean}  props.disabled
  */
-export default function SchemaCompositeRow({ fields, disabled }) {
+export default function SchemaCompositeRow(props) {
+	// Pro renders composite rows through the host too; see SchemaFieldRow.
+	return (
+		<AdminUiScope>
+			<SchemaCompositeRowContent {...props} />
+		</AdminUiScope>
+	);
+}
+
+/**
+ * @param {Object}   props
+ * @param {Object[]} props.fields
+ * @param {boolean}  props.disabled
+ */
+function SchemaCompositeRowContent({ fields, disabled }) {
 	const n = fields.length;
 	const withHeading = fields[0]?.editorUi?.compositeHeading === true;
 	const dividerBefore = fields[0]?.editorUi?.compositeDividerBefore === true;
@@ -96,7 +115,7 @@ export default function SchemaCompositeRow({ fields, disabled }) {
 
 		return (
 			<div
-				className={`modula-settings-editor__field-row modula-settings-editor__field-row--composite modula-settings-editor__field-row--composite-with-heading modula-settings-editor__field-row--device-tabs${
+				className={`modula-settings-editor__field-row modula-settings-editor__field-row--composite modula-settings-editor__field-row--composite-with-heading modula-settings-editor__field-row--device-tabs modula-settings-editor__field-row--layout-${DEVICE_ROW_LAYOUT}${
 					dividerBefore
 						? ' modula-settings-editor__field-row--composite-divider-before'
 						: ''
@@ -119,51 +138,43 @@ export default function SchemaCompositeRow({ fields, disabled }) {
 								getGroupKeyFromGroupedPath(activeField);
 							const activeFieldName = `${activeGroupKey}.${activeField.groupedKey}`;
 
-							const options = sorted.map((field, i) => {
-								const key = deviceKeys[i];
-								const label =
+							const devices = sorted.map((field, i) => ({
+								value: deviceKeys[i],
+								label:
 									typeof field.editorLabel === 'string' &&
 									field.editorLabel !== ''
 										? field.editorLabel
-										: key;
-								const current = getByPath(
-									values,
-									field.groupedPath
-								);
-								const def = field.schema?.default;
-								return {
-									value: key,
-									label,
-									dirty: differsFromDefault(current, def),
-								};
-							});
+										: deviceLabel(deviceKeys[i]),
+							}));
 							return (
-								<>
+								// One line: title, reset dot and device switch
+								// (the slider's value box joins it; canvas).
+								<div className="modula-settings-editor__composite-stack-heading-row">
+									<DependentRowIcon />
 									{stackTitle ? (
-										<div className="modula-settings-editor__composite-stack-heading-row">
-											<SchemaFieldDirtyChrome
-												dirty={dirtyActive}
-												onReset={() => {
-													resetSettingsFieldValue(
-														form,
-														activeFieldName,
-														activeField.schema,
-														activeField.groupedPath
-													);
-												}}
-											>
-												<div className="modula-settings-editor__composite-stack-heading">
-													{stackTitle}
-												</div>
-											</SchemaFieldDirtyChrome>
-										</div>
+										<SchemaFieldDirtyChrome
+											label={stackTitle}
+											dirty={dirtyActive}
+											onReset={() => {
+												resetSettingsFieldValue(
+													form,
+													activeFieldName,
+													activeField.schema,
+													activeField.groupedPath
+												);
+											}}
+										>
+											<div className="modula-settings-editor__composite-stack-heading">
+												{stackTitle}
+											</div>
+										</SchemaFieldDirtyChrome>
 									) : null}
-									<Tabs
-										options={options}
+									<DeviceSwitch
+										devices={devices}
 										value={activeDevice}
 										onChange={setActiveDevice}
 										disabled={disabled}
-										aria-label={
+										label={
 											stackTitle ||
 											__(
 												'Device',
@@ -171,7 +182,7 @@ export default function SchemaCompositeRow({ fields, disabled }) {
 											)
 										}
 									/>
-								</>
+								</div>
 							);
 						}}
 					</form.Subscribe>

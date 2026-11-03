@@ -93,14 +93,15 @@ class Modula_Compatibility {
 	 */
 	public function modula_lazyloading_compatibilty_admin( $tab_content ) {
 
+		// Modula keeps the `lazyload` class and the `src` on its images, so the detected loader lazy loads them.
 		if ( $this->sg_optimizer_check() ) {
-			$compatibility_description = esc_html__( 'We detected that you are using Site Ground Optimizer lazyloading software that conflicts with ours. If you wish to use ours, please disable Site Ground\'s lazy loading. Else, our lazy loading will be disabled by default.', 'modula-best-grid-gallery' );
+			$compatibility_description = esc_html__( 'We detected that SiteGround Optimizer lazy loading is enabled. Modula turns off its own lazy loading and lets SiteGround Optimizer lazy load your gallery images. To use Modula\'s lazy loading instead, disable lazy loading in SiteGround Optimizer.', 'modula-best-grid-gallery' );
 
 			$tab_content .= $this->generate_compatibility_box( $compatibility_description );
 		}
 
 		if ( $this->avada_check() ) {
-			$compatibility_description = esc_html__( 'We detected that you are using Avada lazyloading software that conflicts with ours. If you wish to use ours, please disable Avada\'s lazy loading. Else, our lazy loading will be disabled by default.', 'modula-best-grid-gallery' );
+			$compatibility_description = esc_html__( 'We detected that Avada lazy loading is enabled. Modula turns off its own lazy loading and lets Avada lazy load your gallery images. To use Modula\'s lazy loading instead, disable lazy loading in Avada.', 'modula-best-grid-gallery' );
 
 			$tab_content .= $this->generate_compatibility_box( $compatibility_description );
 		}

@@ -13,10 +13,10 @@ function safeColor(value) {
 }
 
 /**
- * @param {string} align
- * @return {string}
+ * @param {string} align The "Alignment" setting (`filterTextAlignment`).
+ * @return {string} Its flex value, or '' for Inherit.
  */
-function flexAlignValue(align) {
+export function flexAlignValue(align) {
 	switch (align) {
 		case 'center':
 			return 'center';
@@ -30,8 +30,8 @@ function flexAlignValue(align) {
 }
 
 /**
- * @param {string} positioning
- * @return {boolean}
+ * @param {string} positioning The "Position" setting (`filterPositioning`).
+ * @return {boolean} Whether the bar stands beside the content.
  */
 function isVerticalFilterLayout(positioning) {
 	return ['left', 'right', 'left_right'].includes(positioning || 'top');
@@ -41,7 +41,7 @@ function isVerticalFilterLayout(positioning) {
  * @param {string} root           Gallery root selector (e.g. `#modula-123`).
  * @param {Object} groupedFilters `settings.filters`
  * @param {Object} config         Derived flat config.
- * @return {string}
+ * @return {string} The bar's alignment and colour rules, or '' when none is set.
  */
 export function buildFilterBarDynamicCss(root, groupedFilters, config) {
 	let css = '';
@@ -83,14 +83,17 @@ export function buildFilterBarDynamicCss(root, groupedFilters, config) {
 		}
 	}
 
+	// The chips by their class: the visitor's are links, the Filters tab's
+	// static ones spans (Lite ticket 99). Hover stays on the visitor's links,
+	// as nothing in the static bar responds.
 	if (filterLinkColor) {
-		css += `${root}.modula-gallery .filters a{color:${filterLinkColor} !important;}`;
+		css += `${root}.modula-gallery .filters .modula_menu__link{color:${filterLinkColor} !important;}`;
 	}
 
 	if (filterLinkHoverColor) {
 		css +=
-			`${root}.modula-gallery .filters a:hover,` +
-			`${root}.modula-gallery .filters li.modula_menu__item--current a{color:${filterLinkHoverColor} !important;border-bottom-color:${filterLinkHoverColor} !important;}`;
+			`${root}.modula-gallery .filters a.modula_menu__link:hover,` +
+			`${root}.modula-gallery .filters .modula_menu__item--current .modula_menu__link{color:${filterLinkHoverColor} !important;border-bottom-color:${filterLinkHoverColor} !important;}`;
 	}
 
 	return css;

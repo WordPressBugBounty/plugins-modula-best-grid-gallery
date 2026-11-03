@@ -16,12 +16,12 @@ export default {
 			hubSections: [
 				{
 					type: "submenu",
-					label: __( "Structure", 'modula-best-grid-gallery' ),
+					id: "hub",
+					role: "hub",
 					items: [
 						{
 							type: "field",
-							groupedPath: "general.type",
-							fieldPresentation: "embedded"
+							groupedPath: "general.type"
 						},
 						{
 							type: "field",
@@ -33,377 +33,361 @@ export default {
 							}
 						},
 						{
-							type: "drill",
-							label: __( "Gallery layout", 'modula-best-grid-gallery' ),
-							icon: "layout",
-							summaryKind: "galleryLayout",
-							visibleWhen: {
-								all: [
-									{
-										path: "general.type",
-										neq: "slider"
-									},
-									{
-										path: "general.type",
-										neq: "story"
-									},
-									{
-										path: "general.type",
-										neq: "showcase"
-									},
-									{
-										path: "general.type",
-										neq: "template"
-									},
-									{
-										path: "general.type",
-										neq: "freeform"
-									}
-								]
-							},
-							groupedPaths: [
-								"general.width",
-								"general.alignment",
-								"video.maxHeight",
-								"general.height",
-								"layout.gridType",
-								"polaroid.uniformSize",
-								"polaroid.uniformColumns",
-								"layout.uniformGridTileAspect",
-								"layout.uniformGridTileAspectCustom",
-								"layout.fitGridImageAlign",
-								"layout.gridRowHeight",
-								"layout.gridJustifyLastRow",
-								"layout.gutter",
-								"layout.tabletGutter",
-								"layout.mobileGutter",
-								"layout.gridImageSize",
-								"layout.gridImageDimensions",
-								"layout.gridImageCrop",
-								"layout.parallaxOverlayEnabled",
-								"layout.parallaxOverlayBackground",
-								"layout.parallaxCaption",
-								"layout.parallaxMotionPreset",
-								"general.randomFactor",
-								"polaroid.randomFactor",
-								"polaroid.rotationMax",
-								"polaroid.scatterMax",
-								"polaroid.showPin",
-								"polaroid.framePadding",
-								"polaroid.chinHeight",
-								"general.shuffle"
-							]
-						},
-						{
-							type: "drill",
-							label: __( "Gallery layout", 'modula-best-grid-gallery' ),
-							icon: "layout",
-							summaryKind: "galleryLayout",
-							visibleWhen: {
-								path: "general.type",
-								eq: "template"
-							},
-							groupedPaths: [
-								"general.width",
-								"general.alignment"
-							]
-						},
-						{
-							type: "drill",
-							label: __( "Gallery layout", 'modula-best-grid-gallery' ),
-							icon: "layout",
-							visibleWhen: {
-								path: "general.type",
-								eq: "freeform"
-							},
-							groupedPaths: [
-								"general.width",
-								"general.alignment",
-								"layout.gutter",
-								"layout.tabletGutter",
-								"layout.mobileGutter",
-								"layout.gridImageSize",
-								"layout.gridImageDimensions",
-								"layout.gridImageCrop"
-							]
-						},
-						{
-							type: "drill",
-							label: __( "Gallery layout", 'modula-best-grid-gallery' ),
-							icon: "gallery",
-							prependGroupedPaths: [
-								"slider.sectionSize",
-								"general.width",
-								"general.alignment"
-							],
-							group: "slider",
-							summaryParts: [
-								{
-									path: "general.width",
-									type: "text",
-									template: __( "{value}", 'modula-best-grid-gallery' )
-								},
-								{
-									path: "slider.slidesToShow",
-									type: "text",
-									template: __( "{value} visible", 'modula-best-grid-gallery' )
-								}
-							],
-							visibleWhen: {
-								path: "general.type",
-								eq: "slider"
-							}
-						},
-						{
-							type: "drill",
-							label: __( "Gallery layout", 'modula-best-grid-gallery' ),
-							icon: "gallery",
-							prependGroupedPaths: [
-								"story.sectionSize",
-								"general.width",
-								"general.alignment"
-							],
-							group: "story",
-							summaryParts: [
-								{
-									path: "general.width",
-									type: "text",
-									template: __( "{value}", 'modula-best-grid-gallery' )
-								},
-								{
-									path: "story.infinite",
-									type: "truthy",
-									trueLabel: "loop",
-									falseLabel: "once"
-								}
-							],
-							visibleWhen: {
-								path: "general.type",
-								eq: "story"
-							}
-						},
-						{
-							type: "drill",
-							label: __( "Gallery layout", 'modula-best-grid-gallery' ),
-							icon: "gallery",
-							prependGroupedPaths: [
-								"showcase.sectionLayout",
-								"general.width",
-								"general.alignment"
-							],
-							group: "showcase",
-							summaryParts: [
-								{
-									path: "general.width",
-									type: "text",
-									template: __( "{value}", 'modula-best-grid-gallery' )
-								},
-								{
-									path: "showcase.visibleCount",
-									type: "text",
-									template: __( "{value} visible", 'modula-best-grid-gallery' )
-								}
-							],
-							visibleWhen: {
-								path: "general.type",
-								eq: "showcase"
-							}
+							type: "field",
+							groupedPath: "layout.gridType"
 						},
 						{
 							type: "field",
-							groupedPath: "pagination.enablePagination",
-							icon: "queryPagination",
-							visibleWhen: {
-								all: [
-									{
-										path: "general.type",
-										neq: "slider"
-									},
-									{
-										path: "general.type",
-										neq: "story"
-									},
-									{
-										path: "general.type",
-										neq: "showcase"
-									},
-									{
-										path: "general.type",
-										neq: "template"
-									},
-									{
-										path: "general.type",
-										neq: "freeform"
-									},
-									{
-										path: "general.type",
-										neq: "parallax-masonry"
-									},
-									{
-										path: "general.type",
-										neq: "video"
-									},
-									{
-										path: "general.type",
-										neq: "bnb"
-									}
-								]
-							},
-							hubHelp: __( "Split large galleries into pages", 'modula-best-grid-gallery' )
+							groupedPath: "layout.uniformGridTileAspect"
 						},
 						{
 							type: "field",
-							groupedPath: "pagination.themeInheritControls",
-							icon: "styles"
+							groupedPath: "layout.uniformGridTileAspectCustom"
+						},
+						{
+							type: "field",
+							groupedPath: "layout.gridRowHeight"
+						},
+						{
+							type: "field",
+							groupedPath: "layout.fitGridImageAlign"
+						},
+						{
+							type: "field",
+							groupedPath: "layout.gridJustifyLastRow"
+						},
+						{
+							type: "field",
+							groupedPath: "layout.gutter"
+						},
+						{
+							type: "field",
+							groupedPath: "layout.tabletGutter"
+						},
+						{
+							type: "field",
+							groupedPath: "layout.mobileGutter"
+						},
+						{
+							type: "field",
+							groupedPath: "general.height"
+						},
+						{
+							type: "field",
+							groupedPath: "general.randomFactor"
+						},
+						{
+							type: "field",
+							groupedPath: "polaroid.randomFactor"
+						},
+						{
+							type: "field",
+							groupedPath: "polaroid.rotationMax"
+						},
+						{
+							type: "field",
+							groupedPath: "polaroid.uniformSize"
 						},
 						{
 							type: "drill",
-							label: __( "Page size & navigation", 'modula-best-grid-gallery' ),
-							icon: "queryPagination",
-							summaryKind: "pagination",
-							groupedPaths: [
-								"pagination.maxImagesCount",
-								"pagination.maxImagesCountMobile",
-								"pagination.enableInfiniteScroll",
-								"pagination.enableLoadMore",
-								"pagination.paginationNumber",
-								"pagination.paginationColor",
-								"pagination.activePaginationColor",
-								"pagination.paginationPosition"
-							],
+							id: "prints",
+							label: __( "Prints", 'modula-best-grid-gallery' ),
+							nestedUnder: "polaroid.uniformSize",
 							visibleWhen: {
-								all: [
-									{
-										path: "pagination.enablePagination",
-										truthy: true
-									},
-									{
-										path: "general.type",
-										neq: "slider"
-									},
-									{
-										path: "general.type",
-										neq: "story"
-									},
-									{
-										path: "general.type",
-										neq: "showcase"
-									},
-									{
-										path: "general.type",
-										neq: "template"
-									},
-									{
-										path: "general.type",
-										neq: "freeform"
-									},
-									{
-										path: "general.type",
-										neq: "parallax-masonry"
-									},
-									{
-										path: "general.type",
-										neq: "video"
-									},
-									{
-										path: "general.type",
-										neq: "bnb"
-									}
-								]
+								path: "polaroid.uniformSize",
+								truthy: true
 							},
-							hubHelp: __( "Images per page, scroll or load more, and control styling", 'modula-best-grid-gallery' )
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "Content", 'modula-best-grid-gallery' ),
-					items: [
-						{
-							type: "drill",
-							label: __( "Captions & titles", 'modula-best-grid-gallery' ),
-							group: "captions",
-							icon: "caption",
-							prependGroupedPaths: [
-								"slider.imageInfo",
-								"slider.imageInfoPosition"
-							],
-							summaryParts: [
+							items: [
 								{
-									path: "slider.imageInfoPosition",
-									type: "enum"
-								},
-								{
-									path: "captions.titleFontSize",
-									type: "text",
-									template: __( "{value}px", 'modula-best-grid-gallery' )
+									type: "field",
+									groupedPath: "polaroid.uniformColumns"
 								}
 							],
-							visibleWhen: {
-								path: "general.type",
-								eq: "slider"
-							}
+							groupedPaths: [
+								"polaroid.uniformColumns"
+							]
+						},
+						{
+							type: "field",
+							groupedPath: "layout.parallaxOverlayEnabled"
 						},
 						{
 							type: "drill",
-							label: __( "Captions & titles", 'modula-best-grid-gallery' ),
-							group: "captions",
-							icon: "caption",
-							summaryParts: [
+							id: "overlay",
+							label: __( "Overlay", 'modula-best-grid-gallery' ),
+							nestedUnder: "layout.parallaxOverlayEnabled",
+							visibleWhen: {
+								path: "layout.parallaxOverlayEnabled",
+								truthy: true
+							},
+							items: [
 								{
-									path: "captions.titleFontSize",
-									type: "text",
-									template: __( "{value}px", 'modula-best-grid-gallery' )
+									type: "field",
+									groupedPath: "layout.parallaxOverlayBackground"
 								}
 							],
-							visibleWhen: {
-								path: "general.type",
-								eq: "template"
-							}
+							groupedPaths: [
+								"layout.parallaxOverlayBackground"
+							]
+						},
+						{
+							type: "field",
+							groupedPath: "layout.parallaxMotionPreset"
+						},
+						{
+							type: "field",
+							groupedPath: "slider.slidesToShow"
+						},
+						{
+							type: "field",
+							groupedPath: "slider.arrows"
 						},
 						{
 							type: "drill",
-							label: __( "Captions & titles", 'modula-best-grid-gallery' ),
-							group: "captions",
-							icon: "caption",
-							summaryParts: [
+							id: "arrows",
+							label: __( "Arrows", 'modula-best-grid-gallery' ),
+							nestedUnder: "slider.arrows",
+							visibleWhen: {
+								path: "slider.arrows",
+								truthy: true
+							},
+							items: [
 								{
-									path: "captions.contentPlacement",
-									type: "enum"
-								},
-								{
-									path: "captions.titleFontSize",
-									type: "text",
-									template: __( "{value}px", 'modula-best-grid-gallery' )
+									type: "field",
+									groupedPath: "slider.arrowsInside"
 								}
 							],
-							visibleWhen: {
-								all: [
-									{
-										path: "general.type",
-										neq: "slider"
-									},
-									{
-										path: "general.type",
-										neq: "video"
-									},
-									{
-										path: "general.type",
-										neq: "template"
-									}
-								]
-							}
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "Appearance", 'modula-best-grid-gallery' ),
-					items: [
+							groupedPaths: [
+								"slider.arrowsInside"
+							]
+						},
+						{
+							type: "field",
+							groupedPath: "slider.dots"
+						},
+						{
+							type: "field",
+							groupedPath: "slider.autoplay"
+						},
 						{
 							type: "drill",
+							id: "slider-autoplay",
+							label: __( "Autoplay", 'modula-best-grid-gallery' ),
+							nestedUnder: "slider.autoplay",
+							visibleWhen: {
+								path: "slider.autoplay",
+								truthy: true
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "slider.pauseOnHover"
+								},
+								{
+									type: "field",
+									groupedPath: "slider.autoplaySpeed"
+								}
+							],
+							headless: true,
+							groupedPaths: [
+								"slider.pauseOnHover",
+								"slider.autoplaySpeed"
+							]
+						},
+						{
+							type: "field",
+							groupedPath: "slider.syncing"
+						},
+						{
+							type: "drill",
+							id: "thumbnails",
+							label: __( "Thumbnails", 'modula-best-grid-gallery' ),
+							nestedUnder: "slider.syncing",
+							visibleWhen: {
+								path: "slider.syncing",
+								truthy: true
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "slider.syncingNavSize"
+								},
+								{
+									type: "field",
+									groupedPath: "slider.syncingNavThumbnailsNumber"
+								},
+								{
+									type: "field",
+									groupedPath: "slider.syncingNavThumbnailsGutter"
+								},
+								{
+									type: "field",
+									groupedPath: "slider.syncingNavThumbnailsBorderColor"
+								}
+							],
+							headless: true,
+							groupedPaths: [
+								"slider.syncingNavSize",
+								"slider.syncingNavThumbnailsNumber",
+								"slider.syncingNavThumbnailsGutter",
+								"slider.syncingNavThumbnailsBorderColor"
+							]
+						},
+						{
+							type: "field",
+							groupedPath: "story.infinite"
+						},
+						{
+							type: "field",
+							groupedPath: "showcase.visibleCount"
+						},
+						{
+							type: "field",
+							groupedPath: "showcase.arrowPosition"
+						},
+						{
+							type: "field",
+							groupedPath: "showcase.autoplay"
+						},
+						{
+							type: "drill",
+							id: "showcase-autoplay",
+							label: __( "Autoplay", 'modula-best-grid-gallery' ),
+							nestedUnder: "showcase.autoplay",
+							visibleWhen: {
+								path: "showcase.autoplay",
+								truthy: true
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "showcase.autoplayInterval"
+								}
+							],
+							headless: true,
+							groupedPaths: [
+								"showcase.autoplayInterval"
+							]
+						},
+						{
+							type: "field",
+							groupedPath: "general.width"
+						},
+						{
+							type: "field",
+							groupedPath: "layout.gridImageSize"
+						},
+						{
+							type: "field",
+							groupedPath: "layout.gridImageDimensions"
+						},
+						{
+							type: "field",
+							groupedPath: "layout.gridImageCrop"
+						},
+						{
+							type: "field",
+							groupedPath: "polaroid.scatterMax"
+						},
+						{
+							type: "field",
+							groupedPath: "polaroid.showPin"
+						},
+						{
+							type: "field",
+							groupedPath: "polaroid.framePadding"
+						},
+						{
+							type: "field",
+							groupedPath: "polaroid.chinHeight"
+						},
+						{
+							type: "field",
+							groupedPath: "layout.parallaxCaption"
+						},
+						{
+							type: "field",
+							groupedPath: "slider.imageSize"
+						},
+						{
+							type: "field",
+							groupedPath: "slider.imageDimensions"
+						},
+						{
+							type: "field",
+							groupedPath: "slider.imageCrop"
+						},
+						{
+							type: "field",
+							groupedPath: "slider.adaptiveHeight"
+						},
+						{
+							type: "field",
+							groupedPath: "slider.slidesToScroll"
+						},
+						{
+							type: "field",
+							groupedPath: "slider.centerMode"
+						},
+						{
+							type: "drill",
+							id: "peek",
+							label: __( "Peek", 'modula-best-grid-gallery' ),
+							nestedUnder: "slider.centerMode",
+							visibleWhen: {
+								path: "slider.centerMode",
+								truthy: true
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "slider.centerPadding"
+								}
+							],
+							groupedPaths: [
+								"slider.centerPadding"
+							]
+						},
+						{
+							type: "field",
+							groupedPath: "slider.fade"
+						},
+						{
+							type: "field",
+							groupedPath: "slider.infinite"
+						},
+						{
+							type: "field",
+							groupedPath: "slider.speed"
+						},
+						{
+							type: "field",
+							groupedPath: "slider.rtl"
+						},
+						{
+							type: "field",
+							groupedPath: "slider.initialSlide"
+						},
+						{
+							type: "field",
+							groupedPath: "slider.draggable"
+						},
+						{
+							type: "field",
+							groupedPath: "showcase.gap"
+						},
+						{
+							type: "field",
+							groupedPath: "showcase.centerScale"
+						},
+						{
+							type: "field",
+							groupedPath: "showcase.mobileSimplify"
+						},
+						{
+							type: "drill",
+							id: "style",
 							label: __( "Style", 'modula-best-grid-gallery' ),
-							group: "style",
 							icon: "styles",
 							summaryParts: [
 								{
@@ -421,14 +405,15 @@ export default {
 									template: __( "{value}px corners", 'modula-best-grid-gallery' ),
 									zeroLabel: __( "square corners", 'modula-best-grid-gallery' )
 								}
+							],
+							groupedPaths: [
+								"style.borderRadius",
+								"style.borderSize",
+								"style.borderColor",
+								"style.shadowSize",
+								"style.shadowColor"
 							]
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "Responsive", 'modula-best-grid-gallery' ),
-					items: [
+						},
 						{
 							type: "field",
 							groupedPath: "responsive.enableResponsive",
@@ -480,7 +465,83 @@ export default {
 						},
 						{
 							type: "drill",
+							id: "responsive",
 							label: __( "On phones and tablets", 'modula-best-grid-gallery' ),
+							nestedUnder: "responsive.enableResponsive",
+							visibleWhen: {
+								all: [
+									{
+										path: "responsive.enableResponsive",
+										truthy: true
+									},
+									{
+										all: [
+											{
+												path: "general.type",
+												neq: "video"
+											},
+											{
+												path: "general.type",
+												neq: "creative-gallery"
+											},
+											{
+												path: "general.type",
+												neq: "bnb"
+											},
+											{
+												path: "general.type",
+												neq: "story"
+											},
+											{
+												path: "general.type",
+												neq: "showcase"
+											},
+											{
+												path: "general.type",
+												neq: "template"
+											},
+											{
+												path: "general.type",
+												neq: "freeform"
+											}
+										]
+									}
+								]
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "responsive.tabletColumns"
+								},
+								{
+									type: "field",
+									groupedPath: "responsive.mobileColumns"
+								},
+								{
+									type: "field",
+									groupedPath: "responsive.treatAsTabletUnder"
+								},
+								{
+									type: "field",
+									groupedPath: "responsive.treatAsPhoneUnder"
+								},
+								{
+									type: "field",
+									groupedPath: "slider.tabletSlides"
+								},
+								{
+									type: "field",
+									groupedPath: "slider.tabletScrolls"
+								},
+								{
+									type: "field",
+									groupedPath: "slider.mobileSlides"
+								},
+								{
+									type: "field",
+									groupedPath: "slider.mobileScrolls"
+								}
+							],
 							icon: "desktop",
 							summaryParts: [
 								{
@@ -503,24 +564,215 @@ export default {
 								"slider.tabletScrolls",
 								"slider.mobileSlides",
 								"slider.mobileScrolls"
+							]
+						},
+						{
+							type: "drill",
+							id: "captions",
+							label: __( "Captions", 'modula-best-grid-gallery' ),
+							icon: "caption",
+							summaryParts: [
+								{
+									path: "captions.contentPlacement",
+									type: "enum"
+								},
+								{
+									path: "captions.titleFontSize",
+									type: "text",
+									template: __( "{value}px", 'modula-best-grid-gallery' )
+								}
 							],
+							visibleWhen: {
+								path: "general.type",
+								neq: "video"
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "captions.contentPlacement"
+								},
+								{
+									type: "field",
+									groupedPath: "captions.hideGalleryTitle"
+								},
+								{
+									type: "drill",
+									id: "gallery-title",
+									label: __( "Gallery title", 'modula-best-grid-gallery' ),
+									nestedUnder: "captions.hideGalleryTitle",
+									visibleWhen: {
+										path: "captions.hideGalleryTitle",
+										eq: false
+									},
+									items: [
+										{
+											type: "field",
+											groupedPath: "captions.galleryTitleType"
+										}
+									],
+									groupedPaths: [
+										"captions.galleryTitleType"
+									]
+								},
+								{
+									type: "field",
+									groupedPath: "slider.imageInfo"
+								},
+								{
+									type: "field",
+									groupedPath: "captions.hideTitle"
+								},
+								{
+									type: "drill",
+									id: "title-style",
+									label: __( "Title style", 'modula-best-grid-gallery' ),
+									nestedUnder: "captions.hideTitle",
+									visibleWhen: {
+										path: "captions.hideTitle",
+										eq: false
+									},
+									items: [
+										{
+											type: "field",
+											groupedPath: "captions.titleColor"
+										},
+										{
+											type: "field",
+											groupedPath: "captions.titleFontSize"
+										},
+										{
+											type: "field",
+											groupedPath: "captions.mobileTitleFontSize"
+										},
+										{
+											type: "field",
+											groupedPath: "captions.titleFontWeight"
+										}
+									],
+									headless: true,
+									groupedPaths: [
+										"captions.titleColor",
+										"captions.titleFontSize",
+										"captions.mobileTitleFontSize",
+										"captions.titleFontWeight"
+									]
+								},
+								{
+									type: "field",
+									groupedPath: "captions.hideDescription"
+								},
+								{
+									type: "drill",
+									id: "caption-style",
+									label: __( "Caption style", 'modula-best-grid-gallery' ),
+									nestedUnder: "captions.hideDescription",
+									visibleWhen: {
+										path: "captions.hideDescription",
+										eq: false
+									},
+									items: [
+										{
+											type: "field",
+											groupedPath: "captions.captionColor"
+										},
+										{
+											type: "field",
+											groupedPath: "captions.captionFontSize"
+										},
+										{
+											type: "field",
+											groupedPath: "captions.mobileCaptionFontSize"
+										},
+										{
+											type: "field",
+											groupedPath: "captions.captionFontWeight"
+										}
+									],
+									headless: true,
+									groupedPaths: [
+										"captions.captionColor",
+										"captions.captionFontSize",
+										"captions.mobileCaptionFontSize",
+										"captions.captionFontWeight"
+									]
+								},
+								{
+									type: "field",
+									groupedPath: "slider.imageInfoPosition"
+								},
+								{
+									type: "field",
+									groupedPath: "captions.compactCaptionPopover"
+								},
+								{
+									type: "drill",
+									id: "bubble",
+									label: __( "Bubble", 'modula-best-grid-gallery' ),
+									nestedUnder: "captions.compactCaptionPopover",
+									visibleWhen: {
+										path: "captions.compactCaptionPopover",
+										truthy: true
+									},
+									items: [
+										{
+											type: "field",
+											groupedPath: "captions.compactCaptionMinSize"
+										}
+									],
+									groupedPaths: [
+										"captions.compactCaptionMinSize"
+									]
+								},
+								{
+									type: "field",
+									groupedPath: "captions.belowImageAlignment"
+								},
+								{
+									type: "field",
+									groupedPath: "captions.belowImageSpacing"
+								},
+								{
+									type: "field",
+									groupedPath: "captions.belowImagePadding"
+								}
+							],
+							hubHelp: __( "Titles, captions, and where they sit on the image", 'modula-best-grid-gallery' ),
+							groupedPaths: [
+								"captions.contentPlacement",
+								"captions.hideGalleryTitle",
+								"captions.galleryTitleType",
+								"slider.imageInfo",
+								"captions.hideTitle",
+								"captions.titleColor",
+								"captions.titleFontSize",
+								"captions.mobileTitleFontSize",
+								"captions.titleFontWeight",
+								"captions.hideDescription",
+								"captions.captionColor",
+								"captions.captionFontSize",
+								"captions.mobileCaptionFontSize",
+								"captions.captionFontWeight",
+								"slider.imageInfoPosition",
+								"captions.compactCaptionPopover",
+								"captions.compactCaptionMinSize",
+								"captions.belowImageAlignment",
+								"captions.belowImageSpacing",
+								"captions.belowImagePadding"
+							]
+						},
+						{
+							type: "field",
+							groupedPath: "general.shuffle"
+						},
+						{
+							type: "field",
+							groupedPath: "pagination.enablePagination",
+							icon: "queryPagination",
 							visibleWhen: {
 								all: [
 									{
-										path: "responsive.enableResponsive",
-										truthy: true
-									},
-									{
 										path: "general.type",
-										neq: "video"
-									},
-									{
-										path: "general.type",
-										neq: "creative-gallery"
-									},
-									{
-										path: "general.type",
-										neq: "bnb"
+										neq: "slider"
 									},
 									{
 										path: "general.type",
@@ -537,21 +789,271 @@ export default {
 									{
 										path: "general.type",
 										neq: "freeform"
+									},
+									{
+										path: "general.type",
+										neq: "parallax-masonry"
+									},
+									{
+										path: "general.type",
+										neq: "video"
+									},
+									{
+										path: "general.type",
+										neq: "bnb"
 									}
 								]
-							}
+							},
+							hubHelp: __( "Split large galleries into pages", 'modula-best-grid-gallery' )
+						},
+						{
+							type: "drill",
+							id: "pagination",
+							label: __( "Page size & navigation", 'modula-best-grid-gallery' ),
+							nestedUnder: "pagination.enablePagination",
+							visibleWhen: {
+								all: [
+									{
+										path: "pagination.enablePagination",
+										truthy: true
+									},
+									{
+										all: [
+											{
+												path: "general.type",
+												neq: "slider"
+											},
+											{
+												path: "general.type",
+												neq: "story"
+											},
+											{
+												path: "general.type",
+												neq: "showcase"
+											},
+											{
+												path: "general.type",
+												neq: "template"
+											},
+											{
+												path: "general.type",
+												neq: "freeform"
+											},
+											{
+												path: "general.type",
+												neq: "parallax-masonry"
+											},
+											{
+												path: "general.type",
+												neq: "video"
+											},
+											{
+												path: "general.type",
+												neq: "bnb"
+											}
+										]
+									}
+								]
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "pagination.maxImagesCount"
+								},
+								{
+									type: "field",
+									groupedPath: "pagination.maxImagesCountMobile"
+								},
+								{
+									type: "field",
+									groupedPath: "pagination.enableInfiniteScroll"
+								},
+								{
+									type: "field",
+									groupedPath: "pagination.enableLoadMore"
+								},
+								{
+									type: "field",
+									groupedPath: "pagination.paginationNumber"
+								},
+								{
+									type: "field",
+									groupedPath: "pagination.paginationColor"
+								},
+								{
+									type: "field",
+									groupedPath: "pagination.activePaginationColor"
+								},
+								{
+									type: "field",
+									groupedPath: "pagination.paginationPosition"
+								}
+							],
+							icon: "queryPagination",
+							summaryKind: "pagination",
+							defaultOpen: false,
+							hubHelp: __( "Images per page, scroll or load more, and control styling", 'modula-best-grid-gallery' ),
+							groupedPaths: [
+								"pagination.maxImagesCount",
+								"pagination.maxImagesCountMobile",
+								"pagination.enableInfiniteScroll",
+								"pagination.enableLoadMore",
+								"pagination.paginationNumber",
+								"pagination.paginationColor",
+								"pagination.activePaginationColor",
+								"pagination.paginationPosition"
+							]
 						}
 					]
 				},
 				{
 					type: "submenu",
-					label: __( "Elsewhere", 'modula-best-grid-gallery' ),
+					id: "more",
+					role: "more",
+					label: __( "More settings", 'modula-best-grid-gallery' ),
 					items: [
 						{
-							type: "exit",
-							label: __( "Hover and loading effects", 'modula-best-grid-gallery' ),
-							targetCategory: "interaction",
-							targetLabel: "Interaction"
+							type: "drill",
+							id: "general",
+							label: __( "General", 'modula-best-grid-gallery' ),
+							items: [
+								{
+									type: "field",
+									groupedPath: "general.alignment"
+								},
+								{
+									type: "field",
+									groupedPath: "video.maxHeight"
+								},
+								{
+									type: "field",
+									groupedPath: "slider.lightbox"
+								},
+								{
+									type: "field",
+									groupedPath: "showcase.clickBehavior"
+								},
+								{
+									type: "field",
+									groupedPath: "slider.syncingNavImageDimensions",
+									visibleWhen: {
+										path: "slider.syncing",
+										truthy: true
+									}
+								},
+								{
+									type: "field",
+									groupedPath: "slider.syncingNavImageCrop",
+									visibleWhen: {
+										path: "slider.syncing",
+										truthy: true
+									}
+								},
+								{
+									type: "field",
+									groupedPath: "captions.mobileCaptionCopy",
+									visibleWhen: {
+										path: "general.type",
+										neq: "video"
+									}
+								},
+								{
+									type: "field",
+									groupedPath: "pagination.themeInheritControls",
+									visibleWhen: {
+										all: [
+											{
+												path: "pagination.enablePagination",
+												truthy: true
+											},
+											{
+												all: [
+													{
+														path: "general.type",
+														neq: "slider"
+													},
+													{
+														path: "general.type",
+														neq: "story"
+													},
+													{
+														path: "general.type",
+														neq: "showcase"
+													},
+													{
+														path: "general.type",
+														neq: "template"
+													},
+													{
+														path: "general.type",
+														neq: "freeform"
+													},
+													{
+														path: "general.type",
+														neq: "parallax-masonry"
+													},
+													{
+														path: "general.type",
+														neq: "video"
+													},
+													{
+														path: "general.type",
+														neq: "bnb"
+													}
+												]
+											}
+										]
+									}
+								}
+							],
+							groupedPaths: [
+								"general.alignment",
+								"video.maxHeight",
+								"slider.lightbox",
+								"showcase.clickBehavior",
+								"slider.syncingNavImageDimensions",
+								"slider.syncingNavImageCrop",
+								"captions.mobileCaptionCopy",
+								"pagination.themeInheritControls"
+							]
+						},
+						{
+							type: "drill",
+							id: "performance",
+							label: __( "Speed Up", 'modula-best-grid-gallery' ),
+							icon: "chartBar",
+							summaryKind: "performance",
+							visibleWhen: {
+								path: "general.type",
+								neq: "video"
+							},
+							groupedPaths: [
+								"performance.sectionLoading",
+								"performance.lazyLoad",
+								"performance.sectionFiles",
+								"performance.enableOptimization",
+								"performance.thumbnailOptimization",
+								"performance.lightboxOptimization",
+								"performance.modulaSpeedHelp",
+								"performance.speedupGlobalNote"
+							],
+							hubHelp: __( "Lazy load and image compression for faster pages.", 'modula-best-grid-gallery' )
+						},
+						{
+							type: "drill",
+							id: "presets",
+							label: __( "Presets", 'modula-best-grid-gallery' ),
+							icon: "download",
+							summaryKind: "exportImport",
+							nestedUpsellGroupedPath: "exportImport.galleryDefaultsPanel",
+							visibleWhen: {
+								path: "general.type",
+								neq: "video"
+							},
+							groupedPaths: [
+								"exportImport.galleryDefaultsPanel"
+							],
+							hubHelp: __( "Save these settings and reuse them on new galleries.", 'modula-best-grid-gallery' )
 						}
 					]
 				}
@@ -582,13 +1084,225 @@ export default {
 			hubSections: [
 				{
 					type: "submenu",
-					label: __( "Lightbox", 'modula-best-grid-gallery' ),
+					id: "hub",
+					role: "hub",
 					items: [
 						{
 							type: "field",
 							groupedPath: "lightbox.lightbox",
-							fieldPresentation: "embedded",
 							hubHelp: __( "Choose what happens when an image is clicked.", 'modula-best-grid-gallery' )
+						},
+						{
+							type: "drill",
+							id: "lightbox-options",
+							label: __( "Lightbox", 'modula-best-grid-gallery' ),
+							nestedUnder: "lightbox.lightbox",
+							visibleWhen: {
+								any: [
+									{
+										path: "lightbox.lightbox",
+										eq: "fancybox"
+									},
+									{
+										path: "lightbox.lightbox",
+										eq: "lightbox-prefer-url"
+									}
+								]
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "lightbox.openOn"
+								},
+								{
+									type: "field",
+									groupedPath: "lightbox.loop"
+								},
+								{
+									type: "field",
+									groupedPath: "lightbox.showNavigation"
+								},
+								{
+									type: "field",
+									groupedPath: "lightbox.backgroundColor"
+								},
+								{
+									type: "field",
+									groupedPath: "lightbox.transitionEffect"
+								},
+								{
+									type: "field",
+									groupedPath: "lightbox.showTitle"
+								},
+								{
+									type: "field",
+									groupedPath: "lightbox.showCaption"
+								},
+								{
+									type: "field",
+									groupedPath: "lightbox.captionPosition"
+								},
+								{
+									type: "field",
+									groupedPath: "zoom.enableZoom"
+								},
+								{
+									type: "drill",
+									id: "zoom",
+									label: __( "Zoom", 'modula-best-grid-gallery' ),
+									nestedUnder: "zoom.enableZoom",
+									visibleWhen: {
+										path: "zoom.enableZoom",
+										truthy: true
+									},
+									items: [
+										{
+											type: "field",
+											groupedPath: "zoom.zoomType"
+										},
+										{
+											type: "field",
+											groupedPath: "zoom.zoomEffect"
+										},
+										{
+											type: "field",
+											groupedPath: "zoom.magnifiedWindowHint"
+										},
+										{
+											type: "field",
+											groupedPath: "zoom.zoomWindowPosition"
+										},
+										{
+											type: "field",
+											groupedPath: "zoom.zoomWindowSize"
+										},
+										{
+											type: "field",
+											groupedPath: "zoom.zoomLensSize"
+										},
+										{
+											type: "field",
+											groupedPath: "zoom.zoomLensShape"
+										},
+										{
+											type: "field",
+											groupedPath: "zoom.zoomTintOpacity"
+										},
+										{
+											type: "field",
+											groupedPath: "zoom.zoomTintColor"
+										}
+									],
+									icon: "search",
+									summaryKind: "zoom",
+									headless: true,
+									groupedPaths: [
+										"zoom.zoomType",
+										"zoom.zoomEffect",
+										"zoom.magnifiedWindowHint",
+										"zoom.zoomWindowPosition",
+										"zoom.zoomWindowSize",
+										"zoom.zoomLensSize",
+										"zoom.zoomLensShape",
+										"zoom.zoomTintOpacity",
+										"zoom.zoomTintColor"
+									]
+								},
+								{
+									type: "field",
+									groupedPath: "slideshow.enableSlideshow"
+								},
+								{
+									type: "drill",
+									id: "slideshow",
+									label: __( "Slideshow", 'modula-best-grid-gallery' ),
+									nestedUnder: "slideshow.enableSlideshow",
+									visibleWhen: {
+										path: "slideshow.enableSlideshow",
+										truthy: true
+									},
+									items: [
+										{
+											type: "field",
+											groupedPath: "slideshow.enableAutoplay"
+										},
+										{
+											type: "field",
+											groupedPath: "slideshow.pauseOnHover"
+										},
+										{
+											type: "field",
+											groupedPath: "slideshow.slideshowSpeed"
+										}
+									],
+									icon: "next",
+									summaryParts: [
+										{
+											path: "slideshow.enableAutoplay",
+											type: "truthy",
+											trueLabel: "Autoplay",
+											falseLabel: "Manual"
+										}
+									],
+									headless: true,
+									groupedPaths: [
+										"slideshow.enableAutoplay",
+										"slideshow.pauseOnHover",
+										"slideshow.slideshowSpeed"
+									]
+								},
+								{
+									type: "field",
+									groupedPath: "lightbox.showThumbnails"
+								},
+								{
+									type: "drill",
+									id: "thumbnail-strip",
+									label: __( "Thumbnail strip", 'modula-best-grid-gallery' ),
+									nestedUnder: "lightbox.showThumbnails",
+									visibleWhen: {
+										path: "lightbox.showThumbnails",
+										truthy: true
+									},
+									items: [
+										{
+											type: "field",
+											groupedPath: "lightbox.thumbsPosition"
+										}
+									],
+									headless: true,
+									groupedPaths: [
+										"lightbox.thumbsPosition"
+									]
+								}
+							],
+							hubHelp: __( "Opening, navigation, text, zoom and slideshow in the lightbox", 'modula-best-grid-gallery' ),
+							groupedPaths: [
+								"lightbox.openOn",
+								"lightbox.loop",
+								"lightbox.showNavigation",
+								"lightbox.backgroundColor",
+								"lightbox.transitionEffect",
+								"lightbox.showTitle",
+								"lightbox.showCaption",
+								"lightbox.captionPosition",
+								"zoom.enableZoom",
+								"zoom.zoomType",
+								"zoom.zoomEffect",
+								"zoom.magnifiedWindowHint",
+								"zoom.zoomWindowPosition",
+								"zoom.zoomWindowSize",
+								"zoom.zoomLensSize",
+								"zoom.zoomLensShape",
+								"zoom.zoomTintOpacity",
+								"zoom.zoomTintColor",
+								"slideshow.enableSlideshow",
+								"slideshow.enableAutoplay",
+								"slideshow.pauseOnHover",
+								"slideshow.slideshowSpeed",
+								"lightbox.showThumbnails",
+								"lightbox.thumbsPosition"
+							]
 						},
 						{
 							type: "field",
@@ -598,141 +1312,133 @@ export default {
 				},
 				{
 					type: "submenu",
-					label: __( "Lightbox zoom", 'modula-best-grid-gallery' ),
+					id: "more",
+					role: "more",
+					label: __( "More settings", 'modula-best-grid-gallery' ),
 					items: [
 						{
-							type: "field",
-							groupedPath: "zoom.enableZoom",
-							icon: "search",
-							hubHelp: __( "Magnify images inside the lightbox (Modula ZOOM)", 'modula-best-grid-gallery' )
-						},
-						{
 							type: "drill",
-							label: __( "Zoom options", 'modula-best-grid-gallery' ),
-							icon: "search",
-							summaryKind: "zoom",
-							groupedPaths: [
-								"zoom.sectionStyle",
-								"zoom.zoomOnHover",
-								"zoom.zoomType",
-								"zoom.zoomEffect",
-								"zoom.sectionMagnifiedWindow",
-								"zoom.magnifiedWindowHint",
-								"zoom.zoomWindowPosition",
-								"zoom.zoomWindowSize",
-								"zoom.zoomLensSize",
-								"zoom.zoomLensShape",
-								"zoom.sectionTint",
-								"zoom.zoomTintOpacity",
-								"zoom.zoomTintColor"
-							],
+							id: "links",
+							label: __( "Lightbox & Links", 'modula-best-grid-gallery' ),
+							icon: "fullscreen",
 							visibleWhen: {
-								path: "zoom.enableZoom",
-								truthy: true
+								any: [
+									{
+										path: "lightbox.lightbox",
+										eq: "fancybox"
+									},
+									{
+										path: "lightbox.lightbox",
+										eq: "lightbox-prefer-url"
+									}
+								]
 							},
-							hubHelp: __( "Lightbox magnify style, window, lens, and tint", 'modula-best-grid-gallery' )
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "Opening", 'modula-best-grid-gallery' ),
-					visibleWhen: {
-						any: [
-							{
-								path: "lightbox.lightbox",
-								eq: "fancybox"
-							},
-							{
-								path: "lightbox.lightbox",
-								eq: "lightbox-prefer-url"
-							}
-						]
-					},
-					items: [
-						{
-							type: "field",
-							groupedPath: "lightbox.openOn",
-							fieldPresentation: "embedded"
-						},
-						{
-							type: "field",
-							groupedPath: "lightbox.loop"
-						},
-						{
-							type: "field",
-							groupedPath: "slideshow.enableSlideshow",
-							icon: "next",
-							hubHelp: __( "Turns the lightbox into a slideshow so images advance in place.", 'modula-best-grid-gallery' )
-						},
-						{
-							type: "drill",
-							label: __( "Slideshow options", 'modula-best-grid-gallery' ),
-							icon: "next",
-							summaryParts: [
+							items: [
 								{
-									path: "slideshow.enableAutoplay",
-									type: "truthy",
-									trueLabel: "Autoplay",
-									falseLabel: "Manual"
+									type: "field",
+									groupedPath: "lightbox.animationEffect"
+								},
+								{
+									type: "field",
+									groupedPath: "lightbox.showAll"
+								},
+								{
+									type: "field",
+									groupedPath: "lightbox.openFullscreen"
+								},
+								{
+									type: "field",
+									groupedPath: "lightbox.toolbar"
+								},
+								{
+									type: "drill",
+									id: "buttons",
+									label: __( "Buttons", 'modula-best-grid-gallery' ),
+									nestedUnder: "lightbox.toolbar",
+									visibleWhen: {
+										path: "lightbox.toolbar",
+										truthy: true
+									},
+									items: [
+										{
+											type: "field",
+											groupedPath: "lightbox.close"
+										},
+										{
+											type: "field",
+											groupedPath: "lightbox.thumbs"
+										},
+										{
+											type: "field",
+											groupedPath: "lightbox.download"
+										},
+										{
+											type: "field",
+											groupedPath: "lightbox.zoom"
+										},
+										{
+											type: "field",
+											groupedPath: "lightbox.share"
+										},
+										{
+											type: "field",
+											groupedPath: "lightbox.infobar"
+										},
+										{
+											type: "field",
+											groupedPath: "lightbox.enableFullscreen"
+										},
+										{
+											type: "field",
+											groupedPath: "lightbox.downloadAllButton"
+										},
+										{
+											type: "field",
+											groupedPath: "comments.toggleComments"
+										}
+									],
+									icon: "menu",
+									summaryKind: "lightboxToolbarButtons",
+									headless: true,
+									groupedPaths: [
+										"lightbox.close",
+										"lightbox.thumbs",
+										"lightbox.download",
+										"lightbox.zoom",
+										"lightbox.share",
+										"lightbox.infobar",
+										"lightbox.enableFullscreen",
+										"lightbox.downloadAllButton",
+										"comments.toggleComments"
+									]
+								},
+								{
+									type: "field",
+									groupedPath: "lightbox.toolbarOffHint"
+								},
+								{
+									type: "field",
+									groupedPath: "lightbox.doubleClick"
+								},
+								{
+									type: "field",
+									groupedPath: "lightbox.clickSlide"
+								},
+								{
+									type: "field",
+									groupedPath: "zoom.zoomOnHover",
+									visibleWhen: {
+										path: "zoom.enableZoom",
+										truthy: true
+									}
 								}
 							],
+							hubHelp: __( "Animation, toolbar buttons, and click behaviour in the lightbox", 'modula-best-grid-gallery' ),
 							groupedPaths: [
-								"slideshow.sectionPlayback",
-								"slideshow.enableAutoplay",
-								"slideshow.pauseOnHover",
-								"slideshow.slideshowSpeed"
-							],
-							visibleWhen: {
-								path: "slideshow.enableSlideshow",
-								truthy: true
-							},
-							hubHelp: __( "Auto-play and timing settings", 'modula-best-grid-gallery' )
-						},
-						{
-							type: "drill",
-							label: __( "Click and motion", 'modula-best-grid-gallery' ),
-							icon: "fullscreen",
-							groupedPaths: [
-								"lightbox.sectionClick",
-								"lightbox.doubleClick",
-								"lightbox.clickSlide",
-								"lightbox.sectionMotion",
 								"lightbox.animationEffect",
-								"lightbox.sectionDisplay",
 								"lightbox.showAll",
-								"lightbox.openFullscreen"
-							],
-							hubHelp: __( "Double-click open, close on click, and how the lightbox moves", 'modula-best-grid-gallery' )
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "Controls", 'modula-best-grid-gallery' ),
-					visibleWhen: {
-						any: [
-							{
-								path: "lightbox.lightbox",
-								eq: "fancybox"
-							},
-							{
-								path: "lightbox.lightbox",
-								eq: "lightbox-prefer-url"
-							}
-						]
-					},
-					items: [
-						{
-							type: "drill",
-							label: __( "Buttons in the viewer", 'modula-best-grid-gallery' ),
-							icon: "menu",
-							summaryKind: "lightboxToolbarButtons",
-							groupedPaths: [
-								"lightbox.sectionToolbar",
+								"lightbox.openFullscreen",
 								"lightbox.toolbar",
-								"lightbox.toolbarOffHint",
-								"lightbox.sectionButtons",
 								"lightbox.close",
 								"lightbox.thumbs",
 								"lightbox.download",
@@ -740,80 +1446,176 @@ export default {
 								"lightbox.share",
 								"lightbox.infobar",
 								"lightbox.enableFullscreen",
-								"lightbox.downloadAllButton"
+								"lightbox.downloadAllButton",
+								"comments.toggleComments",
+								"lightbox.toolbarOffHint",
+								"lightbox.doubleClick",
+								"lightbox.clickSlide",
+								"zoom.zoomOnHover"
+							]
+						},
+						{
+							type: "drill",
+							id: "exif",
+							label: __( "EXIF", 'modula-best-grid-gallery' ),
+							icon: "capturePhoto",
+							summaryKind: "shootingData",
+							nestedUpsellGroupedPath: "exif.enableExif",
+							visibleWhen: {
+								any: [
+									{
+										path: "lightbox.lightbox",
+										eq: "fancybox"
+									},
+									{
+										path: "lightbox.lightbox",
+										eq: "lightbox-prefer-url"
+									}
+								]
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "exif.enableExif"
+								},
+								{
+									type: "drill",
+									id: "exif-details",
+									label: __( "Details", 'modula-best-grid-gallery' ),
+									nestedUnder: "exif.enableExif",
+									visibleWhen: {
+										path: "exif.enableExif",
+										truthy: true
+									},
+									items: [
+										{
+											type: "field",
+											groupedPath: "exif.exifCamera"
+										},
+										{
+											type: "field",
+											groupedPath: "exif.exifLens"
+										},
+										{
+											type: "field",
+											groupedPath: "exif.exifShutterSpeed"
+										},
+										{
+											type: "field",
+											groupedPath: "exif.exifAperture"
+										},
+										{
+											type: "field",
+											groupedPath: "exif.exifFocalLength"
+										},
+										{
+											type: "field",
+											groupedPath: "exif.exifIso"
+										},
+										{
+											type: "field",
+											groupedPath: "exif.exifDate"
+										}
+									],
+									headless: true,
+									groupedPaths: [
+										"exif.exifCamera",
+										"exif.exifLens",
+										"exif.exifShutterSpeed",
+										"exif.exifAperture",
+										"exif.exifFocalLength",
+										"exif.exifIso",
+										"exif.exifDate"
+									]
+								},
+								{
+									type: "field",
+									groupedPath: "exif.enableExifOffHint"
+								},
+								{
+									type: "field",
+									groupedPath: "exif.sectionResult"
+								},
+								{
+									type: "field",
+									groupedPath: "exif.exifResultPreview"
+								}
 							],
-							hubHelp: __( "Which toolbar buttons appear in the lightbox", 'modula-best-grid-gallery' )
+							hubHelp: __( "Read from the file and shown under the image in the lightbox.", 'modula-best-grid-gallery' ),
+							groupedPaths: [
+								"exif.enableExif",
+								"exif.exifCamera",
+								"exif.exifLens",
+								"exif.exifShutterSpeed",
+								"exif.exifAperture",
+								"exif.exifFocalLength",
+								"exif.exifIso",
+								"exif.exifDate",
+								"exif.enableExifOffHint",
+								"exif.sectionResult",
+								"exif.exifResultPreview"
+							]
 						},
 						{
-							type: "field",
-							groupedPath: "lightbox.showThumbnails"
-						},
-						{
-							type: "field",
-							groupedPath: "lightbox.thumbsPosition",
-							fieldPresentation: "embedded"
-						},
-						{
-							type: "field",
-							groupedPath: "lightbox.showNavigation"
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "Appearance", 'modula-best-grid-gallery' ),
-					visibleWhen: {
-						any: [
-							{
-								path: "lightbox.lightbox",
-								eq: "fancybox"
+							type: "drill",
+							id: "deeplink",
+							label: __( "Photo links", 'modula-best-grid-gallery' ),
+							icon: "link",
+							summaryKind: "deeplink",
+							nestedUpsellGroupedPath: "deeplink.modulaDeeplink",
+							visibleWhen: {
+								any: [
+									{
+										path: "lightbox.lightbox",
+										eq: "fancybox"
+									},
+									{
+										path: "lightbox.lightbox",
+										eq: "lightbox-prefer-url"
+									}
+								]
 							},
-							{
-								path: "lightbox.lightbox",
-								eq: "lightbox-prefer-url"
-							}
-						]
-					},
-					items: [
-						{
-							type: "field",
-							groupedPath: "lightbox.backgroundColor"
-						},
-						{
-							type: "field",
-							groupedPath: "lightbox.transitionEffect",
-							fieldPresentation: "embedded"
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "Text", 'modula-best-grid-gallery' ),
-					visibleWhen: {
-						any: [
-							{
-								path: "lightbox.lightbox",
-								eq: "fancybox"
-							},
-							{
-								path: "lightbox.lightbox",
-								eq: "lightbox-prefer-url"
-							}
-						]
-					},
-					items: [
-						{
-							type: "field",
-							groupedPath: "lightbox.showTitle"
-						},
-						{
-							type: "field",
-							groupedPath: "lightbox.showCaption"
-						},
-						{
-							type: "field",
-							groupedPath: "lightbox.captionPosition",
-							fieldPresentation: "embedded"
+							items: [
+								{
+									type: "field",
+									groupedPath: "deeplink.modulaDeeplink"
+								},
+								{
+									type: "drill",
+									id: "deeplink-link",
+									label: __( "Link", 'modula-best-grid-gallery' ),
+									nestedUnder: "deeplink.modulaDeeplink",
+									visibleWhen: {
+										path: "deeplink.modulaDeeplink",
+										truthy: true
+									},
+									items: [
+										{
+											type: "field",
+											groupedPath: "deeplink.customLinkName"
+										},
+										{
+											type: "field",
+											groupedPath: "deeplink.urlPreview"
+										}
+									],
+									groupedPaths: [
+										"deeplink.customLinkName",
+										"deeplink.urlPreview"
+									]
+								},
+								{
+									type: "field",
+									groupedPath: "deeplink.modulaDeeplinkOffHint"
+								}
+							],
+							hubHelp: __( "Share a URL that opens one image in this gallery.", 'modula-best-grid-gallery' ),
+							groupedPaths: [
+								"deeplink.modulaDeeplink",
+								"deeplink.customLinkName",
+								"deeplink.urlPreview",
+								"deeplink.modulaDeeplinkOffHint"
+							]
 						}
 					]
 				}
@@ -824,6 +1626,24 @@ export default {
 		{
 			name: "filters",
 			title: __( "Filters", 'modula-best-grid-gallery' ),
+			liteUpsell: {
+				title: __( "Let visitors filter the gallery", 'modula-best-grid-gallery' ),
+				pitch: __( "Sort photos into categories people can click.", 'modula-best-grid-gallery' ),
+				points: [
+					{
+						label: __( "Filter galleries by category", 'modula-best-grid-gallery' )
+					},
+					{
+						label: __( "Image sorting", 'modula-best-grid-gallery' )
+					},
+					{
+						extension: "modula-video"
+					},
+					{
+						extension: "modula-slideshow"
+					}
+				]
+			},
 			visibleWhen: {
 				all: [
 					{
@@ -863,88 +1683,108 @@ export default {
 			hubSections: [
 				{
 					type: "submenu",
-					label: __( "Filter Bar", 'modula-best-grid-gallery' ),
+					id: "hub",
+					role: "hub",
 					items: [
+						{
+							type: "field",
+							groupedPath: "filters.filters"
+						},
+						{
+							type: "field",
+							groupedPath: "filters.allFilterLabel"
+						},
 						{
 							type: "field",
 							groupedPath: "filters.showFilterBar"
 						},
 						{
 							type: "drill",
-							label: __( "Filters", 'modula-best-grid-gallery' ),
-							icon: "tag",
-							summaryKind: "filtersList",
-							groupedPaths: [
-								"filters.sectionFiltersList",
-								"filters.filters",
-								"filters.sectionAllLabel",
-								"filters.allFilterLabel"
+							id: "filter-bar",
+							label: __( "Filter bar", 'modula-best-grid-gallery' ),
+							nestedUnder: "filters.showFilterBar",
+							visibleWhen: {
+								path: "filters.showFilterBar",
+								truthy: true
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "filters.filterTextAlignment"
+								},
+								{
+									type: "field",
+									groupedPath: "filters.filterPositioning"
+								},
+								{
+									type: "field",
+									groupedPath: "filters.defaultActiveFilter"
+								},
+								{
+									type: "field",
+									groupedPath: "filters.dropdownFilters"
+								},
+								{
+									type: "field",
+									groupedPath: "filters.hideAllFilter"
+								},
+								{
+									type: "field",
+									groupedPath: "filters.showFilterCount"
+								},
+								{
+									type: "field",
+									groupedPath: "filters.filterLinkColor"
+								},
+								{
+									type: "field",
+									groupedPath: "filters.filterLinkHoverColor"
+								},
+								{
+									type: "field",
+									groupedPath: "filters.enableCollapsibleFilters"
+								},
+								{
+									type: "drill",
+									id: "collapse",
+									label: __( "Collapse", 'modula-best-grid-gallery' ),
+									nestedUnder: "filters.enableCollapsibleFilters",
+									visibleWhen: {
+										path: "filters.enableCollapsibleFilters",
+										truthy: true
+									},
+									items: [
+										{
+											type: "field",
+											groupedPath: "filters.collapsibleActionText"
+										}
+									],
+									headless: true,
+									groupedPaths: [
+										"filters.collapsibleActionText"
+									]
+								},
+								{
+									type: "field",
+									groupedPath: "filters.enableMobileDropdownFilters"
+								}
 							],
-							hubHelp: __( "Names visitors can use to narrow the gallery", 'modula-best-grid-gallery' )
-						},
-						{
-							type: "field",
-							groupedPath: "filters.filterTextAlignment"
-						},
-						{
-							type: "field",
-							groupedPath: "filters.filterPositioning"
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "Behavior", 'modula-best-grid-gallery' ),
-					items: [
-						{
-							type: "field",
-							groupedPath: "filters.defaultActiveFilter",
-							fieldPresentation: "embedded"
-						},
-						{
-							type: "field",
-							groupedPath: "filters.dropdownFilters"
-						},
-						{
-							type: "field",
-							groupedPath: "filters.hideAllFilter"
-						},
-						{
-							type: "field",
-							groupedPath: "filters.showFilterCount"
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "Appearance", 'modula-best-grid-gallery' ),
-					items: [
-						{
-							type: "field",
-							groupedPath: "filters.filterLinkColor"
-						},
-						{
-							type: "field",
-							groupedPath: "filters.filterLinkHoverColor"
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "Mobile", 'modula-best-grid-gallery' ),
-					items: [
-						{
-							type: "field",
-							groupedPath: "filters.enableCollapsibleFilters"
-						},
-						{
-							type: "field",
-							groupedPath: "filters.collapsibleActionText",
-							fieldPresentation: "embedded"
-						},
-						{
-							type: "field",
-							groupedPath: "filters.enableMobileDropdownFilters"
+							icon: "tag",
+							headless: true,
+							hubHelp: __( "Where the bar sits, how it looks, and how it behaves on phones", 'modula-best-grid-gallery' ),
+							groupedPaths: [
+								"filters.filterTextAlignment",
+								"filters.filterPositioning",
+								"filters.defaultActiveFilter",
+								"filters.dropdownFilters",
+								"filters.hideAllFilter",
+								"filters.showFilterCount",
+								"filters.filterLinkColor",
+								"filters.filterLinkHoverColor",
+								"filters.enableCollapsibleFilters",
+								"filters.collapsibleActionText",
+								"filters.enableMobileDropdownFilters"
+							]
 						}
 					]
 				}
@@ -953,9 +1793,221 @@ export default {
 			panelDescription: __( "The bar visitors use to narrow the gallery down.", 'modula-best-grid-gallery' )
 		},
 		{
+			name: "motion",
+			title: __( "Motion", 'modula-best-grid-gallery' ),
+			description: __( "Hover and the effects that play as the gallery loads.", 'modula-best-grid-gallery' ),
+			hubSections: [
+				{
+					type: "submenu",
+					id: "hub",
+					role: "hub",
+					items: [
+						{
+							type: "field",
+							groupedPath: "motion.entrance"
+						},
+						{
+							type: "field",
+							groupedPath: "motion.speed"
+						},
+						{
+							type: "field",
+							groupedPath: "motion.hover",
+							visibleWhen: {
+								all: [
+									{
+										path: "general.type",
+										neq: "story"
+									},
+									{
+										path: "general.type",
+										neq: "slider"
+									},
+									{
+										path: "general.type",
+										neq: "video"
+									}
+								]
+							}
+						},
+						{
+							type: "field",
+							groupedPath: "hover.dimOverlay",
+							visibleWhen: {
+								all: [
+									{
+										path: "general.type",
+										neq: "video"
+									}
+								]
+							}
+						},
+						{
+							type: "field",
+							groupedPath: "motion.phones"
+						}
+					]
+				},
+				{
+					type: "submenu",
+					id: "more",
+					role: "more",
+					label: __( "More settings", 'modula-best-grid-gallery' ),
+					items: [
+						{
+							type: "drill",
+							id: "layout",
+							label: __( "This layout", 'modula-best-grid-gallery' ),
+							icon: "gallery",
+							visibleWhen: {
+								any: [
+									{
+										all: [
+											{
+												path: "general.type",
+												eq: "justified-grid"
+											},
+											{
+												path: "captions.contentPlacement",
+												neq: "below-image"
+											}
+										]
+									},
+									{
+										path: "general.type",
+										eq: "polaroid"
+									}
+								]
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "motion.widen",
+									visibleWhen: {
+										all: [
+											{
+												path: "general.type",
+												eq: "justified-grid"
+											},
+											{
+												path: "captions.contentPlacement",
+												neq: "below-image"
+											}
+										]
+									}
+								},
+								{
+									type: "field",
+									groupedPath: "motion.movePrints",
+									visibleWhen: {
+										path: "general.type",
+										eq: "polaroid"
+									}
+								}
+							],
+							groupedPaths: [
+								"motion.widen",
+								"motion.movePrints"
+							]
+						},
+						{
+							type: "drill",
+							id: "overlay",
+							label: __( "Overlay", 'modula-best-grid-gallery' ),
+							icon: "brush",
+							visibleWhen: {
+								all: [
+									{
+										path: "hover.dimOverlay",
+										truthy: true
+									},
+									{
+										path: "general.type",
+										neq: "video"
+									}
+								]
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "hover.hoverColor"
+								}
+							],
+							groupedPaths: [
+								"hover.hoverColor"
+							]
+						},
+						{
+							type: "drill",
+							id: "cursor-zoom",
+							label: __( "Cursor options", 'modula-best-grid-gallery' ),
+							icon: "search",
+							visibleWhen: {
+								all: [
+									{
+										path: "general.type",
+										neq: "video"
+									},
+									{
+										path: "general.type",
+										neq: "story"
+									},
+									{
+										path: "general.type",
+										neq: "slider"
+									}
+								]
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "hover.changeCursor",
+									visibleWhen: {
+										all: [
+											{
+												path: "general.type",
+												neq: "video"
+											},
+											{
+												path: "general.type",
+												neq: "story"
+											},
+											{
+												path: "general.type",
+												neq: "template"
+											},
+											{
+												path: "general.type",
+												neq: "slider"
+											}
+										]
+									}
+								},
+								{
+									type: "field",
+									groupedPath: "hover.cursor"
+								},
+								{
+									type: "field",
+									groupedPath: "hover.uploadCursor"
+								}
+							],
+							groupedPaths: [
+								"hover.changeCursor",
+								"hover.cursor",
+								"hover.uploadCursor"
+							]
+						}
+					]
+				}
+			],
+			navHelp: __( "Hover and load effects", 'modula-best-grid-gallery' ),
+			panelDescription: __( "Hover and the effects that play as the gallery loads.", 'modula-best-grid-gallery' )
+		},
+		{
 			name: "interaction",
-			title: __( "Interaction", 'modula-best-grid-gallery' ),
-			description: __( "Hover, click and the effects that play as the gallery loads.", 'modula-best-grid-gallery' ),
+			title: __( "Interact", 'modula-best-grid-gallery' ),
+			description: __( "What visitors can do with the images.", 'modula-best-grid-gallery' ),
 			visibleWhen: {
 				path: "general.type",
 				neq: "video"
@@ -963,173 +2015,8 @@ export default {
 			hubSections: [
 				{
 					type: "submenu",
-					label: __( "On Hover", 'modula-best-grid-gallery' ),
-					items: [
-						{
-							type: "drill",
-							label: __( "Hover effect", 'modula-best-grid-gallery' ),
-							icon: "brush",
-							summaryKind: "hoverEffect",
-							groupedPaths: [
-								"hover.sectionPresets",
-								"hover.effectBuilder",
-								"hover.sectionOverlay",
-								"hover.dimOverlay",
-								"hover.hoverColor",
-								"hover.sectionCursor",
-								"hover.cursor",
-								"hover.uploadCursor"
-							],
-							visibleWhen: {
-								all: [
-									{
-										path: "general.type",
-										neq: "video"
-									},
-									{
-										path: "general.type",
-										neq: "story"
-									},
-									{
-										path: "general.type",
-										neq: "slider"
-									}
-								]
-							},
-							hubHelp: __( "Presets, motion, and overlay for image hover", 'modula-best-grid-gallery' )
-						},
-						{
-							type: "zoomOnHoverToggle",
-							visibleWhen: {
-								all: [
-									{
-										path: "general.type",
-										neq: "video"
-									},
-									{
-										path: "general.type",
-										neq: "story"
-									},
-									{
-										path: "general.type",
-										neq: "slider"
-									}
-								]
-							}
-						},
-						{
-							type: "field",
-							groupedPath: "hover.changeCursor",
-							visibleWhen: {
-								all: [
-									{
-										path: "general.type",
-										neq: "video"
-									},
-									{
-										path: "general.type",
-										neq: "story"
-									},
-									{
-										path: "general.type",
-										neq: "template"
-									},
-									{
-										path: "general.type",
-										neq: "slider"
-									}
-								]
-							},
-							hubHelp: __( "Use a special cursor over gallery images", 'modula-best-grid-gallery' )
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "On Load", 'modula-best-grid-gallery' ),
-					items: [
-						{
-							type: "drill",
-							label: __( "Loading effect", 'modula-best-grid-gallery' ),
-							icon: "shuffle",
-							summaryKind: "loadingEffect",
-							groupedPaths: [
-								"loadingEffects.sectionMotion",
-								"loadingEffects.enableScale",
-								"loadingEffects.loadedScale",
-								"loadingEffects.enableRotate",
-								"loadingEffects.loadedRotate",
-								"loadingEffects.enableSlide",
-								"loadingEffects.loadedHSlide",
-								"loadingEffects.loadedVSlide"
-							],
-							visibleWhen: {
-								all: [
-									{
-										path: "general.type",
-										neq: "parallax-masonry"
-									},
-									{
-										path: "general.type",
-										neq: "story"
-									},
-									{
-										path: "general.type",
-										neq: "showcase"
-									},
-									{
-										path: "general.type",
-										neq: "template"
-									},
-									{
-										path: "general.type",
-										neq: "slider"
-									},
-									{
-										path: "general.type",
-										neq: "video"
-									}
-								]
-							},
-							hubHelp: __( "Scale, rotate, and slide when images load", 'modula-best-grid-gallery' )
-						},
-						{
-							type: "field",
-							groupedPath: "loadingEffects.inView",
-							visibleWhen: {
-								all: [
-									{
-										path: "general.type",
-										neq: "parallax-masonry"
-									},
-									{
-										path: "general.type",
-										neq: "story"
-									},
-									{
-										path: "general.type",
-										neq: "showcase"
-									},
-									{
-										path: "general.type",
-										neq: "template"
-									},
-									{
-										path: "general.type",
-										neq: "slider"
-									},
-									{
-										path: "general.type",
-										neq: "video"
-									}
-								]
-							}
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "What visitors can do", 'modula-best-grid-gallery' ),
+					id: "hub",
+					role: "hub",
 					items: [
 						{
 							type: "field",
@@ -1143,26 +2030,9 @@ export default {
 						},
 						{
 							type: "drill",
-							label: __( "Download options", 'modula-best-grid-gallery' ),
-							icon: "download",
-							summaryKind: "download",
-							groupedPaths: [
-								"download.sectionWhatTheyCanTake",
-								"download.downloadGalleryButton",
-								"download.downloadAllGalleryButton",
-								"download.downloadImageSizes",
-								"download.sectionGalleryButton",
-								"download.downloadAllLabel",
-								"download.downloadAllPosition",
-								"download.downloadAllHposition",
-								"download.sectionHowItLooks",
-								"download.downloadAllColor",
-								"download.downloadAllBackgroundColor",
-								"download.downloadAllGalleryButtonIcon",
-								"download.downloadAllGalleryIconColor",
-								"download.sectionZipName",
-								"download.customZipName"
-							],
+							id: "download",
+							label: __( "Download", 'modula-best-grid-gallery' ),
+							nestedUnder: "download.enableDownload",
 							visibleWhen: {
 								all: [
 									{
@@ -1175,35 +2045,91 @@ export default {
 									}
 								]
 							},
-							hubHelp: __( "What visitors can take, the gallery button, and zip name", 'modula-best-grid-gallery' )
-						},
-						{
-							type: "drill",
-							label: __( "Sharing", 'modula-best-grid-gallery' ),
-							icon: "share",
-							summaryKind: "socialNetworks",
-							groupedPaths: [
-								"social.sectionWhereTheyCanShare",
-								"social.enableTwitter",
-								"social.enableFacebook",
-								"social.enableWhatsapp",
-								"social.enableLinkedin",
-								"social.enablePinterest",
-								"social.enableEmail",
-								"social.emailSubject",
-								"social.emailMessage",
-								"social.sectionHowButtonsLook",
-								"social.noNetworkStyleHint",
-								"social.socialIconColor",
-								"social.socialIconSize",
-								"social.socialIconPadding",
-								"social.socialDesktopCollapsed"
+							items: [
+								{
+									type: "field",
+									groupedPath: "download.downloadGalleryButton"
+								},
+								{
+									type: "field",
+									groupedPath: "download.downloadAllGalleryButton"
+								},
+								{
+									type: "drill",
+									id: "gallery-button",
+									label: __( "The gallery button", 'modula-best-grid-gallery' ),
+									nestedUnder: "download.downloadAllGalleryButton",
+									visibleWhen: {
+										path: "download.downloadAllGalleryButton",
+										truthy: true
+									},
+									items: [
+										{
+											type: "field",
+											groupedPath: "download.downloadAllLabel"
+										},
+										{
+											type: "field",
+											groupedPath: "download.downloadAllPosition"
+										},
+										{
+											type: "field",
+											groupedPath: "download.downloadAllHposition"
+										},
+										{
+											type: "field",
+											groupedPath: "download.downloadAllColor"
+										},
+										{
+											type: "field",
+											groupedPath: "download.downloadAllBackgroundColor"
+										},
+										{
+											type: "field",
+											groupedPath: "download.downloadAllGalleryButtonIcon"
+										},
+										{
+											type: "field",
+											groupedPath: "download.downloadAllGalleryIconColor"
+										},
+										{
+											type: "field",
+											groupedPath: "download.customZipName"
+										}
+									],
+									groupedPaths: [
+										"download.downloadAllLabel",
+										"download.downloadAllPosition",
+										"download.downloadAllHposition",
+										"download.downloadAllColor",
+										"download.downloadAllBackgroundColor",
+										"download.downloadAllGalleryButtonIcon",
+										"download.downloadAllGalleryIconColor",
+										"download.customZipName"
+									]
+								},
+								{
+									type: "field",
+									groupedPath: "download.downloadImageSizes"
+								}
 							],
-							visibleWhen: {
-								path: "general.type",
-								neq: "video"
-							},
-							hubHelp: __( "Buttons that hand the image to somewhere else.", 'modula-best-grid-gallery' )
+							icon: "download",
+							summaryKind: "download",
+							headless: true,
+							hubHelp: __( "What visitors can take, the gallery button, and zip name", 'modula-best-grid-gallery' ),
+							groupedPaths: [
+								"download.downloadGalleryButton",
+								"download.downloadAllGalleryButton",
+								"download.downloadAllLabel",
+								"download.downloadAllPosition",
+								"download.downloadAllHposition",
+								"download.downloadAllColor",
+								"download.downloadAllBackgroundColor",
+								"download.downloadAllGalleryButtonIcon",
+								"download.downloadAllGalleryIconColor",
+								"download.customZipName",
+								"download.downloadImageSizes"
+							]
 						},
 						{
 							type: "field",
@@ -1217,14 +2143,9 @@ export default {
 						},
 						{
 							type: "drill",
-							label: __( "Comments options", 'modula-best-grid-gallery' ),
-							icon: "comment",
-							summaryKind: "comments",
-							groupedPaths: [
-								"comments.sectionDisplay",
-								"comments.toggleComments",
-								"comments.startCollapsed"
-							],
+							id: "comments",
+							label: __( "Comments", 'modula-best-grid-gallery' ),
+							nestedUnder: "comments.commentStatus",
 							visibleWhen: {
 								all: [
 									{
@@ -1237,32 +2158,185 @@ export default {
 									}
 								]
 							},
-							hubHelp: __( "Show or hide the comments panel on the gallery", 'modula-best-grid-gallery' )
+							items: [
+								{
+									type: "field",
+									groupedPath: "comments.startCollapsed"
+								}
+							],
+							icon: "comment",
+							summaryKind: "comments",
+							headless: true,
+							hubHelp: __( "Show or hide the comments panel on the gallery", 'modula-best-grid-gallery' ),
+							groupedPaths: [
+								"comments.startCollapsed"
+							]
 						}
 					]
 				},
 				{
 					type: "submenu",
-					label: __( "Motion", 'modula-best-grid-gallery' ),
+					id: "share",
+					role: "hub",
+					label: __( "Share", 'modula-best-grid-gallery' ),
 					items: [
 						{
 							type: "field",
-							groupedPath: "interaction.respectReducedMotion"
+							groupedPath: "social.enableSocial",
+							icon: "share",
+							visibleWhen: {
+								path: "general.type",
+								neq: "video"
+							}
+						},
+						{
+							type: "drill",
+							id: "social",
+							label: __( "Sharing", 'modula-best-grid-gallery' ),
+							nestedUnder: "social.enableSocial",
+							visibleWhen: {
+								all: [
+									{
+										path: "social.enableSocial",
+										truthy: true
+									},
+									{
+										path: "general.type",
+										neq: "video"
+									}
+								]
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "social.enableTwitter"
+								},
+								{
+									type: "field",
+									groupedPath: "social.enableFacebook"
+								},
+								{
+									type: "field",
+									groupedPath: "social.enableWhatsapp"
+								},
+								{
+									type: "field",
+									groupedPath: "social.enableLinkedin"
+								},
+								{
+									type: "field",
+									groupedPath: "social.enablePinterest"
+								},
+								{
+									type: "field",
+									groupedPath: "social.enableEmail"
+								},
+								{
+									type: "field",
+									groupedPath: "social.noNetworkStyleHint"
+								},
+								{
+									type: "field",
+									groupedPath: "social.socialIconColor"
+								},
+								{
+									type: "field",
+									groupedPath: "social.socialIconSize"
+								},
+								{
+									type: "field",
+									groupedPath: "social.socialIconPadding"
+								},
+								{
+									type: "field",
+									groupedPath: "social.socialDesktopCollapsed"
+								}
+							],
+							icon: "share",
+							summaryKind: "socialNetworks",
+							headless: true,
+							hubHelp: __( "Buttons that hand the image to somewhere else.", 'modula-best-grid-gallery' ),
+							groupedPaths: [
+								"social.enableTwitter",
+								"social.enableFacebook",
+								"social.enableWhatsapp",
+								"social.enableLinkedin",
+								"social.enablePinterest",
+								"social.enableEmail",
+								"social.noNetworkStyleHint",
+								"social.socialIconColor",
+								"social.socialIconSize",
+								"social.socialIconPadding",
+								"social.socialDesktopCollapsed"
+							]
+						}
+					]
+				},
+				{
+					type: "submenu",
+					id: "more",
+					role: "more",
+					label: __( "More settings", 'modula-best-grid-gallery' ),
+					items: [
+						{
+							type: "drill",
+							id: "email",
+							label: __( "Email", 'modula-best-grid-gallery' ),
+							icon: "share",
+							visibleWhen: {
+								all: [
+									{
+										path: "general.type",
+										neq: "video"
+									},
+									{
+										path: "social.enableSocial",
+										truthy: true
+									},
+									{
+										path: "social.enableEmail",
+										truthy: true
+									}
+								]
+							},
+							groupedPaths: [
+								"social.emailSubject",
+								"social.emailMessage"
+							]
 						}
 					]
 				}
 			],
-			navHelp: __( "Hover, click, and load effects", 'modula-best-grid-gallery' ),
-			panelDescription: __( "Hover, click and the effects that play as the gallery loads.", 'modula-best-grid-gallery' )
+			navHelp: __( "Download, comments, sharing", 'modula-best-grid-gallery' ),
+			panelDescription: __( "What visitors can do with the images.", 'modula-best-grid-gallery' )
 		},
 		{
 			name: "protection",
-			title: __( "Protection", 'modula-best-grid-gallery' ),
+			title: __( "Protect", 'modula-best-grid-gallery' ),
 			description: __( "How hard it is to take an image out of this gallery.", 'modula-best-grid-gallery' ),
+			liteUpsell: {
+				title: __( "Protect your photos", 'modula-best-grid-gallery' ),
+				pitch: __( "Stop people from copying or reusing your images.", 'modula-best-grid-gallery' ),
+				points: [
+					{
+						extension: "modula-password-protect"
+					},
+					{
+						extension: "modula-image-guardian"
+					},
+					{
+						extension: "modula-image-licensing"
+					},
+					{
+						extension: "modula-watermark"
+					}
+				]
+			},
 			hubSections: [
 				{
 					type: "submenu",
-					label: __( "Access", 'modula-best-grid-gallery' ),
+					id: "hub",
+					role: "hub",
 					items: [
 						{
 							type: "field",
@@ -1271,102 +2345,223 @@ export default {
 						},
 						{
 							type: "drill",
-							label: __( "Password", 'modula-best-grid-gallery' ),
-							icon: "lock",
-							summaryKind: "password",
-							groupedPaths: [
-								"passwordProtect.sectionPasswordForm",
-								"passwordProtect.password",
-								"passwordProtect.passwordProtectUsername",
-								"passwordProtect.passwordProtectText"
-							],
+							id: "password",
+							label: __( "Pass Protect", 'modula-best-grid-gallery' ),
+							nestedUnder: "passwordProtect.enablePassword",
 							visibleWhen: {
 								path: "passwordProtect.enablePassword",
 								truthy: true
 							},
-							hubHelp: __( "Password, username, and message on the lock screen", 'modula-best-grid-gallery' )
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "The image files", 'modula-best-grid-gallery' ),
-					items: [
+							items: [
+								{
+									type: "field",
+									groupedPath: "passwordProtect.password"
+								},
+								{
+									type: "field",
+									groupedPath: "passwordProtect.passwordProtectText"
+								}
+							],
+							icon: "lock",
+							summaryKind: "password",
+							headless: true,
+							hubHelp: __( "Password, username, and message on the lock screen", 'modula-best-grid-gallery' ),
+							groupedPaths: [
+								"passwordProtect.password",
+								"passwordProtect.passwordProtectText"
+							]
+						},
+						{
+							type: "field",
+							groupedPath: "watermark.enableWatermark",
+							icon: "image",
+							visibleWhen: {
+								path: "general.type",
+								neq: "video"
+							}
+						},
 						{
 							type: "drill",
+							id: "watermark",
+							label: __( "Watermark", 'modula-best-grid-gallery' ),
+							nestedUnder: "watermark.enableWatermark",
+							visibleWhen: {
+								all: [
+									{
+										path: "watermark.enableWatermark",
+										truthy: true
+									},
+									{
+										path: "general.type",
+										neq: "video"
+									}
+								]
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "watermark.watermarkType"
+								},
+								{
+									type: "field",
+									groupedPath: "watermark.customSettingsWatermark"
+								},
+								{
+									type: "field",
+									groupedPath: "watermark.watermarkText"
+								},
+								{
+									type: "field",
+									groupedPath: "watermark.watermarkTextSizeShare"
+								},
+								{
+									type: "field",
+									groupedPath: "watermark.watermarkTextColor"
+								},
+								{
+									type: "field",
+									groupedPath: "watermark.watermarkTextTypeHint"
+								},
+								{
+									type: "field",
+									groupedPath: "watermark.watermarkImage"
+								},
+								{
+									type: "field",
+									groupedPath: "watermark.watermarkImageDimensionWidth"
+								},
+								{
+									type: "field",
+									groupedPath: "watermark.watermarkImageTypeHint"
+								},
+								{
+									type: "field",
+									groupedPath: "watermark.watermarkPosition"
+								},
+								{
+									type: "field",
+									groupedPath: "watermark.watermarkOpacity"
+								},
+								{
+									type: "field",
+									groupedPath: "watermark.watermarkApplyScope"
+								},
+								{
+									type: "field",
+									groupedPath: "watermark.watermarkEnableBackup"
+								},
+								{
+									type: "field",
+									groupedPath: "watermark.watermarkBurnInHint"
+								},
+								{
+									type: "field",
+									groupedPath: "watermark.watermarkApplyToExistingImages"
+								}
+							],
+							icon: "image",
+							summaryKind: "watermark",
+							headless: true,
+							hubHelp: __( "Burned into the delivered image, so it survives a screenshot.", 'modula-best-grid-gallery' ),
+							groupedPaths: [
+								"watermark.watermarkType",
+								"watermark.customSettingsWatermark",
+								"watermark.watermarkText",
+								"watermark.watermarkTextSizeShare",
+								"watermark.watermarkTextColor",
+								"watermark.watermarkTextTypeHint",
+								"watermark.watermarkImage",
+								"watermark.watermarkImageDimensionWidth",
+								"watermark.watermarkImageTypeHint",
+								"watermark.watermarkPosition",
+								"watermark.watermarkOpacity",
+								"watermark.watermarkApplyScope",
+								"watermark.watermarkEnableBackup",
+								"watermark.watermarkBurnInHint",
+								"watermark.watermarkApplyToExistingImages"
+							]
+						},
+						{
+							type: "field",
+							groupedPath: "watermark.watermarkRemoveWatermark",
+							visibleWhen: {
+								path: "general.type",
+								neq: "video"
+							}
+						},
+						{
+							type: "drill",
+							id: "guardian",
 							label: __( "Image Guardian", 'modula-best-grid-gallery' ),
 							icon: "shield",
 							summaryKind: "imageGuardian",
 							nestedUpsellGroupedPath: "protection.protection",
+							visibleWhen: {
+								path: "general.type",
+								neq: "video"
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "protection.protection"
+								},
+								{
+									type: "drill",
+									id: "guardian-message",
+									label: __( "Message", 'modula-best-grid-gallery' ),
+									nestedUnder: "protection.protection",
+									visibleWhen: {
+										path: "protection.protection",
+										truthy: true
+									},
+									items: [
+										{
+											type: "field",
+											groupedPath: "protection.rightClickMessage"
+										}
+									],
+									groupedPaths: [
+										"protection.rightClickMessage"
+									]
+								},
+								{
+									type: "field",
+									groupedPath: "protection.blockDragging"
+								},
+								{
+									type: "field",
+									groupedPath: "protection.blurProtection"
+								},
+								{
+									type: "field",
+									groupedPath: "protection.urlProtection"
+								},
+								{
+									type: "field",
+									groupedPath: "protection.urlProtectionCostHint"
+								}
+							],
+							hubHelp: __( "Modula’s name for the anti-saving tools. They make casual saving harder. None of them stops a screenshot.", 'modula-best-grid-gallery' ),
 							groupedPaths: [
-								"protection.sectionBasics",
 								"protection.protection",
 								"protection.rightClickMessage",
 								"protection.blockDragging",
-								"protection.sectionHarderMeasures",
 								"protection.blurProtection",
 								"protection.urlProtection",
 								"protection.urlProtectionCostHint"
-							],
-							visibleWhen: {
-								path: "general.type",
-								neq: "video"
-							},
-							hubHelp: __( "Modula’s name for the anti-saving tools. They make casual saving harder. None of them stops a screenshot.", 'modula-best-grid-gallery' )
+							]
 						},
 						{
 							type: "drill",
-							label: __( "Watermark", 'modula-best-grid-gallery' ),
-							icon: "image",
-							summaryKind: "watermark",
-							nestedUpsellGroupedPath: "watermark.enableWatermark",
-							groupedPaths: [
-								"watermark.watermarkType",
-								"watermark.customSettingsWatermark",
-								"watermark.sectionText",
-								"watermark.watermarkText",
-								"watermark.watermarkTextSize",
-								"watermark.watermarkTextColor",
-								"watermark.watermarkTextTypeHint",
-								"watermark.sectionImage",
-								"watermark.watermarkImage",
-								"watermark.watermarkImageDimensionWidth",
-								"watermark.watermarkImageTypeHint",
-								"watermark.sectionPlacement",
-								"watermark.watermarkPosition",
-								"watermark.watermarkMargin",
-								"watermark.watermarkOpacity",
-								"watermark.sectionAppliesTo",
-								"watermark.watermarkApplyScope",
-								"watermark.watermarkEnableBackup",
-								"watermark.watermarkBurnInHint",
-								"watermark.watermarkApplyToExistingImages",
-								"watermark.watermarkRemoveWatermark"
-							],
-							visibleWhen: {
-								path: "general.type",
-								neq: "video"
-							},
-							hubHelp: __( "Burned into the delivered image, so it survives a screenshot.", 'modula-best-grid-gallery' )
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "Credit", 'modula-best-grid-gallery' ),
-					items: [
-						{
-							type: "drill",
-							label: __( "License", 'modula-best-grid-gallery' ),
+							id: "licensing",
+							label: __( "Image licensing", 'modula-best-grid-gallery' ),
 							icon: "info",
 							summaryKind: "imageLicensing",
 							nestedUpsellGroupedPath: "licensing.imageLicensing",
 							groupedPaths: [
-								"licensing.sectionLicense",
 								"licensing.imageLicensing",
 								"licensing.author",
 								"licensing.company",
-								"licensing.sectionWhereItShows",
 								"licensing.displayWithDescription",
 								"licensing.showOnLightbox"
 							],
@@ -1379,18 +2574,75 @@ export default {
 					]
 				},
 				{
-					type: "note",
-					label: __( "Honesty", 'modula-best-grid-gallery' ),
-					text: __( "These raise the effort, not a wall. A watermark is the only one that survives a screenshot.", 'modula-best-grid-gallery' )
+					type: "submenu",
+					id: "more",
+					role: "more",
+					label: __( "More settings", 'modula-best-grid-gallery' ),
+					items: [
+						{
+							type: "drill",
+							id: "password-more",
+							label: __( "Pass Protect", 'modula-best-grid-gallery' ),
+							icon: "lock",
+							visibleWhen: {
+								path: "passwordProtect.enablePassword",
+								truthy: true
+							},
+							groupedPaths: [
+								"passwordProtect.passwordProtectUsername"
+							],
+							hubHelp: __( "Password, username, and message on the lock screen", 'modula-best-grid-gallery' )
+						},
+						{
+							type: "drill",
+							id: "watermark-more",
+							label: __( "Watermark margin", 'modula-best-grid-gallery' ),
+							icon: "image",
+							nestedUpsellGroupedPath: "watermark.enableWatermark",
+							visibleWhen: {
+								all: [
+									{
+										path: "general.type",
+										neq: "video"
+									},
+									{
+										path: "watermark.enableWatermark",
+										truthy: true
+									}
+								]
+							},
+							groupedPaths: [
+								"watermark.watermarkMarginShare"
+							]
+						}
+					]
 				}
 			],
 			navHelp: __( "Keeping your photos yours", 'modula-best-grid-gallery' ),
 			panelDescription: __( "How hard it is to take an image out of this gallery.", 'modula-best-grid-gallery' )
 		},
 		{
-			name: "advanced",
-			title: __( "Advanced", 'modula-best-grid-gallery' ),
-			description: __( "EXIF, performance, integrations and technical options.", 'modula-best-grid-gallery' ),
+			name: "instagram",
+			title: __( "Instagram", 'modula-best-grid-gallery' ),
+			description: __( "Bring the photos from an Instagram account into this gallery.", 'modula-best-grid-gallery' ),
+			liteUpsell: {
+				title: __( "Show your Instagram photos", 'modula-best-grid-gallery' ),
+				pitch: __( "Bring the photos from your Instagram account into this gallery.", 'modula-best-grid-gallery' ),
+				points: [
+					{
+						extension: "modula-instagram"
+					},
+					{
+						extension: "modula-albums"
+					},
+					{
+						extension: "modula-password-protect"
+					},
+					{
+						extension: "modula-speedup"
+					}
+				]
+			},
 			visibleWhen: {
 				path: "general.type",
 				neq: "video"
@@ -1398,146 +2650,169 @@ export default {
 			hubSections: [
 				{
 					type: "submenu",
-					label: __( "Image data", 'modula-best-grid-gallery' ),
+					id: "hub",
+					role: "hub",
 					items: [
 						{
-							type: "drill",
-							label: __( "Shooting data", 'modula-best-grid-gallery' ),
-							icon: "capturePhoto",
-							summaryKind: "shootingData",
-							nestedUpsellGroupedPath: "exif.enableExif",
-							groupedPaths: [
-								"exif.enableExif",
-								"exif.enableExifOffHint",
-								"exif.exifCamera",
-								"exif.exifLens",
-								"exif.exifShutterSpeed",
-								"exif.exifAperture",
-								"exif.exifFocalLength",
-								"exif.exifIso",
-								"exif.exifDate",
-								"exif.sectionResult",
-								"exif.exifResultPreview"
-							],
-							hubHelp: __( "Read from the file and shown under the image in the lightbox.", 'modula-best-grid-gallery' )
+							type: "field",
+							groupedPath: "instagram.accountPanel"
+						},
+						{
+							type: "field",
+							groupedPath: "instagram.syncWithInstagram"
+						},
+						{
+							type: "field",
+							groupedPath: "instagram.managePhotos"
+						},
+						{
+							type: "field",
+							groupedPath: "instagram.cronNote"
+						}
+					]
+				}
+			],
+			navHelp: __( "Photos from an Instagram account", 'modula-best-grid-gallery' ),
+			panelDescription: __( "Bring the photos from an Instagram account into this gallery.", 'modula-best-grid-gallery' )
+		},
+		{
+			name: "proofing",
+			title: __( "Proofing", 'modula-best-grid-gallery' ),
+			description: __( "Let clients pick their favourite images.", 'modula-best-grid-gallery' ),
+			liteUpsell: {
+				title: __( "Let clients pick their favorites", 'modula-best-grid-gallery' ),
+				pitch: __( "Share the gallery with a client. They mark the photos they like and you get the list.", 'modula-best-grid-gallery' ),
+				points: [
+					{
+						extension: "modula-image-proofing"
+					},
+					{
+						extension: "modula-watermark"
+					},
+					{
+						extension: "modula-exif"
+					},
+					{
+						extension: "modula-download"
+					}
+				]
+			},
+			visibleWhen: {
+				all: [
+					{
+						path: "general.type",
+						neq: "video"
+					},
+					{
+						path: "general.type",
+						neq: "template"
+					}
+				]
+			},
+			hubSections: [
+				{
+					type: "submenu",
+					id: "hub",
+					role: "hub",
+					items: [
+						{
+							type: "field",
+							groupedPath: "proofing.imageProofing"
 						},
 						{
 							type: "drill",
-							label: __( "Link to one image", 'modula-best-grid-gallery' ),
-							icon: "link",
-							summaryKind: "deeplink",
-							nestedUpsellGroupedPath: "deeplink.modulaDeeplink",
-							groupedPaths: [
-								"deeplink.modulaDeeplink",
-								"deeplink.modulaDeeplinkOffHint",
-								"deeplink.customLinkName",
-								"deeplink.urlPreview"
+							id: "proofing-options",
+							label: __( "Proofing", 'modula-best-grid-gallery' ),
+							nestedUnder: "proofing.imageProofing",
+							visibleWhen: {
+								path: "proofing.imageProofing",
+								truthy: true
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "proofing.minSelection"
+								},
+								{
+									type: "field",
+									groupedPath: "proofing.maxSelection"
+								},
+								{
+									type: "field",
+									groupedPath: "proofing.notificationEmail"
+								},
+								{
+									type: "field",
+									groupedPath: "proofing.showLoginLink"
+								},
+								{
+									type: "field",
+									groupedPath: "proofing.loginRejectionNotice"
+								},
+								{
+									type: "field",
+									groupedPath: "proofing.expireRejectionNotice"
+								},
+								{
+									type: "field",
+									groupedPath: "proofing.expireLinkToPage"
+								},
+								{
+									type: "field",
+									groupedPath: "proofing.expireLinkToPageUrl"
+								},
+								{
+									type: "field",
+									groupedPath: "proofing.manageProofing"
+								}
 							],
-							hubHelp: __( "Share a URL that opens one image in this gallery.", 'modula-best-grid-gallery' )
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "Integrations", 'modula-best-grid-gallery' ),
-					items: [
-						{
-							type: "drill",
-							label: __( "Instagram", 'modula-best-grid-gallery' ),
-							icon: "atSymbol",
-							summaryKind: "instagram",
-							nestedUpsellGroupedPath: "instagram.syncWithInstagram",
-							groupedPaths: [
-								"instagram.accountPanel",
-								"instagram.syncWithInstagram",
-								"instagram.managePhotos",
-								"instagram.cronNote"
-							],
-							hubHelp: __( "Connect an account and keep this gallery in sync.", 'modula-best-grid-gallery' )
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "Client review", 'modula-best-grid-gallery' ),
-					visibleWhen: {
-						path: "general.type",
-						neq: "template"
-					},
-					items: [
-						{
-							type: "drill",
-							group: "proofing",
 							icon: "people",
-							nestedUpsellGroupedPath: "proofing.imageProofing",
+							headless: true,
+							hubHelp: __( "Selection limits, notifications, and the messages clients see", 'modula-best-grid-gallery' ),
 							groupedPaths: [
-								"proofing.imageProofing",
 								"proofing.minSelection",
 								"proofing.maxSelection",
 								"proofing.notificationEmail",
 								"proofing.showLoginLink",
 								"proofing.loginRejectionNotice",
+								"proofing.expireRejectionNotice",
 								"proofing.expireLinkToPage",
 								"proofing.expireLinkToPageUrl",
-								"proofing.expireRejectionNotice"
+								"proofing.manageProofing"
 							]
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "Delivery", 'modula-best-grid-gallery' ),
-					items: [
-						{
-							type: "drill",
-							label: __( "Performance", 'modula-best-grid-gallery' ),
-							icon: "chartBar",
-							summaryKind: "performance",
-							groupedPaths: [
-								"performance.sectionLoading",
-								"performance.lazyLoad",
-								"performance.sectionFiles",
-								"performance.enableOptimization",
-								"performance.thumbnailOptimization",
-								"performance.lightboxOptimization",
-								"performance.modulaSpeedHelp",
-								"performance.speedupGlobalNote"
-							],
-							hubHelp: __( "Lazy load and image compression for faster pages.", 'modula-best-grid-gallery' )
-						},
-						{
-							type: "drill",
-							label: __( "Presets", 'modula-best-grid-gallery' ),
-							icon: "download",
-							summaryKind: "exportImport",
-							nestedUpsellGroupedPath: "exportImport.galleryDefaultsPanel",
-							groupedPaths: [
-								"exportImport.galleryDefaultsPanel"
-							],
-							hubHelp: __( "Save these settings and reuse them on new galleries.", 'modula-best-grid-gallery' )
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "Elsewhere", 'modula-best-grid-gallery' ),
-					items: [
-						{
-							type: "exit",
-							label: __( "Zoom on hover", 'modula-best-grid-gallery' ),
-							targetCategory: "interaction",
-							targetLabel: "Interaction"
 						}
 					]
 				}
 			],
-			navHelp: __( "Speed, camera data, extras", 'modula-best-grid-gallery' ),
-			panelDescription: __( "EXIF, performance, integrations and technical options.", 'modula-best-grid-gallery' )
+			navHelp: __( "Clients pick their favourites", 'modula-best-grid-gallery' ),
+			panelDescription: __( "Let clients pick their favourite images.", 'modula-best-grid-gallery' )
 		},
 		{
 			name: "video",
 			title: __( "Video", 'modula-best-grid-gallery' ),
 			description: __( "Video playback, play icons, lightbox autoplay, and hover preview for Video galleries and mixed image galleries that include videos.", 'modula-best-grid-gallery' ),
+			requiresExtension: "modula-video",
+			liteUpsell: {
+				title: __( "Add videos to your galleries", 'modula-best-grid-gallery' ),
+				pitch: __( "Mix YouTube, Vimeo and your own videos with photos.", 'modula-best-grid-gallery' ),
+				points: [
+					{
+						extension: "modula-video"
+					},
+					{
+						extension: "modula-slideshow"
+					},
+					{
+						label: __( "Filter galleries by category", 'modula-best-grid-gallery' )
+					},
+					{
+						label: __( "Image sorting", 'modula-best-grid-gallery' )
+					}
+				],
+				needsProMessage: __( "Adding a video gallery with self-hosted videos or videos from sources like YouTube and Vimeo to your website has never been easier.", 'modula-best-grid-gallery' ),
+				pricingUrl: "https://wp-modula.com/pricing/?utm_source=upsell&utm_medium=modula-video_tab_upsell-tab&utm_campaign=modula-video&utm_content=v3",
+				getPremiumLabel: __( "Get Premium!", 'modula-best-grid-gallery' )
+			},
 			visibleWhen: {
 				all: [
 					{
@@ -1561,155 +2836,149 @@ export default {
 			hubSections: [
 				{
 					type: "submenu",
-					label: __( "Playback", 'modula-best-grid-gallery' ),
-					visibleWhen: {
-						path: "general.type",
-						eq: "video"
-					},
+					id: "hub",
+					role: "hub",
 					items: [
 						{
 							type: "field",
-							groupedPath: "video.autoplayThumbnail",
-							fieldPresentation: "embedded"
+							groupedPath: "video.playlistPosition"
 						},
 						{
 							type: "field",
-							groupedPath: "video.loopVideos",
-							fieldPresentation: "embedded"
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "In the lightbox", 'modula-best-grid-gallery' ),
-					items: [
-						{
-							type: "field",
-							groupedPath: "video.playlistPosition",
-							fieldPresentation: "embedded",
-							visibleWhen: {
-								path: "general.type",
-								eq: "video"
-							}
+							groupedPath: "video.autoplayVideos"
 						},
 						{
 							type: "field",
-							groupedPath: "video.showPlaylistScrollbar",
-							fieldPresentation: "embedded",
-							visibleWhen: {
-								path: "general.type",
-								eq: "video"
-							}
+							groupedPath: "video.loopVideos"
 						},
 						{
 							type: "field",
-							groupedPath: "video.autoplayVideos",
-							icon: "next",
-							visibleWhen: {
-								path: "general.type",
-								neq: "video"
-							}
-						},
-						{
-							type: "field",
-							groupedPath: "video.loopVideos",
-							icon: "shuffle",
-							visibleWhen: {
-								path: "general.type",
-								neq: "video"
-							}
-						}
-					]
-				},
-				{
-					type: "submenu",
-					label: __( "In the grid", 'modula-best-grid-gallery' ),
-					items: [
-						{
-							type: "field",
-							groupedPath: "video.showVideoIcon",
-							fieldPresentation: "embedded",
-							visibleWhen: {
-								path: "general.type",
-								eq: "video"
-							}
-						},
-						{
-							type: "field",
-							groupedPath: "video.videoIconColor",
-							fieldPresentation: "embedded",
-							visibleWhen: {
-								path: "general.type",
-								eq: "video"
-							}
-						},
-						{
-							type: "field",
-							groupedPath: "video.playIconSize",
-							fieldPresentation: "embedded",
-							visibleWhen: {
-								path: "general.type",
-								eq: "video"
-							}
-						},
-						{
-							type: "field",
-							groupedPath: "video.videoIconIcon",
-							fieldPresentation: "embedded",
-							visibleWhen: {
-								path: "general.type",
-								eq: "video"
-							}
-						},
-						{
-							type: "field",
-							groupedPath: "video.customVideoIcon",
-							fieldPresentation: "embedded",
-							visibleWhen: {
-								path: "general.type",
-								eq: "video"
-							}
+							groupedPath: "video.showVideoIcon"
 						},
 						{
 							type: "drill",
+							id: "play-icon",
 							label: __( "Play icon", 'modula-best-grid-gallery' ),
-							icon: "image",
-							summaryKind: "playIcon",
+							nestedUnder: "video.showVideoIcon",
 							visibleWhen: {
-								path: "general.type",
-								neq: "video"
+								path: "video.showVideoIcon",
+								truthy: true
 							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "video.videoIconIcon"
+								},
+								{
+									type: "field",
+									groupedPath: "video.customVideoIcon"
+								},
+								{
+									type: "field",
+									groupedPath: "video.videoIconColor"
+								},
+								{
+									type: "field",
+									groupedPath: "video.playIconSize"
+								}
+							],
+							summaryKind: "playIcon",
+							headless: true,
+							hubHelp: __( "The mark that tells a visitor a tile is a video, not a photo.", 'modula-best-grid-gallery' ),
 							groupedPaths: [
-								"video.showVideoIcon",
 								"video.videoIconIcon",
 								"video.customVideoIcon",
 								"video.videoIconColor",
 								"video.playIconSize"
-							],
-							hubHelp: __( "The mark that tells a visitor a tile is a video, not a photo.", 'modula-best-grid-gallery' )
+							]
+						},
+						{
+							type: "field",
+							groupedPath: "video.previewVideo"
 						},
 						{
 							type: "drill",
-							label: __( "Hover preview", 'modula-best-grid-gallery' ),
-							icon: "search",
-							summaryKind: "hoverPreview",
+							id: "preview",
+							label: __( "Preview", 'modula-best-grid-gallery' ),
+							nestedUnder: "video.previewVideo",
+							visibleWhen: {
+								all: [
+									{
+										path: "video.previewVideo",
+										truthy: true
+									},
+									{
+										path: "general.type",
+										neq: "video"
+									}
+								]
+							},
+							items: [
+								{
+									type: "field",
+									groupedPath: "video.autoplayThumbnail"
+								},
+								{
+									type: "field",
+									groupedPath: "video.previewVideoDuration"
+								}
+							],
+							headless: true,
+							groupedPaths: [
+								"video.autoplayThumbnail",
+								"video.previewVideoDuration"
+							]
+						},
+						{
+							type: "field",
+							groupedPath: "video.autoplayThumbnail",
 							visibleWhen: {
 								path: "general.type",
-								neq: "video"
-							},
+								eq: "video"
+							}
+						}
+					]
+				},
+				{
+					type: "submenu",
+					id: "more",
+					role: "more",
+					label: __( "More settings", 'modula-best-grid-gallery' ),
+					items: [
+						{
+							type: "drill",
+							id: "playlist",
+							label: __( "Playlist", 'modula-best-grid-gallery' ),
+							icon: "video",
 							groupedPaths: [
-								"video.previewVideo",
-								"video.autoplayThumbnail",
-								"video.previewVideoDuration",
-								"video.previewVideoOffHint"
-							],
-							hubHelp: __( "A short silent clip that plays in the tile while the pointer is on it.", 'modula-best-grid-gallery' )
+								"video.showPlaylistScrollbar"
+							]
 						}
 					]
 				}
 			],
 			navHelp: __( "If the gallery holds videos", 'modula-best-grid-gallery' ),
 			panelDescription: __( "Applies to the video items in this gallery.", 'modula-best-grid-gallery' )
+		},
+		{
+			name: "css",
+			title: __( "CSS", 'modula-best-grid-gallery' ),
+			description: __( "Custom CSS for this gallery.", 'modula-best-grid-gallery' ),
+			hubSections: [
+				{
+					type: "submenu",
+					id: "hub",
+					role: "hub",
+					items: [
+						{
+							type: "field",
+							groupedPath: "style.customCss"
+						}
+					]
+				}
+			],
+			navHelp: __( "Custom CSS", 'modula-best-grid-gallery' ),
+			panelDescription: __( "Custom CSS for this gallery.", 'modula-best-grid-gallery' )
 		}
 	],
 	GROUP_LABELS: {

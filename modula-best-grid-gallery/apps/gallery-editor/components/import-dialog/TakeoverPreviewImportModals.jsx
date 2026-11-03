@@ -2,7 +2,9 @@
  * Mounts takeover Add New import flows: folder, ZIP, and registry-driven extension modals.
  * Folder/ZIP implementations are registered by Pro (`window.modula.proCore`).
  */
-import { Spinner } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { Spinner } from 'admin-ui';
+import { AdminUiScope } from 'editor-shell';
 import { useExtensionImportHost } from '../../platform/ExtensionImportHostContext';
 import { getAddNewEntitlements } from '../../utils/addNewEntitlements';
 import { useProCoreRegistration } from '../../hooks/useProCoreRegistration';
@@ -14,9 +16,12 @@ function ImportModalFallback() {
 		<div
 			className="modula-import-dialog__spinner-wrap modula-import-dialog__lazy-fallback"
 			role="status"
+			aria-label={__('Loading…', 'modula-best-grid-gallery')}
 			aria-live="polite"
 		>
-			<Spinner />
+			<AdminUiScope>
+				<Spinner />
+			</AdminUiScope>
 		</div>
 	);
 }

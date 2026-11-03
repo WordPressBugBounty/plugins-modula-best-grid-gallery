@@ -1,24 +1,23 @@
 import { __ } from '@wordpress/i18n';
-import { Segmented } from 'shared-ui';
+import { Segmented } from 'admin-ui';
 
 /**
- * Build / Preview canvas toggle — style-kit Segmented (same as Presets / Customize).
+ * Build / Preview canvas toggle — admin-ui Segmented, in the builder
+ * column's admin-ui scope.
  *
  * @param {{
- *   buildMode: boolean,
  *   previewMode: boolean,
  *   setBuilderViewMode: (mode: 'build' | 'preview') => void,
  * }} props
  */
 export default function HoverBuilderCanvasModeNav({
-	buildMode,
 	previewMode,
 	setBuilderViewMode,
 }) {
 	const value = previewMode ? 'preview' : 'build';
 
 	return (
-		<div className="modula-gallery-takeover__hover-builder-mode-nav modula-gallery-takeover__hover-builder-mode-nav--canvas">
+		<div className="modula-gallery-takeover__hover-builder-mode-nav">
 			<Segmented
 				aria-label={__(
 					'Build or preview hover on the sample tile',

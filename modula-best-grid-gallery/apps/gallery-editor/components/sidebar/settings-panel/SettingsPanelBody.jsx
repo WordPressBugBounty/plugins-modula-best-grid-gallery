@@ -1,400 +1,179 @@
 /**
- * Redesign settings panel — walks hubSections; submenu + field + drill + exit + note.
+ * Settings panel body (canvas "1 · Editor"): the category's hub fields first,
+ * then a "More settings" heading over accordion sections that expand in place.
+ * A labelled hub submenu (Interact › Share) is a heading inside the hub.
+ * A category Lite locks (Filters, Protect, Instagram, Proofing, Video) shows its upsell card instead.
  */
-import { useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { SettingsPanelExitRow } from 'editor-shell';
+import { Accordion } from 'admin-ui';
 import { useGallerySettingsFormBundle } from '../../../form/GallerySettingsFormContext';
-import { GROUP_LABELS } from '../../../constants/editorStructure';
+import { useLiveGalleryPhotoCount } from '../../../hooks/useLiveGalleryPhotoCount';
 import { useModulaSettingsEditorConfig } from '../../../hooks/useModulaSettingsEditorConfig';
-import { useTakeoverSidebarStack } from '../../../context/TakeoverSidebarStackContext';
-import { isFieldVisible } from '../../../logic/fieldVisibility';
-import { getEnrichedFieldByGroupedPath } from '../../../data/formSchema';
-import { getGroupedPathsForHubDrillSection } from '../../../utils/getGroupedPathsForHubDrillSection';
 import { shouldRenderHubSection } from '../../../logic/hubSectionVisibility';
-import SettingsPanelSection from './SettingsPanelSection';
-import SettingsPanelDrillRow from './SettingsPanelDrillRow';
-import SettingsPanelEmbeddedField from './SettingsPanelEmbeddedField';
-import SettingsPanelToggleRow from './SettingsPanelToggleRow';
-import SettingsPanelColorRow from './SettingsPanelColorRow';
-import SettingsPanelSegmentedRow from './SettingsPanelSegmentedRow';
-import SettingsPanelSelectRow from './SettingsPanelSelectRow';
-import SettingsPanelPositionGridRow from './SettingsPanelPositionGridRow';
-import SettingsPanelNestedFields from './SettingsPanelNestedFields';
-import SchemaFieldRow from '../../schema/SchemaFieldRow';
-import ZoomOnHoverHubToggle from '../ZoomOnHoverHubToggle';
+import { resolveCategoryLiteLock } from '../../../logic/liteUpsell';
+import { settingAnchorProps } from '../../../logic/settingAnchor';
+import {
+	buildSectionKey,
+	isMoreSettingsSubmenu,
+} from '../../../logic/settingsPanelSections';
+import LiteUpsellCard from '../../upsell/LiteUpsellCard';
+import SettingsPanelHubField from './SettingsPanelHubField';
+import SettingsPanelLiteLock from './SettingsPanelLiteLock';
+import SettingsPanelItems, {
+	SettingsPanelAccordionSection,
+} from './SettingsPanelItems';
 
 /**
- * @param {Object}                                  section
- * @param {Record<string, Record<string, unknown>>} values
- * @return {boolean}
+ * @type {import('./SettingsPanelItems').RenderField} The field's hub row.
  */
-function isHubSectionVisible(section, values) {
-	return shouldRenderHubSection(section, values);
+function renderHubField(field, dependentsReset) {
+	return (
+		<SettingsPanelLiteLock field={field}>
+			<SettingsPanelHubField
+				field={field}
+				dependentsReset={dependentsReset}
+			/>
+		</SettingsPanelLiteLock>
+	);
 }
 
 /**
- * @param {Object}                                  item
- * @param {Record<string, Record<string, unknown>>} values
- * @param {string}                                  reactKey
- * @return {import('react').ReactNode}
+ * @param {Object}                                  props
+ * @param {Object}                                  props.submenu   Hub submenu.
+ * @param {string}                                  props.parentKey Its open state key.
+ * @param {Record<string, Record<string, unknown>>} props.values
  */
-function renderHubFieldItem(item, values, reactKey) {
-	if (
-		typeof item.groupedPath !== 'string' ||
-		item.groupedPath.trim() === ''
-	) {
-		return null;
-	}
-	const hit = getEnrichedFieldByGroupedPath(item.groupedPath.trim());
-	if (!hit || !isFieldVisible(hit.field, values)) {
-		return null;
-	}
-
-	const safeId = item.groupedPath.replace(/[^a-z0-9.-]/gi, '-');
-	const labelId = `modula-settings-panel-field-${safeId}`;
-	const isEmbedded =
-		item.fieldPresentation === 'embedded' ||
-		item.hubFieldPresentation === 'embedded';
-	const kind = hit.field.control?.kind;
-
-	if (kind === 'galleryDefaultsShell') {
-		return (
-			<SchemaFieldRow
-				key={reactKey}
-				groupKey={hit.groupId}
-				field={hit.field}
-				disabled={false}
-				variant="stacked"
+function SettingsPanelHub({ submenu, parentKey, values }) {
+	const heading = typeof submenu.label === 'string' ? submenu.label : '';
+	return (
+		<div className="modula-settings-panel__hub">
+			{heading !== '' ? (
+				<h3 className="modula-settings-panel__hub-heading">
+					{heading}
+				</h3>
+			) : null}
+			<SettingsPanelItems
+				items={submenu.items}
+				parentKey={parentKey}
+				values={values}
+				headingLevel={heading !== '' ? 4 : 3}
+				renderField={renderHubField}
 			/>
-		);
-	}
-
-	/*
-	 * Hub `embedded` means “surface on the hub, not a drill” — not stacked chrome.
-	 * Boolean toggles always use the label|switch row (same as non-embedded hubs).
-	 */
-	if (kind === 'toggle' || kind === 'toggleWithNested') {
-		return (
-			<SettingsPanelToggleRow
-				key={reactKey}
-				groupKey={hit.groupId}
-				field={hit.field}
-				labelId={labelId}
-			/>
-		);
-	}
-
-	if (isEmbedded) {
-		return (
-			<SettingsPanelEmbeddedField
-				key={reactKey}
-				groupKey={hit.groupId}
-				field={hit.field}
-				labelId={labelId}
-			/>
-		);
-	}
-
-	if (kind === 'color' || kind === 'parallaxOverlayColor') {
-		return (
-			<SettingsPanelColorRow
-				key={reactKey}
-				groupKey={hit.groupId}
-				field={hit.field}
-				labelId={labelId}
-			/>
-		);
-	}
-
-	if (kind === 'segmentedEnum') {
-		return (
-			<SettingsPanelSegmentedRow
-				key={reactKey}
-				groupKey={hit.groupId}
-				field={hit.field}
-				labelId={labelId}
-			/>
-		);
-	}
-
-	if (kind === 'select' || kind === 'templateLayoutSelect') {
-		return (
-			<SettingsPanelSelectRow
-				key={reactKey}
-				groupKey={hit.groupId}
-				field={hit.field}
-				labelId={labelId}
-			/>
-		);
-	}
-
-	if (kind === 'positionGrid') {
-		return (
-			<SettingsPanelPositionGridRow
-				key={reactKey}
-				groupKey={hit.groupId}
-				field={hit.field}
-				labelId={labelId}
-			/>
-		);
-	}
-
-	// Presentation rows (info callouts, etc.) — reuse schema row chrome.
-	if (kind === 'infoCallout') {
-		return (
-			<SchemaFieldRow
-				key={reactKey}
-				groupKey={hit.groupId}
-				field={hit.field}
-				disabled={false}
-				variant="stacked"
-			/>
-		);
-	}
-
-	return null;
+		</div>
+	);
 }
 
 /**
- * @param {Object}                 props
- * @param {Object}                 props.category
- * @param {(name: string) => void} props.onExitCategory
+ * @param {Object}                                  props
+ * @param {Object[]}                                props.submenus     "More settings" submenus.
+ * @param {string}                                  props.categoryName
+ * @param {Record<string, Record<string, unknown>>} props.values
  */
-export default function SettingsPanelBody({ category, onExitCategory }) {
-	const config = useModulaSettingsEditorConfig();
+function SettingsPanelMoreSettings({ submenus, categoryName, values }) {
+	const sections = submenus.flatMap((submenu) =>
+		submenu.items
+			.filter(
+				(item) =>
+					item?.type === 'drill' &&
+					shouldRenderHubSection(item, values)
+			)
+			.map((item) => ({
+				item,
+				key: buildSectionKey(
+					buildSectionKey(categoryName, submenu),
+					item
+				),
+			}))
+	);
+	if (sections.length === 0) {
+		return null;
+	}
+	return (
+		<section
+			className="modula-settings-panel__more"
+			aria-labelledby="modula-settings-panel-more-title"
+		>
+			<h2
+				id="modula-settings-panel-more-title"
+				className="modula-settings-panel__more-title"
+			>
+				{__('More settings', 'modula-best-grid-gallery')}
+			</h2>
+			<Accordion className="modula-settings-panel__more-sections">
+				{sections.map(({ item, key }) => (
+					<SettingsPanelAccordionSection
+						key={key}
+						section={item}
+						sectionKey={key}
+						values={values}
+						headingLevel={3}
+					/>
+				))}
+			</Accordion>
+		</section>
+	);
+}
+
+/**
+ * @param {Object} props
+ * @param {Object} props.category Entry from `SETTINGS_EDITOR_CATEGORIES`.
+ */
+export default function SettingsPanelBody({ category }) {
 	const { form } = useGallerySettingsFormBundle();
-	const { stack, stackDepth, clearStack } = useTakeoverSidebarStack();
-	const formUi = config.formUi || {};
-	const groupLabels = formUi.groupLabels || {};
-
-	const groupLabel = (key) => groupLabels[key] || GROUP_LABELS[key] || key;
-
-	useEffect(() => {
-		clearStack();
-	}, [category?.name, clearStack]);
-
-	if (stackDepth > 0) {
-		const frame = stack[stack.length - 1];
-		return (
-			<div className="modula-settings-panel__body modula-settings-panel__body--nested">
-				<SettingsPanelNestedFields frame={frame} />
-			</div>
-		);
-	}
-
-	const sections = Array.isArray(category?.hubSections)
-		? category.hubSections
-		: [];
+	const editor = useModulaSettingsEditorConfig();
+	// Re-renders when photos are added or removed, so rows gated on the photo count follow.
+	useLiveGalleryPhotoCount();
+	const submenus = category.hubSections.filter(
+		(entry) => entry?.type === 'submenu' && Array.isArray(entry.items)
+	);
+	const hubSubmenus = submenus.filter(
+		(submenu) => !isMoreSettingsSubmenu(submenu)
+	);
+	const moreSubmenus = submenus.filter(isMoreSettingsSubmenu);
 
 	return (
-		<div className="modula-settings-panel__body">
-			<form.Subscribe selector={(s) => s.values}>
-				{(values) =>
-					sections.map((section, i) => {
-						if (!section || typeof section !== 'object') {
-							return null;
-						}
-						if (!isHubSectionVisible(section, values)) {
-							return null;
-						}
-
-						if (section.type === 'note') {
-							const noteLabel =
-								typeof section.label === 'string'
-									? section.label.trim()
-									: '';
-							const noteText =
-								typeof section.text === 'string'
-									? section.text.trim()
-									: '';
-							if (noteLabel === '' && noteText === '') {
-								return null;
-							}
-							return (
-								<SettingsPanelSection
-									key={`note-${i}-${noteLabel || i}`}
-									label={noteLabel}
-								>
-									{noteText !== '' ? (
-										<p className="modula-settings-panel__note-text">
-											{noteText}
-										</p>
-									) : null}
-								</SettingsPanelSection>
-							);
-						}
-
-						if (
-							section.type !== 'submenu' ||
-							!Array.isArray(section.items)
-						) {
-							return null;
-						}
-
-						const submenuLabel =
-							typeof section.label === 'string'
-								? section.label.trim()
-								: '';
-						const children = section.items
-							.map((item, j) => {
-								if (
-									!item ||
-									typeof item !== 'object' ||
-									!isHubSectionVisible(item, values)
-								) {
-									return null;
-								}
-
-								if (item.type === 'note') {
-									const noteText =
-										typeof item.text === 'string'
-											? item.text.trim()
-											: '';
-									if (noteText === '') {
-										return null;
-									}
-									return (
-										<p
-											key={`note-${i}-${j}`}
-											className="modula-settings-panel__note-text"
-										>
-											{noteText}
-										</p>
-									);
-								}
-
-								if (item.type === 'zoomOnHoverToggle') {
-									return (
-										<div
-											key={`zoom-on-hover-${i}-${j}`}
-											className="modula-settings-panel__hub-field"
-										>
-											<ZoomOnHoverHubToggle />
-										</div>
-									);
-								}
-
-								if (item.type === 'field') {
-									return renderHubFieldItem(
-										item,
-										values,
-										`field-${i}-${j}`
-									);
-								}
-
-								if (item.type === 'drill') {
-									if (!shouldRenderHubSection(item, values)) {
-										return null;
-									}
-									const paths =
-										getGroupedPathsForHubDrillSection(
-											item,
-											values
-										);
-									let drillLabel = __(
-										'Options',
-										'modula-best-grid-gallery'
-									);
-									if (
-										typeof item.label === 'string' &&
-										item.label.trim() !== ''
-									) {
-										drillLabel = item.label;
-									} else if (typeof item.group === 'string') {
-										drillLabel = groupLabel(item.group);
-									}
-									const aux =
-										item.auxiliaryPanel &&
-										typeof item.auxiliaryPanel ===
-											'object' &&
-										typeof item.auxiliaryPanel.kind ===
-											'string' &&
-										item.auxiliaryPanel.kind !== ''
-											? item.auxiliaryPanel
-											: null;
-									const nestedUpsellGroupedPath =
-										typeof item.nestedUpsellGroupedPath ===
-										'string'
-											? item.nestedUpsellGroupedPath
-											: '';
-									const hubHelp =
-										typeof item.hubHelp === 'string' &&
-										item.hubHelp.trim() !== ''
-											? item.hubHelp.trim()
-											: '';
-									return (
-										<SettingsPanelDrillRow
-											key={`drill-${i}-${j}`}
-											section={item}
-											label={drillLabel}
-											groupedPaths={paths}
-											{...(hubHelp !== ''
-												? { hubHelp }
-												: {})}
-											{...(aux
-												? { auxiliaryPanel: aux }
-												: {})}
-											{...(nestedUpsellGroupedPath.trim() !==
-											''
-												? {
-														nestedUpsellGroupedPath,
-													}
-												: {})}
-										/>
-									);
-								}
-
-								if (
-									item.type === 'exit' &&
-									typeof item.targetCategory === 'string' &&
-									item.targetCategory.trim() !== ''
-								) {
-									const exitLabel =
-										typeof item.label === 'string' &&
-										item.label.trim() !== ''
-											? item.label
-											: __(
-													'Related settings',
-													'modula-best-grid-gallery'
-												);
-									const targetLabel =
-										typeof item.targetLabel === 'string'
-											? item.targetLabel
-											: item.targetCategory;
-									return (
-										<SettingsPanelExitRow
-											key={`exit-${i}-${j}`}
-											label={exitLabel}
-											targetLabel={targetLabel}
-											onActivate={() => {
-												onExitCategory(
-													item.targetCategory.trim()
-												);
-											}}
-										/>
-									);
-								}
-
-								return null;
-							})
-							.filter(Boolean);
-
-						if (children.length === 0) {
-							return null;
-						}
-
-						return (
-							<SettingsPanelSection
-								key={`submenu-${i}-${submenuLabel || i}`}
-								label={submenuLabel}
-							>
-								{children}
-							</SettingsPanelSection>
-						);
-					})
+		<form.Subscribe selector={(s) => s.values}>
+			{(values) => {
+				const lock = resolveCategoryLiteLock(category, values, editor);
+				if (lock) {
+					return (
+						<div
+							className="modula-settings-panel__body"
+							{...settingAnchorProps(lock.anchors)}
+						>
+							<LiteUpsellCard
+								upsell={lock.upsell}
+								variant="tab"
+								title={category.title}
+							/>
+						</div>
+					);
 				}
-			</form.Subscribe>
-		</div>
+				return (
+					<div className="modula-settings-panel__body">
+						{hubSubmenus
+							.filter((submenu) =>
+								shouldRenderHubSection(submenu, values)
+							)
+							.map((submenu) => (
+								<SettingsPanelHub
+									key={submenu.id}
+									submenu={submenu}
+									parentKey={buildSectionKey(
+										category.name,
+										submenu
+									)}
+									values={values}
+								/>
+							))}
+						<SettingsPanelMoreSettings
+							submenus={moreSubmenus}
+							categoryName={category.name}
+							values={values}
+						/>
+					</div>
+				);
+			}}
+		</form.Subscribe>
 	);
 }

@@ -1,6 +1,7 @@
-import { Switch } from 'shared-ui';
+import { Toggle } from 'admin-ui';
 import { isNil } from '../../../logic/isNil';
 import { isWpTruthy } from '../../../logic/wpTruthy';
+import { ControlHelp, describedByHelp } from './ControlHelp';
 import { resolveToggleSwitchAriaLabel } from './toggleSwitchName';
 
 /**
@@ -33,76 +34,98 @@ function isInvertBoolean(control) {
 }
 
 /**
- * @param {Object}           ctx
- * @param {Object}           ctx.field
- * @param {Object}           ctx.control
- * @param {*}                ctx.value
- * @param {Function}         ctx.onChange
- * @param {boolean}          ctx.disabled
- * @param {string|undefined} ctx.help
+ * @param {Object} control
+ * @return {boolean} Whether the setting stores its own on/off strings.
+ */
+function hasStringValues(control) {
+	return control.stringOn !== undefined && control.stringOff !== undefined;
+}
+
+/**
+ * @param {Object}  control
+ * @param {*}       displayValue
+ * @return {boolean} Whether the stored value means "on".
+ */
+function isStoredOn(control, displayValue) {
+	if (!hasStringValues(control)) {
+		return isWpTruthy(displayValue);
+	}
+	const raw =
+		displayValue === '' || isNil(displayValue)
+			? control.stringOff
+			: String(displayValue);
+
+	return raw === control.stringOn;
+}
+
+/**
+ * The stored value for "on" or "off", in the setting's own type.
+ *
+ * @param {Object}  field
+ * @param {Object}  control
+ * @param {boolean} writeOn
+ * @return {*} Value to store.
+ */
+function storedToggleValue(field, control, writeOn) {
+	if (hasStringValues(control)) {
+		return writeOn ? control.stringOn : control.stringOff;
+	}
+	const schemaType = field?.schema?.type;
+	if (schemaType === 'string') {
+		return writeOn ? '1' : '0';
+	}
+	if (schemaType === 'integer') {
+		return writeOn ? 1 : 0;
+	}
+
+	return writeOn;
+}
+
+/**
+ * @param {import('../fieldControlKinds').FieldControlContext} ctx
  */
 export function renderToggleKind({
 	field,
 	control,
+	controlId,
 	value,
 	onChange,
 	disabled,
 	help,
 }) {
-	const displayValue = resolveToggleDisplayValue(value, field);
 	const invert = isInvertBoolean(control);
-	const stringOn = control.stringOn;
-	const stringOff = control.stringOff;
-	if (stringOn !== undefined && stringOff !== undefined) {
-		const raw =
-			displayValue === '' || isNil(displayValue)
-				? stringOff
-				: String(displayValue);
-		const storedOn = raw === stringOn;
-		const on = invert ? !storedOn : storedOn;
-		let labelText = '';
-		if (typeof control.toggleLabel === 'string') {
-			labelText = control.toggleLabel;
-		}
-		return (
-			<div className="modula-settings-editor__toggle-end">
-				<Switch
-					label={labelText}
-					aria-label={resolveToggleSwitchAriaLabel(field, labelText)}
-					checked={on}
-					disabled={disabled}
-					showStatus
-					help={help}
-					onChange={(next) => {
-						const writeOn = invert ? !next : next;
-						onChange(writeOn ? stringOn : stringOff);
-					}}
-				/>
-			</div>
-		);
-	}
-	const storedOn = isWpTruthy(displayValue);
-	const checked = invert ? !storedOn : storedOn;
+	const storedOn = isStoredOn(
+		control,
+		resolveToggleDisplayValue(value, field)
+	);
+	// A visible `toggleLabel` (string toggles only) names the switch itself.
+	const visibleLabel =
+		hasStringValues(control) && typeof control.toggleLabel === 'string'
+			? control.toggleLabel
+			: '';
+
 	return (
 		<div className="modula-settings-editor__toggle-end">
-			<Switch
-				aria-label={resolveToggleSwitchAriaLabel(field, '')}
-				checked={checked}
+			{visibleLabel !== '' ? (
+				<label
+					className="modula-settings-editor__toggle-label"
+					htmlFor={controlId}
+				>
+					{visibleLabel}
+				</label>
+			) : null}
+			<Toggle
+				id={controlId}
+				aria-label={resolveToggleSwitchAriaLabel(field, visibleLabel)}
+				aria-describedby={describedByHelp(controlId, help)}
+				checked={invert ? !storedOn : storedOn}
 				disabled={disabled}
-				showStatus
-				help={help}
 				onChange={(next) => {
 					const writeOn = invert ? !next : next;
-					const schemaType = field?.schema?.type;
-					let nextValue = writeOn;
-					if (schemaType === 'string') {
-						nextValue = writeOn ? '1' : '0';
-					} else if (schemaType === 'integer') {
-						nextValue = writeOn ? 1 : 0;
-					}
-					onChange(nextValue);
+					onChange(storedToggleValue(field, control, writeOn));
 				}}
 			/>
+			<ControlHelp help={help} controlId={controlId} />
 		</div>
 	);
 }

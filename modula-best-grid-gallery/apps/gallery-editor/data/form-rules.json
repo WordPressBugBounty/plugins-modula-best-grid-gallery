@@ -2,13 +2,6 @@
 	"version": "1.0",
 	"visibility": [
 		{
-			"pathPattern": "^general\\.width$",
-			"when": {
-				"path": "general.type",
-				"neq": "custom-grid"
-			}
-		},
-		{
 			"pathPattern": "^general\\.height$",
 			"when": {
 				"any": [
@@ -304,37 +297,6 @@
 			}
 		},
 		{
-			"pathPattern": "^video\\.previewVideoOffHint$",
-			"when": {
-				"all": [
-					{
-						"path": "general.type",
-						"neq": "video"
-					},
-					{
-						"path": "general.type",
-						"neq": "story"
-					},
-					{
-						"path": "general.type",
-						"neq": "showcase"
-					},
-					{
-						"path": "general.type",
-						"neq": "slider"
-					},
-					{
-						"path": "video.previewVideo",
-						"eq": false
-					},
-					{
-						"path": "general.type",
-						"neq": "template"
-					}
-				]
-			}
-		},
-		{
 			"pathPattern": "^video\\.customVideoIcon$",
 			"when": {
 				"all": [
@@ -612,6 +574,10 @@
 						"neq": "video"
 					},
 					{
+						"path": "social.enableSocial",
+						"truthy": true
+					},
+					{
 						"path": "social.enableEmail",
 						"truthy": true
 					}
@@ -625,6 +591,10 @@
 					{
 						"path": "general.type",
 						"neq": "video"
+					},
+					{
+						"path": "social.enableSocial",
+						"truthy": true
 					},
 					{
 						"path": "social.enableTwitter",
@@ -654,10 +624,25 @@
 			}
 		},
 		{
-			"pathPattern": "^social\\.(?!enableSocial$).+",
+			"pathPattern": "^social\\.enableSocial$",
 			"when": {
 				"path": "general.type",
 				"neq": "video"
+			}
+		},
+		{
+			"pathPattern": "^social\\.(?!enableSocial$).+",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "social.enableSocial",
+						"truthy": true
+					}
+				]
 			}
 		},
 		{
@@ -945,12 +930,47 @@
 			}
 		},
 		{
+			"pathPattern": "^captions\\.(hideTitle|hideDescription)$",
+			"when": {
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"any": [
+							{
+								"path": "general.type",
+								"neq": "slider"
+							},
+							{
+								"path": "slider.imageInfo",
+								"truthy": true
+							}
+						]
+					}
+				]
+			}
+		},
+		{
 			"pathPattern": "^captions\\.(titleColor|titleFontSize|mobileTitleFontSize|titleFontWeight|sectionTitleStyle)$",
 			"when": {
 				"all": [
 					{
 						"path": "general.type",
 						"neq": "video"
+					},
+					{
+						"any": [
+							{
+								"path": "general.type",
+								"neq": "slider"
+							},
+							{
+								"path": "slider.imageInfo",
+								"truthy": true
+							}
+						]
 					},
 					{
 						"path": "captions.hideTitle",
@@ -966,6 +986,18 @@
 					{
 						"path": "general.type",
 						"neq": "video"
+					},
+					{
+						"any": [
+							{
+								"path": "general.type",
+								"neq": "slider"
+							},
+							{
+								"path": "slider.imageInfo",
+								"truthy": true
+							}
+						]
 					},
 					{
 						"path": "captions.hideDescription",
@@ -1102,10 +1134,25 @@
 			}
 		},
 		{
+			"pathPattern": "^hover\\.cursor$",
+			"when": {
+				"path": "hover.changeCursor",
+				"truthy": true
+			}
+		},
+		{
 			"pathPattern": "^hover\\.uploadCursor$",
 			"when": {
-				"path": "hover.cursor",
-				"eq": "custom"
+				"all": [
+					{
+						"path": "hover.changeCursor",
+						"truthy": true
+					},
+					{
+						"path": "hover.cursor",
+						"eq": "custom"
+					}
+				]
 			}
 		},
 		{
@@ -1350,7 +1397,7 @@
 			}
 		},
 		{
-			"pathPattern": "^watermark\\.(sectionText|watermarkText|watermarkTextSize|watermarkTextColor|sectionImage|watermarkImage|watermarkImageDimensionWidth|sectionPlacement|watermarkPosition|watermarkMargin|watermarkOpacity)$",
+			"pathPattern": "^watermark\\.(sectionText|watermarkText|watermarkTextSizeShare|watermarkTextColor|sectionImage|watermarkImage|watermarkImageDimensionWidth|sectionPlacement|watermarkPosition|watermarkMarginShare|watermarkOpacity)$",
 			"when": {
 				"all": [
 					{
@@ -1577,7 +1624,7 @@
 						"neq": "template"
 					},
 					{
-						"path": "__modulaReserved.__proofingShowSchemaFields",
+						"path": "proofing.imageProofing",
 						"truthy": true
 					}
 				]

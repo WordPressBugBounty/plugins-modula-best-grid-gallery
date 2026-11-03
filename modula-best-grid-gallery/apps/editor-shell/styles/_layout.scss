@@ -1,4 +1,5 @@
 @use 'variables' as *;
+@use 'auxiliary-panel';
 
 .modula-takeover__shell {
 	position: relative;
@@ -6,12 +7,16 @@
 	flex-direction: column;
 	height: 100%;
 	min-height: 0;
-	color: var(--mod-se-shell-ink, #{$mod-takeover-shell-ink});
-
-	/* Accent: inherited from `.modula-takeover__app` → fixed style-kit --mod-se-accent */
+	color: var(--mod-se-shell-ink);
 }
 
-/* Redesign: stage beside sidebar; optional shared-ui AuxiliaryPanel column. */
+// AdminUiScope's root (sidebar, canvas toolbar, device pill, fields) never
+// takes part in layout; tokens and type still inherit through it.
+.modula-admin-ui.modula-takeover__admin-ui-scope {
+	display: contents;
+}
+
+/* Redesign: stage beside sidebar; optional AuxiliaryPanel column. */
 .modula-takeover__shell--redesign-topbar-only,
 .modula-takeover__shell--redesign-sidebar {
 
@@ -26,7 +31,16 @@
 		overflow: hidden;
 	}
 
+	/*
+	 * The canvas's stage: dark in both appearances, the gallery renders on it.
+	 * No text colour here, so the frontend render keeps its own; chrome drawn
+	 * on the stage, and a gallery's default text outside the image
+	 * (`resolveBelowImagePreviewTextColor`), read the stage inks.
+	 */
 	.modula-takeover__redesign-stage {
+		--modula-takeover-stage-bg: #{$mod-takeover-stage-bg};
+		--modula-takeover-stage-ink: #{$mod-takeover-stage-ink};
+		--modula-takeover-stage-ink-muted: #{$mod-takeover-stage-ink-muted};
 		flex: 1;
 		min-height: 0;
 		min-width: 0;
@@ -34,14 +48,16 @@
 		flex-direction: row;
 		align-items: stretch;
 		gap: $mod-takeover-canvas-gap;
-		padding: $mod-space-12 $mod-takeover-canvas-gap $mod-space-16;
+		padding: $mod-space-32;
 		box-sizing: border-box;
-		background: var(--mod-se-stage, var(--mod-se-canvas-bg, #{$mod-takeover-canvas-bg}));
-		/* Keep canvas content inside the stage so it cannot paint over the status bar. */
+		background: var(--modula-takeover-stage-bg);
+		/* Keep canvas content inside the stage, off the toolbar. */
 		overflow: hidden;
 	}
 
+	/* Positions the device pill over the artboard. */
 	.modula-takeover__preview-column {
+		position: relative;
 		flex: 1;
 		min-width: 0;
 		min-height: 0;
@@ -49,7 +65,9 @@
 
 	/*
 	 * Artboard: desktop = flush to stage (no raised paper / inset).
-	 * Tablet/mobile keep device frames; each editor styles its own canvas body.
+	 * Tablet/mobile keep device frames unless the editor clears them for its
+	 * canvas content (`device-canvas-on-stage`, _device-frame.scss); each
+	 * editor styles its own canvas body.
 	 */
 	.modula-takeover__preview-card {
 		width: 100%;
@@ -63,45 +81,12 @@
 		box-shadow: none;
 	}
 
-	.modula-ui-auxiliary-panel {
+	.modula-takeover__aux-panel {
 		/* Keep room for the previewer — same scale as sorting aux. */
 		flex: 0 0 min(320px, 36vw);
 		width: min(320px, 36vw);
 		max-width: 420px;
 		min-width: 0;
 		align-self: stretch;
-	}
-}
-
-.modula-takeover__skip-link {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	padding: 0;
-	margin: -1px;
-	overflow: hidden;
-	clip: rect(0, 0, 0, 0);
-	white-space: nowrap;
-	border: 0;
-	z-index: 100001;
-
-	&:focus {
-		width: auto;
-		height: auto;
-		margin: 0;
-		overflow: visible;
-		clip: auto;
-		position: fixed;
-		left: $mod-space-12;
-		top: $mod-space-12;
-		padding: $mod-space-10 $mod-space-16;
-		background: var(--mod-se-skip-bg, #{$mod-takeover-skip-bg});
-		color: var(--mod-se-skip-ink, #{$mod-takeover-skip-ink});
-		font-weight: 600;
-		text-decoration: none;
-		border-radius: $mod-space-2;
-		box-shadow: 0 0 0 $mod-space-focus-ring var(--modula-takeover-accent, #{$modula-takeover-accent}),
-		$mod-takeover-skip-shadow;
-		white-space: normal;
 	}
 }

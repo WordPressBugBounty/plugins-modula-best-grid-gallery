@@ -1,8 +1,12 @@
 /**
- * Gallery “respect reduced motion” helpers (Interaction → No animation for people who ask for less).
+ * Gallery reduced-motion helpers.
  *
- * On the **visitor frontend** only: when the setting is On and the OS asks for less motion,
- * suppress animations/transitions. Settings-editor preview keeps motion so authors can design.
+ * On the **visitor frontend**, whenever the device asks for less motion, all
+ * gallery motion stops: entrances and loading effects, parallax, carousels,
+ * the lightbox, hover treatments and layer animations. Captions and Darken on
+ * hover still change on hover, instantly. That holds whatever the gallery's
+ * "No animation for people who ask for less" setting says (maintainer, Motion
+ * ticket 05). The settings-editor preview keeps motion so authors can design.
  *
  * @package
  */
@@ -11,14 +15,6 @@ import { isSettingsEditorPreview } from './displayContext';
 
 /** Fancyapps tween friction high enough to feel instant. */
 export const REDUCED_MOTION_CAROUSEL_FRICTION = 100000;
-
-/**
- * @param {Object|null|undefined} config
- * @return {boolean}
- */
-export function isRespectReducedMotionSettingOn(config) {
-	return config?.respectReducedMotion !== false;
-}
 
 /**
  * @return {boolean}
@@ -34,20 +30,17 @@ export function prefersReducedMotion() {
 }
 
 /**
- * @param {Object|null|undefined}                      config
  * @param {{ displayContext?: string }|null|undefined} metadata
- * @return {boolean}
+ * @return {boolean} The gallery's motion stays off here: a visitor whose device asks for less motion.
  */
-export function shouldSuppressGalleryMotion(config, metadata) {
-	if (isSettingsEditorPreview(metadata)) {
-		return false;
-	}
-	return isRespectReducedMotionSettingOn(config) && prefersReducedMotion();
+export function shouldSuppressGalleryMotion(metadata) {
+	return !isSettingsEditorPreview(metadata) && prefersReducedMotion();
 }
 
 /**
- * Gallery root has `.modula-respect-reduced-motion` when the Interaction toggle is On
- * (visitor frontend only). Combined with OS reduce → suppress Fancybox / runtime motion.
+ * Visitor gallery roots have `.modula-respect-reduced-motion` (the PHP
+ * container and useGalleryRootClasses). Combined with OS reduce → suppress
+ * Fancybox / runtime motion.
  *
  * @param {Element|null|undefined} hostEl Gallery host or descendant.
  * @return {boolean}

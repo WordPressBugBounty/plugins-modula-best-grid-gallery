@@ -1,44 +1,37 @@
 /**
- * Gallery category rail: visible gallery categories, icons and short labels for the shared rail.
+ * Gallery category rail: visible gallery categories and short labels for the shared rail.
+ * Categories Lite locks are marked PRO, Video included (its extension needs PRO).
  */
 
 import { useMemo } from '@wordpress/element';
 import { SidebarRailNav, getSidebarRailNavLabel } from 'editor-shell';
 import { SETTINGS_EDITOR_CATEGORIES } from '../../constants/editorStructure';
-import { TAKEOVER_CATEGORY_ICONS } from '../../constants/takeoverCategoryIcons';
-import { getVisibleCategories } from '../../logic/categoryVisibility';
+import { isCategoryVisible } from '../../logic/categoryVisibility';
+import { resolveCategoryLiteLock } from '../../logic/liteUpsell';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
+import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 
 /**
  * @param {Object}                 props
  * @param {string}                 props.activeCategory
  * @param {(name: string) => void} props.onActiveCategoryChange
  * @param {(name: string) => void} props.onSelect
- * @param {string}                 [props.docsUrl]
  */
 export default function TakeoverSidebarNavV2({
 	activeCategory,
 	onActiveCategoryChange,
 	onSelect,
-	docsUrl = '',
 }) {
 	const { form } = useGallerySettingsFormBundle();
 
 	return (
-		<form.Subscribe
-			selector={(s) => ({
-				general: {
-					type: s.values?.general?.type,
-				},
-			})}
-		>
+		<form.Subscribe selector={(s) => s.values}>
 			{(values) => (
 				<TakeoverSidebarNavV2Inner
 					values={values}
 					activeCategory={activeCategory}
 					onActiveCategoryChange={onActiveCategoryChange}
 					onSelect={onSelect}
-					docsUrl={docsUrl}
 				/>
 			)}
 		</form.Subscribe>
@@ -51,29 +44,43 @@ export default function TakeoverSidebarNavV2({
  * @param {string}                                  props.activeCategory
  * @param {(name: string) => void}                  props.onActiveCategoryChange
  * @param {(name: string) => void}                  props.onSelect
- * @param {string}                                  props.docsUrl
  */
 function TakeoverSidebarNavV2Inner({
 	values,
 	activeCategory,
 	onActiveCategoryChange,
 	onSelect,
-	docsUrl,
 }) {
-	const visible = useMemo(
-		() => getVisibleCategories(SETTINGS_EDITOR_CATEGORIES, values),
-		[values]
+	const editor = useModulaSettingsEditorConfig();
+	const lockedNames = useMemo(
+		() =>
+			new Set(
+				SETTINGS_EDITOR_CATEGORIES.filter((category) =>
+					resolveCategoryLiteLock(category, values, editor)
+				).map((category) => category.name)
+			),
+		[values, editor]
+	);
+	// A category locked behind its extension (Video) is not visible, but the
+	// rail still lists it, locked.
+	const railCategories = useMemo(
+		() =>
+			SETTINGS_EDITOR_CATEGORIES.filter(
+				(category) =>
+					lockedNames.has(category.name) ||
+					isCategoryVisible(category, values)
+			),
+		[lockedNames, values]
 	);
 
 	return (
 		<SidebarRailNav
-			categories={visible}
+			categories={railCategories}
 			activeCategory={activeCategory}
 			onActiveCategoryChange={onActiveCategoryChange}
 			onSelect={onSelect}
-			icons={TAKEOVER_CATEGORY_ICONS}
 			getRailLabel={getSidebarRailNavLabel}
-			docsUrl={docsUrl}
+			isCategoryLocked={(name) => lockedNames.has(name)}
 		/>
 	);
 }

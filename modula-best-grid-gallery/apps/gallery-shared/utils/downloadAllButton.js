@@ -44,19 +44,29 @@ export function buildDownloadAllUrl(galleryId, editorPreview = false) {
 }
 
 /**
+ * The button prints while both the download extension and its “Download all”
+ * toggle are on (galleries and albums share these keys).
+ *
+ * @param {Object|null|undefined} download Grouped `download.*` settings.
+ * @return {boolean} Whether the button prints.
+ */
+export function shouldShowDownloadAllButton(download) {
+	return (
+		isDownloadToggleOn(download?.enableDownload) &&
+		isDownloadToggleOn(download?.downloadAllGalleryButton)
+	);
+}
+
+/**
  * @param {Object|null|undefined} settings Grouped v2 settings.
- * @return {boolean}
+ * @return {boolean} Whether the gallery prints the button (never on video galleries).
  */
 export function shouldShowDownloadAllGalleryButton(settings) {
 	const type = String(settings?.general?.type || '').trim();
 	if (type === 'video') {
 		return false;
 	}
-	const download = settings?.download || {};
-	return (
-		isDownloadToggleOn(download.enableDownload) &&
-		isDownloadToggleOn(download.downloadAllGalleryButton)
-	);
+	return shouldShowDownloadAllButton(settings?.download);
 }
 
 /**
@@ -93,4 +103,40 @@ export function resolveDownloadAllHposition(hposition) {
 		return hposition;
 	}
 	return 'center';
+}
+
+/**
+ * @param {unknown} value
+ * @return {string} The trimmed string, or '' for anything else.
+ */
+function trimmedString(value) {
+	return typeof value === 'string' ? value.trim() : '';
+}
+
+/**
+ * @typedef {Object} DownloadAllButtonLook
+ * @property {string}                  label           The label, or '' for the default label.
+ * @property {boolean}                 showIcon        Whether the icon prints before the label.
+ * @property {'left'|'center'|'right'} hposition       The row alignment.
+ * @property {string}                  textColor       Text color, or '' to keep the theme's.
+ * @property {string}                  backgroundColor Background, or '' to keep the theme's.
+ * @property {string}                  iconColor       Icon fill, or '' to follow the text.
+ */
+
+/**
+ * What the button looks like, from `download.*`. An empty color adds nothing,
+ * as the extension's visitor CSS.
+ *
+ * @param {Object|null|undefined} download Grouped `download.*` settings.
+ * @return {DownloadAllButtonLook} The button's label, icon, alignment and colors.
+ */
+export function resolveDownloadAllButtonLook(download) {
+	return {
+		label: trimmedString(download?.downloadAllLabel),
+		showIcon: isDownloadToggleOn(download?.downloadAllGalleryButtonIcon),
+		hposition: resolveDownloadAllHposition(download?.downloadAllHposition),
+		textColor: trimmedString(download?.downloadAllColor),
+		backgroundColor: trimmedString(download?.downloadAllBackgroundColor),
+		iconColor: trimmedString(download?.downloadAllGalleryIconColor),
+	};
 }

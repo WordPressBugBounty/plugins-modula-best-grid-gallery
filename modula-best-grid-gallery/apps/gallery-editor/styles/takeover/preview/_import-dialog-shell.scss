@@ -1,7 +1,7 @@
 @use '../../variables' as *;
 
 // Shared takeover extension import dialog inner layout.
-// Modal shell chrome lives in _gallery-modal.scss.
+// The shell is GalleryModal (admin-ui Dialog, `_gallery-modal.scss`).
 
 .modula-import-dialog__inner {
 	display: flex;
@@ -13,9 +13,9 @@
 
 .modula-import-dialog__intro {
 	margin: 0 0 $mod-space-14;
-	font-size: 13px;
+	font-size: var(--modula-admin-text-body);
 	line-height: 1.55;
-	color: #50575e;
+	color: var(--modula-admin-ink-secondary);
 }
 
 .modula-import-dialog__spinner-wrap {
@@ -25,7 +25,7 @@
 	gap: $mod-space-10;
 	min-height: 120px;
 	font-size: 13px;
-	color: #50575e;
+	color: var(--modula-admin-ink-muted);
 }
 
 .modula-import-dialog__lazy-fallback {

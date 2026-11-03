@@ -1,22 +1,13 @@
 /**
  * Count preview-store images tagged with each filter name.
  */
-import {
-	filterBulkEditableImageRows,
-	parseFiltersField,
-} from '../components/bulk-edit/bulkEditUtils';
+import { countFilterTags } from 'editor-shell/logic';
+import { filterBulkEditableImageRows } from '../components/bulk-edit/bulkEditUtils';
 
 /**
  * @param {Object[]} items Gallery preview rows.
- * @return {Map<string, number>}
+ * @return {Map<string, number>} How many images carry each name.
  */
 export function buildFilterImageUsageCounts(items) {
-	/** @type {Map<string, number>} */
-	const counts = new Map();
-	for (const row of filterBulkEditableImageRows(items)) {
-		for (const tag of parseFiltersField(row.filters)) {
-			counts.set(tag, (counts.get(tag) || 0) + 1);
-		}
-	}
-	return counts;
+	return countFilterTags(filterBulkEditableImageRows(items));
 }

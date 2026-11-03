@@ -12,7 +12,7 @@ import {
 
 /**
  * @param {'drag'|'resize'|string|null|undefined} kind
- * @return {string} Brief status-bar / tooltip label.
+ * @return {string} Brief History step / tooltip label.
  */
 export function describeCustomGridLayoutStep(kind) {
 	if (kind === 'resize') {
@@ -23,7 +23,7 @@ export function describeCustomGridLayoutStep(kind) {
 
 /**
  * @param {boolean} locked Whether the step locked the tile (true) or unlocked it.
- * @return {string} Brief status-bar / tooltip label.
+ * @return {string} Brief History step / tooltip label.
  */
 export function describeCustomGridLockStep(locked) {
 	if (locked) {

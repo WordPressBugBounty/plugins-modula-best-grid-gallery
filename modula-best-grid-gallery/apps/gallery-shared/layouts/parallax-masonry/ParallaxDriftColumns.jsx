@@ -70,7 +70,7 @@ const ParallaxDriftColumns = memo(
 			const els = columnElsRef.current;
 			const n = motionRef.current.n;
 
-			if (shouldSuppressGalleryMotion(config, metadata)) {
+			if (shouldSuppressGalleryMotion(metadata)) {
 				for (let i = 0; i < n; i++) {
 					const el = els[i];
 					if (el) {
@@ -116,11 +116,7 @@ const ParallaxDriftColumns = memo(
 				}
 			};
 			// amplitudeBaseRef: stable ref from parent; .current updated without re-subscribing RAF
-		}, [
-			amplitudeBaseRef,
-			config?.respectReducedMotion,
-			metadata?.displayContext,
-		]);
+		}, [amplitudeBaseRef, metadata?.displayContext]);
 
 		const setColumnRef = useCallback(
 			(index) => (el) => {

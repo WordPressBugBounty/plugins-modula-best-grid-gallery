@@ -1,0 +1,22 @@
+// An item's filters (`fields/FilterChipsEditor.jsx`): chips, then the
+// underlined "+ Add" link, as in the canvas's image panel and Bulk edit
+// (gallery) and the member panel (Albums editor).
+.modula-filter-chips {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+}
+
+.modula-filter-chips__add {
+	height: 32px;
+	padding: 0 10px;
+	border: 0;
+	background: transparent;
+	color: var(--modula-admin-ink);
+	font: inherit;
+	font-size: var(--modula-admin-text-control);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	cursor: pointer;
+}

@@ -23,6 +23,11 @@ import { parseFiltersField } from '../components/bulk-edit/bulkEditUtils';
 import { mergeTagsIntoGalleryFilterSettings } from '../components/bulk-edit/bulkEditSave';
 import { useGallerySettingsFormBundle } from '../form/GallerySettingsFormContext';
 import { resolveProGateLock } from '../logic/proGateLock';
+import {
+	ITEM_CSS_CLASS_KEY,
+	ITEM_HOVER_PRESET_KEY,
+	sanitizeItemCssClass,
+} from '../utils/galleryItemFields';
 import { useModulaSettingsEditorConfig } from './useModulaSettingsEditorConfig';
 import {
 	collectImageMetadataEditValues,
@@ -91,6 +96,10 @@ export function useGalleryItemMetadataAutosave({
 			valign: local.valign,
 			togglelightbox: Number(local.togglelightbox) || 0,
 			hide_title: Number(local.hide_title) || 0,
+			[ITEM_HOVER_PRESET_KEY]: local[ITEM_HOVER_PRESET_KEY],
+			[ITEM_CSS_CLASS_KEY]: sanitizeItemCssClass(
+				local[ITEM_CSS_CLASS_KEY]
+			),
 		};
 		if (filtersGate.allowed) {
 			fields.filters = local.filters;

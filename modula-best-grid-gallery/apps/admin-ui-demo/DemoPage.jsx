@@ -24,7 +24,9 @@ import {
 	rowHelpId,
 	rowLabelId,
 } from 'admin-ui';
+import { useSettingsEditorAppearance } from 'editor-shell/appearance/SettingsEditorAppearanceContext';
 import { AI_CLAIM_URL } from '../general-settings/ai-settings/aiSettings';
+import { AppearanceSwitch } from './AppearanceSwitch';
 import {
 	ExpandableStates,
 	HeaderStates,
@@ -38,12 +40,136 @@ import {
 	ConfirmDialogStates,
 } from './ChromeDemos';
 import { DemoSection, DemoState, DemoStates } from './demoSections';
-import { DisclosureStates, NoticeStates, StepsStates } from './AssistantDemos';
+import {
+	DisclosureStates,
+	NoticeStates,
+	SpinnerStates,
+	StepsStates,
+	TooltipStates,
+} from './AssistantDemos';
 import {
 	ImagePickerStates,
 	RangeStates,
 	TokenPickerStates,
 } from './PickerDemos';
+import {
+	AccordionStates,
+	ChipStates,
+	ChoiceListStates,
+	ColorFieldStates,
+	DeviceSwitchStates,
+	DialogStates,
+	MenuStates,
+	PlanBadgeStates,
+	PositionPadStates,
+	PresetTilesStates,
+	ResetButtonStates,
+	UndoToastStates,
+	UnitInputStates,
+	UnitRangeStates,
+} from './EditorDemos';
+
+/**
+ * The gallery editor's primitives, grouped after the Settings controls.
+ * Each is new for the editor redesign and awaits approval here.
+ */
+function EditorSections() {
+	return (
+		<>
+			<header className="modula-admin-demo__group">
+				<h2 className="modula-admin-demo__title">Editor primitives</h2>
+				<p className="modula-admin-demo__intro">
+					New for the gallery editor redesign (“1 · Editor” artboard),
+					for approval before the editor uses them.
+				</p>
+			</header>
+			<DemoSection
+				title="Range with unit box"
+				description="The value and a unit menu in a box after the slider. Changing the unit only reports it; the editor converts the value."
+			>
+				<UnitRangeStates />
+			</DemoSection>
+			<DemoSection
+				title="Number with unit"
+				description="Typed number and its fixed unit in one field (Gallery width)."
+			>
+				<UnitInputStates />
+			</DemoSection>
+			<DemoSection
+				title="Device switch"
+				description="Segmented with icon-only options, for per-device values. Each icon is named and has a tooltip."
+			>
+				<DeviceSwitchStates />
+			</DemoSection>
+			<DemoSection
+				title="Color"
+				description="Swatch button; it opens presets, a hex field, Custom (the browser’s picker) and opacity under it. Escape in the panel closes it."
+			>
+				<ColorFieldStates />
+			</DemoSection>
+			<DemoSection
+				title="Preset tiles"
+				description="One-of-several tiles, as pressed buttons. A locked tile stays clickable and shows its PRO pill; the editor opens the upsell."
+			>
+				<PresetTilesStates />
+			</DemoSection>
+			<DemoSection
+				title="Choice list"
+				description="One-of-several full-width rows, as pressed buttons; the chosen row shows the ink check."
+			>
+				<ChoiceListStates />
+			</DemoSection>
+			<DemoSection
+				title="Plan and PRO pills"
+				description="PlanBadge gains the editor’s PRO tones and a lock; with onClick it is a button."
+			>
+				<PlanBadgeStates />
+			</DemoSection>
+			<DemoSection
+				title="Reset dot"
+				description="Marks a changed value or section; hover or keyboard focus turns it into a cross."
+			>
+				<ResetButtonStates />
+			</DemoSection>
+			<DemoSection
+				title="Menu and popover"
+				description="Anchored under the trigger. Arrow keys, Home and End move through a menu; Escape closes and returns focus to the trigger; a click outside or Tab closes."
+			>
+				<MenuStates />
+			</DemoSection>
+			<DemoSection
+				title="Chip"
+				description="A pill with an optional remove button (filters)."
+			>
+				<ChipStates />
+			</DemoSection>
+			<DemoSection
+				title="Accordion sections"
+				description="“More settings”: each heading button expands its section in place. The reset dot and the PRO pill sit in the header."
+			>
+				<AccordionStates />
+			</DemoSection>
+			<DemoSection
+				title="Position pad"
+				description="Watermark position: nine places on the image, as a radio group. The canvas drags freely, but the stored value is one of nine places, so the pad snaps to them."
+			>
+				<PositionPadStates />
+			</DemoSection>
+			<DemoSection
+				title="Toast with Undo"
+				description="Stays 8 s, and waits while hovered or focused. Undo dismisses it."
+			>
+				<UndoToastStates />
+			</DemoSection>
+			<DemoSection
+				title="Dialog"
+				description="A large modal panel (Add media): title, a tab list in the header, Close. The page behind is inert, so Tab stays inside; Escape and Close close it and focus returns to the button that opened it. A tab can carry a PRO pill."
+			>
+				<DialogStates />
+			</DemoSection>
+		</>
+	);
+}
 
 const LICENSES = [
 	{ value: 'none', label: 'None' },
@@ -683,15 +809,20 @@ function LockedCardExample() {
 }
 
 export function DemoPage() {
+	const { appearance } = useSettingsEditorAppearance();
+
 	return (
-		<AdminUiRoot className="modula-admin-demo">
+		<AdminUiRoot appearance={appearance} className="modula-admin-demo">
 			<header className="modula-admin-demo__header">
 				<h1 className="modula-admin-demo__title">admin-ui demo</h1>
 				<p className="modula-admin-demo__intro">
 					Every admin-ui control in every state, from the Settings
 					artboard. Tab through the page to check real focus; the
-					“Focus” states draw it without the keyboard.
+					“Focus” states draw it without the keyboard. The switch
+					shows the page light or dark; System follows the computer,
+					and the gallery editor shares the choice.
 				</p>
+				<AppearanceSwitch />
 			</header>
 			<DemoSection title="Color tokens">
 				<TokenSwatches />
@@ -737,9 +868,21 @@ export function DemoPage() {
 			</DemoSection>
 			<DemoSection
 				title="Notice"
-				description="A tinted message inside a card. Warning is the artboard’s amber note (AI assistants); error is new, for failed actions."
+				description="A tinted message inside a card. Warning is the artboard’s amber note (AI assistants); error is new, for failed actions. With onDismiss it ends with a close button."
 			>
 				<NoticeStates />
+			</DemoSection>
+			<DemoSection
+				title="Tooltip"
+				description="New, not in the design (the editor’s ⓘ help). Opens on hover and focus, describes its trigger, Escape hides it."
+			>
+				<TooltipStates />
+			</DemoSection>
+			<DemoSection
+				title="Spinner"
+				description="New, not in the design (editor loading states). Decorative; the status region around it says what loads."
+			>
+				<SpinnerStates />
 			</DemoSection>
 			<DemoSection
 				title="Steps"
@@ -841,6 +984,7 @@ export function DemoPage() {
 					</DemoState>
 				</DemoStates>
 			</DemoSection>
+			<EditorSections />
 		</AdminUiRoot>
 	);
 }

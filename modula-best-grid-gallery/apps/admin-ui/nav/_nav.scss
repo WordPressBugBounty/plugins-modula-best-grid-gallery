@@ -66,11 +66,13 @@
 	pointer-events: none;
 }
 
-// Outranks wp-admin's `input[type="search"]` and its `:focus` rule.
+// Outranks wp-admin's `input[type="search"]` and its `:focus` rule. WP 7.1
+// gives search inputs a 40px min-height, which a smaller height must undo.
 .modula-admin-search__input {
 	box-sizing: border-box;
 	width: 100%;
 	height: var(--modula-admin-search-height);
+	min-height: 0;
 	margin: 0;
 	padding: 0 12px 0 38px;
 	border: 1px solid transparent;

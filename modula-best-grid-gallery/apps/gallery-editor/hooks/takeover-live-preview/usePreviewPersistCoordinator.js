@@ -34,6 +34,8 @@ export function usePreviewPersistCoordinator({
 	const persistInFlightPromiseRef = useRef(
 		/** @type {Promise<void>|null} */ (null)
 	);
+	// The Custom Grid gesture holding scheduled saves back, if any.
+	const persistHoldRef = useRef(/** @type {Object|null} */ (null));
 
 	const bootstrapQueryKey = useMemo(
 		() => getGalleryBootstrapQueryKey(galleryId),
@@ -130,6 +132,10 @@ export function usePreviewPersistCoordinator({
 			return;
 		}
 		if (!previewPersistDirtyRef.current) {
+			return;
+		}
+		if (persistHoldRef.current) {
+			// The gesture's release flushes, with the gesture's result included.
 			return;
 		}
 		const now = Date.now();
@@ -241,6 +247,28 @@ export function usePreviewPersistCoordinator({
 		markPreviewPersistDirty();
 	}, [markPreviewPersistDirty]);
 
+	/**
+	 * Holds scheduled saves back while a Custom Grid drag or resize is held,
+	 * so a save cannot start mid-gesture (ticket 75). Edits stay dirty;
+	 * explicit flushes (`persistPreviewItemsNow`) are not held.
+	 *
+	 * @return {() => void} Release: ends the hold once; pending edits, the
+	 *                      gesture's result included, save after the usual debounce.
+	 */
+	const holdScheduledPreviewPersist = useCallback(() => {
+		const hold = {};
+		persistHoldRef.current = hold;
+		return () => {
+			if (persistHoldRef.current !== hold) {
+				return;
+			}
+			persistHoldRef.current = null;
+			if (previewPersistDirtyRef.current) {
+				markPreviewPersistDirty();
+			}
+		};
+	}, [markPreviewPersistDirty]);
+
 	const resetPreviewPersistDirty = useCallback(() => {
 		if (persistPreviewDebounceRef.current) {
 			window.clearTimeout(persistPreviewDebounceRef.current);
@@ -259,6 +287,7 @@ export function usePreviewPersistCoordinator({
 		persistPreviewItemsNow,
 		flushPreviewItemsPersistNow,
 		schedulePersistPreviewItems,
+		holdScheduledPreviewPersist,
 		isPreviewItemsPersistPending,
 	};
 }

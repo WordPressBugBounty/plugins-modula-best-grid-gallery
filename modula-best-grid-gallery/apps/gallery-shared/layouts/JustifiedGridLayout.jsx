@@ -20,30 +20,10 @@ import { usePreviewCatalogChunks } from '../hooks/usePreviewCatalogChunks';
 import { isCaptionBelowImage } from '../utils/captionPlacement';
 import { parseItemFocalCrop } from '../utils/galleryItemImage';
 import { resolveGalleryItemIntrinsicDimensions } from '../utils/galleryItemIntrinsicDimensions';
-
-const ROW_DEBUG_COLORS = [
-	'#4a90d9',
-	'#7ed321',
-	'#bd10e0',
-	'#f5a623',
-	'#50e3c2',
-	'#d0021b',
-];
-
-function getDebugColor(rowIndex) {
-	return ROW_DEBUG_COLORS[rowIndex % ROW_DEBUG_COLORS.length] ?? '#999';
-}
-
-function isLayoutDebugMode() {
-	if (typeof window === 'undefined') {
-		return false;
-	}
-	return (
-		new URLSearchParams(window.location.search).get(
-			'modula_layout_debug'
-		) === '1'
-	);
-}
+import {
+	getLayoutDebugColor as getDebugColor,
+	isLayoutDebugMode,
+} from '../utils/layoutDebug';
 
 /**
  * @param {Object}  props

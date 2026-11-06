@@ -78,6 +78,42 @@ export function focusedImageMetadataProtectedFieldName(el) {
 }
 
 /**
+ * @param {Object|null|undefined} values
+ * @return {Object}
+ */
+function asValuesObject(values) {
+	return values && typeof values === 'object' ? values : {};
+}
+
+/**
+ * The clobber guard: of `keys`, the fields the user owns locally. A field is
+ * owned when it is the focused title/caption, or when its text differs from
+ * `referenceValues`.
+ *
+ * @param {{
+ *   keys: string[],
+ *   focusedProtectedKey?: 'title'|'description'|null,
+ *   currentValues?: Object|null,
+ *   referenceValues?: Object|null,
+ * }} args
+ * @return {string[]} Owned keys, in `keys` order.
+ */
+function locallyOwnedImageMetadataKeys({
+	keys,
+	focusedProtectedKey = null,
+	currentValues = null,
+	referenceValues = null,
+}) {
+	const current = asValuesObject(currentValues);
+	const reference = asValuesObject(referenceValues);
+	return keys.filter(
+		(key) =>
+			key === focusedProtectedKey ||
+			asPlainFieldText(current[key]) !== asPlainFieldText(reference[key])
+	);
+}
+
+/**
  * Whether a save snapshot or WP-media refetch may `form.reset` the live values.
  *
  * False while title/caption is focused, or when local text has moved past the
@@ -95,26 +131,48 @@ export function shouldApplyImageMetadataExternalReset({
 	currentValues = null,
 	incomingValues = null,
 } = {}) {
-	if (
-		focusedProtectedKey === 'title' ||
-		focusedProtectedKey === 'description'
-	) {
-		return false;
+	return (
+		locallyOwnedImageMetadataKeys({
+			keys: IMAGE_METADATA_PROTECTED_KEYS,
+			focusedProtectedKey,
+			currentValues,
+			referenceValues: incomingValues,
+		}).length === 0
+	);
+}
+
+/**
+ * Values for the panel's first WP-media hydration. The media request can answer
+ * after the user started typing; fields edited since the panel opened (or the
+ * focused title/caption) keep their local text, the rest take `hydratedValues`.
+ *
+ * @param {{
+ *   focusedProtectedKey?: 'title'|'description'|null,
+ *   currentValues?: Object|null,
+ *   openingValues?: Object|null,
+ *   hydratedValues?: Object|null,
+ * }} args
+ * @return {Object}
+ */
+export function mergeMediaHydrationPreservingLocalEdits({
+	focusedProtectedKey = null,
+	currentValues = null,
+	openingValues = null,
+	hydratedValues = null,
+} = {}) {
+	const current = asValuesObject(currentValues);
+	const opening = asValuesObject(openingValues);
+	const next = { ...asValuesObject(hydratedValues) };
+	const ownedKeys = locallyOwnedImageMetadataKeys({
+		keys: Object.keys(opening),
+		focusedProtectedKey,
+		currentValues: current,
+		referenceValues: opening,
+	});
+	for (const key of ownedKeys) {
+		next[key] = current[key];
 	}
-	const current =
-		currentValues && typeof currentValues === 'object' ? currentValues : {};
-	const incoming =
-		incomingValues && typeof incomingValues === 'object'
-			? incomingValues
-			: {};
-	for (const key of IMAGE_METADATA_PROTECTED_KEYS) {
-		if (
-			asPlainFieldText(current[key]) !== asPlainFieldText(incoming[key])
-		) {
-			return false;
-		}
-	}
-	return true;
+	return next;
 }
 
 /**

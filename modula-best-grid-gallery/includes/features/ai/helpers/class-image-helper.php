@@ -48,34 +48,28 @@ class Image_Helper {
 				);
 			}
 
-			$excerpt_write  = null;
-			$content_write  = null;
+			// The gallery row's `description` is Modula's caption: the Media Library
+			// Caption (post_excerpt). The Description (post_content) is never written.
+			$excerpt_write = null;
 			if ( null !== $desc_incoming ) {
 				$excerpt_write = modula_resolve_attachment_text_write(
 					(string) $desc_incoming,
 					(string) $attachment->post_excerpt
 				);
-				$content_write = modula_resolve_attachment_text_write(
-					(string) $desc_incoming,
-					(string) $attachment->post_content
-				);
 			}
 
 			$resolved_title   = null !== $title_write ? $title_write : $attachment->post_title;
 			$resolved_excerpt = null !== $excerpt_write ? $excerpt_write : $attachment->post_excerpt;
-			$resolved_content = null !== $content_write ? $content_write : $attachment->post_content;
 
 			$needs_post_update = ( null !== $title_write && $title_write !== $attachment->post_title )
-				|| ( null !== $excerpt_write && $excerpt_write !== $attachment->post_excerpt )
-				|| ( null !== $content_write && $content_write !== $attachment->post_content );
+				|| ( null !== $excerpt_write && $excerpt_write !== $attachment->post_excerpt );
 
 			if ( $needs_post_update ) {
 				$post_updates[] = $wpdb->prepare(
-					'(%d, %s, %s, %s)',
+					'(%d, %s, %s)',
 					$attachment_id,
 					$resolved_title,
-					$resolved_excerpt,
-					$resolved_content
+					$resolved_excerpt
 				);
 			}
 
@@ -106,11 +100,10 @@ class Image_Helper {
 		}
 
 		if ( ! empty( $post_updates ) ) {
-			$query = "INSERT INTO {$wpdb->posts} (ID, post_title, post_excerpt, post_content) VALUES " .
+			$query = "INSERT INTO {$wpdb->posts} (ID, post_title, post_excerpt) VALUES " .
 					implode( ',', $post_updates ) .
-					' ON DUPLICATE KEY UPDATE post_title = VALUES(post_title), 
-					post_excerpt = VALUES(post_excerpt), 
-					post_content = VALUES(post_content)';
+					' ON DUPLICATE KEY UPDATE post_title = VALUES(post_title),
+					post_excerpt = VALUES(post_excerpt)';
 			//phpcs:ignore WordPress.DB
 			$wpdb->query( $query );
 		}

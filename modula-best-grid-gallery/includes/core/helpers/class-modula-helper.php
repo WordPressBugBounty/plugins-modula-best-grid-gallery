@@ -32,7 +32,9 @@ class Modula_Helper {
 				$value = preg_replace( '@<(script|style)[^>]*?>.*?</\\1>@si', '', $value );
 			}
 
-			$return .= ' ' . esc_attr( $name ) . '="' . esc_attr( $value ) . '"';
+			// Item links reach href unchanged on older saves; esc_url() drops javascript: and data: URLs.
+			$escaped = 'href' === $name ? esc_url( (string) $value ) : esc_attr( $value );
+			$return .= ' ' . esc_attr( $name ) . '="' . $escaped . '"';
 		}
 
 		return $return;

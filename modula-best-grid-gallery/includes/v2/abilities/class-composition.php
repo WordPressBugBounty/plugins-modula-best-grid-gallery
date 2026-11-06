@@ -4,6 +4,7 @@ namespace Modula\V2\Abilities;
 
 use Modula\V2\Meta_Sync;
 use Modula\V2\Images\Adapter;
+use Modula\V2\Images\Item_Fields;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -158,7 +159,7 @@ final class Composition {
 				array_splice( $items, $index, 1 );
 				continue;
 			}
-			if ( isset( $fields['link'] ) && $fields['link'] !== esc_url_raw( $fields['link'], array( 'http', 'https', 'mailto', 'tel' ) ) ) {
+			if ( isset( $fields[ Item_Fields::LINK ] ) && Item_Fields::sanitize_link( $fields[ Item_Fields::LINK ] ) !== $fields[ Item_Fields::LINK ] ) {
 				return self::invalid( 'link must be a safe URL; unsafe or silently rewritten values are rejected.' );
 			}
 			$row = 'add' === $action ? \Modula_Gallery_Upload::get_instance()->build_attachment_image_row( $id, $change['id'], false ) : $items[ $index ];

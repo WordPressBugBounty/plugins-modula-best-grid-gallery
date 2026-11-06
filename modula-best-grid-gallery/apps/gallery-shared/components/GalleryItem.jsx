@@ -90,8 +90,10 @@ function GalleryItem({
 
 	const resolvedSlotWidth =
 		Number(slotWidth) > 0 ? slotWidth : measuredW || undefined;
-	const resolvedSlotHeight =
-		Number(slotHeight) > 0 ? slotHeight : measuredH || undefined;
+	const layoutGaveSlotHeight = Number(slotHeight) > 0;
+	const resolvedSlotHeight = layoutGaveSlotHeight
+		? slotHeight
+		: measuredH || undefined;
 
 	/*
 	 * Settings-editor preview never renders navigable tile links (including
@@ -164,6 +166,7 @@ function GalleryItem({
 			itemChrome={renderItemChrome ? renderItemChrome(itemData) : null}
 			renderItemContent={renderItemContent}
 			slotMeasureRef={needsSlotMeasure ? slotRef : undefined}
+			slotHeightMeasured={needsSlotMeasure && !layoutGaveSlotHeight}
 			videoPlayOverlay={videoPlayOverlay}
 			videoPreviewNode={videoPreviewNode}
 		/>

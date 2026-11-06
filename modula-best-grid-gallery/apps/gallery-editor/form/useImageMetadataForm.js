@@ -9,6 +9,7 @@ import { captionToPlainString } from '../utils/captionToPlainString';
 import { useWpMediaAttachmentQuery } from '../query/useWpMediaAttachmentQuery';
 import {
 	focusedImageMetadataProtectedFieldName,
+	mergeMediaHydrationPreservingLocalEdits,
 	shouldApplyImageMetadataExternalReset,
 } from '../utils/imageMetadataAutosavePolicy';
 import {
@@ -166,6 +167,9 @@ export function useImageMetadataForm(isOpen, storeIndex, item, attachmentId) {
 
 	const itemFingerprintRef = useRef(/** @type {string|null} */ (null));
 	const mediaHydratedFingerprintRef = useRef('');
+	// Form values when this row's panel opened: the first media hydration keeps
+	// fields that moved away from them (typed before the media response).
+	const openingValuesRef = useRef(/** @type {Object|null} */ (null));
 
 	useLayoutEffect(() => {
 		if (!itemFingerprint) {
@@ -178,7 +182,8 @@ export function useImageMetadataForm(isOpen, storeIndex, item, attachmentId) {
 		itemFingerprintRef.current = itemFingerprint;
 		const row = itemRef.current;
 		if (row) {
-			form.reset(buildValuesFromItem(row));
+			openingValuesRef.current = buildValuesFromItem(row);
+			form.reset(openingValuesRef.current);
 		}
 	}, [itemFingerprint, form]);
 
@@ -203,16 +208,23 @@ export function useImageMetadataForm(isOpen, storeIndex, item, attachmentId) {
 			mediaQuery.data,
 			itemRef.current
 		);
+		const focused = focusedImageMetadataProtectedFieldName(
+			typeof document !== 'undefined' ? document.activeElement : null
+		);
 		const isNewRow =
 			itemFingerprint !== mediaHydratedFingerprintRef.current;
 		if (isNewRow) {
 			mediaHydratedFingerprintRef.current = itemFingerprint;
-			form.reset(merged);
+			form.reset(
+				mergeMediaHydrationPreservingLocalEdits({
+					focusedProtectedKey: focused,
+					currentValues: form.state.values,
+					openingValues: openingValuesRef.current,
+					hydratedValues: merged,
+				})
+			);
 			return;
 		}
-		const focused = focusedImageMetadataProtectedFieldName(
-			typeof document !== 'undefined' ? document.activeElement : null
-		);
 		if (
 			!shouldApplyImageMetadataExternalReset({
 				focusedProtectedKey: focused,

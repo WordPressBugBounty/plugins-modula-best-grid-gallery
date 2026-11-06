@@ -98,16 +98,14 @@ final class Replacement {
 	private static function crops( int $id ): array {
 		$file  = get_attached_file( $id, true );
 		$meta  = wp_get_attachment_metadata( $id, true );
-		$info  = pathinfo( $file );
 		$paths = array();
 		foreach ( $meta['image_meta']['resized_images'] ?? array() as $suffix ) {
 			if ( ! is_string( $suffix ) || ! preg_match( '/^[0-9]+x[0-9]+(?:_[a-z]+)*$/D', $suffix ) ) {
 				throw new \DomainException( 'unsafe_crop' ); }
-			$path = $info['dirname'] . '/' . $info['filename'] . '-' . $suffix . '.' . $info['extension'];
-			if ( is_file( $path ) ) {
-				$paths[] = $path; }
+			// The editor's extension and the legacy original-extension path.
+			$paths = array_merge( $paths, array_filter( \Modula_Image::crop_file_paths( $file, $suffix ), 'is_file' ) );
 		}
-		return array_unique( $paths );
+		return array_values( array_unique( $paths ) );
 	}
 
 	private static function paths( int $id ): array {

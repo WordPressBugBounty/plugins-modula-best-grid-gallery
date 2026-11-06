@@ -3,6 +3,7 @@
  */
 /* eslint-disable no-undef */
 import { useEffect, useMemo, useRef } from '@wordpress/element';
+import { isClassicCaptionCodeViewActive } from '../../utils/classicCaptionEditorView';
 
 const TINYMCE_OPTIONS = {
 	wpautop: false,
@@ -355,10 +356,7 @@ export default function WpClassicCaptionEditor({
 
 	useEffect(() => {
 		const next = typeof value === 'string' ? value : '';
-		const wrap = document.getElementById(`wp-${editorId}-wrap`);
-		const htmlActive =
-			wrap instanceof HTMLElement &&
-			wrap.classList.contains('html-active');
+		const htmlActive = isClassicCaptionCodeViewActive(editorId);
 		const ed = window.tinymce?.get(editorId);
 		if (htmlActive || !ed || ed.removed) {
 			const ta = document.getElementById(editorId);

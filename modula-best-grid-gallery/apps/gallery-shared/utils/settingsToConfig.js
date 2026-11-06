@@ -33,6 +33,7 @@ import {
 	isLightboxToggleOn,
 } from './lightboxSettingsToFancyboxOpts';
 import { isResponsiveSettingsSupportedForGalleryType } from './galleryLayoutEditorSupport';
+import { resolveCreativeEngine } from './creativeEngine';
 import {
 	groupedUiSettingsToConfig,
 	mergeLegacyJsConfigIntoConfig,
@@ -505,6 +506,8 @@ export function settingsToConfig(settings, opts = {}) {
 		),
 		lazyLoad: lazyLoadFlag,
 		randomFactor: parseInt(general.randomFactor ?? 50, 10) / 100,
+		/** Creative gallery tile engine: `packery` (fixed-height, default) or `mosaic`. */
+		creativeEngine: resolveCreativeEngine(general),
 		playsLoadingEffects: loadingEffectsPlay,
 		inView,
 		/** Motion → This layout: Justified "Widen on hover", Polaroid "Visitors can move the prints". */

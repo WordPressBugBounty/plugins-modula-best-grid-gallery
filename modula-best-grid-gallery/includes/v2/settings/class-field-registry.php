@@ -29,6 +29,7 @@ class Field_Registry {
 		'alignment' => array( 'group' => 'general', 'key' => 'alignment' ),
 		'height' => array( 'group' => 'general', 'key' => 'height' ),
 		'randomFactor' => array( 'group' => 'general', 'key' => 'randomFactor' ),
+		'creative_engine' => array( 'group' => 'general', 'key' => 'creativeEngine' ),
 		'shuffle' => array( 'group' => 'general', 'key' => 'shuffle' ),
 		'grid_type' => array( 'group' => 'layout', 'key' => 'gridType' ),
 		'uniform_grid_tile_aspect' => array( 'group' => 'layout', 'key' => 'uniformGridTileAspect' ),

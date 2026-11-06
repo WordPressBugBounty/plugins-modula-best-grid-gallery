@@ -52,6 +52,7 @@ import {
 	galleryUsesFancyboxLightbox,
 	resolveGalleryItemLink,
 } from './resolveGalleryItemLink';
+import { safeItemLink } from './safeItemLink';
 import {
 	getItemVideoUrl,
 	resolveItemLightboxVideoFlags,
@@ -345,8 +346,7 @@ export function getGalleryItemViewModel(itemData, config, options = {}) {
 	 * Beta Fancybox lightbox-first: expose Custom URL for in-lightbox follow.
 	 * Hybrid / simple-link tiles navigate away and must not carry this attr.
 	 */
-	const itemCustomUrl =
-		typeof itemData?.link === 'string' ? itemData.link.trim() : '';
+	const itemCustomUrl = safeItemLink(itemData?.link);
 	if (
 		!linkResolution.isSimpleLink &&
 		itemCustomUrl &&

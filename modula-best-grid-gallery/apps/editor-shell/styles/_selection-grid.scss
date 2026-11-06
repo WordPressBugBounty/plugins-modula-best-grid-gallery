@@ -10,8 +10,13 @@ $mod-selection-grid-stage: #1c1b19;
 	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
 	gap: 16px;
+	box-sizing: border-box;
 	max-width: 1000px;
 	margin: 0 auto;
+	// The canvas body clips (overflow: hidden), and a thumb paints outside its
+	// box: the ticked ring 6px, the focus outline 10px (8px offset + 2px). The
+	// inset keeps both whole on the first row and column.
+	padding: 10px;
 }
 
 .modula-takeover__preview-wrap--tablet .modula-takeover__selection-grid {
@@ -43,10 +48,11 @@ $mod-selection-grid-stage: #1c1b19;
 		object-fit: cover;
 	}
 
+	// The canvas selection colour, as on the selected tile and the Freeform frame.
 	&[aria-checked="true"] {
 		box-shadow:
 			0 0 0 3px var(--modula-selection-grid-gap-ring),
-			0 0 0 6px #8f8b80;
+			0 0 0 6px var(--mod-se-selection);
 	}
 
 	&:focus {

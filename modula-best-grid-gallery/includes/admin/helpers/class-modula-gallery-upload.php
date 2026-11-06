@@ -548,7 +548,7 @@ class Modula_Gallery_Upload {
 				'id'          => $image_id,
 				'alt'         => sanitize_text_field( get_post_meta( $image_id, '_wp_attachment_image_alt', true ) ),
 				'title'       => sanitize_text_field( $attachment->post_title ),
-				'description' => wp_filter_post_kses( $attachment->post_content ),
+				'description' => wp_filter_post_kses( $attachment->post_excerpt ),
 				'halign'      => 'center',
 				'valign'      => 'middle',
 				'link'        => '',
@@ -636,7 +636,7 @@ class Modula_Gallery_Upload {
 			'id'          => $image_id,
 			'alt'         => sanitize_text_field( get_post_meta( $image_id, '_wp_attachment_image_alt', true ) ),
 			'title'       => sanitize_text_field( $attachment->post_title ),
-			'description' => wp_filter_post_kses( $attachment->post_content ),
+			'description' => wp_filter_post_kses( $attachment->post_excerpt ),
 			'halign'      => 'center',
 			'valign'      => 'middle',
 			'link'        => '',
@@ -663,10 +663,12 @@ class Modula_Gallery_Upload {
 
 	/**
 	 * Write Modula “title”, “alt”, and “description” onto the media attachment (canonical store).
-	 * “description” maps to attachment post_content, matching {@see rest_build_single_image_row()}.
+	 * The row key “description” is the gallery caption and maps to the Media Library Caption
+	 * (post_excerpt), matching {@see rest_build_single_image_row()}. The Media Library
+	 * Description (post_content) is never written.
 	 *
 	 * @param int   $attachment_id Attachment post ID.
-	 * @param array $fields          Partial fields: optional keys title, alt, description (HTML allowed for description).
+	 * @param array $fields          Partial fields: optional keys title, alt, description (the caption; HTML allowed).
 	 * @return true|\WP_Error
 	 */
 	public function apply_modula_media_fields_to_attachment( $attachment_id, $fields ) {
@@ -706,12 +708,12 @@ class Modula_Gallery_Upload {
 			}
 		}
 		if ( array_key_exists( 'description', $fields ) ) {
-			$description_write = modula_resolve_attachment_text_write(
+			$caption_write = modula_resolve_attachment_text_write(
 				modula_sanitize_attachment_description_for_write( $fields['description'] ),
-				(string) $attachment->post_content
+				(string) $attachment->post_excerpt
 			);
-			if ( null !== $description_write ) {
-				$post_data['post_content'] = $description_write;
+			if ( null !== $caption_write ) {
+				$post_data['post_excerpt'] = $caption_write;
 			}
 		}
 
@@ -742,6 +744,7 @@ class Modula_Gallery_Upload {
 
 	/**
 	 * Overwrite title / alt / description on a modula-images row from attachment post data (after attachment updates).
+	 * The row “description” (the caption) comes from the Media Library Caption (post_excerpt).
 	 *
 	 * Keys listed in $explicit_clear_keys stay '' on the gallery row so an intentional
 	 * clear is not undone when Media Library still holds non-empty text.
@@ -775,7 +778,7 @@ class Modula_Gallery_Upload {
 			in_array( 'alt', $explicit_clear_keys, true )
 		);
 		$row['description'] = modula_resolve_gallery_row_attachment_text_after_sync(
-			$attachment->post_content,
+			$attachment->post_excerpt,
 			in_array( 'description', $explicit_clear_keys, true )
 		);
 		return $row;

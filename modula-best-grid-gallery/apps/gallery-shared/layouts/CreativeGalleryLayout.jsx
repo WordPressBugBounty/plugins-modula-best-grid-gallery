@@ -1,8 +1,13 @@
 /**
  * Modula Gallery - Creative gallery layout
  *
- * Uses packery-style bin-packing (generatePackeryTiles) for tile positions
- * and renders GalleryItem in each tile.
+ * Two tile engines, chosen per gallery by `config.creativeEngine`
+ * (`utils/creativeEngine.js`):
+ *
+ * - `packery` (default): packery-style bin-packing (generatePackeryTiles) on a
+ *   fixed-height canvas; every tile crops its photo.
+ * - `mosaic`: Jetpack-style rows of columns at the photos' own ratios
+ *   (CreativeMosaicChunk); the gallery grows with its photos.
  *
  * @package
  */
@@ -11,6 +16,7 @@ import { Fragment, useMemo } from '@wordpress/element';
 import { useSelector } from 'react-redux';
 import GalleryItem from '../components/GalleryItem';
 import EditorPreviewPageBreakDivider from '../components/EditorPreviewPageBreakDivider';
+import CreativeMosaicChunk from './CreativeMosaicChunk';
 import { useContainerWidth } from '../hooks/useContainerWidth';
 import { useResponsiveGutter } from '../hooks/useResponsiveColumns';
 import { resolveResponsiveGalleryHeight } from '../utils/resolvePreviewViewport';
@@ -21,17 +27,99 @@ import {
 import { galleryItemRowKey } from '../utils/galleryItemIdentity';
 import { usePreviewCatalogChunks } from '../hooks/usePreviewCatalogChunks';
 import { isCaptionBelowImage } from '../utils/captionPlacement';
+import { isMosaicCreativeEngine } from '../utils/creativeEngine';
+import { isLayoutDebugMode } from '../utils/layoutDebug';
 
-export default function CreativeGalleryLayout() {
+/**
+ * @param {Object} config Gallery config.
+ * @return {number} Gutter for the current breakpoint, in px.
+ */
+function useCreativeGutter(config) {
+	return parseInt(
+		useResponsiveGutter({ ...config, enableResponsive: 1 }) ?? 0,
+		10
+	);
+}
+
+/**
+ * Mosaic engine: rows of columns per page, no fixed height.
+ *
+ * @return {JSX.Element}
+ */
+function CreativeMosaicLayout() {
+	const items = useSelector((state) => state.items.items);
+	const config = useSelector((state) => state.gallery.config);
+	const { containerRef, containerWidth } = useContainerWidth(0);
+	const gutter = useCreativeGutter(config);
+	const captionBelowImage = isCaptionBelowImage(config);
+	const layoutDebug = isLayoutDebugMode();
+	const chunks = usePreviewCatalogChunks(items, config);
+
+	return (
+		<div
+			ref={containerRef}
+			className="modula-items modula-creative-gallery modula-creative-gallery--mosaic modula-creative-gallery--editor-pages"
+			style={{
+				display: 'flex',
+				flexDirection: 'column',
+				gap: 0,
+				width: '100%',
+				minHeight: 0,
+			}}
+		>
+			{layoutDebug && (
+				<div
+					style={{
+						padding: '8px 12px',
+						background: '#1a1a1a',
+						color: '#eee',
+						fontSize: 12,
+						fontFamily: 'monospace',
+						marginBottom: 8,
+						borderRadius: 4,
+					}}
+				>
+					<strong>Layout debug</strong>
+					{' · '}
+					engine=mosaic
+					{' · '}
+					containerWidth={containerWidth}
+					{' · '}
+					pages={chunks.length}
+					{' · '}
+					gutter={gutter}
+				</div>
+			)}
+			{chunks.map((chunk, chunkIndex) => (
+				<Fragment key={chunkIndex}>
+					{chunkIndex > 0 ? <EditorPreviewPageBreakDivider /> : null}
+					<CreativeMosaicChunk
+						chunk={chunk}
+						chunkIndex={chunkIndex}
+						containerWidth={containerWidth}
+						config={config}
+						gutter={gutter}
+						captionBelowImage={captionBelowImage}
+						layoutDebug={layoutDebug}
+					/>
+				</Fragment>
+			))}
+		</div>
+	);
+}
+
+/**
+ * Packery engine: a fixed-height canvas per page, split into tiles.
+ *
+ * @return {JSX.Element}
+ */
+function CreativePackeryLayout() {
 	const items = useSelector((state) => state.items.items);
 	const config = useSelector((state) => state.gallery.config);
 	const galleryId = useSelector((state) => state.gallery.galleryId ?? 0);
 	const { containerRef, containerWidth } = useContainerWidth(0);
 
-	const gutter = parseInt(
-		useResponsiveGutter({ ...config, enableResponsive: 1 }) ?? 0,
-		10
-	);
+	const gutter = useCreativeGutter(config);
 	const randomFactor = Number(config?.randomFactor ?? 0);
 	const height = resolveResponsiveGalleryHeight(config);
 	const captionBelowImage = isCaptionBelowImage(config);
@@ -142,4 +230,12 @@ export default function CreativeGalleryLayout() {
 			))}
 		</div>
 	);
+}
+
+export default function CreativeGalleryLayout() {
+	const config = useSelector((state) => state.gallery.config);
+	if (isMosaicCreativeEngine(config)) {
+		return <CreativeMosaicLayout />;
+	}
+	return <CreativePackeryLayout />;
 }

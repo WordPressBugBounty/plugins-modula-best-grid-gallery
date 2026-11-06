@@ -148,28 +148,71 @@ class Modula_Grid {
 	 */
 	public function generate_grid_css( $css, $gallery_id, $settings ) {
 
-		if ( 'grid' === $settings['type'] ) {
-			if ( 'automatic' !== $settings['grid_type'] ) {
-				$css .= "#{$gallery_id}.modula-gallery .modula-item, #{$gallery_id}.modula-gallery .modula-grid-sizer { width: calc(" . 100 / absint( $settings['grid_type'] ) . '% - ' . ( absint( $settings['gutter'] ) - absint( $settings['gutter'] ) / absint( $settings['grid_type'] ) ) . 'px) ; } ';
-
-				// Make the modula-item and grid-sizer width
-				if ( 1 === (int) $settings['enable_responsive'] ) {
-					$tablet_width = 100 / absint( $settings['tablet_columns'] ) . '% - ' . ( absint( $settings['tablet_gutter'] ) - absint( $settings['tablet_gutter'] ) / absint( $settings['tablet_columns'] ) ) . 'px';
-					$mobile_width = 100 / absint( $settings['mobile_columns'] ) . '% - ' . ( absint( $settings['mobile_gutter'] ) - absint( $settings['mobile_gutter'] ) / absint( $settings['mobile_columns'] ) . 'px' );
-				} else {
-					$tablet_width = 100 / absint( $settings['grid_type'] ) . '% - ' . ( absint( $settings['tablet_gutter'] ) - absint( $settings['tablet_gutter'] ) / absint( $settings['grid_type'] ) ) . 'px';
-					$mobile_width = 100 / absint( $settings['grid_type'] ) . '% - ' . ( absint( $settings['mobile_gutter'] ) - absint( $settings['mobile_gutter'] ) / absint( $settings['grid_type'] ) ) . 'px';
-				}
-
-				$css .= "@media (min-width: 768px) and (max-width:992px) { html body #{$gallery_id}.modula-gallery .modula-item, html body  #{$gallery_id}.modula-gallery .modula-grid-sizer {width: calc(" . esc_attr( $tablet_width ) . ' ) ; } }';
-
-				$css .= "@media (max-width: 768px) { html body #{$gallery_id}.modula-gallery .modula-item, html body  #{$gallery_id}.modula-gallery .modula-grid-sizer {width: calc(" . esc_attr( $mobile_width ) . ' ) ; } }';
-
-				$css .= "#{$gallery_id} .modula-items{position:relative;}";
-			}
+		if ( 'grid' !== $settings['type'] || 'automatic' === $settings['grid_type'] ) {
+			return $css;
 		}
 
+		$columns = absint( $settings['grid_type'] );
+
+		$css .= "#{$gallery_id}.modula-gallery .modula-item, #{$gallery_id}.modula-gallery .modula-grid-sizer { width: calc(" . $this->column_width( $columns, $settings['gutter'] ) . ') ; } ';
+
+		// Make the modula-item and grid-sizer width
+		if ( 1 === (int) $settings['enable_responsive'] ) {
+			$tablet_columns = $this->breakpoint_columns( $settings, 'tablet_columns' );
+			$mobile_columns = $this->breakpoint_columns( $settings, 'mobile_columns' );
+		} else {
+			$tablet_columns = $columns;
+			$mobile_columns = $columns;
+		}
+
+		if ( $tablet_columns > 0 ) {
+			$css .= "@media (min-width: 768px) and (max-width:992px) { html body #{$gallery_id}.modula-gallery .modula-item, html body  #{$gallery_id}.modula-gallery .modula-grid-sizer {width: calc(" . esc_attr( $this->column_width( $tablet_columns, $settings['tablet_gutter'] ) ) . ' ) ; } }';
+		}
+
+		if ( $mobile_columns > 0 ) {
+			$css .= "@media (max-width: 768px) { html body #{$gallery_id}.modula-gallery .modula-item, html body  #{$gallery_id}.modula-gallery .modula-grid-sizer {width: calc(" . esc_attr( $this->column_width( $mobile_columns, $settings['mobile_gutter'] ) ) . ' ) ; } }';
+		}
+
+		$css .= "#{$gallery_id} .modula-items{position:relative;}";
+
 		return $css;
+	}
+
+	/**
+	 * Width of one grid column as a calc() body, e.g. "50% - 5px".
+	 *
+	 * @param int   $columns Column count, greater than zero.
+	 * @param mixed $gutter  Gutter in px.
+	 *
+	 * @return string
+	 */
+	private function column_width( $columns, $gutter ) {
+		$gutter = absint( $gutter );
+
+		return 100 / $columns . '% - ' . ( $gutter - $gutter / $columns ) . 'px';
+	}
+
+	/**
+	 * Tablet or mobile column count of a custom-responsive grid.
+	 *
+	 * Classic galleries saved without `modula-settings` (or with a zero or
+	 * non-numeric count) lack a usable value, and get_defaults() has none for
+	 * these keys, so the classic field's default stands in.
+	 *
+	 * @param array  $settings Gallery settings.
+	 * @param string $key      'tablet_columns' or 'mobile_columns'.
+	 *
+	 * @return int Column count, or 0 when neither the setting nor the field default is usable.
+	 */
+	private function breakpoint_columns( $settings, $key ) {
+		$columns = isset( $settings[ $key ] ) ? absint( $settings[ $key ] ) : 0;
+		if ( $columns > 0 ) {
+			return $columns;
+		}
+
+		$fields = Modula_CPT_Fields_Helper::get_fields( 'responsive' );
+
+		return isset( $fields[ $key ]['default'] ) ? absint( $fields[ $key ]['default'] ) : 0;
 	}
 
 	/**

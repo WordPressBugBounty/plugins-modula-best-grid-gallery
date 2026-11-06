@@ -213,6 +213,7 @@ return array(
 							$modula_nav_field( 'layout.gutter' ),
 							$modula_nav_field( 'layout.tabletGutter' ),
 							$modula_nav_field( 'layout.mobileGutter' ),
+							$modula_nav_field( 'general.creativeEngine' ),
 							$modula_nav_field( 'general.height' ),
 							$modula_nav_field( 'general.randomFactor' ),
 							$modula_nav_field( 'polaroid.randomFactor' ),

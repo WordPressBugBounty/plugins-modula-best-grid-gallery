@@ -70,6 +70,10 @@ export default {
 						},
 						{
 							type: "field",
+							groupedPath: "general.creativeEngine"
+						},
+						{
+							type: "field",
 							groupedPath: "general.height"
 						},
 						{

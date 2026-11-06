@@ -190,6 +190,34 @@ return array(
 					'kind' => 'segmentedEnum',
 				),
 			),
+			/*
+			 * Creative gallery tile engine. Schema default `packery` so hydrate/sanitize
+			 * keep existing galleries on their fixed-height tiles; a new Beta gallery
+			 * create stamps `mosaic` (Meta_Sync create defaults). Height and Randomness
+			 * apply to `packery` only; infinite scroll to `mosaic` only (form-rules.json,
+			 * galleryLayoutEditorSupport.js, Shortcode::is_infinite_scroll_allowed_for_type).
+			 */
+			'creativeEngine' =>
+			array(
+				'type'              => 'string',
+				'enum'              =>
+				array(
+					0 => 'packery',
+					1 => 'mosaic',
+				),
+				'default'           => 'packery',
+				'editorLabel'       => 'Tile engine',
+				'editorDescription' => 'Classic tiles splits a fixed-height canvas into tiles and crops each photo to fit. Mosaic lays photos out in rows at their own proportions and the gallery grows with them.',
+				'enumOptionLabels'  =>
+				array(
+					'packery' => 'Classic tiles',
+					'mosaic'  => 'Mosaic',
+				),
+				'editorControl'     =>
+				array(
+					'kind' => 'segmentedEnum',
+				),
+			),
 			'height'         =>
 			array(
 				'type'              => 'array',
@@ -218,7 +246,7 @@ return array(
 				'maximum'           => 100,
 				'default'           => 50,
 				'editorLabel'       => 'Randomness',
-				'editorDescription' => 'How much creative-gallery tile splits vary from a strict half split (0 = none).',
+				'editorDescription' => 'How much Classic tiles splits vary from a strict half split (0 = none).',
 			),
 			'shuffle'        =>
 			array(

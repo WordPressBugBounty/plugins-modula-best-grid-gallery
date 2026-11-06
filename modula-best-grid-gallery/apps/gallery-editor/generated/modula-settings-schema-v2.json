@@ -48,6 +48,14 @@
                 ],
                 "default": "center"
             },
+            "creativeEngine": {
+                "type": "string",
+                "enum": [
+                    "packery",
+                    "mosaic"
+                ],
+                "default": "packery"
+            },
             "height": {
                 "type": "array",
                 "items": {

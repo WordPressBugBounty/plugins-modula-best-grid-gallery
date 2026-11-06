@@ -241,6 +241,17 @@ class Gallery_Upload_Controller {
 
 		register_rest_route(
 			self::NAMESPACE,
+			$base . '/move-to-caption',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( __CLASS__, 'move_to_caption' ),
+				'permission_callback' => $edit_perm,
+				'args'                => $id_args,
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
 			$base . '/unzip',
 			array(
 				'methods'             => \WP_REST_Server::CREATABLE,
@@ -676,6 +687,33 @@ class Gallery_Upload_Controller {
 		self::persist_modula_images_list( $gallery_id, $images );
 
 		return self::write_response( $gallery_id, array( 'image' => $images[ $index ] ) );
+	}
+
+	/**
+	 * Move captions kept only in the Media Library Description into the Media Library Caption.
+	 *
+	 * Writes attachments only; the gallery rows already hold the caption. Responds with
+	 * `{ moved: int[], skipped: { id: int, reason: string }[] }`. Classic galleries are refused.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public static function move_to_caption( $request ) {
+		$gallery_id = (int) $request['id'];
+		if ( ! \Modula\V2\Legacy_Caption_Move::applies_to( $gallery_id ) ) {
+			return new \WP_Error(
+				'modula_not_beta_gallery',
+				__( 'Only Beta galleries can move captions to the Media Library Caption.', 'modula-best-grid-gallery' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$outcome = \Modula\V2\Legacy_Caption_Move::move(
+			self::get_modula_images_list( $gallery_id ),
+			\Modula_Gallery_Upload::get_instance()
+		);
+
+		return new \WP_REST_Response( $outcome, 200 );
 	}
 
 	/**

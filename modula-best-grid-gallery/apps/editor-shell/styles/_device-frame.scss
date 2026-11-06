@@ -1,6 +1,7 @@
 // The tablet and phone device frames around the canvas. Mixin and selector
 // list only: this file emits no CSS. Each editor includes
-// `device-canvas-on-stage` in its shell styles.
+// `device-canvas-on-stage` in its shell styles and
+// `device-scroller-without-scrollbar` on its preview scroll area.
 $device-preview-wraps: ".modula-takeover__preview-wrap--tablet, .modula-takeover__preview-wrap--mobile";
 
 // Tablet and phone draw the editor's canvas on the stage at the device width,
@@ -14,5 +15,21 @@ $device-preview-wraps: ".modula-takeover__preview-wrap--tablet, .modula-takeover
 		background: transparent;
 		border-color: transparent;
 		box-shadow: none;
+	}
+}
+
+// In a device frame the preview's scroll area is the frame itself, so the
+// browser's default scrollbar (light, when scrollbars always show) sits on the
+// dark stage right beside the canvas. The frames draw none; wheel, trackpad,
+// touch and keyboard scrolling are unaffected. Include it at the root, passing
+// the editor's scroll area selector.
+@mixin device-scroller-without-scrollbar($scroller) {
+	:is(#{$device-preview-wraps}) #{$scroller} {
+		scrollbar-width: none;
+
+		// Safari before 18.2 ignores `scrollbar-width`.
+		&::-webkit-scrollbar {
+			display: none;
+		}
 	}
 }

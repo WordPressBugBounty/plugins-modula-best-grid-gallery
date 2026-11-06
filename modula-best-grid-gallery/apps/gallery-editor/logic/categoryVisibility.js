@@ -10,7 +10,8 @@
  * - **video**: **Video** category for Video type and mixed image galleries (hidden for story/slider). It needs the Video extension (`requiresExtension` on the category). Video type shows playlist + play icon + autoplay thumbnail; mixed types show lightbox autoplay/loop, play icon, and hover preview.
  * - **slider / story / showcase / template / freeform / parallax-masonry / bnb / video**: Pagination hub item and fields hidden;
  *   visitor pagination chrome off (`GALLERY_TYPES_WITHOUT_PAGINATION`).
- * - **creative-gallery**: Infinite scroll hidden (fixed packery height); numbered pages / load more only.
+ * - **creative-gallery**: Infinite scroll hidden on the Classic tiles engine (fixed packery height);
+ *   numbered pages / load more only. The Mosaic engine (general.creativeEngine) flows rows and allows it.
  * - **creative-gallery / bnb / story**: Responsive hub hidden (fixed featured / packery / fullscreen story).
  * - **slider**: Responsive hub shows tablet/mobile slides-to-show/scroll (nested under enableResponsive); column fields stay hidden.
  * - **polaroid**: Infinite scroll hidden when Uniform size is off (packery / fixed height); allowed when Uniform size is on.

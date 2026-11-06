@@ -88,6 +88,27 @@ function modula_resolve_gallery_row_attachment_text_after_sync( $attachment_valu
 }
 
 /**
+ * Resolve the caption a Beta gallery item shows and the gallery editor loads.
+ *
+ * The Media Library Caption (post_excerpt) is the caption. When it is empty, the
+ * caption cached on the modula-images row (key `description`) is kept, so galleries
+ * saved while Beta wrote captions to the Description still show them, and the next
+ * save moves that copy into Caption. The Media Library Description is never read.
+ *
+ * @param mixed $media_library_caption Attachment post_excerpt.
+ * @param mixed $row_caption           Row `description`; null when the row has none.
+ * @return string
+ */
+function modula_resolve_gallery_item_caption( $media_library_caption, $row_caption ) {
+	$media_library_caption = is_string( $media_library_caption ) ? $media_library_caption : (string) $media_library_caption;
+	if ( '' !== $media_library_caption ) {
+		return $media_library_caption;
+	}
+
+	return is_string( $row_caption ) ? $row_caption : (string) $row_caption;
+}
+
+/**
  * Sanitize attachment description for wp_update_post().
  *
  * wp_kses_post() returns unslashed HTML; wp_update_post() unslashes once.

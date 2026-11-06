@@ -1,5 +1,6 @@
 @use "../../variables" as *;
 @use "../../../../editor-shell/styles/download-all-preview" as *;
+@use "../../../../editor-shell/styles/device-frame" as *;
 
 /* Desktop artboard max-width (style kit). Tablet/mobile modifiers override below. */
 .modula-takeover__preview-wrap:not(.modula-takeover__preview-wrap--tablet):not(.modula-takeover__preview-wrap--mobile) {
@@ -131,9 +132,14 @@
 	}
 }
 
-.modula-gallery-takeover__live-preview-width-overflow-notice {
+.modula-gallery-takeover__live-preview-width-overflow-notice,
+.modula-gallery-takeover__move-to-caption-notice {
 	flex-shrink: 0;
 	margin: 0;
+}
+
+.modula-gallery-takeover__move-to-caption-button {
+	margin-top: $mod-space-8;
 }
 
 .modula-gallery-takeover__live-preview-body--hover-builder {
@@ -183,6 +189,12 @@
 		}
 	}
 }
+
+/*
+ * Tablet/mobile: no scrollbar beside the gallery. A gallery wider than the
+ * frame keeps it: there the bar is how a mouse scrolls sideways.
+ */
+@include device-scroller-without-scrollbar(".modula-gallery-takeover__live-preview-gallery-scroll:not(.modula-gallery-takeover__live-preview-gallery-scroll--width-overflow)");
 
 /* Story editor strip: tile box-shadows extend below the row — extra scroll foot room */
 .modula-gallery-takeover__live-preview-gallery-scroll:has(.modula-story--editor-preview) {

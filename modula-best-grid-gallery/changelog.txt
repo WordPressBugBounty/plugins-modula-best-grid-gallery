@@ -1,3 +1,8 @@
+= 3.0.18 - 04.11.2026 =
+Added: Creative galleries have a Tile engine setting. The new Mosaic engine lays photos out in rows at their own proportions, like a tiled gallery, with nothing cropped and the gallery growing with its photos; new Creative galleries start on it, existing ones keep their look on Classic tiles, and you can switch either way.
+Fixed: In the new gallery editor, Select multiple shows the whole outline around each selected image, in the selection colour.
+Fixed: Security issue — image links only accept web, email and phone addresses, so a link can no longer run a script when a visitor clicks the image. Thanks to Wordfence for the report.
+
 = 3.0.17 - 22.10.2026 =
 Improved: The new gallery editor has a cleaner layout, with settings grouped into tabs, a setting search, and a preview that shows hover effects as visitors will see them.
 Improved: In the new gallery editor, clicking an image selects it, and Edit image opens its settings.

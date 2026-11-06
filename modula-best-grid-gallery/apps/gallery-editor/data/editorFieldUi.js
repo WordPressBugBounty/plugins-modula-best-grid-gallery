@@ -24,6 +24,7 @@ export const EDITOR_UI_BY_PATH = {
 	/* Canvas: Gallery width is its own row; Alignment lives in More settings. */
 	'general.width': { sortIndex: 20 },
 	'general.alignment': { sortIndex: 20 },
+	'general.creativeEngine': { sortIndex: 21 },
 	'general.height': { sortIndex: 22 },
 	'video.maxHeight': { sortIndex: 21 },
 	'general.shuffle': { sortIndex: 99 },

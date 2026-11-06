@@ -8,6 +8,7 @@ import { buildLightboxPreviewCaption } from '../utils/buildLightboxPreviewSlides
 import { galleryRowToLightboxImageRow } from '../utils/collectGalleryImageRowsForLightboxPreview';
 import { isEmbeddedGalleryItemRow } from '../utils/embeddedGalleryItemKinds';
 import { isGalleryItemHiddenFromLightbox } from '../utils/prepareItemData';
+import { safeItemLink } from '../utils/safeItemLink';
 import {
 	buildLicenseCaptionHtml,
 	getLicenseEntry,
@@ -84,7 +85,7 @@ function isLightboxSlideRow(row, config) {
 	 * (parity with DOM `.modula-simple-link` filtering).
 	 * Fancybox: keep URL tiles in the lightbox (lightbox-first; URL for follow).
 	 */
-	const itemLink = typeof row.link === 'string' ? row.link.trim() : '';
+	const itemLink = safeItemLink(row.link);
 	if (itemLink && mode === 'lightbox-prefer-url') {
 		return false;
 	}
@@ -135,8 +136,7 @@ export function buildModulaLightboxSlidesFromItems(
 		);
 		const imageId = resolveGalleryItemImageIdFromRow(sourceRow, false);
 		const imageIdStr = imageId > 0 ? String(imageId) : '';
-		const itemUrl =
-			typeof sourceRow.link === 'string' ? sourceRow.link.trim() : '';
+		const itemUrl = safeItemLink(sourceRow.link);
 		const itemTarget = sourceRow.target;
 		const openInNewTab =
 			itemTarget === 1 || itemTarget === '1' || itemTarget === true;
@@ -196,7 +196,7 @@ export function buildModulaLightboxSlidesFromItems(
 				: {}),
 			opts: {
 				caption,
-				alt: row?.alt || row?.title || '',
+				alt: row?.alt ?? '',
 				thumb: poster || playbackSrc,
 				...(poster && isVideo ? { poster } : {}),
 				image_id: imageIdStr,

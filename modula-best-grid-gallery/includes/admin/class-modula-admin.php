@@ -44,23 +44,17 @@ class Modula_Admin {
 			return;
 		}
 
-		$info     = pathinfo( $metadata['file'] );
-		$uploads  = wp_upload_dir();
-		$filename = $info['filename'];
-		$file_dir = $uploads['basedir'] . '/' . $info['dirname'];
-		$ext      = $info['extension'];
-
-		if ( ! isset( $metadata['image_meta']['resized_images'] ) ) {
+		if ( empty( $metadata['image_meta']['resized_images'] ) || ! is_array( $metadata['image_meta']['resized_images'] ) ) {
 			return;
 		}
 
-		if ( count( $metadata['image_meta']['resized_images'] ) > 0 ) {
-			foreach ( $metadata['image_meta']['resized_images'] as $value ) {
-				$size = '-' . $value;
+		$uploads   = wp_upload_dir();
+		$file_path = $uploads['basedir'] . '/' . $metadata['file'];
+		$file_dir  = dirname( $file_path );
 
-				// Format the files in the appropriate format
-				$file = $file_dir . '/' . $filename . $size . '.' . $ext;
-				// Delete found files
+		foreach ( $metadata['image_meta']['resized_images'] as $suffix ) {
+			// Crops saved under the editor's extension and legacy original-extension ones.
+			foreach ( Modula_Image::crop_file_paths( $file_path, $suffix ) as $file ) {
 				wp_delete_file_from_directory( $file, $file_dir );
 			}
 		}

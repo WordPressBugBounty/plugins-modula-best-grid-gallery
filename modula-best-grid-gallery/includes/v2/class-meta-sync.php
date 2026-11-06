@@ -195,9 +195,40 @@ class Meta_Sync {
 		return Settings\Writer::patch( $post_id, array( 'motion' => $defaults ) );
 	}
 
+	/** Creative gallery tile engine a new Beta gallery starts on (`general.creativeEngine`). */
+	public const CREATIVE_ENGINE_CREATE_DEFAULT = 'mosaic';
+
+	/**
+	 * The create-only Creative engine patch: new galleries start on Mosaic.
+	 *
+	 * The schema default stays `packery` so existing galleries (missing key) keep
+	 * their fixed-height tiles; this is what a create path writes on top of it.
+	 * A preset applied after the create defaults (Preset Pro) may carry its own
+	 * engine and wins.
+	 *
+	 * @return array<string, array<string, string>> Grouped patch for Writer::patch().
+	 */
+	public static function creative_engine_create_defaults() {
+		return array( 'general' => array( 'creativeEngine' => self::CREATIVE_ENGINE_CREATE_DEFAULT ) );
+	}
+
+	/**
+	 * New Beta gallery create: Creative galleries start on the Mosaic tile engine.
+	 *
+	 * Written through the shared writer, as the Motion defaults are, so the flat
+	 * copy carries `creative_engine` too and a later flat → v2 sync keeps it.
+	 * Call only from create paths — never from Convert to beta or Try the beta duplicate.
+	 *
+	 * @param int $post_id Gallery post ID.
+	 * @return array<string, array<string, mixed>>|\WP_Error Saved grouped settings.
+	 */
+	public static function stamp_creative_engine_create_default( $post_id ) {
+		return Settings\Writer::patch( $post_id, self::creative_engine_create_defaults() );
+	}
+
 	/**
 	 * Ensure defaults exist, then stamp the create-only defaults (new Beta galleries):
-	 * theme-inherit ON and the Motion choices on `auto`.
+	 * theme-inherit ON, the Motion choices on `auto` and the Creative engine on Mosaic.
 	 *
 	 * @param int $post_id Gallery post ID.
 	 * @return void
@@ -214,6 +245,7 @@ class Meta_Sync {
 		self::stamp_theme_inherit_controls_create_default( $post_id );
 		// Writer::patch fails only for a non-gallery post (ruled out above) or a malformed patch (the schema defaults are not).
 		self::stamp_motion_create_defaults( $post_id );
+		self::stamp_creative_engine_create_default( $post_id );
 	}
 
 	/** Targets whose canonical grouped/items state is already owned by a domain write. */

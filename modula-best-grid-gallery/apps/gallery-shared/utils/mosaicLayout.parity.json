@@ -1,0 +1,21 @@
+{
+	"description": "Parity cases for the Creative gallery's mosaic engine (mosaicLayout.js). `jetpack` is Jetpack Tiled Gallery's own Jest fixture and snapshot, copied from Automattic/jetpack at commit 618b99b578b182fe4fff4d5da712f422c29df64e: extensions/blocks/tiled-gallery/layout/mosaic/test/fixtures/ratios.js and test/__snapshots__/ratios.js.snap (ratiosToMosaicRows, not wide). buildMosaicRows() must return the same row shapes. `legacyRow` is the numeric example from research.md §2.1 worked through Jetpack's legacy PHP math (width 500, margin 4, shape [1, 2]); sizeMosaicRow() runs it as a Modula row of width 496 with gutter 4, which gives the same image sizes. The second column's raw image heights are 118.55 and 111.84 (sum 230.40) and must total 238 - 2 * 4 = 230, so the one missing pixel goes to the larger fraction: [118, 112].",
+	"jetpack": {
+		"ratios": [
+			4, 2.26056338028169, 0.6676143094053542, 0.75, 0.7444409646100846,
+			0.6666666666666666, 0.8000588062334607, 3.6392174704276616,
+			1.335559265442404, 1.509433962264151, 1.6, 1.3208430913348945,
+			1.3553937789543349, 1.499531396438613
+		],
+		"rows": [[1], [1], [1, 1, 1, 1], [1, 1], [1, 2], [2, 1]]
+	},
+	"legacyRow": {
+		"jetpackWidth": 500,
+		"margin": 4,
+		"columns": [[1.335559265442404], [1.509433962264151, 1.6]],
+		"jetpackRowHeight": 238,
+		"jetpackColumnWidths": [317, 183],
+		"imageWidths": [313, 179],
+		"secondColumnImageHeights": [118, 112]
+	}
+}

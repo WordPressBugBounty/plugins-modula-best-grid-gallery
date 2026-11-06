@@ -2,12 +2,16 @@
  * Unsaved-change detection for the unified gallery item edit modal.
  */
 import { defaultImageMetadataValuesFromItem } from '../form/useImageMetadataForm';
+import { isClassicCaptionCodeViewActive } from './classicCaptionEditorView';
 import {
 	contentBlockStateToSaveFields,
 	createContentBlockEditInitialState,
 } from './contentBlockEditState';
 
 /**
+ * The live caption from the editor's active tab: the TinyMCE content on the
+ * Visual tab, the textarea on the Code tab or before TinyMCE mounts.
+ *
  * @param {string} editorInstanceKey
  * @return {string|undefined} Live caption HTML when editor exists.
  */
@@ -24,7 +28,12 @@ export function snapshotCaptionFromImageMetadataEditor(editorInstanceKey) {
 		window.tinymce && typeof window.tinymce.get === 'function'
 			? window.tinymce.get(editorId)
 			: null;
-	if (ed && !ed.removed && typeof ed.getContent === 'function') {
+	const visualEditorActive =
+		ed &&
+		!ed.removed &&
+		typeof ed.getContent === 'function' &&
+		!isClassicCaptionCodeViewActive(editorId);
+	if (visualEditorActive) {
 		return ed.getContent();
 	}
 	if (typeof document === 'undefined') {

@@ -2,12 +2,27 @@
 	"version": "1.0",
 	"visibility": [
 		{
+			"pathPattern": "^general\\.creativeEngine$",
+			"when": {
+				"path": "general.type",
+				"eq": "creative-gallery"
+			}
+		},
+		{
 			"pathPattern": "^general\\.height$",
 			"when": {
 				"any": [
 					{
-						"path": "general.type",
-						"eq": "creative-gallery"
+						"all": [
+							{
+								"path": "general.type",
+								"eq": "creative-gallery"
+							},
+							{
+								"path": "general.creativeEngine",
+								"neq": "mosaic"
+							}
+						]
 					},
 					{
 						"all": [
@@ -27,8 +42,16 @@
 		{
 			"pathPattern": "^general\\.randomFactor$",
 			"when": {
-				"path": "general.type",
-				"eq": "creative-gallery"
+				"all": [
+					{
+						"path": "general.type",
+						"eq": "creative-gallery"
+					},
+					{
+						"path": "general.creativeEngine",
+						"neq": "mosaic"
+					}
+				]
 			}
 		},
 		{
@@ -1160,8 +1183,16 @@
 			"when": {
 				"all": [
 					{
-						"path": "general.type",
-						"neq": "creative-gallery"
+						"any": [
+							{
+								"path": "general.type",
+								"neq": "creative-gallery"
+							},
+							{
+								"path": "general.creativeEngine",
+								"eq": "mosaic"
+							}
+						]
 					},
 					{
 						"any": [

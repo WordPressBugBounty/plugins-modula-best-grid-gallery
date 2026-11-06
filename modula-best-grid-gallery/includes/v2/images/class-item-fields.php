@@ -5,7 +5,9 @@
  * in `apps/gallery-editor/utils/galleryItemFields.js`.
  *
  * Both keys join the item whitelist (`modula_gallery_image_attributes`), so every
- * item save keeps them in `modula-images` and `modula_images_v2`.
+ * item save keeps them in `modula-images` and `modula_images_v2`. Merged saves
+ * also clean the image's link here; the whitelist save cleans it in
+ * `Modula_Admin_Helpers::sanitize_image()`.
  *
  * @package Modula
  */
@@ -22,6 +24,12 @@ final class Item_Fields {
 
 	/** Space-separated CSS classes added to the item's element. */
 	public const CSS_CLASS = 'css_class';
+
+	/** The image's Custom URL; the tile's href in the link click modes. */
+	public const LINK = 'link';
+
+	/** Schemes an item link may use; relative URLs are kept too. The visitor JS keeps a copy in `apps/gallery-shared/utils/safeItemLink.js`. */
+	public const LINK_PROTOCOLS = array( 'http', 'https', 'mailto', 'tel' );
 
 	// Letters, digits, `-` and `_`, not starting with a digit or `-` plus a digit.
 	private const CSS_CLASS_TOKEN = '/^-?[A-Za-z_][A-Za-z0-9_-]*$/';
@@ -81,7 +89,24 @@ final class Item_Fields {
 		if ( array_key_exists( self::HOVER_PRESET, $row ) ) {
 			$row[ self::HOVER_PRESET ] = self::sanitize_hover_preset( $row[ self::HOVER_PRESET ] );
 		}
+		if ( array_key_exists( self::LINK, $row ) ) {
+			$row[ self::LINK ] = self::sanitize_link( $row[ self::LINK ] );
+		}
 		return $row;
+	}
+
+	/**
+	 * The link renders as the tile's href, so a `javascript:` or `data:` link
+	 * would run script on click (stored XSS for Authors without unfiltered_html).
+	 *
+	 * @param mixed $raw Submitted link.
+	 * @return string The link with a safe scheme, or ''.
+	 */
+	public static function sanitize_link( $raw ): string {
+		if ( ! is_string( $raw ) ) {
+			return '';
+		}
+		return esc_url_raw( trim( $raw ), self::LINK_PROTOCOLS );
 	}
 
 	/**

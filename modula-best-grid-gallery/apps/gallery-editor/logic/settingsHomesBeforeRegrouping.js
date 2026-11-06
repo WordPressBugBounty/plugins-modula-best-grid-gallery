@@ -74,6 +74,7 @@ const KEYS_BY_GROUP = {
 	],
 	general: [
 		'alignment',
+		'creativeEngine',
 		'height',
 		'randomFactor',
 		'shuffle',

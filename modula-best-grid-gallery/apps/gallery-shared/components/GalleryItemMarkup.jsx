@@ -206,6 +206,7 @@ export function GalleryItemTextContent({
  * @param {import('react').ReactNode} [props.videoPlayOverlay]           - Play icon for mixed-gallery video tiles.
  * @param {import('react').ReactNode} [props.videoPreviewNode]           - Hover / autoplay video preview layer.
  * @param                             props.slotMeasureRef
+ * @param {boolean}                   [props.slotHeightMeasured]         - `vm.slotHeight` was measured from this tile's own image area, not given by the layout, so it must not lock that area's height.
  * @param                             props.eagerImageMount
  */
 export default function GalleryItemMarkup({
@@ -221,6 +222,7 @@ export default function GalleryItemMarkup({
 	itemChrome = null,
 	renderItemContent = null,
 	slotMeasureRef = undefined,
+	slotHeightMeasured = false,
 	suppressOverlayText = false,
 	eagerImageMount = false,
 	videoPlayOverlay = null,
@@ -539,10 +541,20 @@ export default function GalleryItemMarkup({
 	]
 		.filter(Boolean)
 		.join(' ');
-	const belowImageLockedSlotHeight =
-		captionBelowImage && !itemFillsParentSlot && Number(vm.slotHeight) > 0
-			? Number(vm.slotHeight)
-			: 0;
+	/*
+	 * Only a slot height the layout gave the tile locks the image area. A
+	 * height measured from this same area (Uniform / Fit Grid) would lock its
+	 * own first measure, such as 1px before boot, and every later measure
+	 * would read the lock back; the grid's CSS aspect-ratio sizes it instead.
+	 */
+	const locksBelowImageHeight =
+		captionBelowImage &&
+		!itemFillsParentSlot &&
+		!slotHeightMeasured &&
+		Number(vm.slotHeight) > 0;
+	const belowImageLockedSlotHeight = locksBelowImageHeight
+		? Number(vm.slotHeight)
+		: 0;
 	const belowImageAreaStyle = captionBelowImage
 		? itemFillsParentSlot
 			? {

@@ -184,14 +184,15 @@ class Modula_Image {
 			$suffix .= '_wp';
 		}
 
-		// Get the destination file name
-		$dest_file_name = "{$dir}/{$name}-{$suffix}.{$ext}";
+		// The editor's save() may rename the extension; predict the file it writes.
+		$crop_ext       = self::crop_extension( $file_path );
+		$dest_file_name = "{$dir}/{$name}-{$suffix}.{$crop_ext}";
 
-		// Return the info.
+		// Return the info. `ext` is the crop's extension, so name-suffix.ext is the crop file.
 		$info = array(
 			'dir'            => $dir,
 			'name'           => $name,
-			'ext'            => $ext,
+			'ext'            => $crop_ext,
 			'suffix'         => $suffix,
 			'orig_width'     => $orig_width,
 			'orig_height'    => $orig_height,
@@ -379,18 +380,7 @@ class Modula_Image {
 			// Add the resized dimensions and alignment to original image metadata, so the images
 			// can be deleted when the original image is delete from the Media Library.
 			if ( $get_attachment ) {
-				$metadata = wp_get_attachment_metadata( $get_attachment );
-
-				if ( isset( $metadata['image_meta'] ) ) {
-					$md = $suffix;
-
-					if ( ! isset( $metadata['image_meta']['resized_images'] ) ) {
-						$metadata['image_meta']['resized_images'] = array();
-					}
-
-					$metadata['image_meta']['resized_images'][] = $md;
-					wp_update_attachment_metadata( $get_attachment, $metadata );
-				}
+				$this->record_crop_suffix( (int) $get_attachment, $suffix );
 			}
 
 			// Set the resized image URL.
@@ -406,5 +396,135 @@ class Modula_Image {
 		);
 		// Return the resized image URL.
 		return $return;
+	}
+
+	/**
+	 * The extension the WordPress image editor saves a crop of this file under.
+	 *
+	 * Mirrors WP_Image_Editor::get_output_format() for a destination that keeps
+	 * the original's extension: the extension is lowercased, and when the
+	 * `image_editor_output_format` mapping converts the type (HEIC → JPEG by
+	 * default since WP 6.7, JPEG → WebP on sites that filter it) and an editor
+	 * can write the target type, the target type's default extension wins.
+	 *
+	 * @param string $file_path Path of the original image.
+	 * @return string Extension without the leading dot.
+	 */
+	public static function crop_extension( $file_path ) {
+		$extension = strtolower( pathinfo( $file_path, PATHINFO_EXTENSION ) );
+		$filetype  = wp_check_filetype( $file_path );
+
+		// WordPress < 5.8 has no output-format mapping.
+		if ( empty( $filetype['type'] ) || ! function_exists( 'wp_get_default_extension_for_mime_type' ) ) {
+			return $extension;
+		}
+
+		$output_mime = self::mapped_output_mime( $file_path, $filetype['type'] );
+		if ( '' === $output_mime ) {
+			return $extension;
+		}
+
+		$output_extension = wp_get_default_extension_for_mime_type( $output_mime );
+
+		return $output_extension ? $output_extension : $extension;
+	}
+
+	/**
+	 * Every path a crop of this file may sit at: the editor's current output
+	 * path first, then the original-extension path crops used to be predicted
+	 * at (legacy files, cleaned up alongside).
+	 *
+	 * @param string $file_path Path of the original image.
+	 * @param string $suffix    Crop suffix as stored in `resized_images`.
+	 * @return string[] Unique candidate paths.
+	 */
+	public static function crop_file_paths( $file_path, $suffix ) {
+		$info       = pathinfo( $file_path );
+		$extensions = array( self::crop_extension( $file_path ), pathinfo( $file_path, PATHINFO_EXTENSION ) );
+		$paths      = array();
+
+		foreach ( array_unique( $extensions ) as $extension ) {
+			$paths[] = "{$info['dirname']}/{$info['filename']}-{$suffix}.{$extension}";
+		}
+
+		return $paths;
+	}
+
+	/**
+	 * Adds a crop suffix to the `resized_images` list, keeping each suffix once.
+	 *
+	 * Duplicates written before the list was de-duplicated collapse here too.
+	 *
+	 * @param mixed  $suffixes Stored `resized_images` value.
+	 * @param string $suffix   Crop suffix to record.
+	 * @return string[] Unique suffixes, in first-seen order.
+	 */
+	public static function add_crop_suffix( $suffixes, $suffix ) {
+		$suffixes   = is_array( $suffixes ) ? $suffixes : array();
+		$suffixes[] = $suffix;
+
+		return array_values( array_unique( $suffixes ) );
+	}
+
+	/**
+	 * Records a crop suffix in the attachment metadata, writing only on change.
+	 *
+	 * @param int    $attachment_id Attachment the crop belongs to.
+	 * @param string $suffix        Crop suffix.
+	 * @return void
+	 */
+	private function record_crop_suffix( $attachment_id, $suffix ) {
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		if ( ! isset( $metadata['image_meta'] ) ) {
+			return;
+		}
+
+		$current = isset( $metadata['image_meta']['resized_images'] ) ? $metadata['image_meta']['resized_images'] : array();
+		$updated = self::add_crop_suffix( $current, $suffix );
+		if ( $updated === $current ) {
+			return;
+		}
+
+		$metadata['image_meta']['resized_images'] = $updated;
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+	}
+
+	/**
+	 * The mime type `image_editor_output_format` converts this type to, when an
+	 * editor can write it (the editor keeps the source type otherwise).
+	 *
+	 * @param string $file_path Path passed to the filter, as the editor does.
+	 * @param string $mime_type Source mime type.
+	 * @return string Target mime type, or '' when the type is not converted.
+	 */
+	private static function mapped_output_mime( $file_path, $mime_type ) {
+		// WordPress 5.8–6.6 applied the filter inline with an empty default.
+		$output_format = function_exists( 'wp_get_image_editor_output_format' )
+			? wp_get_image_editor_output_format( $file_path, $mime_type )
+			: apply_filters( 'image_editor_output_format', array(), $file_path, $mime_type ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core's filter, applied as the editor does.
+
+		if ( ! is_array( $output_format ) || empty( $output_format[ $mime_type ] ) ) {
+			return '';
+		}
+
+		$output_mime = $output_format[ $mime_type ];
+
+		return self::editor_supports_mime( $output_mime ) ? $output_mime : '';
+	}
+
+	/**
+	 * Whether an available image editor can write this mime type, once per request.
+	 *
+	 * @param string $mime_type Mime type.
+	 * @return bool
+	 */
+	private static function editor_supports_mime( $mime_type ) {
+		static $supported = array();
+
+		if ( ! isset( $supported[ $mime_type ] ) ) {
+			$supported[ $mime_type ] = wp_image_editor_supports( array( 'mime_type' => $mime_type ) );
+		}
+
+		return $supported[ $mime_type ];
 	}
 }

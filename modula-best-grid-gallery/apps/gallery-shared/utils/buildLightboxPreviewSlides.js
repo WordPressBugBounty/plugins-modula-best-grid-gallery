@@ -72,7 +72,7 @@ export function buildLightboxPreviewSlides(rows, settings, options = {}) {
 					options.exifCaption
 				)
 			),
-			alt: row.alt || row.title || '',
+			alt: row.alt,
 			thumb: row.thumb || row.src,
 		},
 	}));

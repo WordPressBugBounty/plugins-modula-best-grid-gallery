@@ -442,12 +442,18 @@ export function buildLightboxV6OptsFromFlat(flat, opts = {}) {
 		}
 	}
 
-	/** @type {Record<string, string>} */
+	/**
+	 * Fancybox slide keyframes compute `calc(-100% - var(--f-carousel-gap, 0))`;
+	 * the gap must be a length (`0px`), since a unitless `0` invalidates that calc
+	 * and slides overlap instead of animating.
+	 *
+	 * @type {Record<string, string>}
+	 */
 	const mainStyle = {
 		'--f-carousel-slide-width': '100%',
 		'--f-carousel-slide-height': '100%',
 		'--f-carousel-slide-padding': 'clamp(12px, 2.5vh, 28px)',
-		'--f-carousel-gap': '0',
+		'--f-carousel-gap': '0px',
 	};
 
 	const backdropColor =

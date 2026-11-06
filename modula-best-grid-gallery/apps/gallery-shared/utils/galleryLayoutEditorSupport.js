@@ -4,18 +4,39 @@
  * @package
  */
 
-/** Packery-style fixed segment height (creative, polaroid). */
+import {
+	CREATIVE_ENGINE_MOSAIC,
+	resolveCreativeEngineFromSettings,
+} from './creativeEngine';
+
+/** Packery-style fixed segment height (creative on Classic tiles, polaroid). */
 const FIXED_HEIGHT_LAYOUT_TYPES = new Set(['creative-gallery', 'polaroid']);
 
 /**
- * @param {string|undefined|null} type `general.type` / `gallery.config.type`
+ * @param {string|undefined|null} type      `general.type` / `gallery.config.type`
+ * @param {Object|null|undefined} [context] Grouped settings, flat config or flat settings; decides the Creative engine.
  * @return {boolean}
  */
-export function isFixedHeightGalleryLayout(type) {
+export function isFixedHeightGalleryLayout(type, context = {}) {
 	if (!type || typeof type !== 'string') {
 		return false;
 	}
+	if (type === 'creative-gallery') {
+		return !isMosaicCreativeGallery(context);
+	}
 	return FIXED_HEIGHT_LAYOUT_TYPES.has(type);
+}
+
+/**
+ * Creative on the Mosaic engine flows rows like Justified: no fixed height.
+ *
+ * @param {Object|null|undefined} context Grouped settings, flat config or flat settings.
+ * @return {boolean}
+ */
+function isMosaicCreativeGallery(context) {
+	return (
+		resolveCreativeEngineFromSettings(context) === CREATIVE_ENGINE_MOSAIC
+	);
 }
 
 /**
@@ -44,7 +65,8 @@ export function isResponsiveSettingsSupportedForGalleryType(type) {
 
 /**
  * Whether Infinite scroll is valid for this gallery type / polaroid mode.
- * Fixed-height packery (creative, polaroid with Uniform size off) cannot grow with appends.
+ * Fixed-height packery (creative on Classic tiles, polaroid with Uniform size
+ * off) cannot grow with appends; Creative on Mosaic can.
  *
  * @param {string|undefined|null} type      `general.type` / config.type
  * @param {Object|null|undefined} [context] Grouped settings, flat config, or `{ polaroid: { uniformSize } }`.
@@ -55,7 +77,7 @@ export function isInfiniteScrollSupportedForGalleryType(type, context = {}) {
 		return true;
 	}
 	if (type === 'creative-gallery') {
-		return false;
+		return isMosaicCreativeGallery(context);
 	}
 	if (type === 'polaroid') {
 		return isPolaroidUniformSizeEnabled(context);

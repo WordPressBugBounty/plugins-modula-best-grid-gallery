@@ -33,9 +33,13 @@ class WPChill_Rest_Api {
 			)
 		);
 
+		// Keys are stored as given, and some carry free text (Image Proofing's
+		// `selection-notice-<gallery>-<visitor name>` has spaces), so any one
+		// path segment is accepted; the key must reach clear_notification()
+		// unchanged to match the stored option.
 		register_rest_route(
 			$this->namespace,
-			'/notifications/(?P<id>[\w-]+)',
+			'/notifications/(?P<id>[^/]+)',
 			array(
 				'methods'             => 'DELETE',
 				'callback'            => array( $this, 'delete_notification' ),

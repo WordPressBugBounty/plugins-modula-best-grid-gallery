@@ -107,20 +107,29 @@ export function hasBulkEditWatermarkAction(editor, watermarkRegistration) {
 }
 
 /**
- * Attachments the watermark action applies to: the ticked rows, or every
- * row in the dialog when none is ticked (the dialog then holds the canvas
- * selection it opened with, or the whole gallery).
+ * The rows the footer's actions (watermark, filters, delete) act on.
+ *
+ * @param {Object[]} rows        Rows shown in the dialog.
+ * @param {string[]} selectedIds Ticked row keys.
+ * @return {Object[]} The ticked rows, in row order.
+ */
+export function bulkEditTickedRows(rows, selectedIds) {
+	const ticked = new Set(selectedIds);
+	return rows.filter((row) => ticked.has(bulkEditRowKey(row)));
+}
+
+/**
+ * Attachments the watermark action applies to: the ticked rows only, so
+ * "(N)" counts the same rows as every other footer action.
  *
  * @param {Object[]} rows        Rows shown in the dialog.
  * @param {string[]} selectedIds Ticked row keys.
  * @return {number[]} Unique attachment ids, in row order.
  */
 export function bulkEditWatermarkTargetIds(rows, selectedIds) {
-	const ticked = new Set(selectedIds);
-	const targets = ticked.size
-		? rows.filter((row) => ticked.has(bulkEditRowKey(row)))
-		: rows;
-	const ids = targets.map(bulkEditNumericAttachmentId).filter((id) => id > 0);
+	const ids = bulkEditTickedRows(rows, selectedIds)
+		.map(bulkEditNumericAttachmentId)
+		.filter((id) => id > 0);
 	return [...new Set(ids)];
 }
 

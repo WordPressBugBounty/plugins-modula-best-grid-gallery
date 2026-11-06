@@ -32,6 +32,7 @@ import {
 } from './prepareModulaLightboxV6';
 import { normalizeLightboxCaptionHtml } from '../utils/lightboxCaptionExtra';
 import { sanitizeCaptionHtml } from '../utils/sanitizeCaptionHtml';
+import { safeItemLink } from '../utils/safeItemLink';
 import {
 	attachModulaLightboxCompactToolbar,
 	detachModulaLightboxCompactToolbar,
@@ -46,6 +47,10 @@ import {
 	detachModulaLightboxImageProtection,
 	refreshModulaLightboxImageProtection,
 } from './modulaLightboxImageProtection';
+import {
+	applyModulaLightboxSlideAlt,
+	withModulaLightboxSlideAlt,
+} from './modulaLightboxSlideAlt';
 import { releaseModulaGalleryItemPointerFocusFromContext } from './releaseModulaGalleryItemPointerFocus';
 import { resolveModulaLightboxFancyboxOpts } from '../utils/lightboxSettingsToFancyboxOpts';
 import { readModulaVideoSlideLoop } from '../video/videoGalleryModel';
@@ -381,7 +386,7 @@ function syncPauseOnHoverState(fancybox) {
  */
 function sanitizeSlides(links) {
 	return links.map((value) => {
-		const link = { ...value };
+		const link = withModulaLightboxSlideAlt(value);
 		const imageId =
 			link.opts?.image_id ||
 			link.opts?.imageId ||
@@ -497,6 +502,13 @@ function buildEventHandlers(v6Opts, context, userOn = {}, modulaSlides = []) {
 				userOn.destroy(fancybox);
 			}
 		},
+		// Zoomable gave the image the caption as alt (`modulaLightboxSlideAlt`).
+		'Carousel.attachSlideEl': (fancybox, carousel, slide) => {
+			applyModulaLightboxSlideAlt(slide);
+			if (typeof userOn['Carousel.attachSlideEl'] === 'function') {
+				userOn['Carousel.attachSlideEl'](fancybox, carousel, slide);
+			}
+		},
 		/*
 		 * Fancybox v6 has no `reveal`; a slide's content (a lazily loaded image,
 		 * a video) is ready once per slide, current or preloaded. Only the slide
@@ -583,12 +595,10 @@ function buildEventHandlers(v6Opts, context, userOn = {}, modulaSlides = []) {
 				? fancybox.modulaSlideSources
 				: modulaSlides;
 			const slide = sources[pageIndex];
-			const itemUrl =
-				typeof slide?.opts?.modulaItemUrl === 'string'
-					? slide.opts.modulaItemUrl.trim()
-					: typeof slide?.modulaItemUrl === 'string'
-						? slide.modulaItemUrl.trim()
-						: '';
+			// Slides read the URL from tile markup and item rows; location.assign() would run a javascript: URL.
+			const itemUrl = safeItemLink(
+				slide?.opts?.modulaItemUrl ?? slide?.modulaItemUrl
+			);
 			if (itemUrl) {
 				const openBlank =
 					slide?.opts?.modulaItemUrlTarget === '_blank' ||

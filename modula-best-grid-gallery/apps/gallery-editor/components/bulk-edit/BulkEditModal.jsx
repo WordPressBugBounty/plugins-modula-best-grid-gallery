@@ -31,7 +31,9 @@ import {
 import { getGalleryPreviewReduxStore } from '../../utils/previewReduxStoreRef';
 import { useWatermarkRegistration } from '../../hooks/useWatermarkRegistration';
 import WatermarkActionButtonSlot from '../field/WatermarkActionButtonSlot';
+import BulkEditFilterActions from './BulkEditFilterActions';
 import {
+	bulkEditTickedRows,
 	bulkEditWatermarkTargetIds,
 	filterBulkEditRowsByStoreIndices,
 	hasBulkEditFiltersColumn,
@@ -262,6 +264,11 @@ export default function BulkEditModal() {
 			rows.filter((row) => bulkEditRowIsModified(row, draft.localChanges))
 				.length,
 		[rows, draft.localChanges]
+	);
+
+	const tickedRows = useMemo(
+		() => bulkEditTickedRows(rows, draft.selectedIds),
+		[rows, draft.selectedIds]
 	);
 
 	const watermarkRegistration = useWatermarkRegistration();
@@ -504,6 +511,14 @@ export default function BulkEditModal() {
 						{__('Discard changes', 'modula-best-grid-gallery')}
 					</Button>
 					<div className="modula-bulk-edit__footer-actions">
+						{showFiltersColumn ? (
+							<BulkEditFilterActions
+								tickedRows={tickedRows}
+								getRowField={draft.getRowField}
+								patchRow={draft.patchRow}
+								busy={busy}
+							/>
+						) : null}
 						{showWatermarkAction
 							? bulkEditWatermarkActions().map(
 									({ action, label }) => (

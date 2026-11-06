@@ -6,6 +6,7 @@
 
 import { isEmbeddedGalleryItemRow } from './embeddedGalleryItemKinds';
 import { EXIF_ROW_FIELDS } from './exifCaption';
+import { lightboxImageAlt } from './lightboxImageAlt';
 import { isProbableModulaVideoPlaybackUrl } from '../video/videoGalleryModel';
 
 /**
@@ -52,7 +53,7 @@ function asPosterUrl(value) {
  * @typedef {Object} LightboxPreviewImageRow
  * @property {string} src         Full-size image URL.
  * @property {string} thumb       Thumbnail URL for Fancybox strip.
- * @property {string} alt         Image alt text.
+ * @property {string} alt         Image alt text, plain (`lightboxImageAlt`); '' when it has none.
  * @property {string} title       Plain title.
  * @property {string} description Plain caption/description.
  * @property {Record<string, unknown>} exif The row's stored `exif_*` fields.
@@ -107,25 +108,16 @@ export function galleryRowToLightboxImageRow(row) {
 
 	const thumb = asPosterUrl(row.thumbnail) || asPosterUrl(row.thumb) || src;
 
-	let alt = '';
-	if (typeof row.alt === 'string') {
-		alt = row.alt;
-	}
-
 	const title = captionToPlainString(row.title).trim();
 	const description = (
 		captionToPlainString(row.description) ||
 		captionToPlainString(row.caption)
 	).trim();
 
-	if (!alt) {
-		alt = title;
-	}
-
 	return {
 		src,
 		thumb,
-		alt: alt || title,
+		alt: lightboxImageAlt(row.alt),
 		title,
 		description,
 		exif: pickExifFields(row),

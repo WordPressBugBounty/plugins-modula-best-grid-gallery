@@ -386,9 +386,11 @@ class Shortcode {
 			if ( isset( $post_data[ $image_id ] ) ) {
 				$post           = $post_data[ $image_id ];
 				$image['title'] = $post->post_title;
-				// Match attachment “Description” (post_content) and REST patch / rest_build_single_image_row(); caption stays excerpt.
-				$image['description'] = $post->post_content;
-				$image['caption']     = $post->post_excerpt;
+				// The caption is the Media Library Caption, as REST patch / rest_build_single_image_row() write it.
+				$row_caption          = isset( $image['description'] ) ? $image['description'] : '';
+				$caption              = modula_resolve_gallery_item_caption( $post->post_excerpt, $row_caption );
+				$image['description'] = $caption;
+				$image['caption']     = $caption;
 			}
 		}
 
@@ -437,8 +439,8 @@ class Shortcode {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT ID, post_title, post_excerpt, post_content 
-				FROM {$wpdb->posts} 
+				"SELECT ID, post_title, post_excerpt
+				FROM {$wpdb->posts}
 				WHERE ID IN ({$placeholders})",
 				$image_ids
 			),
@@ -636,7 +638,14 @@ class Shortcode {
 		 * Bootstrap order may differ from modula-images (e.g. shuffle on load). REST
 		 * replace/remove/patch use raw modula-images indices — expose canonical row index per item.
 		 */
-		$gallery_data = $this->attach_canonical_modula_row_indexes( $gallery_data, $gallery_id );
+		$canonical_rows = $this->get_canonical_modula_rows( $gallery_id );
+		$gallery_data   = $this->attach_canonical_modula_row_indexes( $gallery_data, $canonical_rows );
+
+		// "Move to Caption" notice: images whose caption is still only in the Media Library Description.
+		$gallery_data['metadata'] = array_merge(
+			$gallery_data['metadata'],
+			\Modula\V2\Legacy_Caption_Move::editor_metadata( $gallery_id, $canonical_rows )
+		);
 
 		$item_count = isset( $gallery_data['items'] ) && is_array( $gallery_data['items'] )
 			? count( $gallery_data['items'] )
@@ -673,23 +682,31 @@ class Shortcode {
 	}
 
 	/**
+	 * The gallery's raw `modula-images` rows (a bound gallery's derived rows when bound).
+	 *
+	 * @param int $gallery_id Gallery post ID.
+	 * @return array<int, mixed>
+	 */
+	private function get_canonical_modula_rows( $gallery_id ) {
+		$canonical_rows = class_exists( '\Modula\Bound_Gallery\Bound_Gallery', false )
+			? \Modula\Bound_Gallery\Bound_Gallery::get_image_rows( $gallery_id )
+			: get_post_meta( $gallery_id, 'modula-images', true );
+
+		return is_array( $canonical_rows ) ? $canonical_rows : array();
+	}
+
+	/**
 	 * Map each image item to its index in raw `modula-images` meta.
 	 *
-	 * @param array<string, mixed> $gallery_data Bootstrap payload.
-	 * @param int                  $gallery_id   Gallery post ID.
+	 * @param array<string, mixed> $gallery_data   Bootstrap payload.
+	 * @param array<int, mixed>    $canonical_rows The gallery's raw `modula-images` rows.
 	 * @return array<string, mixed>
 	 */
-	private function attach_canonical_modula_row_indexes( array $gallery_data, $gallery_id ) {
+	private function attach_canonical_modula_row_indexes( array $gallery_data, array $canonical_rows ) {
 		if ( ! isset( $gallery_data['items'] ) || ! is_array( $gallery_data['items'] ) ) {
 			return $gallery_data;
 		}
 
-		$canonical_rows = class_exists( '\Modula\Bound_Gallery\Bound_Gallery', false )
-			? \Modula\Bound_Gallery\Bound_Gallery::get_image_rows( $gallery_id )
-			: get_post_meta( $gallery_id, 'modula-images', true );
-		if ( ! is_array( $canonical_rows ) ) {
-			$canonical_rows = array();
-		}
 		if ( count( $canonical_rows ) < 1 ) {
 			return $gallery_data;
 		}
@@ -1246,7 +1263,7 @@ class Shortcode {
 	 */
 	private function is_infinite_scroll_allowed_for_type( $type, array $grouped, array $flat ) {
 		if ( 'creative-gallery' === $type ) {
-			return false;
+			return $this->is_creative_mosaic_engine( $grouped, $flat );
 		}
 
 		if ( 'polaroid' !== $type ) {
@@ -1254,6 +1271,26 @@ class Shortcode {
 		}
 
 		return $this->is_polaroid_uniform_size_on( $grouped, $flat );
+	}
+
+	/**
+	 * Creative on the Mosaic engine flows rows and can append; Classic tiles
+	 * (the schema default, so a missing key) is a fixed-height canvas and cannot.
+	 * Mirrors isInfiniteScrollSupportedForGalleryType() in galleryLayoutEditorSupport.js.
+	 *
+	 * @param array<string, mixed> $grouped Grouped v2 settings.
+	 * @param array<string, mixed> $flat    Flat settings.
+	 * @return bool
+	 */
+	private function is_creative_mosaic_engine( array $grouped, array $flat ) {
+		$engine = null;
+		if ( isset( $grouped['general']['creativeEngine'] ) ) {
+			$engine = $grouped['general']['creativeEngine'];
+		} elseif ( isset( $flat['creative_engine'] ) ) {
+			$engine = $flat['creative_engine'];
+		}
+
+		return 'mosaic' === $engine;
 	}
 
 	/**

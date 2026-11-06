@@ -9,14 +9,14 @@ import {
 	isProbableModulaVideoPlaybackUrl,
 } from '../video/videoGalleryModel';
 import { isGalleryItemHiddenFromLightbox } from './prepareItemData';
+import { safeItemLink } from './safeItemLink';
 
 /**
  * @param {unknown} itemData
  * @return {string}
  */
 function normalizeItemLink(itemData) {
-	const raw = itemData?.link;
-	return typeof raw === 'string' ? raw.trim() : '';
+	return safeItemLink(itemData?.link);
 }
 
 /**
@@ -37,8 +37,8 @@ function readExistingHref(itemData) {
 	if (!attrs || typeof attrs !== 'object') {
 		return '';
 	}
-	const href = attrs.href;
-	return typeof href === 'string' ? href.trim() : '';
+	// PHP copies the item link into href before the payload is encoded.
+	return safeItemLink(attrs.href);
 }
 
 /**

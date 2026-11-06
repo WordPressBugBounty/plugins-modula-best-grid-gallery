@@ -1,14 +1,17 @@
 /**
  * Creative gallery: tile aspect ratio for image-focus crop framing.
  *
- * Tiles are packery-generated (not stored on the item row). Prefer reading the
+ * Packery engine only: its tiles are generated (not stored on the item row)
+ * and crop the photo, so the Focus Point modal frames them. Prefer reading the
  * rendered preview shell; fall back to the same deterministic layout math as
- * `CreativeGalleryLayout`.
+ * `CreativeGalleryLayout`. The Mosaic engine gives every cell the photo's own
+ * ratio, so there is no crop to frame and these helpers return null.
  *
  * @package
  */
 
 import { isCaptionBelowImage } from './captionPlacement';
+import { isMosaicCreativeEngine } from './creativeEngine';
 import { galleryItemRowKey } from './galleryItemIdentity';
 import { previewCatalogPagesFromGalleryState } from './previewCatalogPages';
 import { generatePackeryTiles, hashLayoutSeedString } from './packeryLayout';
@@ -104,6 +107,9 @@ export function resolveCreativeGalleryTileAspect({
 	if (!item || !Array.isArray(items) || !config) {
 		return null;
 	}
+	if (isMosaicCreativeEngine(config)) {
+		return null;
+	}
 
 	let width = Number(containerWidth);
 	if (!Number.isFinite(width) || width <= 0) {
@@ -196,6 +202,9 @@ export function getCreativeGalleryItemFocusAspect({
 	settings,
 	metadata,
 }) {
+	if (isMosaicCreativeEngine(config)) {
+		return null;
+	}
 	return (
 		readCreativeGalleryTileAspectFromDom(item?.id) ??
 		resolveCreativeGalleryTileAspect({

@@ -27,6 +27,7 @@ import { useGalleryBootstrapQuery } from '../../query/useGalleryBootstrapQuery';
 import { useWatermarkPreviewSelection } from '../../context/WatermarkPreviewSelectionContext';
 import { useGalleryPreviewTileSelection } from '../../context/GalleryPreviewTileSelectionContext';
 import GalleryTakeoverPreviewEmptyState from './GalleryTakeoverPreviewEmptyState';
+import MoveToCaptionNotice from './move-to-caption/MoveToCaptionNotice';
 import GallerySelectionGrid from './selection-grid/GallerySelectionGrid';
 import { galleryHasPreviewContent } from './galleryPreviewContent';
 import { useGalleryTakeoverLivePreviewController } from '../../hooks/useGalleryTakeoverLivePreviewController';
@@ -398,6 +399,12 @@ function GalleryTakeoverLivePreviewMounted({
 						/>
 					) : (
 						<>
+							<MoveToCaptionNotice
+								galleryId={galleryId}
+								captionsToMove={
+									bootstrap?.metadata?.captionsToMove
+								}
+							/>
 							{galleryWidthOverflow ? (
 								<AdminUiScope>
 									<Notice

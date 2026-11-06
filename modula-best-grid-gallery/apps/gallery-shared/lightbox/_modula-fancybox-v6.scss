@@ -22,7 +22,8 @@
 	--f-carousel-slide-height: 100%;
 	/* Keep a small gutter so images are not flush against the viewport/toolbar. */
 	--f-carousel-slide-padding: clamp(12px, 2.5vh, 28px);
-	--f-carousel-gap: 0;
+	/* A length, not `0`: Fancybox slide keyframes use calc(-100% - var(--f-carousel-gap)). */
+	--f-carousel-gap: 0px;
 	--modula-lightbox-caption-gutter: clamp(16px, 4vw, 40px);
 
 	/*

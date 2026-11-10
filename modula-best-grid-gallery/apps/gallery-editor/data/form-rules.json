@@ -57,8 +57,16 @@
 		{
 			"pathPattern": "^general\\.shuffle$",
 			"when": {
-				"path": "general.type",
-				"neq": "video"
+				"all": [
+					{
+						"path": "general.type",
+						"neq": "video"
+					},
+					{
+						"path": "general.type",
+						"neq": "bento"
+					}
+				]
 			}
 		},
 		{
@@ -419,7 +427,8 @@
 					"grid",
 					"uniform-grid",
 					"fit-grid",
-					"parallax-masonry"
+					"parallax-masonry",
+					"bento"
 				]
 			}
 		},
@@ -507,7 +516,8 @@
 					"creative-gallery",
 					"custom-grid",
 					"freeform",
-					"polaroid"
+					"polaroid",
+					"bento"
 				]
 			}
 		},
@@ -523,7 +533,8 @@
 					"parallax-masonry",
 					"creative-gallery",
 					"custom-grid",
-					"polaroid"
+					"polaroid",
+					"bento"
 				]
 			}
 		},
@@ -544,7 +555,8 @@
 							"justified-grid",
 							"parallax-masonry",
 							"creative-gallery",
-							"polaroid"
+							"polaroid",
+							"bento"
 						]
 					}
 				]
@@ -567,7 +579,8 @@
 							"justified-grid",
 							"parallax-masonry",
 							"creative-gallery",
-							"polaroid"
+							"polaroid",
+							"bento"
 						]
 					}
 				]
@@ -699,6 +712,10 @@
 					{
 						"path": "general.type",
 						"neq": "template"
+					},
+					{
+						"path": "general.type",
+						"neq": "bento"
 					}
 				]
 			}
@@ -812,6 +829,10 @@
 					{
 						"path": "general.type",
 						"neq": "template"
+					},
+					{
+						"path": "general.type",
+						"neq": "bento"
 					}
 				]
 			}

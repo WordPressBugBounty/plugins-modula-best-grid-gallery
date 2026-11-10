@@ -193,6 +193,22 @@ function AdapterRow({ status, step }) {
 		);
 	}
 
+	if ('too-old' === step) {
+		return (
+			<RequirementRow
+				controlId={controlId}
+				text={sprintf(
+					/* translators: %s: minimum MCP Adapter version */
+					__(
+						'AI assistants need MCP Adapter %s or newer. Update the MCP Adapter plugin, or the plugin on this site that includes it.',
+						'modula-best-grid-gallery'
+					),
+					status.adapter_required
+				)}
+			/>
+		);
+	}
+
 	if ('manual' === step) {
 		return (
 			<RequirementRow

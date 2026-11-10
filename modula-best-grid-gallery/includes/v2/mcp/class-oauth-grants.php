@@ -48,6 +48,9 @@ final class Oauth_Grants {
 	/** Last-used is a date for the connections list; recording it more often only costs writes. */
 	private const LAST_USED_PRECISION = MINUTE_IN_SECONDS;
 
+	/** Every access and refresh token ever issued: `<grant id>.<secret>`, lowercase hex. */
+	private const TOKEN_FORMAT = '/^([a-f0-9]{16})\.([a-f0-9]{64})$/';
+
 	/**
 	 * Issues a single-use authorization code bound to the request, its approver and the access they chose.
 	 *
@@ -200,6 +203,17 @@ final class Oauth_Grants {
 	}
 
 	/**
+	 * Whether a token is written the way Modula writes its tokens, which is how Modula tells
+	 * its own from another plugin's (ADR 0044). The format, not a stored row: revoking or
+	 * pruning a grant deletes its row, and the client must still be told to sign in again.
+	 *
+	 * @param string $token Token from the Bearer header.
+	 */
+	public static function has_token_format( string $token ): bool {
+		return 1 === preg_match( self::TOKEN_FORMAT, $token );
+	}
+
+	/**
 	 * Live grants for the connections list: no hashes, no secrets. Grants that already
 	 * ended, but that prune has not removed yet, are left out.
 	 *
@@ -272,7 +286,7 @@ final class Oauth_Grants {
 	 * @return array{id:string,grant:array}|null
 	 */
 	private static function find_by_token( string $token, string $field ): ?array {
-		if ( 1 !== preg_match( '/^([a-f0-9]{16})\.([a-f0-9]{64})$/', $token, $parts ) ) {
+		if ( 1 !== preg_match( self::TOKEN_FORMAT, $token, $parts ) ) {
 			return null;
 		}
 		$grant = self::find_grant( $parts[1] );

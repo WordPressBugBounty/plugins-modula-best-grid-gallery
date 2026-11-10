@@ -6,6 +6,7 @@ import {
 	getEnrichedFieldByGroupedPath,
 } from '../data/formSchema';
 import { isFieldVisible } from '../logic/fieldVisibility';
+import { fieldForGalleryLayout } from '../logic/layoutColumnFields';
 import { getModulaSettingsEditorConfig } from '../config/modulaSettingsEditorConfig';
 import { shouldHideFieldForPanelUpsell } from '../logic/proGateLock';
 
@@ -81,7 +82,7 @@ export function getNestedStackRows(frame, values) {
 			continue;
 		}
 		seen.add(hit.field.groupedPath);
-		fields.push(hit.field);
+		fields.push(fieldForGalleryLayout(hit.field, values));
 	}
 	const rows = dropOrphanHeadingRows(getDisplayBucketsForFields(fields));
 	return { rows };

@@ -5,7 +5,9 @@
  * On the adapter's default MCP route only, a valid Bearer token authenticates the request
  * as the Modula agent, so Agent_Access contains it like any agent credential, and limits it
  * to reads when its grant is read-only. On every other route a Bearer token authenticates
- * nothing. A 401 from the MCP route carries the challenge that leads clients to the
+ * nothing, and a token in another format is another plugin's to decide, on any route.
+ * A 401 from the MCP route that Modula refused, or that answers a request without
+ * credentials and without another challenge, carries the challenge that leads clients to the
  * protected-resource metadata.
  */
 namespace Modula\V2\Mcp;
@@ -47,6 +49,10 @@ final class Bearer_Auth {
 		if ( null === $token || ! self::is_oauth_route( Adapter::requested_route() ) ) {
 			return $result;
 		}
+		// Before the switch: another plugin's token is not Modula's to refuse, on or off.
+		if ( ! Oauth_Grants::has_token_format( $token ) ) {
+			return $result;
+		}
 		// While connections are off: a 403 with the reason, not a 401, so the client keeps its tokens.
 		$off = Connection_Switch::unmet();
 		if ( $off ) {
@@ -65,7 +71,7 @@ final class Bearer_Auth {
 	}
 
 	/**
-	 * Adds the RFC 9728 challenge to a 401 from the MCP route.
+	 * Adds the RFC 9728 challenge to a 401 from the MCP route that is Modula's to challenge.
 	 *
 	 * @param \WP_HTTP_Response $response Response to send.
 	 * @param \WP_REST_Server   $server   Server answering.
@@ -73,13 +79,43 @@ final class Bearer_Auth {
 	 * @return \WP_HTTP_Response
 	 */
 	public static function challenge( $response, $server, $request ) {
-		if ( 401 !== $response->get_status() || ! self::is_oauth_route( $request->get_route() ) ) {
+		if ( ! self::is_modulas_to_challenge( $response, $request->get_route() ) ) {
 			return $response;
 		}
-		$data  = $response->get_data();
-		$error = self::INVALID_TOKEN === ( $data['code'] ?? null ) ? 'error="invalid_token", ' : '';
+		$error = self::is_modula_refusal( $response ) ? 'error="invalid_token", ' : '';
 		$response->header( 'WWW-Authenticate', sprintf( 'Bearer %sresource_metadata="%s"', $error, Oauth::protected_resource_metadata_url() ) );
 		return $response;
+	}
+
+	/**
+	 * Other plugins share the MCP route: a 401 they answered, with their own challenge or for
+	 * credentials Modula did not refuse, must reach the client as they sent it, or the client
+	 * would sign in with Modula's OAuth server instead of theirs.
+	 *
+	 * @param \WP_HTTP_Response $response Response to send.
+	 * @param string            $route    Route answered.
+	 */
+	private static function is_modulas_to_challenge( $response, string $route ): bool {
+		if ( 401 !== $response->get_status() || ! self::is_oauth_route( $route ) || self::has_challenge( $response ) ) {
+			return false;
+		}
+		return self::is_modula_refusal( $response ) || ! self::has_credentials();
+	}
+
+	/** @param \WP_HTTP_Response $response Response to send. */
+	private static function has_challenge( $response ): bool {
+		return array_key_exists( 'www-authenticate', array_change_key_case( $response->get_headers() ) );
+	}
+
+	/** @param \WP_HTTP_Response $response Response to send. */
+	private static function is_modula_refusal( $response ): bool {
+		$data = $response->get_data();
+		return is_array( $data ) && self::INVALID_TOKEN === ( $data['code'] ?? null );
+	}
+
+	/** Any Authorization credential, usable by Modula or not. Under mod_php, Basic credentials can arrive only as PHP_AUTH_USER. */
+	private static function has_credentials(): bool {
+		return '' !== self::authorization_header() || isset( $_SERVER['PHP_AUTH_USER'] );
 	}
 
 	/** The MCP route, on a site that supports OAuth: the only place a Bearer token counts, even while connections are off. */
@@ -89,13 +125,16 @@ final class Bearer_Auth {
 
 	/** The Bearer credential, or null when the request carries none in a usable form. */
 	private static function bearer_token(): ?string {
-		$header = '';
+		return preg_match( '/^Bearer\s+([A-Za-z0-9._~-]+)$/i', self::authorization_header(), $matches ) ? $matches[1] : null;
+	}
+
+	/** The request's Authorization header, or an empty string without one. */
+	private static function authorization_header(): string {
 		foreach ( array( 'HTTP_AUTHORIZATION', 'REDIRECT_HTTP_AUTHORIZATION' ) as $key ) {
 			if ( isset( $_SERVER[ $key ] ) ) {
-				$header = sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) );
-				break;
+				return sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) );
 			}
 		}
-		return preg_match( '/^Bearer\s+([A-Za-z0-9._~-]+)$/i', $header, $matches ) ? $matches[1] : null;
+		return '';
 	}
 }

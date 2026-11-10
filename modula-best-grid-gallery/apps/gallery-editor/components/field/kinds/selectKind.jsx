@@ -5,6 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import { PlanBadge } from 'admin-ui';
 import { SelectMenuControl } from 'editor-shell';
+import { getLayoutPolicy } from 'gallery-shared/layoutRules';
 import { getModulaSettingsEditorConfig } from '../../../config/modulaSettingsEditorConfig';
 import { useOpenLiteUpsell } from '../../../context/LiteUpsellContext';
 import { useGallerySettingsFormBundle } from '../../../form/GallerySettingsFormContext';
@@ -105,11 +106,16 @@ function renderSelectControl({
 	let optionValues = Array.isArray(control.options)
 		? [...control.options]
 		: [];
-	if (
-		field?.groupedPath === 'layout.gridType' &&
-		(galleryType === 'uniform-grid' || galleryType === 'fit-grid')
-	) {
-		optionValues = optionValues.filter((o) => String(o) !== '1');
+	// Desktop columns: no option below the layout's minimum (Uniform grid, Fit grid, Bento: 2).
+	const minColumns =
+		field?.groupedPath === 'layout.gridType'
+			? getLayoutPolicy({ general: { type: galleryType } }).derived
+					.minColumns.desktop
+			: 0;
+	if (minColumns > 1) {
+		optionValues = optionValues.filter(
+			(o) => parseInt(o, 10) >= minColumns
+		);
 	}
 	const opts = optionValues.map((o, i) => {
 		const raw = Array.isArray(labels)
@@ -171,12 +177,8 @@ function renderSelectControl({
 	}
 
 	let v = isNil(value) || value === '' ? '' : String(value);
-	if (
-		field?.groupedPath === 'layout.gridType' &&
-		(galleryType === 'uniform-grid' || galleryType === 'fit-grid') &&
-		v === '1'
-	) {
-		v = '2';
+	if (minColumns > 1 && v !== '' && parseInt(v, 10) < minColumns) {
+		v = String(minColumns);
 	}
 	if (
 		v === '' &&

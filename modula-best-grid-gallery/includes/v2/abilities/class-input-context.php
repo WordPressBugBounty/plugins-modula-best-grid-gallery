@@ -2,6 +2,8 @@
 /** Exact JSON collection types across native REST, official MCP and batch dispatch. */
 namespace Modula\V2\Abilities;
 
+use Modula\V2\Mcp\Adapter as Mcp_Adapter;
+
 defined( 'ABSPATH' ) || exit;
 
 final class Input_Context {
@@ -44,7 +46,7 @@ final class Input_Context {
 
 	/** The adapter flattens STDIO arguments before this hook, so geometry fails closed. */
 	public static function require_exact_authoring_input( $arguments, $tool_name, $tool ) {
-		if ( ! is_array( $arguments ) ) {
+		if ( ! Mcp_Adapter::takes_part() || ! is_array( $arguments ) ) {
 			return $arguments;
 		}
 		$context = method_exists( $tool, 'get_observability_context' ) ? $tool->get_observability_context() : array();

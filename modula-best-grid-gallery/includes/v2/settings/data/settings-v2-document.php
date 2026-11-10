@@ -45,6 +45,7 @@ return array(
 					12 => 'showcase',
 					13 => 'template',
 					14 => 'freeform',
+					15 => 'bento',
 				),
 				'default'                 => 'grid',
 				'editorLabel'             => 'Type',
@@ -60,6 +61,7 @@ return array(
 					'showcase'         => 'Showcase',
 					'template'         => 'Template',
 					'freeform'         => 'Freeform',
+					'bento'            => 'Bento',
 					'video'            => 'Video gallery',
 					'bnb'              => 'BnB (hero + grid)',
 					'justified-grid'   => 'Justified grid',
@@ -93,8 +95,9 @@ return array(
 							1 => 'polaroid',
 							2 => 'parallax-masonry',
 							3 => 'bnb',
-							4 => 'template',
-							5 => 'freeform',
+							4 => 'bento',
+							5 => 'template',
+							6 => 'freeform',
 						),
 					),
 					array(
@@ -118,6 +121,7 @@ return array(
 						2 => 'story',
 						3 => 'showcase',
 						4 => 'freeform',
+						5 => 'bento',
 					),
 					'extensionBased' =>
 					array(
@@ -130,11 +134,21 @@ return array(
 							0 => 'video',
 						),
 					),
+					/*
+					 * Base members a visitor sees as the default type (Masonry) while Compatible Pro
+					 * is absent; the other base types keep rendering from Lite's shared layouts.
+					 * Read by Modern_Gallery::fallback_to_default_types().
+					 */
+					'fallbackToDefaultWithoutPro' =>
+					array(
+						0 => 'freeform',
+						1 => 'bento',
+					),
 				),
 				'editorGalleryTypeUpsell' =>
 				array(
-					'needsProMessage'         => 'Modula Pro unlocks additional gallery types—including Showcase, Story, Parallax masonry, BnB, Slider, and Video—so you can match layout to your content instead of staying on grid-only layouts.',
-					'needsPlanUpgradeMessage' => 'Your current subscription does not include every gallery type. Upgrading unlocks Slider and Video (add-ons), and full Pro coverage for Showcase, Story, Parallax masonry, BnB, and the rest of the premium layouts.',
+					'needsProMessage'         => 'Modula Pro unlocks additional gallery types—including Showcase, Story, Parallax masonry, BnB, Bento, Slider, and Video—so you can match layout to your content instead of staying on grid-only layouts.',
+					'needsPlanUpgradeMessage' => 'Your current subscription does not include every gallery type. Upgrading unlocks Slider and Video (add-ons), and full Pro coverage for Showcase, Story, Parallax masonry, BnB, Bento, and the rest of the premium layouts.',
 				),
 			),
 			'uploadPosition' =>

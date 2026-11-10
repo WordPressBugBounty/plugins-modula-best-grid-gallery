@@ -9,12 +9,19 @@ import { DEFAULT_GALLERY_TYPE } from '../constants/galleryLayoutDefaults';
 /**
  * Resolve the component type shared by bootstrap loading and rendering.
  *
- * @param {{ type?: string, grid_type?: string }} config
+ * `fallbackToDefaultTypes` comes from the server bootstrap: the Pro types the settings
+ * document marks to render as the default type while Compatible Pro is absent (Freeform,
+ * Bento). A config without it (e.g. Pro's album shells) keeps its type.
+ *
+ * @param {{ type?: string, grid_type?: string, fallbackToDefaultTypes?: string[] }} config
  * @return {string} Available component type.
  */
 export function resolveGalleryLayoutType(config) {
-	if (config?.type === 'freeform' && config.freeformAvailable === false) {
-		return 'grid';
+	if (
+		Array.isArray(config?.fallbackToDefaultTypes) &&
+		config.fallbackToDefaultTypes.includes(config.type)
+	) {
+		return DEFAULT_GALLERY_TYPE;
 	}
 	const type = config?.type || DEFAULT_GALLERY_TYPE;
 	return type === 'grid' && config?.grid_type === 'automatic'
@@ -35,6 +42,7 @@ export const GALLERY_LAYOUT_TYPES = Object.freeze([
 	'fit-grid',
 	'video',
 	'bnb',
+	'bento',
 	'parallax-masonry',
 	'polaroid',
 	'showcase',

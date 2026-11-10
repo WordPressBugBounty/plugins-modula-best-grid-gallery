@@ -4,10 +4,32 @@
  * @package
  */
 
-import { getLayoutPolicy } from 'gallery-shared/preview';
+import {
+	GALLERY_TYPE_CHOICE_STAMPS,
+	getLayoutPolicy,
+} from 'gallery-shared/preview';
 
 /** v2 style.shadowColor schema default — no tile shadow. */
 const STYLE_DEFAULT_SHADOW_COLOR = '#ffffff';
+
+/**
+ * Writes the chosen type's stamp (e.g. Bento's columns, gutter and corners)
+ * over the current values. A type without a stamp writes nothing.
+ *
+ * @param {import('@tanstack/react-form').ReactFormExtendedApi} form
+ * @param {string}                                              prev Previous `general.type`.
+ * @param {string}                                              next Chosen `general.type`.
+ * @return {void}
+ */
+function applyGalleryTypeChoiceStamp(form, prev, next) {
+	const stamp = GALLERY_TYPE_CHOICE_STAMPS[next];
+	if (!stamp || prev === next) {
+		return;
+	}
+	for (const [path, value] of Object.entries(stamp)) {
+		form.setFieldValue(path, value);
+	}
+}
 
 /**
  * @param {unknown} color
@@ -70,6 +92,8 @@ export function applyGalleryTypeSideEffects(form, prevType, nextType) {
 			form.setFieldValue('style.shadowColor', STYLE_DEFAULT_SHADOW_COLOR);
 		}
 	}
+
+	applyGalleryTypeChoiceStamp(form, prev, next);
 
 	const nextPolicy = getLayoutPolicy({ general: { type: next } });
 

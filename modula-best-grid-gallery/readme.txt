@@ -4,7 +4,7 @@ Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPres
 Requires at least: 5.3
 Tested up to: 7.1
 Requires PHP: 5.6
-Stable tag: 3.0.18
+Stable tag: 3.0.19
 
 License: GNU General Public License v3.0 or later  
 
@@ -237,6 +237,10 @@ To install it by hand, go to Plugins > Add New > Upload Plugin and choose the pl
 23. PRO: video galleries with self-hosted videos or links from YouTube and Vimeo.
 
 == Changelog ==
+
+= 3.0.19 - 09.11.2026 =
+Added: Support for the Bento gallery type in Modula PRO.
+Fixed: Changing gallery settings through the AI connection accepts whole numbers for number settings, such as the watermark margin.
 
 = 3.0.18 - 04.11.2026 =
 Added: Creative galleries have a Tile engine setting. The new Mosaic engine lays photos out in rows at their own proportions, like a tiled gallery, with nothing cropped and the gallery growing with its photos; new Creative galleries start on it, existing ones keep their look on Classic tiles, and you can switch either way.

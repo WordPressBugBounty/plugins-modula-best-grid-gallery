@@ -72,7 +72,8 @@ export function resolveGalleryItemLoadedFileDimensions(itemData, config) {
  *
  * Showcase, Template, Story and Video rows load the full file without
  * dimensions, and the editor keeps those rows after a type switch. The
- * editor-only `fullImageSize` (the attachment's original) then gives the
+ * `fullImageSize` of editor preview (and Bento) items, the attachment's
+ * original, then gives the
  * proportions; without them an `img[sizes=auto]` lays out at Chrome's
  * 300×150 placeholder.
  *

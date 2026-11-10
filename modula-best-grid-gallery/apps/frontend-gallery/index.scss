@@ -1301,6 +1301,45 @@
 	}
 }
 
+/* Bento layout: square cells, tiles on explicit grid lines from BentoLayout.
+ * The host is the size container, so a row is exactly one column wide
+ * (100cqw minus the gaps, over the tracks) from first paint, without JS
+ * measurement. Tracks and the summed gaps of a row come inline from the
+ * layout. */
+.modula-bento-host {
+	container-type: inline-size;
+	width: 100%;
+	min-width: 0;
+}
+
+.modula-bento-pages {
+	width: 100%;
+	min-width: 0;
+}
+
+.modula-bento {
+	--modula-bento-cells-width: calc(100cqw - var(--modula-bento-gaps));
+	display: grid;
+	grid-auto-rows: calc(var(--modula-bento-cells-width) / var(--modula-bento-tracks));
+	grid-auto-flow: row;
+	width: 100%;
+
+	.modula-bento-tile {
+		position: relative;
+		min-width: 0;
+		min-height: 0;
+	}
+
+	/* No container units: tiles keep their cell proportions (gaps ignored). */
+	@supports not (width: 1cqw) {
+		grid-auto-rows: auto;
+
+		.modula-bento-tile {
+			aspect-ratio: var(--modula-bento-col-span) / var(--modula-bento-row-span);
+		}
+	}
+}
+
 /*
  * Legacy modula.css forces html body .modula .modula-items .modula-item { position: absolute }.
  * React masonry columns need normal flow; without this, every tile stacks at (0,0).

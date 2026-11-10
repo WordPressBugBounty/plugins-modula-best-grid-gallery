@@ -24,6 +24,33 @@ import {
 	POLAROID_DEFAULT_SHADOW_SIZE,
 } from './polaroidFrameShadow';
 import { resolveUniformGridTileAspect } from './uniformGridTileAspect';
+import { BENTO_MIN_COLUMNS } from './bentoLayout';
+import { UNIFORM_GRID_MIN_COLUMNS } from './uniformGridColumns';
+
+/**
+ * Fewest columns a layout draws: on desktop (`layout.gridType`) and on tablet
+ * and mobile (`responsive.*Columns`). Uniform grid and Fit grid clamp only the
+ * desktop count (EqualCellGridLayout draws one column on a phone); Bento's
+ * tracks are at least two on every breakpoint (normalizeBentoTracks).
+ */
+const UNIFORM_MIN_COLUMNS = Object.freeze({
+	desktop: UNIFORM_GRID_MIN_COLUMNS,
+	responsive: 1,
+});
+const MIN_COLUMNS_BY_TYPE = new Map([
+	['uniform-grid', UNIFORM_MIN_COLUMNS],
+	['fit-grid', UNIFORM_MIN_COLUMNS],
+	[
+		'bento',
+		Object.freeze({
+			desktop: BENTO_MIN_COLUMNS,
+			responsive: BENTO_MIN_COLUMNS,
+		}),
+	],
+]);
+
+/** Every other layout can draw a single column. */
+const DEFAULT_MIN_COLUMNS = Object.freeze({ desktop: 1, responsive: 1 });
 
 /**
  * @param {unknown} groupedSettings Grouped v2 settings.
@@ -85,6 +112,7 @@ function resolveTileAspectCss(type, groupedSettings) {
  *     fitGridAlign: string,
  *     polaroidShadowSize: number,
  *     polaroidShadowColor: string,
+ *     minColumns: { desktop: number, responsive: number },
  *   },
  *   clampWidth: (raw: unknown) => unknown,
  * }} Layout policy for the gallery editor.
@@ -119,6 +147,7 @@ export function getLayoutPolicy(groupedSettings) {
 			fitGridAlign: normalizeFitGridImageAlign(layout.fitGridImageAlign),
 			polaroidShadowSize: POLAROID_DEFAULT_SHADOW_SIZE,
 			polaroidShadowColor: POLAROID_DEFAULT_SHADOW_COLOR,
+			minColumns: MIN_COLUMNS_BY_TYPE.get(type) ?? DEFAULT_MIN_COLUMNS,
 		},
 		clampWidth(raw) {
 			return clampMasonryGalleryWidth(raw, type);

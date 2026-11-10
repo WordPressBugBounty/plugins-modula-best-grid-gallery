@@ -2,6 +2,8 @@
 /** Bounded attachment pixels and revision-bound visual inspection of shared attachments. */
 namespace Modula\V2\Abilities;
 
+use Modula\V2\Mcp\Adapter as Mcp_Adapter;
+
 defined( 'ABSPATH' ) || exit;
 
 final class Attachment_Image {
@@ -90,7 +92,7 @@ final class Attachment_Image {
 	}
 
 	public static function mcp_result( $result, $args, $name, $tool ) {
-		if ( 'modula-read-attachment-image' !== $name || self::IMAGE !== ( $tool->get_adapter_meta()['ability'] ?? '' ) || is_wp_error( $result ) || ! is_array( $result ) || ! isset( $result['data'], $result['visual_revision'] ) ) {
+		if ( ! Mcp_Adapter::takes_part() || 'modula-read-attachment-image' !== $name || self::IMAGE !== ( $tool->get_adapter_meta()['ability'] ?? '' ) || is_wp_error( $result ) || ! is_array( $result ) || ! isset( $result['data'], $result['visual_revision'] ) ) {
 			return $result;
 		}
 		return array(

@@ -161,6 +161,25 @@ final class Modern_Gallery {
 	}
 
 	/**
+	 * Gallery types this site renders as the default type (Masonry): the base Pro types the
+	 * settings document lists in `general.type` proEnhancements.fallbackToDefaultWithoutPro,
+	 * while Compatible Pro is absent. The visitor runtime reads it as `fallbackToDefaultTypes`
+	 * (resolveGalleryLayoutType in apps/gallery-shared/layouts/layoutTypes.js).
+	 *
+	 * @return array<int, string> Type slugs; empty with Compatible Pro.
+	 */
+	public static function fallback_to_default_types(): array {
+		if ( modula_is_compatible_pro() ) {
+			return array();
+		}
+		$gates    = \Modula\V2\Settings\Settings_Schema_Document::get_settings_tree_raw()['general']['type']['proEnhancements'] ?? array();
+		$base     = is_array( $gates['base'] ?? null ) ? $gates['base'] : array();
+		$fallback = is_array( $gates['fallbackToDefaultWithoutPro'] ?? null ) ? $gates['fallbackToDefaultWithoutPro'] : array();
+		// Only a Pro-gated type can fall back; a free type never loses its layout.
+		return array_values( array_intersect( $fallback, $base ) );
+	}
+
+	/**
 	 * Let Pro / extensions skip slicing the grid to maxImagesCount when modern catalog handles pages.
 	 *
 	 * @param bool  $skip      Incoming (unused).

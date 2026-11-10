@@ -8,11 +8,14 @@ import { resolveCompactCaptionMinSize } from './compactCaptionTile';
 
 /**
  * Gallery types that manage captions in their own layout (not below-image placement).
+ * Bento: a tile is a fixed number of square cells, so a caption below the
+ * image would either break the closed grid or shrink the photo.
  */
 export const GALLERY_TYPES_WITHOUT_BELOW_IMAGE_CAPTIONS = [
 	'story',
 	'bnb',
 	'parallax-masonry',
+	'bento',
 ];
 
 /**

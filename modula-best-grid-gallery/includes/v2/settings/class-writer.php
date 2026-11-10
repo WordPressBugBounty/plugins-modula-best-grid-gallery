@@ -84,9 +84,38 @@ class Writer {
 				if ( 'filters' === $group && 'filters' === $key && array() === $value ) {
 					continue;
 				}
-				if ( ! array_key_exists( $key, $sanitized[ $group ] ?? array() ) || $sanitized[ $group ][ $key ] !== $value ) {
+				if ( ! array_key_exists( $key, $sanitized[ $group ] ?? array() ) || ! self::is_canonical_value( $sanitized[ $group ][ $key ], $value ) ) {
 					return new \WP_Error( 'modula_noncanonical_setting', 'Requested values must use the canonical setting form: ' . $group . '.' . $key );
 				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Whether a requested value already is what the sanitizer returns for it.
+	 *
+	 * JSON has one number kind: a `number` setting the sanitizer returns as the
+	 * float 2.0 arrives from a client, and reads back from the stored document,
+	 * as the integer 2. That pair is one value. Everything else must be identical,
+	 * so an `integer` setting still refuses a float.
+	 *
+	 * @param mixed $sanitized Sanitizer output.
+	 * @param mixed $value     Requested value.
+	 */
+	private static function is_canonical_value( $sanitized, $value ): bool {
+		if ( is_float( $sanitized ) && is_int( $value ) ) {
+			return (float) $value === $sanitized;
+		}
+		if ( ! is_array( $sanitized ) || ! is_array( $value ) ) {
+			return $sanitized === $value;
+		}
+		if ( array_keys( $sanitized ) !== array_keys( $value ) ) {
+			return false;
+		}
+		foreach ( $sanitized as $key => $child ) {
+			if ( ! self::is_canonical_value( $child, $value[ $key ] ) ) {
+				return false;
 			}
 		}
 		return true;

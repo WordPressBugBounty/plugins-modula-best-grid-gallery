@@ -9,27 +9,74 @@ final class Adapter {
 	public const SLUG       = 'mcp-adapter';
 	public const SERVER_ID  = 'mcp-adapter-default-server';
 	public const MIN_WP     = '6.9';
-	public const PLUGIN_URL = 'https://wordpress.org/plugins/mcp-adapter/';
+	/** The tools list filter gets the protocol schema Modula projects tools with from this version. */
+	public const MIN_VERSION = '0.7.0';
+	public const PLUGIN_URL  = 'https://wordpress.org/plugins/mcp-adapter/';
 
 	public const MISSING        = 'missing';
 	public const INACTIVE       = 'inactive';
 	public const ACTIVE         = 'active';
+	public const TOO_OLD        = 'too-old';
 	public const UNSUPPORTED_WP = 'unsupported-wp';
+
+	/** Also loaded from copies other plugins bundle, under the same namespace and at their own version. */
+	private const CORE_CLASS = '\WP\MCP\Core\McpAdapter';
 
 	/** The Abilities API arrived in WordPress 6.9; the adapter cannot run without it. */
 	public static function state(): string {
 		if ( ! function_exists( 'wp_register_ability' ) ) {
 			return self::UNSUPPORTED_WP;
 		}
-		if ( class_exists( '\WP\MCP\Core\McpAdapter' ) ) {
-			return self::ACTIVE;
+		if ( class_exists( self::CORE_CLASS ) ) {
+			return self::takes_part() ? self::ACTIVE : self::TOO_OLD;
 		}
 		return self::plugin_file() ? self::INACTIVE : self::MISSING;
 	}
 
-	/** @return \WP\MCP\Core\McpServer|null */
+	/**
+	 * Whether Modula takes part in the adapter's requests. Adapter hooks ask this when they run,
+	 * not at boot: a copy bundled by another plugin can load after Modula.
+	 */
+	public static function takes_part(): bool {
+		return self::is_supported_version( self::version() );
+	}
+
+	/** Whether an adapter of too old or unreadable a version is loaded. */
+	public static function is_too_old(): bool {
+		return class_exists( self::CORE_CLASS ) && ! self::takes_part();
+	}
+
+	/** The loaded adapter's version, or null when none is loaded or it does not say. */
+	public static function version(): ?string {
+		$constant = self::CORE_CLASS . '::VERSION';
+		if ( ! class_exists( self::CORE_CLASS ) || ! defined( $constant ) ) {
+			return null;
+		}
+		$version = constant( $constant );
+		return is_string( $version ) ? $version : null;
+	}
+
+	/** An unreadable version counts as too old. */
+	public static function is_supported_version( ?string $version ): bool {
+		return null !== $version && version_compare( $version, self::MIN_VERSION, '>=' );
+	}
+
+	/** Why Modula stays out of a loaded adapter. */
+	public static function too_old_error(): \WP_Error {
+		return new \WP_Error(
+			'modula_mcp_adapter_too_old',
+			sprintf(
+				/* translators: %s: minimum MCP Adapter version */
+				__( 'MCP connections need MCP Adapter %s or newer.', 'modula-best-grid-gallery' ),
+				self::MIN_VERSION
+			),
+			array( 'status' => 409 )
+		);
+	}
+
+	/** @return \WP\MCP\Core\McpServer|null Null also on a too-old adapter, whose route Modula leaves alone. */
 	public static function default_server() {
-		if ( ! class_exists( '\WP\MCP\Core\McpAdapter' ) ) {
+		if ( ! self::takes_part() ) {
 			return null;
 		}
 		return \WP\MCP\Core\McpAdapter::instance()->get_server( self::SERVER_ID );
@@ -125,8 +172,12 @@ final class Adapter {
 
 	/** @return true|\WP_Error */
 	public static function activate() {
-		if ( self::ACTIVE === self::state() ) {
+		$state = self::state();
+		if ( self::ACTIVE === $state ) {
 			return true;
+		}
+		if ( self::TOO_OLD === $state ) {
+			return self::too_old_error();
 		}
 		$file = self::plugin_file();
 		if ( ! $file ) {

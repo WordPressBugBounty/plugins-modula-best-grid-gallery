@@ -554,15 +554,15 @@ class Shortcode {
 		$items = $this->build_converted_items_list( $gallery_id, $flat, $images_for_items, $images, $context );
 
 		$metadata = array(
-			'galleryId'            => $gallery_id,
-			'galleryTitle'         => $this->resolve_bootstrap_gallery_title( $gallery_id ),
-			'hoverCustomCursorUrl' => $this->resolve_hover_custom_cursor_url( $flat, $grouped ),
-			'outputSchema'         => \Modula\V2\Modern_Gallery::OUTPUT_SCHEMA_VERSION,
-			'catalogPaged'         => $effective_catalog,
-			'imageSizeDimensions'  => \Modula_Helper::get_image_sizes( false ),
-			'zoomExtensionActive'  => \Modula\V2\Modern_Gallery::is_zoom_extension_active(),
-			'freeformAvailable'    => modula_is_compatible_pro(),
-			'blockAlign'           => is_string( $settings['align'] ?? null ) ? (string) $settings['align'] : '',
+			'galleryId'              => $gallery_id,
+			'galleryTitle'           => $this->resolve_bootstrap_gallery_title( $gallery_id ),
+			'hoverCustomCursorUrl'   => $this->resolve_hover_custom_cursor_url( $flat, $grouped ),
+			'outputSchema'           => \Modula\V2\Modern_Gallery::OUTPUT_SCHEMA_VERSION,
+			'catalogPaged'           => $effective_catalog,
+			'imageSizeDimensions'    => \Modula_Helper::get_image_sizes( false ),
+			'zoomExtensionActive'    => \Modula\V2\Modern_Gallery::is_zoom_extension_active(),
+			'fallbackToDefaultTypes' => \Modula\V2\Modern_Gallery::fallback_to_default_types(),
+			'blockAlign'             => is_string( $settings['align'] ?? null ) ? (string) $settings['align'] : '',
 		);
 		if ( ! $editor_preview && null !== $shuffle_seed && (int) $shuffle_seed > 0 ) {
 			$metadata['shuffleSeed'] = (int) $shuffle_seed;
@@ -839,24 +839,38 @@ class Shortcode {
 		if ( $skip_image_guardian ) {
 			remove_filter( 'modula_apply_image_guardian_item_data', '__return_false' );
 			$items = $this->apply_settings_editor_media_cache_bust( $items, $flat );
-			$items = $this->add_settings_editor_full_size( $items );
 		}
 
-		return $items;
+		return $this->with_full_image_size( $items, $flat, $context );
 	}
 
 	/**
-	 * Give each preview item its attachment's Full size (`fullImageSize`).
+	 * Give the items that need it their attachment's Full size (`fullImageSize`).
 	 *
-	 * A preview item carries the file the saved settings serve. The canvas sizes
-	 * a slider slide from the Image file size being edited, so it needs the
-	 * size every WordPress derivative comes from (editor-only, stripped before
-	 * persistence).
+	 * An item carries the file the saved settings serve. Settings-editor preview:
+	 * the canvas sizes a slider slide from the Image file size being edited.
+	 * Bento (visitor too): a tile's shape follows the photo's proportions, and the
+	 * served file may be cropped to the grid image size. Both need the size every
+	 * WordPress derivative comes from. Stripped before persistence
+	 * (Adapter::strip_bootstrap_only_row_keys()).
+	 *
+	 * @param array<int, mixed>    $items   Bootstrap items.
+	 * @param array<string, mixed> $flat    Flat gallery settings.
+	 * @param string               $context `public` or `settings_editor`.
+	 * @return array<int, mixed>
+	 */
+	private function with_full_image_size( array $items, array $flat, $context ) {
+		$needs_full_size = 'settings_editor' === $context || 'bento' === ( $flat['type'] ?? '' );
+		return $needs_full_size ? $this->add_full_image_size( $items ) : $items;
+	}
+
+	/**
+	 * Set `fullImageSize` from attachment metadata on every item that has an attachment.
 	 *
 	 * @param array<int, mixed> $items Bootstrap items.
 	 * @return array<int, mixed>
 	 */
-	private function add_settings_editor_full_size( array $items ) {
+	private function add_full_image_size( array $items ) {
 		foreach ( $items as $index => $item ) {
 			$attachment_id = is_array( $item ) && isset( $item['id'] ) ? absint( $item['id'] ) : 0;
 			if ( $attachment_id < 1 ) {
@@ -1254,7 +1268,10 @@ class Shortcode {
 	}
 
 	/**
-	 * Whether infinite scroll is allowed for this gallery type.
+	 * Whether infinite scroll is allowed for this gallery type. Every type that
+	 * grows with appended items allows it (Bento included); only fixed-height
+	 * packery layouts refuse it. Mirrors isInfiniteScrollSupportedForGalleryType()
+	 * in galleryLayoutEditorSupport.js.
 	 *
 	 * @param string               $type    Gallery type slug.
 	 * @param array<string, mixed> $grouped Grouped v2 settings.

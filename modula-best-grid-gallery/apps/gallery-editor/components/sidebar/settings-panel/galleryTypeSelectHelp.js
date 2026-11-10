@@ -51,6 +51,10 @@ const HELP_BY_TYPE = {
 		'BnB highlights a hero image with a supporting grid — common for listings and stays.',
 		'modula-best-grid-gallery'
 	),
+	bento: __(
+		'Bento sizes every tile for you: wide, tall or small by the photo’s shape, with a large tile at a regular rhythm. Reorder to change the layout.',
+		'modula-best-grid-gallery'
+	),
 	'parallax-masonry': __(
 		'Parallax masonry adds depth as visitors scroll. Motion presets live under Gallery layout.',
 		'modula-best-grid-gallery'

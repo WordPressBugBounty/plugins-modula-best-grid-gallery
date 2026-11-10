@@ -66,7 +66,8 @@ export function isResponsiveSettingsSupportedForGalleryType(type) {
 /**
  * Whether Infinite scroll is valid for this gallery type / polaroid mode.
  * Fixed-height packery (creative on Classic tiles, polaroid with Uniform size
- * off) cannot grow with appends; Creative on Mosaic can.
+ * off) cannot grow with appends; Creative on Mosaic and every other type
+ * (Bento included) can. Mirrored by Shortcode::is_infinite_scroll_allowed_for_type().
  *
  * @param {string|undefined|null} type      `general.type` / config.type
  * @param {Object|null|undefined} [context] Grouped settings, flat config, or `{ polaroid: { uniformSize } }`.

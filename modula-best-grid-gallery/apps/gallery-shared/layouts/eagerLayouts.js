@@ -17,6 +17,7 @@ import FitGridLayout from './FitGridLayout';
 import UniformGridLayout from './UniformGridLayout';
 import VideoLayout from './VideoLayout';
 import BnbLayout from './BnbLayout';
+import BentoLayout from './BentoLayout';
 import ParallaxMasonryLayout from './ParallaxMasonryLayout';
 import PolaroidGalleryLayout from './PolaroidGalleryLayout';
 import ShowcaseLayout from './ShowcaseLayout';
@@ -36,6 +37,7 @@ const eagerByType = {
 	'fit-grid': FitGridLayout,
 	video: VideoLayout,
 	bnb: BnbLayout,
+	bento: BentoLayout,
 	'parallax-masonry': ParallaxMasonryLayout,
 	polaroid: PolaroidGalleryLayout,
 	showcase: ShowcaseLayout,

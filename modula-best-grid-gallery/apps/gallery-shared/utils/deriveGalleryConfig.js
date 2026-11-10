@@ -49,7 +49,7 @@ export function deriveGalleryConfig(groupedSettings, extras = {}) {
 	if (hasGroupedSettings(groupedSettings)) {
 		const runtimeType = resolveGalleryLayoutType({
 			type: groupedSettings.general?.type,
-			freeformAvailable: extras.freeformAvailable,
+			fallbackToDefaultTypes: extras.fallbackToDefaultTypes,
 		});
 		const runtimeSettings = {
 			...groupedSettings,
@@ -88,8 +88,8 @@ export function deriveGalleryConfig(groupedSettings, extras = {}) {
 		config.imageLicensingExtensionActive =
 			extras.imageLicensingExtensionActive;
 	}
-	if (typeof extras.freeformAvailable === 'boolean') {
-		config.freeformAvailable = extras.freeformAvailable;
+	if (Array.isArray(extras.fallbackToDefaultTypes)) {
+		config.fallbackToDefaultTypes = extras.fallbackToDefaultTypes;
 	}
 	if (extras.licensingGlobal && typeof extras.licensingGlobal === 'object') {
 		config.licensingGlobal = extras.licensingGlobal;
@@ -126,7 +126,7 @@ export function galleryConfigExtrasFromPreloadData(data, galleryId) {
 		legacyJsConfig: data?.legacyJsConfig || {},
 		galleryComments: metadata.galleryComments,
 		zoomExtensionActive: metadata.zoomExtensionActive,
-		freeformAvailable: metadata.freeformAvailable,
+		fallbackToDefaultTypes: metadata.fallbackToDefaultTypes,
 		previewViewport: data?.previewViewport,
 		imageSizeDimensions:
 			metadata.imageSizeDimensions &&

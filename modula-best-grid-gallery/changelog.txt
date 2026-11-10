@@ -1,3 +1,7 @@
+= 3.0.19 - 09.11.2026 =
+Added: Support for the Bento gallery type in Modula PRO.
+Fixed: Changing gallery settings through the AI connection accepts whole numbers for number settings, such as the watermark margin.
+
 = 3.0.18 - 04.11.2026 =
 Added: Creative galleries have a Tile engine setting. The new Mosaic engine lays photos out in rows at their own proportions, like a tiled gallery, with nothing cropped and the gallery growing with its photos; new Creative galleries start on it, existing ones keep their look on Classic tiles, and you can switch either way.
 Fixed: In the new gallery editor, Select multiple shows the whole outline around each selected image, in the selection colour.

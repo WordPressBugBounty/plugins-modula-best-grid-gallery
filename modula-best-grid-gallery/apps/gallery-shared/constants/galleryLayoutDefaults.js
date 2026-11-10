@@ -11,6 +11,26 @@ export const DEFAULT_GALLERY_TYPE = 'grid';
 export const DEFAULT_MASONRY_GRID_TYPE = '3';
 
 /**
+ * Settings written over the gallery's current values when the author chooses
+ * a gallery type (grouped path → value, stored types). Leaving the type
+ * writes nothing back. Bento: 4 / 3 / 2 columns, a 12px gutter on every
+ * breakpoint and 16px corners (ADR 0058).
+ *
+ * @type {Readonly<Record<string, Readonly<Record<string, string|number>>>>}
+ */
+export const GALLERY_TYPE_CHOICE_STAMPS = Object.freeze({
+	bento: Object.freeze({
+		'layout.gridType': '4',
+		'responsive.tabletColumns': 3,
+		'responsive.mobileColumns': 2,
+		'layout.gutter': 12,
+		'layout.tabletGutter': 12,
+		'layout.mobileGutter': 12,
+		'style.borderRadius': 16,
+	}),
+});
+
+/**
  * Layouts where the filter bar must not slice items or render visitor chrome.
  *
  * @type {ReadonlySet<string>}

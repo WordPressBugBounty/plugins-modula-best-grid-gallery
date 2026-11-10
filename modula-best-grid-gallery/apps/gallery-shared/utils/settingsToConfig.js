@@ -47,6 +47,7 @@ import {
 import { normalizeGalleryAlignment } from './resolveGalleryAlignmentCss';
 import { resolveVideoMaxHeightCss } from './resolveVideoMaxHeightCss';
 import { coerceLightboxClickMode } from './resolveGalleryItemLink';
+import { normalizeBentoTracks } from './bentoLayout';
 
 /**
  * @param {unknown} openOn
@@ -61,6 +62,25 @@ function resolveLightboxDevices(openOn) {
 		return mode;
 	}
 	return 'both';
+}
+
+/**
+ * Bento grid tracks per breakpoint: the existing column settings, at least
+ * two each. An unreadable desktop value takes the column setting's default.
+ *
+ * @param {Object} layout     Grouped `layout` settings.
+ * @param {Object} responsive Grouped `responsive` settings.
+ * @return {{ columns: number, tabletColumns: number, mobileColumns: number }} Tracks for desktop, tablet and mobile.
+ */
+function bentoTracks(layout, responsive) {
+	const desktop = parseInt(layout.gridType, 10);
+	return {
+		columns: normalizeBentoTracks(
+			Number.isFinite(desktop) ? desktop : DEFAULT_MASONRY_GRID_TYPE
+		),
+		tabletColumns: normalizeBentoTracks(responsive.tabletColumns ?? 2),
+		mobileColumns: normalizeBentoTracks(responsive.mobileColumns ?? 1),
+	};
 }
 
 /**
@@ -415,6 +435,8 @@ export function settingsToConfig(settings, opts = {}) {
 					: 0,
 		tabletColumns: parseInt(responsive.tabletColumns ?? 2, 10),
 		mobileColumns: parseInt(responsive.mobileColumns ?? 1, 10),
+		// Bento's tracks replace the three column keys above.
+		...(type === 'bento' ? bentoTracks(layout, responsive) : {}),
 		treatAsTabletUnder: parseInt(responsive.treatAsTabletUnder ?? 1024, 10),
 		treatAsPhoneUnder: parseInt(responsive.treatAsPhoneUnder ?? 600, 10),
 		height: h0,

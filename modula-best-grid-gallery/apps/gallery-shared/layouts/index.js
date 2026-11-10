@@ -20,6 +20,7 @@ const lazyByType = {
 	'fit-grid': () => import('./FitGridLayout'),
 	video: () => import('./VideoLayout'),
 	bnb: () => import('./BnbLayout'),
+	bento: () => import('./BentoLayout'),
 	'parallax-masonry': () => import('./ParallaxMasonryLayout'),
 	polaroid: () => import('./PolaroidGalleryLayout'),
 	showcase: () => import('./ShowcaseLayout'),

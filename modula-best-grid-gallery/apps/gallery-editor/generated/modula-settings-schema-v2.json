@@ -23,7 +23,8 @@
                     "fit-grid",
                     "showcase",
                     "template",
-                    "freeform"
+                    "freeform",
+                    "bento"
                 ],
                 "default": "grid"
             },

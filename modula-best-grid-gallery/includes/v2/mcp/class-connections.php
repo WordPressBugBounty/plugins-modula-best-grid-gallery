@@ -416,6 +416,8 @@ final class Connections {
 		switch ( Adapter::state() ) {
 			case Adapter::ACTIVE:
 				return null;
+			case Adapter::TOO_OLD:
+				return Adapter::too_old_error();
 			case Adapter::INACTIVE:
 				return new \WP_Error( 'modula_mcp_adapter_inactive', __( 'Activate the MCP Adapter plugin first.', 'modula-best-grid-gallery' ), array( 'status' => 409 ) );
 			case Adapter::MISSING:

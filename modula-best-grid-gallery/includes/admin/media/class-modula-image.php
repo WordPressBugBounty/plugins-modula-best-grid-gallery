@@ -25,9 +25,8 @@ class Modula_Image {
 				'url' => $image_full[0],
 			);
 
-			$gallery_types = array( 'creative-gallery', 'custom-grid', 'grid', 'justified-grid', 'parallax-masonry', 'uniform-grid', 'fit-grid', 'polaroid' );
-
-			if ( in_array( $type, $gallery_types, true ) ) {
+			// One list with the item processor's resize step (both always loaded by Modula_Dependency_Loader::load_all()).
+			if ( in_array( $type, Modula_Item_Data_Processor::RESIZED_GALLERY_TYPES, true ) ) {
 				if ( is_array( $sizes ) && ! empty( $sizes ) ) {
 					$size_width  = isset( $sizes['width'] ) ? $sizes['width'] : 0;
 					$size_height = isset( $sizes['height'] ) ? $sizes['height'] : 0;

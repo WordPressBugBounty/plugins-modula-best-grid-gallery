@@ -29,6 +29,12 @@
  * - **parallax-masonry / story / slider / video**: Loading effects hub hidden (layout owns motion; story/slider are fullscreen or carousel slides; video is player + playlist).
  * - **parallax-masonry**: Captions stay inside-image only (moving photo wall).
  * - **video**: Shuffle on load hidden (playlist order is intentional; PHP shuffle permit list excludes video).
+ * - **bento**: Layout shows columns (desktop/tablet/mobile, at least two), gutters, image size and Style; filters,
+ *   pagination (infinite scroll and load more included), captions, hover, lightbox and Motion as on Masonry.
+ *   Hidden: Shuffle on load (the PHP shuffle permit list excludes Bento; its layout follows the saved order),
+ *   Caption placement and the below-image caption fields (captions stay inside the image), and every
+ *   type-specific Layout field (row height, height, tile shape, Custom grid). Choosing Bento stamps its
+ *   columns, gutters and corners (`GALLERY_TYPE_CHOICE_STAMPS`, applyGalleryTypeSideEffects).
  * - **video**: Protection keeps Password protect only; Watermark, Image licensing, and Image Guardian hub items hidden.
  * - **video**: Instagram and Proofing categories hidden; EXIF, Zoom and Deeplink live in the hidden Lightbox category.
  * - **video**: Captions & titles hub hidden (VideoLayout has no grid caption placement; hover is already off).

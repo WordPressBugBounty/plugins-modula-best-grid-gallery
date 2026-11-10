@@ -17,12 +17,13 @@ final class Requirements {
 	 * code of what blocks signing in, or empty. `can_create_password` says whether a Password
 	 * connection, the fallback, can be created now. `clients` has the shape Clients::options() documents.
 	 *
-	 * @return array{connections_enabled:bool,adapter:string,application_passwords:array{available:bool,reason:string},oauth:array{available:bool,reason:string},multisite:bool,wordpress:array{version:string,required:string},endpoint:string,can_install:bool,can_activate:bool,plugin_url:string,clients:array<int,array{id:string,label:string,steps:array<int,array{text:string,code?:string}>,cloud:bool,install_url:?string,has_fallback:bool}>,can_create_password:bool}
+	 * @return array{connections_enabled:bool,adapter:string,adapter_required:string,application_passwords:array{available:bool,reason:string},oauth:array{available:bool,reason:string},multisite:bool,wordpress:array{version:string,required:string},endpoint:string,can_install:bool,can_activate:bool,plugin_url:string,clients:array<int,array{id:string,label:string,steps:array<int,array{text:string,code?:string}>,cloud:bool,install_url:?string,has_fallback:bool}>,can_create_password:bool}
 	 */
 	public static function status(): array {
 		return array(
 			'connections_enabled'   => Connection_Switch::is_on(),
 			'adapter'               => Adapter::state(),
+			'adapter_required'      => Adapter::MIN_VERSION,
 			'application_passwords' => self::application_passwords(),
 			'oauth'                 => self::oauth(),
 			'multisite'             => is_multisite(),

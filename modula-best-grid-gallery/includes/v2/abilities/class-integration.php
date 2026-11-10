@@ -66,7 +66,7 @@ final class Integration {
 	 * @return mixed The configuration, unchanged when it has no tools list or the request does not serve the server.
 	 */
 	public static function server_config( $config ) {
-		if ( ! is_array( $config ) || ! is_array( $config['tools'] ?? null ) || ! self::serves_server( $config ) ) {
+		if ( ! Mcp_Adapter::takes_part() || ! is_array( $config ) || ! is_array( $config['tools'] ?? null ) || ! self::serves_server( $config ) ) {
 			return $config;
 		}
 		$modula_tools = array();
@@ -217,12 +217,17 @@ final class Integration {
 	 * stays readable through get-ability-info and modula/discover. Image-only results
 	 * have no structured content, so the image tool must not advertise one either.
 	 *
+	 * Adapters older than 0.7.0 pass no schema, and their list is left as it is.
+	 *
 	 * @param array<int,\WP\McpSchema\Record\Tool> $tools  Listed tools.
 	 * @param \WP\MCP\Core\McpServer              $server Server answering the request.
-	 * @param \WP\McpSchema\Schema                $schema Negotiated protocol schema.
+	 * @param \WP\McpSchema\Schema|null           $schema Negotiated protocol schema.
 	 * @return array<int,\WP\McpSchema\Record\Tool>
 	 */
-	public static function tools_list( array $tools, $server, $schema ): array {
+	public static function tools_list( array $tools, $server, $schema = null ): array {
+		if ( null === $schema || ! Mcp_Adapter::takes_part() ) {
+			return $tools;
+		}
 		foreach ( $tools as $index => $tool ) {
 			$ability = self::tool_ability( $server, $tool->getName() );
 			if ( ! $ability ) {
@@ -368,6 +373,8 @@ final class Integration {
 	public static function register_abilities(): void {
 		$callbacks = Providers::callbacks();
 		$table     = self::table();
+		// A too-old adapter's generic discover and execute tools read this meta; offer it nothing.
+		$mcp_ready = ! Mcp_Adapter::is_too_old();
 		foreach ( Contract::definitions() as $name => $definition ) {
 			if ( ! isset( $callbacks[ $name ] ) ) {
 				continue;
@@ -382,7 +389,7 @@ final class Integration {
 			}
 			$definition['meta'] = array(
 				'mcp'          => array(
-					'public' => Folders_Dependency::operation_available( $name ),
+					'public' => $mcp_ready && Folders_Dependency::operation_available( $name ),
 					'type'   => 'tool',
 				),
 				'annotations'  => array(

@@ -54,6 +54,7 @@ export * from './layouts/template/templateDefinitions';
 export {
 	DEFAULT_GALLERY_TYPE,
 	DEFAULT_MASONRY_GRID_TYPE,
+	GALLERY_TYPE_CHOICE_STAMPS,
 } from './constants/galleryLayoutDefaults';
 export * from './utils/galleryItemIdentity';
 export * from './utils/embeddedGalleryItemKinds';

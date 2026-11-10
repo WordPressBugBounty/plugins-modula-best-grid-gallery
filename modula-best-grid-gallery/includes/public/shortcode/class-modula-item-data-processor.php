@@ -48,6 +48,18 @@ class Modula_Item_Data_Processor {
 	const HOVER_SCRIM_BOTTOM_EDGE_MIN_Y = 84;
 
 	/**
+	 * Gallery types whose tiles are resized to the grid image size (and, on the
+	 * classic modern shortcode, get a srcset). Beta-only Bento resizes like Masonry.
+	 */
+	const RESIZED_GALLERY_TYPES = array( 'creative-gallery', 'custom-grid', 'grid', 'justified-grid', 'parallax-masonry', 'uniform-grid', 'fit-grid', 'polaroid', 'bento' );
+
+	/**
+	 * Gallery types whose items carry the grid image size and crop flags. Not the
+	 * resize list: Justified and Parallax size their tiles from the photo.
+	 */
+	const GRID_SETTINGS_GALLERY_TYPES = array( 'creative-gallery', 'grid', 'custom-grid', 'uniform-grid', 'fit-grid', 'polaroid', 'bento' );
+
+	/**
 	 * Process item data through all transformation steps
 	 *
 	 * @param array  $image      Image data
@@ -321,10 +333,9 @@ class Modula_Item_Data_Processor {
 			return $item_data;
 		}
 
-		$gallery_type      = $settings['type'] ?? 'creative-gallery';
-		$allowed_galleries = array( 'creative-gallery', 'custom-grid', 'grid', 'justified-grid', 'parallax-masonry', 'uniform-grid', 'fit-grid', 'polaroid' );
+		$gallery_type = $settings['type'] ?? 'creative-gallery';
 
-		if ( ! in_array( $gallery_type, $allowed_galleries, true ) ) {
+		if ( ! in_array( $gallery_type, self::RESIZED_GALLERY_TYPES, true ) ) {
 			return $item_data;
 		}
 
@@ -392,10 +403,9 @@ class Modula_Item_Data_Processor {
 			return $item_data;
 		}
 
-		$gallery_type      = $settings['type'] ?? 'creative-gallery';
-		$allowed_galleries = array( 'creative-gallery', 'custom-grid', 'grid', 'justified-grid', 'parallax-masonry', 'uniform-grid', 'fit-grid', 'polaroid' );
+		$gallery_type = $settings['type'] ?? 'creative-gallery';
 		// Beta's former HTML pass covered every image layout, including BnB and Slider.
-		if ( ! isset( $settings['modula_display_context'] ) && ! in_array( $gallery_type, $allowed_galleries, true ) ) {
+		if ( ! isset( $settings['modula_display_context'] ) && ! in_array( $gallery_type, self::RESIZED_GALLERY_TYPES, true ) ) {
 			return $item_data;
 		}
 
@@ -1034,10 +1044,9 @@ class Modula_Item_Data_Processor {
 	 * @return array Modified item data
 	 */
 	private function process_grid_settings( $item_data, $image, $settings ) {
-		$type       = $settings['type'] ?? 'creative-gallery';
-		$grid_types = array( 'creative-gallery', 'grid', 'custom-grid', 'uniform-grid', 'fit-grid', 'polaroid' );
+		$type = $settings['type'] ?? 'creative-gallery';
 
-		if ( ! in_array( $type, $grid_types, true ) ) {
+		if ( ! in_array( $type, self::GRID_SETTINGS_GALLERY_TYPES, true ) ) {
 			return $item_data;
 		}
 

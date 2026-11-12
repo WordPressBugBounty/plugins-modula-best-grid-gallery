@@ -1,3 +1,11 @@
+= 3.0.20 - 12.11.2026 =
+Changed: In the lightbox of galleries made in the new editor, the title and caption are as wide as the image and sit right under it, instead of stretching across the screen. A long caption scrolls in its own space, so the image stays large.
+Fixed: In the new gallery editor, Select multiple scrolls, so every image in a large gallery can be reached and selected.
+Fixed: Saving a gallery made in the new editor copies an image caption that was kept only in the gallery into the image's empty Caption in the Media Library, so other galleries that use the image show it too. A Caption that already has text is never changed.
+Fixed: On the Galleries page, the actions menu at the end of a row shows all of its actions when the list is short.
+Fixed: On sites using the Genesis theme, confirmation dialogs such as "Clear history?" no longer stay on screen in the new gallery editor and on Modula's admin pages.
+Fixed: In the Elementor editor, the Modula widget shows galleries made in the new editor in the preview, instead of an empty space.
+
 = 3.0.19 - 09.11.2026 =
 Added: Support for the Bento gallery type in Modula PRO.
 Fixed: Changing gallery settings through the AI connection accepts whole numbers for number settings, such as the watermark margin.

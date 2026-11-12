@@ -90,6 +90,10 @@ class Modula_Elementor_Widget_Activation
 		wp_enqueue_script('modulaFancybox');
 		\Modula_Helper::add_lightbox_share_buttons_inline_script('modulaFancybox');
 
+		// Elementor renders the widget over AJAX, so the shortcode of a gallery
+		// made in the new editor cannot enqueue its own renderer in the preview.
+		\Modula\V2\Modern_Gallery::enqueue_visitor_renderer_assets(array(), array(), false);
+
 		do_action('modula_elementor_before_enqueue_elementor-preview');
 
 		wp_enqueue_script('modula-elementor-preview', MODULA_URL . 'assets/js/admin/modula-elementor-preview.js', null, MODULA_LITE_VERSION, true);

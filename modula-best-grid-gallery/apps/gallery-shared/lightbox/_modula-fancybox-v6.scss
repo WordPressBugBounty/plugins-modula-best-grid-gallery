@@ -27,8 +27,16 @@
 	--modula-lightbox-caption-gutter: clamp(16px, 4vw, 40px);
 
 	/*
-	 * Caption width uses viewport gutters (not image bounds) so left/right/center
-	 * stay readable without spanning edge-to-edge.
+	 * An image slide with a caption: the image's share of the slide height;
+	 * the caption gets the rest (see the captioned image slide below).
+	 */
+	--modula-lightbox-image-share: 0.6;
+
+	/*
+	 * A viewport-wide caption, inset and capped by the gutters, that Position
+	 * moves: video, iframe and HTML slides, and every slide in a lightbox
+	 * narrower than 768px. An image slide's caption from 768px up follows the
+	 * image instead (the captioned image slide below).
 	 */
 	.f-caption,
 	.fancybox__caption {
@@ -81,6 +89,132 @@
 			-webkit-user-select: none;
 			user-select: none;
 			-webkit-touch-callout: none;
+		}
+	}
+}
+
+/*
+ * Captioned image slide, from 768px of lightbox width up: the image and its
+ * caption are one block centred in the slide, the image above with
+ * `--modula-lightbox-image-share` of the slide's height, the caption below at
+ * the image's width with the rest, scrolling inside its own box. Position
+ * aligns only the caption's text.
+ *
+ * Panzoom marks an image slide `.f-zoomable` and Fancybox marks a slide with a
+ * caption `.has-caption`. A caption made only of empty Pro title/description
+ * wrappers is hidden (above), so its slide keeps the default layout.
+ */
+$modula-lightbox-caption-parts: ".modula-caption-title, .modula-caption-description";
+$modula-lightbox-captioned-image-slide: ".fancybox__slide.f-zoomable.has-caption:is(:has(> .f-caption :is(#{$modula-lightbox-caption-parts}):not(:empty)), :not(:has(> .f-caption :is(#{$modula-lightbox-caption-parts}))))";
+
+/*
+ * The 768px threshold is measured on the carousel: it spans the lightbox
+ * (comments sidebar included), so for a visitor it is the viewport width, and
+ * the editor preview's tablet and mobile frames get their own layout.
+ */
+.modula-fancybox-container .fancybox__carousel {
+	container-name: modula-lightbox;
+	container-type: inline-size;
+}
+
+/*
+ * The caption's last 48px fade out while text remains below; at the end of its
+ * scroll the fade is gone (a scroll-driven animation of a registered length).
+ * Without scroll-driven animations the animation ends at once on 0px; without
+ * @property the gradient is invalid and drops. Either way the caption shows
+ * without the fade.
+ */
+@property --modula-lightbox-caption-fade {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 0px; /* stylelint-disable-line length-zero-no-unit -- @property needs a unit */
+}
+
+@keyframes modula-lightbox-caption-fade {
+
+	0%,
+	85% {
+		--modula-lightbox-caption-fade: 48px;
+	}
+
+	100% {
+		// stylelint-disable-next-line length-zero-no-unit -- used in calc().
+		--modula-lightbox-caption-fade: 0px;
+	}
+}
+
+@container modula-lightbox (min-width: 768px) {
+
+	/*
+	 * The slide is the size container for its image and caption: `cqw` and
+	 * `cqh` are what the toolbar, the thumbnail strip (bottom, side or off) and
+	 * the comments sidebar leave of it. The column is the image's width, 240px
+	 * at least.
+	 */
+	.modula-fancybox-container #{$modula-lightbox-captioned-image-slide} {
+		container-type: size;
+		display: grid;
+		grid-template-columns: minmax(min(240px, 100%), auto);
+		grid-template-rows: auto auto;
+		place-content: center;
+
+		// Fancybox centres its flex slide with these; in the grid they
+		// would take rows.
+		&::before,
+		&::after {
+			content: none;
+		}
+	}
+
+	/*
+	 * Panzoom writes the wrapper's max-width and max-height (the image's natural
+	 * size, capped at 100%) and its aspect-ratio inline on every render, so no
+	 * option or event handler keeps them off; these overrides let the image
+	 * below size the wrapper. Zoom and pan transform the viewport absolutely
+	 * positioned inside the wrapper, so they never move the caption.
+	 */
+	.modula-fancybox-container #{$modula-lightbox-captioned-image-slide} > .f-panzoom__wrapper {
+		max-width: none !important;
+		max-height: none !important;
+		aspect-ratio: auto !important;
+		justify-self: center;
+	}
+
+	// The wrapper's in-flow (hidden) copy of the image sets its size; 80px
+	// leaves room for the arrows.
+	.modula-fancybox-container #{$modula-lightbox-captioned-image-slide} > .f-panzoom__wrapper > .f-panzoom__content {
+		max-width: min(100cqw - 80px, 1920px);
+		max-height: calc(100cqh * var(--modula-lightbox-image-share));
+	}
+
+	/*
+	 * Inline-size containment keeps the text from widening the image's column;
+	 * the caption stretches to it. The 16px gap above the text is part of the
+	 * caption's share. Wheel over a caption that scrolls scrolls the text:
+	 * Fancybox skips wheel navigation inside a scrollable element.
+	 */
+	.modula-fancybox-container #{$modula-lightbox-captioned-image-slide} > .f-caption {
+		contain: inline-size;
+		justify-self: stretch;
+		align-self: start;
+		width: auto;
+		max-width: none;
+		max-height: calc(100cqh * (1 - var(--modula-lightbox-image-share)));
+		margin: 0;
+		padding: 16px 0 0;
+		overflow-y: auto;
+		scrollbar-width: none;
+		$fade: var(--modula-lightbox-caption-fade);
+		$mask: linear-gradient(to bottom, #000 calc(100% - #{$fade}), transparent);
+		-webkit-mask-image: $mask;
+		mask-image: $mask;
+		animation: modula-lightbox-caption-fade linear both;
+		// The linter's property list predates scroll-driven animations.
+		// stylelint-disable-next-line property-no-unknown
+		animation-timeline: scroll(self);
+
+		&::-webkit-scrollbar {
+			display: none;
 		}
 	}
 }

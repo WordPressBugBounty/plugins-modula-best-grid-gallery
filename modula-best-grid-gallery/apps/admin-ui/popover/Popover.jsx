@@ -8,6 +8,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { placePopover } from './placePopover';
+import { scrollContainersOf, visibleBounds } from './visibleBounds';
 
 // Lets content inside a popover (MenuItem) close it and return focus.
 const PopoverCloseContext = createContext(() => {});
@@ -26,56 +27,6 @@ function isSamePlacement(a, b) {
 		a.side === b.side &&
 		a.hidden === b.hidden
 	);
-}
-
-/**
- * The trigger's scroll containers: the panel stays inside what they show,
- * so it never covers the chrome around them (the top bar over the settings
- * panel). Clipping-only ancestors (a card's rounded `overflow: hidden`) do
- * not count; they are what the panel must escape.
- *
- * @param {Element} element The anchor.
- * @return {Element[]} Scrollable ancestors, nearest first.
- */
-function scrollContainersOf(element) {
-	const view = element.ownerDocument.defaultView;
-	const containers = [];
-	for (
-		let node = element.parentElement;
-		node && node !== element.ownerDocument.body;
-		node = node.parentElement
-	) {
-		const { overflowX, overflowY } = view.getComputedStyle(node);
-		if (/auto|scroll/.test(`${overflowX} ${overflowY}`)) {
-			containers.push(node);
-		}
-	}
-	return containers;
-}
-
-/**
- * The part of the window the trigger can be seen in: the window without its
- * scrollbars, cut down to each scroll container's box.
- *
- * @param {Element[]} containers
- * @param {Document}  doc
- * @return {import('./placePopover').Box} Bounds in window coordinates.
- */
-function visibleBounds(containers, doc) {
-	const bounds = {
-		top: 0,
-		left: 0,
-		right: doc.documentElement.clientWidth,
-		bottom: doc.documentElement.clientHeight,
-	};
-	for (const container of containers) {
-		const box = container.getBoundingClientRect();
-		bounds.top = Math.max(bounds.top, box.top);
-		bounds.left = Math.max(bounds.left, box.left);
-		bounds.right = Math.min(bounds.right, box.right);
-		bounds.bottom = Math.min(bounds.bottom, box.bottom);
-	}
-	return bounds;
 }
 
 /**

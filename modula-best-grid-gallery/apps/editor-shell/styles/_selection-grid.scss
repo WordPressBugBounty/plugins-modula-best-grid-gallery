@@ -2,7 +2,23 @@
 // the stage (`SelectionGrid`). It replaces the editor's canvas body inside the
 // artboard, which sits outside the admin-ui scope, so the canvas values are
 // written out. The stage is the same dark in both appearances, on every device.
+@use "device-frame" as *;
+
 $mod-selection-grid-stage: #1c1b19;
+
+// The canvas body is a column that clips (overflow: hidden), so the grid
+// scrolls in this region, which fills the body's height.
+.modula-takeover__selection-grid-scroll {
+	flex: 1;
+	min-height: 0;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+// Tablet/mobile: no scrollbar beside the grid, as beside the gallery.
+@include device-scroller-without-scrollbar(
+	".modula-takeover__selection-grid-scroll"
+);
 
 .modula-takeover__selection-grid {
 	--modula-selection-grid-gap-ring: #{$mod-selection-grid-stage};
@@ -13,9 +29,10 @@ $mod-selection-grid-stage: #1c1b19;
 	box-sizing: border-box;
 	max-width: 1000px;
 	margin: 0 auto;
-	// The canvas body clips (overflow: hidden), and a thumb paints outside its
-	// box: the ticked ring 6px, the focus outline 10px (8px offset + 2px). The
-	// inset keeps both whole on the first row and column.
+	// The scroll region clips, and a thumb paints outside its box: the ticked
+	// ring 6px, the focus outline 10px (8px offset + 2px). The inset sits inside
+	// the scrolled content, so it keeps both whole on every edge, the last row
+	// included once scrolled to.
 	padding: 10px;
 }
 

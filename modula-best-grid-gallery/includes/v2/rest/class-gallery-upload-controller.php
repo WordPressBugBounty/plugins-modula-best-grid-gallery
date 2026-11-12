@@ -495,6 +495,18 @@ class Gallery_Upload_Controller {
 	}
 
 	/**
+	 * Move the gallery's row-only captions into their empty Media Library Caption (Beta only).
+	 *
+	 * Skipped attachments do not fail the save, so the outcome is not reported.
+	 *
+	 * @param int                              $gallery_id Gallery post ID.
+	 * @param array<int, array<string, mixed>> $rows       Gallery rows.
+	 */
+	private static function move_row_only_captions( $gallery_id, array $rows ) {
+		\Modula\V2\Legacy_Caption_Move::move_row_only_captions( $gallery_id, $rows, \Modula_Gallery_Upload::get_instance() );
+	}
+
+	/**
 	 * Remove one image row by index in modula-images (0-based).
 	 *
 	 * @param \WP_REST_Request $request Request.
@@ -628,6 +640,7 @@ class Gallery_Upload_Controller {
 		}
 		$current = isset( $images[ $index ] ) && is_array( $images[ $index ] ) ? $images[ $index ] : array();
 
+		$patch_sets_caption  = array_key_exists( 'description', $fields );
 		$attachment_id       = isset( $current['id'] ) ? absint( $current['id'] ) : 0;
 		$media_keys          = array( 'title', 'alt', 'description' );
 		$explicit_clear_keys = array();
@@ -677,6 +690,13 @@ class Gallery_Upload_Controller {
 				$attachment_id,
 				$explicit_clear_keys
 			);
+			if ( ! $patch_sets_caption ) {
+				// The overlay copied the Caption; while it is empty, a row-only caption stays on the row.
+				$merged['description'] = modula_resolve_gallery_item_caption(
+					$merged['description'],
+					isset( $current['description'] ) ? $current['description'] : ''
+				);
+			}
 		}
 		$sanitized = $upload->sanitize_modula_image_row( $merged );
 		// Sanitize whitelists every key; missing `id` becomes ''. Restore from the row we merged so the client never gets an empty id (would drop the tile).
@@ -686,7 +706,34 @@ class Gallery_Upload_Controller {
 		$images[ $index ] = $sanitized;
 		self::persist_modula_images_list( $gallery_id, $images );
 
+		/*
+		 * After every write that can fail. A patch that sets or clears this image's caption
+		 * is the only caption write for its attachment, so a duplicate row cannot undo it.
+		 */
+		$rows_to_move = $patch_sets_caption ? self::rows_without_attachment( $images, $attachment_id ) : $images;
+		self::move_row_only_captions( $gallery_id, $rows_to_move );
+
 		return self::write_response( $gallery_id, array( 'image' => $images[ $index ] ) );
+	}
+
+	/**
+	 * Gallery rows except those of one attachment.
+	 *
+	 * @param array<int, mixed> $rows          Gallery rows.
+	 * @param int               $attachment_id Attachment ID to leave out; 0 leaves every row in.
+	 * @return array<int, mixed>
+	 */
+	private static function rows_without_attachment( array $rows, $attachment_id ) {
+		if ( $attachment_id < 1 ) {
+			return $rows;
+		}
+
+		return array_filter(
+			$rows,
+			function ( $row ) use ( $attachment_id ) {
+				return ! ( is_array( $row ) && isset( $row['id'] ) && absint( $row['id'] ) === $attachment_id );
+			}
+		);
 	}
 
 	/**
@@ -834,6 +881,7 @@ class Gallery_Upload_Controller {
 				self::persist_modula_images_list( $gallery_id, $new_rows );
 			}
 			update_post_meta( $gallery_id, 'modulaSorting', 'manual' );
+			self::move_row_only_captions( $gallery_id, self::get_modula_images_list( $gallery_id ) );
 			return self::write_response(
 				$gallery_id,
 				array(
@@ -857,6 +905,7 @@ class Gallery_Upload_Controller {
 		}
 		self::persist_modula_images_list( $gallery_id, $new_rows );
 		update_post_meta( $gallery_id, 'modulaSorting', $sorting );
+		self::move_row_only_captions( $gallery_id, $new_rows );
 		return self::write_response(
 			$gallery_id,
 			array(
@@ -896,6 +945,7 @@ class Gallery_Upload_Controller {
 			);
 		}
 		update_post_meta( $gallery_id, 'modulaSorting', $sorting );
+		self::move_row_only_captions( $gallery_id, self::get_modula_images_list( $gallery_id ) );
 		return self::write_response(
 			$gallery_id,
 			array(
@@ -939,6 +989,7 @@ class Gallery_Upload_Controller {
 			return $new_rows;
 		}
 		self::persist_modula_images_list( $gallery_id, $new_rows );
+		self::move_row_only_captions( $gallery_id, $new_rows );
 		return self::write_response( $gallery_id, array( 'ok' => true ) );
 	}
 
@@ -1007,6 +1058,7 @@ class Gallery_Upload_Controller {
 			);
 			return $result;
 		}
+		self::move_row_only_captions( $gallery_id, self::get_modula_images_list( $gallery_id ) );
 		return self::write_response( $gallery_id, array( 'ok' => true ) );
 	}
 

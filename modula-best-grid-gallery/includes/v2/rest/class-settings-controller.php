@@ -379,12 +379,35 @@ class Settings_Controller {
 			return $sanitized;
 		}
 
+		self::move_row_only_captions( $id );
+
 		$response = array_merge(
 			$sanitized,
 			\Modula\V2\Gallery_Post::rest_response_meta( $id )
 		);
 
 		return new \WP_REST_Response( $response, 200 );
+	}
+
+	/**
+	 * Move the gallery's row-only captions into their empty Media Library Caption (Beta only).
+	 *
+	 * A settings save does not touch the items, so without this a caption kept only on
+	 * a row never reaches the Media Library. Skipped attachments do not fail the save.
+	 *
+	 * @param int $gallery_id Gallery post ID.
+	 */
+	private static function move_row_only_captions( $gallery_id ) {
+		$rows = get_post_meta( $gallery_id, 'modula-images', true );
+		if ( ! is_array( $rows ) || empty( $rows ) ) {
+			return;
+		}
+		if ( ! class_exists( 'Modula_Gallery_Upload', false ) ) {
+			// Admin-conditional loader skips this file on REST.
+			require_once MODULA_PATH . 'includes/admin/helpers/class-modula-gallery-upload.php';
+		}
+
+		\Modula\V2\Legacy_Caption_Move::move_row_only_captions( $gallery_id, $rows, \Modula_Gallery_Upload::get_instance() );
 	}
 
 	/**

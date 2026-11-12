@@ -300,6 +300,11 @@ export function lightboxPreviewShowNavigation(settings) {
 }
 
 /**
+ * Position aligns the caption text. `alignSelf` moves a viewport-wide caption
+ * (video, iframe and HTML slides, and every slide below 768px); an image's
+ * caption from 768px up takes the image's column instead
+ * (`_modula-fancybox-v6.scss`), so only `textAlign` applies to it.
+ *
  * @param {string} [captionPosition]
  * @return {{ alignSelf: 'flex-start'|'center'|'flex-end', textAlign: 'left'|'center'|'right' }}
  */
@@ -317,7 +322,10 @@ export function resolveLightboxCaptionPositionAlignment(captionPosition) {
 	return { alignSelf: 'flex-start', textAlign: 'left' };
 }
 
-/** Horizontal inset for lightbox captions (viewport-based, not tied to image bounds). */
+/**
+ * Horizontal inset from the viewport for a viewport-wide caption; an image's
+ * caption from 768px up matches the image's column instead.
+ */
 export const MODULA_LIGHTBOX_CAPTION_GUTTER = 'clamp(16px, 4vw, 40px)';
 
 /**

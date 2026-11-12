@@ -27,6 +27,13 @@
 		font-size: var(--modula-admin-text-mono);
 	}
 
+	// A closed <dialog> is hidden by the browser's own stylesheet only, so
+	// any theme or plugin rule wins over it (Genesis' admin.css sets
+	// `dialog { display: block }`) and every closed dialog shows on the page.
+	dialog:not([open]) {
+		display: none;
+	}
+
 	:focus-visible {
 		@include mixins.focus-ring;
 	}

@@ -12,6 +12,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { useMutation } from '@tanstack/react-query';
+import { useGallerySettingsFormBundle } from '../form/GallerySettingsFormContext';
 import { useModulaSettingsEditorConfig } from '../hooks/useModulaSettingsEditorConfig';
 import { useProofingGalleryCapabilities } from '../hooks/useProofingGalleryCapabilities';
 import { getImageProofingEditorRegistration } from '../platform/imageProofingRegistry';
@@ -27,6 +28,7 @@ const ProofingModeContext = createContext(null);
 export function ProofingModeProvider({ galleryId, children }) {
 	const config = useModulaSettingsEditorConfig();
 	const { canUseImageProofing } = useProofingGalleryCapabilities();
+	const { adoptStoredSettings } = useGallerySettingsFormBundle();
 
 	const [isLocked, setIsLocked] = useState(() =>
 		Boolean(config.lockedForProofing)
@@ -51,7 +53,16 @@ export function ProofingModeProvider({ galleryId, children }) {
 			}
 			return response;
 		},
-		onSuccess: (response, lock) => setIsLocked(Boolean(lock)),
+		onSuccess: (response, lock) => {
+			setIsLocked(Boolean(lock));
+			// The lock stays an immediate write (decision 28); the editor
+			// takes what it stored as saved, so it reads neither Unsaved nor
+			// "saved elsewhere", and Save never sends a stale lock.
+			adoptStoredSettings(
+				{ proofing: { imageProofing: Boolean(lock) } },
+				response
+			);
+		},
 	});
 
 	const unlock = useCallback(async () => {

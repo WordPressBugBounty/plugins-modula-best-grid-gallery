@@ -48,20 +48,26 @@ export function parseUploadAttachmentId(raw) {
 }
 
 /**
- * @param {number}                                                                                                        galleryId
- * @param {string[]}                                                                                                      files
- * @param {{ deleteFiles: boolean, uploadPosition: string, onImportProgress?: (current: number, total: number) => void }} opts
+ * Create one attachment per server file (`import-media-file`, which may
+ * delete the source file). The files are in the Media Library at once, like
+ * an upload; the gallery is not touched, so a never-saved gallery stays an
+ * auto-draft (spec decision 30). Stops at the first failed file.
+ *
+ * @param {number}                                                                                galleryId
+ * @param {string[]}                                                                              files
+ * @param {{ deleteFiles: boolean, onImportProgress?: (current: number, total: number) => void }} opts
+ * @return {Promise<number[]>} Attachment ids, in file order.
  */
-export async function importServerFilesToGallery(
+async function importServerFilesToMediaLibrary(
 	galleryId,
 	files,
-	{ deleteFiles, uploadPosition, onImportProgress }
+	{ deleteFiles, onImportProgress }
 ) {
 	const total = files.length;
 	const ids = [];
 	for (let i = 0; i < total; i++) {
 		onImportProgress?.(i + 1, total);
-		const row = await galleryUploadPost(galleryId, 'import-file', {
+		const row = await galleryUploadPost(galleryId, 'import-media-file', {
 			file: files[i],
 			delete_files: Boolean(deleteFiles),
 		});
@@ -70,25 +76,22 @@ export async function importServerFilesToGallery(
 			ids.push(aid);
 		}
 	}
-	if (ids.length) {
-		await galleryUploadPost(galleryId, 'add-images', {
-			ids,
-			upload_position: uploadPosition === 'start' ? 'start' : 'end',
-		});
-	}
+	return ids;
 }
 
 /**
- * Validate folder paths → list files → import (used by folder UI and ZIP extraction).
+ * Validate folder paths → list files → create the attachments. Writes no
+ * gallery row: the caller adds the ids as unsaved changes (ADR 0059).
  *
- * @param {number}                                                                                                                                                   galleryId
- * @param {string[]}                                                                                                                                                 folderPaths Absolute server paths under uploads.
- * @param {{ deleteFiles: boolean, uploadPosition: string, onImportProgress?: (c: number, t: number) => void, onPhase?: (phase: 'paths'|'files'|'import') => void }} opts
+ * @param {number}                                                                                                                           galleryId
+ * @param {string[]}                                                                                                                         folderPaths Absolute server paths under uploads.
+ * @param {{ deleteFiles: boolean, onImportProgress?: (c: number, t: number) => void, onPhase?: (phase: 'paths'|'files'|'import') => void }} opts
+ * @return {Promise<number[]>} Attachment ids, in file order.
  */
-export async function runFoldersToGalleryPipeline(
+export async function importFoldersToMediaLibrary(
 	galleryId,
 	folderPaths,
-	{ deleteFiles, uploadPosition, onImportProgress, onPhase }
+	{ deleteFiles, onImportProgress, onPhase }
 ) {
 	onPhase?.('paths');
 	const pathsRes = await galleryUploadPost(galleryId, 'check-paths', {
@@ -114,39 +117,9 @@ export async function runFoldersToGalleryPipeline(
 		);
 	}
 	onPhase?.('import');
-	await importServerFilesToGallery(galleryId, files, {
+	return importServerFilesToMediaLibrary(galleryId, files, {
 		deleteFiles,
-		uploadPosition,
 		onImportProgress,
-	});
-}
-
-/**
- * After a .zip is uploaded as an attachment, extract and import images.
- *
- * @param {number}                                                                                                                                                           galleryId
- * @param {number}                                                                                                                                                           attachmentId
- * @param {{ deleteFiles: boolean, uploadPosition: string, onImportProgress?: (c: number, t: number) => void, onPhase?: (phase: 'unzip'|'paths'|'files'|'import') => void }} opts
- */
-/**
- * @param {number} galleryId
- * @param {number} index     Row index in modula-images (0-based, no page breaks).
- */
-export function galleryRemoveImageByIndex(galleryId, index) {
-	return galleryUploadPost(galleryId, 'remove-image-by-index', {
-		index,
-	});
-}
-
-/**
- * @param {number} galleryId
- * @param {number} index        Row index in modula-images.
- * @param {number} attachmentId New WordPress attachment ID.
- */
-export function galleryReplaceImageByIndex(galleryId, index, attachmentId) {
-	return galleryUploadPost(galleryId, 'replace-image-by-index', {
-		index,
-		attachment_id: attachmentId,
 	});
 }
 
@@ -162,51 +135,12 @@ export function saveMergedGalleryItems(galleryId, items) {
 }
 
 /**
- * @param {number}                  galleryId
- * @param {number}                  index     Row index in modula-images.
- * @param {Record<string, unknown>} fields    Partial modula-images row.
- */
-export function galleryPatchImageByIndex(galleryId, index, fields) {
-	return galleryUploadPost(galleryId, 'patch-image-by-index', {
-		index,
-		fields,
-	});
-}
-
-/**
  * @param {number} galleryId
  * @param {string} sorting   Whitelisted `modulaSorting` key.
  */
 export function gallerySetSortingMode(galleryId, sorting) {
 	return /** @type {Promise<{ ok?: boolean, sorting?: string }>} */ (
 		galleryUploadPost(galleryId, 'set-gallery-sorting', { sorting })
-	);
-}
-
-/**
- * @param {number}   galleryId
- * @param {number[]} order     Attachment IDs in the new order (multiset must match modula-images).
- */
-export function galleryReorderImages(galleryId, order) {
-	return /** @type {Promise<{ ok?: boolean }>} */ (
-		galleryUploadPost(galleryId, 'reorder-images', { order })
-	);
-}
-
-/**
- * Single request: update `modulaSorting` and optionally reorder `modula-images` (avoids split REST calls).
- *
- * @param {number}                                galleryId
- * @param {{ sorting: string, order?: number[] }} payload
- */
-export function galleryApplySortingAndOrder(galleryId, payload) {
-	const { sorting, order } = payload;
-	const data =
-		order !== undefined && order !== null
-			? { sorting, order }
-			: { sorting };
-	return /** @type {Promise<{ ok?: boolean, sorting?: string }>} */ (
-		galleryUploadPost(galleryId, 'apply-sorting-and-order', data)
 	);
 }
 
@@ -230,20 +164,15 @@ export function uploadAttachmentFileViaWpRest(file) {
 }
 
 /**
- * Upload local image files: WP REST media for each file, then Modula `add-images` (same end state as legacy Plupload flow).
+ * Upload local image files to the Media Library (WP REST media, one file at a
+ * time). The files are stored at once; adding them to the gallery is the
+ * caller's unsaved change (ADR 0059).
  *
- * @param {number}                                                                                                  galleryId
- * @param {File[]|FileList}                                                                                         files
- * @param {{ uploadPosition: string, onProgress?: (current: number, total: number) => void, signal?: AbortSignal }} opts
- * @param {(fn: () => void | Promise<void>) => Promise<void>}                                                       runPersistTask Save-bar serialiser from TakeoverSaveStatusContext.
- * @return {Promise<{ ids: number[] }>} Attachment ids successfully added to the gallery.
+ * @param {File[]|FileList}                                                                 files
+ * @param {{ onProgress?: (current: number, total: number) => void, signal?: AbortSignal }} opts
+ * @return {Promise<{ ids: number[] }>} Attachment ids of the uploaded files.
  */
-export async function uploadBrowserImageFilesToGallery(
-	galleryId,
-	files,
-	opts,
-	runPersistTask
-) {
+export async function uploadBrowserImageFilesToMediaLibrary(files, opts) {
 	const list = Array.from(files).filter(
 		(f) =>
 			f instanceof File &&
@@ -265,47 +194,22 @@ export async function uploadBrowserImageFilesToGallery(
 			ids.push(id);
 		}
 	}
-	if (!ids.length) {
-		return { ids: [] };
-	}
-	await addAttachmentsToGallery(
-		galleryId,
-		ids,
-		opts.uploadPosition,
-		runPersistTask
-	);
 	return { ids };
 }
 
 /**
- * Add existing attachments to the gallery at the insert position, through
- * the save-bar serialiser. The server skips attachments already in it.
+ * After a .zip is uploaded as an attachment, extract it and create the
+ * attachments. Writes no gallery row (ADR 0059).
  *
- * @param {number}                                                            galleryId
- * @param {number[]}                                                          ids            Attachment ids.
- * @param {string}                                                            uploadPosition `start`; anything else adds at the end.
- * @param {(fn: () => void | Promise<void>, label?: string) => Promise<void>} runPersistTask Save-bar serialiser from TakeoverSaveStatusContext.
- * @return {Promise<void>}
+ * @param {number}                                                                                                                                   galleryId
+ * @param {number}                                                                                                                                   attachmentId
+ * @param {{ deleteFiles: boolean, onImportProgress?: (c: number, t: number) => void, onPhase?: (phase: 'unzip'|'paths'|'files'|'import') => void }} opts
+ * @return {Promise<number[]>} Attachment ids, in file order.
  */
-export function addAttachmentsToGallery(
-	galleryId,
-	ids,
-	uploadPosition,
-	runPersistTask
-) {
-	const pos = uploadPosition === 'start' ? 'start' : 'end';
-	return runPersistTask(async () => {
-		await galleryUploadPost(galleryId, 'add-images', {
-			ids,
-			upload_position: pos,
-		});
-	}, 'gallery-add-images');
-}
-
-export async function runZipAttachmentPipeline(
+export async function importZipToMediaLibrary(
 	galleryId,
 	attachmentId,
-	{ deleteFiles, uploadPosition, onImportProgress, onPhase }
+	{ deleteFiles, onImportProgress, onPhase }
 ) {
 	onPhase?.('unzip');
 	const unzipRes = await galleryUploadPost(galleryId, 'unzip', {
@@ -320,9 +224,8 @@ export async function runZipAttachmentPipeline(
 			)
 		);
 	}
-	await runFoldersToGalleryPipeline(galleryId, folders, {
+	return importFoldersToMediaLibrary(galleryId, folders, {
 		deleteFiles,
-		uploadPosition,
 		onImportProgress,
 		onPhase,
 	});

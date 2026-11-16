@@ -53,11 +53,16 @@ export function getListingQuickEditSavedMessage({
 	isListed,
 	viewStatuses,
 }) {
-	if (item.type === 'gallery' && saved?.status === 'future') {
-		return __(
-			'Changes saved. This gallery is scheduled and will not be public until its publication date. It is listed under All.',
-			'modula-best-grid-gallery'
-		);
+	if (saved?.status === 'future') {
+		return item.type === 'album'
+			? __(
+					'Changes saved. This album is scheduled and will not be public until its publication date. It is listed under All.',
+					'modula-best-grid-gallery'
+				)
+			: __(
+					'Changes saved. This gallery is scheduled and will not be public until its publication date. It is listed under All.',
+					'modula-best-grid-gallery'
+				);
 	}
 	if (isListed) {
 		return __('Changes saved.', 'modula-best-grid-gallery');

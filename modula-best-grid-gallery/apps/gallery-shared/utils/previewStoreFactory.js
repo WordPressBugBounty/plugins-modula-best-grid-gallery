@@ -223,3 +223,19 @@ export function updatePreviewStore(store, args) {
 	}
 	refreshPreviewCatalogPaginationTotals(store);
 }
+
+/**
+ * Merge fields into the preview store's gallery metadata (e.g. the editor's
+ * working sort mode). Settings, config and the catalog are unchanged.
+ *
+ * @param {import('@reduxjs/toolkit').Store} store Preview store.
+ * @param {Record<string, unknown>}          patch Metadata fields to set.
+ * @return {void} Nothing.
+ */
+export function setPreviewGalleryMetadata(store, patch) {
+	if (!store || !patch) {
+		return;
+	}
+	const metadata = store.getState()?.gallery?.metadata || {};
+	store.dispatch(setGallery({ metadata: { ...metadata, ...patch } }));
+}

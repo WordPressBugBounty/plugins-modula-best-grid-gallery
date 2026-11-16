@@ -1,19 +1,13 @@
 /**
- * Clear focal point + crop on every gallery image (REST), then sync Redux preview.
+ * Clear the focal point and crop of every gallery image in the preview store.
+ * Nothing is sent: the editor save stores it with the items (ADR 0059).
  */
 
 import {
 	asGalleryItemList,
-	findStoreIndexForItemId,
-	modulaImagesRowIndexForPreviewWrite,
-	storeIndexToCoreIndex,
-} from 'gallery-shared/preview';
-import { galleryPatchImageByIndex } from '../api/galleryUploadApi';
-import {
 	commitPreviewCatalog,
-	mergeModulaRowIntoPreviewItem,
-	stripFocalDataAttributesFromPreviewItem,
-} from './previewItemsCommit';
+} from 'gallery-shared/preview';
+import { stripFocalDataAttributesFromPreviewItem } from './previewItemsCommit';
 import { itemHasImageFocusData } from './itemHasImageFocus';
 
 const CLEAR_FIELDS = {
@@ -35,64 +29,46 @@ function clearFocusCropSessionForItem(galleryId, item) {
 			`modula-focus-crop-area:v1:${galleryId}:${String(item.id)}`
 		);
 	} catch {
-		// ignore
+		// The crop area kept for the focus dialog is a convenience only.
 	}
 }
 
 /**
- * @param {{ galleryId: number, store: import('@reduxjs/toolkit').Store }} args
- * @return {Promise<void>}
+ * @param {{
+ *   galleryId: number,
+ *   store: import('@reduxjs/toolkit').Store,
+ *   commitCatalog?: (catalog: Object[]) => void,
+ * }} args `commitCatalog` writes the cleared catalog; the store's catalog by default.
+ * @return {boolean} True when an image had focus data.
  */
-export async function clearAllGalleryImageFocus({ galleryId, store }) {
-	if (!galleryId || !store) {
-		return;
+export function clearAllGalleryImageFocus({
+	galleryId,
+	store,
+	commitCatalog = (catalog) => commitPreviewCatalog(store, catalog),
+}) {
+	if (!store) {
+		return false;
 	}
 	const core = asGalleryItemList(store.getState().items.items);
-	const ids = [];
-	for (const row of core) {
-		if (
+	const cleared = core.filter(
+		(row) =>
 			itemHasImageFocusData(row) &&
 			row.id !== undefined &&
 			row.id !== null
-		) {
-			ids.push(row.id);
-		}
+	);
+	if (cleared.length === 0) {
+		return false;
 	}
-	for (const id of ids) {
-		const itemsNow = store.getState().items.items;
-		const storeIndex = findStoreIndexForItemId(itemsNow, id);
-		if (storeIndex < 0) {
-			continue;
-		}
-		const restRowIndex = modulaImagesRowIndexForPreviewWrite(
-			itemsNow,
-			storeIndex
-		);
-		const displayCoreIndex = storeIndexToCoreIndex(itemsNow, storeIndex);
-		if (restRowIndex < 0 || displayCoreIndex < 0) {
-			continue;
-		}
-		const res = await galleryPatchImageByIndex(
-			galleryId,
-			restRowIndex,
-			CLEAR_FIELDS
-		);
-		const patchRow = res?.image;
-		if (!patchRow) {
-			throw new Error(
-				'Could not clear image focus (empty server response).'
-			);
-		}
-		const nextCore = asGalleryItemList(store.getState().items.items);
-
-		const prevItem = nextCore[displayCoreIndex];
-		if (!prevItem) {
-			continue;
-		}
-		nextCore[displayCoreIndex] = stripFocalDataAttributesFromPreviewItem(
-			mergeModulaRowIntoPreviewItem(prevItem, patchRow)
-		);
-		commitPreviewCatalog(store, nextCore);
-		clearFocusCropSessionForItem(galleryId, prevItem);
-	}
+	commitCatalog(
+		core.map((row) =>
+			cleared.includes(row)
+				? stripFocalDataAttributesFromPreviewItem({
+						...row,
+						...CLEAR_FIELDS,
+					})
+				: row
+		)
+	);
+	cleared.forEach((row) => clearFocusCropSessionForItem(galleryId, row));
+	return true;
 }

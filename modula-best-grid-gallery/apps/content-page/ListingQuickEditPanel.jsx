@@ -110,17 +110,109 @@ function QuickEditStatus({ id, value, seedStatus, disabled, onChange }) {
 }
 
 /**
+ * Hints under the publication date, per row type.
+ *
+ * @param {string} type     Listing row type (`gallery` or `album`).
+ * @param {string} timezone Site timezone identifier or UTC offset.
+ * @return {{ schedule: string, scheduled: string }} The scheduling note, and the line for a row already scheduled.
+ */
+function publicationDateHints(type, timezone) {
+	if (type === 'album') {
+		return {
+			schedule: sprintf(
+				/* translators: %s: WordPress site timezone. */
+				__(
+					'Site timezone: %s. WordPress schedules published albums with a future date; they will not be public until that date.',
+					'modula-best-grid-gallery'
+				),
+				timezone
+			),
+			scheduled: __(
+				'This album is scheduled. Moving the date into the past publishes it immediately.',
+				'modula-best-grid-gallery'
+			),
+		};
+	}
+	return {
+		schedule: sprintf(
+			/* translators: %s: WordPress site timezone. */
+			__(
+				'Site timezone: %s. WordPress schedules published galleries with a future date; they will not be public until that date.',
+				'modula-best-grid-gallery'
+			),
+			timezone
+		),
+		scheduled: __(
+			'This gallery is scheduled. Moving the date into the past publishes it immediately.',
+			'modula-best-grid-gallery'
+		),
+	};
+}
+
+/**
+ * Publication date of a gallery or album, as a site-local wall time. The
+ * row's date is already in the site timezone, so it is shown and sent as
+ * typed; the save boundary validates it.
+ *
+ * @param {Object}   props
+ * @param {string}   props.id
+ * @param {string}   props.type        Listing row type (`gallery` or `album`).
+ * @param {string}   props.value
+ * @param {string}   props.timezone    Site timezone identifier or UTC offset.
+ * @param {boolean}  props.isScheduled Whether the row is saved as scheduled.
+ * @param {boolean}  props.disabled
+ * @param {Function} props.onChange
+ */
+function QuickEditPublicationDate({
+	id,
+	type,
+	value,
+	timezone,
+	isScheduled,
+	disabled,
+	onChange,
+}) {
+	const hints = publicationDateHints(type, timezone || 'UTC');
+	return (
+		<div className="modula-content-page__quick-edit-field is-wide">
+			<label htmlFor={id}>
+				{__('Publication date', 'modula-best-grid-gallery')}
+			</label>
+			<TextInput
+				id={id}
+				type="datetime-local"
+				// Seconds stay editable, so a stored time with seconds is
+				// not a step mismatch that blocks the form.
+				step="1"
+				value={value}
+				disabled={disabled}
+				aria-describedby={`${id}-hint`}
+				onChange={onChange}
+			/>
+			<span
+				id={`${id}-hint`}
+				className="modula-content-page__quick-edit-hint"
+			>
+				{hints.schedule}
+				{isScheduled ? ` ${hints.scheduled}` : null}
+			</span>
+		</div>
+	);
+}
+
+/**
  * Quick edit (listing): the panel under its row, in the Table's expansion
- * row, for title, status and slug. The app captures the row when Quick Edit
- * is used, so a listing refresh does not reset the draft. A failed save
+ * row, for title, status, slug and publication date. The app captures the
+ * row when Quick Edit is used, so a listing refresh does not reset the
+ * draft. A failed save
  * keeps the draft and shows the error here; Save retries. Cancel (off
  * while saving) and Escape, which the Table reports to the app, close it;
  * the Table returns focus to Quick Edit.
  *
- * @param {Object}                                                                             props
- * @param {import('./listingRowToFields').ListingRow}                                          props.item
- * @param {(document: { title?: string, status?: string, slug?: string }) => Promise<unknown>} props.onSave
- * @param {() => void}                                                                         props.onCancel
+ * @param {Object}                                                                                            props
+ * @param {import('./listingRowToFields').ListingRow}                                                         props.item
+ * @param {(document: { title?: string, status?: string, slug?: string, date?: string }) => Promise<unknown>} props.onSave
+ * @param {() => void}                                                                                        props.onCancel
  */
 export function ListingQuickEditPanel({ item, onSave, onCancel }) {
 	const id = useId();
@@ -138,7 +230,9 @@ export function ListingQuickEditPanel({ item, onSave, onCancel }) {
 	const savingRef = useRef(false);
 	const [errorMessage, setErrorMessage] = useState('');
 	const canChangeStatus = isAllowedListingRowPostDocumentStatus(seed.status);
-	const isDirty = ['title', 'status', 'slug'].some(
+	// A row without a date (an older listing payload) gets no field.
+	const canChangeDate = typeof seed.date === 'string';
+	const isDirty = ['title', 'status', 'slug', 'date'].some(
 		(field) => form[field] !== seed[field]
 	);
 	const prefix = displayPermalinkPrefix(seed.permalinkPrefix);
@@ -158,6 +252,9 @@ export function ListingQuickEditPanel({ item, onSave, onCancel }) {
 					? { status: form.status }
 					: {}),
 				...(form.slug !== seed.slug ? { slug: form.slug } : {}),
+				...(canChangeDate && form.date !== seed.date
+					? { date: form.date }
+					: {}),
 			});
 		} catch (error) {
 			setErrorMessage(
@@ -236,6 +333,17 @@ export function ListingQuickEditPanel({ item, onSave, onCancel }) {
 							/>
 						</div>
 					</div>
+					{canChangeDate ? (
+						<QuickEditPublicationDate
+							id={`${id}-date`}
+							type={item.type}
+							value={form.date}
+							timezone={item.timezone}
+							isScheduled={'future' === seed.status}
+							disabled={isSaving}
+							onChange={(date) => setForm({ ...form, date })}
+						/>
+					) : null}
 				</div>
 			</div>
 			{errorMessage ? (

@@ -13,17 +13,26 @@ import {
  * Visual tab, the textarea on the Code tab or before TinyMCE mounts.
  *
  * @param {string} editorInstanceKey
- * @return {string|undefined} Live caption HTML when editor exists.
+ * @return {string|undefined} Live caption HTML while the editor is in the document.
  */
 export function snapshotCaptionFromImageMetadataEditor(editorInstanceKey) {
 	if (
 		typeof window === 'undefined' ||
+		typeof document === 'undefined' ||
 		typeof editorInstanceKey !== 'string' ||
 		!editorInstanceKey
 	) {
 		return undefined;
 	}
 	const editorId = `modula-img-meta-caption-${editorInstanceKey}`;
+	const ta = document.getElementById(editorId);
+	// On the panel's unmount flush the editor has already left the document
+	// while its TinyMCE instance is not removed yet. The active tab can no
+	// longer be read there, and after a Code tab edit the hidden instance still
+	// holds the old caption; the form has every change the editor reported.
+	if (!ta) {
+		return undefined;
+	}
 	const ed =
 		window.tinymce && typeof window.tinymce.get === 'function'
 			? window.tinymce.get(editorId)
@@ -36,14 +45,7 @@ export function snapshotCaptionFromImageMetadataEditor(editorInstanceKey) {
 	if (visualEditorActive) {
 		return ed.getContent();
 	}
-	if (typeof document === 'undefined') {
-		return undefined;
-	}
-	const ta = document.getElementById(editorId);
-	if (ta && typeof ta.value === 'string') {
-		return ta.value;
-	}
-	return undefined;
+	return typeof ta.value === 'string' ? ta.value : undefined;
 }
 
 /**

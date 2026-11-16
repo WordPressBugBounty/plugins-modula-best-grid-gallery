@@ -1,17 +1,14 @@
 import {
 	TILE_IMAGE_FIT_CONTAIN,
 	asGalleryItemList,
-	modulaImagesRowIndexForPreviewWrite,
 	storeIndexToCoreIndex,
 } from 'gallery-shared/preview';
-import { useMutation } from '@tanstack/react-query';
+import { useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { galleryPatchImageByIndex } from '../api/galleryUploadApi';
 import {
 	commitPreviewCatalog,
-	mergeModulaRowIntoPreviewItem,
+	stripFocalDataAttributesFromPreviewItem,
 } from '../utils/previewItemsCommit';
-import { patchBootstrapQueryItems } from '../utils/patchBootstrapQueryItems';
 import {
 	clearFocusCropAreaFromSession,
 	focalFromCroppedArea,
@@ -22,249 +19,198 @@ import {
 	writeFocusCropAreaToSession,
 } from '../utils/focusPointCrop';
 import {
-	applyLetterboxFitToOtherGalleryImages,
 	buildLetterboxPatchFields,
+	clearOtherLetterboxFocusSessions,
 	mergeLetterboxFieldsIntoCoreItems,
 } from '../utils/applyLetterboxFitToGalleryImages';
 
+const CLEARED_FOCUS_FIELDS = {
+	focal_x: '',
+	focal_y: '',
+	focal_crop_x: '',
+	focal_crop_y: '',
+	focal_crop_w: '',
+	focal_crop_h: '',
+	tile_image_fit: '',
+};
+
 /**
- * Save / clear focal point for takeover preview focus modal.
+ * The focus fields Apply writes: letterbox alignment, or focal point and crop.
+ *
+ * @param {{
+ *   item: Object,
+ *   areaPct: import('react-easy-crop').Area|undefined,
+ *   letterboxFit: boolean,
+ *   letterboxFocal: { x: number, y: number },
+ * }} args
+ * @return {{ focal: { x: number, y: number }, fields: Record<string, string|number> }} The focal point and the row fields.
+ */
+function buildFocusFields({ item, areaPct, letterboxFit, letterboxFocal }) {
+	let focal = parseFocalFromItem(item) || { x: 0.5, y: 0.5 };
+	if (letterboxFit) {
+		focal = letterboxFocal;
+	} else if (areaPct) {
+		focal = focalFromCroppedArea(areaPct);
+	}
+	const fields = {
+		focal_x: focal.x,
+		focal_y: focal.y,
+		tile_image_fit: letterboxFit ? TILE_IMAGE_FIT_CONTAIN : '',
+		focal_crop_x: '',
+		focal_crop_y: '',
+		focal_crop_w: '',
+		focal_crop_h: '',
+	};
+	if (letterboxFit) {
+		return { focal, fields };
+	}
+	if (areaPct) {
+		fields.focal_crop_x = areaPct.x / 100;
+		fields.focal_crop_y = areaPct.y / 100;
+		fields.focal_crop_w = areaPct.width / 100;
+		fields.focal_crop_h = areaPct.height / 100;
+		return { focal, fields };
+	}
+	return { focal, fields: { ...fields, ...getFocalCrop01FromItem(item) } };
+}
+
+/**
+ * Apply / reset the image focus from the focus view. Both change the preview
+ * store at once and send nothing: the editor save stores them (ADR 0059).
  *
  * @param {{
  *   galleryId: number,
  *   storeIndex: number|null,
  *   item: Object|null,
  *   store: import('redux').Store,
- *   runPersistTask: (fn: () => void | Promise<void>) => Promise<void>,
- *   queryClient: import('@tanstack/react-query').QueryClient,
- *   bootstrapQueryKey: import('@tanstack/react-query').QueryKey,
  *   onClose: () => void,
  *   lastAreaRef: import('react').MutableRefObject<import('react-easy-crop').Area|undefined>,
  *   letterboxFit: boolean,
  *   letterboxFocalRef: import('react').MutableRefObject<{ x: number, y: number }|undefined>,
  *   setPersistError: (msg: string) => void,
  * }} args
+ * @return {{ applyFocus: (opts?: { applyToAll?: boolean }) => void, clearFocus: () => void }} Focus actions.
  */
 export function useFocusPointMutations({
 	galleryId,
 	storeIndex,
 	item,
 	store,
-	runPersistTask,
-	queryClient,
-	bootstrapQueryKey,
 	onClose,
 	lastAreaRef,
 	letterboxFit = false,
 	letterboxFocalRef,
 	setPersistError,
 }) {
-	const persistOwner = `item-focus:${galleryId}:${item?.freeformId || `${item?.id}:${storeIndex}`}`;
-	const saveMutation = useMutation({
-		mutationFn: async ({ applyToAll = false } = {}) => {
+	/**
+	 * The catalog and the edited row's position in it, or null when the
+	 * focus view has no image to edit.
+	 */
+	const readTarget = useCallback(() => {
+		if (storeIndex === null || storeIndex < 0 || !item) {
+			return null;
+		}
+		const itemsLive = store.getState().items.items;
+		const coreIndex = storeIndexToCoreIndex(itemsLive, storeIndex);
+		const core = asGalleryItemList(itemsLive);
+		if (coreIndex < 0 || !core[coreIndex]) {
+			return null;
+		}
+		return { core, coreIndex };
+	}, [item, store, storeIndex]);
+
+	const reportMissingImage = useCallback(() => {
+		setPersistError(
+			__(
+				'This image is no longer in the gallery.',
+				'modula-best-grid-gallery'
+			)
+		);
+	}, [setPersistError]);
+
+	const applyFocus = useCallback(
+		({ applyToAll = false } = {}) => {
+			const target = readTarget();
+			if (!target) {
+				reportMissingImage();
+				return;
+			}
 			setPersistError('');
-			if (!galleryId || storeIndex === null || storeIndex < 0 || !item) {
-				throw new Error('missing_context');
-			}
-			const itemsLive = store.getState().items.items;
-			const displayCoreIndex = storeIndexToCoreIndex(
-				itemsLive,
-				storeIndex
-			);
-			const restRowIndex = modulaImagesRowIndexForPreviewWrite(
-				itemsLive,
-				storeIndex
-			);
-			if (displayCoreIndex < 0 || restRowIndex < 0) {
-				throw new Error('invalid_indices');
-			}
+			const { core, coreIndex } = target;
 			const areaPct =
 				lastAreaRef.current ??
 				focalCropPercentagesFromItem(item) ??
 				undefined;
-			const letterboxFocal = letterboxFocalRef?.current ??
-				parseFocalFromItem(item) ?? { x: 0.5, y: 0.5 };
-			const focal = letterboxFit
-				? letterboxFocal
-				: areaPct
-					? focalFromCroppedArea(areaPct)
-					: parseFocalFromItem(item) || { x: 0.5, y: 0.5 };
-			const fields = {
-				focal_x: focal.x,
-				focal_y: focal.y,
-				tile_image_fit: letterboxFit ? TILE_IMAGE_FIT_CONTAIN : '',
-			};
-			if (letterboxFit) {
-				fields.focal_crop_x = '';
-				fields.focal_crop_y = '';
-				fields.focal_crop_w = '';
-				fields.focal_crop_h = '';
-			} else if (areaPct) {
-				fields.focal_crop_x = areaPct.x / 100;
-				fields.focal_crop_y = areaPct.y / 100;
-				fields.focal_crop_w = areaPct.width / 100;
-				fields.focal_crop_h = areaPct.height / 100;
-			} else {
-				const persisted = getFocalCrop01FromItem(item);
-				if (persisted) {
-					Object.assign(fields, persisted);
-				} else {
-					fields.focal_crop_x = '';
-					fields.focal_crop_y = '';
-					fields.focal_crop_w = '';
-					fields.focal_crop_h = '';
-				}
-			}
-			const core = asGalleryItemList(itemsLive);
-			if (displayCoreIndex >= 0 && core[displayCoreIndex]) {
-				core[displayCoreIndex] = {
-					...core[displayCoreIndex],
-					...fields,
-				};
-			}
-			if (letterboxFit && applyToAll) {
-				const letterboxPatch = buildLetterboxPatchFields(focal);
-				const merged = mergeLetterboxFieldsIntoCoreItems(
-					core,
-					letterboxPatch,
-					item.id
-				);
-				commitPreviewCatalog(store, merged);
-			} else if (displayCoreIndex >= 0) {
-				commitPreviewCatalog(store, core);
-			}
-			await runPersistTask(async () => {
-				const res = await galleryPatchImageByIndex(
-					galleryId,
-					restRowIndex,
-					fields
-				);
-				const row = res?.image;
-				if (!row) {
-					throw new Error(
-						__(
-							'Could not save image focus (empty server response).',
-							'modula-best-grid-gallery'
+			const { focal, fields } = buildFocusFields({
+				item,
+				areaPct,
+				letterboxFit,
+				letterboxFocal: letterboxFocalRef?.current ??
+					parseFocalFromItem(item) ?? { x: 0.5, y: 0.5 },
+			});
+			core[coreIndex] = { ...core[coreIndex], ...fields };
+			const applyLetterboxToAll = letterboxFit && applyToAll;
+			commitPreviewCatalog(
+				store,
+				applyLetterboxToAll
+					? mergeLetterboxFieldsIntoCoreItems(
+							core,
+							buildLetterboxPatchFields(focal),
+							item.id
 						)
-					);
-				}
-				const coreAfter = asGalleryItemList(
-					store.getState().items.items
-				);
-				coreAfter[displayCoreIndex] = mergeModulaRowIntoPreviewItem(
-					coreAfter[displayCoreIndex],
-					row
-				);
-				commitPreviewCatalog(store, coreAfter);
-				if (letterboxFit && applyToAll) {
-					await applyLetterboxFitToOtherGalleryImages({
-						galleryId,
-						store,
-						fields: buildLetterboxPatchFields(focal),
-						excludeItemId: item.id,
-					});
-				}
-			}, persistOwner);
-		},
-		onSuccess: async () => {
-			setPersistError('');
+					: core
+			);
+			if (applyLetterboxToAll) {
+				clearOtherLetterboxFocusSessions({
+					galleryId,
+					items: core,
+					excludeItemId: item.id,
+				});
+			}
 			const key = getFocusCropStorageKey(galleryId, item);
 			if (key && lastAreaRef.current) {
 				writeFocusCropAreaToSession(key, lastAreaRef.current);
 			}
-			const core = asGalleryItemList(store.getState().items.items);
-			patchBootstrapQueryItems(queryClient, galleryId, core);
 			onClose();
 		},
-		onError: (e) => {
-			// eslint-disable-next-line no-console
-			console.error(e);
-			const msg =
-				(typeof e?.message === 'string' && e.message) ||
-				e?.data?.message ||
-				__(
-					'Could not save image focus. Please try again.',
-					'modula-best-grid-gallery'
-				);
-			setPersistError(String(msg));
-		},
-	});
+		[
+			galleryId,
+			item,
+			lastAreaRef,
+			letterboxFit,
+			letterboxFocalRef,
+			onClose,
+			readTarget,
+			reportMissingImage,
+			setPersistError,
+			store,
+		]
+	);
 
-	const clearMutation = useMutation({
-		mutationFn: async () => {
-			setPersistError('');
-			if (!galleryId || storeIndex === null || storeIndex < 0 || !item) {
-				throw new Error('missing_context');
-			}
-			const itemsLive = store.getState().items.items;
-			const displayCoreIndex = storeIndexToCoreIndex(
-				itemsLive,
-				storeIndex
-			);
-			const restRowIndex = modulaImagesRowIndexForPreviewWrite(
-				itemsLive,
-				storeIndex
-			);
-			if (displayCoreIndex < 0 || restRowIndex < 0) {
-				throw new Error('invalid_indices');
-			}
-			const fields = {
-				focal_x: '',
-				focal_y: '',
-				focal_crop_x: '',
-				focal_crop_y: '',
-				focal_crop_w: '',
-				focal_crop_h: '',
-				tile_image_fit: '',
-			};
-			await runPersistTask(async () => {
-				const res = await galleryPatchImageByIndex(
-					galleryId,
-					restRowIndex,
-					fields
-				);
-				const row = res?.image;
-				if (!row) {
-					throw new Error(
-						__(
-							'Could not clear image focus (empty server response).',
-							'modula-best-grid-gallery'
-						)
-					);
-				}
-				const core = asGalleryItemList(store.getState().items.items);
-				core[displayCoreIndex] = mergeModulaRowIntoPreviewItem(
-					core[displayCoreIndex],
-					row
-				);
-				commitPreviewCatalog(store, core);
-			}, persistOwner);
-		},
-		onSuccess: async () => {
-			setPersistError('');
-			clearFocusCropAreaFromSession(
-				getFocusCropStorageKey(galleryId, item)
-			);
-			const core = asGalleryItemList(store.getState().items.items);
-			patchBootstrapQueryItems(queryClient, galleryId, core);
-			onClose();
-		},
-		onError: (e) => {
-			// eslint-disable-next-line no-console
-			console.error(e);
-			const msg =
-				(typeof e?.message === 'string' && e.message) ||
-				e?.data?.message ||
-				__(
-					'Could not clear image focus. Please try again.',
-					'modula-best-grid-gallery'
-				);
-			setPersistError(String(msg));
-		},
-	});
+	const clearFocus = useCallback(() => {
+		const target = readTarget();
+		if (!target) {
+			reportMissingImage();
+			return;
+		}
+		setPersistError('');
+		const { core, coreIndex } = target;
+		core[coreIndex] = stripFocalDataAttributesFromPreviewItem({
+			...core[coreIndex],
+			...CLEARED_FOCUS_FIELDS,
+		});
+		commitPreviewCatalog(store, core);
+		clearFocusCropAreaFromSession(getFocusCropStorageKey(galleryId, item));
+		onClose();
+	}, [
+		galleryId,
+		item,
+		onClose,
+		readTarget,
+		reportMissingImage,
+		setPersistError,
+		store,
+	]);
 
-	return {
-		saveMutation,
-		clearMutation,
-	};
+	return { applyFocus, clearFocus };
 }

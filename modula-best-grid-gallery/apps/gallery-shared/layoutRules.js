@@ -9,3 +9,8 @@
  */
 
 export { getLayoutPolicy } from './utils/getLayoutPolicy';
+export { isManualLayoutGalleryType } from './utils/galleryLayoutEditorSupport';
+export {
+	freeformOccurrenceIds,
+	placeFreeformLayoutSlots,
+} from './utils/freeformGeometry';

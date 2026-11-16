@@ -1,15 +1,14 @@
 /**
  * State, effects, and admin callbacks for the takeover live preview mounted body.
  */
-import { useCallback, useRef } from '@wordpress/element';
+import { useMemo, useRef } from '@wordpress/element';
 import { useTakeoverPreviewStore } from './takeover-live-preview/useTakeoverPreviewStore';
-import { usePreviewPersistCoordinator } from './takeover-live-preview/usePreviewPersistCoordinator';
+import { useGalleryItemsSavePart } from './takeover-live-preview/useGalleryItemsSavePart';
 import { usePreviewItemModals } from './takeover-live-preview/usePreviewItemModals';
 import { usePreviewItemAdminActions } from './takeover-live-preview/usePreviewItemAdminActions';
 import { useCustomGridPaginationLayoutEffect } from './takeover-live-preview/useCustomGridPaginationLayoutEffect';
 import { useFitGridClearImageFocus } from './useFitGridClearImageFocus';
 import { useTemplateLayoutSideEffects } from './useTemplateLayoutSideEffects';
-import { runCustomGridPreviewItemMutation } from '../utils/customGridPreviewItemMutation';
 import { useGallerySettingsFormBundle } from '../form/GallerySettingsFormContext';
 
 /**
@@ -36,7 +35,11 @@ export function useGalleryTakeoverLivePreviewController({
 			? groupedSettings.general.type
 			: '';
 	const { undoRedo } = useGallerySettingsFormBundle();
-	const preservePreviewItemsRef = useRef(() => false);
+	// Filled by the items part below, read by hydration after render.
+	const itemsBaselineRef = useRef({
+		hasUnsavedChanges: () => false,
+		adoptStoredItems: () => {},
+	});
 
 	const { store, storeRef } = useTakeoverPreviewStore({
 		galleryId,
@@ -44,47 +47,23 @@ export function useGalleryTakeoverLivePreviewController({
 		groupedSettings,
 		previewViewport,
 		galleryTitle,
-		shouldPreservePreviewItemsRef: preservePreviewItemsRef,
+		itemsBaselineRef,
 	});
 
-	const {
-		queryClient,
-		bootstrapQueryKey,
-		runPersistTaskWithDeferredRefresh,
-		schedulePersistPreviewItems,
-		holdScheduledPreviewPersist,
-		flushPreviewItemsPersistNow,
-		resetPreviewPersistDirty,
-		isPreviewItemsPersistPending,
-	} = usePreviewPersistCoordinator({
-		galleryId,
-		storeRef,
-		preservePreviewItemsRef,
-	});
+	const { hasUnsavedChanges, adoptStoredItems, commitDerivedItems } =
+		useGalleryItemsSavePart({
+			galleryId,
+			store,
+			commitItemsStep: undoRedo.commitItemsStep,
+		});
+	itemsBaselineRef.current = { hasUnsavedChanges, adoptStoredItems };
 
 	useCustomGridPaginationLayoutEffect({
 		store,
 		galleryType,
 		enablePagination: groupedSettings?.pagination?.enablePagination,
-		schedulePersistPreviewItems,
 		dropLayoutSteps: undoRedo.dropLayoutSteps,
 	});
-
-	const runPreviewItemMutation = useCallback(
-		(task, owner) =>
-			runCustomGridPreviewItemMutation({
-				isPersistPending: isPreviewItemsPersistPending,
-				flushPersist: flushPreviewItemsPersistNow,
-				runMutation: (pendingTask) =>
-					runPersistTaskWithDeferredRefresh(pendingTask, owner),
-				task,
-			}),
-		[
-			isPreviewItemsPersistPending,
-			flushPreviewItemsPersistNow,
-			runPersistTaskWithDeferredRefresh,
-		]
-	);
 
 	const {
 		metaModalStoreIndex,
@@ -105,7 +84,7 @@ export function useGalleryTakeoverLivePreviewController({
 		galleryId,
 		galleryType,
 		storeRef,
-		runPersistTask: runPersistTaskWithDeferredRefresh,
+		commitDerivedItems,
 	});
 
 	const templateLayout =
@@ -115,42 +94,33 @@ export function useGalleryTakeoverLivePreviewController({
 			: 'split-stack';
 
 	useTemplateLayoutSideEffects({
-		galleryId,
 		store,
 		galleryType,
 		templateLayout,
-		runPersistTask: runPersistTaskWithDeferredRefresh,
 	});
 
 	const { handleSaveContentBlock, previewAdminValue } =
 		usePreviewItemAdminActions({
 			galleryId,
 			galleryType,
-			queryClient,
 			storeRef,
-			runPreviewItemMutation,
 			contentBlockEdit,
 			setContentBlockEdit,
 			saveMetaModalReturnFocus,
 			setMetaModalStoreIndex,
-			schedulePersistPreviewItems,
-			holdScheduledPreviewPersist,
 		});
 
-	const previewItemPersistApi = {
-		runPersistTaskWithDeferredRefresh,
-		flushPreviewItemsPersistNow,
-		resetPreviewPersistDirty,
-	};
+	const previewItemsPart = useMemo(
+		() => ({ commitDerivedItems }),
+		[commitDerivedItems]
+	);
 
 	return {
 		store,
 		galleryType,
 		previewGalleryShellStyle,
 		galleryWidthOverflow,
-		queryClient,
-		bootstrapQueryKey,
-		previewItemPersistApi,
+		previewItemsPart,
 		metaModalStoreIndex,
 		setMetaModalStoreIndex,
 		closeMetaModal,

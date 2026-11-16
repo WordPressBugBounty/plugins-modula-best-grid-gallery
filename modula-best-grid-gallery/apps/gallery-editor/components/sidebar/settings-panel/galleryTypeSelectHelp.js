@@ -24,7 +24,7 @@ const HELP_BY_TYPE = {
 		'modula-best-grid-gallery'
 	),
 	'creative-gallery': __(
-		'Creative gallery splits tiles into varied blocks. Spacing and randomness change the rhythm.',
+		'Tiles gallery splits tiles into varied blocks. Spacing and randomness change the rhythm.',
 		'modula-best-grid-gallery'
 	),
 	'custom-grid': __(

@@ -2,15 +2,15 @@
  * Redesign canvas toolbar above the live preview:
  * Select multiple | Bulk edit | Sort · <mode> ⌄ ··· Add split (+ import host).
  * In selection mode: Done selecting | Select all | N selected · Clear | Bulk edit (N) | Sort.
- * Sort opens its popover (GallerySortPopover).
+ * Sort opens its popover (GallerySortPopover); Custom grid and Freeform have no Sort.
  */
 import { useEffect, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { isManualLayoutGalleryType } from 'gallery-shared/layoutRules';
 import {
 	CanvasToolbar,
 	CanvasToolbarActionButton,
 	CanvasToolbarSelectionCount,
-	useTakeoverSaveStatus,
 } from 'editor-shell';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
 import { useInvalidateGalleryBootstrap } from '../../hooks/useInvalidateGalleryBootstrap';
@@ -32,23 +32,21 @@ import GallerySortPopover from './GallerySortPopover';
  * @param {{
  *   galleryId?: number,
  *   galleryType?: string,
- *   runPreviewItemMutation?: (task: () => void | Promise<void>) => Promise<void>,
  * }} props
  */
 export default function GalleryPreviewCanvasToolbar({
 	galleryId = 0,
 	galleryType = '',
-	runPreviewItemMutation,
 }) {
 	const { form } = useGallerySettingsFormBundle();
-	const { runPersistTask } = useTakeoverSaveStatus();
-	const persistItemMutation = runPreviewItemMutation ?? runPersistTask;
 	const { openBulkEdit } = useBulkEdit();
 	const tileSelection = useGalleryPreviewTileSelection();
 	const selectedCount = tileSelection?.modeActive
 		? tileSelection.selectedStoreIndices.length
 		: 0;
 	const editor = getModulaSettingsEditorConfig();
+	// On a manual layout the author places every tile; there is no order to sort.
+	const canSort = editor.isPro && !isManualLayoutGalleryType(galleryType);
 	const [mediaLibraryError, setMediaLibraryError] = useState('');
 
 	const invalidateBootstrap = useInvalidateGalleryBootstrap(galleryId);
@@ -96,7 +94,6 @@ export default function GalleryPreviewCanvasToolbar({
 						galleryId,
 						uploadPosition,
 						invalidateBootstrap,
-						runPersistTask: persistItemMutation,
 						form,
 						config: editor,
 					}}
@@ -197,7 +194,7 @@ export default function GalleryPreviewCanvasToolbar({
 												)}
 									</CanvasToolbarActionButton>
 								) : null}
-								{editor.isPro ? (
+								{canSort ? (
 									<GallerySortPopover galleryId={galleryId} />
 								) : null}
 							</>
@@ -211,7 +208,6 @@ export default function GalleryPreviewCanvasToolbar({
 								galleryId={galleryId}
 								galleryType={galleryType}
 								uploadPosition={uploadPosition}
-								runPersistTask={persistItemMutation}
 								onLibraryAdded={() => {
 									setMediaLibraryError('');
 									invalidateBootstrap();

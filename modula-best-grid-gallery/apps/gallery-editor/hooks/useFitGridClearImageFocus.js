@@ -5,28 +5,30 @@
  * @package
  */
 
-import { asGalleryItemList, getLayoutPolicy } from 'gallery-shared/preview';
+import { getLayoutPolicy } from 'gallery-shared/preview';
 import { useEffect, useRef } from '@wordpress/element';
 import { clearAllGalleryImageFocus } from '../utils/clearAllGalleryImageFocus';
-import { itemHasImageFocusData } from '../utils/itemHasImageFocus';
-import { GALLERY_SAVE_OWNERS } from '../constants/gallerySaveOwners';
 
 /**
+ * Switching to a layout without image focus clears it in the store, an
+ * unsaved change the editor save stores (ADR 0059). Opening a gallery stored
+ * with such a layout clears it as a derived change: that layout ignores the
+ * focus, so the editor does not open with unsaved changes.
+ *
  * @param {{
  *   galleryId: number,
  *   galleryType: string,
  *   storeRef: import('react').MutableRefObject<import('@reduxjs/toolkit').Store|null>,
- *   runPersistTask?: (task: () => Promise<unknown>) => Promise<unknown>,
+ *   commitDerivedItems: (catalog: Object[]) => void,
  * }} args
  */
 export function useFitGridClearImageFocus({
 	galleryId,
 	galleryType,
 	storeRef,
-	runPersistTask,
+	commitDerivedItems,
 }) {
-	const clearingRef = useRef(false);
-	const wasImageFocusSupportedRef = useRef(true);
+	const wasImageFocusSupportedRef = useRef(null);
 
 	useEffect(() => {
 		const supportsImageFocus = getLayoutPolicy({
@@ -35,46 +37,14 @@ export function useFitGridClearImageFocus({
 		const wasSupported = wasImageFocusSupportedRef.current;
 		wasImageFocusSupportedRef.current = supportsImageFocus;
 
-		if (supportsImageFocus || !galleryId || !storeRef.current) {
+		if (supportsImageFocus || wasSupported === false || !storeRef.current) {
 			return;
 		}
-
-		if (!wasSupported) {
-			return;
-		}
-
-		const items = storeRef.current.getState()?.items?.items;
-		const hasFocus =
-			Array.isArray(items) &&
-			asGalleryItemList(items).some((row) => itemHasImageFocusData(row));
-
-		if (!hasFocus || clearingRef.current) {
-			return;
-		}
-
-		clearingRef.current = true;
-		const clearTask = () =>
-			clearAllGalleryImageFocus({
-				galleryId,
-				store: storeRef.current,
-			});
-
-		(async () => {
-			try {
-				if (typeof runPersistTask === 'function') {
-					await runPersistTask(
-						clearTask,
-						GALLERY_SAVE_OWNERS.clearFocus
-					);
-				} else {
-					await clearTask();
-				}
-			} catch (e) {
-				// eslint-disable-next-line no-console
-				console.error(e);
-			} finally {
-				clearingRef.current = false;
-			}
-		})();
-	}, [galleryId, galleryType, runPersistTask, storeRef]);
+		const isOpening = wasSupported === null;
+		clearAllGalleryImageFocus({
+			galleryId,
+			store: storeRef.current,
+			...(isOpening ? { commitCatalog: commitDerivedItems } : {}),
+		});
+	}, [galleryId, galleryType, storeRef, commitDerivedItems]);
 }

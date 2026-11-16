@@ -35,9 +35,7 @@ function bulkEditGridColumns(columns) {
  * @param {boolean}                                      [props.unavailableOnLocalhost]
  * @param {string[]}                                     props.selectedIds
  * @param {ReturnType<typeof import('./useBulkEditDraft').useBulkEditDraft>} props.draft
- * @param {number}                                       props.galleryId
  * @param {import('@reduxjs/toolkit').Store}             props.previewStore
- * @param {Function}                                     props.runPersistTask
  * @param {(message: string, tone?: string) => void}     props.onNotice
  */
 export default function BulkEditTable({
@@ -49,9 +47,7 @@ export default function BulkEditTable({
 	unavailableOnLocalhost = false,
 	selectedIds,
 	draft,
-	galleryId,
 	previewStore,
-	runPersistTask,
 	onNotice,
 }) {
 	const [expandedDescriptionKey, setExpandedDescriptionKey] = useState(
@@ -120,9 +116,7 @@ export default function BulkEditTable({
 							unavailableOnLocalhost={unavailableOnLocalhost}
 							patchRow={draft.patchRow}
 							getRowField={draft.getRowField}
-							galleryId={galleryId}
 							previewStore={previewStore}
-							runPersistTask={runPersistTask}
 							onNotice={onNotice}
 							onRowSaved={(id) => draft.clearRowDraft(id)}
 							isDescriptionExpanded={

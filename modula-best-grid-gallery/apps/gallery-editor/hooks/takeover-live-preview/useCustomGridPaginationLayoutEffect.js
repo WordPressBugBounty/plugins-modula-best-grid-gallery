@@ -1,5 +1,6 @@
 /**
  * When custom-grid pagination is toggled, clear absolute coords and repack / reflow.
+ * The repack changes the preview store only; the editor save stores it.
  */
 import {
 	measureCustomGridPreviewWidth,
@@ -28,7 +29,6 @@ function isPaginationEnabled(value) {
  *   store: import('@reduxjs/toolkit').Store|null,
  *   galleryType: string,
  *   enablePagination: unknown,
- *   schedulePersistPreviewItems: () => void,
  *   dropLayoutSteps?: () => void,
  * }} args
  */
@@ -36,7 +36,6 @@ export function useCustomGridPaginationLayoutEffect({
 	store,
 	galleryType,
 	enablePagination,
-	schedulePersistPreviewItems,
 	dropLayoutSteps,
 }) {
 	const prevEnabledRef = useRef(/** @type {boolean|null} */ (null));
@@ -75,18 +74,11 @@ export function useCustomGridPaginationLayoutEffect({
 		}
 
 		if (changed) {
-			schedulePersistPreviewItems();
 			dropGalleryEditorLayoutStepsIfNeeded(dropLayoutSteps, {
 				prevType: galleryType,
 				nextType: galleryType,
 				cellsMutated: changed,
 			});
 		}
-	}, [
-		store,
-		galleryType,
-		enablePagination,
-		schedulePersistPreviewItems,
-		dropLayoutSteps,
-	]);
+	}, [store, galleryType, enablePagination, dropLayoutSteps]);
 }

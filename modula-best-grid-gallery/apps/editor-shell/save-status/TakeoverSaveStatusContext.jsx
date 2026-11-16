@@ -1,9 +1,15 @@
 /**
- * Takeover save status: one "Saved / Saving… / Unsaved changes / error" state, plus
- * the time of the latest success, for every write an editor makes (settings
- * autosave, items or members, title, status).
- * The rules live in `saveStatusModel`; this provider serializes writes and
- * re-renders on change.
+ * Takeover write queue: one "Saved / Saving… / error" state, plus the time of
+ * the latest success, for the writes an editor runs through `runPersistTask`.
+ * Unsaved changes and Save belong to the editor save session (ADR 0059,
+ * `EditorSaveSessionContext`); the top bar merges both views.
+ *
+ * Kept for its callers: the gallery editor's items and post-fields parts run
+ * their save requests through it, so the top bar's save state and the
+ * recovery copy's saved-state marker follow them. Only Pro 3.0.24 or newer
+ * loads in the new editor (spec decision 29), and it writes nothing through
+ * the queue. The rules live in `saveStatusModel`; this provider serializes
+ * writes and re-renders on change.
  */
 import {
 	createContext,
@@ -13,14 +19,12 @@ import {
 	useRef,
 	useState,
 } from '@wordpress/element';
-import { applyRestPostStatus } from './restPostStatus';
 import {
 	createSaveStatusState,
 	deriveSaveStatus,
 	dismissSaveFailures,
 	finishWrite,
 	queueWrite,
-	setOwnerDirty,
 	startWrite,
 	writeFailed,
 	writeSucceeded,
@@ -34,10 +38,11 @@ const INITIAL_VIEW = deriveSaveStatus(createSaveStatusState());
  * @param {{ children: import('react').ReactNode }} props
  */
 export function TakeoverSaveStatusProvider({ children }) {
-	/** Serializes writes so debounced autosaves of one document cannot race. */
+	/** Serializes writes so two writes of one document cannot race. */
 	const persistQueueRef = useRef(Promise.resolve());
 	const saveStateRef = useRef(createSaveStatusState());
-	const postStatusSyncRef = useRef(null);
+	/** @type {import('react').MutableRefObject<Set<(result: unknown) => void>>} */
+	const writeResultListenersRef = useRef(new Set());
 	const [view, setView] = useState(INITIAL_VIEW);
 
 	const refreshStatus = useCallback(() => {
@@ -52,16 +57,13 @@ export function TakeoverSaveStatusProvider({ children }) {
 		);
 	}, []);
 
-	const setDirty = useCallback(
-		(owner, dirty) => {
-			setOwnerDirty(saveStateRef.current, owner, dirty);
-			refreshStatus();
-		},
-		[refreshStatus]
-	);
-
-	const registerPostStatusSync = useCallback((fn) => {
-		postStatusSyncRef.current = typeof fn === 'function' ? fn : null;
+	/*
+	 * Hear the result of every queued write that succeeded, e.g. to read the
+	 * saved-state marker the server returns with it (recovery copy).
+	 */
+	const subscribeWriteResults = useCallback((listener) => {
+		writeResultListenersRef.current.add(listener);
+		return () => writeResultListenersRef.current.delete(listener);
 	}, []);
 
 	/** An acknowledgement recovers only its own owner; other failures remain visible. */
@@ -75,7 +77,9 @@ export function TakeoverSaveStatusProvider({ children }) {
 				refreshStatus();
 				try {
 					const result = await fn();
-					applyRestPostStatus(result, postStatusSyncRef.current);
+					writeResultListenersRef.current.forEach((listener) =>
+						listener(result)
+					);
 					writeSucceeded(state, owner);
 					return result;
 				} catch (error) {
@@ -105,10 +109,9 @@ export function TakeoverSaveStatusProvider({ children }) {
 			runPersistTask,
 			...view,
 			clearError,
-			setDirty,
-			registerPostStatusSync,
+			subscribeWriteResults,
 		}),
-		[runPersistTask, view, clearError, setDirty, registerPostStatusSync]
+		[runPersistTask, view, clearError, subscribeWriteResults]
 	);
 
 	return (
@@ -123,8 +126,10 @@ export function TakeoverSaveStatusProvider({ children }) {
  * explicit owner recovers only that owner. Without one, the calling hook
  * instance is the owner, so retries from the same producer still recover.
  * Outside a provider, writes run directly and the status stays saved.
+ * `subscribeWriteResults(listener)` hears each successful queued write's
+ * result and returns its unsubscribe.
  *
- * @return {Object} Save status, `runPersistTask`, `setDirty(owner, dirty)`, `clearError`, `registerPostStatusSync`.
+ * @return {Object} Save status, `runPersistTask`, `clearError`, `subscribeWriteResults`.
  */
 export function useTakeoverSaveStatus() {
 	const ctx = useContext(TakeoverSaveStatusContext);
@@ -143,8 +148,7 @@ export function useTakeoverSaveStatus() {
 		() => ({
 			...INITIAL_VIEW,
 			clearError: () => {},
-			setDirty: () => {},
-			registerPostStatusSync: () => {},
+			subscribeWriteResults: () => () => {},
 			...ctx,
 			runPersistTask,
 		}),

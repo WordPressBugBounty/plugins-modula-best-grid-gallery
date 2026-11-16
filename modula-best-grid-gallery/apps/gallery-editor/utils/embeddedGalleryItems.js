@@ -139,7 +139,13 @@ const EMBEDDED_ROW_COMPUTED_SAVE_KEYS = [
 	'blockBackgroundImageUrl',
 ];
 
-/** Settings-editor bootstrap fields that must not be written back to post meta. */
+/**
+ * Settings-editor bootstrap fields that must not be written back to post meta:
+ * the server drops the same keys before storing a row
+ * (`Adapter::$bootstrap_only_storage_keys` in PHP), so the items part neither
+ * sends nor compares them. A watermark burn changes only these on a tile
+ * (`watermarkApplied`, cache-busted URLs), so it is never an unsaved change.
+ */
 const BOOTSTRAP_ONLY_ROW_SAVE_KEYS = [
 	'modulaRowIndex',
 	'itemClasses',
@@ -149,6 +155,8 @@ const BOOTSTRAP_ONLY_ROW_SAVE_KEYS = [
 	'imgClasses',
 	'imgAttributes',
 	'srcset',
+	'sliderThumbnail',
+	'sliderThumbnailChoices',
 	'sizes',
 	'lazyLoad',
 	'hideTitle',
@@ -156,6 +164,10 @@ const BOOTSTRAP_ONLY_ROW_SAVE_KEYS = [
 	'hideSocials',
 	'src',
 	'thumbnail',
+	'url',
+	'watermarkApplied',
+	'watermarkSourceSize',
+	'fullImageSize',
 ];
 
 /**

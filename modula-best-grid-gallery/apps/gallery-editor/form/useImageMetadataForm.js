@@ -11,7 +11,7 @@ import {
 	focusedImageMetadataProtectedFieldName,
 	mergeMediaHydrationPreservingLocalEdits,
 	shouldApplyImageMetadataExternalReset,
-} from '../utils/imageMetadataAutosavePolicy';
+} from '../utils/imageMetadataMediaHydration';
 import {
 	ITEM_CSS_CLASS_KEY,
 	ITEM_HOVER_PRESET_KEY,

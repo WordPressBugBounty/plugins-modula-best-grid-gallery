@@ -16,7 +16,6 @@ export function GalleryTypeChangeProvider({ children }) {
 			{children}
 			<GalleryTypeChangeConfirmModal
 				isOpen={confirm.galleryTypeConfirmOpen}
-				isBusy={confirm.galleryTypeConfirmBusy}
 				onCancel={confirm.handleGalleryTypeConfirmCancel}
 				onConfirm={confirm.handleGalleryTypeConfirm}
 			/>

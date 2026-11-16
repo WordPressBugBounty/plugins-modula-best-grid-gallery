@@ -33,7 +33,7 @@ const PREVIEW_WRAP_MODIFIERS = {
  * @param {import('react').ReactNode}                       props.canvas                    Artboard body.
  * @param {'desktop'|'tablet'|'mobile'}                     props.previewViewport
  * @param {(viewport: 'desktop'|'tablet'|'mobile') => void} [props.onPreviewViewportChange] Shows the device pill.
- * @param {import('react').ReactNode}                       [props.children]                Non-visual helpers (autosave, listeners).
+ * @param {import('react').ReactNode}                       [props.children]                Non-visual helpers (listeners).
  * @param {string}                                          [props.className]               Editor-specific root classes.
  */
 export default function TakeoverLayout(props) {

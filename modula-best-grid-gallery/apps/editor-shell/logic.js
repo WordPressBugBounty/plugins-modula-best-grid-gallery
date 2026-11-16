@@ -51,10 +51,17 @@ export {
 	EDITOR_HISTORY_MAX_PAST,
 } from './history/editorHistoryStack';
 export * from './top-bar/editorPostDocument';
+export { createEditorPostFields } from './top-bar/editorPostFields';
 export { buildEmbedRows, isPhpEmbedRow } from './top-bar/embedRows';
 export * from './save-status/saveStatusModel';
 export * from './save-status/restPostStatus';
+export { createEditorSaveSession } from './save-status/editorSaveSession';
+export { mergeEditorSaveStatus } from './save-status/editorSaveStatusView';
 export * from './appearance/settingsEditorAppearance';
+export {
+	EDITOR_DOCUMENT_QUERY_OPTIONS,
+	editorDocumentQueryPhase,
+} from './app/editorDocumentQuery';
 export {
 	DESKTOP_EDITOR_MIN_WIDTH_PX,
 	DESKTOP_EDITOR_MEDIA_QUERY,

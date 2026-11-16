@@ -266,8 +266,7 @@ class Settings_Controller {
 	public static function get_settings( $request ) {
 		$id = (int) $request['id'];
 		if ( current_user_can( 'edit_post', $id ) ) {
-			\Modula\V2\Meta_Sync::ensure_settings_v2_from_flat( $id );
-			\Modula\V2\Meta_Sync::ensure_default_settings( $id );
+			\Modula\V2\Gallery_Post::repair_for_editor( $id );
 		}
 		$data = \Modula\V2\Meta_Sync::get_settings_v2( $id );
 		/**
@@ -467,6 +466,11 @@ class Settings_Controller {
 				__( 'Gallery not found.', 'modula-best-grid-gallery' ),
 				array( 'status' => 404 )
 			);
+		}
+
+		if ( 'settings_editor' === $context ) {
+			// After an immediate action's write the editor adopts the stored gallery with this marker (ADR 0059).
+			$payload['savedState'] = \Modula\V2\Gallery_Post::saved_state_marker( $id );
 		}
 
 		return new \WP_REST_Response( $payload, 200 );

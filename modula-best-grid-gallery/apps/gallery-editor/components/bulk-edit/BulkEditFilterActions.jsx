@@ -190,13 +190,11 @@ function RemoveFilterMenu({ label, names, disabled, onPick }) {
  * @param {Object[]}                                props.tickedRows
  * @param {BulkEditRowField}                        props.getRowField
  * @param {(rowKey: string, patch: Object) => void} props.patchRow
- * @param {boolean}                                 props.busy
  */
 export default function BulkEditFilterActions({
 	tickedRows,
 	getRowField,
 	patchRow,
-	busy,
 }) {
 	const count = tickedRows.length;
 	const namesOnRows = bulkEditFilterNamesOnRows(tickedRows, getRowField);
@@ -216,7 +214,7 @@ export default function BulkEditFilterActions({
 					__('Add filter (%d)', 'modula-best-grid-gallery'),
 					count
 				)}
-				disabled={busy || count === 0}
+				disabled={count === 0}
 				onPick={(name) =>
 					applyPatches(
 						bulkEditAddFilterPatches(tickedRows, getRowField, name)
@@ -230,7 +228,7 @@ export default function BulkEditFilterActions({
 					count
 				)}
 				names={namesOnRows}
-				disabled={busy || namesOnRows.length === 0}
+				disabled={namesOnRows.length === 0}
 				onPick={(name) =>
 					applyPatches(
 						bulkEditRemoveFilterPatches(

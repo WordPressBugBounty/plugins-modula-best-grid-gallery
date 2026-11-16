@@ -2,14 +2,12 @@
  * Image focus view of the item edit column: FocusPointModal on the preview's store.
  */
 import { Provider } from 'react-redux';
-import { useQueryClient } from '@tanstack/react-query';
 import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useGalleryItemEditSidebar } from '../../context/GalleryItemEditSidebarContext';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 import { getFocusModalCropHints } from '../../utils/getFocusModalCropHints';
-import { getGalleryBootstrapQueryKey } from '../../query/useGalleryBootstrapQuery';
 import { getGalleryPreviewReduxStore } from '../../utils/previewReduxStoreRef';
 import { resolveGalleryAdminPostId } from '../../utils/resolveGalleryAdminPostId';
 import FocusPointModal from '../modals/FocusPointModal';
@@ -25,7 +23,6 @@ export default function GalleryItemFocusPanel({ storeIndex }) {
 		closeFocus: () => {},
 	};
 	const { form } = useGallerySettingsFormBundle();
-	const queryClient = useQueryClient();
 	const store = getGalleryPreviewReduxStore();
 
 	const focusCropHints = useMemo(
@@ -54,8 +51,6 @@ export default function GalleryItemFocusPanel({ storeIndex }) {
 				onClose={closeFocus}
 				galleryId={galleryId}
 				storeIndex={storeIndex}
-				queryClient={queryClient}
-				bootstrapQueryKey={getGalleryBootstrapQueryKey(galleryId)}
 				focusCropHints={focusCropHints}
 			/>
 		</Provider>

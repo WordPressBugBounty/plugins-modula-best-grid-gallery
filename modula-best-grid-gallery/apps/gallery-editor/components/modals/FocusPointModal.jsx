@@ -18,11 +18,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import Cropper from 'react-easy-crop';
 import { useSelector, useStore } from 'react-redux';
 import { Button, Notice } from 'admin-ui';
-import {
-	ItemEditCard,
-	SettingsPanelHeader,
-	useTakeoverSaveStatus,
-} from 'editor-shell';
+import { ItemEditCard, SettingsPanelHeader } from 'editor-shell';
 import ItemEditTipToggleRow from '../gallery-item-edit-panel/ItemEditTipToggleRow';
 import { useFocusPointMutations } from '../../hooks/useFocusPointMutations';
 import { FOCUS_MATCH_LAYOUT_SESSION_KEY } from '../../utils/getFocusModalCropHints';
@@ -50,8 +46,6 @@ const LETTERBOX_TILE_TYPES = new Set(['custom-grid', 'freeform']);
  * @param {() => void}                                                                                                          props.onClose
  * @param {number}                                                                                                              props.galleryId
  * @param {number|null}                                                                                                         props.storeIndex
- * @param {import('@tanstack/react-query').QueryClient}                                                                         props.queryClient
- * @param {import('@tanstack/react-query').QueryKey}                                                                            props.bootstrapQueryKey
  * @param {{ suggestedAspect: number|null, canLockToLayout: boolean, layoutHint: string|null, showMatchLayoutToggle: boolean }} [props.focusCropHints]
  */
 export default function FocusPointModal({
@@ -59,8 +53,6 @@ export default function FocusPointModal({
 	onClose,
 	galleryId,
 	storeIndex,
-	queryClient,
-	bootstrapQueryKey,
 	focusCropHints = {
 		suggestedAspect: null,
 		canLockToLayout: false,
@@ -69,7 +61,6 @@ export default function FocusPointModal({
 	},
 }) {
 	const store = useStore();
-	const { runPersistTask } = useTakeoverSaveStatus();
 	const reduxItems = useSelector((s) => s.items.items);
 	const galleryConfig = useSelector((s) => s.gallery.config);
 	const gallerySettings = useSelector((s) => s.gallery.settings);
@@ -283,14 +274,11 @@ export default function FocusPointModal({
 		setLetterboxFocal(next);
 	}, []);
 
-	const { saveMutation, clearMutation } = useFocusPointMutations({
+	const { applyFocus, clearFocus } = useFocusPointMutations({
 		galleryId,
 		storeIndex,
 		item,
 		store,
-		runPersistTask,
-		queryClient,
-		bootstrapQueryKey,
 		onClose,
 		lastAreaRef,
 		letterboxFit,
@@ -298,25 +286,23 @@ export default function FocusPointModal({
 		setPersistError,
 	});
 
-	const busy = saveMutation.isPending || clearMutation.isPending;
-
 	const handleApplyClick = useCallback(() => {
 		if (letterboxFit && otherLetterboxCount > 0) {
 			setLetterboxApplyConfirmOpen(true);
 			return;
 		}
-		saveMutation.mutate({ applyToAll: false });
-	}, [letterboxFit, otherLetterboxCount, saveMutation]);
+		applyFocus({ applyToAll: false });
+	}, [letterboxFit, otherLetterboxCount, applyFocus]);
 
 	const handleApplyThisImageOnly = useCallback(() => {
 		setLetterboxApplyConfirmOpen(false);
-		saveMutation.mutate({ applyToAll: false });
-	}, [saveMutation]);
+		applyFocus({ applyToAll: false });
+	}, [applyFocus]);
 
 	const handleApplyLetterboxToAll = useCallback(() => {
 		setLetterboxApplyConfirmOpen(false);
-		saveMutation.mutate({ applyToAll: true });
-	}, [saveMutation]);
+		applyFocus({ applyToAll: true });
+	}, [applyFocus]);
 
 	const subtitleParts = [];
 	if (filename) {
@@ -480,23 +466,21 @@ export default function FocusPointModal({
 				</div>
 				<div className="modula-gallery-item-edit-panel__footer">
 					<Button
-						disabled={!previewSrc || busy || !item}
-						onClick={() => clearMutation.mutate()}
+						disabled={!previewSrc || !item}
+						onClick={clearFocus}
 					>
 						{__('Reset crop', 'modula-best-grid-gallery')}
 					</Button>
 					<div className="modula-gallery-item-edit-panel__footer-end">
-						<Button disabled={busy} onClick={onClose}>
+						<Button onClick={onClose}>
 							{__('Cancel', 'modula-best-grid-gallery')}
 						</Button>
 						<Button
 							variant="primary"
-							disabled={!previewSrc || busy || !item}
+							disabled={!previewSrc || !item}
 							onClick={handleApplyClick}
 						>
-							{saveMutation.isPending
-								? __('Applying…', 'modula-best-grid-gallery')
-								: __('Apply crop', 'modula-best-grid-gallery')}
+							{__('Apply crop', 'modula-best-grid-gallery')}
 						</Button>
 					</div>
 				</div>

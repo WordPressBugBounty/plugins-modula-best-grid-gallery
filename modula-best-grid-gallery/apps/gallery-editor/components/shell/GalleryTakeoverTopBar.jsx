@@ -3,7 +3,7 @@
  * state for the shared takeover top bar.
  */
 import { __ } from '@wordpress/i18n';
-import { TakeoverTopBar, useTakeoverSaveStatus } from 'editor-shell';
+import { TakeoverTopBar, useEditorSaveStatus } from 'editor-shell';
 import { getModulaSettingsEditorConfig } from '../../config/modulaSettingsEditorConfig';
 import { buildGalleryEmbedRows } from '../../utils/galleryEmbedRows';
 
@@ -75,7 +75,8 @@ export default function GalleryTakeoverTopBar({
 	documentStatusBusy = false,
 	canEditDocumentStatus = false,
 }) {
-	const { status, saveErrorMessage } = useTakeoverSaveStatus();
+	// The editor save session merged with writes a Pro flow still queues.
+	const { status, errorMessage } = useEditorSaveStatus();
 	const showDocumentStatus =
 		typeof onDocumentStatusChange === 'function' && canEditDocumentStatus;
 
@@ -88,7 +89,7 @@ export default function GalleryTakeoverTopBar({
 			onTitleChange={onPostTitleChange}
 			onTitleCommit={onPostTitleCommit}
 			titleDisabled={titleDisabled}
-			saveStatus={{ status, errorMessage: saveErrorMessage }}
+			saveStatus={{ status, errorMessage }}
 			history={history}
 			historyLabels={history ? HISTORY_LABELS : null}
 			embed={getGalleryEmbed(galleryId)}

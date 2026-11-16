@@ -1,4 +1,3 @@
-import { modulaImagesRowIndexForPreviewWrite } from 'gallery-shared/preview';
 import { useCallback, useId, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Checkbox, ConfirmDialog, TextInput } from 'admin-ui';
@@ -21,7 +20,6 @@ import {
 	bulkEditThumbUrl,
 } from './bulkEditUtils';
 import { getModulaAiSettingsAdminUrl } from '../../utils/galleryAdminUrls';
-import { galleryRemoveImageByIndex } from '../../api/galleryUploadApi';
 import { removePreviewItemAtStoreIndex } from '../../utils/previewItemsCommit';
 
 function SparkleIcon() {
@@ -123,9 +121,7 @@ function rowRemoveCopy(name, isHide) {
  * @param {boolean}                                                          [props.unavailableOnLocalhost]
  * @param {(rowOrId: Object|string, patch: Record<string, unknown>) => void} props.patchRow
  * @param {(row: Object, field: string) => unknown}                          props.getRowField
- * @param {number}                                                           props.galleryId
  * @param {import('@reduxjs/toolkit').Store}                                 props.previewStore
- * @param {Function}                                                         props.runPersistTask
  * @param {(message: string, tone?: string) => void}                         props.onNotice
  * @param {(rowOrId: Object|string) => void}                                 props.onRowSaved
  * @param {boolean}                                                          props.isDescriptionExpanded
@@ -145,9 +141,7 @@ export default function BulkEditRow({
 	unavailableOnLocalhost = false,
 	patchRow,
 	getRowField,
-	galleryId,
 	previewStore,
-	runPersistTask,
 	onNotice,
 	onRowSaved,
 	isDescriptionExpanded,
@@ -217,42 +211,12 @@ export default function BulkEditRow({
 		);
 	}, [aiTitleMutation, attachmentId, applyAiResult, canUseAi]);
 
-	const performDeleteRow = useCallback(async () => {
-		const itemsLive = previewStore.getState().items.items;
-		const restRowIndex = modulaImagesRowIndexForPreviewWrite(
-			itemsLive,
-			storeIndex
-		);
-		if (restRowIndex < 0) {
-			return;
-		}
-		try {
-			await runPersistTask(async () => {
-				await galleryRemoveImageByIndex(galleryId, restRowIndex);
-				removePreviewItemAtStoreIndex(previewStore, storeIndex);
-			}, `item-remove:${galleryId}:${rowKey}`);
-		} catch (err) {
-			onNotice(
-				err?.message ||
-					__(
-						'Could not remove the image.',
-						'modula-best-grid-gallery'
-					),
-				'error'
-			);
-			return;
-		}
+	// Off the canvas at once; the editor save stores the removal.
+	const performDeleteRow = useCallback(() => {
+		removePreviewItemAtStoreIndex(previewStore, storeIndex);
 		onNotice(__('Image removed.', 'modula-best-grid-gallery'));
 		onRowSaved(rowKey);
-	}, [
-		galleryId,
-		onNotice,
-		onRowSaved,
-		previewStore,
-		rowKey,
-		runPersistTask,
-		storeIndex,
-	]);
+	}, [onNotice, onRowSaved, previewStore, rowKey, storeIndex]);
 
 	const rowBusy = aiAltMutation.isPending || aiTitleMutation.isPending;
 
@@ -438,7 +402,7 @@ export default function BulkEditRow({
 				confirmLabel={removeCopy.confirmLabel}
 				onConfirm={() => {
 					setConfirmDeleteOpen(false);
-					void performDeleteRow();
+					performDeleteRow();
 				}}
 				onCancel={() => setConfirmDeleteOpen(false)}
 			/>

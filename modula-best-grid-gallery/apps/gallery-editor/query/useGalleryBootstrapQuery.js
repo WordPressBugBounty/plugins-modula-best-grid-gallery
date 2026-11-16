@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import apiFetch from '@wordpress/api-fetch';
+import { EDITOR_DOCUMENT_QUERY_OPTIONS } from 'editor-shell/logic';
 
 /**
  * Coerce post ID for React Query keys / REST paths so "1560" and 1560 share one cache.
@@ -44,6 +45,7 @@ export function fetchGalleryBootstrapPayload(galleryId) {
 export function useGalleryBootstrapQuery(galleryId) {
 	const id = normalizeGalleryPostId(galleryId);
 	return useQuery({
+		...EDITOR_DOCUMENT_QUERY_OPTIONS,
 		queryKey: getGalleryBootstrapQueryKey(id),
 		enabled: Boolean(id),
 		queryFn: () => fetchGalleryBootstrapPayload(id),

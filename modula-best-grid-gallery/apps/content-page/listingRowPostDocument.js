@@ -1,5 +1,5 @@
 /**
- * Listing row post document — title, status, slug and optional gallery publication date via CPT REST.
+ * Listing row post document — title, status, slug and optional publication date via CPT REST.
  *
  * Shared write path for Quick edit (listing) and editor status/permalink surfaces.
  */
@@ -52,7 +52,6 @@ export function isAllowedListingRowPostDocumentStatus(status) {
  * Seed Quick edit / editor controls from a listing row payload.
  *
  * @param {{
- *   type?: string,
  *   date?: string,
  *   title?: string,
  *   status?: string,
@@ -66,9 +65,7 @@ export function isAllowedListingRowPostDocumentStatus(status) {
  */
 export function listingRowToPostDocumentSeed(row) {
 	return {
-		...(row?.type === 'gallery' && typeof row?.date === 'string'
-			? { date: row.date }
-			: {}),
+		...(typeof row?.date === 'string' ? { date: row.date } : {}),
 		title: typeof row?.title === 'string' ? row.title : '',
 		status: typeof row?.status === 'string' ? row.status : '',
 		slug: typeof row?.slug === 'string' ? row.slug : '',

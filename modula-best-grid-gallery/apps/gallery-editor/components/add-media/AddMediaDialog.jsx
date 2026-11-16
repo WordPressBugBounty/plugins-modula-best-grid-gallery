@@ -1,27 +1,29 @@
 /**
  * Modula's Add media dialog (spec item 18): Upload files, Media library and
- * Video link, replacing the WordPress media frame. Items are added through
- * today's paths: REST upload then `add-images`, `add-images` for library
- * picks, and the Video extension's own import flow for links. New items go
- * to the configured insert position ("New images go to the…").
+ * Video link, replacing the WordPress media frame. Uploads go to the Media
+ * Library at once; uploaded files and library picks then join the gallery as
+ * unsaved changes: the item-rows route builds their rows and the editor save
+ * stores them (ADR 0059). Links use the Video extension's own import flow.
+ * New items go to the configured insert position ("New images go to the…").
  */
 import './_add-media-dialog.scss';
 import { useId, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Dialog, Notice, PlanBadge, TabList, TabPanel } from 'admin-ui';
-import { AdminUiScope, useTakeoverSaveStatus } from 'editor-shell';
+import { AdminUiScope, useTakeoverToast } from 'editor-shell';
 import {
 	ADD_MEDIA_TABS,
 	useAddMediaDialog,
 } from '../../context/addMediaDialogStore';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
-import { useInvalidateGalleryBootstrap } from '../../hooks/useInvalidateGalleryBootstrap';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 import { resolveGalleryAdminPostId } from '../../utils/resolveGalleryAdminPostId';
+import { uploadBrowserImageFilesToMediaLibrary } from '../../api/galleryUploadApi';
+import { getGalleryPreviewReduxStore } from '../../utils/previewReduxStoreRef';
 import {
-	addAttachmentsToGallery,
-	uploadBrowserImageFilesToGallery,
-} from '../../api/galleryUploadApi';
+	addAttachmentsToPreviewCatalog,
+	workingTileLayout,
+} from '../../utils/galleryItemRowsCommit';
 import { resolveVideoLinkAvailability } from './addMediaAvailability';
 import AddMediaUploadTab from './AddMediaUploadTab';
 import AddMediaLibraryTab from './AddMediaLibraryTab';
@@ -44,9 +46,8 @@ export default function AddMediaDialog() {
 		useAddMediaDialog();
 	const config = useModulaSettingsEditorConfig();
 	const galleryId = resolveGalleryAdminPostId(config);
-	const { form } = useGallerySettingsFormBundle();
-	const { runPersistTask } = useTakeoverSaveStatus();
-	const invalidateBootstrap = useInvalidateGalleryBootstrap(galleryId);
+	const { form, undoRedo } = useGallerySettingsFormBundle();
+	const toast = useTakeoverToast();
 	const tabsId = `modula-add-media-${useId()}`;
 	const [busy, setBusy] = useState(false);
 	const [uploadProgress, setUploadProgress] = useState(
@@ -86,8 +87,9 @@ export default function AddMediaDialog() {
 	};
 
 	/**
-	 * Runs one add; the dialog closes when it succeeds and shows the error
-	 * when it fails.
+	 * Runs one add; the dialog closes when it succeeds. A failure stays in
+	 * the dialog's notice and the editor's error toast, and the gallery is
+	 * unchanged.
 	 *
 	 * @param {() => Promise<unknown>} task
 	 * @param {string}                 fallbackError
@@ -97,28 +99,53 @@ export default function AddMediaDialog() {
 		setError('');
 		try {
 			await task();
-			invalidateBootstrap();
 			closeAddMedia();
 		} catch (err) {
-			setError(errorMessage(err, fallbackError));
+			const message = errorMessage(err, fallbackError);
+			setError(message);
+			toast?.show({ message, tone: 'error' });
 		} finally {
 			setBusy(false);
 			setUploadProgress(null);
 		}
 	};
 
+	/**
+	 * Put attachments in the gallery as an unsaved change (nothing is
+	 * stored until Save).
+	 *
+	 * @param {number[]}      ids
+	 * @param {'start'|'end'} uploadPosition
+	 */
+	const addToCatalog = (ids, uploadPosition) => {
+		const store = getGalleryPreviewReduxStore();
+		if (!store) {
+			throw new Error(
+				__(
+					'The gallery preview is not ready.',
+					'modula-best-grid-gallery'
+				)
+			);
+		}
+		return addAttachmentsToPreviewCatalog({
+			store,
+			galleryId,
+			attachmentIds: ids,
+			position: uploadPosition,
+			layout: workingTileLayout(form.state.values),
+			commitItemsStep: undoRedo.commitItemsStep,
+		});
+	};
+
 	const uploadFiles = (uploadPosition, files) =>
 		runAdd(
 			async () => {
-				const { ids } = await uploadBrowserImageFilesToGallery(
-					galleryId,
+				const { ids } = await uploadBrowserImageFilesToMediaLibrary(
 					files,
 					{
-						uploadPosition,
 						onProgress: (current, total) =>
 							setUploadProgress({ current, total }),
-					},
-					runPersistTask
+					}
 				);
 				if (!ids.length) {
 					throw new Error(
@@ -126,6 +153,18 @@ export default function AddMediaDialog() {
 							'No images could be uploaded.',
 							'modula-best-grid-gallery'
 						)
+					);
+				}
+				try {
+					await addToCatalog(ids, uploadPosition);
+				} catch (err) {
+					// The files are stored already; only joining the gallery failed.
+					throw new Error(
+						__(
+							'The files are in the Media Library, but could not be added to the gallery.',
+							'modula-best-grid-gallery'
+						),
+						{ cause: err }
 					);
 				}
 			},
@@ -137,13 +176,7 @@ export default function AddMediaDialog() {
 
 	const addFromLibrary = (uploadPosition, ids) =>
 		runAdd(
-			() =>
-				addAttachmentsToGallery(
-					galleryId,
-					ids,
-					uploadPosition,
-					runPersistTask
-				),
+			() => addToCatalog(ids, uploadPosition),
 			__(
 				'Could not add images to the gallery.',
 				'modula-best-grid-gallery'

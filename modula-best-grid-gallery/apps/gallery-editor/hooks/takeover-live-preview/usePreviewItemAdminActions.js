@@ -3,31 +3,26 @@ import {
 	getLayoutPolicy,
 	isGridItemLocked,
 	isTemplateProtectedEmbeddedRow,
-	modulaImagesRowIndexForPreviewWrite,
 	movePreviewItemToAdjacentPage,
 	normalizeGalleryItemLookupString,
 	previewItemRowLookupKey,
 	storeIndexToCoreIndex,
 } from 'gallery-shared/preview';
-import { useCallback, useEffect, useMemo, useRef } from '@wordpress/element';
+import { useCallback, useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { useUndoToastOffer } from 'editor-shell';
-import {
-	galleryRemoveImageByIndex,
-	galleryReplaceImageByIndex,
-	saveMergedGalleryItems,
-} from '../../api/galleryUploadApi';
-import { captionToPlainString } from '../../utils/captionToPlainString';
+import { useTakeoverToast, useUndoToastOffer } from 'editor-shell';
 import {
 	commitPreviewCatalog,
-	mergeModulaRowIntoPreviewItem,
 	removePreviewItemAtStoreIndex,
-	syncPreviewCoreToStoreAndBootstrap,
 } from '../../utils/previewItemsCommit';
+import {
+	replaceAttachmentsInPreviewCatalog,
+	workingTileLayout,
+} from '../../utils/galleryItemRowsCommit';
+import { applyGalleryItemHistoryOp } from '../../utils/galleryItemHistory';
 import {
 	isContentBlockGalleryItemRow,
 	isEmbeddedGalleryItemRow,
-	previewCoreItemsToSaveMergedPayload,
 	mergeContentBlockSaveFieldsIntoRow,
 	reanchorEmbeddedRowsInMergedList,
 } from '../../utils/embeddedGalleryItems';
@@ -48,7 +43,6 @@ import {
 	restoreCatalogFromLayoutHistory,
 } from '../../utils/customGridLayoutHistory';
 import {
-	applyItemRemovalOp,
 	buildItemRemovalChange,
 	describeRemovedItem,
 } from '../../utils/galleryItemRemovalHistory';
@@ -81,36 +75,33 @@ function settleSelectionAfterRemoval(
 
 /**
  * Preview item admin actions (remove, replace, content blocks) and context value.
+ * Removal, replacement, layout, lock, page moves and content block edits
+ * change the preview store only: the items part of the editor save session
+ * stores them on Save. Replace reads the new image's row from the item-rows
+ * route, which stores nothing (explicit-save ticket 11).
  *
  * @param {{
  *   galleryId: number,
  *   galleryType: string,
- *   queryClient: import('@tanstack/react-query').QueryClient,
  *   storeRef: import('react').MutableRefObject<import('@reduxjs/toolkit').Store|null>,
- *   runPreviewItemMutation: (task: () => Promise<unknown>) => Promise<unknown>,
  *   contentBlockEdit: { storeIndex: number, row: Record<string, unknown> } | null,
  *   setContentBlockEdit: (value: { storeIndex: number, row: Record<string, unknown> } | null) => void,
  *   saveMetaModalReturnFocus: () => void,
  *   setMetaModalStoreIndex: (idx: number | null) => void,
- *   schedulePersistPreviewItems: () => void,
- *   holdScheduledPreviewPersist: () => (() => void),
  * }} args
  */
 export function usePreviewItemAdminActions({
 	galleryId,
 	galleryType,
-	queryClient,
 	storeRef,
-	runPreviewItemMutation,
 	contentBlockEdit,
 	setContentBlockEdit,
 	saveMetaModalReturnFocus,
 	setMetaModalStoreIndex: _setMetaModalStoreIndex,
-	schedulePersistPreviewItems,
-	holdScheduledPreviewPersist,
 }) {
 	const itemEditSidebar = useGalleryItemEditSidebar();
-	const { undoRedo } = useGallerySettingsFormBundle();
+	const { form, undoRedo } = useGallerySettingsFormBundle();
+	const toast = useTakeoverToast();
 	const {
 		adoptLayoutCheckpoint,
 		commitLayoutStep,
@@ -121,10 +112,6 @@ export function usePreviewItemAdminActions({
 		undo,
 	} = undoRedo;
 	const offerRemovalUndo = useUndoToastOffer({ undo, currentStepId });
-	// Releases the save hold of the Custom Grid gesture in progress.
-	const releaseGesturePersistRef = useRef(
-		/** @type {(() => void)|null} */ (null)
-	);
 
 	useEffect(() => {
 		return registerLayoutApplier((layout) => {
@@ -137,9 +124,8 @@ export function usePreviewItemAdminActions({
 				st,
 				restoreCatalogFromLayoutHistory(core, layout)
 			);
-			schedulePersistPreviewItems();
 		});
-	}, [registerLayoutApplier, schedulePersistPreviewItems, storeRef]);
+	}, [registerLayoutApplier, storeRef]);
 
 	useEffect(() => {
 		return registerItemsApplier((op) => {
@@ -147,7 +133,7 @@ export function usePreviewItemAdminActions({
 			if (!st) {
 				return;
 			}
-			const next = applyItemRemovalOp(
+			const next = applyGalleryItemHistoryOp(
 				asGalleryItemList(st.getState().items.items),
 				op
 			);
@@ -164,15 +150,13 @@ export function usePreviewItemAdminActions({
 				itemEditSidebar.close();
 			}
 			commitPreviewCatalog(st, reanchorEmbeddedRowsInMergedList(next));
-			schedulePersistPreviewItems();
 		});
-	}, [
-		itemEditSidebar,
-		registerItemsApplier,
-		schedulePersistPreviewItems,
-		storeRef,
-	]);
+	}, [itemEditSidebar, registerItemsApplier, storeRef]);
 
+	/*
+	 * The layout buffers a drag or resize and writes the store only on
+	 * release, so a save during the gesture stores the state before it.
+	 */
 	const onCustomGridLayoutInteractionStart = useCallback(
 		(_args) => {
 			const st = storeRef.current;
@@ -181,20 +165,9 @@ export function usePreviewItemAdminActions({
 			}
 			const core = asGalleryItemList(st.getState().items.items);
 			adoptLayoutCheckpoint(snapshotCustomGridItemCells(core));
-			if (!releaseGesturePersistRef.current) {
-				releaseGesturePersistRef.current =
-					holdScheduledPreviewPersist();
-			}
 		},
-		[adoptLayoutCheckpoint, holdScheduledPreviewPersist, storeRef]
+		[adoptLayoutCheckpoint, storeRef]
 	);
-
-	// Drag/resize released or cancelled: saves held back since its start go now.
-	const onCustomGridLayoutInteractionEnd = useCallback(() => {
-		const release = releaseGesturePersistRef.current;
-		releaseGesturePersistRef.current = null;
-		release?.();
-	}, []);
 
 	const onCustomGridLayoutCommit = useCallback(
 		({ kind }) => {
@@ -212,116 +185,54 @@ export function usePreviewItemAdminActions({
 	);
 
 	/**
+	 * Remove at once and send nothing: the editor save stores the removal
+	 * (ADR 0059). It is a history step, with Undo in a toast.
+	 *
 	 * @param {number} storeIndex
-	 * @return {Promise<boolean>} True once the row is removed and saved.
 	 */
-	const performRemoveItem = useCallback(
-		async (storeIndex) => {
-			const st = storeRef.current;
-			if (!st || !galleryId) {
-				return false;
-			}
-			const itemsSnap = st.getState().items.items;
-			const row = itemsSnap[storeIndex];
-			const occurrenceId =
-				row?.freeformId ||
-				row?.embeddedId ||
-				`${row?.id}:${storeIndex}`;
-			const removeOwner = `item-remove:${galleryId}:${occurrenceId}`;
-			if (row && isEmbeddedGalleryItemRow(row)) {
-				if (isTemplateProtectedEmbeddedRow(row, galleryType)) {
-					return false;
-				}
-				const coreIndex = storeIndexToCoreIndex(itemsSnap, storeIndex);
-				if (coreIndex < 0) {
-					return false;
-				}
-				const wasEditingThis =
-					itemEditSidebar?.storeIndex !== null &&
-					itemEditSidebar?.storeIndex === storeIndex;
-				const core = asGalleryItemList(itemsSnap);
-				core.splice(coreIndex, 1);
-				try {
-					await runPreviewItemMutation(async () => {
-						await saveMergedGalleryItems(
-							galleryId,
-							previewCoreItemsToSaveMergedPayload(core)
-						);
-					}, removeOwner);
-					commitPreviewCatalog(st, core);
-					settleSelectionAfterRemoval(
-						itemEditSidebar,
-						wasEditingThis,
-						null
-					);
-					return true;
-				} catch (e) {
-					// eslint-disable-next-line no-console
-					console.error(e);
-					return false;
-				}
-			}
-			const restRowIndex = modulaImagesRowIndexForPreviewWrite(
-				itemsSnap,
-				storeIndex
-			);
-			if (restRowIndex < 0) {
-				return false;
-			}
-			const wasEditingThis =
-				itemEditSidebar?.storeIndex !== null &&
-				itemEditSidebar?.storeIndex === storeIndex;
-			const nextStoreIndex = wasEditingThis
-				? getNextImageStoreIndexAfterRemove(itemsSnap, storeIndex)
-				: null;
-			try {
-				await runPreviewItemMutation(async () => {
-					await galleryRemoveImageByIndex(galleryId, restRowIndex);
-					// Update Redux before deferred bootstrap patch (runPersistTaskWithDeferredRefresh).
-					removePreviewItemAtStoreIndex(st, storeIndex);
-				}, removeOwner);
-				settleSelectionAfterRemoval(
-					itemEditSidebar,
-					wasEditingThis,
-					nextStoreIndex
-				);
-				return true;
-			} catch (e) {
-				// eslint-disable-next-line no-console
-				console.error(e);
-				return false;
-			}
-		},
-		[
-			galleryId,
-			galleryType,
-			itemEditSidebar,
-			runPreviewItemMutation,
-			storeRef,
-		]
-	);
-
-	/** Remove at once; the removal is a history step, with Undo in a toast. */
 	const requestRemoveItem = useCallback(
-		async (storeIndex) => {
+		(storeIndex) => {
 			const st = storeRef.current;
 			if (!st) {
 				return;
 			}
 			const itemsSnap = st.getState().items.items;
+			const row = itemsSnap[storeIndex];
+			if (!row || isTemplateProtectedEmbeddedRow(row, galleryType)) {
+				return;
+			}
 			const change = buildItemRemovalChange(
 				asGalleryItemList(itemsSnap),
 				storeIndexToCoreIndex(itemsSnap, storeIndex)
 			);
-			const removed = await performRemoveItem(storeIndex);
-			if (!removed || !change) {
+			if (!change) {
 				return;
 			}
+			const wasEditingThis =
+				itemEditSidebar?.storeIndex !== null &&
+				itemEditSidebar?.storeIndex === storeIndex;
+			// The panel follows to the next image; a content block has none.
+			const nextStoreIndex =
+				wasEditingThis && !isEmbeddedGalleryItemRow(row)
+					? getNextImageStoreIndexAfterRemove(itemsSnap, storeIndex)
+					: null;
+			removePreviewItemAtStoreIndex(st, storeIndex);
+			settleSelectionAfterRemoval(
+				itemEditSidebar,
+				wasEditingThis,
+				nextStoreIndex
+			);
 			const copy = describeRemovedItem(change.row);
 			const stepId = commitItemsStep({ label: copy.stepLabel, change });
 			offerRemovalUndo(stepId, copy);
 		},
-		[commitItemsStep, offerRemovalUndo, performRemoveItem, storeRef]
+		[
+			commitItemsStep,
+			galleryType,
+			itemEditSidebar,
+			offerRemovalUndo,
+			storeRef,
+		]
 	);
 
 	const openReplaceMedia = useCallback(
@@ -426,62 +337,29 @@ export function usePreviewItemAdminActions({
 					}
 					let didReplace = false;
 					try {
-						const replaceOwner = `item-replace:${galleryId}:${indices.join(',')}`;
-						await runPreviewItemMutation(async () => {
-							for (let i = 0; i < toReplace.length; i++) {
-								const storeIndex = indices[i];
-								const sel = toReplace[i];
-								const newId = Number(sel.id);
-								const itemsSnap = st.getState().items.items;
-								const restRowIndex =
-									modulaImagesRowIndexForPreviewWrite(
-										itemsSnap,
-										storeIndex
-									);
-								const displayCoreIndex = storeIndexToCoreIndex(
-									itemsSnap,
-									storeIndex
-								);
-								if (restRowIndex < 0 || displayCoreIndex < 0) {
-									continue;
-								}
-								const res = await galleryReplaceImageByIndex(
-									galleryId,
-									restRowIndex,
-									newId
-								);
-								const row = res?.image;
-								const prev = itemsSnap[storeIndex];
-								const merged = row
-									? mergeModulaRowIntoPreviewItem(prev, row)
-									: mergeModulaRowIntoPreviewItem(prev, {
-											id: newId,
-											url: sel.url,
-											title: captionToPlainString(
-												sel.title
-											),
-											alt: sel.alt || '',
-											description:
-												captionToPlainString(
-													sel.caption
-												) || '',
-										});
-								const core = asGalleryItemList(itemsSnap);
-								if (displayCoreIndex < core.length) {
-									core[displayCoreIndex] = merged;
-									syncPreviewCoreToStoreAndBootstrap(
-										st,
-										queryClient,
-										galleryId,
-										core
-									);
-									didReplace = true;
-								}
-							}
-						}, replaceOwner);
+						// Shown once the route answers; stored by the editor save.
+						const replaced =
+							await replaceAttachmentsInPreviewCatalog({
+								store: st,
+								galleryId,
+								replacements: toReplace.map((sel, i) => ({
+									storeIndex: indices[i],
+									attachmentId: Number(sel.id),
+								})),
+								layout: workingTileLayout(form.state.values),
+								commitItemsStep,
+							});
+						didReplace = replaced > 0;
 					} catch (e) {
-						// eslint-disable-next-line no-console
-						console.error(e);
+						toast?.show({
+							message:
+								e?.message ||
+								__(
+									'Could not replace the image.',
+									'modula-best-grid-gallery'
+								),
+							tone: 'error',
+						});
 					} finally {
 						finish(didReplace);
 					}
@@ -490,7 +368,7 @@ export function usePreviewItemAdminActions({
 				frame.open();
 			});
 		},
-		[galleryId, queryClient, runPreviewItemMutation, storeRef]
+		[commitItemsStep, form, galleryId, storeRef, toast]
 	);
 
 	const toggleGridItemLock = useCallback(
@@ -528,14 +406,8 @@ export function usePreviewItemAdminActions({
 					}
 				);
 			}
-			schedulePersistPreviewItems();
 		},
-		[
-			adoptLayoutCheckpoint,
-			commitLayoutStep,
-			schedulePersistPreviewItems,
-			storeRef,
-		]
+		[adoptLayoutCheckpoint, commitLayoutStep, storeRef]
 	);
 
 	const openEditContentBlock = useCallback(
@@ -553,9 +425,10 @@ export function usePreviewItemAdminActions({
 		[itemEditSidebar, saveMetaModalReturnFocus, storeRef]
 	);
 
+	// A content block edit changes the store; the editor save stores it.
 	const handleSaveContentBlock = useCallback(
-		async (fields) => {
-			if (!contentBlockEdit || !galleryId) {
+		(fields) => {
+			if (!contentBlockEdit) {
 				return;
 			}
 			const st = storeRef.current;
@@ -575,55 +448,30 @@ export function usePreviewItemAdminActions({
 					? mergeContentBlockSaveFieldsIntoRow(r, fields)
 					: r
 			);
-			const reanchored = reanchorEmbeddedRowsInMergedList(next);
-			await runPreviewItemMutation(async () => {
-				await saveMergedGalleryItems(
-					galleryId,
-					previewCoreItemsToSaveMergedPayload(reanchored)
-				);
-			}, `item-content:${galleryId}:${eidNorm}`);
-			commitPreviewCatalog(st, reanchored);
+			commitPreviewCatalog(st, reanchorEmbeddedRowsInMergedList(next));
 			setContentBlockEdit(null);
 		},
-		[
-			contentBlockEdit,
-			galleryId,
-			runPreviewItemMutation,
-			setContentBlockEdit,
-			storeRef,
-		]
+		[contentBlockEdit, setContentBlockEdit, storeRef]
 	);
 
 	const moveItemToPreviousPage = useCallback(
 		(storeIndex) => {
 			const st = storeRef.current;
-			if (!st) {
-				return;
-			}
-			const moved = movePreviewItemToAdjacentPage(
-				st,
-				storeIndex,
-				'previous'
-			);
-			if (moved) {
-				schedulePersistPreviewItems();
+			if (st) {
+				movePreviewItemToAdjacentPage(st, storeIndex, 'previous');
 			}
 		},
-		[schedulePersistPreviewItems, storeRef]
+		[storeRef]
 	);
 
 	const moveItemToNextPage = useCallback(
 		(storeIndex) => {
 			const st = storeRef.current;
-			if (!st) {
-				return;
-			}
-			const moved = movePreviewItemToAdjacentPage(st, storeIndex, 'next');
-			if (moved) {
-				schedulePersistPreviewItems();
+			if (st) {
+				movePreviewItemToAdjacentPage(st, storeIndex, 'next');
 			}
 		},
-		[schedulePersistPreviewItems, storeRef]
+		[storeRef]
 	);
 
 	const previewAdminValue = useMemo(() => {
@@ -650,7 +498,6 @@ export function usePreviewItemAdminActions({
 			openEditContentBlock,
 			moveItemToPreviousPage,
 			moveItemToNextPage,
-			schedulePersistPreviewItems,
 			onCustomGridLayoutInteractionStart:
 				galleryType === 'custom-grid'
 					? onCustomGridLayoutInteractionStart
@@ -658,10 +505,6 @@ export function usePreviewItemAdminActions({
 			onCustomGridLayoutCommit:
 				galleryType === 'custom-grid'
 					? onCustomGridLayoutCommit
-					: undefined,
-			onCustomGridLayoutInteractionEnd:
-				galleryType === 'custom-grid'
-					? onCustomGridLayoutInteractionEnd
 					: undefined,
 			selectItem: (idx) => itemEditSidebar?.select(idx),
 			// Double-click runs the tile toolbar's Edit (same panel, same `open`).
@@ -691,10 +534,8 @@ export function usePreviewItemAdminActions({
 		openEditContentBlock,
 		moveItemToPreviousPage,
 		moveItemToNextPage,
-		schedulePersistPreviewItems,
 		onCustomGridLayoutInteractionStart,
 		onCustomGridLayoutCommit,
-		onCustomGridLayoutInteractionEnd,
 		saveMetaModalReturnFocus,
 		itemEditSidebar,
 		storeRef,

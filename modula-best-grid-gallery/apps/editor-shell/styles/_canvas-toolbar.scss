@@ -36,6 +36,22 @@ $mod-canvas-toolbar-control-h: 36px;
 	flex-shrink: 0;
 }
 
+// The recovery copy's offer under the toolbar (EditorRecoveryNotice): the
+// message, then Restore and Discard. It stays until one is chosen.
+.modula-takeover__recovery-notice {
+	position: relative;
+	z-index: 5;
+	flex-shrink: 0;
+	margin: $mod-space-8 24px 0;
+}
+
+.modula-takeover__recovery-notice-actions {
+	display: flex;
+	flex-shrink: 0;
+	gap: $mod-space-8;
+	margin-top: $mod-space-8;
+}
+
 // One line of controls. When they need more room than the canvas has, Sort
 // narrows first (`_sort-popover.scss`), then the left group wraps; Add never
 // shrinks under them (ticket 81).

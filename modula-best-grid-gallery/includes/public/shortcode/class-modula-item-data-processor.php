@@ -450,7 +450,7 @@ class Modula_Item_Data_Processor {
 			&& ! empty( $image_meta['width'] ) && ! empty( $image_meta['height'] )
 			&& ! wp_image_matches_ratio( $image_meta['width'], $image_meta['height'], $img_w, $img_h );
 		if ( $beta_crop && ! empty( $item_data['img_attributes']['src'] ) ) {
-			$srcset = $this->get_beta_crop_srcset( $item_data, $image_meta, $settings );
+			$srcset = $this->get_beta_crop_srcset( $item_data, $image_meta, $settings, $full_image );
 		} elseif ( empty( $srcset ) && function_exists( 'wp_calculate_image_srcset' ) ) {
 			$srcset = wp_calculate_image_srcset( $size_array, $full_image, $image_meta, $attachment_id );
 		}
@@ -482,14 +482,21 @@ class Modula_Item_Data_Processor {
 	 * Fill cropped main-image size gaps without mixing unrelated crop origins.
 	 * Registered crops use their declared alignment; Modula crops retain their encoded alignment.
 	 * Unknown/filtered crops retain their selected file because a ratio alone is unsafe.
+	 *
+	 * @param array  $item_data  Item data with the tile's img_attributes.
+	 * @param array  $image_meta Attachment metadata.
+	 * @param array  $settings   Gallery settings.
+	 * @param string $full_image Full image URL that process_srcset_sizes resolved. Items whose
+	 *                           resize step was skipped (Pro video, SpeedUp) have no `image_full`.
+	 * @return string Comma-separated srcset.
 	 */
-	private function get_beta_crop_srcset( $item_data, $image_meta, $settings ) {
+	private function get_beta_crop_srcset( $item_data, $image_meta, $settings, $full_image ) {
 		$src    = $item_data['img_attributes']['src'];
 		$width  = (int) $item_data['img_attributes']['width'];
 		$height = (int) $item_data['img_attributes']['height'];
 		$srcset = array( $src . ' ' . $width . 'w' );
 		$file   = wp_basename( wp_parse_url( $src, PHP_URL_PATH ) );
-		$stem   = pathinfo( wp_basename( wp_parse_url( $item_data['image_full'], PHP_URL_PATH ) ), PATHINFO_FILENAME );
+		$stem   = pathinfo( wp_basename( wp_parse_url( $full_image, PHP_URL_PATH ) ), PATHINFO_FILENAME );
 		$slider = 'slider' === ( $settings['type'] ?? '' );
 		$size   = $settings[ $slider ? 'slider_image_size' : 'grid_image_size' ] ?? '';
 		$align  = 'c';
@@ -544,7 +551,7 @@ class Modula_Item_Data_Processor {
 			// These extra Beta candidates follow the site's native encoding policy.
 			// Forcing quality 100 here inflates origin delivery when SpeedUp redirects.
 			$resized = $resizer->resize_image(
-				$item_data['image_full'], $candidate_width, (int) round( $candidate_width * $height / $width ), true, $align, null
+				$full_image, $candidate_width, (int) round( $candidate_width * $height / $width ), true, $align, null
 			);
 			if ( ! is_wp_error( $resized ) && ! empty( $resized['resized_url'] ) ) {
 				$srcset[] = $resized['resized_url'] . ' ' . $candidate_width . 'w';

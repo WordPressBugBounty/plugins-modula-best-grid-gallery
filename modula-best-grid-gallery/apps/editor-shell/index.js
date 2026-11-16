@@ -36,6 +36,10 @@ export {
 	MediaPickerSearch,
 	MediaPickerToolbar,
 } from './media-picker/MediaPicker';
+export {
+	EMPTY_PICKER_SELECTION,
+	pressPickerItem,
+} from './media-picker/pickerSelection';
 export { default as SelectMenuControl } from './fields/SelectMenuControl';
 export { default as MotionChoicePicker } from './fields/MotionChoicePicker';
 export { default as FilterNameListControl } from './fields/FilterNameListControl';
@@ -72,4 +76,14 @@ export {
 	TakeoverSaveStatusProvider,
 	useTakeoverSaveStatus,
 } from './save-status/TakeoverSaveStatusContext';
+export {
+	EditorSaveSessionProvider,
+	useEditorSavePart,
+	useEditorSaveSession,
+	useEditorSaveStatus,
+} from './save-status/EditorSaveSessionContext';
+export {
+	EditorRecoveryNotice,
+	useEditorSavedStateSync,
+} from './recovery/EditorRecoveryCopy';
 export * from './logic';

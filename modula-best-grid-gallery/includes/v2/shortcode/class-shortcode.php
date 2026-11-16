@@ -221,12 +221,13 @@ class Shortcode {
 	 * Get gallery settings from v2 JSON (modula_settings_v2), with legacy fallback.
 	 * Returns a bag: grouped (for frontend JSON), flat (for PHP item processor/filters), type, align, gallery_id.
 	 *
-	 * @param int    $gallery_id Gallery ID.
-	 * @param string $align      Alignment attribute.
+	 * @param int    $gallery_id      Gallery ID.
+	 * @param string $align           Alignment attribute.
+	 * @param bool   $repair_settings Whether reading may repair the stored settings (a write).
 	 * @return array{grouped: array, flat: array, type: string, align: string, gallery_id: string}
 	 */
-	private function get_gallery_settings( $gallery_id, $align ) {
-		$grouped = \Modula\V2\Meta_Sync::get_settings_v2( $gallery_id );
+	private function get_gallery_settings( $gallery_id, $align, $repair_settings = true ) {
+		$grouped = \Modula\V2\Meta_Sync::get_settings_v2( $gallery_id, $repair_settings );
 
 		if ( \Modula\V2\Meta_Sync::settings_v2_is_usable( $grouped ) ) {
 			\Modula\V2\Settings\Adapter::enrich_video_media_urls( $grouped );
@@ -777,6 +778,33 @@ class Shortcode {
 	 */
 	public function build_bootstrap_items_batch( $gallery_id, array $flat, array $rows_slice, array $full_context ) {
 		return $this->build_converted_items_list( $gallery_id, $flat, $rows_slice, $full_context, 'public' );
+	}
+
+	/**
+	 * Editor items for rows that are not stored yet (an image being added or
+	 * replacing another), shaped as the editor bootstrap shows stored rows.
+	 * Reads the stored settings without repairing them, so it writes nothing.
+	 *
+	 * @param int                              $gallery_id Gallery post ID.
+	 * @param array<int, array<string, mixed>> $rows       Gallery rows, in order.
+	 * @param string                           $type       The editor's working layout type; '' keeps the stored one.
+	 * @return array<int, array<string, mixed>|null> One item per row, same keys; null for a row the editor cannot show.
+	 */
+	public function build_settings_editor_items( $gallery_id, array $rows, $type = '' ) {
+		$settings = $this->get_gallery_settings( $gallery_id, '', false );
+		$flat     = $settings['flat'];
+		if ( is_string( $type ) && '' !== $type ) {
+			$flat['type'] = $type;
+		}
+		$rows = $this->apply_image_reports( $rows );
+
+		$items = array();
+		foreach ( $rows as $index => $row ) {
+			// One row at a time: the converter drops rows it cannot show, which would shift the list.
+			$converted       = $this->build_converted_items_list( $gallery_id, $flat, array( $row ), $rows, 'settings_editor' );
+			$items[ $index ] = isset( $converted[0] ) && is_array( $converted[0] ) ? $converted[0] : null;
+		}
+		return $items;
 	}
 
 	/**

@@ -87,7 +87,6 @@ export default function HubV2FieldControl({
 		field.groupedPath === 'general.type' && !sharedGalleryTypeConfirm ? (
 			<GalleryTypeChangeConfirmModal
 				isOpen={localGalleryTypeConfirm.galleryTypeConfirmOpen}
-				isBusy={localGalleryTypeConfirm.galleryTypeConfirmBusy}
 				onCancel={
 					localGalleryTypeConfirm.handleGalleryTypeConfirmCancel
 				}

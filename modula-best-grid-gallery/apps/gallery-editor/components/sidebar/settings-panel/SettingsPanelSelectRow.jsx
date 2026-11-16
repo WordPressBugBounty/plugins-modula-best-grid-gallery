@@ -1,9 +1,6 @@
 /**
  * Redesign settings panel — select row; the control comes from selectKind.
  */
-import { useQueryClient } from '@tanstack/react-query';
-import { useTakeoverSaveStatus } from 'editor-shell';
-import { useModulaSettingsEditorConfig } from '../../../hooks/useModulaSettingsEditorConfig';
 import { getGalleryPreviewReduxStore } from '../../../utils/previewReduxStoreRef';
 import { seedTemplateContentBlocksForLayout } from '../../../logic/applyTemplateLayoutSideEffects';
 import SettingsPanelFieldRow from './SettingsPanelFieldRow';
@@ -21,10 +18,6 @@ export default function SettingsPanelSelectRow({
 	labelId,
 	dependentsReset,
 }) {
-	const editor = useModulaSettingsEditorConfig();
-	const queryClient = useQueryClient();
-	const { runPersistTask } = useTakeoverSaveStatus();
-
 	const fieldWithoutHelp = {
 		...field,
 		editorUi: {
@@ -41,21 +34,11 @@ export default function SettingsPanelSelectRow({
 			return;
 		}
 		const store = getGalleryPreviewReduxStore();
-		const galleryId = Number(editor.galleryId) || 0;
 		const slug = String(next || '').trim();
-		if (!store || !galleryId || !slug) {
+		if (!store || !slug) {
 			return;
 		}
-		void seedTemplateContentBlocksForLayout(
-			store,
-			galleryId,
-			slug,
-			runPersistTask,
-			queryClient
-		).catch((err) => {
-			// eslint-disable-next-line no-console
-			console.error('[modula] template content block seed failed', err);
-		});
+		seedTemplateContentBlocksForLayout(store, slug);
 	};
 
 	return (

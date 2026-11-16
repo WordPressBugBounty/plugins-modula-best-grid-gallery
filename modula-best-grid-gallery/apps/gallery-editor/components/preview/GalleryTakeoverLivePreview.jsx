@@ -10,17 +10,25 @@ import {
 	GalleryPreviewEagerLayoutsContext,
 	GalleryPreviewFilterBarContext,
 	GalleryPreviewHoverTileContext,
+	asGalleryItemList,
 	buildFilteringFromSettings,
 	isEmbeddedGalleryItemRow,
 	resolveGalleryHoverBuilder,
 } from 'gallery-shared/preview';
 import FreeformEditorLayout from './FreeformEditorLayout';
 import { WatermarkPreviewProvider } from './WatermarkPreviewProvider';
-import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
+import {
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+	useSyncExternalStore,
+} from '@wordpress/element';
 import '../../styles/takeover/preview/_hover-effect-builder.scss';
 import { __, sprintf } from '@wordpress/i18n';
 import { Notice, Spinner } from 'admin-ui';
 import { AdminUiScope } from 'editor-shell';
+import { editorDocumentQueryPhase } from 'editor-shell/logic';
 import { Provider } from 'react-redux';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
 import { useGalleryBootstrapQuery } from '../../query/useGalleryBootstrapQuery';
@@ -31,7 +39,7 @@ import MoveToCaptionNotice from './move-to-caption/MoveToCaptionNotice';
 import GallerySelectionGrid from './selection-grid/GallerySelectionGrid';
 import { galleryHasPreviewContent } from './galleryPreviewContent';
 import { useGalleryTakeoverLivePreviewController } from '../../hooks/useGalleryTakeoverLivePreviewController';
-import { PreviewItemPersistProvider } from '../../context/PreviewItemPersistContext';
+import { PreviewItemsPartProvider } from '../../context/PreviewItemsPartContext';
 import HoverEffectBuilderCard from '../hover-effect-builder/HoverEffectBuilderCard';
 import { buildPreviewHoverTile } from 'gallery-shared/hover/hoverTile';
 import { editorCaptionsAreBelowImage } from '../../utils/editorCaptionsAreBelowImage';
@@ -66,6 +74,20 @@ const KEEPS_ITEM_SELECTION = [
 const EDITOR_LAYOUTS = { ...EAGER_LAYOUTS, freeform: FreeformEditorLayout };
 
 /**
+ * The preview store's catalog (the editor's working items), re-read on change.
+ *
+ * @param {import('@reduxjs/toolkit').Store} store
+ * @return {Object[]} Gallery items in display order.
+ */
+function usePreviewStoreCatalog(store) {
+	const rows = useSyncExternalStore(
+		store.subscribe,
+		() => store.getState().items.items
+	);
+	return useMemo(() => asGalleryItemList(rows), [rows]);
+}
+
+/**
  * @param {{
  *   galleryId: number,
  *   previewViewport?: 'desktop'|'tablet'|'mobile',
@@ -87,12 +109,9 @@ export default function GalleryTakeoverLivePreview({
 	paginationPreviewActive = false,
 	postTitle = '',
 }) {
-	const {
-		data: bootstrap,
-		isPending,
-		isError,
-		error,
-	} = useGalleryBootstrapQuery(galleryId);
+	const bootstrapQuery = useGalleryBootstrapQuery(galleryId);
+	const { data: bootstrap, error } = bootstrapQuery;
+	const phase = editorDocumentQueryPhase(bootstrapQuery);
 	const { form } = useGallerySettingsFormBundle();
 
 	if (!galleryId) {
@@ -110,7 +129,7 @@ export default function GalleryTakeoverLivePreview({
 		);
 	}
 
-	if (isPending) {
+	if (phase === 'loading') {
 		return (
 			<div
 				className="modula-gallery-takeover__preview-loading"
@@ -128,7 +147,9 @@ export default function GalleryTakeoverLivePreview({
 		);
 	}
 
-	if (isError) {
+	// A failed background refetch keeps the mounted preview: unmounting it
+	// would discard the unsaved items in its store.
+	if (phase === 'error') {
 		const msg =
 			error?.message ||
 			error?.data?.message ||
@@ -219,7 +240,7 @@ function GalleryTakeoverLivePreviewMounted({
 		galleryType,
 		previewGalleryShellStyle,
 		galleryWidthOverflow,
-		previewItemPersistApi,
+		previewItemsPart,
 		previewAdminValue,
 	} = useGalleryTakeoverLivePreviewController({
 		galleryId,
@@ -229,6 +250,7 @@ function GalleryTakeoverLivePreviewMounted({
 		galleryTitle: postTitle,
 		artboardInnerWidth,
 	});
+	const previewItems = usePreviewStoreCatalog(store);
 
 	const itemEdit = useGalleryItemEditSidebar();
 	const hasSelectedItem = Number.isInteger(itemEdit?.selectedIndex);
@@ -318,11 +340,13 @@ function GalleryTakeoverLivePreviewMounted({
 		isLightboxPreview &&
 		(lightboxClickMode === 'fancybox' ||
 			lightboxClickMode === 'lightbox-prefer-url');
+	// The canvas shows the working catalog: added and removed items count
+	// before the editor save stores them.
 	const hasPreviewContent = galleryHasPreviewContent(
-		bootstrap?.items,
+		previewItems,
 		galleryType
 	);
-	const hoverSampleRow = pickFirstGalleryRowForHoverPreview(bootstrap?.items);
+	const hoverSampleRow = pickFirstGalleryRowForHoverPreview(previewItems);
 
 	return (
 		<div className="modula-gallery-takeover__live-preview modula modula-gallery modula-gallery-modern modula-gallery-initialized modula-gallery-chrome-ready">
@@ -376,7 +400,7 @@ function GalleryTakeoverLivePreviewMounted({
 						</>
 					) : useFancyboxLightboxPreview ? (
 						<LightboxPreviewPanelLazy
-							items={bootstrap?.items}
+							items={previewItems}
 							groupedSettings={groupedSettings}
 							galleryId={galleryId}
 							previewViewport={previewViewport}
@@ -434,8 +458,8 @@ function GalleryTakeoverLivePreviewMounted({
 										: ''
 								}`}
 							>
-								<PreviewItemPersistProvider
-									value={previewItemPersistApi}
+								<PreviewItemsPartProvider
+									value={previewItemsPart}
 								>
 									<Provider store={store}>
 										<GalleryPreviewEagerLayoutsContext.Provider
@@ -466,7 +490,7 @@ function GalleryTakeoverLivePreviewMounted({
 											</div>
 										</GalleryPreviewEagerLayoutsContext.Provider>
 									</Provider>
-								</PreviewItemPersistProvider>
+								</PreviewItemsPartProvider>
 							</div>
 						</>
 					)}

@@ -17,6 +17,9 @@ class Gallery_Upload_Controller {
 
 	const NAMESPACE = Settings_Controller::NAMESPACE;
 
+	/** Attachment ids one item-rows request may ask for; the editor sends larger picks in batches. */
+	const MAX_ITEM_ROW_IDS = 50;
+
 	/**
 	 * Register REST routes.
 	 */
@@ -40,6 +43,52 @@ class Gallery_Upload_Controller {
 				},
 			),
 		);
+	}
+
+	/**
+	 * Args of the item-rows route. The layout is the editor's working one, which
+	 * may not be saved yet; each key left out falls back to the stored settings.
+	 *
+	 * @return array
+	 */
+	private static function item_rows_args() {
+		return array_merge(
+			self::gallery_id_args(),
+			array(
+				'ids'     => array(
+					'required' => true,
+					'type'     => 'array',
+					'minItems' => 1,
+					'maxItems' => self::MAX_ITEM_ROW_IDS,
+					'items'    => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+					),
+				),
+				'type'    => array(
+					'type'              => 'string',
+					'validate_callback' => array( __CLASS__, 'is_registered_gallery_type' ),
+				),
+				'columns' => array(
+					'type'    => 'integer',
+					'minimum' => 1,
+					'maximum' => 12,
+				),
+			)
+		);
+	}
+
+	/**
+	 * `type` of the item-rows route: one of the registered gallery types. The
+	 * settings schema owns the list (Pro's types included); it is read when
+	 * the route is called, not on every REST request.
+	 *
+	 * @param mixed $type Request value.
+	 * @return bool
+	 */
+	public static function is_registered_gallery_type( $type ) {
+		$types = \Modula\V2\Settings\Registry::get_schema()['general']['type']['enum'] ?? array();
+		return is_string( $type ) && in_array( $type, (array) $types, true );
 	}
 
 	/**
@@ -148,6 +197,18 @@ class Gallery_Upload_Controller {
 				'callback'            => array( __CLASS__, 'import_file' ),
 				'permission_callback' => $edit_perm,
 				'args'                => $id_args,
+			)
+		);
+
+		// Media Library only: the editor's folder/ZIP import (ADR 0059). The gallery is not written.
+		register_rest_route(
+			self::NAMESPACE,
+			$base . '/import-media-file',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( __CLASS__, 'import_media_file' ),
+				'permission_callback' => $edit_perm,
+				'args'                => self::import_media_file_args(),
 			)
 		);
 
@@ -271,6 +332,141 @@ class Gallery_Upload_Controller {
 				'args'                => $id_args,
 			)
 		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/gallery/(?P<id>\d+)/item-rows',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( __CLASS__, 'build_item_rows' ),
+				'permission_callback' => array( __CLASS__, 'check_item_rows_permission' ),
+				'args'                => self::item_rows_args(),
+			)
+		);
+	}
+
+	/**
+	 * Requested attachment ids, without repeats, in request order. The schema
+	 * already made each one a positive integer.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return int[]
+	 */
+	private static function requested_attachment_ids( $request ) {
+		return array_values( array_unique( array_map( 'absint', (array) $request['ids'] ) ) );
+	}
+
+	/**
+	 * Item-rows permission: edit the gallery, upload files (as add-images), and
+	 * read every requested attachment. One unusable id refuses the whole request;
+	 * missing, non-attachment and unreadable ids share one error, so the answer
+	 * does not tell which ids exist.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return true|\WP_Error
+	 */
+	public static function check_item_rows_permission( $request ) {
+		$gallery_allowed = Settings_Controller::check_gallery_edit( $request );
+		if ( true !== $gallery_allowed ) {
+			return $gallery_allowed;
+		}
+		if ( ! \Modula_Gallery_Upload::get_instance()->check_user_upload_rights() ) {
+			return new \WP_Error(
+				'modula_forbidden',
+				__( 'You do not have the rights to upload files.', 'modula-best-grid-gallery' ),
+				array( 'status' => 403 )
+			);
+		}
+		foreach ( self::requested_attachment_ids( $request ) as $attachment_id ) {
+			if ( ! self::can_use_attachment( $attachment_id ) ) {
+				return new \WP_Error(
+					'modula_attachment_unavailable',
+					__( 'One of the selected files is not available.', 'modula-best-grid-gallery' ),
+					array(
+						'status' => 403,
+						'id'     => $attachment_id,
+					)
+				);
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * @param int $attachment_id Attachment ID.
+	 * @return bool Whether the current user may put this attachment in a gallery.
+	 */
+	private static function can_use_attachment( $attachment_id ) {
+		return 'attachment' === get_post_type( $attachment_id ) && current_user_can( 'read_post', $attachment_id );
+	}
+
+	/**
+	 * The layout new rows are built for: the request's working values over the
+	 * stored settings, read without repairing them (a repair would write).
+	 *
+	 * @param \WP_REST_Request $request    Request.
+	 * @param int              $gallery_id Gallery post ID.
+	 * @return array{type: string, columns: int}
+	 */
+	private static function requested_tile_layout( $request, $gallery_id ) {
+		$layout = \Modula_Gallery_Upload::get_instance()->get_stored_tile_layout( $gallery_id, false );
+		if ( is_string( $request['type'] ) && '' !== $request['type'] ) {
+			$layout['type'] = $request['type'];
+		}
+		if ( null !== $request['columns'] ) {
+			$layout['columns'] = absint( $request['columns'] );
+		}
+		return $layout;
+	}
+
+	/**
+	 * Build the gallery rows for attachments without storing anything (ADR 0059:
+	 * an added or replacing image is an unsaved change until the editor save).
+	 *
+	 * Responds `{ images: { row, item }[] }` in request order: `row` is what
+	 * add-images and replace-image-by-index store for the attachment, `item` is
+	 * that row as the editor bootstrap shows it. Writes nothing to the gallery
+	 * and posts no notification; `modula_image_properties` callbacks run as on
+	 * add-images (Pro EXIF may store the lens in the attachment metadata).
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public static function build_item_rows( $request ) {
+		$gallery_id = (int) $request['id'];
+		$layout     = self::requested_tile_layout( $request, $gallery_id );
+		$upload     = \Modula_Gallery_Upload::get_instance();
+		$rows       = array();
+		foreach ( self::requested_attachment_ids( $request ) as $attachment_id ) {
+			$row = $upload->build_attachment_image_row_for_layout( $gallery_id, $attachment_id, $layout );
+			if ( is_wp_error( $row ) ) {
+				return $row;
+			}
+			// Storing sanitizes the list once more (empty flags become 0); answer with the stored form.
+			$rows[] = $upload->sanitize_modula_image_row( $row );
+		}
+
+		$shortcode = new \Modula\V2\Shortcode\Shortcode( false );
+		$items     = $shortcode->build_settings_editor_items( $gallery_id, $rows, $layout['type'] );
+		$images    = array();
+		foreach ( $rows as $index => $row ) {
+			if ( empty( $items[ $index ] ) ) {
+				return new \WP_Error(
+					'modula_attachment_unavailable',
+					__( 'One of the selected files cannot be shown in the gallery.', 'modula-best-grid-gallery' ),
+					array(
+						'status' => 400,
+						'id'     => (int) $row['id'],
+					)
+				);
+			}
+			$images[] = array(
+				'row'  => $row,
+				'item' => $items[ $index ],
+			);
+		}
+
+		return new \WP_REST_Response( array( 'images' => $images ), 200 );
 	}
 
 	/**
@@ -367,6 +563,49 @@ class Gallery_Upload_Controller {
 			return $result;
 		}
 		return self::write_response( $id, array( 'attachment_id' => $result ) );
+	}
+
+	/**
+	 * Args of the import-media-file route: one server file under uploads.
+	 *
+	 * @return array
+	 */
+	private static function import_media_file_args() {
+		return array_merge(
+			self::gallery_id_args(),
+			array(
+				'file'         => array(
+					'required'  => true,
+					'type'      => 'string',
+					'minLength' => 1,
+				),
+				'delete_files' => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+			)
+		);
+	}
+
+	/**
+	 * Import one server file into the Media Library for the gallery editor's
+	 * folder and ZIP import. Shares the import (rights, path under uploads,
+	 * the attachment authorization of ADR 0031) with `import-file`, and touches
+	 * no gallery: no promotion of a never-saved gallery, no gallery meta, no
+	 * upload-error meta. A failure is the response.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return \WP_REST_Response|\WP_Error `{ attachment_id }`.
+	 */
+	public static function import_media_file( $request ) {
+		$attachment_id = \Modula_Gallery_Upload::get_instance()->import_file_to_media_library(
+			$request->get_param( 'file' ),
+			(bool) $request->get_param( 'delete_files' )
+		);
+		if ( is_wp_error( $attachment_id ) ) {
+			return $attachment_id;
+		}
+		return new \WP_REST_Response( array( 'attachment_id' => $attachment_id ), 200 );
 	}
 
 	/**

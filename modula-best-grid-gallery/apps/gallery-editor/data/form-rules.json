@@ -65,6 +65,14 @@
 					{
 						"path": "general.type",
 						"neq": "bento"
+					},
+					{
+						"path": "general.type",
+						"neq": "custom-grid"
+					},
+					{
+						"path": "general.type",
+						"neq": "freeform"
 					}
 				]
 			}

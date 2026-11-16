@@ -16,6 +16,7 @@ export {
 } from './utils/downloadAllButton';
 export {
 	createPreviewStore,
+	setPreviewGalleryMetadata,
 	updatePreviewStore,
 } from './utils/previewStoreFactory';
 export { commitPreviewCatalog } from './utils/commitPreviewCatalog';

@@ -108,7 +108,7 @@ export function decodeListingTitle(title) {
  * @property {string}                             shortcode
  * @property {{ rows?: ListingShortcodeRow[] }}   [shortcodes]
  * @property {string}                             updatedAt
- * @property {string}                             [date]                     Gallery publication wall time in the WordPress site timezone.
+ * @property {string}                             [date]                     Publication wall time in the WordPress site timezone.
  * @property {string}                             [timezone]                 WordPress site timezone identifier or UTC offset.
  * @property {string}                             createdAt
  * @property {{ name: string, initials: string }} author

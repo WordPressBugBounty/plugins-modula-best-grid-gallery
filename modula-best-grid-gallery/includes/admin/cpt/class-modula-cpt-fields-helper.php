@@ -193,7 +193,7 @@ class Modula_CPT_Fields_Helper {
 						'type'      => 'icon-radio',
 						'default'   => 'grid',
 						'values'    => array(
-							'creative-gallery' => esc_html__( 'Creative', 'modula-best-grid-gallery' ),
+							'creative-gallery' => esc_html__( 'Tiles', 'modula-best-grid-gallery' ),
 							'custom-grid'      => esc_html__( 'Custom', 'modula-best-grid-gallery' ),
 							'grid'             => esc_html__( 'Masonry', 'modula-best-grid-gallery' ),
 							'parallax-masonry' => esc_html__( 'Parallax', 'modula-best-grid-gallery' ),

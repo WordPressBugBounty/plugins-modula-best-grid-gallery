@@ -81,7 +81,7 @@ function GalleryReorderDialogContent({ galleryId, onClose }) {
 		onDragEnd,
 		moveOrderKey,
 		applyManualOrder,
-	} = useGalleryReorderController({ galleryId, onClose });
+	} = useGalleryReorderController({ onClose });
 
 	const items = orderedRows.map((row) =>
 		reorderItem(row, openContentBlockEdit)
@@ -105,7 +105,7 @@ function GalleryReorderDialogContent({ galleryId, onClose }) {
 }
 
 /**
- * Mounted only while open, so each opening starts from the saved order.
+ * Mounted only while open, so each opening starts from the canvas's order.
  * The key remounts it when the gallery changes.
  *
  * @param {{ galleryId: number, open: boolean, onClose: () => void }} props

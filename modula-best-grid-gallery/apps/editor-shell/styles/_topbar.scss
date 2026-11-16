@@ -93,6 +93,13 @@ $topbar-height: 64px;
 	border-right: 1px solid var(--modula-admin-border);
 }
 
+// The Popover anchor wraps the trigger. Without `min-width: 0` it keeps the
+// width of a long save state (an error message), and Undo, Redo, Retry and
+// Save overflow into the title column, which then takes their clicks.
+.modula-takeover__topbar-history > .modula-admin-popover-anchor {
+	min-width: 0;
+}
+
 .modula-takeover__topbar-history-spacer {
 	flex-grow: 1;
 }
@@ -165,6 +172,19 @@ button.modula-takeover__topbar-history-trigger {
 	width: 1px;
 	height: 18px;
 	background: var(--modula-admin-border-strong);
+}
+
+// Save (and Retry after a failed save), as tall as the undo/redo track.
+.modula-takeover__topbar-save {
+	display: flex;
+	flex: none;
+	align-items: center;
+	gap: 4px;
+	margin-left: 6px;
+
+	.modula-admin-button {
+		height: 34px;
+	}
 }
 
 // History popover (today's history jump, restyled).

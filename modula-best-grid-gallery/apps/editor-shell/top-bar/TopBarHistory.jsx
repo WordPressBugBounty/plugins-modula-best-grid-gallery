@@ -1,6 +1,7 @@
 /**
  * Header column above the settings panel: the save state opens the History
- * popover (history jump), followed by Undo and Redo.
+ * popover (history jump), followed by Undo and Redo, then the Save control
+ * when the editor mounts a save session.
  */
 import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
@@ -14,6 +15,7 @@ import {
 import { historyIcon, redoIcon, undoIcon } from '../history/historyIcons';
 import { getUndoRedoTitles } from '../history/undoRedoTitles';
 import { useSaveStatusLabel } from './saveStatusLabel';
+import TopBarSaveControl from './TopBarSaveControl';
 import { chevronDownIcon, closeIcon } from './topBarIcons';
 
 /** `jumpTo` index of the document before any entry ("Original settings"). */
@@ -336,6 +338,8 @@ export default function TopBarHistory({
 					<Icon icon={historyIcon} size={15} />
 					{saveState}
 				</span>
+				<span className="modula-takeover__topbar-history-spacer" />
+				<TopBarSaveControl />
 			</div>
 		);
 	}
@@ -375,6 +379,7 @@ export default function TopBarHistory({
 			</Popover>
 			<span className="modula-takeover__topbar-history-spacer" />
 			<UndoRedoButtons history={history} />
+			<TopBarSaveControl />
 			<ConfirmDialog
 				open={confirmClearOpen}
 				title={__('Clear history?', 'modula-best-grid-gallery')}

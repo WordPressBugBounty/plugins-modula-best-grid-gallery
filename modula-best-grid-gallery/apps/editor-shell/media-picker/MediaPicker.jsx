@@ -84,14 +84,14 @@ export function MediaPickerSearch({ label, placeholder, value, onChange }) {
  * The scrolling grid, with a loading, failure or empty line above it and
  * "Load more" under it while the server has more pages.
  *
- * @param {Object}               props
- * @param {MediaPickerItem[]}    props.items
- * @param {Set<number>}          props.selectedIds
- * @param {(id: number) => void} props.onToggle
- * @param {string}               [props.message]       Shown instead of an empty grid's silence.
- * @param {boolean}              [props.hasMore]
- * @param {boolean}              [props.isLoadingMore]
- * @param {() => void}           [props.onLoadMore]
+ * @param {Object}                                               props
+ * @param {MediaPickerItem[]}                                    props.items
+ * @param {Set<number>}                                          props.selectedIds
+ * @param {(id: number, options: { shiftKey: boolean }) => void} props.onToggle        Receives Shift for a range.
+ * @param {string}                                               [props.message]       Shown instead of an empty grid's silence.
+ * @param {boolean}                                              [props.hasMore]
+ * @param {boolean}                                              [props.isLoadingMore]
+ * @param {() => void}                                           [props.onLoadMore]
  */
 export function MediaPickerGrid({
 	items,
@@ -113,7 +113,9 @@ export function MediaPickerGrid({
 						key={item.id}
 						item={item}
 						selected={selectedIds.has(item.id)}
-						onToggle={() => onToggle(item.id)}
+						onToggle={(event) =>
+							onToggle(item.id, { shiftKey: event.shiftKey })
+						}
 					/>
 				))}
 			</div>
@@ -133,10 +135,10 @@ export function MediaPickerGrid({
 /**
  * One item: a checkbox button, disabled when it is already in the document.
  *
- * @param {Object}          props
- * @param {MediaPickerItem} props.item
- * @param {boolean}         props.selected
- * @param {() => void}      props.onToggle
+ * @param {Object}                                      props
+ * @param {MediaPickerItem}                             props.item
+ * @param {boolean}                                     props.selected
+ * @param {(event: import('react').MouseEvent) => void} props.onToggle
  */
 function PickerItem({ item, selected, onToggle }) {
 	return (

@@ -54,7 +54,8 @@ return array(
 					'grid'             => 'Masonry',
 					'uniform-grid'     => 'Uniform grid',
 					'fit-grid'         => 'Fit grid',
-					'creative-gallery' => 'Creative',
+					// Shown as "Tiles"; the stored id stays `creative-gallery`.
+					'creative-gallery' => 'Tiles',
 					'custom-grid'      => 'Custom grid',
 					'polaroid'         => 'Polaroid',
 					'slider'           => 'Slider',
@@ -74,30 +75,32 @@ return array(
 				 */
 				'editorOptionGroups'      =>
 				array(
+					// The layout is generated from the photos.
 					array(
-						'id'     => 'grids',
-						'label'  => 'Grid layouts',
+						'id'     => 'automatic',
+						'label'  => 'Automatic layouts',
 						'values' =>
 						array(
 							0 => 'grid',
 							1 => 'uniform-grid',
 							2 => 'fit-grid',
 							3 => 'justified-grid',
-							4 => 'custom-grid',
+							4 => 'creative-gallery',
+							5 => 'polaroid',
+							6 => 'parallax-masonry',
+							7 => 'bnb',
+							8 => 'bento',
+							9 => 'template',
 						),
 					),
+					// The author places and sizes each tile by dragging.
 					array(
-						'id'     => 'creative',
-						'label'  => 'Creative layouts',
+						'id'     => 'manual',
+						'label'  => 'Manual layouts',
 						'values' =>
 						array(
-							0 => 'creative-gallery',
-							1 => 'polaroid',
-							2 => 'parallax-masonry',
-							3 => 'bnb',
-							4 => 'bento',
-							5 => 'template',
-							6 => 'freeform',
+							0 => 'custom-grid',
+							1 => 'freeform',
 						),
 					),
 					array(

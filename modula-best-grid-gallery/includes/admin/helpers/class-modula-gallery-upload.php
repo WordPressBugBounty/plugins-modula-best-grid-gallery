@@ -255,6 +255,8 @@ class Modula_Gallery_Upload {
 
 	/**
 	 * REST: import one file into the media library (replaces ajax_import_file).
+	 * A failed upload is also recorded on the gallery (the upload-error meta
+	 * the classic import notice reads).
 	 *
 	 * @param int    $gallery_id Gallery ID (for error meta).
 	 * @param string $file Server file path.
@@ -262,6 +264,27 @@ class Modula_Gallery_Upload {
 	 * @return int|\WP_Error Attachment ID.
 	 */
 	public function rest_import_file( $gallery_id, $file, $delete_file ) {
+		$attachment_id = $this->import_file_to_media_library( $file, $delete_file );
+		$gallery_id    = absint( $gallery_id );
+		if ( is_wp_error( $attachment_id ) && 'modula_import_failed' === $attachment_id->get_error_code() && $gallery_id > 0 ) {
+			$prev_uploaded_files       = $this->get_uploaded_error_files( $gallery_id );
+			$uploaded_files['files'][] = wp_unslash( $file );
+			$this->update_uploaded_error_files( $gallery_id, array_merge( $prev_uploaded_files, $uploaded_files ) );
+		}
+		return $attachment_id;
+	}
+
+	/**
+	 * Import one server file into the Media Library and nothing else: no
+	 * gallery is read or written. Upload rights, the path under uploads and
+	 * the attachment authorization of ADR 0031 are checked first; a failure
+	 * is only returned.
+	 *
+	 * @param string $file        Server file path.
+	 * @param bool   $delete_file Whether Delete after import was requested (unlinks source after a temp sideload).
+	 * @return int|\WP_Error Attachment ID.
+	 */
+	public function import_file_to_media_library( $file, $delete_file ) {
 		if ( ! $this->check_user_upload_rights() ) {
 			return new \WP_Error(
 				'modula_forbidden',
@@ -303,14 +326,8 @@ class Modula_Gallery_Upload {
 			return $authorized;
 		}
 
-		$gallery_id    = absint( $gallery_id );
 		$attachment_id = $this->upload_image( $real_path, (bool) $delete_file );
 		if ( ! $attachment_id ) {
-			if ( $gallery_id > 0 ) {
-				$prev_uploaded_files       = $this->get_uploaded_error_files( $gallery_id );
-				$uploaded_files['files'][] = $file;
-				$this->update_uploaded_error_files( $gallery_id, array_merge( $prev_uploaded_files, $uploaded_files ) );
-			}
 			return new \WP_Error(
 				'modula_import_failed',
 				__( 'The file could not be uploaded.', 'modula-best-grid-gallery' ),
@@ -466,25 +483,39 @@ class Modula_Gallery_Upload {
 	}
 
 	/**
+	 * The stored layout a new image's tile spans depend on.
+	 *
+	 * @param int  $gallery_id      Gallery post ID.
+	 * @param bool $repair_settings Whether reading the settings may repair them (a write).
+	 * @return array{type: string, columns: int} Layout type and grid column count (1–12).
+	 */
+	public function get_stored_tile_layout( $gallery_id, $repair_settings = true ) {
+		return array(
+			'type'    => $this->get_gallery_layout_type_string( $gallery_id, $repair_settings ),
+			'columns' => $this->get_gallery_grid_column_count( $gallery_id, $repair_settings ),
+		);
+	}
+
+	/**
 	 * Default data-width / data-height grid units for a new image when the gallery is custom-grid.
 	 *
-	 * @param int $gallery_id Gallery post ID.
-	 * @param int $image_id   Attachment ID.
+	 * @param int                                 $gallery_id Gallery post ID.
+	 * @param int                                 $image_id   Attachment ID.
+	 * @param array{type: string, columns: int}   $layout     See get_stored_tile_layout().
 	 * @return int[] { width, height }.
 	 */
-	private function get_default_tile_spans_for_new_image( $gallery_id, $image_id, $repair_settings = true ) {
-		if ( 'custom-grid' !== $this->get_gallery_layout_type_string( $gallery_id, $repair_settings ) ) {
+	private function get_default_tile_spans_for_new_image( $gallery_id, $image_id, array $layout ) {
+		if ( 'custom-grid' !== $layout['type'] ) {
 			return array( 2, 2 );
 		}
 		$meta = wp_get_attachment_metadata( $image_id );
 		if ( ! is_array( $meta ) || empty( $meta['width'] ) || empty( $meta['height'] ) ) {
 			return array( 3, 3 );
 		}
-		$columns     = $this->get_gallery_grid_column_count( $gallery_id, $repair_settings );
 		list($w, $h) = $this->custom_grid_tile_spans_from_pixel_ratio(
 			(int) $meta['width'],
 			(int) $meta['height'],
-			$columns
+			$layout['columns']
 		);
 		/**
 		 * Filter spans [w,h] in grid units for newly added images in custom-grid galleries.
@@ -537,27 +568,15 @@ class Modula_Gallery_Upload {
 			);
 		}
 		$modula_images = array();
+		$layout        = $this->get_stored_tile_layout( $gallery_id );
 		foreach ( $ids as $image_id ) {
-			$image_id   = absint( $image_id );
-			$attachment = get_post( $image_id );
-			if ( ! $attachment ) {
+			$image_id = absint( $image_id );
+			$row      = $this->build_attachment_image_row_for_layout( $gallery_id, $image_id, $layout );
+			// A missing attachment is skipped, as before; the request fails only when none is left.
+			if ( is_wp_error( $row ) ) {
 				continue;
 			}
-			list($def_w, $def_h)        = $this->get_default_tile_spans_for_new_image( $gallery_id, $image_id );
-			$image                      = array(
-				'id'          => $image_id,
-				'alt'         => sanitize_text_field( get_post_meta( $image_id, '_wp_attachment_image_alt', true ) ),
-				'title'       => sanitize_text_field( $attachment->post_title ),
-				'description' => wp_filter_post_kses( $attachment->post_excerpt ),
-				'halign'      => 'center',
-				'valign'      => 'middle',
-				'link'        => '',
-				'target'      => '',
-				'width'       => $def_w,
-				'height'      => $def_h,
-				'filters'     => '',
-			);
-			$modula_images[ $image_id ] = $this->prepare_new_image_row( $image );
+			$modula_images[ $image_id ] = $row;
 		}
 		if ( empty( $modula_images ) ) {
 			return new \WP_Error(
@@ -623,6 +642,25 @@ class Modula_Gallery_Upload {
 	 * Automation passes repair_settings=false to avoid implicit settings repairs.
 	 */
 	public function build_attachment_image_row( $gallery_id, $image_id, $repair_settings = true ) {
+		return $this->build_attachment_image_row_for_layout(
+			$gallery_id,
+			$image_id,
+			$this->get_stored_tile_layout( $gallery_id, $repair_settings )
+		);
+	}
+
+	/**
+	 * Build the row an attachment joins a gallery with, for a given layout. The one
+	 * row builder behind add-images, replace, the abilities and the read-only
+	 * item-rows route. Stores nothing in the gallery; `modula_image_properties`
+	 * callbacks may still write to the attachment (Pro EXIF can store the lens).
+	 *
+	 * @param int                               $gallery_id Gallery post ID.
+	 * @param int                               $image_id   Attachment ID.
+	 * @param array{type: string, columns: int} $layout     See get_stored_tile_layout().
+	 * @return array|\WP_Error Row shaped like modula-images entries.
+	 */
+	public function build_attachment_image_row_for_layout( $gallery_id, $image_id, array $layout ) {
 		$attachment = get_post( $image_id );
 		if ( ! $attachment ) {
 			return new \WP_Error(
@@ -631,7 +669,7 @@ class Modula_Gallery_Upload {
 				array( 'status' => 400 )
 			);
 		}
-		list($def_w, $def_h) = $this->get_default_tile_spans_for_new_image( $gallery_id, $image_id, $repair_settings );
+		list($def_w, $def_h) = $this->get_default_tile_spans_for_new_image( $gallery_id, $image_id, $layout );
 		$image               = array(
 			'id'          => $image_id,
 			'alt'         => sanitize_text_field( get_post_meta( $image_id, '_wp_attachment_image_alt', true ) ),

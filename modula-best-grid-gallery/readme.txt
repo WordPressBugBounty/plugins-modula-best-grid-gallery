@@ -4,7 +4,7 @@ Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPres
 Requires at least: 5.3
 Tested up to: 7.1
 Requires PHP: 5.6
-Stable tag: 3.0.20
+Stable tag: 3.0.21
 
 License: GNU General Public License v3.0 or later  
 
@@ -237,6 +237,27 @@ To install it by hand, go to Plugins > Add New > Upload Plugin and choose the pl
 23. PRO: video galleries with self-hosted videos or links from YouTube and Vimeo.
 
 == Changelog ==
+
+= 3.0.21 - 16.11.2026 =
+Changed: The new gallery editor saves only when you press Save in the top bar (or Cmd/Ctrl+S), so visitors see your changes only once you are done, and editing no longer pauses to save. A new gallery is created by its first save, and changes you had not saved when a tab closed or crashed are offered back the next time you open the gallery.
+Fixed: In Safari, the lightbox of galleries made in the new editor opens images at full size on sites where an image optimiser such as ShortPixel Adaptive Images had left them at thumbnail size.
+Fixed: In the lightbox of galleries made in the new editor, an image with a caption is shown as large as the screen allows again: the caption takes only the space its text needs, instead of always keeping 40% of the height free for it.
+Fixed: On pages that also have a gallery made in the classic editor, the lightbox of galleries made in the new editor shows the image again, instead of only the thumbnail strip.
+Fixed: Galleries made in the new editor no longer show "Undefined array key image_full" warnings on sites with debugging on, for example with videos or Modula SpeedUp, and their cropped images keep their larger sizes for high-resolution screens.
+Added: On the Galleries page, Quick Edit can change a gallery's publication date.
+Added: In the new gallery editor's media picker, holding Shift while you click selects every image between two clicks.
+Added: In a Custom grid, the canvas scrolls by itself while you drag or resize an image at its top or bottom edge.
+Changed: In the new gallery editor, the Type menu groups gallery types as Automatic layouts, Manual layouts (Custom grid and Freeform) and Slides & video.
+Changed: The Creative gallery type is now called Tiles. Existing galleries keep their look and their settings.
+Changed: Custom grid and Freeform galleries no longer offer Sort or Randomize images, because you place every image by hand there.
+Changed: A Custom grid switches to its phone and tablet layout by the width of the screen, not of the space the gallery sits in, so a gallery placed in a narrow column keeps its columns on a desktop.
+Changed: With Modula PRO active, the new gallery editor needs Modula PRO 3.0.24 or newer, and asks you to update an older one.
+Fixed: In the new gallery editor, removing, adding or editing an image no longer replays the entrance animation of every image.
+Fixed: In a Custom grid, a resize that makes the gallery taller than the canvas is no longer undone on computers that show a permanent scrollbar, such as Windows.
+Fixed: An image with both a shadow and rounded corners has its corners rounded, instead of square corners inside a rounded shadow.
+Fixed: On sites with plain permalinks, the Link field in Quick Edit shows the gallery's address once, instead of repeating its last part.
+Fixed: Modula's AI connection no longer breaks the tools other plugins, such as Elementor, add to the same MCP server, and adds nothing to it while the connection is switched off.
+Fixed: In the new gallery editor, closing the Image panel no longer brings back a caption you had cleared.
 
 = 3.0.20 - 12.11.2026 =
 Changed: In the lightbox of galleries made in the new editor, the title and caption are as wide as the image and sit right under it, instead of stretching across the screen. A long caption scrolls in its own space, so the image stays large.

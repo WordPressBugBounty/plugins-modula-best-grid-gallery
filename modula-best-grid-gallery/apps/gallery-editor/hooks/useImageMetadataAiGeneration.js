@@ -98,8 +98,11 @@ export function useImageMetadataAiGeneration({
 
 	const applyPatch = useCallback(
 		(/** @type {Record<string, string>} */ patch) => {
-			const prev = form.state.values;
-			form.reset({ ...prev, ...patch });
+			// An author's edit like typing: it marks the form dirty, which is
+			// how the panel's edits reach the preview store (and the save).
+			Object.entries(patch).forEach(([key, value]) => {
+				form.setFieldValue(key, value);
+			});
 			setAiSuggestedFields((prevSet) => {
 				const next = new Set(prevSet);
 				Object.keys(patch).forEach((key) => next.add(key));

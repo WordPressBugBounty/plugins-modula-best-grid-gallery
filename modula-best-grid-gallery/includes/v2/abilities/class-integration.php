@@ -7,6 +7,7 @@ use Modula\V2\Freeform_Catalog;
 use Modula\V2\Meta_Sync;
 use Modula\V2\Images\Adapter;
 use Modula\V2\Mcp\Adapter as Mcp_Adapter;
+use Modula\V2\Mcp\Connection_Switch;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -42,14 +43,17 @@ final class Integration {
 		add_action( 'modula_abilities_cleanup', array( Requests::class, 'cleanup' ) );
 		add_action( 'wp_abilities_api_categories_init', array( __CLASS__, 'register_category' ) );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_abilities' ) );
-		add_filter( 'mcp_adapter_default_server_config', array( __CLASS__, 'server_config' ) );
+		// Last: on tools/list Modula lists tool instances (listing_tools()), and other plugins'
+		// filters on this shared list expect ability names only (Elementor runs array_unique() on it).
+		add_filter( 'mcp_adapter_default_server_config', array( __CLASS__, 'server_config' ), PHP_INT_MAX );
 		add_filter( 'mcp_adapter_tools_list', array( __CLASS__, 'tools_list' ), 10, 3 );
 	}
 
 	/**
 	 * Lists each MCP-public Modula ability as a direct tool on the adapter's default server,
 	 * and describes the server with Modula's initialize instructions, on requests that serve
-	 * the server (serves_server()).
+	 * the server (serves_server()). With AI connections turned off (Connection_Switch) Modula
+	 * adds nothing to the shared server.
 	 *
 	 * The adapter auto-discovers resources and prompts, but not tools. Exposure reads
 	 * the `mcp.public` meta set at registration, so this list and the generic
@@ -63,10 +67,10 @@ final class Integration {
 	 * reads (served_tools()); the instructions still describe every Modula tool.
 	 *
 	 * @param mixed $config Default server configuration; another filter may have broken its shape.
-	 * @return mixed The configuration, unchanged when it has no tools list or the request does not serve the server.
+	 * @return mixed The configuration, unchanged when AI connections are off, it has no tools list or the request does not serve the server.
 	 */
 	public static function server_config( $config ) {
-		if ( ! Mcp_Adapter::takes_part() || ! is_array( $config ) || ! is_array( $config['tools'] ?? null ) || ! self::serves_server( $config ) ) {
+		if ( ! Mcp_Adapter::takes_part() || ! Connection_Switch::is_on() || ! is_array( $config ) || ! is_array( $config['tools'] ?? null ) || ! self::serves_server( $config ) ) {
 			return $config;
 		}
 		$modula_tools = array();

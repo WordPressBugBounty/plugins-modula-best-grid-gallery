@@ -2,9 +2,9 @@
  * Gallery editor takeover — gallery content for the shared takeover layout:
  * top bar, rail + settings panel, canvas toolbar, live preview, device pill.
  */
-import { useEffect, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { useStore } from '@tanstack/react-form';
-import { TakeoverLayout, useTakeoverSaveStatus } from 'editor-shell';
+import { EditorRecoveryNotice, TakeoverLayout } from 'editor-shell';
 import { SETTINGS_EDITOR_CATEGORIES } from '../../constants/editorStructure';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 import { getTakeoverStateFromLocationHash } from '../../logic/settingsEditorHash';
@@ -12,7 +12,7 @@ import { useTakeoverAuxiliaryPanel } from '../../context/TakeoverAuxiliaryPanelC
 import { useSettingsPanelSections } from '../../context/SettingsPanelSectionsContext';
 import { HoverEffectBuilderProvider } from '../../context/HoverEffectBuilderContext';
 import { BulkEditProvider } from '../../context/BulkEditContext';
-import { useTakeoverPostMeta } from '../../hooks/useTakeoverPostMeta';
+import { useGalleryPostFieldsPart } from '../../hooks/useGalleryPostFieldsPart';
 import { useTakeoverSidebarStateSync } from '../../hooks/useTakeoverSidebarStateSync';
 import { useTakeoverAuxiliarySync } from '../../hooks/useTakeoverAuxiliarySync';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
@@ -28,19 +28,25 @@ import GalleryPreviewCanvasToolbar from '../preview/GalleryPreviewCanvasToolbar'
 import BulkEditModalLazy from '../bulk-edit/BulkEditModalLazy';
 import AddMediaDialogLazy from '../add-media/AddMediaDialogLazy';
 import GalleryTakeoverTopBar from './GalleryTakeoverTopBar';
-import TakeoverSettingsAutosave from './TakeoverSettingsAutosave';
 import TakeoverAuxiliaryPanelHost from './TakeoverAuxiliaryPanelHost';
 import LicenseExpiredBanner from './LicenseExpiredBanner';
+import ProUpdateNotice from './ProUpdateNotice';
+import { useGallerySettingsSavePart } from '../../form/useGallerySettingsSavePart';
 
 const initialTakeoverUi = getTakeoverStateFromLocationHash(
 	SETTINGS_EDITOR_CATEGORIES
 );
 
+/** Registers the gallery settings with the editor save session. */
+function GallerySettingsSavePart() {
+	useGallerySettingsSavePart(useGallerySettingsFormBundle());
+	return null;
+}
+
 export default function GalleryTakeoverShell() {
 	const config = useModulaSettingsEditorConfig();
 	const galleryId = resolveGalleryAdminPostId(config);
 	const { form, undoRedo } = useGallerySettingsFormBundle();
-	const { runPersistTask, registerPostStatusSync } = useTakeoverSaveStatus();
 	const { auxiliary, isAuxiliaryOpen, openFromCategory, closePanel } =
 		useTakeoverAuxiliaryPanel();
 	const { openSections } = useSettingsPanelSections();
@@ -51,27 +57,7 @@ export default function GalleryTakeoverShell() {
 		/** @type {'desktop'|'tablet'|'mobile'} */ ('desktop')
 	);
 	const adminUrl = getGalleryListUrl(config);
-	const {
-		liveTitle,
-		setLiveTitle,
-		commitPostTitle,
-		livePostStatus,
-		livePostStatusLabel,
-		handlePostStatusChange,
-		statusBusy,
-		applyPostStatusFromServer,
-	} = useTakeoverPostMeta({
-		galleryId,
-		initialTitle: config.postTitle || '',
-		initialStatus: config.postStatus || '',
-		initialStatusLabel: config.postStatusLabel || '',
-		runPersistTask,
-	});
-
-	useEffect(() => {
-		registerPostStatusSync(applyPostStatusFromServer);
-		return () => registerPostStatusSync(null);
-	}, [applyPostStatusFromServer, registerPostStatusSync]);
+	const postFields = useGalleryPostFieldsPart(galleryId);
 
 	const hoverEffectBuilderActive =
 		activeCategory === 'hover' ||
@@ -112,19 +98,18 @@ export default function GalleryTakeoverShell() {
 					topBar={
 						<GalleryTakeoverTopBar
 							galleryId={galleryId}
-							postTitle={liveTitle}
-							onPostTitleChange={setLiveTitle}
-							onPostTitleCommit={commitPostTitle}
+							postTitle={postFields.title}
+							onPostTitleChange={postFields.setTitle}
+							onPostTitleCommit={postFields.commitTitle}
 							adminUrl={adminUrl}
 							newGalleryUrl={getNewGalleryUrl(config)}
 							history={undoRedo}
-							documentStatus={livePostStatus}
-							documentStatusLabel={livePostStatusLabel}
+							documentStatus={postFields.status}
+							documentStatusLabel={postFields.statusLabel}
 							documentStatusChoices={
 								config.postStatusChoices || []
 							}
-							onDocumentStatusChange={handlePostStatusChange}
-							documentStatusBusy={statusBusy}
+							onDocumentStatusChange={postFields.setStatus}
 							canEditDocumentStatus={Boolean(
 								config.canEditGalleryStatus
 							)}
@@ -149,9 +134,10 @@ export default function GalleryTakeoverShell() {
 									<GalleryPreviewCanvasToolbar
 										galleryId={galleryId}
 										galleryType={galleryType}
-										runPreviewItemMutation={runPersistTask}
 									/>
+									<ProUpdateNotice />
 									<LicenseExpiredBanner />
+									<EditorRecoveryNotice />
 								</>
 							)}
 						</form.Subscribe>
@@ -164,7 +150,7 @@ export default function GalleryTakeoverShell() {
 					canvas={
 						<GalleryTakeoverLivePreviewLazy
 							galleryId={galleryId}
-							postTitle={liveTitle}
+							postTitle={postFields.title}
 							previewViewport={previewViewport}
 							activeCategory={activeCategory}
 							hoverEffectBuilderActive={hoverEffectBuilderActive}
@@ -174,7 +160,7 @@ export default function GalleryTakeoverShell() {
 						/>
 					}
 				>
-					<TakeoverSettingsAutosave />
+					<GallerySettingsSavePart />
 				</TakeoverLayout>
 				<BulkEditModalLazy />
 				<AddMediaDialogLazy />

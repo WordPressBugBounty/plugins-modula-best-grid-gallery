@@ -2,12 +2,10 @@ import { asGalleryItemList } from 'gallery-shared/preview';
 import { useMemo } from '@wordpress/element';
 import {
 	buildNewContentBlockRow,
-	previewCoreItemsToSaveMergedPayload,
 	reanchorEmbeddedRowsInMergedList,
 } from '../utils/embeddedGalleryItems';
 import { commitPreviewCatalog } from '../utils/previewItemsCommit';
 import { getGalleryPreviewReduxStore } from '../utils/previewReduxStoreRef';
-import { saveMergedGalleryItems } from '../api/galleryUploadApi';
 import {
 	getAddMediaDialogTab,
 	getAddNewMenuDefinition,
@@ -20,6 +18,7 @@ import {
 	getBoundGallerySummaryFromEditor,
 } from '../utils/boundGalleryChromePolicy';
 import { openTakeoverVideoMediaLibrary } from '../utils/openTakeoverVideoMediaLibrary';
+import { useGalleryEditorChanges } from './useGalleryEditorChanges';
 import { resolveTakeoverPrimaryAddNewAction } from '../utils/resolveTakeoverPrimaryAddNewAction';
 
 const PREVIEW_IMPORT_REACT_FLOWS = new Set([
@@ -42,7 +41,6 @@ const PREVIEW_IMPORT_REACT_FLOWS = new Set([
  *   onOpenAddMedia?: (tab: 'upload' | 'library') => void,
  *   onLibraryAdded?: () => void,
  *   onLibraryError?: (msg: string) => void,
- *   runPersistTask?: (fn: () => void | Promise<void>) => Promise<void>,
  *   galleryType?: string,
  * }} args `onOpenAddMedia` opens the Add media dialog (takeover only).
  */
@@ -54,10 +52,10 @@ export function useTakeoverPreviewAddNewMenu({
 	onOpenAddMedia,
 	onLibraryAdded,
 	onLibraryError,
-	runPersistTask,
 	galleryType = '',
 }) {
 	const isVideoGallery = galleryType === 'video';
+	const editorChanges = useGalleryEditorChanges();
 	const boundSummary = getBoundGallerySummaryFromEditor(editor);
 
 	const rows = useMemo(() => {
@@ -81,7 +79,8 @@ export function useTakeoverPreviewAddNewMenu({
 		openTakeoverVideoMediaLibrary({
 			galleryId,
 			uploadPosition,
-			runPersistTask,
+			// The picked videos become unsaved changes (Lite 3.0.21, Pro 3.0.24).
+			addItems: editorChanges.addItems,
 			onSuccess: () => onLibraryAdded?.(),
 			onError: (msg) => onLibraryError?.(msg),
 		});
@@ -101,21 +100,8 @@ export function useTakeoverPreviewAddNewMenu({
 			position: insertStart ? 'start' : 'end',
 		});
 		const next = insertStart ? [newRow, ...core] : [...core, newRow];
-		const reanchored = reanchorEmbeddedRowsInMergedList(next);
-		void runPersistTask(async () => {
-			return saveMergedGalleryItems(
-				galleryId,
-				previewCoreItemsToSaveMergedPayload(reanchored)
-			);
-		}, 'gallery-add-content')
-			.then(() => {
-				commitPreviewCatalog(st, reanchored);
-				onLibraryAdded?.();
-			})
-			.catch((err) => {
-				const msg = err?.message || err?.data?.message || String(err);
-				onLibraryError?.(msg);
-			});
+		// On the canvas at once; the editor save stores it (ADR 0059).
+		commitPreviewCatalog(st, reanchorEmbeddedRowsInMergedList(next));
 	};
 
 	const handlePrimaryAddNew = () => {

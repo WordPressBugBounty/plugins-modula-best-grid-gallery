@@ -177,6 +177,12 @@
 	min-height: 0;
 	overflow: auto;
 	box-sizing: border-box;
+	/*
+	 * A classic scrollbar takes width when it appears. Reserve it, so a gallery
+	 * that grows past the frame keeps its width: a Custom grid resize that made
+	 * the bar appear was cancelled by the width change.
+	 */
+	scrollbar-gutter: stable;
 
 	&--width-overflow {
 		overflow-x: auto;

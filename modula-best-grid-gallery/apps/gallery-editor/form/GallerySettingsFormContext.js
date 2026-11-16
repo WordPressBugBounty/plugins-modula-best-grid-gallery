@@ -38,6 +38,8 @@ const GallerySettingsFormContext = createContext(null);
  * @property {(snapshot: Object, serverData: Object) => void}                                                                                            acknowledgeSettingsSave
  * @property {() => (() => void)}                                                                                                                        beginSettingsGesture
  * @property {(values?: Object) => Object}                                                                                                               getPendingSettingsPatch
+ * @property {(stored: Record<string, Record<string, unknown>>, response?: unknown) => void}                                                             adoptStoredSettings     Settings an immediate action stored become saved state (Pro proofing lock).
+ * @property {(listener: (response: unknown) => void) => () => void}                                                                                     subscribeStoredWrites
  */
 
 /**

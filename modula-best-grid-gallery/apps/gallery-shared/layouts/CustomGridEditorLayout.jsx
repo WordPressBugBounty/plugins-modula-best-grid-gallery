@@ -30,6 +30,7 @@ import {
 import { splitCustomGridDisplayChunks } from '../utils/customGridDisplayChunks';
 import { getCustomGridEditorDragCancelSelector } from '../utils/customGridEditorDrag';
 import { applyCustomGridLayoutSectionToStore } from '../utils/applyCustomGridLayoutSectionToStore';
+import { startGestureEdgeAutoScroll } from '../utils/gestureEdgeAutoScroll';
 import {
 	consumeCustomGridRepackPending,
 	repackCustomGridPreviewItems,
@@ -106,10 +107,6 @@ function CustomGridEditorRglLayout({
 	const [guide, setGuide] = useState(null);
 	const [gestureEpoch, setGestureEpoch] = useState(0);
 	const previewAdmin = useContext(GalleryPreviewAdminActionsContext);
-	// Cancel reads the latest actions without changing identity: its listeners
-	// and the cancel-on-layout-change effect must not re-run on a new context value.
-	const previewAdminRef = useRef(previewAdmin);
-	previewAdminRef.current = previewAdmin;
 	const { scale: customGridPreviewScale } =
 		useGalleryPreviewCustomGridScale();
 	/**
@@ -159,7 +156,6 @@ function CustomGridEditorRglLayout({
 				layout,
 				chunks
 			);
-			previewAdmin?.schedulePersistPreviewItems?.();
 			if (kind === 'drag' || kind === 'resize') {
 				previewAdmin?.onCustomGridLayoutCommit?.({ kind });
 			}
@@ -183,11 +179,19 @@ function CustomGridEditorRglLayout({
 		[gridEditable]
 	);
 
+	const stopEdgeAutoScrollRef = useRef(() => {});
+	const stopEdgeAutoScroll = useCallback(() => {
+		stopEdgeAutoScrollRef.current();
+		stopEdgeAutoScrollRef.current = () => {};
+	}, []);
+
 	const beginInteraction = useCallback(
-		(kind, sectionIndex, item) => {
+		(kind, sectionIndex, item, tile) => {
 			if (!gridEditable) {
 				return;
 			}
+			stopEdgeAutoScroll();
+			stopEdgeAutoScrollRef.current = startGestureEdgeAutoScroll(tile);
 			setGuide({ kind, sectionIndex, rectangle: item });
 			previewAdmin?.onCustomGridLayoutInteractionStart?.({ kind });
 			interactionRef.current = {
@@ -196,12 +200,13 @@ function CustomGridEditorRglLayout({
 				layout: null,
 			};
 		},
-		[gridEditable, previewAdmin]
+		[gridEditable, previewAdmin, stopEdgeAutoScroll]
 	);
 
 	const endInteraction = useCallback(
 		(sectionIndex, layout) => {
 			const interaction = interactionRef.current;
+			stopEdgeAutoScroll();
 			setGuide(null);
 			const kind = interaction.kind;
 			if (!kind || interaction.sectionIndex !== sectionIndex) {
@@ -217,13 +222,12 @@ function CustomGridEditorRglLayout({
 			if (gridEditable && Array.isArray(finalLayout)) {
 				commitSectionLayout(sectionIndex, finalLayout, kind);
 			}
-			// After the commit, so the held save includes the gesture's result.
-			previewAdmin?.onCustomGridLayoutInteractionEnd?.();
 		},
-		[gridEditable, commitSectionLayout, previewAdmin]
+		[gridEditable, commitSectionLayout, stopEdgeAutoScroll]
 	);
 
 	const cancelInteraction = useCallback(() => {
+		stopEdgeAutoScroll();
 		if (!interactionRef.current.kind) {
 			return;
 		}
@@ -235,9 +239,8 @@ function CustomGridEditorRglLayout({
 		setGuide(null);
 		// RGL owns its live layout; remount from the unchanged committed catalog.
 		setGestureEpoch((value) => value + 1);
-		previewAdminRef.current?.onCustomGridLayoutInteractionEnd?.();
-	}, []);
-	// Unmounting mid-gesture (e.g. a viewport switch) must not keep saves held.
+	}, [stopEdgeAutoScroll]);
+	// Unmounting mid-gesture (e.g. a viewport switch) ends the gesture.
 	useEffect(() => cancelInteraction, [cancelInteraction]);
 	useEffect(() => {
 		const onKey = (event) => {
@@ -296,15 +299,8 @@ function CustomGridEditorRglLayout({
 		if (!consumeCustomGridRepackPending()) {
 			return;
 		}
-		const didRepack = repackCustomGridPreviewItems(
-			store,
-			config,
-			gridLayoutWidth
-		);
-		if (didRepack) {
-			previewAdmin?.schedulePersistPreviewItems?.();
-		}
-	}, [gridEditable, gridLayoutWidth, config, store, previewAdmin, chunks]);
+		repackCustomGridPreviewItems(store, config, gridLayoutWidth);
+	}, [gridEditable, gridLayoutWidth, config, store, chunks]);
 
 	useLayoutEffect(() => {
 		if (!gridEditable || gridLayoutWidth <= 0) {
@@ -378,7 +374,11 @@ function CustomGridEditorRglLayout({
 										rectangle={guide?.rectangle}
 									/>
 									<GridLayout
-										key={`${section.rglKey || si}-${gestureEpoch}`}
+										// Not keyed by the page's items: adding or
+										// removing one must leave the other tiles
+										// mounted. The grid takes the new layout
+										// from its `layout` prop.
+										key={`${si}-${gestureEpoch}`}
 										width={gridLayoutWidth}
 										gridConfig={section.gridConfig}
 										layout={section.layout}
@@ -401,8 +401,20 @@ function CustomGridEditorRglLayout({
 												nextLayout
 											)
 										}
-										onDragStart={(_layout, _old, item) =>
-											beginInteraction('drag', si, item)
+										onDragStart={(
+											_layout,
+											_old,
+											item,
+											_placeholder,
+											_event,
+											tile
+										) =>
+											beginInteraction(
+												'drag',
+												si,
+												item,
+												tile
+											)
 										}
 										onDrag={(nextLayout, _old, item) =>
 											updateGuide(
@@ -415,8 +427,20 @@ function CustomGridEditorRglLayout({
 										onDragStop={(nextLayout) =>
 											endInteraction(si, nextLayout)
 										}
-										onResizeStart={(_layout, _old, item) =>
-											beginInteraction('resize', si, item)
+										onResizeStart={(
+											_layout,
+											_old,
+											item,
+											_placeholder,
+											_event,
+											tile
+										) =>
+											beginInteraction(
+												'resize',
+												si,
+												item,
+												tile
+											)
 										}
 										onResize={(nextLayout, _old, item) =>
 											updateGuide(

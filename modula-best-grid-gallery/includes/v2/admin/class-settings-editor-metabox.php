@@ -126,51 +126,6 @@ class Settings_Editor_Metabox {
 	}
 
 	/**
-	 * Slug + classic-style permalink pieces for editor permalink seeding.
-	 *
-	 * Mirrors listing Quick edit permalink chrome (prefix + slug + suffix).
-	 *
-	 * @param \WP_Post|null $post Gallery post.
-	 * @return array{slug:string,permalinkPrefix:string,permalinkSuffix:string}
-	 */
-	private static function editor_permalink_pieces( $post ) {
-		$slug   = ( $post instanceof \WP_Post ) ? (string) $post->post_name : '';
-		$prefix = '';
-		$suffix = '';
-
-		if ( ! ( $post instanceof \WP_Post ) || (int) $post->ID < 1 ) {
-			return array(
-				'slug'            => $slug,
-				'permalinkPrefix' => $prefix,
-				'permalinkSuffix' => $suffix,
-			);
-		}
-
-		if ( ! function_exists( 'get_sample_permalink' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/post.php';
-		}
-
-		$sample = get_sample_permalink( (int) $post->ID );
-		if ( is_array( $sample ) ) {
-			$template = isset( $sample[0] ) ? (string) $sample[0] : '';
-			if ( '' === $slug && isset( $sample[1] ) && is_string( $sample[1] ) ) {
-				$slug = (string) $sample[1];
-			}
-			$parts = preg_split( '/%(?:postname|pagename)%/', $template, 2 );
-			if ( is_array( $parts ) ) {
-				$prefix = isset( $parts[0] ) ? (string) $parts[0] : '';
-				$suffix = isset( $parts[1] ) ? (string) $parts[1] : '';
-			}
-		}
-
-		return array(
-			'slug'            => $slug,
-			'permalinkPrefix' => $prefix,
-			'permalinkSuffix' => $suffix,
-		);
-	}
-
-	/**
 	 * The Lite paywall's plan data (`Modula_Extension_Catalog::paywall()`)
 	 * and where "I already have a license key" goes.
 	 *
@@ -452,7 +407,7 @@ class Settings_Editor_Metabox {
 		 */
 		$post_status_choices = apply_filters( 'modula_settings_editor_post_status_choices', $post_status_choices, $post_id );
 
-		$permalink_pieces = self::editor_permalink_pieces(
+		$permalink_pieces = \Modula\V2\Gallery_Post::permalink_pieces(
 			$post_id ? get_post( $post_id ) : null
 		);
 	$view_permalink = $post_id ? get_permalink( $post_id ) : false;
@@ -486,6 +441,8 @@ class Settings_Editor_Metabox {
 			'upgradeUrl'                   => defined( 'MODULA_PRO_STORE_UPGRADE_URL' ) ? MODULA_PRO_STORE_UPGRADE_URL : 'https://wp-modula.com/pricing',
 			// The license card's state (renewal grace included): the canvas shows a banner once it expired.
 			'licenseState'                 => class_exists( 'Modula_License_Card' ) ? \Modula_License_Card::current_state() : 'none',
+			// Pro too old to extend this editor: the update prompt the canvas shows (empty otherwise).
+			'proUpdateNotice'              => modula_editor_pro_update_notice( MODULA_LITE_VERSION, admin_url( 'plugins.php' ) ),
 			'litePaywall'                  => self::lite_paywall_for_editor(),
 			// Speed Up fields are disabled where the Settings page disables compression.
 			'compressionAvailable'         => \Modula_Settings::compression_available(),
@@ -504,6 +461,11 @@ class Settings_Editor_Metabox {
 			'postStatus'                   => $post_status,
 			'postStatusLabel'              => ( $status_object && ! empty( $status_object->label ) ) ? $status_object->label : $post_status,
 			'postStatusChoices'            => $post_status_choices,
+			// A new gallery: the title and status its first editor save stores (null once saved).
+			'postFirstSave'                => $post_id ? \Modula\V2\Gallery_Post::first_save_post_fields( $post_id ) : null,
+			// The recovery copy: the stored state's marker after the editor's read-time repairs (null for a new gallery) and whose copy it is.
+			'savedState'                   => $post_id ? \Modula\V2\Gallery_Post::editor_open_saved_state( $post_id ) : null,
+			'recoveryIdentity'             => \Modula\V2\Saved_State_Marker::recovery_identity(),
 			'canEditGalleryStatus'         => (bool) ( $post_id && current_user_can( 'edit_post', $post_id ) ),
 			'postSlug'                     => $permalink_pieces['slug'],
 			'permalinkPrefix'              => $permalink_pieces['permalinkPrefix'],
@@ -554,8 +516,15 @@ class Settings_Editor_Metabox {
 			$editor_config
 		);
 
+		// A Pro below the new editors' floor would write the gallery from inside the editor on its own: its extensions stay out (spec decision 29).
+		if ( modula_has_editor_incompatible_pro() ) {
+			return;
+		}
+
 		/**
-		 * Fires after the v2 gallery settings editor scripts are enqueued.
+		 * Fires after the v2 gallery settings editor scripts are enqueued:
+		 * where Pro loads its gallery-editor extensions. Not fired while Pro is
+		 * below `MODULA_EDITOR_PRO_MIN_VERSION`.
 		 *
 		 * @param int $post_id Current gallery post ID.
 		 */

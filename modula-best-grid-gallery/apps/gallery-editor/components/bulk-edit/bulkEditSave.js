@@ -1,15 +1,15 @@
 /**
- * Persist bulk-edit drafts via v2 REST (no Backbone).
+ * Bulk-edit drafts: compare them with the preview store and apply them to it.
  */
-import { asGalleryItemList } from 'gallery-shared/preview';
+import {
+	asGalleryItemList,
+	commitPreviewCatalog,
+} from 'gallery-shared/preview';
 import { mergeFilterTagsIntoList } from 'editor-shell/logic';
-import { saveMergedGalleryItems } from '../../api/galleryUploadApi';
 import {
 	isEmbeddedGalleryItemRow,
-	previewCoreItemsToSaveMergedPayload,
 	reanchorEmbeddedRowsInMergedList,
 } from '../../utils/embeddedGalleryItems';
-import { commitPreviewCatalog } from '../../utils/previewItemsCommit';
 import {
 	ITEM_CSS_CLASS_KEY,
 	sanitizeItemCssClass,
@@ -135,43 +135,42 @@ export function normalizeDraftFields(changes) {
 }
 
 /**
- * @param {import('@reduxjs/toolkit').Store}        store
- * @param {Record<string, Record<string, unknown>>} localChanges
- * @param {Set<string>}                             [excludeRowIds]
- * @return {Object[]}
+ * One row with its draft applied. The canvas reads the caption from
+ * `caption`; the items save stores `description`.
+ *
+ * @param {Object}                  row
+ * @param {Record<string, unknown>} changes
+ * @return {Object} The edited row.
  */
-export function buildBulkEditMergedPayload(
-	store,
-	localChanges,
-	excludeRowIds = new Set()
-) {
-	const items = asGalleryItemList(store.getState().items.items);
-	const merged = items
-		.filter((row) => {
-			if (isEmbeddedGalleryItemRow(row)) {
-				return true;
-			}
-			const key = bulkEditRowKey(row);
-			if (!key) {
-				return true;
-			}
-			return !excludeRowIds.has(key);
-		})
+function applyDraftToRow(row, changes) {
+	const fields = normalizeDraftFields(changes);
+	const next = { ...row, ...fields };
+	if (Object.prototype.hasOwnProperty.call(fields, 'description')) {
+		next.caption = fields.description;
+	}
+	return next;
+}
+
+/**
+ * The catalog with the draft applied and the excluded images left out.
+ *
+ * @param {Object[]}                                items         Preview catalog.
+ * @param {Record<string, Record<string, unknown>>} localChanges  Keyed by row key.
+ * @param {Set<string>}                             excludeRowIds Row keys to remove.
+ * @return {Object[]} Catalog rows in display order.
+ */
+function applyBulkEditDraftToCatalog(items, localChanges, excludeRowIds) {
+	// Bulk edit lists images only: content blocks and shortcodes stay as they are.
+	const draftKey = (row) =>
+		isEmbeddedGalleryItemRow(row) ? '' : bulkEditRowKey(row);
+	const rows = items
+		.filter((row) => !excludeRowIds.has(draftKey(row)))
 		.map((row) => {
-			if (isEmbeddedGalleryItemRow(row)) {
-				return { ...row };
-			}
-			const key = bulkEditRowKey(row);
-			const changes = key ? localChanges[key] : undefined;
-			if (!changes) {
-				return { ...row };
-			}
-			return { ...row, ...normalizeDraftFields(changes) };
+			const changes = localChanges[draftKey(row)];
+			return changes ? applyDraftToRow(row, changes) : row;
 		});
 
-	return reanchorEmbeddedRowsInMergedList(
-		previewCoreItemsToSaveMergedPayload(merged)
-	);
+	return reanchorEmbeddedRowsInMergedList(rows);
 }
 
 /**
@@ -212,35 +211,34 @@ export function mergeTagsIntoGalleryFilterSettings(form, newTags) {
 }
 
 /**
+ * Apply the draft to the preview store, leaving out the excluded images, and
+ * add new filter names to the gallery's filter list. Nothing is sent: the
+ * editor save stores the items and the settings (ADR 0059).
+ *
  * @param {{
- *   galleryId: number,
  *   store: import('@reduxjs/toolkit').Store,
  *   localChanges: Record<string, Record<string, unknown>>,
  *   form?: import('@tanstack/react-form').ReactFormExtendedApi,
  *   excludeAttachmentIds?: Set<string>,
  * }} args
  */
-export async function persistBulkEditDraft({
-	galleryId,
+export function commitBulkEditDraft({
 	store,
 	localChanges,
 	form,
 	excludeAttachmentIds = new Set(),
 }) {
 	const sourceItems = asGalleryItemList(store.getState().items.items);
-	const payload = buildBulkEditMergedPayload(
-		store,
+	const catalog = applyBulkEditDraftToCatalog(
+		sourceItems,
 		localChanges,
 		excludeAttachmentIds
 	);
-	await saveMergedGalleryItems(galleryId, payload);
 
 	if (form) {
 		const tags = collectNewFilterTagsFromDraft(sourceItems, localChanges);
 		mergeTagsIntoGalleryFilterSettings(form, tags);
 	}
 
-	commitPreviewCatalog(store, payload);
-
-	return payload;
+	commitPreviewCatalog(store, catalog);
 }

@@ -226,9 +226,38 @@ class Meta_Sync {
 		return Settings\Writer::patch( $post_id, self::creative_engine_create_defaults() );
 	}
 
+	/** Where a new Beta gallery puts its Video playlist (`video.playlistPosition`). */
+	public const VIDEO_PLAYLIST_CREATE_DEFAULT = 'bottom';
+
+	/**
+	 * The create-only Video playlist patch: new galleries put the playlist under the player.
+	 *
+	 * The schema default stays `right` so existing galleries (missing key) keep the
+	 * playlist beside the player. Every new gallery is stamped, whatever its type, so
+	 * it shows the playlist under the player once it becomes a Video gallery.
+	 *
+	 * @return array<string, array<string, string>> Grouped patch for Writer::patch().
+	 */
+	public static function video_playlist_create_defaults() {
+		return array( 'video' => array( 'playlistPosition' => self::VIDEO_PLAYLIST_CREATE_DEFAULT ) );
+	}
+
+	/**
+	 * New Beta gallery create: the Video playlist starts under the player.
+	 *
+	 * Call only from create paths — never from Convert to beta or Try the beta duplicate.
+	 *
+	 * @param int $post_id Gallery post ID.
+	 * @return array<string, array<string, mixed>>|\WP_Error Saved grouped settings.
+	 */
+	public static function stamp_video_playlist_create_default( $post_id ) {
+		return Settings\Writer::patch( $post_id, self::video_playlist_create_defaults() );
+	}
+
 	/**
 	 * Ensure defaults exist, then stamp the create-only defaults (new Beta galleries):
-	 * theme-inherit ON, the Motion choices on `auto` and the Creative engine on Mosaic.
+	 * theme-inherit ON, the Motion choices on `auto`, the Creative engine on Mosaic and
+	 * the Video playlist under the player.
 	 *
 	 * @param int $post_id Gallery post ID.
 	 * @return void
@@ -246,6 +275,7 @@ class Meta_Sync {
 		// Writer::patch fails only for a non-gallery post (ruled out above) or a malformed patch (the schema defaults are not).
 		self::stamp_motion_create_defaults( $post_id );
 		self::stamp_creative_engine_create_default( $post_id );
+		self::stamp_video_playlist_create_default( $post_id );
 	}
 
 	/** Targets whose canonical grouped/items state is already owned by a domain write. */

@@ -23,6 +23,7 @@ import {
 } from 'gallery-shared/preview';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
 import { useGalleryItemEditSidebar } from '../../context/GalleryItemEditSidebarContext';
+import { usePreviewItemsPart } from '../../context/PreviewItemsPartContext';
 import { canArrangeFreeform } from '../../utils/canArrangeFreeform';
 import {
 	FREEFORM_STACKING_STEPS,
@@ -40,35 +41,73 @@ function FreeformEditorSurface({
 	metrics,
 	device,
 }) {
-	const { form, undoRedo, beginSettingsGesture } =
-		useGallerySettingsFormBundle();
+	const {
+		form,
+		undoRedo,
+		beginSettingsGesture,
+		getPendingSettingsPatch,
+		reconcileDerivedSettings,
+	} = useGallerySettingsFormBundle();
 	const previewStore = useStore();
+	const itemsPart = usePreviewItemsPart();
 	const itemEdit = useGalleryItemEditSidebar();
 	const [live, setLive] = useState(null);
 	const gestureRef = useRef(null);
 	const suppressedClick = useRef(false);
 	const editable = canArrangeFreeform(device);
 
+	/*
+	 * Occurrence ids derive from the stored rows (the visitor derives the
+	 * same), so stamping them is never an unsaved change. Placements
+	 * reconciled with the catalog when the surface opens over saved settings
+	 * are not either: opening a gallery must not leave unsaved changes. Any
+	 * other reconcile follows the author's own change (choosing Freeform, a
+	 * removal pruning its placement) and is stored with it.
+	 */
+	const placementsOpenedRef = useRef(false);
 	useEffect(() => {
 		if (editable && items.some((item) => !item.freeformId)) {
 			const ids = freeformOccurrenceIds(items);
-			commitPreviewCatalog(
-				previewStore,
-				items.map((item, i) => ({ ...item, freeformId: ids[i] }))
-			);
+			const stamped = items.map((item, i) => ({
+				...item,
+				freeformId: ids[i],
+			}));
+			if (itemsPart) {
+				itemsPart.commitDerivedItems(stamped);
+			} else {
+				commitPreviewCatalog(previewStore, stamped);
+			}
 		}
-	}, [editable, items, previewStore]);
+	}, [editable, items, itemsPart, previewStore]);
 	useEffect(() => {
-		if (
-			editable &&
-			JSON.stringify(config.freeformPlacements || []) !==
-				JSON.stringify(composition)
-		) {
-			undoRedo.reconcileSettingsCheckpoint(() =>
-				form.setFieldValue('freeform.placements', composition)
-			);
+		if (!editable) {
+			return;
 		}
-	}, [editable, config.freeformPlacements, composition, form, undoRedo]);
+		const opening = !placementsOpenedRef.current;
+		placementsOpenedRef.current = true;
+		if (
+			JSON.stringify(config.freeformPlacements || []) ===
+			JSON.stringify(composition)
+		) {
+			return;
+		}
+		// Opened over saved settings: the gallery was stored as Freeform.
+		if (opening && Object.keys(getPendingSettingsPatch()).length === 0) {
+			reconcileDerivedSettings('freeform.placements', composition);
+			return;
+		}
+		undoRedo.reconcileSettingsCheckpoint(() =>
+			form.setFieldValue('freeform.placements', composition)
+		);
+	}, [
+		editable,
+		config.freeformPlacements,
+		composition,
+		form,
+		undoRedo,
+		getPendingSettingsPatch,
+		reconcileDerivedSettings,
+	]);
 	const cancel = useCallback(() => {
 		const gesture = gestureRef.current;
 		gestureRef.current = null;

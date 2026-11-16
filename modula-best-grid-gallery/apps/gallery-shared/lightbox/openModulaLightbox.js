@@ -52,6 +52,7 @@ import {
 	withModulaLightboxSlideAlt,
 } from './modulaLightboxSlideAlt';
 import { releaseModulaGalleryItemPointerFocusFromContext } from './releaseModulaGalleryItemPointerFocus';
+import { bypassUndersizedDecodedImage } from './bypassUndersizedDecodedImage';
 import { resolveModulaLightboxFancyboxOpts } from '../utils/lightboxSettingsToFancyboxOpts';
 import { readModulaVideoSlideLoop } from '../video/videoGalleryModel';
 
@@ -656,10 +657,14 @@ export function openModulaLightbox(links, lightboxOpts, index, context = {}) {
 	});
 
 	const sanitized = sanitizeSlides(links);
+	// The editor preview is out of scope for the Safari decoded-size workaround.
+	const slides = context.editorPreview
+		? sanitized
+		: bypassUndersizedDecodedImage(sanitized, activeGalleryHostEl);
 	let { v6Opts, previewBackgroundColor, runtimeContext, userEventHandlers } =
 		prepareModulaLightboxV6(resolvedLightboxOpts, context, {
 			startIndex: index,
-			slideCount: sanitized.length,
+			slideCount: slides.length,
 		});
 
 	/*
@@ -690,14 +695,14 @@ export function openModulaLightbox(links, lightboxOpts, index, context = {}) {
 		v6Opts,
 		runtimeContext,
 		userEventHandlers,
-		sanitized
+		slides
 	);
 
 	wireModulaLightboxShareToolbarClick(v6Opts, runtimeContext);
 
-	dispatchModulaFancyboxBeforeOpen(sanitized, v6Opts, v6Opts.startIndex);
+	dispatchModulaFancyboxBeforeOpen(slides, v6Opts, v6Opts.startIndex);
 
-	const instance = Fancybox.show(sanitized, v6Opts);
+	const instance = Fancybox.show(slides, v6Opts);
 	if (Boolean(context.editorPreview) && instance) {
 		editorPreviewInstance = instance;
 	}

@@ -1,7 +1,7 @@
 /**
  * Image edit panel — the image's filters as chips, then "+ Add" (canvas).
- * The item autosave adds new names to the gallery's filter list
- * (`useGalleryItemMetadataAutosave`).
+ * New names join the gallery's filter list as the edit reaches the item
+ * (`useGalleryItemMetadataEdits`).
  */
 import { useId, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';

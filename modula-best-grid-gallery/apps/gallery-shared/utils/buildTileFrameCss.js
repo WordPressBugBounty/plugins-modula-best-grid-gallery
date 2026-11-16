@@ -85,11 +85,25 @@ export function buildTileFrameCss(root, frame) {
 		css += `${nestedTileFrameResetSelectors}{border:none;box-shadow:none;border-radius:0;}`;
 	}
 	/*
-	 * BnB: cell stays overflow:visible for shadow, so clip media/overlays on
-	 * nested content with the inner radius (outer radius minus border width).
+	 * The frame's shell may be overflow:visible (BnB cells and, with a shadow,
+	 * the Custom grid, Creative and Justified visitor shells), so the nested
+	 * content is clipped at the inner radius (outer radius minus border width).
 	 */
 	if (borderRadiusPx > 0) {
-		const bnbInnerRadiusPx = Math.max(0, borderRadiusPx - borderSizePx);
+		const innerRadiusPx = Math.max(0, borderRadiusPx - borderSizePx);
+		/*
+		 * Tiled and justified shells keep overflow:visible under a shadow so
+		 * hover lift and spotlight still move past the tile. Only the radius is
+		 * set here: the nested item's own `.modula-item { overflow: hidden }`
+		 * does the clipping, and caption-below-image keeps its overflow:visible.
+		 * Freeform shells (no `.modula-item`) and Polaroid slots (frame child)
+		 * do not match.
+		 */
+		const tileClipSelectors = [
+			`${root} .modula-item.modula-item-tiled > .modula-item`,
+			`${root} .modula-justified-tile > .modula-item`,
+		].join(',');
+		css += `${tileClipSelectors}{border-radius:${innerRadiusPx}px;}`;
 		const bnbClipSelectors = [
 			`${root} .modula-bnb-hero > .modula-item`,
 			`${root} .modula-bnb-featured-cell > .modula-item`,
@@ -97,7 +111,7 @@ export function buildTileFrameCss(root, frame) {
 			`${root} .modula-bnb-lightbox-only-overlay`,
 			`${root} .modula-bnb-featured-cell--has-more::after`,
 		].join(',');
-		css += `${bnbClipSelectors}{border-radius:${bnbInnerRadiusPx}px;overflow:hidden;}`;
+		css += `${bnbClipSelectors}{border-radius:${innerRadiusPx}px;overflow:hidden;}`;
 	}
 	/* Polaroid: frame shadow/border live on `.modula-polaroid-frame`, not the slot shell. */
 	if (galleryType === 'polaroid') {

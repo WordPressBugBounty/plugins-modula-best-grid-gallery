@@ -1,11 +1,12 @@
 /**
- * Plays a Motion entrance on the tiles of a host: each tile plays it once,
- * as it enters view, while motion may play. A tile waits hidden
+ * Plays a Motion entrance on the tiles of a host: for visitors each tile
+ * plays it once, as it enters view, while motion may play. A tile waits hidden
  * (`data-modula-entrance="pending"`; each host's stylesheet hides it) until
  * it enters view, so it never shows before its entrance starts.
  *
- * In a settings-editor preview a new entrance or speed plays at once on the
- * shown tiles, and the editor's Motion picker can ask for a replay or a peek
+ * A settings-editor preview plays on request only: its tiles show at once as
+ * they mount, a new entrance or speed plays at once on the shown tiles, and
+ * the editor's Motion picker can ask for a replay or a peek
  * (`requestEntranceReplay`). The gallery (`useGalleryEntrance`) and the Pro
  * Albums editor canvas use it, each with its own tiles and its own rule for
  * what a choice plays.
@@ -127,6 +128,9 @@ export function useTileEntrance(
 		if (
 			!host ||
 			!allowed ||
+			// A preview plays on request only (below); its tiles mount and
+			// remount as the author edits, and must show at once.
+			preview ||
 			tracks.length === 0 ||
 			typeof window.IntersectionObserver !== 'function'
 		) {
@@ -172,7 +176,7 @@ export function useTileEntrance(
 				`[${ENTRANCE_STATE_ATTR}="${PENDING}"]`
 			).forEach((tile) => tile.removeAttribute(ENTRANCE_STATE_ATTR));
 		};
-	}, [hostRef, presetId, speedScale, allowed, tileSelector]);
+	}, [hostRef, presetId, speedScale, allowed, preview, tileSelector]);
 
 	// Preview: a new entrance or speed plays at once on the shown tiles.
 	const shownKeyRef = useRef(null);

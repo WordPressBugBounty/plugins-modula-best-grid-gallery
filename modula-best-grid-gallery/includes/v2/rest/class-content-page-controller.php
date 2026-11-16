@@ -1694,49 +1694,6 @@ class Content_Page_Controller {
 	}
 
 	/**
-	 * Slug + classic-style permalink pieces for Quick edit (listing) seeding.
-	 *
-	 * @param \WP_Post $post Gallery or album post.
-	 * @return array{slug:string,permalinkPrefix:string,permalinkSuffix:string}
-	 */
-	private static function listing_permalink_pieces( $post ) {
-		$slug = ( $post instanceof \WP_Post ) ? (string) $post->post_name : '';
-		$prefix = '';
-		$suffix = '';
-
-		if ( ! ( $post instanceof \WP_Post ) || (int) $post->ID < 1 ) {
-			return array(
-				'slug'            => $slug,
-				'permalinkPrefix' => $prefix,
-				'permalinkSuffix' => $suffix,
-			);
-		}
-
-		if ( ! function_exists( 'get_sample_permalink' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/post.php';
-		}
-
-		$sample = get_sample_permalink( (int) $post->ID );
-		if ( is_array( $sample ) ) {
-			$template = isset( $sample[0] ) ? (string) $sample[0] : '';
-			if ( '' === $slug && isset( $sample[1] ) && is_string( $sample[1] ) ) {
-				$slug = (string) $sample[1];
-			}
-			$parts = preg_split( '/%(?:postname|pagename)%/', $template, 2 );
-			if ( is_array( $parts ) ) {
-				$prefix = isset( $parts[0] ) ? (string) $parts[0] : '';
-				$suffix = isset( $parts[1] ) ? (string) $parts[1] : '';
-			}
-		}
-
-		return array(
-			'slug'            => $slug,
-			'permalinkPrefix' => $prefix,
-			'permalinkSuffix' => $suffix,
-		);
-	}
-
-	/**
 	 * @param \WP_Post $post     Gallery post.
 	 * @param bool     $in_album Whether the gallery is referenced by an album.
 	 * @return array<string, mixed>
@@ -1767,7 +1724,7 @@ class Content_Page_Controller {
 		$shortcode      = ! empty( $shortcode_rows[0]['code'] )
 			? (string) $shortcode_rows[0]['code']
 			: sprintf( '[modula id="%d"]', $id );
-		$permalink      = self::listing_permalink_pieces( $post );
+		$permalink      = \Modula\V2\Gallery_Post::permalink_pieces( $post );
 
 		return array(
 			'id'                       => $id,
@@ -1843,7 +1800,7 @@ class Content_Page_Controller {
 				'description' => '',
 			),
 		);
-		$permalink      = self::listing_permalink_pieces( $post );
+		$permalink      = \Modula\V2\Gallery_Post::permalink_pieces( $post );
 
 		return array(
 			'id'                     => $id,
@@ -1873,6 +1830,8 @@ class Content_Page_Controller {
 				'rows' => $shortcode_rows,
 			),
 			'updatedAt'              => gmdate( 'c', strtotime( $post->post_modified_gmt . ' UTC' ) ),
+			'date'                   => str_replace( ' ', 'T', $post->post_date ),
+			'timezone'               => wp_timezone_string(),
 			'createdAt'              => gmdate( 'c', strtotime( $post->post_date_gmt . ' UTC' ) ),
 			'author'                 => $author,
 			'editUrl'                => get_edit_post_link( $id, 'raw' ) ? get_edit_post_link( $id, 'raw' ) : '',

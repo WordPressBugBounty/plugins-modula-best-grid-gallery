@@ -6,7 +6,7 @@
 
 /**
  * @typedef {{
- *   setProofingGalleryLock?: (galleryId: number, lock: boolean) => Promise<{ updated?: boolean }>,
+ *   setProofingGalleryLock?: (galleryId: number, lock: boolean) => Promise<{ updated?: boolean, savedState?: string|null }>,
  * }} ImageProofingApi
  */
 

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import apiFetch from '@wordpress/api-fetch';
+import { EDITOR_DOCUMENT_QUERY_OPTIONS } from 'editor-shell/logic';
 import { normalizeGalleryPostId } from './useGalleryBootstrapQuery';
 
 /**
@@ -10,6 +11,7 @@ import { normalizeGalleryPostId } from './useGalleryBootstrapQuery';
 export function useGallerySettingsV2Query(galleryId) {
 	const id = normalizeGalleryPostId(galleryId);
 	return useQuery({
+		...EDITOR_DOCUMENT_QUERY_OPTIONS,
 		queryKey: ['modula', 'gallery-settings-v2', id],
 		enabled: Boolean(id),
 		queryFn: async () =>

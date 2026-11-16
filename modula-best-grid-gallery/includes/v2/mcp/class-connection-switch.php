@@ -5,8 +5,10 @@
  * Off, the Modula agent is refused (Agent_Access), an OAuth token on the MCP route gets a
  * 403 with the reason (Bearer_Auth), and OAuth is unavailable (Oauth::unavailable), so its
  * endpoints answer 404. A 403 rather than a 401, so clients keep their tokens instead of
- * signing in again. Grants, passwords and the agent are kept, so turning it back on restores
- * every connection. Administrators using the MCP Adapter directly are not affected. On by
+ * signing in again. Modula also adds no tools or instructions to the adapter's shared default
+ * server (Integration::server_config), so other plugins' tools on it are served as if Modula
+ * were not there. Grants, passwords and the agent are kept, so turning it back on restores
+ * every connection. On by
  * default: off, a first OAuth connection could not even discover the server.
  */
 namespace Modula\V2\Mcp;

@@ -18,7 +18,7 @@ import { useGalleryItemEditSidebar } from '../../context/GalleryItemEditSidebarC
 import { useGalleryPreviewAdminActionsOptional } from '../../hooks/useGalleryPreviewAdminActionsOptional';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 import { usePreviewReduxStoreItems } from '../../hooks/usePreviewReduxStoreItems';
-import { useGalleryItemContentBlockAutosave } from '../../hooks/useGalleryItemContentBlockAutosave';
+import { useGalleryItemContentBlockEdits } from '../../hooks/useGalleryItemContentBlockEdits';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
 import { resolveGalleryAdminPostId } from '../../utils/resolveGalleryAdminPostId';
 import { isContentBlockGalleryItemRow } from '../../utils/embeddedGalleryItems';
@@ -75,7 +75,7 @@ export default function GalleryItemContentBlockPanel({ storeIndex }) {
 
 	/*
 	 * Reset only when switching tiles (rowKey). Do not reset on every Redux
-	 * item refresh after autosave — that would clobber in-progress edits.
+	 * item refresh as edits reach the store — that would clobber in-progress edits.
 	 */
 	useEffect(() => {
 		setStateInternal(createContentBlockEditInitialState(item || {}));
@@ -101,9 +101,7 @@ export default function GalleryItemContentBlockPanel({ storeIndex }) {
 	const getSavePayloadRef = useRef(getSavePayload);
 	getSavePayloadRef.current = getSavePayload;
 
-	const { flush } = useGalleryItemContentBlockAutosave({
-		galleryId,
-		storeIndex,
+	const { flush } = useGalleryItemContentBlockEdits({
 		item: isContentBlockGalleryItemRow(item) ? item : null,
 		getSavePayload: () => getSavePayloadRef.current(),
 		editSessionTick,

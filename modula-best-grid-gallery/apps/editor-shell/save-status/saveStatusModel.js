@@ -1,10 +1,11 @@
 /**
  * Takeover save-status contract shared by the gallery and Albums editors.
  *
- * Each write reports under an owner (a write boundary such as settings, members
- * or the document title). A failure stays visible until a later write of the
- * same owner succeeds with no newer edits pending for it; writes of other
- * owners never clear it. Dismissing hides the notice message only.
+ * Each queued write reports under an owner (a write boundary such as the items
+ * or the post fields). A failure stays visible until a later write of the same
+ * owner succeeds; writes of other owners never clear it. Dismissing hides the
+ * notice message only. Unsaved changes are the editor save session's
+ * (ADR 0059); this model only knows the writes in the queue.
  *
  * The state is mutable and owned by one provider; every function updates it in
  * place and `deriveSaveStatus` projects what the UI shows.
@@ -16,51 +17,24 @@
 
 /**
  * @typedef {Object} SaveStatusState
- * @property {number}               active    Writes running now.
- * @property {number}               pending   Writes queued or running.
- * @property {Map<unknown,boolean>} dirty     Owner → unsaved local edits.
- * @property {Map<unknown,string>}  failures  Owner → last failure message.
- * @property {Set<unknown>}         recovered Owners whose latest write succeeded while still dirty.
- * @property {Set<unknown>}         dismissed Owners whose failure notice was dismissed.
- * @property {number|null}          savedAt   When the latest write succeeded (ms), or null before the first.
+ * @property {number}              active    Writes running now.
+ * @property {number}              pending   Writes queued or running.
+ * @property {Map<unknown,string>} failures  Owner → last failure message.
+ * @property {Set<unknown>}        dismissed Owners whose failure notice was dismissed.
+ * @property {number|null}         savedAt   When the latest write succeeded (ms), or null before the first.
  */
 
 /**
- * @return {SaveStatusState} Empty state: nothing dirty, nothing failed.
+ * @return {SaveStatusState} Empty state: nothing queued, nothing failed.
  */
 export function createSaveStatusState() {
 	return {
 		active: 0,
 		pending: 0,
-		dirty: new Map(),
 		failures: new Map(),
-		recovered: new Set(),
 		dismissed: new Set(),
 		savedAt: null,
 	};
-}
-
-/**
- * @param {SaveStatusState} state
- * @param {unknown}         owner
- */
-function clearFailure(state, owner) {
-	state.failures.delete(owner);
-	state.dismissed.delete(owner);
-	state.recovered.delete(owner);
-}
-
-/**
- * @param {SaveStatusState} state
- * @param {unknown}         owner
- * @param {boolean}         dirty
- */
-export function setOwnerDirty(state, owner, dirty) {
-	state.dirty.set(owner, Boolean(dirty));
-	// A successful write may still have newer edits to confirm before its failure can clear.
-	if (!dirty && state.recovered.has(owner)) {
-		clearFailure(state, owner);
-	}
 }
 
 /**
@@ -84,10 +58,8 @@ export function startWrite(state) {
  */
 export function writeSucceeded(state, owner, at = Date.now()) {
 	state.savedAt = at;
-	state.recovered.add(owner);
-	if (!state.dirty.get(owner)) {
-		clearFailure(state, owner);
-	}
+	state.failures.delete(owner);
+	state.dismissed.delete(owner);
 }
 
 /**
@@ -96,7 +68,6 @@ export function writeSucceeded(state, owner, at = Date.now()) {
  * @param {unknown}         error Rejection reason; its `message` is shown when present.
  */
 export function writeFailed(state, owner, error) {
-	state.recovered.delete(owner);
 	state.failures.set(owner, String(error?.message ?? error));
 	state.dismissed.delete(owner);
 }
@@ -139,10 +110,8 @@ export function deriveSaveStatus(state) {
 	if (state.active > 0) {
 		return { status: 'saving', errorMessage, saveErrorMessage, savedAt };
 	}
-	const hasPending =
-		state.pending > 0 || Array.from(state.dirty.values()).some(Boolean);
 	return {
-		status: hasPending ? 'unsaved' : 'saved',
+		status: state.pending > 0 ? 'unsaved' : 'saved',
 		errorMessage,
 		saveErrorMessage,
 		savedAt,

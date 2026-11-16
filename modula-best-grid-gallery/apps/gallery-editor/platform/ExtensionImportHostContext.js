@@ -5,7 +5,6 @@ import { createContext, useContext } from '@wordpress/element';
  *   galleryId: number,
  *   uploadPosition: 'start' | 'end',
  *   invalidateBootstrap: () => void,
- *   runPersistTask: (task: () => void | Promise<void>) => Promise<unknown>,
  *   form: import('@tanstack/react-form').ReactFormExtendedApi,
  *   config: Record<string, unknown>,
   }} ExtensionImportHostValue */

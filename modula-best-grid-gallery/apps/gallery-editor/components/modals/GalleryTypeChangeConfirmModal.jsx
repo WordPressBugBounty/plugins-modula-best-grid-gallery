@@ -8,13 +8,11 @@ import { AdminUiScope } from 'editor-shell';
 /**
  * @param {Object}     props
  * @param {boolean}    props.isOpen
- * @param {boolean}    props.isBusy
  * @param {() => void} props.onCancel
  * @param {() => void} props.onConfirm
  */
 export default function GalleryTypeChangeConfirmModal({
 	isOpen,
-	isBusy,
 	onCancel,
 	onConfirm,
 }) {
@@ -27,13 +25,8 @@ export default function GalleryTypeChangeConfirmModal({
 					'Changing the gallery layout will remove image focus (focal point and crop) from all images.',
 					'modula-best-grid-gallery'
 				)}
-				confirmLabel={
-					isBusy
-						? __('Working…', 'modula-best-grid-gallery')
-						: __('Continue', 'modula-best-grid-gallery')
-				}
+				confirmLabel={__('Continue', 'modula-best-grid-gallery')}
 				confirmVariant="primary"
-				busy={isBusy}
 				onConfirm={onConfirm}
 				onCancel={onCancel}
 			/>

@@ -2,7 +2,8 @@
  * Image edit panel (canvas "Edit image"): replaces the settings panel in its
  * column. The header pages through the gallery; the cards hold the file, the
  * text, the link, the filters and the hover effect, and "More settings" holds
- * Video, EXIF, Watermark and Advanced. Edits autosave to the item.
+ * Video, EXIF, Watermark and Advanced. Edits change the item in the preview at
+ * once; the editor save stores them (ADR 0059).
  */
 import { useCallback, useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -11,7 +12,7 @@ import { isWpTruthy } from '../../logic/wpTruthy';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 import { usePreviewReduxStoreItems } from '../../hooks/usePreviewReduxStoreItems';
 import { useImageMetadataForm } from '../../form/useImageMetadataForm';
-import { useGalleryItemMetadataAutosave } from '../../hooks/useGalleryItemMetadataAutosave';
+import { useGalleryItemMetadataEdits } from '../../hooks/useGalleryItemMetadataEdits';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
 import { useGalleryItemEditSidebar } from '../../context/GalleryItemEditSidebarContext';
 import { useGalleryPreviewAdminActionsOptional } from '../../hooks/useGalleryPreviewAdminActionsOptional';
@@ -73,11 +74,9 @@ export default function GalleryItemEditPanel({ storeIndex }) {
 	const media = mediaQuery.data;
 
 	const { filtersGate, videoGate, exifGate, flush } =
-		useGalleryItemMetadataAutosave({
-			galleryId,
+		useGalleryItemMetadataEdits({
 			storeIndex,
 			attachmentId,
-			item,
 			form,
 			enabled: Boolean(item && galleryId),
 		});

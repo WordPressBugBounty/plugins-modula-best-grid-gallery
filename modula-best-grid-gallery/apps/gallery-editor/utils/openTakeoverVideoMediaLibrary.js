@@ -11,9 +11,9 @@ import { getVideoEditorRegistration } from '../platform/videoRegistry';
  *   uploadPosition: string,
  *   onSuccess?: () => void,
  *   onError?: (msg: string) => void,
- *   runPersistTask?: (fn: () => void | Promise<void>) => Promise<unknown>,
+ *   addItems?: import('../hooks/useGalleryEditorChanges').GalleryEditorChanges['addItems'],
  *   multiple?: boolean | 'add',
- * }} opts
+ * }} opts `addItems` (Lite 3.0.21) adds the built video rows as unsaved changes.
  */
 export function openTakeoverVideoMediaLibrary(opts) {
 	const open = getVideoEditorRegistration()?.openMediaLibrary;

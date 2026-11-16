@@ -22,7 +22,6 @@ import { useTakeoverPreviewAddNewMenu } from '../../hooks/useTakeoverPreviewAddN
  *   uploadPosition?: string,
  *   onLibraryAdded?: () => void,
  *   onLibraryError?: (msg: string) => void,
- *   runPersistTask?: (fn: () => void | Promise<void>) => Promise<void>,
  *   mainLabel?: string,
  * }} props
  */
@@ -33,7 +32,6 @@ export default function PreviewAddNewSplit({
 	uploadPosition = 'end',
 	onLibraryAdded,
 	onLibraryError,
-	runPersistTask,
 	mainLabel,
 }) {
 	const editor = getModulaSettingsEditorConfig();
@@ -47,7 +45,6 @@ export default function PreviewAddNewSplit({
 			onOpenAddMedia: openAddMedia,
 			onLibraryAdded,
 			onLibraryError,
-			runPersistTask,
 		});
 
 	const menuGroups = useMemo(() => {

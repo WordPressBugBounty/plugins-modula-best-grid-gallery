@@ -143,70 +143,55 @@ export function buildTakeoverLivePreviewPreloadedState(args) {
 }
 
 /**
- * Update only preview viewport + responsive height on an existing store (items unchanged).
+ * Push the form settings, preview viewport and title into an existing preview
+ * store. The catalog is unchanged.
  *
- * @param {import('@reduxjs/toolkit').Store} store
- * @param {Object}                           groupedSettings
- * @param {'desktop'|'tablet'|'mobile'}      previewViewport
+ * @param {import('@reduxjs/toolkit').Store}              store Preview store.
+ * @param {{
+ *   groupedSettings: Object,
+ *   previewViewport: 'desktop'|'tablet'|'mobile',
+ *   galleryTitle?: string,
+ * }} args Settings, viewport and title.
  */
-export function applyPreviewViewportToGalleryStore(
-	store,
-	groupedSettings,
-	previewViewport
-) {
+export function applyPreviewSettingsToGalleryStore(store, args) {
 	if (!store) {
 		return;
 	}
 	updatePreviewStore(store, {
-		groupedSettings: normalizePreviewGroupedSettings(groupedSettings),
-		previewViewport,
+		groupedSettings: normalizePreviewGroupedSettings(args.groupedSettings),
+		previewViewport: args.previewViewport,
+		galleryTitle: args.galleryTitle,
 	});
 }
 
 /**
- * Push latest bootstrap + form settings into an existing preview store without recreating it.
- * Keeps the same store instance when React Query refetches bootstrap so react-grid-layout does not remount.
+ * Replace the preview catalog with a fetched bootstrap catalog, keeping the
+ * same store so react-grid-layout does not remount. A fetch that lost every
+ * embedded row while the store has some is treated as stale and skipped.
  *
- * @param {import('@reduxjs/toolkit').Store}              store Preview store.
- * @param {{
- *   bootstrap: Object,
- *   groupedSettings: Object,
- *   previewViewport: 'desktop'|'tablet'|'mobile',
- *   galleryTitle?: string,
- *   preserveItems?: boolean,
- * }} args Bootstrap payload, settings, and preserve flag.
- * @return {void} Nothing.
+ * @param {import('@reduxjs/toolkit').Store} store          Preview store.
+ * @param {unknown[]}                        bootstrapItems Bootstrap item rows.
+ * @return {boolean} True when the catalog was replaced.
  */
-export function hydrateTakeoverLivePreviewStore(store, args) {
-	if (!store || !args) {
-		return;
+export function hydrateTakeoverLivePreviewItems(store, bootstrapItems) {
+	if (!store) {
+		return false;
 	}
-	const groupedSettings = normalizePreviewGroupedSettings(
-		args.groupedSettings
-	);
-	updatePreviewStore(store, {
-		groupedSettings,
-		previewViewport: args.previewViewport,
-		galleryTitle: args.galleryTitle,
-	});
-
 	const incoming = cloneBootstrapItemsForPreviewStore(
-		Array.isArray(args.bootstrap?.items) ? args.bootstrap.items : []
+		Array.isArray(bootstrapItems) ? bootstrapItems : []
 	);
-	const incomingEmbedded = countEmbeddedGalleryItems(incoming);
 	const currentEmbedded = countEmbeddedGalleryItems(
 		store.getState()?.items?.items
 	);
-	const wouldDropEmbedded = currentEmbedded > 0 && incomingEmbedded === 0;
-	const preserveItems = Boolean(args.preserveItems) || wouldDropEmbedded;
-	if (preserveItems) {
-		return;
+	if (currentEmbedded > 0 && countEmbeddedGalleryItems(incoming) === 0) {
+		return false;
 	}
 	const mergedItems = mergeBootstrapItemsPreservingEmbedded(
 		asGalleryItemList(store.getState()?.items?.items ?? []),
 		asGalleryItemList(incoming)
 	);
 	commitPreviewCatalog(store, mergedItems);
+	return true;
 }
 
 /**

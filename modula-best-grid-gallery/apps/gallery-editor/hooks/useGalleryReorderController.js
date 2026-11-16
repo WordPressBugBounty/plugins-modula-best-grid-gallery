@@ -1,22 +1,22 @@
+/**
+ * The canvas Sort popover's sort mode and the Reorder dialog. Both change the
+ * preview store only: the catalog order and the working sort mode are
+ * unsaved changes of the gallery's items until the editor save (ADR 0059).
+ */
 import {
 	asGalleryItemList,
+	commitPreviewCatalog,
 	normalizeGalleryItemLookupString,
 } from 'gallery-shared/preview';
-import { useCallback, useMemo } from '@wordpress/element';
-import { useQueryClient } from '@tanstack/react-query';
-import { useReorderDraft, useTakeoverSaveStatus } from 'editor-shell';
 import {
-	galleryApplySortingAndOrder,
-	gallerySetSortingMode,
-	saveMergedGalleryItems,
-} from '../api/galleryUploadApi';
+	useCallback,
+	useState,
+	useSyncExternalStore,
+} from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
+import { useReorderDraft, useTakeoverToast } from 'editor-shell';
 import { useGalleryItemEditSidebar } from '../context/GalleryItemEditSidebarContext';
-import { useInvalidateGalleryBootstrap } from './useInvalidateGalleryBootstrap';
 import { useModulaSettingsEditorConfig } from './useModulaSettingsEditorConfig';
-import {
-	getGalleryBootstrapQueryKey,
-	useGalleryBootstrapQuery,
-} from '../query/useGalleryBootstrapQuery';
 import {
 	bootstrapRowsForSorting,
 	computeSortedAttachmentOrder,
@@ -26,225 +26,121 @@ import {
 import { getSortingMenuDefinition } from '../utils/gallerySortingMenuDefinition';
 import {
 	isContentBlockGalleryItemRow,
-	previewCoreItemsToSaveMergedPayload,
 	reanchorEmbeddedRowsInMergedList,
 } from '../utils/embeddedGalleryItems';
 import { buildGalleryReorderRows } from '../components/gallery-reorder/buildGalleryReorderRows';
-import { getGalleryPreviewReduxStore } from '../utils/previewReduxStoreRef';
+import {
+	getGalleryPreviewReduxStore,
+	subscribeGalleryPreviewReduxStore,
+} from '../utils/previewReduxStoreRef';
 import {
 	reorderCoreItemsByAttachmentIds,
 	stripStaleModulaRowIndex,
-	syncPreviewCoreToStoreAndBootstrap,
 } from '../utils/previewItemsCommit';
-import { cloneBootstrapItemsForPreviewStore } from '../utils/takeoverLivePreviewBootstrap';
+import {
+	readPreviewSortingMode,
+	setPreviewSortingMode,
+} from '../utils/previewSortingMode';
 
 /**
- * Drop stale `modulaRowIndex` from reordered rows.
+ * Commit a new catalog order and sort mode to the preview store.
  *
- * `modulaRowIndex` is the row's position in post meta `modula-images` captured at bootstrap.
- * After a reorder the persisted `modula-images` order changes, so the cached value no longer
- * matches; leaving it in place makes index-based writes (focus, metadata, remove) target the
- * wrong row and visibly duplicate an image in the preview. Removing it lets positional index
- * fall back to the (now correct) display order until the next bootstrap refetch.
+ * `modulaRowIndex` is a row's position in the stored `modula-images` at
+ * bootstrap. After a reorder it no longer matches the canvas; the writes that
+ * still go by row index store the unsaved items first, so the display order
+ * is the stored order they target.
  *
- * @param {Object[]} rows Core rows in the new order.
- * @return {Object[]} Rows without `modulaRowIndex`.
+ * @param {import('@reduxjs/toolkit').Store} store       Preview store.
+ * @param {Object[]}                         rows        Catalog rows in the new order.
+ * @param {string}                           sortingMode Sort mode.
  */
-function stripStaleModulaRowIndexLocal(rows) {
-	return stripStaleModulaRowIndex(rows);
-}
-
-/**
- * Optimistic preview + React Query bootstrap cache after reorder/sort.
- *
- * @param {import('@tanstack/react-query').QueryClient}        queryClient
- * @param {number}                                             galleryId
- * @param {{ previewCore: Object[], bootstrapCore: Object[] }} cores
- * @param {string|undefined}                                   sortingMode
- */
-function patchOptimisticGalleryItemOrder(
-	queryClient,
-	galleryId,
-	cores,
-	sortingMode
-) {
-	const previewCore = stripStaleModulaRowIndexLocal(cores.previewCore);
-	const bootstrapCore = stripStaleModulaRowIndexLocal(cores.bootstrapCore);
-	const store = getGalleryPreviewReduxStore();
-	const bootstrapKey = getGalleryBootstrapQueryKey(galleryId);
-	const cacheItems = bootstrapCore.length > 0 ? bootstrapCore : previewCore;
-	queryClient.setQueryData(bootstrapKey, (prev) => {
-		if (!prev || typeof prev !== 'object') {
-			return prev;
-		}
-		return {
-			...prev,
-			items: cloneBootstrapItemsForPreviewStore(cacheItems),
-			metadata: {
-				...(prev.metadata && typeof prev.metadata === 'object'
-					? prev.metadata
-					: {}),
-				...(typeof sortingMode === 'string'
-					? { gallerySorting: sortingMode }
-					: {}),
-			},
-		};
-	});
-	if (store && previewCore.length) {
-		syncPreviewCoreToStoreAndBootstrap(
-			store,
-			queryClient,
-			galleryId,
-			previewCore
-		);
-	}
-}
-
-function resolveBootstrapCoreItems(queryClient, galleryId) {
-	const data = queryClient.getQueryData(
-		getGalleryBootstrapQueryKey(galleryId)
+function commitPreviewOrder(store, rows, sortingMode) {
+	commitPreviewCatalog(
+		store,
+		stripStaleModulaRowIndex(reanchorEmbeddedRowsInMergedList(rows))
 	);
-	if (!Array.isArray(data?.items)) {
-		return [];
-	}
-	return data.items.slice();
+	setPreviewSortingMode(store, sortingMode);
 }
 
-/**
- * Reorder attachments for a sort mode and re-anchor embedded rows for v2 persist.
- *
- * @param {Object[]} coreItems
- * @param {number[]} orderedAttachmentIds
- * @return {Object[]}
- */
-function buildSortedMergedCoreForPersist(coreItems, orderedAttachmentIds) {
-	return reanchorEmbeddedRowsInMergedList(
-		reorderCoreItemsByAttachmentIds(coreItems, orderedAttachmentIds)
+/** @return {string} The working sort mode, re-read on every store change. */
+function usePreviewSortingMode() {
+	const store = useSyncExternalStore(
+		subscribeGalleryPreviewReduxStore,
+		getGalleryPreviewReduxStore
 	);
+	const subscribe = useCallback(
+		(onChange) => (store ? store.subscribe(onChange) : () => {}),
+		[store]
+	);
+	return useSyncExternalStore(subscribe, () => readPreviewSortingMode(store));
 }
 
 /**
- * The gallery's sort mode and its persistence (the canvas toolbar's Sort
- * popover).
+ * The gallery's sort mode (the canvas toolbar's Sort popover).
+ * `onManualSorting` runs once "Drag and drop reorder" is chosen; it opens the
+ * Reorder view.
  *
  * @param {{ galleryId: number, onManualSorting: () => void }} args
- *        `onManualSorting` runs once "Drag and drop reorder" is saved; it
- *        opens the Reorder view.
  */
 export function useGallerySortMode({ galleryId, onManualSorting }) {
-	const { runPersistTask } = useTakeoverSaveStatus();
-	const queryClient = useQueryClient();
-	const invalidateBootstrap = useInvalidateGalleryBootstrap(galleryId);
-	const { data: bootstrap } = useGalleryBootstrapQuery(galleryId);
-
 	const editor = useModulaSettingsEditorConfig();
 	const pro = Boolean(editor.isPro);
+	const currentMode = usePreviewSortingMode();
+	const toast = useTakeoverToast();
 
-	const rawMode = bootstrap?.metadata?.gallerySorting;
-	const currentMode = isGallerySortMode(rawMode) ? rawMode : 'manual';
-
-	const applySortMode = useCallback(
-		async (mode) => {
-			if (!galleryId || !isGallerySortMode(mode)) {
-				return;
-			}
-			const bootstrapKey = getGalleryBootstrapQueryKey(galleryId);
-			try {
-				if (mode === 'manual') {
-					await runPersistTask(async () => {
-						await galleryApplySortingAndOrder(galleryId, {
-							sorting: 'manual',
-						});
-					}, 'gallery-order');
-					queryClient.setQueryData(bootstrapKey, (prev) => {
-						if (!prev || typeof prev !== 'object') {
-							return prev;
-						}
-						return {
-							...prev,
-							metadata: {
-								...(prev.metadata &&
-								typeof prev.metadata === 'object'
-									? prev.metadata
-									: {}),
-								gallerySorting: 'manual',
-							},
-						};
-					});
-				} else {
-					const data = queryClient.getQueryData(bootstrapKey);
-					const imageRows = bootstrapRowsForSorting(data?.items);
-					const ids = imageRows.map((r) => r.id);
-					const media = await fetchAttachmentSortFields(ids);
-					const order = computeSortedAttachmentOrder(
-						imageRows,
-						mode,
-						media
-					);
-					const bootstrapCore = resolveBootstrapCoreItems(
-						queryClient,
-						galleryId
-					);
-					const store = getGalleryPreviewReduxStore();
-					const previewCore = store
-						? asGalleryItemList(store.getState().items.items)
-						: bootstrapCore;
-					const reorderedPreview = buildSortedMergedCoreForPersist(
-						previewCore,
-						order
-					);
-					const reorderedBootstrap = buildSortedMergedCoreForPersist(
-						bootstrapCore,
-						order
-					);
-					patchOptimisticGalleryItemOrder(
-						queryClient,
-						galleryId,
-						{
-							previewCore: reorderedPreview,
-							bootstrapCore: reorderedBootstrap,
-						},
-						mode
-					);
-					await runPersistTask(async () => {
-						await saveMergedGalleryItems(
-							galleryId,
-							previewCoreItemsToSaveMergedPayload(
-								reorderedBootstrap
-							)
-						);
-						await gallerySetSortingMode(galleryId, mode);
-					}, 'gallery-order');
-				}
-			} catch (e) {
-				invalidateBootstrap();
-				throw e;
-			}
-		},
-		[galleryId, invalidateBootstrap, queryClient, runPersistTask]
-	);
+	/**
+	 * Sort the canvas for `mode`. Only the attachments' dates and titles are
+	 * read from the server; the order is computed here.
+	 */
+	const applySortMode = useCallback(async (mode) => {
+		const store = getGalleryPreviewReduxStore();
+		if (!store || !isGallerySortMode(mode)) {
+			return;
+		}
+		if (mode === 'manual') {
+			setPreviewSortingMode(store, mode);
+			return;
+		}
+		const catalog = asGalleryItemList(store.getState().items.items);
+		const imageRows = bootstrapRowsForSorting(catalog);
+		const media = await fetchAttachmentSortFields(
+			imageRows.map((r) => r.id)
+		);
+		const order = computeSortedAttachmentOrder(imageRows, mode, media);
+		// The catalog may have changed while the dates and titles loaded.
+		const latest = asGalleryItemList(store.getState().items.items);
+		commitPreviewOrder(
+			store,
+			reorderCoreItemsByAttachmentIds(latest, order),
+			mode
+		);
+	}, []);
 
 	const handleSortOptionClick = useCallback(
 		(rowId) => {
-			if (!pro || !galleryId) {
+			if (!pro || !galleryId || !isGallerySortMode(rowId)) {
 				return;
 			}
-			if (rowId === 'manual') {
-				void applySortMode('manual')
-					.then(onManualSorting)
-					.catch(() => {
-						/* Error: Notice + save status */
-					});
-				return;
-			}
-			if (!isGallerySortMode(rowId)) {
-				return;
-			}
-			void applySortMode(rowId).catch(() => {
-				/* Error: Notice + save status */
+			const applied = applySortMode(rowId);
+			const done =
+				rowId === 'manual' ? applied.then(onManualSorting) : applied;
+			// The mode is unchanged and the canvas keeps its order: say why.
+			done.catch((error) => {
+				toast?.show({
+					message: sprintf(
+						/* translators: %s: the error message. */
+						__(
+							'Could not sort the images: %s',
+							'modula-best-grid-gallery'
+						),
+						error?.message ||
+							__('Unknown error', 'modula-best-grid-gallery')
+					),
+					tone: 'error',
+				});
 			});
 		},
-		[applySortMode, galleryId, onManualSorting, pro]
+		[applySortMode, galleryId, onManualSorting, pro, toast]
 	);
 
 	return {
@@ -255,65 +151,35 @@ export function useGallerySortMode({ galleryId, onManualSorting }) {
 }
 
 /**
- * The Reorder dialog: the draft order (drag or arrows) and its persistence.
- * `onClose` closes the dialog; the draft goes with it.
+ * The Reorder dialog: the draft order (drag or arrows) over the canvas's
+ * current catalog. `onClose` closes the dialog; the draft goes with it.
  *
- * @param {{ galleryId: number, onClose: () => void }} args
+ * @param {{ onClose: () => void }} args
  */
-export function useGalleryReorderController({ galleryId, onClose }) {
+export function useGalleryReorderController({ onClose }) {
 	const itemEditSidebar = useGalleryItemEditSidebar();
-	const { runPersistTask } = useTakeoverSaveStatus();
-	const queryClient = useQueryClient();
-	const invalidateBootstrap = useInvalidateGalleryBootstrap(galleryId);
 
-	const { data: bootstrap } = useGalleryBootstrapQuery(galleryId);
-
-	const rows = useMemo(() => buildGalleryReorderRows(bootstrap), [bootstrap]);
+	// Read when the dialog opens: the canvas cannot change behind the modal.
+	const [rows] = useState(() => {
+		const store = getGalleryPreviewReduxStore();
+		const items = store
+			? asGalleryItemList(store.getState().items.items)
+			: [];
+		return buildGalleryReorderRows({ items });
+	});
 
 	const { orderedRows, onDragEnd, moveOrderKey } = useReorderDraft(rows);
 
 	const applyManualOrder = useCallback(() => {
-		const merged = orderedRows
+		const store = getGalleryPreviewReduxStore();
+		const ordered = orderedRows
 			.map((r) => (r.rawRow ? { ...r.rawRow } : null))
 			.filter(Boolean);
-		if (!merged.length) {
+		if (!store || !ordered.length) {
 			return;
 		}
-		const reanchored = reanchorEmbeddedRowsInMergedList(merged);
-		const prepared = stripStaleModulaRowIndex(reanchored);
-		patchOptimisticGalleryItemOrder(
-			queryClient,
-			galleryId,
-			{
-				previewCore: prepared,
-				bootstrapCore: prepared,
-			},
-			'manual'
-		);
-		void runPersistTask(async () => {
-			await saveMergedGalleryItems(
-				galleryId,
-				previewCoreItemsToSaveMergedPayload(prepared)
-			);
-			const store = getGalleryPreviewReduxStore();
-			if (store) {
-				syncPreviewCoreToStoreAndBootstrap(
-					store,
-					queryClient,
-					galleryId,
-					prepared
-				);
-			}
-		}, 'gallery-order').catch(() => {
-			invalidateBootstrap();
-		});
-	}, [
-		galleryId,
-		orderedRows,
-		queryClient,
-		runPersistTask,
-		invalidateBootstrap,
-	]);
+		commitPreviewOrder(store, ordered, 'manual');
+	}, [orderedRows]);
 
 	const openContentBlockEdit = useCallback(
 		(rawRow) => {

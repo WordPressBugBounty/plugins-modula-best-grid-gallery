@@ -16,12 +16,11 @@ import {
 	Notice,
 	Toast,
 } from 'admin-ui';
-import { AdminUiScope, useTakeoverSaveStatus } from 'editor-shell';
+import { AdminUiScope } from 'editor-shell';
 import { useBulkEdit } from '../../context/BulkEditContext';
 import { useGalleryPreviewTileSelection } from '../../context/GalleryPreviewTileSelectionContext';
 import { usePreviewReduxStoreItems } from '../../hooks/usePreviewReduxStoreItems';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
-import { useInvalidateGalleryBootstrap } from '../../hooks/useInvalidateGalleryBootstrap';
 import { useModulaAiDescriptorSettingsQuery } from '../../query/useModulaAiDescriptorSettingsQuery';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 import {
@@ -40,7 +39,7 @@ import {
 	hasBulkEditWatermarkAction,
 } from './bulkEditUtils';
 import { useBulkEditDraft } from './useBulkEditDraft';
-import { persistBulkEditDraft, bulkEditRowIsModified } from './bulkEditSave';
+import { commitBulkEditDraft, bulkEditRowIsModified } from './bulkEditSave';
 import BulkEditTable, { buildBulkEditRowsWithIndices } from './BulkEditTable';
 
 const NO_TOAST = { message: '', tone: 'success' };
@@ -222,10 +221,7 @@ export default function BulkEditModal() {
 	const galleryId = config.galleryId ? Number(config.galleryId) : 0;
 	const postTitle = config.postTitle || '';
 	const { form } = useGallerySettingsFormBundle();
-	const { runPersistTask } = useTakeoverSaveStatus();
-	const invalidateBootstrap = useInvalidateGalleryBootstrap(galleryId);
 	const [toast, setToast] = useState(NO_TOAST);
-	const [busy, setBusy] = useState(false);
 	const [showCssClassColumn, setShowCssClassColumn] = useState(false);
 	const [confirmKind, setConfirmKind] = useState(
 		/** @type {'discard'|'discard-close'|'delete'|null} */ (null)
@@ -318,98 +314,42 @@ export default function BulkEditModal() {
 		showToast(__('Unsaved changes discarded.', 'modula-best-grid-gallery'));
 	}, [close, confirmKind, draft, showToast]);
 
-	const handleSaveAll = useCallback(async () => {
+	// The edits go to the canvas; the editor save stores them (ADR 0059).
+	const handleSaveAll = useCallback(() => {
 		if (!galleryId || !previewStore) {
 			return;
 		}
-		if (!draft.hasChanges) {
-			close();
-			return;
-		}
-		setBusy(true);
-		try {
-			await runPersistTask(async () => {
-				await persistBulkEditDraft({
-					galleryId,
-					store: previewStore,
-					localChanges: draft.localChanges,
-					form,
-				});
-			}, 'bulk-edit');
-			invalidateBootstrap();
+		if (draft.hasChanges) {
+			commitBulkEditDraft({
+				store: previewStore,
+				localChanges: draft.localChanges,
+				form,
+			});
 			draft.resetDraft();
-			close();
-		} catch (err) {
-			showToast(
-				err?.message ||
-					__(
-						'Could not save bulk edits.',
-						'modula-best-grid-gallery'
-					),
-				'error'
-			);
-		} finally {
-			setBusy(false);
 		}
-	}, [
-		close,
-		draft,
-		form,
-		galleryId,
-		invalidateBootstrap,
-		previewStore,
-		runPersistTask,
-		showToast,
-	]);
+		close();
+	}, [close, draft, form, galleryId, previewStore]);
 
-	const performDeleteSelected = useCallback(async () => {
+	const performDeleteSelected = useCallback(() => {
 		if (!galleryId || !previewStore || draft.selectedCount === 0) {
 			return;
 		}
-		setBusy(true);
-		try {
-			const exclude = new Set(draft.selectedIds);
-			await runPersistTask(async () => {
-				await persistBulkEditDraft({
-					galleryId,
-					store: previewStore,
-					localChanges: draft.localChanges,
-					form,
-					excludeAttachmentIds: exclude,
-				});
-			}, 'bulk-remove');
-			invalidateBootstrap();
-			draft.resetDraft();
-			showToast(
-				hideCopy.isHide
-					? __(
-							'Selected images hidden from this gallery.',
-							'modula-best-grid-gallery'
-						)
-					: __('Selected images deleted.', 'modula-best-grid-gallery')
-			);
-		} catch (err) {
-			showToast(
-				err?.message ||
-					__(
-						'Could not delete selected images.',
+		commitBulkEditDraft({
+			store: previewStore,
+			localChanges: draft.localChanges,
+			form,
+			excludeAttachmentIds: new Set(draft.selectedIds),
+		});
+		draft.resetDraft();
+		showToast(
+			hideCopy.isHide
+				? __(
+						'Selected images hidden from this gallery.',
 						'modula-best-grid-gallery'
-					),
-				'error'
-			);
-		} finally {
-			setBusy(false);
-		}
-	}, [
-		draft,
-		form,
-		galleryId,
-		hideCopy.isHide,
-		invalidateBootstrap,
-		previewStore,
-		runPersistTask,
-		showToast,
-	]);
+					)
+				: __('Selected images deleted.', 'modula-best-grid-gallery')
+		);
+	}, [draft, form, galleryId, hideCopy.isHide, previewStore, showToast]);
 
 	const handleDeleteSelected = useCallback(() => {
 		if (!galleryId || !previewStore || draft.selectedCount === 0) {
@@ -450,7 +390,6 @@ export default function BulkEditModal() {
 					/>
 				}
 				className="modula-bulk-edit-modal"
-				closeDisabled={busy}
 			>
 				{unavailableOnLocalhost ? (
 					<Notice tone="warning" className="modula-bulk-edit__notice">
@@ -495,9 +434,7 @@ export default function BulkEditModal() {
 						unavailableOnLocalhost={unavailableOnLocalhost}
 						selectedIds={draft.selectedIds}
 						draft={draft}
-						galleryId={galleryId}
 						previewStore={previewStore}
-						runPersistTask={runPersistTask}
 						onNotice={showToast}
 					/>
 				) : null}
@@ -506,7 +443,7 @@ export default function BulkEditModal() {
 					<Button
 						variant="link"
 						onClick={handleDiscardDraft}
-						disabled={busy || !draft.hasChanges}
+						disabled={!draft.hasChanges}
 					>
 						{__('Discard changes', 'modula-best-grid-gallery')}
 					</Button>
@@ -516,7 +453,6 @@ export default function BulkEditModal() {
 								tickedRows={tickedRows}
 								getRowField={draft.getRowField}
 								patchRow={draft.patchRow}
-								busy={busy}
 							/>
 						) : null}
 						{showWatermarkAction
@@ -530,7 +466,6 @@ export default function BulkEditModal() {
 												watermarkTargetIds.length
 											)}
 											disabled={
-												busy ||
 												watermarkTargetIds.length === 0
 											}
 											imageIds={watermarkTargetIds}
@@ -540,7 +475,7 @@ export default function BulkEditModal() {
 							: null}
 						<Button
 							onClick={handleDeleteSelected}
-							disabled={busy || draft.selectedCount === 0}
+							disabled={draft.selectedCount === 0}
 						>
 							{sprintf(
 								/* translators: %d: number of selected images */
@@ -554,7 +489,7 @@ export default function BulkEditModal() {
 						<Button
 							variant="primary"
 							onClick={handleSaveAll}
-							disabled={busy || !draft.hasChanges}
+							disabled={!draft.hasChanges}
 						>
 							{__(
 								'Save all and close',
@@ -585,7 +520,7 @@ export default function BulkEditModal() {
 					confirmLabel={deleteCopy.confirmLabel}
 					onConfirm={() => {
 						setConfirmKind(null);
-						void performDeleteSelected();
+						performDeleteSelected();
 					}}
 					onCancel={() => setConfirmKind(null)}
 				/>

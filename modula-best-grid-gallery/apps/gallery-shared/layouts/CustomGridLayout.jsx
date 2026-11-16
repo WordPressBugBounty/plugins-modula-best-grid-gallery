@@ -13,6 +13,7 @@ import Masonry from 'react-responsive-masonry';
 import GalleryItem from '../components/GalleryItem';
 import EditorPreviewPageBreakDivider from '../components/EditorPreviewPageBreakDivider';
 import { useContainerWidth } from '../hooks/useContainerWidth';
+import { useViewportWidth } from '../hooks/useViewportWidth';
 import { isSettingsEditorPreview } from '../utils/displayContext';
 import { buildCustomGridPackedTiles } from '../utils/customGridLayout';
 import { galleryItemRowKey } from '../utils/galleryItemIdentity';
@@ -45,15 +46,15 @@ function masonryGutterProp(raw) {
  * @param root0.items
  * @param root0.config
  * @param root0.containerRef
- * @param root0.containerWidth
+ * @param {number} root0.viewportWidth Browser viewport width (px): the breakpoints follow the device, not the gallery's column.
  */
 function CustomGridColumnFlowLayout({
 	items,
 	config,
 	containerRef,
-	containerWidth,
+	viewportWidth,
 }) {
-	const measureWidth = containerWidth > 0 ? containerWidth : 0;
+	const measureWidth = viewportWidth > 0 ? viewportWidth : 0;
 	const columnsCount = useMemo(
 		() =>
 			resolveResponsiveColumnsForWidth(
@@ -262,10 +263,13 @@ export default function CustomGridLayout({ EditorLayout } = {}) {
 	);
 
 	const isEditorPreview = isSettingsEditorPreview(metadata);
+	// The viewport, not the gallery's own width: a gallery in a narrow column
+	// on a desktop keeps its desktop grid.
+	const viewportWidth = useViewportWidth();
 	const useColumnFlow = shouldCustomGridUseColumnFlow(
 		config,
 		metadata,
-		containerWidth
+		viewportWidth
 	);
 	const gridEditable = isCustomGridPreviewLayoutEditable(config, metadata);
 
@@ -275,7 +279,7 @@ export default function CustomGridLayout({ EditorLayout } = {}) {
 				items={items}
 				config={config}
 				containerRef={containerRef}
-				containerWidth={containerWidth}
+				viewportWidth={viewportWidth}
 			/>
 		);
 	}

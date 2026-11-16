@@ -27,10 +27,10 @@
 	--modula-lightbox-caption-gutter: clamp(16px, 4vw, 40px);
 
 	/*
-	 * An image slide with a caption: the image's share of the slide height;
-	 * the caption gets the rest (see the captioned image slide below).
+	 * An image slide with a caption: the most of the slide height the caption
+	 * may take; the image gets the rest (see the captioned image slide below).
 	 */
-	--modula-lightbox-image-share: 0.6;
+	--modula-lightbox-caption-share: 0.4;
 
 	/*
 	 * A viewport-wide caption, inset and capped by the gutters, that Position
@@ -94,11 +94,31 @@
 }
 
 /*
+ * Bottom thumbnail strip: restore Fancybox's own height cap. The classic
+ * lightbox's `fancybox.css` lifts it with `.modula-best-grid-gallery
+ * .fancybox__thumbs { max-height: initial !important }` for its side strips,
+ * and it reaches this lightbox too when a page also has a classic gallery.
+ * Uncapped, the strip's `flex: 0 1 100%` takes the column from the carousel.
+ *
+ * The child combinator keeps this to the Fancybox 6 bottom strip: the classic
+ * lightbox shares `.modula-fancybox-container` but nests its strip in
+ * `.fancybox__footer`, and the side strip (own rule below) sits in
+ * `.fancybox__sidebar`.
+ */
+.modula-fancybox-container > .fancybox__thumbs.is-horizontal {
+	max-height: calc(var(--f-carousel-slide-height) + var(--f-thumbs-padding-y) * 2) !important;
+
+	&.is-hidden {
+		max-height: 0 !important;
+	}
+}
+
+/*
  * Captioned image slide, from 768px of lightbox width up: the image and its
- * caption are one block centred in the slide, the image above with
- * `--modula-lightbox-image-share` of the slide's height, the caption below at
- * the image's width with the rest, scrolling inside its own box. Position
- * aligns only the caption's text.
+ * caption are one block centred in the slide: the caption below at the image's
+ * width, as tall as its text up to `--modula-lightbox-caption-share` of the
+ * slide's height (beyond that it scrolls inside its own box), the image above
+ * with the rest. Position aligns only the caption's text.
  *
  * Panzoom marks an image slide `.f-zoomable` and Fancybox marks a slide with a
  * caption `.has-caption`. A caption made only of empty Pro title/description
@@ -150,12 +170,21 @@ $modula-lightbox-captioned-image-slide: ".fancybox__slide.f-zoomable.has-caption
 	 * `cqh` are what the toolbar, the thumbnail strip (bottom, side or off) and
 	 * the comments sidebar leave of it. The column is the image's width, 240px
 	 * at least.
+	 *
+	 * The caption row takes its text's height and the image row what is left,
+	 * up to the image's own height. The image's width follows its row and the
+	 * caption's height follows that width, which grid layout resolves in its
+	 * two sizing passes: the column first assumes the full slide height (the
+	 * `fit-content()` limit), the rows then fit the caption under it, and the
+	 * column and rows are sized once more from that. When the narrower caption
+	 * wraps to more lines in the second pass, it can end up a little wider than
+	 * the image.
 	 */
 	.modula-fancybox-container #{$modula-lightbox-captioned-image-slide} {
 		container-type: size;
 		display: grid;
 		grid-template-columns: minmax(min(240px, 100%), auto);
-		grid-template-rows: auto auto;
+		grid-template-rows: fit-content(100cqh) auto;
 		place-content: center;
 
 		// Fancybox centres its flex slide with these; in the grid they
@@ -178,13 +207,16 @@ $modula-lightbox-captioned-image-slide: ".fancybox__slide.f-zoomable.has-caption
 		max-height: none !important;
 		aspect-ratio: auto !important;
 		justify-self: center;
+		// Stretched to its row, the wrapper's height is definite, so the
+		// image's percentage max-height below resolves against the row.
+		align-self: stretch;
 	}
 
 	// The wrapper's in-flow (hidden) copy of the image sets its size; 80px
 	// leaves room for the arrows.
 	.modula-fancybox-container #{$modula-lightbox-captioned-image-slide} > .f-panzoom__wrapper > .f-panzoom__content {
 		max-width: min(100cqw - 80px, 1920px);
-		max-height: calc(100cqh * var(--modula-lightbox-image-share));
+		max-height: 100%;
 	}
 
 	/*
@@ -199,7 +231,7 @@ $modula-lightbox-captioned-image-slide: ".fancybox__slide.f-zoomable.has-caption
 		align-self: start;
 		width: auto;
 		max-width: none;
-		max-height: calc(100cqh * (1 - var(--modula-lightbox-image-share)));
+		max-height: calc(100cqh * var(--modula-lightbox-caption-share));
 		margin: 0;
 		padding: 16px 0 0;
 		overflow-y: auto;

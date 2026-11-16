@@ -2,7 +2,6 @@
  * Renders a Pro-registered gallery defaults slot with lite form/editor context injected.
  */
 import { useEffect, useMemo, useState } from '@wordpress/element';
-import { useTakeoverSaveStatus } from 'editor-shell';
 import { useGalleryDefaultsRegistration } from '../../hooks/useGalleryDefaultsRegistration';
 import { useModulaSettingsEditorConfig } from '../../hooks/useModulaSettingsEditorConfig';
 import { useGallerySettingsFormBundle } from '../../form/GallerySettingsFormContext';
@@ -16,7 +15,6 @@ import {
 	hasGalleryDefaultsPresets,
 	isGalleryDefaultsEntitled,
 } from '../../logic/galleryDefaultsGate';
-import { useCommitAppliedGalleryDefaultsSettings } from '../../utils/commitAppliedGalleryDefaultsSettings';
 
 /**
  * @param {{
@@ -28,13 +26,10 @@ export default function GalleryDefaultsEditorSlot({ slot, itemCount }) {
 	const registration = useGalleryDefaultsRegistration();
 	const config = useModulaSettingsEditorConfig();
 	const formBundle = useGallerySettingsFormBundle();
-	const { runPersistTask } = useTakeoverSaveStatus();
 	const galleryId = useMemo(
 		() => resolveGalleryAdminPostId(config),
 		[config]
 	);
-	const commitAppliedSettings =
-		useCommitAppliedGalleryDefaultsSettings(galleryId);
 	const { data: bootstrap } = useGalleryBootstrapQuery(galleryId);
 
 	const entitled = isGalleryDefaultsEntitled(config);
@@ -88,16 +83,6 @@ export default function GalleryDefaultsEditorSlot({ slot, itemCount }) {
 		itemCount: resolvedItemCount,
 		showNudge,
 	};
-
-	if (slot === 'Root') {
-		return (
-			<Component
-				{...sharedProps}
-				runPersistTask={runPersistTask}
-				commitAppliedSettings={commitAppliedSettings}
-			/>
-		);
-	}
 
 	return <Component {...sharedProps} />;
 }

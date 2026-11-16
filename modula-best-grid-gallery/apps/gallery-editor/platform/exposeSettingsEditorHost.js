@@ -32,11 +32,10 @@ import { useExtensionImportHost } from './ExtensionImportHostContext';
 import { createTakeoverImportModal } from './createTakeoverImportModal';
 import TakeoverImportDialogShell from '../components/import-dialog/TakeoverImportDialogShell';
 import {
-	saveMergedGalleryItems,
 	galleryUploadPost,
 	parseUploadAttachmentId,
-	runFoldersToGalleryPipeline,
-	runZipAttachmentPipeline,
+	importFoldersToMediaLibrary,
+	importZipToMediaLibrary,
 } from '../api/galleryUploadApi';
 import {
 	previewCoreItemsToSaveMergedPayload,
@@ -60,11 +59,7 @@ import {
 import { normalizeGroupedDefaults } from '../logic/groupedSettingsNormalize';
 import { useWatermarkPreviewSelection } from '../context/WatermarkPreviewSelectionContext';
 import { useQueryClient } from '@tanstack/react-query';
-import {
-	AdminUiScope,
-	GalleryModal,
-	useTakeoverSaveStatus,
-} from 'editor-shell';
+import { AdminUiScope, GalleryModal } from 'editor-shell';
 import { stripRestPostMeta } from 'editor-shell/logic';
 import {
 	getGalleryBootstrapQueryKey,
@@ -73,6 +68,8 @@ import {
 
 import { useGallerySettingsFormBundle } from '../form/GallerySettingsFormContext';
 import { useModulaSettingsEditorConfig } from '../hooks/useModulaSettingsEditorConfig';
+import { useGalleryEditorChanges } from '../hooks/useGalleryEditorChanges';
+import { useImmediateGalleryAction } from '../hooks/useImmediateGalleryAction';
 import {
 	applyGroupedFieldWrite,
 	resetGroupedFieldWrite,
@@ -104,7 +101,6 @@ export function exposeSettingsEditorHost() {
 		useExtensionImportHost,
 		createTakeoverImportModal,
 		TakeoverImportDialogShell,
-		saveMergedGalleryItems,
 		previewCoreItemsToSaveMergedPayload,
 		reanchorEmbeddedRowsInMergedList,
 		commitPreviewCatalog,
@@ -124,7 +120,6 @@ export function exposeSettingsEditorHost() {
 		serializeGroupedForServerRef,
 		normalizeGroupedDefaults,
 		stripRestPostMeta,
-		useTakeoverSaveStatus,
 		useWatermarkPreviewSelection,
 		useQueryClient,
 		getGalleryBootstrapQueryKey,
@@ -144,8 +139,20 @@ export function exposeSettingsEditorHost() {
 		resolveFilterBarCollapsibleActionText,
 		galleryUploadPost,
 		parseUploadAttachmentId,
-		runFoldersToGalleryPipeline,
-		runZipAttachmentPipeline,
+		/*
+		 * Since Lite 3.0.21 (explicit save, ADR 0059): a Pro flow adds its
+		 * result as unsaved changes. Only Pro 3.0.24 or newer loads in this
+		 * editor (spec decision 29), so the host offers no write of its own.
+		 */
+		useGalleryEditorChanges,
+		importFoldersToMediaLibrary,
+		importZipToMediaLibrary,
+		/*
+		 * Since Lite 3.0.21: an action that writes the gallery at once
+		 * (Instagram, content galleries) asks to save unsaved changes first,
+		 * then the editor adopts what it stored.
+		 */
+		useImmediateGalleryAction,
 		/* No controls: Pro compiles its own admin-ui and takes the scope here. */
 		GalleryModal,
 		AdminUiScope,

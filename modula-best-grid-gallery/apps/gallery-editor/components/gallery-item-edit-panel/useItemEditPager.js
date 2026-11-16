@@ -2,7 +2,7 @@
  * Previous/next for the item edit panels, in gallery order.
  *
  * Opening another item remounts the panel (it is keyed by store index), and
- * the panel's unmount flush saves the edits still waiting for the autosave,
+ * the panel's unmount flush applies the edits the item does not have yet,
  * the same path as clicking another tile on the canvas.
  */
 import { useMemo } from '@wordpress/element';
@@ -73,12 +73,12 @@ export function useItemEditPager(reduxItems, storeIndex, fallbackTitle) {
 }
 
 /**
- * Remove for the item edit panels: save pending edits first, so the removal
+ * Remove for the item edit panels: apply pending edits first, so the removal
  * (an `items` history step with Undo in the canvas toast) records the item
  * as last edited, and the next item opened at the same store index does not
- * inherit them. A failed save (logged by the autosave) keeps the item.
+ * inherit them. A failed flush keeps the item.
  *
- * @param {() => Promise<void>} flush      The panel's autosave flush.
+ * @param {() => Promise<void>} flush      The panel's flush of pending edits.
  * @param {number}              storeIndex
  * @param {Object|null}         adminActions Preview admin actions.
  * @return {() => void} The Remove handler.

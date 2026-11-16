@@ -1,6 +1,6 @@
 /**
  * Per-image fields stored on the gallery item (CONTEXT.md "Gallery item"),
- * named once for the image edit panel, the item autosave, Bulk edit and the
+ * named once for the image edit panel, the item metadata edits, Bulk edit and the
  * preview merge. PHP names the same keys in `Modula\V2\Images\Item_Fields`.
  */
 

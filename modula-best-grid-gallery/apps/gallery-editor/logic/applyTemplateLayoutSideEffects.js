@@ -1,24 +1,21 @@
 /**
  * Seed and reconcile template content blocks when layout changes.
- * Uses the same items-array + save-merged-items path as “Add content block”.
+ * Uses the same items-array path as “Add content block”.
  *
  * @package
  */
 
 import {
 	asGalleryItemList,
+	commitPreviewCatalog,
 	getTemplateDefinition,
 	isEmbeddedGalleryItemRow,
 	isTemplateOwnedEmbeddedId,
 } from 'gallery-shared/preview';
 import {
 	buildNewContentBlockRow,
-	previewCoreItemsToSaveMergedPayload,
 	reanchorEmbeddedRowsInMergedList,
 } from '../utils/embeddedGalleryItems';
-import { saveMergedGalleryItems } from '../api/galleryUploadApi';
-import { syncPreviewCoreToStoreAndBootstrap } from '../utils/previewItemsCommit';
-import { GALLERY_SAVE_OWNERS } from '../constants/gallerySaveOwners';
 
 /**
  * @param {string} slug
@@ -158,67 +155,26 @@ export function mergeTemplateContentBlocksForLayout(coreItems, slug) {
 }
 
 /**
- * @param {import('@reduxjs/toolkit').Store}                           store
- * @param {number}                                                     galleryId
- * @param {string}                                                     slug
- * @param {(fn: () => void | Promise<void>) => Promise<void>}          [runPersistTask]
- * @param {import('@tanstack/react-query').QueryClient|null|undefined} [queryClient]
- * @return {Promise<boolean>} True when items were changed.
+ * Put the layout's content blocks into the preview store, as Add content
+ * block does. Nothing is sent: the editor save stores them (ADR 0059).
+ *
+ * @param {import('@reduxjs/toolkit').Store} store
+ * @param {string}                           slug  Template layout.
+ * @return {boolean} True when items were changed.
  */
-export async function seedTemplateContentBlocksForLayout(
-	store,
-	galleryId,
-	slug,
-	runPersistTask,
-	queryClient
-) {
-	if (!store || !galleryId || !getTemplateDefinition(slug)) {
+export function seedTemplateContentBlocksForLayout(store, slug) {
+	if (!store || !getTemplateDefinition(slug)) {
 		return false;
 	}
 	const core = asGalleryItemList(store.getState().items.items);
 	if (!templateLayoutNeedsReconcile(core, slug)) {
 		return false;
 	}
-
-	const merged = mergeTemplateContentBlocksForLayout(core, slug);
-	const reanchored = reanchorEmbeddedRowsInMergedList(merged);
-
-	/*
-	 * Same contract as Add content block:
-	 * 1) put real rows in the items array (preview + bootstrap cache)
-	 * 2) persist via save-merged-items
-	 * Persist reads the live store so later font edits are not overwritten.
-	 */
-	syncPreviewCoreToStoreAndBootstrap(
+	commitPreviewCatalog(
 		store,
-		queryClient,
-		galleryId,
-		reanchored
+		reanchorEmbeddedRowsInMergedList(
+			mergeTemplateContentBlocksForLayout(core, slug)
+		)
 	);
-
-	const persist = async () => {
-		let latest = asGalleryItemList(store.getState().items.items);
-		if (templateLayoutNeedsReconcile(latest, slug)) {
-			latest = mergeTemplateContentBlocksForLayout(latest, slug);
-		}
-		const toSave = reanchorEmbeddedRowsInMergedList(latest);
-		await saveMergedGalleryItems(
-			galleryId,
-			previewCoreItemsToSaveMergedPayload(toSave)
-		);
-		syncPreviewCoreToStoreAndBootstrap(
-			store,
-			queryClient,
-			galleryId,
-			toSave
-		);
-	};
-
-	if (typeof runPersistTask === 'function') {
-		await runPersistTask(persist, GALLERY_SAVE_OWNERS.template);
-	} else {
-		await persist();
-	}
-
 	return true;
 }

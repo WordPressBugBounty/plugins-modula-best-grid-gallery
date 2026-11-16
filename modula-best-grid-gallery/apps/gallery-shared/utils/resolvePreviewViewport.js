@@ -369,17 +369,18 @@ export function resolveResponsiveGutterValue(config, opts = {}) {
 
 /**
  * Custom grid on tablet/mobile: N-column flow (masonry) instead of desktop grid pack / RGL.
- * Settings-editor preview follows preview viewport only; visitor still uses measured width.
+ * Settings-editor preview follows preview viewport only; the visitor's follows the browser
+ * viewport, not the width of the column the gallery sits in.
  *
  * @param {Object|null|undefined}       config
  * @param {{ displayContext?: string }} [metadata]
- * @param {number}                      [containerWidth] Measured gallery width (px); falls back to window.
+ * @param {number}                      [viewportWidth] Browser viewport width (px); read from the document when missing.
  * @return {boolean} True when Custom grid should mount column-flow instead of the packed grid.
  */
 export function shouldCustomGridUseColumnFlow(
 	config,
 	metadata,
-	containerWidth = 0
+	viewportWidth = 0
 ) {
 	if (config?.type !== 'custom-grid') {
 		return false;
@@ -395,8 +396,8 @@ export function shouldCustomGridUseColumnFlow(
 		return false;
 	}
 	const measureWidth =
-		containerWidth > 0
-			? containerWidth
+		viewportWidth > 0
+			? viewportWidth
 			: typeof document !== 'undefined'
 				? document.documentElement.clientWidth
 				: 9999;

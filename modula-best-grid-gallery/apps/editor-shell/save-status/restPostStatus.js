@@ -1,31 +1,25 @@
 /**
- * Sync takeover top-bar post status when REST write responses include postStatus.
+ * The saved-state marker a write response carries (`savedState`, added by the
+ * server next to `postStatus`): it changes whenever the stored document
+ * changes, by any save path. The recovery copy compares it.
  *
- * @param {unknown}                               response REST response body.
- * @param {(slug: string, label: string) => void} apply
+ * @param {unknown} response REST response body.
+ * @return {string|null|undefined} The marker (null: the document was never saved), or undefined when the response has none.
  */
-export function applyRestPostStatus(response, apply) {
-	if (!response || typeof apply !== 'function') {
-		return;
+export function readRestSavedState(response) {
+	if (!response || typeof response !== 'object') {
+		return undefined;
 	}
-	const body =
-		typeof response === 'object' && response !== null ? response : null;
-	if (!body) {
-		return;
-	}
-	const slug = body.postStatus;
-	const label = body.postStatusLabel;
-	if (typeof slug !== 'string' || !slug) {
-		return;
-	}
-	apply(slug, typeof label === 'string' && label ? label : slug);
+	const marker = response.savedState;
+	return typeof marker === 'string' || marker === null ? marker : undefined;
 }
 
 /**
- * Remove postStatus fragments from grouped settings PATCH payloads.
+ * Remove the post fragments (status, saved-state marker) from grouped
+ * settings PATCH payloads.
  *
  * @param {Record<string, unknown>|null|undefined} payload
- * @return {Record<string, unknown>}
+ * @return {Record<string, unknown>} The grouped settings alone.
  */
 export function stripRestPostMeta(payload) {
 	if (!payload || typeof payload !== 'object') {
@@ -34,6 +28,7 @@ export function stripRestPostMeta(payload) {
 	const {
 		postStatus: _postStatus,
 		postStatusLabel: _postStatusLabel,
+		savedState: _savedState,
 		...rest
 	} = payload;
 	return rest;

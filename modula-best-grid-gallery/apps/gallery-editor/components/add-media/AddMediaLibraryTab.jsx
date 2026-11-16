@@ -1,16 +1,18 @@
 /**
  * Media library tab: search and date filters, a grid of images to
- * multi-select, and "Add N images". Images already in the gallery show but
+ * multi-select (Shift for a range), and "Add N images". Images already in the gallery show but
  * cannot be picked.
  */
 import { useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Select } from 'admin-ui';
 import {
+	EMPTY_PICKER_SELECTION,
 	MediaPickerFooter,
 	MediaPickerGrid,
 	MediaPickerSearch,
 	MediaPickerToolbar,
+	pressPickerItem,
 	useDebouncedValue,
 } from 'editor-shell';
 import { useMediaLibraryQuery } from '../../query/useMediaLibraryQuery';
@@ -27,7 +29,7 @@ const SEARCH_DELAY_MS = 300;
 export default function AddMediaLibraryTab({ busy, onAdd }) {
 	const [search, setSearch] = useState('');
 	const [month, setMonth] = useState('');
-	const [selectedIds, setSelectedIds] = useState(() => new Set());
+	const [{ selectedIds }, setSelection] = useState(EMPTY_PICKER_SELECTION);
 	// Read once per open: the gallery does not change while the dialog is up.
 	const [inGalleryIds] = useState(
 		() => new Set(getTakeoverPreviewLibraryAttachmentIds())
@@ -57,16 +59,8 @@ export default function AddMediaLibraryTab({ busy, onAdd }) {
 	const total = pages[0]?.total ?? 0;
 	const isFiltered = debouncedSearch.trim() !== '' || month !== '';
 
-	const toggle = (id) => {
-		setSelectedIds((current) => {
-			const next = new Set(current);
-			if (next.has(id)) {
-				next.delete(id);
-			} else {
-				next.add(id);
-			}
-			return next;
-		});
+	const press = (id, options) => {
+		setSelection((current) => pressPickerItem(current, id, items, options));
 	};
 
 	return (
@@ -113,7 +107,7 @@ export default function AddMediaLibraryTab({ busy, onAdd }) {
 			<MediaPickerGrid
 				items={items}
 				selectedIds={selectedIds}
-				onToggle={toggle}
+				onToggle={press}
 				message={libraryMessage(
 					library,
 					items.length === 0,
@@ -141,7 +135,7 @@ export default function AddMediaLibraryTab({ busy, onAdd }) {
 						: __('Add images', 'modula-best-grid-gallery')
 				}
 				busy={busy}
-				onClear={() => setSelectedIds(new Set())}
+				onClear={() => setSelection(EMPTY_PICKER_SELECTION)}
 				onAdd={() => onAdd([...selectedIds])}
 			/>
 		</>

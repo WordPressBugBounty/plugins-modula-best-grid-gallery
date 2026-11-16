@@ -6,15 +6,7 @@ import {
 	TILE_IMAGE_FIT_CONTAIN,
 	asGalleryItemList,
 	isEmbeddedGalleryItemRow,
-	modulaImagesRowIndexForPreviewWrite,
-	storeIndexToCoreIndex,
 } from 'gallery-shared/preview';
-import { __ } from '@wordpress/i18n';
-import { galleryPatchImageByIndex } from '../api/galleryUploadApi';
-import {
-	commitPreviewCatalog,
-	mergeModulaRowIntoPreviewItem,
-} from './previewItemsCommit';
 import {
 	clearFocusCropAreaFromSession,
 	getFocusCropStorageKey,
@@ -87,85 +79,31 @@ function clearLetterboxFocusSessionForItem(galleryId, item) {
 }
 
 /**
- * Patch letterbox fields on every eligible image except `excludeItemId` (already saved).
+ * Forget the crop area kept for the focus dialog of every eligible image
+ * except `excludeItemId`: letterbox replaces their crop.
  *
  * @param {{
  *   galleryId: number,
- *   store: import('@reduxjs/toolkit').Store,
- *   fields: Record<string, string|number>,
+ *   items: Object[],
  *   excludeItemId: string|number|null|undefined,
  * }} args
- * @return {Promise<void>}
  */
-export async function applyLetterboxFitToOtherGalleryImages({
+export function clearOtherLetterboxFocusSessions({
 	galleryId,
-	store,
-	fields,
+	items,
 	excludeItemId,
 }) {
-	if (!galleryId || !store || !fields) {
-		return;
-	}
 	const excludeId =
 		excludeItemId !== undefined && excludeItemId !== null
 			? String(excludeItemId)
 			: '';
-
-	const itemsLive = store.getState().items.items;
-	const core = asGalleryItemList(itemsLive);
-	const targets = [];
-
-	for (let coreIndex = 0; coreIndex < core.length; coreIndex++) {
-		const row = core[coreIndex];
-		if (!isLetterboxApplyEligibleRow(row)) {
-			continue;
+	for (const row of asGalleryItemList(items)) {
+		if (
+			isLetterboxApplyEligibleRow(row) &&
+			!(excludeId && String(row.id) === excludeId)
+		) {
+			clearLetterboxFocusSessionForItem(galleryId, row);
 		}
-		if (excludeId && String(row.id) === excludeId) {
-			continue;
-		}
-		const storeIndex = itemsLive.findIndex(
-			(it) => it && String(it.id) === String(row.id)
-		);
-		if (storeIndex < 0) {
-			continue;
-		}
-		const restRowIndex = modulaImagesRowIndexForPreviewWrite(
-			itemsLive,
-			storeIndex
-		);
-		const displayCoreIndex = storeIndexToCoreIndex(itemsLive, storeIndex);
-		if (restRowIndex < 0 || displayCoreIndex < 0) {
-			continue;
-		}
-		targets.push({ row, storeIndex, restRowIndex, displayCoreIndex });
-	}
-
-	for (const target of targets) {
-		const res = await galleryPatchImageByIndex(
-			galleryId,
-			target.restRowIndex,
-			fields
-		);
-		const patchRow = res?.image;
-		if (!patchRow) {
-			throw new Error(
-				__(
-					'Could not apply letterbox to all images (empty server response).',
-					'modula-best-grid-gallery'
-				)
-			);
-		}
-		const nextCore = asGalleryItemList(store.getState().items.items);
-		const prevItem = nextCore[target.displayCoreIndex];
-		if (!prevItem) {
-			continue;
-		}
-		nextCore[target.displayCoreIndex] = mergeModulaRowIntoPreviewItem(
-			prevItem,
-			patchRow
-		);
-		commitPreviewCatalog(store, nextCore);
-		clearLetterboxFocusSessionForItem(galleryId, prevItem);
 	}
 }
 

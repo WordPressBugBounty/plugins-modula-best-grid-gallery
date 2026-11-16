@@ -9,6 +9,21 @@ import {
 	resolveCreativeEngineFromSettings,
 } from './creativeEngine';
 
+/** Types whose tiles the author places and sizes by hand (the "Manual layouts" of the Type menu). */
+const MANUAL_LAYOUT_TYPES = new Set(['custom-grid', 'freeform']);
+
+/**
+ * Whether the author places each tile by hand. A menu sort or a random order
+ * has nothing to act on there, so the editor offers neither (the Randomize
+ * images field follows the same two types in form-rules.json).
+ *
+ * @param {string|undefined|null} type `general.type` / `gallery.config.type`
+ * @return {boolean} True for Custom grid and Freeform.
+ */
+export function isManualLayoutGalleryType(type) {
+	return MANUAL_LAYOUT_TYPES.has(type);
+}
+
 /** Packery-style fixed segment height (creative on Classic tiles, polaroid). */
 const FIXED_HEIGHT_LAYOUT_TYPES = new Set(['creative-gallery', 'polaroid']);
 

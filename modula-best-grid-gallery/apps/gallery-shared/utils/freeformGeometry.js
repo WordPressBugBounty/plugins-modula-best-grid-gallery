@@ -51,6 +51,25 @@ export function constrainFreeformPlacement(placement) {
 }
 
 /**
+ * A Preset layout's slots placed on a catalog (ADR 0051): slot N goes to item
+ * N, kept on the surface; slots beyond the items are dropped, items beyond
+ * the slots get none (the composition appends them). Pro's Apply preset maps
+ * the stored catalog the same way; the editor maps its working catalog.
+ *
+ * @param {string[]} ids   Ordered occurrence identities of the catalog.
+ * @param {Object[]} slots Slot geometry (x, y, w, h, z) in slot order.
+ * @return {Object[]} Placements.
+ */
+export function placeFreeformLayoutSlots(ids, slots) {
+	const count = Math.min(ids.length, slots.length);
+	return slots
+		.slice(0, count)
+		.map((slot, index) =>
+			constrainFreeformPlacement({ ...slot, id: ids[index] })
+		);
+}
+
+/**
  * Resolve initial tiles in three columns, retaining any authored rectangles.
  * @param {string[]} ids   Ordered occurrence identities.
  * @param {Object[]} saved Authored cell rectangles.

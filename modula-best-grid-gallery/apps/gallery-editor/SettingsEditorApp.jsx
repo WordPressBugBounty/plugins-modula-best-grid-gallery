@@ -11,7 +11,10 @@ import {
 	SettingsEditorErrorBoundary,
 	useSettingsEditorAppearance,
 } from 'editor-shell';
-import { DESKTOP_EDITOR_MEDIA_QUERY } from 'editor-shell/logic';
+import {
+	DESKTOP_EDITOR_MEDIA_QUERY,
+	editorDocumentQueryPhase,
+} from 'editor-shell/logic';
 import { useGallerySettingsV2Query } from './query/useGallerySettingsV2Query';
 import { useModulaSettingsEditorConfig } from './hooks/useModulaSettingsEditorConfig';
 import { useMatchMedia } from './hooks/useMatchMedia';
@@ -43,8 +46,12 @@ function SettingsEditorAppInner() {
 		}
 	}, [galleryId]);
 
-	const { data, error, isPending, isError, isSuccess } =
-		useGallerySettingsV2Query(isDesktopEditor ? galleryId : 0);
+	const settingsQuery = useGallerySettingsV2Query(
+		isDesktopEditor ? galleryId : 0
+	);
+	const { data, error } = settingsQuery;
+	// Once loaded, the editor stays mounted whatever the query does next.
+	const phase = editorDocumentQueryPhase(settingsQuery);
 
 	if (!isDesktopEditor) {
 		return (
@@ -77,7 +84,8 @@ function SettingsEditorAppInner() {
 	}
 
 	const errorMessage =
-		isError && (error?.message || error?.data?.message || String(error));
+		phase === 'error' &&
+		(error?.message || error?.data?.message || String(error));
 
 	return (
 		<div
@@ -85,7 +93,7 @@ function SettingsEditorAppInner() {
 			data-appearance={appearance}
 		>
 			<SettingsEditorErrorBoundary>
-				{isPending && (
+				{phase === 'loading' && (
 					<div
 						className="modula-settings-editor__status"
 						role="status"
@@ -102,14 +110,14 @@ function SettingsEditorAppInner() {
 						</AdminUiScope>
 					</div>
 				)}
-				{isError && (
+				{phase === 'error' && (
 					<AdminUiScope>
 						<Notice tone="error" role="alert">
 							{errorMessage}
 						</Notice>
 					</AdminUiScope>
 				)}
-				{isSuccess && data && (
+				{phase === 'ready' && (
 					<GallerySettingsEditorLoaded
 						galleryId={galleryId}
 						groupedPayload={data}

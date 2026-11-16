@@ -42,6 +42,9 @@ class Loader {
 		// When modula-settings / modula-images are saved, also save modula_settings_v2 and modula_images_v2.
 		Meta_Sync::init();
 
+		// Core REST writes of a gallery return its saved-state marker (editor recovery copy).
+		Gallery_Post::init();
+
 		// Per-image hover effect and CSS class join the item whitelist.
 		Images\Item_Fields::init();
 

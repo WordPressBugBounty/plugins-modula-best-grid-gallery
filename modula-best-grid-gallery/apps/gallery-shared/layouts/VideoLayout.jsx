@@ -6,6 +6,7 @@
 
 import { useMemo, useRef } from '@wordpress/element';
 import { useSelector } from 'react-redux';
+import { useContainerWidth } from '../hooks/useContainerWidth';
 import usePlaylistDragScroll from '../hooks/usePlaylistDragScroll';
 import { useVideoGalleryController } from '../hooks/useVideoGalleryController';
 import VideoGalleryMainPlayer from '../video/VideoGalleryMainPlayer';
@@ -13,7 +14,8 @@ import VideoGalleryPlaylistItem from '../video/VideoGalleryPlaylistItem';
 import { resolvePlaylistScrollbarChrome } from '../video/playlistScrollbarChrome';
 import {
 	normalizeVideoGalleryItems,
-	resolvePlaylistPosition,
+	resolveEffectivePlaylistPosition,
+	resolvePlaylistScrollAxis,
 } from '../video/videoGalleryModel';
 import VideoGalleryPreviewAdminMount from '../video/VideoGalleryPreviewAdminMount';
 
@@ -37,7 +39,11 @@ export default function VideoLayout() {
 	} = useVideoGalleryController(videos.length);
 
 	const activeVideo = videos[activeIndex] || null;
-	const playlistPosition = resolvePlaylistPosition(config);
+	const { containerRef, containerWidth } = useContainerWidth(0);
+	const playlistPosition = resolveEffectivePlaylistPosition(
+		config,
+		containerWidth
+	);
 	const { showScrollbar, dragEnabled } =
 		resolvePlaylistScrollbarChrome(config);
 	const wrapClass = `modula-video-player-wrap playlist_${playlistPosition}`;
@@ -52,7 +58,7 @@ export default function VideoLayout() {
 
 	usePlaylistDragScroll(playlistItemsRef, {
 		enabled: showPlaylist && dragEnabled,
-		axis: playlistPosition === 'bottom' ? 'x' : 'y',
+		axis: resolvePlaylistScrollAxis(playlistPosition),
 	});
 
 	if (!activeVideo) {
@@ -66,7 +72,7 @@ export default function VideoLayout() {
 	}
 
 	return (
-		<div className="modula-items modula-video">
+		<div ref={containerRef} className="modula-items modula-video">
 			<div className={wrapClass}>
 				<div className="modula-video-main-item">
 					<VideoGalleryMainPlayer

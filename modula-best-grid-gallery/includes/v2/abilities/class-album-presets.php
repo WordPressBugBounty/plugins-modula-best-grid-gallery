@@ -31,6 +31,18 @@ final class Album_Presets extends Presets {
 		);
 	}
 
+	/**
+	 * An album sorts galleries, which have no file name, so the gallery's file-name
+	 * modes are left out. Same keys as Pro's Album_Sorting::modes(), which may not
+	 * be loaded when the schema is built.
+	 */
+	public static function sorting_schema(): array {
+		return array(
+			'type' => 'string',
+			'enum' => array( 'manual', 'dateCreatedNew', 'dateCreatedOld', 'dateModifiedFirst', 'dateModifiedLast', 'titleAZ', 'titleZA', 'random' ),
+		);
+	}
+
 	protected static function settings_schema(): array {
 		if ( class_exists( \Modula_Pro\Extensions\Albums\V2\Registry::class, false ) ) {
 			return Settings_Contract::schema( true );

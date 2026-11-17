@@ -118,6 +118,7 @@ class Beta_Gallery_Admin {
 		}
 
 		\Modula\V2\Beta_Settings::mark_as_beta_gallery( (int) $new_id );
+		\Modula\V2\Meta_Sync::upgrade_classic_hover_import( (int) $new_id );
 
 		return (int) $new_id;
 	}
@@ -259,6 +260,7 @@ class Beta_Gallery_Admin {
 		// Convert only flipped the Beta flag historically; seed v2 from flat so the
 		// modern visitor/editor do not treat an empty v2 stub as masonry defaults.
 		\Modula\V2\Meta_Sync::ensure_settings_v2_from_flat( $post_id );
+		\Modula\V2\Meta_Sync::upgrade_classic_hover_import( $post_id );
 		$images = get_post_meta( $post_id, 'modula-images', true );
 		if ( is_array( $images ) && empty( \Modula\V2\Meta_Sync::get_images_v2( $post_id ) ) ) {
 			\Modula\V2\Meta_Sync::sync_modula_images_v2_from_list( $post_id, $images );

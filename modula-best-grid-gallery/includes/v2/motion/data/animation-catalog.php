@@ -153,7 +153,8 @@ $modula_entrance_preset = static function ( string $id, string $label, string $d
 
 /*
  * A hover preset. `$look` holds cardTreatment, dimOverlay, the three
- * *Enter ids and one `visibility` for the three layers. `$inline_social`:
+ * *Enter ids and one `visibility` for the three layers; `graphicElement` when
+ * the preset draws one (shown on hover). `$inline_social`:
  * the social icons are the preset's look, so they show inline even when the
  * gallery folds them into the share button on desktop.
  */
@@ -170,7 +171,7 @@ $modula_hover_preset = static function ( string $id, string $label, string $desc
 			'builder' => array_merge(
 				array(
 					'cardTreatment'     => $look['cardTreatment'],
-					'graphicElement'    => 'none',
+					'graphicElement'    => $look['graphicElement'] ?? 'none',
 					'graphicVisibility' => 'on-hover',
 					'dimOverlay'        => $look['dimOverlay'],
 					'titleEnter'        => $look['titleEnter'],
@@ -239,13 +240,18 @@ return array(
 				$modula_card_primitive( 'pan', 'Pan image', true, true ),
 			),
 		),
-		// Frame and diamond fade in on a fixed 220ms, outside the builder timings.
+		/*
+		 * Frame and diamond fade in on a fixed 220ms, outside the builder timings.
+		 * Corner frame slides in on the tile's timing (`cardEnter…Ms`), in the
+		 * Dim color while Darken on hover is on.
+		 */
 		'graphic'  => array(
 			'builderFields' => array( 'graphicElement' ),
 			'items'         => array(
 				$modula_hover_primitive( 'none', 'None', false ),
 				$modula_hover_primitive( 'frame', 'Frame', false ),
 				$modula_hover_primitive( 'diamond', 'Diamond', false ),
+				$modula_hover_primitive( 'corner-frame', 'Corner frame', true ),
 			),
 		),
 		'layer'    => array(
@@ -841,6 +847,31 @@ return array(
 			'rgba(0,0,0,.42)',
 			42
 		),
+		/*
+		 * The classic Terry effect in the builder's format (Adapter::TERRY_HOVER_PRESET):
+		 * its frame, timing (350ms, the social icons 25ms apart) and colour. The
+		 * title and caption sit on the frame's bottom band at the left, the
+		 * social icons at the top of its right band.
+		 */
+		$modula_hover_preset(
+			'corner-frame',
+			'Corner frame',
+			'A solid frame slides over the image edges from two opposite corners, with the title and caption on its bottom band.',
+			true,
+			array(
+				'cardTreatment'  => 'none',
+				'graphicElement' => 'corner-frame',
+				'dimOverlay'     => true,
+				'titleEnter'     => 'fade',
+				'captionEnter'   => 'fade',
+				'socialEnter'    => 'slide-left',
+				'visibility'     => 'on-hover',
+			),
+			$modula_preset_timing( 350, 0, 25 ),
+			$modula_preset_slots( 6, 86, 6, 94, 94, 14 ),
+			'rgba(16,16,16,.4)',
+			40
+		),
 		$modula_simple_hover_preset( 'captions', 'Captions only', 'Title, caption and social fade in on hover; the image stays still.', 'none' ),
 		$modula_simple_hover_preset( 'zoom', 'Zoom', 'The image zooms in slightly on hover.', 'zoom' ),
 		$modula_simple_hover_preset( 'lift', 'Lift', 'The image lifts off the page with a soft shadow.', 'lift' ),
@@ -945,6 +976,10 @@ return array(
 				array(
 					'id'    => 'product-card-clean',
 					'label' => 'Product card',
+				),
+				array(
+					'id'    => 'corner-frame',
+					'label' => 'Corner frame',
 				),
 			),
 			'offMenu'        => array( 'none-with-captions', 'portfolio-lift', 'soft-zoom-stack', 'accessible-no-motion' ),

@@ -3,13 +3,14 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
+import { attachmentSortFileName } from '../utils/attachmentSortFileName';
 
 /** WP REST `per_page` max is 100; chunk `include` so large galleries sort correctly. */
 const MEDIA_SORT_FIELDS_BATCH = 100;
 
 /**
  * @param {number[]} ids Attachment IDs to load sort metadata for.
- * @return {Promise<Record<number, { date: string, modified: string, title: string }>>} Map of id → date/modified/title for sorting.
+ * @return {Promise<Record<number, { date: string, modified: string, title: string, fileName: string }>>} Map of id → date/modified/title/file name for sorting.
  */
 export async function fetchAttachmentSortFields(ids) {
 	const unique = [...new Set(ids.filter((n) => n > 0))];
@@ -57,6 +58,7 @@ export async function fetchAttachmentSortFields(ids) {
 				date,
 				modified,
 				title: title.replace(/<[^>]+>/g, '').trim(),
+				fileName: attachmentSortFileName(row),
 			};
 		}
 	}

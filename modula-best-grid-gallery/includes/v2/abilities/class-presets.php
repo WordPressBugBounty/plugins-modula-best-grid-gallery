@@ -2,6 +2,7 @@
 /** Gallery preset descriptors, object authorization and retained-result projection. */
 namespace Modula\V2\Abilities;
 
+use Modula\V2\Gallery_Sorting;
 use Modula_Pro\Extensions\Defaults\Utils\Preset_Storage;
 
 defined( 'ABSPATH' ) || exit;
@@ -95,7 +96,7 @@ class Presets {
 	public static function sorting_schema(): array {
 		return array(
 			'type' => 'string',
-			'enum' => array( 'manual', 'dateCreatedNew', 'dateCreatedOld', 'dateModifiedFirst', 'dateModifiedLast', 'titleAZ', 'titleZA', 'random' ),
+			'enum' => Gallery_Sorting::modes(),
 		);
 	}
 

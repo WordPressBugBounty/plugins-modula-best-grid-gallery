@@ -6,6 +6,12 @@
 		box-sizing: border-box;
 	}
 
+	/*
+	 * Right playlist: these rules have no narrow-screen variant on purpose.
+	 * In a phone-width gallery VideoLayout renders `playlist_bottom` instead
+	 * (resolveEffectivePlaylistPosition), so the drag-to-scroll axis changes
+	 * together with the styles.
+	 */
 	.modula-video-player-wrap.playlist_right {
 		display: flex;
 		flex-direction: row;

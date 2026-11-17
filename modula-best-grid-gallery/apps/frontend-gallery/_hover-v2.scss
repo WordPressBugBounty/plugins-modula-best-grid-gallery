@@ -520,6 +520,62 @@ $hover-share-clearance: 58px;
 	transform: translate(-50%, -50%) rotate(45deg) scale(1);
 }
 
+/*
+ * Corner frame (the classic Terry effect): a solid frame slides over the
+ * tile's edges from two opposite corners, thin along the top and left, thick
+ * along the right and bottom. Each half is the border of a box twice the
+ * tile's size, so its bands span the whole edge while they slide; at rest it
+ * waits outside the tile, clipped by `.figc`. The frame sits under the copy
+ * (z-index 3), which the preset puts on its bands. It takes the Dim color
+ * while Darken on hover is on, else Terry's own, and moves on the tile's
+ * timing, so the Motion speed scales it.
+ */
+$hover-corner-frame-thin: 15px;
+$hover-corner-frame-right: 70px;
+$hover-corner-frame-bottom: 60px;
+$hover-corner-frame-color: #101010;
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame .figc::before,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame .figc::after {
+	content: "";
+	position: absolute;
+	box-sizing: border-box;
+	width: 200%;
+	height: 200%;
+	border: 0 solid var(--modula-hover-overlay-tint, #{$hover-corner-frame-color});
+	pointer-events: none;
+	transition: transform var(--modula-hover-card-enter-duration, 350ms) ease;
+	transition-delay: 0ms;
+	z-index: 2;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame .figc::before {
+	top: 0;
+	left: 0;
+	border-width: $hover-corner-frame-thin 0 0 $hover-corner-frame-thin;
+	transform: translate(-$hover-corner-frame-thin, -$hover-corner-frame-thin);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame .figc::after {
+	right: 0;
+	bottom: 0;
+	border-width: 0 $hover-corner-frame-right $hover-corner-frame-bottom 0;
+	transform: translate($hover-corner-frame-right, $hover-corner-frame-bottom);
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame:hover .figc::before,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame:hover .figc::after,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame:focus-within:has(:focus-visible) .figc::before,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame:focus-within:has(:focus-visible) .figc::after {
+	transition-delay: var(--modula-hover-card-enter-delay, 0ms);
+	transform: none;
+}
+
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic-visibility--always.modula-hover-graphic--corner-frame .figc::before,
+.modula .modula-items .modula-item.modula-hover-v2--free-slots.modula-hover-graphic-visibility--always.modula-hover-graphic--corner-frame .figc::after {
+	transform: none;
+}
+
 .modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .modula-title,
 .modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .jtg-description,
 .modula .modula-items .modula-item.modula-hover-v2--free-slots .figc .modula-social {

@@ -4,7 +4,7 @@ Tags: gallery plugin, image gallery, video gallery, responsive gallery, WordPres
 Requires at least: 5.3
 Tested up to: 7.1
 Requires PHP: 5.6
-Stable tag: 3.0.21
+Stable tag: 3.0.22
 
 License: GNU General Public License v3.0 or later  
 
@@ -237,6 +237,10 @@ To install it by hand, go to Plugins > Add New > Upload Plugin and choose the pl
 23. PRO: video galleries with self-hosted videos or links from YouTube and Vimeo.
 
 == Changelog ==
+
+= 3.0.22 - 17.11.2026 =
+Changed: In a Video gallery made in the new editor, a playlist placed on the right moves under the player on phones and wherever the gallery has only a phone's width. There it scrolls sideways, and the video uses the full width. On wider screens it stays on the right, and existing galleries need no setting change.
+Added: The Sort menu of the new gallery editor can order images by file name, A–Z or Z–A. Numbers are read as numbers, so IMG_2 comes before IMG_10, and letter case and the file extension are ignored.
 
 = 3.0.21 - 16.11.2026 =
 Changed: The new gallery editor saves only when you press Save in the top bar (or Cmd/Ctrl+S), so visitors see your changes only once you are done, and editing no longer pauses to save. A new gallery is created by its first save, and changes you had not saved when a tab closed or crashed are offered back the next time you open the gallery.

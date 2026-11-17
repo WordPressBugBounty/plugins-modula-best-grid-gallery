@@ -10,6 +10,7 @@
 
 namespace Modula\V2\Settings;
 
+use Modula\V2\Motion\Animation_Catalog;
 use Modula\V2\Motion\Motion_Settings;
 
 defined( 'ABSPATH' ) || exit;
@@ -18,6 +19,21 @@ defined( 'ABSPATH' ) || exit;
  * Class Adapter
  */
 class Adapter {
+
+	/**
+	 * Slug of the classic Terry hover effect.
+	 */
+	public const TERRY_EFFECT = 'terry';
+
+	/**
+	 * Hover effect family of the classic Terry effect: the Corner frame hover choice.
+	 */
+	private const CORNER_FRAME_FAMILY = 'corner-frame';
+
+	/**
+	 * The catalog hover preset a classic gallery with Terry plays in the new editor.
+	 */
+	private const TERRY_HOVER_PRESET = 'corner-frame';
 
 
 	/** @var array<string, string>|null */
@@ -441,7 +457,7 @@ class Adapter {
 	 * Hover effect family for a classic effect slug (approximate builder starting point).
 	 *
 	 * @param string $slug Classic effect slug.
-	 * @return string Family id: none|reveal-center|title-only|social-forward|under|grayscale|tilt|fallback.
+	 * @return string Family id: none|reveal-center|title-only|social-forward|under|grayscale|tilt|corner-frame|fallback.
 	 */
 	public static function hover_effect_family_for_slug( $slug ) {
 		$slug = is_string( $slug ) ? sanitize_key( $slug ) : '';
@@ -450,6 +466,9 @@ class Adapter {
 		}
 		if ( 'under' === $slug ) {
 			return 'under';
+		}
+		if ( self::TERRY_EFFECT === $slug ) {
+			return self::CORNER_FRAME_FAMILY;
 		}
 		if ( 'greyscale' === $slug || false !== strpos( $slug, 'greyscale' ) ) {
 			return 'grayscale';
@@ -469,7 +488,6 @@ class Adapter {
 			'honey',
 			'hera',
 			'winston',
-			'terry',
 			'phoebe',
 		);
 		if ( in_array( $slug, $title_only, true ) ) {
@@ -704,6 +722,11 @@ class Adapter {
 					'hoverOpacity' => 54,
 				);
 				break;
+			case self::CORNER_FRAME_FAMILY:
+				$composition = Animation_Catalog::presets( 'hover' )[ self::TERRY_HOVER_PRESET ]['composition'];
+				$base        = array_merge( $base, $composition['builder'] );
+				$hover       = $composition['hover'];
+				break;
 			case 'reveal-center':
 			case 'fallback':
 			default:
@@ -750,12 +773,32 @@ class Adapter {
 	 * @return array<string, mixed>
 	 */
 	public static function hover_builder_from_legacy_effect_slug( $slug ) {
-		$slug   = is_string( $slug ) ? sanitize_key( $slug ) : '';
-		$family = self::hover_effect_family_for_slug( $slug );
-		$pack   = self::hover_builder_template_for_family( $family );
-		$b      = $pack['builder'];
+		$slug = is_string( $slug ) ? sanitize_key( $slug ) : '';
+		return self::hover_builder_for_family_and_slug( self::hover_effect_family_for_slug( $slug ), $slug );
+	}
 
-		if ( 'none' !== $family && 'under' !== $family ) {
+	/**
+	 * The builder a classic Terry gallery imported with before the Corner frame
+	 * hover choice: the title-only family's. Stored on galleries mirrored by
+	 * an earlier release; Motion_Settings::with_earlier_terry_import_as_corner_frame()
+	 * recognises it.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public static function hover_builder_from_terry_before_corner_frame() {
+		return self::hover_builder_for_family_and_slug( 'title-only', self::TERRY_EFFECT );
+	}
+
+	/**
+	 * @param string $family Family id from {@see hover_effect_family_for_slug()}.
+	 * @param string $slug   Sanitized classic effect slug.
+	 * @return array<string, mixed> The family's builder, with the effect's slot paint and `legacy-{slug}` stamp.
+	 */
+	private static function hover_builder_for_family_and_slug( $family, $slug ) {
+		$pack = self::hover_builder_template_for_family( $family );
+		$b    = $pack['builder'];
+
+		if ( self::family_takes_classic_slot_paint( $family ) ) {
 			$paint                  = self::legacy_hover_slot_paint( $slug );
 			$b['titleVisibility']   = $paint['title'] ? 'on-hover' : 'hidden';
 			$b['captionVisibility'] = $paint['caption'] ? 'on-hover' : 'hidden';
@@ -765,6 +808,19 @@ class Adapter {
 		$stamp               = '' === $slug ? 'none' : $slug;
 		$b['sourcePresetId'] = 'legacy-' . $stamp;
 		return $b;
+	}
+
+	/**
+	 * Whether a family's builder shows only the slots the classic effect
+	 * painted. None and Under Image hide every slot. Corner frame is a catalog
+	 * hover choice: its slots are the preset's, so the gallery reads as that
+	 * choice and not as its own (`custom`) hover.
+	 *
+	 * @param string $family Family id from {@see hover_effect_family_for_slug()}.
+	 * @return bool
+	 */
+	private static function family_takes_classic_slot_paint( $family ) {
+		return ! in_array( $family, array( 'none', 'under', self::CORNER_FRAME_FAMILY ), true );
 	}
 
 	/**

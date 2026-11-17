@@ -15,6 +15,7 @@
             "product-card-clean",
             "soft-zoom-stack",
             "accessible-no-motion",
+            "corner-frame",
             "captions",
             "zoom",
             "lift",
@@ -981,6 +982,43 @@
                 "social": {
                     "x": 50,
                     "y": 88
+                }
+            }
+        },
+        "corner-frame": {
+            "cardTreatment": "none",
+            "graphicElement": "corner-frame",
+            "graphicVisibility": "on-hover",
+            "dimOverlay": true,
+            "titleEnter": "fade",
+            "captionEnter": "fade",
+            "socialEnter": "slide-left",
+            "titleVisibility": "on-hover",
+            "captionVisibility": "on-hover",
+            "socialVisibility": "on-hover",
+            "cardEnterDurationMs": 350,
+            "cardEnterDelayMs": 0,
+            "titleEnterDurationMs": 350,
+            "captionEnterDurationMs": 350,
+            "socialEnterDurationMs": 350,
+            "titleEnterDelayMs": 0,
+            "captionEnterDelayMs": 0,
+            "socialEnterDelayMs": 0,
+            "titleEnterStaggerMs": 25,
+            "captionEnterStaggerMs": 25,
+            "socialEnterStaggerMs": 25,
+            "slotPositions": {
+                "title": {
+                    "x": 6,
+                    "y": 86
+                },
+                "caption": {
+                    "x": 6,
+                    "y": 94
+                },
+                "social": {
+                    "x": 94,
+                    "y": 14
                 }
             }
         },

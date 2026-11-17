@@ -1003,24 +1003,6 @@ class Gallery_Upload_Controller {
 	}
 
 	/**
-	 * Whitelisted `modulaSorting` keys (aligned with Modula Pro gallery sorting metabox).
-	 *
-	 * @return string[]
-	 */
-	private static function gallery_sorting_whitelist() {
-		return array(
-			'manual',
-			'dateCreatedNew',
-			'dateCreatedOld',
-			'dateModifiedFirst',
-			'dateModifiedLast',
-			'titleAZ',
-			'titleZA',
-			'random',
-		);
-	}
-
-	/**
 	 * Build reordered `modula-images` rows from an attachment ID sequence (multiset-safe for duplicate IDs).
 	 *
 	 * @param int   $gallery_id Gallery post ID.
@@ -1102,7 +1084,7 @@ class Gallery_Upload_Controller {
 		$gallery_id = $prepared;
 		$params     = $request->get_json_params();
 		$sorting    = isset( $params['sorting'] ) ? sanitize_text_field( (string) $params['sorting'] ) : '';
-		if ( ! in_array( $sorting, self::gallery_sorting_whitelist(), true ) ) {
+		if ( ! in_array( $sorting, \Modula\V2\Gallery_Sorting::modes(), true ) ) {
 			return new \WP_Error(
 				'modula_bad_sorting',
 				__( 'Invalid gallery sorting mode.', 'modula-best-grid-gallery' ),
@@ -1176,7 +1158,7 @@ class Gallery_Upload_Controller {
 		$gallery_id = $prepared;
 		$params     = $request->get_json_params();
 		$sorting    = isset( $params['sorting'] ) ? sanitize_text_field( (string) $params['sorting'] ) : '';
-		if ( ! in_array( $sorting, self::gallery_sorting_whitelist(), true ) ) {
+		if ( ! in_array( $sorting, \Modula\V2\Gallery_Sorting::modes(), true ) ) {
 			return new \WP_Error(
 				'modula_bad_sorting',
 				__( 'Invalid gallery sorting mode.', 'modula-best-grid-gallery' ),

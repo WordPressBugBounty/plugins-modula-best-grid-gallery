@@ -195,6 +195,32 @@ final class Motion_Settings {
 	}
 
 	/**
+	 * A classic gallery with the Terry effect, mirrored before the Corner frame
+	 * hover choice, stores the title-only builder as its own (`custom`) hover.
+	 * Untouched, it becomes what a Terry gallery imports with today: the
+	 * Corner frame builder and hover choice, with Darken on hover on so the
+	 * frame takes the gallery's hover colour. The hover colour stays as stored.
+	 * A builder edited since, and any other hover choice, are left alone.
+	 *
+	 * Not part of the read: a gallery already in the gallery editor keeps its
+	 * hover. Meta_Sync::upgrade_classic_hover_import() applies it when a classic
+	 * gallery moves there.
+	 *
+	 * @param array<string,mixed> $grouped Grouped settings.
+	 * @return array<string,mixed>
+	 */
+	public static function with_earlier_terry_import_as_corner_frame( array $grouped ): array {
+		if ( ! self::plays_earlier_terry_import_as_hover( $grouped ) ) {
+			return $grouped;
+		}
+		$builder                        = Adapter::hover_builder_from_legacy_effect_slug( Adapter::TERRY_EFFECT );
+		$grouped['hover']['builder']    = $builder;
+		$grouped['hover']['dimOverlay'] = (bool) $builder['dimOverlay'];
+		$grouped['motion']['hover']     = self::hover_choice_for_builder( $builder );
+		return $grouped;
+	}
+
+	/**
 	 * A settings patch that changes what `hover.builder` plays, without naming
 	 * `motion.hover`, also sets the hover choice from the new builder (Customize,
 	 * the preset row, Zoom on hover and ability writes all write the builder).
@@ -271,6 +297,20 @@ final class Motion_Settings {
 			return false;
 		}
 		$imported = Adapter::hover_builder_from_legacy_effect_slug( self::UNDER_IMAGE_EFFECT );
+		return $imported['sourcePresetId'] === ( $builder['sourcePresetId'] ?? null )
+			&& Hover_Builder_Policy::same_motion( $builder, $imported );
+	}
+
+	/**
+	 * @param array<string,mixed> $grouped Grouped settings.
+	 * @return bool The hover is `custom` with the builder Terry imported with before Corner frame, as the import made it (Darken on hover aside).
+	 */
+	private static function plays_earlier_terry_import_as_hover( array $grouped ): bool {
+		$builder = $grouped['hover']['builder'] ?? null;
+		if ( self::CUSTOM !== ( $grouped['motion']['hover'] ?? null ) || ! is_array( $builder ) ) {
+			return false;
+		}
+		$imported = Adapter::hover_builder_from_terry_before_corner_frame();
 		return $imported['sourcePresetId'] === ( $builder['sourcePresetId'] ?? null )
 			&& Hover_Builder_Policy::same_motion( $builder, $imported );
 	}

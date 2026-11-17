@@ -110,6 +110,36 @@ class Meta_Sync {
 	}
 
 	/**
+	 * Bring the hover a classic gallery was mirrored with by an earlier release
+	 * up to what it imports with today, and store it. Call only where a classic
+	 * gallery moves to the gallery editor (Convert, Try the beta copy): a
+	 * gallery already there keeps its hover.
+	 *
+	 * @param int $post_id Gallery post ID.
+	 * @return void
+	 */
+	public static function upgrade_classic_hover_import( $post_id ) {
+		$post_id = absint( $post_id );
+		if ( ! $post_id || 'modula-gallery' !== get_post_type( $post_id ) ) {
+			return;
+		}
+		$stored = self::get_settings_v2( $post_id, false );
+		if ( ! self::settings_v2_is_usable( $stored ) ) {
+			return;
+		}
+		$upgraded = Motion\Motion_Settings::with_earlier_terry_import_as_corner_frame( $stored );
+		if ( $upgraded === $stored ) {
+			return;
+		}
+		$json = wp_json_encode( Settings\Sanitizer::sanitize_grouped( $upgraded ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+		// Unencodable settings stay as stored: the gallery opens with the hover it had.
+		if ( false === $json ) {
+			return;
+		}
+		self::update_json_post_meta( $post_id, self::SETTINGS_V2_META_KEY, $json );
+	}
+
+	/**
 	 * Ensure flat modula-settings and modula_settings_v2 exist (defaults for new galleries).
 	 *
 	 * @param int $post_id Gallery post ID.

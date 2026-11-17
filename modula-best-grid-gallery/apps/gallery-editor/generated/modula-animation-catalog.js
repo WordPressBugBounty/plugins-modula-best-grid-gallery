@@ -127,6 +127,16 @@ export default {
 					scalesWithSpeed: false,
 					galleryTypes: "all",
 					pro: false
+				},
+				{
+					id: "corner-frame",
+					label: __( "Corner frame", 'modula-best-grid-gallery' ),
+					triggers: [
+						"hover"
+					],
+					scalesWithSpeed: true,
+					galleryTypes: "all",
+					pro: false
 				}
 			]
 		},
@@ -1462,6 +1472,58 @@ export default {
 			}
 		},
 		{
+			id: "corner-frame",
+			kind: "hover",
+			label: __( "Corner frame", 'modula-best-grid-gallery' ),
+			description: __( "A solid frame slides over the image edges from two opposite corners, with the title and caption on its bottom band.", 'modula-best-grid-gallery' ),
+			galleryTypes: "all",
+			pro: true,
+			inlineSocial: false,
+			composition: {
+				builder: {
+					cardTreatment: "none",
+					graphicElement: "corner-frame",
+					graphicVisibility: "on-hover",
+					dimOverlay: true,
+					titleEnter: "fade",
+					captionEnter: "fade",
+					socialEnter: "slide-left",
+					titleVisibility: "on-hover",
+					captionVisibility: "on-hover",
+					socialVisibility: "on-hover",
+					cardEnterDurationMs: 350,
+					cardEnterDelayMs: 0,
+					titleEnterDurationMs: 350,
+					captionEnterDurationMs: 350,
+					socialEnterDurationMs: 350,
+					titleEnterDelayMs: 0,
+					captionEnterDelayMs: 0,
+					socialEnterDelayMs: 0,
+					titleEnterStaggerMs: 25,
+					captionEnterStaggerMs: 25,
+					socialEnterStaggerMs: 25,
+					slotPositions: {
+						title: {
+							x: 6,
+							y: 86
+						},
+						caption: {
+							x: 6,
+							y: 94
+						},
+						social: {
+							x: 94,
+							y: 14
+						}
+					}
+				},
+				hover: {
+					hoverColor: "rgba(16,16,16,.4)",
+					hoverOpacity: 40
+				}
+			}
+		},
+		{
 			id: "captions",
 			kind: "hover",
 			label: __( "Captions only", 'modula-best-grid-gallery' ),
@@ -2059,6 +2121,10 @@ export default {
 				{
 					id: "product-card-clean",
 					label: __( "Product card", 'modula-best-grid-gallery' )
+				},
+				{
+					id: "corner-frame",
+					label: __( "Corner frame", 'modula-best-grid-gallery' )
 				}
 			],
 			offMenu: [

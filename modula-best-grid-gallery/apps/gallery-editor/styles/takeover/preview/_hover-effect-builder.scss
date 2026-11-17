@@ -719,6 +719,56 @@
 		transform: translate(-50%, -50%) rotate(45deg) scale(1);
 	}
 
+	/*
+	 * Corner frame as on the visitor tile (_hover-v2.scss): two border boxes
+	 * slide in from opposite corners, in the Dim color while Darken on hover
+	 * is on. `::after` paints after the slots, so they go one level up to
+	 * stay on the frame.
+	 */
+	$corner-frame-thin: 15px;
+	$corner-frame-right: 70px;
+	$corner-frame-bottom: 60px;
+
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame .modula-hover-builder-card__media::before,
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame .modula-hover-builder-card__media::after {
+		content: "";
+		position: absolute;
+		box-sizing: border-box;
+		width: 200%;
+		height: 200%;
+		border: 0 solid var(--modula-hover-overlay-tint, #101010);
+		pointer-events: none;
+		transition: transform var(--modula-hover-card-enter-duration, 350ms) ease;
+		z-index: 2;
+	}
+
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame .modula-hover-builder-card__media::before {
+		top: 0;
+		left: 0;
+		border-width: $corner-frame-thin 0 0 $corner-frame-thin;
+		transform: translate(-$corner-frame-thin, -$corner-frame-thin);
+	}
+
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame .modula-hover-builder-card__media::after {
+		right: 0;
+		bottom: 0;
+		border-width: 0 $corner-frame-right $corner-frame-bottom 0;
+		transform: translate($corner-frame-right, $corner-frame-bottom);
+	}
+
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame:is(:hover, .is-forced-hover) .modula-hover-builder-card__media::before,
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame:is(:hover, .is-forced-hover) .modula-hover-builder-card__media::after,
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame:focus-within:has(:focus-visible) .modula-hover-builder-card__media::before,
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame:focus-within:has(:focus-visible) .modula-hover-builder-card__media::after,
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic-visibility--always.modula-hover-graphic--corner-frame .modula-hover-builder-card__media::before,
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic-visibility--always.modula-hover-graphic--corner-frame .modula-hover-builder-card__media::after {
+		transform: none;
+	}
+
+	.modula-item.modula-hover-v2--free-slots.modula-hover-graphic--corner-frame .modula-hover-builder-card__image-slot {
+		z-index: 3;
+	}
+
 	.modula-hover-builder-card__image-slot .modula-title,
 	.modula-hover-builder-card__image-slot .jtg-description,
 	.modula-hover-builder-card__image-slot .modula-social {

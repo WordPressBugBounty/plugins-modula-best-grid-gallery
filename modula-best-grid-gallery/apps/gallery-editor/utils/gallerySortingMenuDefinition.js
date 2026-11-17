@@ -77,6 +77,16 @@ export function getSortingMenuDefinition() {
 				toolbarLabel: __('Title Z–A', 'modula-best-grid-gallery'),
 			},
 			{
+				id: 'fileNameAZ',
+				label: __('File name A–Z', 'modula-best-grid-gallery'),
+				toolbarLabel: __('File name A–Z', 'modula-best-grid-gallery'),
+			},
+			{
+				id: 'fileNameZA',
+				label: __('File name Z–A', 'modula-best-grid-gallery'),
+				toolbarLabel: __('File name Z–A', 'modula-best-grid-gallery'),
+			},
+			{
 				id: 'random',
 				label: __('Random', 'modula-best-grid-gallery'),
 				toolbarLabel: __('Random', 'modula-best-grid-gallery'),

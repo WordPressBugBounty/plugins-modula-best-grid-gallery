@@ -4,6 +4,11 @@
  * @package
  */
 
+import {
+	getForcedPreviewViewport,
+	resolveTreatAsPhoneUnderPx,
+} from '../utils/resolvePreviewViewport';
+
 /**
  * True if URL is likely a video embed or file (not a static image poster).
  * Mirrors PHP `Modula_Frontend_Adapter::is_probable_modula_video_playback_url`.
@@ -548,10 +553,57 @@ export function normalizeVideoGalleryItems(items, galleryConfig = {}) {
 }
 
 /**
+ * The playlist position saved in the gallery settings.
+ *
  * @param {Object} config
  * @return {'right'|'bottom'}
  */
 export function resolvePlaylistPosition(config) {
 	const pos = config?.video?.playlistPosition;
 	return pos === 'bottom' ? 'bottom' : 'right';
+}
+
+/**
+ * Whether the gallery is too narrow for a playlist beside the player. The
+ * editor preview follows its chosen device; a visitor's gallery follows its
+ * own width, because a gallery in a narrow column has the same cramped side
+ * playlist as one on a phone. An unmeasured gallery (width 0) is not narrow.
+ *
+ * @param {Object} config
+ * @param {number} galleryWidth Measured gallery width in px; 0 until measured.
+ * @return {boolean} Whether a side playlist has to stack under the player.
+ */
+function isGalleryTooNarrowForSidePlaylist(config, galleryWidth) {
+	const forcedViewport = getForcedPreviewViewport(config);
+	if (forcedViewport) {
+		return forcedViewport === 'mobile';
+	}
+	const width = Number(galleryWidth);
+	return width > 0 && width <= resolveTreatAsPhoneUnderPx(config);
+}
+
+/**
+ * Where the playlist is drawn. A playlist set to the right moves under the
+ * player in a narrow gallery. The wrap class and the drag-to-scroll axis both
+ * read this value, so the styles and the scroll direction cannot disagree.
+ *
+ * @param {Object} config
+ * @param {number} galleryWidth Measured gallery width in px; 0 until measured.
+ * @return {'right'|'bottom'} The position to render.
+ */
+export function resolveEffectivePlaylistPosition(config, galleryWidth) {
+	if (resolvePlaylistPosition(config) === 'bottom') {
+		return 'bottom';
+	}
+	return isGalleryTooNarrowForSidePlaylist(config, galleryWidth)
+		? 'bottom'
+		: 'right';
+}
+
+/**
+ * @param {'right'|'bottom'} playlistPosition Rendered playlist position.
+ * @return {'x'|'y'} The axis the playlist strip scrolls on.
+ */
+export function resolvePlaylistScrollAxis(playlistPosition) {
+	return playlistPosition === 'bottom' ? 'x' : 'y';
 }

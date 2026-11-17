@@ -3,7 +3,7 @@
  */
 export { fetchAttachmentSortFields } from '../api/wpRestMediaBatchApi';
 
-/** @typedef {'manual'|'dateCreatedNew'|'dateCreatedOld'|'dateModifiedFirst'|'dateModifiedLast'|'titleAZ'|'titleZA'|'random'} GallerySortMode */
+/** @typedef {'manual'|'dateCreatedNew'|'dateCreatedOld'|'dateModifiedFirst'|'dateModifiedLast'|'titleAZ'|'titleZA'|'fileNameAZ'|'fileNameZA'|'random'} GallerySortMode */
 
 export const GALLERY_SORT_MODES = [
 	'manual',
@@ -13,8 +13,34 @@ export const GALLERY_SORT_MODES = [
 	'dateModifiedLast',
 	'titleAZ',
 	'titleZA',
+	'fileNameAZ',
+	'fileNameZA',
 	'random',
 ];
+
+/** Natural order (`IMG_2` before `IMG_10`), ignoring letter case. */
+const FILE_NAME_COLLATOR = new Intl.Collator(undefined, {
+	numeric: true,
+	sensitivity: 'base',
+});
+
+/**
+ * Items with no file go last in both directions and keep their order. Z–A
+ * inverts the comparison instead of reversing the list, so items with the
+ * same name keep the order they had before the sort.
+ *
+ * @param {{ id: number, fileName: string }[]} items     Items in their current order.
+ * @param {1|-1}                               direction 1 for A–Z, -1 for Z–A.
+ * @return {number[]} Attachment IDs by file name.
+ */
+function orderByFileName(items, direction) {
+	const named = items.filter((item) => item.fileName !== '');
+	const unnamed = items.filter((item) => item.fileName === '');
+	named.sort(
+		(a, b) => direction * FILE_NAME_COLLATOR.compare(a.fileName, b.fileName)
+	);
+	return [...named, ...unnamed].map((item) => item.id);
+}
 
 /**
  * @param {unknown} v
@@ -34,9 +60,9 @@ export function isGallerySortMode(v) {
  */
 
 /**
- * @param {BootstrapImageRow[]}                                               rows
- * @param {GallerySortMode}                                                   mode
- * @param {Record<number, { date: string, modified: string, title: string }>} media
+ * @param {BootstrapImageRow[]}                                                                  rows
+ * @param {GallerySortMode}                                                                      mode
+ * @param {Record<number, { date: string, modified: string, title: string, fileName?: string }>} media
  * @return {number[]} Attachment IDs in new order
  */
 export function computeSortedAttachmentOrder(rows, mode, media) {
@@ -55,6 +81,7 @@ export function computeSortedAttachmentOrder(rows, mode, media) {
 			date: m.date,
 			modified: m.modified,
 			sortTitle,
+			fileName: typeof m.fileName === 'string' ? m.fileName : '',
 			stable,
 		};
 	});
@@ -88,6 +115,10 @@ export function computeSortedAttachmentOrder(rows, mode, media) {
 			return byTitleAsc.map((x) => x.id);
 		case 'titleZA':
 			return [...byTitleAsc].reverse().map((x) => x.id);
+		case 'fileNameAZ':
+			return orderByFileName(enriched, 1);
+		case 'fileNameZA':
+			return orderByFileName(enriched, -1);
 		case 'random': {
 			const copy = [...enriched];
 			for (let i = copy.length - 1; i > 0; i--) {

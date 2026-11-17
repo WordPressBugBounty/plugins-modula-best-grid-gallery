@@ -641,7 +641,8 @@
                         "enum": [
                             "none",
                             "frame",
-                            "diamond"
+                            "diamond",
+                            "corner-frame"
                         ],
                         "default": "none"
                     },
@@ -1006,6 +1007,7 @@
                     "product-card-clean",
                     "soft-zoom-stack",
                     "accessible-no-motion",
+                    "corner-frame",
                     "captions",
                     "zoom",
                     "lift",

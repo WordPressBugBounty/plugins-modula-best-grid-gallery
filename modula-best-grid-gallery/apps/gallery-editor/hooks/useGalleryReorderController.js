@@ -89,8 +89,8 @@ export function useGallerySortMode({ galleryId, onManualSorting }) {
 	const toast = useTakeoverToast();
 
 	/**
-	 * Sort the canvas for `mode`. Only the attachments' dates and titles are
-	 * read from the server; the order is computed here.
+	 * Sort the canvas for `mode`. Only the attachments' dates, titles and
+	 * file names are read from the server; the order is computed here.
 	 */
 	const applySortMode = useCallback(async (mode) => {
 		const store = getGalleryPreviewReduxStore();
